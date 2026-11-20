@@ -403,8 +403,8 @@ def discover_group_enrich(
     click.echo(
         f"described {result['signals_described']} signals, "
         f"{result['components_described']} components, "
-        f"{result['patterns_described']} patterns in {result['calls']} calls "
-        f"(${result['cost_usd']:.4f}); awaiting context "
+        f"{result['patterns_described']} patterns in {result['calls']} calls, "
+        f"{result['tokens']} tokens (${result['cost_usd']:.4f}); awaiting context "
         f"{result['signals_awaiting_context']}, failed {result['signals_failed']}"
     )
 
