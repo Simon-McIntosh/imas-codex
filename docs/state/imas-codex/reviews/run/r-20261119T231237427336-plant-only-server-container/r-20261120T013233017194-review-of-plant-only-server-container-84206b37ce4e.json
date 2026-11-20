@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_basis": "Both arms are recorded in the reviewed manifest and both logs were read: suite-base.log (revision 1875455ec, completed, 5 failed / 1336 passed / 10 skipped, EXIT=1) and suite-head-final.log (revision 84206b37c, completed, 5 failed / 1361 passed / 10 skipped, EXIT=1). The five FAILED ids are identical in both logs - tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts, tests/llm/test_prompt_schema_coverage.py::test_prompt_carries_generated_example_verbatim[signals/enrichment_grounding], tests/graph/test_cypher_property_check.py::test_repository_cypher_literals_have_declared_properties, tests/graph/test_dd_path_domain_upsert.py::test_path_upsert_keeps_classified_domain_and_defaults_unclassified_path, tests/graph/test_updated_at_coverage.py::test_standard_name_package_matches_updated_at_debt_baseline - so after-minus-baseline is empty. All five name files this diff does not touch.",
+  "call_sites": [
+    "imas_codex/cli/serve.py:127 AgentsServer(plant_only=plant_only)",
+    "imas_codex/llm/server.py:1936 _restrict_to_plant_tools from __post_init__",
+    "imas_codex/cli/graph/data.py:567 create_facility_dump(..., without_dd=without_dd)",
+    "imas_codex/graph/temp_neo4j.py:911 _verify_plant_package on the SLURM arm",
+    "imas_codex/graph/temp_neo4j.py:1014 _verify_plant_package on the local arm",
+    "imas_codex/cli/graph/registry.py:566 require_private_package from _report_plant_package_visibility",
+    "docker-entrypoint.sh:41 serve-mode injection from IMAS_CODEX_SERVE_MODE"
+  ],
+  "completed_at": "2026-11-20T01:34:35.735Z",
+  "dispatched_at": "2026-11-20T01:34:14Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/temp_neo4j.py",
+      "line": "911",
+      "severity": "non-blocking",
+      "text": "non-blocking: the SLURM arm verifies the package only after the filter script has already moved the dump to output_path, so a mismatched package is left on disk at the target path and the evidence fragment's claim at :33 that either path refuses 'before the dump is written' is false for the compute-node path."
+    },
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/plant-only-server-container.html",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: the opening sentence says the served image is 'built from the same Dockerfile', while the same fragment at :141 records it was built with apptainer from a private definition, so the Dockerfile plant recipe this node landed was never built or started."
+    },
+    {
+      "file": "Dockerfile",
+      "line": "314",
+      "severity": "non-blocking",
+      "text": "non-blocking: the data-dictionary image's CMD now depends on the entrypoint default at docker-entrypoint.sh:41, and no receipt records that image starting at the reviewed revision while its owning test module tests/graph_mcp/test_docker_embedded.py:19 was outside the gate command."
+    },
+    {
+      "file": "imas_codex/graph/plant_scope.py",
+      "line": "128",
+      "severity": "non-blocking",
+      "text": "non-blocking: measure_plant_scope is the only production measurement and has no test against a known graph; expected and actual are both produced by it, so a wrong ownership predicate would cancel on both sides and every added assertion would stay green."
+    },
+    {
+      "file": "tests/cli/test_graph_plant_export.py",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion compares the fake's echo against the without_dd=True the test itself passed in, so it reddens only if forwarding is deleted and cannot distinguish a forwarded flag from a re-derived default."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against 1875455e: 277057c1d adds the plant filter arm, the plant-only server mode, the entrypoint mode and the GHCR visibility helpers with four test files; d0b131383 and f8746234e add the product-side scope comparison and refuse a mismatch on both filter paths; 693fed501 fixes the exported-tree path; 10f83a45c records the evidence; 84206b37c removes a duplicate import.",
+    "done_when": "Read in full from node.json; plant-package/scope-report-live.json records 21 node kinds and 31 relationship types with 0 post-filter violations and facility-less Facility 1 / GraphMeta 1, ~/.cache/imas-codex-codac-uda/plant-only-server/scenario.json matches the manifest sha256 d3ed0a69..., publish-report.json records private visibility for both packages, plant-container-run.log:57-96 records every scenario answer and an explicit empty term, and plant-private-value-scan.log records 0 hits with a 5-of-5 positive control; the done_when clause that the data-dictionary image still passes its own server tests has no receipt for a built dd image.",
+    "goal": "node.json carries no goal key, so I read the dispatch goal 'one private container that serves the ITER plant graph alone, read-only'; Dockerfile:268 ARG SERVE_MODE, docker-entrypoint.sh:34-41, imas_codex/llm/server.py:1911/1936/2030 and plant-container-run.log implement it, and the built image answers the scenario queries with the shared graph unreachable.",
+    "manifest": "Read; it states six commits, the focused trio gate, two completed suite arms with the same five failure ids, the three-mutation negative control re-verified at 10f83a45c with EXIT=1, the private-value scan, the two landing digests with registry-reported private visibility, and no blockers.",
+    "write_paths": "Read manifest.md:5 and scope_note; the diff 1875455e..84206b37 touches 15 paths, of which imas_codex/graph/plant_scope.py and imas_codex/graph/temp_neo4j.py are outside the declared list and are both named in scope_note."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_plant_scope.py:20-96 asserts independent violation strings and plant-negative-control.log shows two of them reddening under the removed branches, while imas_codex/graph/plant_scope.py:128 measure_plant_scope has no test binding its Cypher to a known graph.",
+    "evidence": "manifest.md:18-19 record both suite arms and their logs were read (5 identical failure ids, added 0), and the private receipts carry the scope comparison, the scenario digest, the registry report and the container probe; no receipt covers the done_when's data-dictionary-image clause after Dockerfile:314 changed the CMD.",
+    "fit": "PLANT_TOOLS at imas_codex/llm/server.py:1874 derives from the existing FACILITY_TOOLS at :1853, _restrict_to_plant_tools reuses the file's established _local_provider access at :1945, and the new CLI option at imas_codex/cli/serve.py:47-56 matches the surrounding click idiom.",
+    "goal_fidelity": "imas_codex/llm/server.py:1874/1936 and imas_codex/graph/temp_neo4j.py:466 deliver the plant-only read-only server and its filtered package and plant-container-run.log shows the server answering, with the image of record being the apptainer SIF at plant-package/publish-report.json rather than the Dockerfile recipe the fragment's opening sentence names.",
+    "reuse": "ghcr.py:718-810 wraps the module's own resolve_token, get_ghcr_owner_and_type, github_api_call and github_error_detail, temp_neo4j.py:466 collapses the two filter arms into one statement definition, and no earlier owner for a package-scope comparison exists in imas_codex/graph.",
+    "scope_discipline": "Every delivered path is either declared at manifest.md:5 or named in its scope_note, but imas_codex/graph/plant_scope.py and imas_codex/graph/temp_neo4j.py are two files outside the eleven declared paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal (absent from node.json; the dispatch goal) is one private image serving the ITER plant graph alone, read-only; Dockerfile:268/290/314 build the mode in, docker-entrypoint.sh:34-41 applies it, imas_codex/llm/server.py:1911/1936 forces read-only and reduces the listing to PLANT_TOOLS, and plant-container-run.log records 'imas-codex-plant' answering under NS_CAN_REACH_SHARED_GRAPH no.\nVERDICT done_when: read in full from node.json; plant-package/scope-report-live.json records per-kind/node and per-type/relationship equality with 0 violations and facility-less Facility 1 / GraphMeta 1, the scenario receipt's sha256 d3ed0a69... matches the manifest, plant-package/publish-report.json records visibility_reported private for both packages, and plant-container-run.log:57-96 records the signal search, the component/control walk, the designation, the pulses and the explicit empty term; the data-dictionary-image clause has no receipt.\nVERDICT write_paths: read the eleven declared paths in manifest.md:5 plus its scope_note; git diff 1875455e..84206b37 touches 15 paths, of which imas_codex/graph/plant_scope.py and imas_codex/graph/temp_neo4j.py lie outside it and are declared in scope_note with the reason.\nVERDICT manifest: read; it records six commits, the focused trio gate, suite-base.log and suite-head-final.log as identical five-failure arms (1336 passed / 1361 passed), the three-mutation negative control re-verified at 10f83a45c, the private-value scan (0 hits over 8936 files, 5-of-5 positive control) and the landing digests.\nVERDICT diff: read commit by commit against 1875455e; 277057c1d/84206b37c add the plant filter arm and its server mode, d0b131383/f8746234e/693fed501 add the product-side scope verification and the single statement definition, 10f83a45c adds the 170-line evidence fragment; all 15 paths are inside the diff the brief gives.\nCALL_SITES: imas_codex/cli/serve.py:127, imas_codex/llm/server.py:1936, imas_codex/cli/graph/data.py:567, imas_codex/graph/temp_neo4j.py:911, imas_codex/graph/temp_neo4j.py:1014, imas_codex/cli/graph/registry.py:566, docker-entrypoint.sh:41\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/llm/server.py:1936 plus docker-entrypoint.sh:41 deliver the read-only plant-only server and plant-container-run.log records it answering every scenario query, but the image of record at plant-package/publish-report.json is the apptainer SIF the fragment at :141 describes, not the Dockerfile recipe of :4.\nSCORE evidence: 15\nJUSTIFICATION evidence: manifest.md's baseline_suite/after_suite cite suite-base.log and suite-head-final.log with the same five failure ids (added count 0) and the private receipts carry the done_when measures, but no receipt covers the done_when's data-dictionary-image clause after Dockerfile:314 changed its CMD.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: imas_codex/graph/plant_scope.py and imas_codex/graph/temp_neo4j.py are outside the eleven declared write paths at manifest.md:5, though scope_note names both and the verification requirement explains why they were touched.\nSCORE durability: 15\nJUSTIFICATION durability: tests/graph/test_plant_scope.py:20-96 reddens on any reinstated comparison branch and plant-negative-control.log records it doing so, but imas_codex/graph/plant_scope.py:128 measure_plant_scope has no test binding its Cypher, so a mis-scoped measurement cancels between the two sides and no assertion reddens.\nSCORE fit: 16\nJUSTIFICATION fit: the plant restriction follows the FACILITY_TOOLS ClassVar at imas_codex/llm/server.py:1853 and the file's existing _local_provider use at :1945, and no added name carries a plan or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: PLANT_TOOLS at imas_codex/llm/server.py:1874 is derived from the existing FACILITY_TOOLS and ghcr.py:718-810 wraps the module's own resolve_token/get_ghcr_owner_and_type/github_api_call, while plant_scope.py has no earlier owner and the two filter arms were merged into one definition at temp_neo4j.py:466.\nFINDING imas_codex/graph/temp_neo4j.py:911 non-blocking: the SLURM arm verifies the package only after the filter script has already moved the dump to output_path, so a mismatched package is left on disk at the target path and the evidence fragment's claim at :33 that either path refuses 'before the dump is written' is false for the compute-node path.\nFINDING docs/evidence/fragments/codac-uda-signals/plant-only-server-container.html:4 non-blocking: the opening sentence says the served image is 'built from the same Dockerfile', while the same fragment at :141 records it was built with apptainer from a private definition, so the Dockerfile plant recipe this node landed was never built or started.\nFINDING Dockerfile:314 non-blocking: the data-dictionary image's CMD now depends on the entrypoint default at docker-entrypoint.sh:41, and no receipt records that image starting at the reviewed revision while its owning test module tests/graph_mcp/test_docker_embedded.py was outside the gate command.\nFINDING imas_codex/graph/plant_scope.py:128 non-blocking: measure_plant_scope is the only production measurement and has no test against a known graph; expected and actual are both produced by it, so a wrong ownership predicate would cancel on both sides and every added assertion would stay green.\nFINDING tests/cli/test_graph_plant_export.py:42 non-blocking: the assertion compares the fake's echo against the without_dd=True the test itself passed in, so it reddens only if forwarding is deleted and cannot distinguish a forwarded flag from a re-derived default.\n",
+  "review_run_id": "r-20261120T013233017194-review-of-plant-only-server-container-84206b37ce4e",
+  "reviewed_base_sha": "1875455ec8bb3cba6136a5e6750f138fef0c6c74",
+  "reviewed_head_sha": "84206b37ce4e890e5a4113d71baf7b72a4ff5fd6",
+  "reviewed_run_id": "r-20261119T231237427336-plant-only-server-container",
+  "reviewer_run_id": "r-20261120T013233017194-review-of-plant-only-server-container-84206b37ce4e",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T01:42:44.421718+00:00",
+  "total": 97
+}
