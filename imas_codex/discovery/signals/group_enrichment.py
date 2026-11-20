@@ -117,10 +117,32 @@ OPTIONAL MATCH (c)-[:HAS_ARCHIVE_FIELD_PATTERN]->(p:ArchiveFieldPattern)
 RETURN c.id AS component, p.id AS pattern
 """
 
-STATES_QUERY = """
-MATCH (s:FacilitySignal {facility_id: $facility})
-WHERE s.plant_context_state IS NOT NULL AND s.group_enrichment_state IS NOT NULL
-RETURN s.group_enrichment_state AS state, count(*) AS count
+
+COMPONENT_DESCRIPTION_WRITE = """
+MATCH (c:PlantComponent {id: $component, facility_id: $facility})
+SET c.description = $text,
+    c.description_source = 'group_context',
+    c.description_updated_at = datetime()
+RETURN count(c) AS written
+"""
+
+PATTERN_DESCRIPTION_WRITE = """
+MATCH (p:ArchiveFieldPattern {id: $pattern, facility_id: $facility})
+SET p.description = $text,
+    p.description_source = 'group_context',
+    p.description_updated_at = datetime()
+RETURN count(p) AS written
+"""
+
+GROUP_STATE_WRITE = """
+UNWIND $rows AS row
+MATCH (s:FacilitySignal {id: row.id, facility_id: $facility})
+SET s.group_enrichment_state = row.group_enrichment_state,
+    s.group_enrichment_reason = row.group_enrichment_reason
+FOREACH (_ IN CASE WHEN row.status IS NULL THEN [] ELSE [1] END |
+    SET s.status = row.status, s.claimed_at = null, s.claim_token = null
+)
+RETURN count(s) AS written
 """
 
 
@@ -750,13 +772,7 @@ def apply_composed_plan(
     written_components = 0
     for component_id, text in composed.component_texts.items():
         result = graph.query(
-            """
-            MATCH (c:PlantComponent {id: $component, facility_id: $facility})
-            SET c.description = $text,
-                c.description_source = 'group_context',
-                c.description_updated_at = datetime()
-            RETURN count(c) AS written
-            """,
+            COMPONENT_DESCRIPTION_WRITE,
             component=component_id,
             facility=facility,
             text=text,
@@ -767,13 +783,7 @@ def apply_composed_plan(
     written_patterns = 0
     for pattern_id, text in composed.pattern_texts.items():
         result = graph.query(
-            """
-            MATCH (p:ArchiveFieldPattern {id: $pattern, facility_id: $facility})
-            SET p.description = $text,
-                p.description_source = 'group_context',
-                p.description_updated_at = datetime()
-            RETURN count(p) AS written
-            """,
+            PATTERN_DESCRIPTION_WRITE,
             pattern=pattern_id,
             facility=facility,
             text=text,
@@ -842,16 +852,7 @@ def _write_states(graph, facility: str, rows: Sequence[Mapping[str, Any]]) -> in
     for offset in range(0, len(rows), 500):
         batch = rows[offset : offset + 500]
         result = graph.query(
-            """
-            UNWIND $rows AS row
-            MATCH (s:FacilitySignal {id: row.id, facility_id: $facility})
-            SET s.group_enrichment_state = row.group_enrichment_state,
-                s.group_enrichment_reason = row.group_enrichment_reason
-            FOREACH (_ IN CASE WHEN row.status IS NULL THEN [] ELSE [1] END |
-                SET s.status = row.status, s.claimed_at = null, s.claim_token = null
-            )
-            RETURN count(s) AS written
-            """,
+            GROUP_STATE_WRITE,
             facility=facility,
             rows=batch,
         )
