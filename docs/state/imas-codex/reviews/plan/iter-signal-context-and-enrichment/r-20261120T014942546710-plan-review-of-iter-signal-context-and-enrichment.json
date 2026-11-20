@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T01:51:37.132Z",
+  "dispatched_at": "2026-11-20T01:51:12Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261120T014942546710-plan-review-of-iter-signal-context-and-enrichment/plan.html:70",
+      "id": "done_when-1",
+      "reason": "the role axis of the vocabulary is a stated endpoint that the section's only gate cannot fail, so the fix is one clause that either grades an omitted decided role partly right or ties the stated-role count to the number of described signals whose role the vocabulary decided.",
+      "text": "s6 Delivers requires \"a description states the signal's quantity, unit and role where the vocabulary of section 11 decided them\", but the grade on line 70 makes only an omitted \"quantity or unit\" partly right and sends a description that states everything supported and omits a decided role to \"right\"; the aggregate count \"the number of member descriptions that state each of the three vocabulary values\" carries no target, so a run whose descriptions state no role at all meets every clause of the done-when, including the bar",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261120T014942546710-plan-review-of-iter-signal-context-and-enrichment/plan.html:70",
+      "id": "done_when-2",
+      "reason": "the reading decides pass or fail on exactly this ambiguity, so the plan needs one clause stating that a value the vocabulary decided is not counted unsupported merely because the specification is silent, or that the reading judges only claims the specification addresses.",
+      "text": "the grade makes a description \"wrong when it states something the functional specification contradicts or does not support\", while Delivers obliges the writer to state every quantity, unit and role \u00a711 decided and most decided values are credited to the controls metadata and the field pattern rather than to a signal-list row (c-s11-landed: \"Most decided values are credited to the controls metadata\"), which the functional specification need not mention; a description that obeys Delivers can therefore be counted wrong for obeying it, and the pass bar of at most two wrong of forty is then decided by an instrument whose rule conflicts with the section's own instruction",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0a2336458595297fb1ff9f6743750d8e6bd6c37d",
+  "plan_fingerprint": "ee96d1c3b911eea70b0bfcd1ebd88d9e9d6f9b62b96e090e600052c6fd9f3d37",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 77,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261120T014942546710-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "71cfa6bc3cdfd76baf5cfbdfaa753a379aad5729",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `id=\"s4\"`, `id=\"s5\"` and `id=\"s11\"` all resolve in the snapshot, and s6's references to \"section 11\", \"section 5\" and \"the grouping in section 5\" name those sections.",
+    "done_when": "a finding \u2014 s6's bar (plan.html:70) grades only quantity and unit omissions, leaving the role axis s6's own Delivers (line 69) requires unmeasured.",
+    "evidence_paths": "pass \u2014 s6 fixes no scratch path; its measures land in the section's landing record and its negative control reads a reported state, both durable.",
+    "naming": "pass \u2014 s6 names no symbol, file or plan label; \"awaiting context\" and \"failed\" are outcome states, not tracker vocabulary.",
+    "reasoning": "pass \u2014 the section's scoping of stated values to what \u00a711 decided matches the landed evidence (quantity 742 decided, unit ~1,157, role ~202 of 1,766, c-s11-landed), it prescribes no code path or step sequence, and its measure can fail.",
+    "single_goal": "pass \u2014 s6 delivers one thing: the pilot's descriptions written by group, with the quality reading as its acceptance measure.",
+    "wiring": "pass \u2014 s6's declarations (`s6: implementable`, depends-on `#s4`, `#s5`, `#s11`) name three sections that are all `done` in the same declaration table, and s6's `data-links` agree with them."
+  },
+  "section_digests": {
+    "_document": "6779747f528ff1f6b31e591ec2714dffa68a783ad3f84f0902f50c5d83739420",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s11": "0a44a06e3ce743fddcb14d83e8d2791ca5977f2a3959db6c4f0b59b17f876c9d",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "ab464b6984ed78eea9877e89fa3cccd82bdcf3bf6ce63a729171eadad1163a76",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T01:54:36.194141+00:00",
+  "total": null
+}
