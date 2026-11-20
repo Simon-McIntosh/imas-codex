@@ -25,7 +25,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 77,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0a2336458595297fb1ff9f6743750d8e6bd6c37d",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "An omitted role the vocabulary decided now makes a description partly right, as for quantity and unit.",
+      "reason": "",
+      "when": "2026-11-20T02:00:30.268157+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0a2336458595297fb1ff9f6743750d8e6bd6c37d",
+      "commit_basis": "edit",
+      "note": "An omitted role the vocabulary decided now makes a description partly right, as for quantity and unit.",
+      "reason": "",
+      "when": "2026-11-20T02:00:30.268157+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261120T014942546710-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261120T014942546710-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "71cfa6bc3cdfd76baf5cfbdfaa753a379aad5729",
   "rubric": "content",
