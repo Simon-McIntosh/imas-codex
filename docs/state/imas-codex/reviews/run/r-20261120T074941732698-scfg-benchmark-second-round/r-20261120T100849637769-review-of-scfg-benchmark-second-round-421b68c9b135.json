@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate records: classification.json records manifest.baseline_suite null and manifest.after_suite null, so the reviewed run carries no armed suite arm and no post-change arm; its gates are the fragment's --check plus tests/standard_names/test_record_benchmark_second_round.py, whose tests.log ends '12 passed, 1 warning' with no FAILED id, and my own --check run at 421b68c9 returned EXIT=0. Both arm sets are therefore empty and their difference is 0 with no ids. This is an absence of a suite measurement, not a measured zero: nothing in the reviewed run could have shown a regression outside that test file.",
+  "blockers": "none",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-20T10:20:25.539Z",
+  "dispatched_at": "2026-11-20T10:09:27Z",
+  "evidence_inputs": [
+    "records digest unchanged after the digest repair: 40236fb01f149fe3afa53725d92440ed8c60a0c6475604549a4917014a5b2329 (key and round document agree).",
+    "benchmark.py --check at 421b68c9 in a scratch extraction: EXIT=0; with one records line altered: EXIT=1 and two FAIL lines.",
+    "negative-control-revert.log shows 4 failed / 8 passed when the post-repair test file runs against the pre-repair harness d6de362d3^.",
+    "the source manifest cites negative-control.log for the round-level mutation control, but that file is 0 bytes at the reviewed head; the PASSED output survives in resume-1.jsonl/resume-2.jsonl, and the mutations are also covered by committed tests."
+  ],
+  "findings": [
+    {
+      "file": "tests/standard_names/test_record_benchmark_second_round.py",
+      "line": "188",
+      "severity": "non-blocking",
+      "text": "test_one_canonical_serialisation_backs_every_digest compares records_digest to a re-derivation that is its own implementation (both sides join canonical_json and digest_text), so reinstating the inline json.dumps/sha256 spelling the repair removed leaves the assertion true; it fails on the pre-repair harness only because canonical_json is absent, so the composition it claims to pin is unguarded."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read both gained commits; d6de362d3 refactors benchmark.py (canonical_json plus digest_text composition, case_content accessor, load_verdicts returning unrecognised values, decided-denominator scoring, 1400x722 canvas) and 421b68c9 adds four tests; the html and json changes are the regenerated figure canvas and timestamp only.",
+    "done_when": "the reviewed run's done_when asks --check to pass on the committed files and fail on three named mutations; I ran benchmark.py --check at 421b68c9 in a scratch extraction (EXIT=0, records digest unchanged) and altered one records line to get EXIT=1, so the gate still measures the done_when after the digest repair.",
+    "goal": "the two commits gained since the prior review repair its four reuse findings rather than extending the round; d6de362d3 deletes incumbent_record/record_changed_from_incumbent and routes second_row (:1816) and incumbent_body (:1888) through the first round's incumbent_draft/changed_from_incumbent, and 421b68c9 adds four tests.",
+    "manifest": "read; marks all four prior findings acted in d6de362d3 and pinned by 421b68c9, records 12 passed for the focused test file, records --check as passed, and states the records digest unchanged; it carries baseline_suite null and after_suite null.",
+    "write_paths": "the gained diff 673a76c8..421b68c9 touches exactly four paths, all inside the node's nine declared write paths."
+  },
+  "justifications": {
+    "durability": "three of the four new tests fail on the pre-repair harness for the reason they name (negative-control-revert.log), but the digest assertion at tests/standard_names/test_record_benchmark_second_round.py:188 restates the implementation and survives the inline-spelling regression it claims to pin.",
+    "evidence": "my --check run at 421b68c9 returned EXIT=0 on the committed files with the digest unchanged at 40236fb0..., and an altered records line returned EXIT=1, so the gate still asserts the done_when after the repair.",
+    "fit": "the new helpers at benchmark.py:93 and :488 follow the module's existing module-level helper idiom and are named for what they measure, with no plan or ticket label.",
+    "goal_fidelity": "benchmark.py:498 and :2108 route the incumbent and digest work through the file's existing owners, and all four repairs the prior review named are present at the reviewed head.",
+    "reuse": "the diff removes the two duplicated incumbent functions and composes canonical_json/digest_text instead of re-spelling them; the only canonical serialisers elsewhere are private per-module, so no exported owner is forked.",
+    "scope_discipline": "git diff --stat 673a76c8..421b68c9 lists only the four declared paths and no out-of-scope file."
+  },
+  "outside_scope": [],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the two commits gained since the prior review repair its four reuse findings rather than extending the round; d6de362d3 deletes incumbent_record/record_changed_from_incumbent and routes second_row (:1816) and incumbent_body (:1888) through the first round's incumbent_draft/changed_from_incumbent, and 421b68c9 adds four tests, so the landed change does what the repair commits state.\nVERDICT done_when: the reviewed run's done_when asks --check to pass on the committed files and fail on three named mutations; I ran benchmark.py --check at 421b68c9 in a scratch extraction (EXIT=0, records digest 40236fb01f149fe3afa53725d92440ed8c60a0c6475604549a4917014a5b2329 unchanged) and altered one records line to get EXIT=1 with \"the records file does not match the key's records digest: a line was altered\", so the gate still measures the done_when after the digest repair.\nVERDICT write_paths: the gained diff 673a76c8..421b68c9 touches exactly four paths -- benchmark.py, benchmark-second-round.json, benchmark-second-round.html and tests/standard_names/test_record_benchmark_second_round.py -- all inside the node's nine declared write paths.\nVERDICT manifest: read; the source manifest.md marks all four prior findings acted in d6de362d3 and pinned by 421b68c9, records \"12 passed\" for the focused test file, records the --check as passed, and states the records digest unchanged; it carries baseline_suite null and after_suite null, so the run has no armed suite pair.\nVERDICT diff: read both gained commits; d6de362d3 refactors benchmark.py (canonical_json plus digest_text composition at :93/:2108, a case_content accessor at :488, load_verdicts returning unrecognised values at :2180, decided-denominator scoring at :2210, 1400x722 canvas at :2948) and 421b68c9 adds four tests at :166, :186, :195 and :222; the html and json changes are the regenerated figure canvas and timestamp only.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmark.py:498 and :2108 route the incumbent and digest work through the file's existing owners, and all four repairs the prior review named are present at the reviewed head.\nSCORE evidence: 18\nJUSTIFICATION evidence: my --check run at 421b68c9 returned EXIT=0 on the committed files with the digest unchanged at 40236fb0..., and an altered records line returned EXIT=1, so the gate still asserts the done_when after the repair.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 673a76c8..421b68c9 lists only the four declared paths and no out-of-scope file.\nSCORE durability: 15\nJUSTIFICATION durability: three of the four new tests fail on the pre-repair harness for the reason they name (negative-control-revert.log), but the digest assertion at tests/standard_names/test_record_benchmark_second_round.py:188 restates the implementation and survives the inline-spelling regression it claims to pin.\nSCORE fit: 19\nJUSTIFICATION fit: the new helpers at benchmark.py:93 and :488 follow the module's existing module-level helper idiom and are named for what they measure, with no plan or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the diff removes the two duplicated incumbent functions and composes canonical_json/digest_text instead of re-spelling them; the only canonical serialisers elsewhere are private per-module (_canonical at imas_codex/standard_names/case_file.py:170, _canonical_json at dd_resolutions.py:160 and advisory_benchmark.py:458), so no exported owner is forked.\nFINDING tests/standard_names/test_record_benchmark_second_round.py:188 non-blocking: test_one_canonical_serialisation_backs_every_digest compares records_digest to a re-derivation that is its own implementation (both sides join canonical_json and digest_text), so reinstating the inline json.dumps/sha256 spelling the repair removed leaves the assertion true; it fails on the pre-repair harness only because canonical_json is absent, so the composition it claims to pin is unguarded.\n",
+  "review_node": "review-of-scfg-benchmark-second-round-421b68c9b135",
+  "review_run_id": "r-20261120T100849637769-review-of-scfg-benchmark-second-round-421b68c9b135",
+  "review_scope": "commits gained since the prior review (673a76c8..421b68c9): d6de362d3 and 421b68c9; the cumulative delivered diff base is 8a54d6cb.",
+  "reviewed_base_sha": "673a76c80ee44a806b9edb43afe0e134035d0320",
+  "reviewed_head_sha": "421b68c9b135fe0fe99a71888fd0c2b9706e2832",
+  "reviewed_run_id": "r-20261120T074941732698-scfg-benchmark-second-round",
+  "reviewer": {
+    "backend": null,
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261120T100849637769-review-of-scfg-benchmark-second-round-421b68c9b135"
+  },
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T10:20:43.201844+00:00",
+  "total": 110
+}
