@@ -1,17 +1,35 @@
 <section id="plant-only-server-container-evidence">
   <h3>A private container that serves the ITER plant graph and nothing else</h3>
-  <p>The plant catalogue is served by a second image built from the same
-    Dockerfile, with the serve mode fixed at build time:
-    <code>ARG SERVE_MODE="--dd-only"</code> is recorded as
-    <code>IMAS_CODEX_SERVE_MODE</code>, and the entrypoint applies it to the
-    <code>serve</code> command, so the image mode is a property of the image
-    rather than of the command line. <code>AgentsServer(plant_only=True)</code>
+  <p>The plant catalogue is served by an image built with
+    <code>apptainer</code> from a private definition in the run directory, not
+    by the Dockerfile: this cluster has no reachable Docker daemon, so the
+    Dockerfile's plant recipe exists but <strong>has not been built</strong>.
+    The image's serve mode is its start command — the compose service passes
+    <code>serve --plant-only …</code> — so the image's own default and the
+    entrypoint stay exactly what the data-dictionary image already starts with.
+    <code>AgentsServer(plant_only=True)</code>
     forces read-only operation, names the MCP server
     <code>imas-codex-plant</code>, and deletes every tool component outside
     <code>PLANT_TOOLS</code> — <code>search_signals</code>,
     <code>search_pulses</code>, <code>get_signal_load_recipe</code>,
     <code>signal_analytics</code>, <code>fetch_content</code> and
     <code>get_facility_coverage</code> — before prompts are registered.</p>
+  <p>The data-dictionary image's start path is unchanged, and the diff says so:
+    <code>git diff 1875455e..HEAD -- docker-entrypoint.sh</code> is empty (byte
+    for byte), and every changed line of
+    <code>git diff 1875455e..HEAD -- Dockerfile</code> is a <code>##</code>
+    comment line — <code>CMD</code> still reads
+    <code>["serve", "--dd-only", "--host", "0.0.0.0", "--port", "8000"]</code>,
+    there is no serve-mode build argument, and no
+    <code>IMAS_CODEX_SERVE_MODE</code> anywhere. A test runs the entrypoint
+    itself with Neo4j, <code>curl</code>, <code>cypher-shell</code> and
+    <code>imas-codex</code> stubbed, and compares the argument list the server
+    receives against the list each start command names: the Dockerfile's
+    <code>CMD</code> yields <code>serve --dd-only --host 0.0.0.0 --port 8000</code>,
+    the compose plant service's <code>command</code> yields
+    <code>serve --plant-only --host 0.0.0.0 --port 8000</code>, an environment
+    the plant image never sets changes neither list, and dropping
+    <code>--plant-only</code> from the plant command fails the test.</p>
   <p>The package is produced by the export command's own filter.
     <code>graph export --facility &lt;f&gt; --without-dd</code> refuses without
     a facility, forwards the flag, and the filter deletes every node owned by
@@ -27,10 +45,14 @@
     facility-owned kind and of every relationship between two facility-owned
     nodes as the graph it was exported from, no node of another facility, and
     no facility-less kind beyond the two the server reads. Both filter paths
-    run that rule — the local Bolt filter measures before it deletes and after,
-    and the generated compute-node script prints <code>SCOPE_BEFORE=</code> and
-    <code>SCOPE_AFTER=</code> through the same module — and either refuses the
-    package before the dump is written, so no producer can skip the check.</p>
+    run that rule and refuse the package before the dump exists: the local Bolt
+    filter measures before it deletes and after, then verifies before calling
+    the dump, while the generated compute-node script prints
+    <code>SCOPE_BEFORE=</code> and <code>SCOPE_AFTER=</code>, runs the same
+    check through the same module, and aborts under <code>set -e</code> before
+    <code>neo4j-admin database dump</code>, so no dump file is written and none
+    is moved into place. The caller re-reads the two printed scopes after the
+    job as an independent check of what was measured.</p>
   <p>The filter's statements have one definition, used by both paths: the local
     filter executes them through a session with parameters, and the script
     substitutes the same text for <code>cypher-shell</code>, which takes none.
@@ -93,9 +115,11 @@
         control of 36 matches for the system term. The probe's exit status was
         0 and the harness's <code>EXIT=0</code>.</td></tr>
       <tr><td>Focused product tests</td>
-        <td>25 passed in 2.1 s, exit 0, covering the scope comparison, the
-        plant tool derivation, the export flag forwarding, the public-registry
-        refusal and the refusal to dump a mismatched package.</td></tr>
+        <td>32 passed in 5.8 s, exit 0, covering the scope comparison and its
+        measurement against a hand-counted fixture, the plant tool derivation,
+        the export flag forwarding, the public-registry refusal, the refusal to
+        dump a mismatched package, the script's refusal before it dumps, and the
+        entrypoint's argument list for both images' start commands.</td></tr>
       <tr><td>Gate over the touched surfaces</td>
         <td>One suite (<code>tests/llm</code>, <code>tests/cli</code>,
         <code>tests/graph</code>) run as two arms on the compute partition: at
@@ -137,8 +161,9 @@
     empty temporary Neo4j, injects the foreign node, applies the product filter
     and dumps the result. The shared graph was never stopped, and no
     <code>neo4j-admin dump</code> was attempted against a mounted database.</p>
-  <p>This cluster has no reachable Docker daemon, so the image is built with
-    <code>apptainer build --fakeroot</code> from
+  <p>This cluster has no reachable Docker daemon, so the served image is built
+    with <code>apptainer build --fakeroot</code> from the private
+    <code>plant-only.def</code> in the run directory, over
     <code>neo4j:2026.01.4-community</code>, copying the project's resolved
     environment, the worktree's <code>imas_codex</code>, and the sibling
     standard-name package the server imports during warmup, then loading the

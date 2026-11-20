@@ -38,6 +38,17 @@ logger = logging.getLogger(__name__)
 # Constants
 # ============================================================================
 
+# What the compute-node script runs to judge the package it has just filtered.
+# The two arguments are the measured scopes as JSON; a mismatch exits non-zero,
+# which the script's ``set -e`` turns into an abort before the dump exists.
+VERIFY_SCOPE_PYTHON = (
+    "import json, sys; "
+    "from imas_codex.graph.plant_scope import PlantScope, verify_plant_package; "
+    "verify_plant_package("
+    "PlantScope.from_dict(json.loads(sys.argv[1])), "
+    "PlantScope.from_dict(json.loads(sys.argv[2])))"
+)
+
 # Batch size for every facility-filter deletion. One value for the local filter
 # and the SLURM script, so the two paths cannot drift.
 FACILITY_DELETE_BATCH = 50000
@@ -712,6 +723,9 @@ def _build_filter_script(
             measure_scope() {{
                 "$PYTHON" -c 'import sys; from imas_codex.graph.plant_scope import measure_plant_scope_json; measure_plant_scope_json(sys.argv[1], sys.argv[2], "-")' "bolt://localhost:$BOLT_PORT" "$FACILITY"
             }}
+            verify_scope() {{
+                "$PYTHON" -c '{VERIFY_SCOPE_PYTHON}' "$SCOPE_BEFORE" "$SCOPE_AFTER"
+            }}
         """)
         measure_block = textwrap.dedent("""\
             echo "  Measuring scope before filtering..."
@@ -722,6 +736,10 @@ def _build_filter_script(
             echo "  Measuring scope after filtering..."
             SCOPE_AFTER=$(measure_scope)
             echo "SCOPE_AFTER=$SCOPE_AFTER"
+            echo "  Verifying the package scope..."
+            # Refuses here, before the dump exists, so a mismatched package is
+            # never written and never moved into place.
+            verify_scope
         """)
 
     python_preamble = textwrap.indent(python_preamble, " " * 8)

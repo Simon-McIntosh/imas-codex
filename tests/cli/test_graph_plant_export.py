@@ -193,3 +193,50 @@ def test_export_refuses_to_dump_a_mismatched_package(monkeypatch, tmp_path):
         temp_neo4j.create_facility_dump(
             source, "iter", tmp_path / "out.dump", without_dd=True
         )
+
+
+def test_the_compute_node_script_verifies_before_it_dumps():
+    """The script's own refusal runs while no dump exists yet."""
+    script = _script(without_dd=True)
+    assert script.index("verify_scope\n") < script.index("Dumping filtered graph")
+    assert script.index("verify_scope\n") < script.index("neo4j-admin database dump")
+
+
+def test_the_verify_command_the_script_runs_refuses_a_mismatch():
+    """The command the script executes, run on two measured scopes."""
+    import json
+    import subprocess
+    import sys
+
+    from imas_codex.graph.plant_scope import PlantScope
+    from imas_codex.graph.temp_neo4j import VERIFY_SCOPE_PYTHON
+
+    matched = PlantScope(
+        node_labels={"FacilitySignal": 3},
+        relationship_types={"DATA_ACCESS": 4},
+        facilityless_labels={"Facility": 1, "GraphMeta": 1},
+    ).to_dict()
+    short = PlantScope(
+        node_labels={"FacilitySignal": 2},
+        relationship_types={"DATA_ACCESS": 4},
+        facilityless_labels={"Facility": 1, "GraphMeta": 1},
+    ).to_dict()
+
+    def run(before: dict, after: dict):
+        return subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                VERIFY_SCOPE_PYTHON,
+                json.dumps(before),
+                json.dumps(after),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+    assert run(matched, matched).returncode == 0
+    refused = run(matched, short)
+    assert refused.returncode != 0
+    assert "does not match" in refused.stderr

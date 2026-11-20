@@ -94,3 +94,49 @@ def test_kind_absent_from_the_shared_graph_is_not_silently_accepted():
     assert compare_plant_scope(_shared(), package) == [
         "node kind IMASNode: package has 61000, shared graph has none for this facility"
     ]
+
+
+def test_measure_plant_scope_counts_a_small_known_graph():
+    """The measurement's own arithmetic, against counts written out by hand.
+
+    The fixture is a two-kind plant: 5 nodes of two kinds, 6 relationships of
+    two types, one node of another facility, and the two facility-less kinds a
+    plant package keeps.
+    """
+    from imas_codex.graph.plant_scope import measure_plant_scope
+
+    answered = []
+
+    def query(cypher: str, **params):
+        assert params == {"f": "demo"}
+        answered.append(cypher)
+        if "n.facility_id = $f UNWIND labels(n) AS l" in cypher:
+            return [
+                {"label": "FacilitySignal", "count": 3},
+                {"label": "PlantComponent", "count": 2},
+            ]
+        if "type(r) AS type" in cypher:
+            return [
+                {"type": "CONTAINS", "count": 2},
+                {"type": "DATA_ACCESS", "count": 4},
+            ]
+        if "RETURN count(n) AS n" in cypher:
+            return [{"n": 1}]
+        if "n.facility_id IS NULL" in cypher:
+            return [
+                {"label": "Facility", "count": 1},
+                {"label": "GraphMeta", "count": 1},
+            ]
+        raise AssertionError(f"unexpected statement: {cypher}")
+
+    scope = measure_plant_scope(query, "demo")
+
+    assert scope == PlantScope(
+        node_labels={"FacilitySignal": 3, "PlantComponent": 2},
+        relationship_types={"CONTAINS": 2, "DATA_ACCESS": 4},
+        foreign_nodes=1,
+        facilityless_labels={"Facility": 1, "GraphMeta": 1},
+    )
+    assert sum(scope.node_labels.values()) == 5
+    assert sum(scope.relationship_types.values()) == 6
+    assert len(answered) == 4

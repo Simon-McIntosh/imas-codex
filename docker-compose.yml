@@ -65,9 +65,11 @@ services:
         - GRAPH_TAG=${PLANT_GRAPH_TAG:-latest}
         - GRAPH_PACKAGE=${PLANT_GRAPH_PACKAGE:-imas-codex-graph-iter-without-dd}
         - GHCR_REGISTRY=${GHCR_REGISTRY:-ghcr.io/iterorganization}
-        - SERVE_MODE=--plant-only
       secrets:
         - ghcr_token
+    # The serve mode is this service's command, so the image's own default
+    # (the data-dictionary mode) is untouched.
+    command: ["serve", "--plant-only", "--host", "0.0.0.0", "--port", "8000"]
     ports:
       - "8001:8000"
     environment:
