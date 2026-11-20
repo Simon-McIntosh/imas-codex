@@ -221,6 +221,7 @@ async def test_only_cited_statements_survive():
     )
     assert outcome.text == "Cooling circuit valve assembly."
     assert outcome.drops == 2
+    assert outcome.calls == 1
     assert outcome.cost == pytest.approx(0.25)
     assert outcome.tokens == 7
     assert "[context-1] Meaning." in call.calls[0]["messages"][1]["content"]
@@ -245,6 +246,70 @@ async def test_all_claims_dropped_delivers_nothing_and_reports_failure():
     )
     assert outcome.text == ""
     assert not outcome.delivered
+    assert outcome.error == "No statement was supported by a supplied context item"
+
+
+class SequenceCall:
+    """Return a different batch for each call, in order."""
+
+    def __init__(self, batches, cost=0.1, tokens=4):
+        self.batches = list(batches)
+        self.cost = cost
+        self.tokens = tokens
+        self.calls = []
+
+    async def __call__(self, **kwargs):
+        self.calls.append(kwargs)
+        return self.batches.pop(0), self.cost, self.tokens
+
+
+@pytest.mark.asyncio
+async def test_an_unsupported_answer_is_asked_once_more_and_accumulates_cost():
+    empty = GroupDescriptionBatch(
+        results=[GroupDescription(group_id=COMPONENT, statements=[])]
+    )
+    supported = GroupDescriptionBatch(
+        results=[
+            GroupDescription(
+                group_id=COMPONENT,
+                statements=[
+                    GroupStatement(
+                        text="Cooling circuit valve assembly.",
+                        context_items=["context-1"],
+                    )
+                ],
+            )
+        ]
+    )
+    call = SequenceCall([empty, supported])
+    outcome = await describe_group(
+        GroupRequest(group_id=COMPONENT, kind="component", context=("Meaning.",)),
+        model="local/demo",
+        call=call,
+        attempts=1,
+    )
+    assert outcome.text == "Cooling circuit valve assembly."
+    assert outcome.calls == 2
+    assert outcome.cost == pytest.approx(0.2)
+    assert outcome.tokens == 8
+    assert len(call.calls) == 2
+    assert "delivered no supported statement" in call.calls[1]["messages"][-1]["content"]
+
+
+@pytest.mark.asyncio
+async def test_a_second_unsupported_answer_still_fails():
+    empty = GroupDescriptionBatch(
+        results=[GroupDescription(group_id=COMPONENT, statements=[])]
+    )
+    call = SequenceCall([empty, empty])
+    outcome = await describe_group(
+        GroupRequest(group_id=COMPONENT, kind="component", context=("Meaning.",)),
+        model="local/demo",
+        call=call,
+        attempts=1,
+    )
+    assert not outcome.delivered
+    assert outcome.calls == 2
     assert outcome.error == "No statement was supported by a supplied context item"
 
 
@@ -289,13 +354,14 @@ def test_summary_counts_sum_to_the_pilot_total_and_flag_no_invalid_value():
     cohort = plan([member(), absent])
     composed = compose_plan(
         cohort,
-        {COMPONENT: GroupOutcome(text="Component.", cost=0.5, tokens=10)},
+        {COMPONENT: GroupOutcome(text="Component.", cost=0.5, tokens=10, calls=1)},
         {
             PATTERN: GroupOutcome(
                 text="Pattern.",
                 fields={"TEMP": "temperature"},
                 cost=0.5,
                 tokens=10,
+                calls=1,
             )
         },
     )
@@ -394,6 +460,7 @@ async def test_review_pass_removes_a_statement_its_check_refuses():
     assert outcome.text == "Cooling circuit valve assembly."
     assert outcome.cost == pytest.approx(0.3)
     assert outcome.tokens == 12
+    assert outcome.calls == 2
     assert call.calls[1]["reasoning_effort"] == "high"
     assert call.calls[1]["temperature"] == 0
 
@@ -427,6 +494,7 @@ async def test_review_failure_delivers_nothing_and_keeps_both_costs():
     assert not outcome.delivered
     assert outcome.text == ""
     assert outcome.cost == pytest.approx(0.1)
+    assert outcome.calls == 2
     assert outcome.error is not None and outcome.error.startswith("Review failed:")
 
 
