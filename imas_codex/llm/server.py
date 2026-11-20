@@ -2423,6 +2423,8 @@ class AgentsServer:
                 diagnostic: str | None = None,
                 physics_domain: str | None = None,
                 role: str | None = None,
+                quantity: str | None = None,
+                vocabulary_role: str | None = None,
                 check_status: str | None = None,
                 error_type: str | None = None,
                 include_check_details: bool = False,
@@ -2454,6 +2456,15 @@ class AgentsServer:
                         configuration_parameter, derived_or_computed. A role outside
                         the six is refused with the list. Use "measured" to exclude
                         references and commands from a measurement search.
+                    quantity: Keep only signals whose closed-vocabulary quantity is
+                        this one, e.g. "temperature", "current", "pressure", "flow",
+                        "valve_position". Assigned by rule from a source that states
+                        it, so a signal with no such source is absent from the result.
+                        A quantity outside the sixteen is refused with the list.
+                    vocabulary_role: Keep only signals whose closed-vocabulary role is
+                        this one: measurement, setpoint, state, alarm or command.
+                        Separate from role, which is a model-judged six-member set.
+                        A role outside the five is refused with the list.
                     check_status: Filter by data-access check outcome.
                         Values: "passed", "failed", "unchecked".
                     error_type: Filter by check error classification
@@ -2486,6 +2497,8 @@ class AgentsServer:
                     diagnostic=diagnostic,
                     physics_domain=physics_domain,
                     role=role,
+                    quantity=quantity,
+                    vocabulary_role=vocabulary_role,
                     check_status=check_status,
                     error_type=error_type,
                     include_check_details=include_check_details,
