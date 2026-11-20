@@ -507,6 +507,7 @@ def _group_prompt(
         "signals/group_description",
         {
             "kind": request.kind,
+            "group_id": request.group_id,
             "sentence_limit": sentence_limit,
             "output_schema": GroupDescriptionBatch.model_json_schema(),
         },
@@ -542,21 +543,38 @@ async def describe_group(
     )
 
     messages, items = _group_prompt(request, sentence_limit)
-    try:
-        result = await call(
-            model=model,
-            messages=messages,
-            response_model=GroupDescriptionBatch,
-            **call_kwargs,
-        )
-    except Exception as exc:  # A group failure must not stop its siblings.
+    result, failure = None, None
+    for attempt in range(2):
+        try:
+            result = await call(
+                model=model,
+                messages=messages,
+                response_model=GroupDescriptionBatch,
+                **call_kwargs,
+            )
+            break
+        except ValueError as exc:
+            # A structured-call validation failure is not a transport fault and
+            # is not retried into existence; its spend is still recorded.
+            return GroupOutcome(
+                cost=float(getattr(exc, "cost", 0) or 0.0),
+                tokens=int(getattr(exc, "tokens", 0) or 0),
+                error=f"{type(exc).__name__}: {exc}",
+            )
+        except Exception as exc:  # A transient lane fault is retried once.
+            failure = exc
+            if attempt == 0:
+                await asyncio.sleep(5)
+    if result is None:
         return GroupOutcome(
-            cost=float(getattr(exc, "cost", 0) or 0.0),
-            tokens=int(getattr(exc, "tokens", 0) or 0),
-            error=f"{type(exc).__name__}: {exc}",
+            cost=float(getattr(failure, "cost", 0) or 0.0),
+            tokens=int(getattr(failure, "tokens", 0) or 0),
+            error=f"{type(failure).__name__}: {failure}",
         )
     batch, cost, tokens = result
     rows = [row for row in batch.results if row.group_id == request.group_id]
+    if not rows and len(batch.results) == 1:
+        rows = batch.results
     if len(rows) != 1:
         return GroupOutcome(
             cost=cost,

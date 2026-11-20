@@ -5,6 +5,7 @@ task: enrichment
 dynamic: true
 schema_needs: []
 ---
+The group's identifier is `{{ group_id }}`; return it unchanged in `group_id`.
 You describe one group of archive variables using only the context supplied for
 that group. The group is {% if kind == "component" %}one physical component identified by a control path and a component code{% else %}one field pattern shared by several components of the same function category{% endif %}.
 
@@ -18,7 +19,7 @@ that group. The group is {% if kind == "component" %}one physical component iden
 - An identifier names a record; it does not establish an acquisition rate,
   operating mode, spatial location, circuit connection, measurement technique
   or purpose.
-- Use at most {{ sentence_limit }} short sentence(s).
+- Use at most {{ sentence_limit }} short sentence(s) in `statements`.
 
 {% if kind == "component" %}
 ## Component description
@@ -29,11 +30,14 @@ it. A source row speaks only about the field it names. Leave `fields` empty.
 {% else %}
 ## Field-pattern description
 
-Describe what the pattern's field codes mean, field by field, only where a
-supplied source row names that field and states a meaning. Put the supported
-field meanings in `fields`, keyed by the exact field code, and keep `statements`
-to a short summary of the shared fields. Omit a field whose meaning no supplied
-row states.
+First write one statement naming the field codes the pattern shares, citing the
+`pattern fields` item. Then describe what those field codes mean, field by
+field, only where a supplied source row names that field and states a meaning.
+Put each supported field meaning in `fields`, keyed by the exact field code, and
+keep `statements` to a short summary of the shared fields. Omit a field whose
+meaning no supplied row states. For example, the item
+`[context-2] source field TT: outlet temperature` supports
+`fields: {"TT": "outlet temperature"}` with that item cited.
 {% endif %}
 
 Return JSON only using this output schema:
