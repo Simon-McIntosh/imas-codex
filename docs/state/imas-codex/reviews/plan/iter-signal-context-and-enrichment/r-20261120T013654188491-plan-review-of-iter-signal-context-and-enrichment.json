@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T01:38:57.964Z",
+  "dispatched_at": "2026-11-20T01:38:30Z",
+  "findings": [
+    {
+      "anchor": "plan.html:70",
+      "id": "done_when-1",
+      "reason": "without scoping the omission clause to values the vocabulary decided for that signal, a node following the plan literally can deliver a correct pilot as failed on quality.",
+      "text": "\u00a76 grades a description \"partly right when everything it states is supported but it omits what the signal measures or its unit\", while its Delivers (line 69) now requires omitting exactly that wherever the vocabulary left the value undecided or in conflict; a description that obeys the new rule is therefore scored down, so the thirty-two-right floor is measured against the vocabulary's coverage rather than the writing \u2014 the landed vocabulary has quantity decided for 728 of 1,766 (41%) and unit for 1,157 (65%), so on the described population a compliant description of a signal with no decided quantity can be right only by accident of sampling",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:70",
+      "id": "done_when-2",
+      "reason": "naming the pattern population (patterns with at least one pilot member) is what makes the third leg of the reconciliation able to fail.",
+      "text": "the reconciliation \"the number of signals, of components and of field patterns left awaiting context, each with its described count summing to the pilot's total of that kind\" names no pilot-scoped field-pattern population, and \u00a75 defines patterns across the whole catalogue with 97.8886% of component variables in shared patterns, so a pattern reaches members of several systems and \"the pilot's total of that kind\" is whatever the node declares it to be, letting the pattern leg of the sum hold for any pair of figures while the signal leg (1,766, from \u00a74's census) and the component leg (from \u00a75's grouping) are fixed",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "48509edb60df54e611aee222ffdc5c4344ec59ab",
+  "plan_fingerprint": "e22ab3bd843917355a276b0fa819472c3909578be9a8780c0c1e6fa744aec08a",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 76,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261120T013654188491-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "8ac80c614d0c09aefa5033cd703d930ea97ca043",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a711's anchor (`plan.html:91`) resolves and is the vocabulary the new Delivers sentence cites; the section 5 and 7 references resolve as `#s5` and `#s7`.",
+    "done_when": "a finding \u2014 \u00a76's quality bar at `plan.html:70` grades a description \"partly right when \u2026 it omits what the signal measures or its unit\", unconditionally, while its own Delivers now requires that omission wherever the vocabulary did not decide.",
+    "evidence_paths": "pass \u2014 the landing record and its forty readings sit beside the plan's other landing records under `docs/evidence/fragments/iter-signal-context-and-enrichment/`, which exists and holds the sibling fragments.",
+    "naming": "pass \u2014 \u00a76's added text names no symbol, file or function; \"the one group enrichment mechanism the discovery pipeline already has\" is a behaviour constraint, not an implementation instruction.",
+    "reasoning": "pass \u2014 the new Delivers clause matches the evidence its own dependency landed (quantity decided 728, unit 1,157, role 202 of 1,766, fragment `pilot-signal-vocabulary.html`), and the statements-of-value measure it adds (`none of them stating a value the vocabulary does not hold`) can fail.",
+    "single_goal": "pass \u2014 \u00a76 delivers one thing, the pilot's group enrichment with its measurement; the projection is a figure of that same measurement, not a second deliverable.",
+    "wiring": "pass \u2014 \u00a76 declares depends-on s4, s5 and s11 (`plan.html:68`), all three are `done` in `plan-section-declarations`, so s6's `implementable` is consistent for the first time since the vocabulary section landed."
+  },
+  "section_digests": {
+    "_document": "6779747f528ff1f6b31e591ec2714dffa68a783ad3f84f0902f50c5d83739420",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s11": "0a44a06e3ce743fddcb14d83e8d2791ca5977f2a3959db6c4f0b59b17f876c9d",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "13c009c00536548b753367408ebec0b3064e23a7d154bd854799dad642827cdb",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T01:41:36.501161+00:00",
+  "total": null
+}
