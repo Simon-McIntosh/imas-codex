@@ -340,21 +340,47 @@ def test_check_reconciles_hits_kept_protected_and_leftover(
     )
 
 
+def test_check_refuses_totals_that_do_not_reconcile(
+    tree: Path, kept_list: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tree / "docs" / "evidence" / "run.md").write_text(
+        '{"schema": "imas-codex.authority.v1"}\n'
+    )
+    (tree / "schemas.yaml").write_text('{"schema": "imas-codex.authority.v1"}\n')
+    # A pattern narrower than the identifiers it counts cannot see the
+    # protected occurrences, so the totals stop adding up; the report must say so
+    # rather than print three numbers that look plausible apart.
+    monkeypatch.setattr(
+        "scripts.rename.check.OLD_NAME_PATTERN", re.compile(r"imas_codex\.never")
+    )
+
+    report = check_tree(tree, kept_list=kept_list)
+
+    assert report.protected == 1
+    assert report.old_name_hits == 0
+    assert "counts-unreconciled" in {v.kind for v in report.violations}
+    assert not report.as_dict()["reconciled"]
+
+
+def label_disagreements(data: dict) -> tuple[set[str], set[str]]:
+    """The document labels no row claims, and the labels no document carries."""
+    claimed = {
+        row.get("document_label")
+        for row in data["inventory"]
+        if row.get("origin") == "inventory"
+    }
+    surfaces = inventory_labels()
+    return surfaces - claimed, claimed - inventory_labels(surfaces_only=False)
+
+
 def test_cutover_accounts_for_every_inventory_surface() -> None:
     data = json.loads(Path("scripts/rename/cutover.json").read_text())
-    claimed_inventory = {
-        row["document_label"]
-        for row in data["inventory"]
-        if row["origin"] == "inventory"
-    }
+    unclaimed, invented = label_disagreements(data)
     claimed_brief = {row["id"] for row in data["inventory"] if row["origin"] == "brief"}
-    surfaces = inventory_labels()
 
-    # Every surface the document names is claimed, and no row invents one.
-    assert surfaces <= claimed_inventory
-    assert claimed_inventory <= inventory_labels(surfaces_only=False)
+    assert unclaimed == set()
+    assert invented == set()
     assert claimed_brief == {"worktrees", "docs-state", "gate-scripts", "node-briefs"}
-    assert len(data["inventory"]) == len(claimed_inventory) + len(claimed_brief) + 1
 
     report = check_cutover()
 
@@ -362,17 +388,42 @@ def test_cutover_accounts_for_every_inventory_surface() -> None:
     assert report.as_dict()["unaccounted"] == []
 
 
-def test_cutover_reports_a_surface_the_document_does_not_carry(
-    tmp_path: Path,
-) -> None:
+def test_cutover_rejects_a_label_the_document_does_not_carry(tmp_path: Path) -> None:
     data = json.loads(Path("scripts/rename/cutover.json").read_text())
     row = next(r for r in data["inventory"] if r["origin"] == "inventory")
     row["document_label"] = "Invented surface"
     path = tmp_path / "cutover.json"
     path.write_text(json.dumps(data))
 
-    assert "Invented surface" not in inventory_labels(surfaces_only=False)
-    assert check_cutover(path).ok  # the tool judges coverage, the test judges labels
+    unclaimed, invented = label_disagreements(data)
+
+    assert "Invented surface" in invented
+    assert "Installed units" in unclaimed
+
+
+def test_cutover_refuses_a_row_without_an_origin(tmp_path: Path) -> None:
+    data = json.loads(Path("scripts/rename/cutover.json").read_text())
+    del data["inventory"][0]["origin"]
+    path = tmp_path / "cutover.json"
+    path.write_text(json.dumps(data))
+
+    report = check_cutover(path)
+
+    assert not report.ok
+    assert any("has origin None" in v for v in report.violations)
+
+
+def test_cutover_refuses_an_inventory_row_without_a_label(tmp_path: Path) -> None:
+    data = json.loads(Path("scripts/rename/cutover.json").read_text())
+    row = next(r for r in data["inventory"] if r["origin"] == "inventory")
+    del row["document_label"]
+    path = tmp_path / "cutover.json"
+    path.write_text(json.dumps(data))
+
+    report = check_cutover(path)
+
+    assert not report.ok
+    assert any("names no label" in v for v in report.violations)
 
 
 def test_cutover_reports_an_unaccounted_surface(tmp_path: Path) -> None:
