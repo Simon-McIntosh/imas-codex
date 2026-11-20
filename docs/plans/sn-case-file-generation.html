@@ -14,8 +14,8 @@
 <meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-after" content="sn-audited-group-release">
-<meta name="plan-version" content="18">
-<meta name="plan-modified" content="2026-11-19">
+<meta name="plan-version" content="19">
+<meta name="plan-modified" content="2026-11-20">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[&quot;sn-case-file-generation#s1&quot;,&quot;sn-case-file-generation#s2&quot;],&quot;s4&quot;:[&quot;sn-case-file-generation#s3&quot;],&quot;s5&quot;:[&quot;sn-case-file-generation#s4&quot;],&quot;s6&quot;:[&quot;sn-case-file-generation#s3&quot;,&quot;sn-case-file-generation#s4&quot;,&quot;sn-case-file-generation#s5&quot;,&quot;sn-audited-group-release#s3&quot;]}">
 <meta name="plan-effort-hours" content="53.0">
@@ -72,6 +72,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261118T064807925154-scfg-benchmark" data-who="reckon-build" data-when="2026-11-18T18:31:05Z">
     <div class="r-comment-body"><p>Added a blind record-generation benchmark over the 176-member reference set (89 development, 87 held out) with four structure-by-model arms, two prompt rounds and two controls; final held-out share right: one-pass/frontier 28/87 = 32.2 % (95 % CI 23.3-42.6), staged/frontier 24/87 = 27.6 %, one-pass/local 15/87 = 17.2 %, staged/local 7/87 = 8.0 %, incumbent-unchanged 59/87 = 67.8 %; the incumbent control did not separate and the withheld control is unmeasurable once restricted to members the full arm answered correctly, so the run reports measuring=false and calls no arm difference a win; spend USD 18.54 against the USD 25 ceiling.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s3-lead-rulings-20261120" data-who="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9" data-when="2026-11-20T03:10:00Z">
+    <div class="r-comment-body"><p>State and lead rulings, 2026-11-20. <strong>Lost evidence:</strong> the first round's row-level logs (the generated records and the judge's reasons, 1,234 rows each) were written only to the benchmark run's directory and went with it when the run was promoted; <code>benchmark.json</code> keeps each row's verdict and cost but not the text, so the round cannot be diagnosed row by row. Every later round writes its row-level records inside the repository. <strong>Diagnosis:</strong> the lead ruled that the best arm is regenerated on the 50 seeded held-out rows, with records committed, and those rows are then read blind; no round-two money is spent before that read names what to change. Ceiling for the regeneration USD 4. <strong>Judge:</strong> asked who judges generated records in the next round, the lead answered that the coordinating session does it; the first round's judge model was an unfit reader. <strong>Naming:</strong> the lead raised that a derived locus such as <code>vertical_coordinate_of_current_center</code> should say whose it is; the owner rule (a centre, centroid or axis names its owner unless the term is unique to one object) is carried into the grammar proposal, and a locus without an owner is counted as a defect class when the group is adjudicated again. <strong>Spend:</strong> the repair ceiling is USD 400.</p></div>
 </div>
 </section>
 </main>
