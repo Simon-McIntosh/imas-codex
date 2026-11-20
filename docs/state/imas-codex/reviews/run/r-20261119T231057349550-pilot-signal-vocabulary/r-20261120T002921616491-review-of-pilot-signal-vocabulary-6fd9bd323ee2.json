@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_basis": "The reviewed run files baseline_suite and after_suite. Its baseline arm is logs/base-1875455e-prompt-schema-coverage.log (2 failed, 5 passed, EXIT=1) with failing ids tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts and tests/llm/test_prompt_schema_coverage.py::test_prompt_carries_generated_example_verbatim[signals/enrichment_grounding]. Its after arm is logs/gate-final-1332727.log at head 6fd9bd323 (2773 passed, 10 skipped, 22 deselected, EXIT=0), whose failure set is empty; the two baseline ids are among the 22 deselected, so they are absent from the after set rather than proven fixed. The set difference after-minus-baseline is therefore empty: added_failure_count 0 and added_failure_ids []. The baseline log's own header records revision 86771b9e8, not the declared base 1875455e, which is why the pre-existence of those two ids is recorded as a finding rather than taken as established.",
+  "call_sites": [
+    "imas_codex/remote/signal_vocabulary.py:30 run_assignment",
+    "imas_codex/llm/server.py:2420 search_signals MCP tool",
+    "imas_codex/llm/search_tools.py:405 _search_signals",
+    "imas_codex/llm/search_tools.py:867 _vector_search_signals",
+    "imas_codex/graph/domain_queries.py:117 signal_vector_search_block"
+  ],
+  "completed_at": "2026-11-20T00:30:38.211Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-20T00:30:24Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T231057349550-pilot-signal-vocabulary/manifest.md",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: baseline_suite states the main checkout at base 1875455ec8bb3cba6136a5e6750f138fef0c6c74, but the log it cites (logs/base-1875455e-prompt-schema-coverage.log:2) records revision 86771b9e8, a tree that already contains the reviewed commits 04d4e2ac4..48ac67407, and its command header elides the environment with '...' so the command cannot be re-run from the log; the two test_prompt_schema_coverage.py failures are therefore shown only with the change present, and the added-failure count rests on the after arm deselecting them rather than on a base measurement."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-signal-vocabulary.html",
+      "line": "39",
+      "severity": "non-blocking",
+      "text": "non-blocking: the search check states 'the same query unfiltered returned 20 of which 0 carried both', but no artefact records that control: ~/.cache/imas-codex-codac-uda/pilot-vocabulary/search-check.json holds only the filtered page (returned 20, carrying_both 20, not_carrying_both 0) and search_check.py runs one call, so the unfiltered figure is a claim a reader cannot check."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T231057349550-pilot-signal-vocabulary/logs/rigel-graph2-1332710.log",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only graph-marked run records revision 04d4e2ac42ba006a441d5634ae35604f47d33c64, while imas_codex/discovery/signals/vocabulary_graph.py changed afterwards at f9a1e329e (qualifying_row_texts) and 6fd9bd323 (device_token passed into cohort_sources), so the done_when clause 'Graph-marked statements pass' has no run at the reviewed head 6fd9bd323."
+    },
+    {
+      "file": "imas_codex/remote/signal_vocabulary.py",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: this new production module, imas_codex/llm/search_tools.py and imas_codex/graph/domain_queries.py are outside the node's declared write paths (which name imas_codex/llm/server.py but neither of the other two), so the fence did not cover three of the twelve delivered files; the change itself is small and the search work is implied by the goal."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all four commits against 1875455e: 04d4e2ac4 adds the rule module, the graph store and driver, the schema enums and nine slots, the search filters and the first three test files; f9a1e329e narrows which linked row may state a signal and adds row tests; 48ac67407 adds six evidence lines with no commit body; 6fd9bd323 adds the device-family guard, removes the dead row-unit path, and replaces the literal reading with a tallied verdict file.",
+    "done_when": "read the run's node.json done_when in full and checked each clause against its artefact: the counts and per-source splits are in assignment-receipt.json (728/155/523/50/3/1035 quantity, 1157/1039/118/1/608 unit, 202/3/134/65/1/1563 role, each summing to 1766); the hand reading is verdicts2.json with 108 reasoned verdicts tallied by reading2.py; unit agreement is 1157 signals over 2190 spellings with 0 disagreements; the repeat is changed 0; the served search is search-check.json (20 returned, 20 carrying both, 0 outside the pilot); the scan is scan-hits2.txt with one pre-existing fixture hit, the mutation controls are the three negative logs, and the graph-marked clause has a run only at 04d4e2ac.",
+    "goal": "the reviewed node.json carries no goal key, so I read plan section 11 of docs/plans/iter-signal-context-and-enrichment.html as the deliverable and found it implemented: imas_codex/schemas/facility.yaml:192 adds the three closed enums plus the source and outcome enums, imas_codex/discovery/signals/vocabulary.py:380 assigns one outcome per axis in the declared precedence, and imas_codex/discovery/signals/vocabulary_graph.py:330 stores the nine slots apart from the description.",
+    "manifest": "read the reviewed manifest; it records four commits (04d4e2ac4, f9a1e329e, 48ac67407, 6fd9bd323), a final gate of 2773 passed with EXIT=0 at 6fd9bd323 in logs/gate-final-1332727.log, three mutation logs, a graph run at 04d4e2ac, the hand-reading artefacts with digest 32ad60b9da2d84e0075fd607596529fc2e2f147bc3ba28ff8375e7b1b6c1107e, the receipt values, and the two test_prompt_schema_coverage.py ids recorded under outside_scope.",
+    "write_paths": "read the nine declared paths in this review's dispatch; the diff touches twelve files, of which imas_codex/remote/signal_vocabulary.py, imas_codex/llm/search_tools.py and imas_codex/graph/domain_queries.py lie outside them, while tests/discovery, tests/llm, tests/graph, imas_codex/llm/server.py, imas_codex/schemas/facility.yaml, imas_codex/discovery/signals and the evidence fragment are inside."
+  },
+  "justifications": {
+    "durability": "the mutation logs show the guards fire: logs/negative-control.log fails 16 of 40, logs/negative-guard.log fails the two family tests at tests/discovery/test_signal_vocabulary.py:214 and :274, and logs/negative-precedence.log fails the literal-source assertions at :50 and :58 where the earlier version compared against SOURCE_ORDER.",
+    "evidence": "the done_when's quantitative clauses rest on artefacts that a reader can open (assignment-receipt.json, verdicts2.json, search-check.json, the three negative logs), but the baseline arm is mislabelled at manifest.md:16 and the graph clause has no run at the head.",
+    "fit": "imas_codex/discovery/signals/vocabulary.py:209 uses the surrounding frozen-dataclass idiom and imas_codex/schemas/facility.yaml:192 follows the existing SignalRole spelling, though the 48ac67407 commit carries no body.",
+    "goal_fidelity": "imas_codex/discovery/signals/vocabulary_graph.py:330 writes all nine slots per signal and imas_codex/schemas/facility.yaml:3139 declares them apart from description, satisfying the plan section 11 deliverable.",
+    "reuse": "imas_codex/discovery/signals/vocabulary.py:39 reuses imas_codex.units.normalize_unit_symbol and imas_codex/llm/search_tools.py:116 extends the existing SIGNAL_ROLES refusal pattern; a repository search for term-to-member rule maps (QUANTITY_TERMS, values_from_text, device_token, role_terms) found no existing owner.",
+    "scope_discipline": "three of the twelve changed files \u2014 imas_codex/llm/search_tools.py, imas_codex/graph/domain_queries.py and imas_codex/remote/signal_vocabulary.py \u2014 are outside the declared write paths even though the goal implies the search work."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node.json carries no goal key, so I read plan section 11 of docs/plans/iter-signal-context-and-enrichment.html and found it implemented by imas_codex/discovery/signals/vocabulary.py:380 with imas_codex/schemas/facility.yaml:192.\nVERDICT done_when: the counts, splits, unit agreement and repeat are recorded in assignment-receipt.json, the hand reading in verdicts2.json and hand-reading2.json, the served search in search-check.json and the scan in scan-hits2.txt; the graph clause has a run only at 04d4e2ac.\nVERDICT write_paths: read the nine declared paths; twelve files changed and imas_codex/remote/signal_vocabulary.py, imas_codex/llm/search_tools.py and imas_codex/graph/domain_queries.py lie outside them.\nVERDICT manifest: read; it records four commits, 2773 passed with EXIT=0 at 6fd9bd323 in logs/gate-final-1332727.log, three mutation logs, and the two pre-existing prompt-coverage failures under outside_scope.\nVERDICT diff: read all four commits against 1875455e; the change adds the rule engine, graph store and driver, schema enums and nine slots, the search filters, four test files and the evidence fragment, with the repair commit adding the family guard and the tallied reading.\nCALL_SITES: imas_codex/remote/signal_vocabulary.py:30 run_assignment, imas_codex/llm/server.py:2420 search_signals MCP tool, imas_codex/llm/search_tools.py:405 _search_signals, imas_codex/llm/search_tools.py:867 _vector_search_signals, imas_codex/graph/domain_queries.py:117 signal_vector_search_block\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/vocabulary_graph.py:330 writes all nine slots per signal and imas_codex/schemas/facility.yaml:3139 declares them apart from description.\nSCORE evidence: 13\nJUSTIFICATION evidence: the quantitative clauses rest on openable artefacts (assignment-receipt.json, verdicts2.json, search-check.json, the three negative logs), but the baseline arm is mislabelled at manifest.md:16 and the graph clause has no run at the head.\nSCORE scope_discipline: 11\nJUSTIFICATION scope_discipline: imas_codex/llm/search_tools.py, imas_codex/graph/domain_queries.py and imas_codex/remote/signal_vocabulary.py are outside the declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: logs/negative-control.log fails 16 of 40 tests, logs/negative-guard.log fails tests/discovery/test_signal_vocabulary.py:214 and :274, and logs/negative-precedence.log fails the literal-source assertions at :50 and :58.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/discovery/signals/vocabulary.py:143 follows the frozen-dataclass idiom and imas_codex/schemas/facility.yaml:192 the existing SignalRole naming, though 48ac67407 has no commit body.\nSCORE reuse: 18\nJUSTIFICATION reuse: imas_codex/discovery/signals/vocabulary.py:39 reuses imas_codex.units.normalize_unit_symbol and imas_codex/llm/search_tools.py:116 extends the existing SIGNAL_ROLES refusal pattern; a repository search found no existing term-to-member rule map.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T231057349550-pilot-signal-vocabulary/manifest.md:16 non-blocking: baseline_suite names base 1875455e but its log header records 86771b9e8, a tree that already contains the reviewed commits, and the log's command elides the environment, so the pre-existing-failure claim has no base measurement.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-signal-vocabulary.html:39 non-blocking: the unfiltered-search figure is recorded in no artefact; search-check.json holds only the filtered page.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T231057349550-pilot-signal-vocabulary/logs/rigel-graph2-1332710.log:3 non-blocking: the graph run records revision 04d4e2ac while vocabulary_graph.py changed at f9a1e329e and 6fd9bd323, so graph-marked statements have no run at the head.\nFINDING imas_codex/remote/signal_vocabulary.py:1 non-blocking: this module and two search files landed outside the declared write paths, so the fence did not cover three of the twelve changed files.",
+  "review_run_id": "r-20261120T002921616491-review-of-pilot-signal-vocabulary-6fd9bd323ee2",
+  "reviewed_base_sha": "1875455ec8bb3cba6136a5e6750f138fef0c6c74",
+  "reviewed_head_sha": "6fd9bd323ee2abe1bdc58d66772579c9e1cf04aa",
+  "reviewed_run_id": "r-20261119T231057349550-pilot-signal-vocabulary",
+  "reviewer_run_id": "r-20261120T002921616491-review-of-pilot-signal-vocabulary-6fd9bd323ee2",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 11
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T00:40:25.927259+00:00",
+  "total": 94
+}
