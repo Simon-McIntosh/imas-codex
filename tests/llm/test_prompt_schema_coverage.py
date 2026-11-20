@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import ast
 import importlib
+import json
 from functools import lru_cache
 from pathlib import Path
 
@@ -34,15 +35,10 @@ _DECISIONS_PROMPTS = {"code/triage"}
 _PROMPT_ROOT = Path(prompt_loader.__file__).parent / "prompts"
 
 
-def _carries_generated_example(prompt_name: str) -> bool:
-    """Whether the prompt embeds a static example rather than a caller's schema.
-
-    A prompt that templates ``output_schema`` is handed the JSON Schema its
-    caller chooses, so the generated example is not what it carries and the
-    verbatim assertion below does not apply to it.
-    """
+def _carries_caller_schema(prompt_name: str) -> bool:
+    """Whether the prompt templates the JSON Schema its caller supplies."""
     template = _PROMPT_ROOT / f"{prompt_name}.md"
-    return template.is_file() and "output_schema" not in template.read_text()
+    return template.is_file() and "output_schema" in template.read_text()
 
 # The prompts whose call sites this walk must reach; a positive control that the
 # analysis actually follows discovery's render→builder→call dataflow rather than
@@ -182,7 +178,7 @@ def _collect_pairs() -> dict[str, str]:
             if enclosing is None:
                 continue
             prompt = _resolve_prompt(enclosing, imports, render_map, module)
-            if prompt and _carries_generated_example(prompt):
+            if prompt:
                 pairs[prompt] = model
     return pairs
 
@@ -190,12 +186,15 @@ def _collect_pairs() -> dict[str, str]:
 @lru_cache(maxsize=1)
 def _model_objects() -> dict[str, type]:
     """Response model name -> class, discovered by scanning the package."""
+    wanted = set(_collect_pairs().values())
     out: dict[str, type] = {}
     for path in _iter_module_files():
         tree = ast.parse(path.read_text())
         module = _module_key(path)
         for node in tree.body:
-            if isinstance(node, ast.ClassDef) and node.name.endswith("Batch"):
+            if isinstance(node, ast.ClassDef) and (
+                node.name.endswith("Batch") or node.name in wanted
+            ):
                 try:
                     obj = getattr(importlib.import_module(module), node.name)
                 except (ImportError, AttributeError):
@@ -213,15 +212,39 @@ def test_walk_reaches_expected_prompts():
 
 
 @pytest.mark.parametrize("prompt_name", sorted(_collect_pairs()))
-def test_prompt_carries_generated_example_verbatim(prompt_name):
+def test_prompt_carries_its_response_model_schema(prompt_name):
     model_name = _collect_pairs()[prompt_name]
     model = _model_objects()[model_name]
+    if _carries_caller_schema(prompt_name):
+        # The caller hands this prompt the model's JSON Schema inside a branch
+        # of its own; the structural guard below pins the template's use of it
+        # and the review prompt's rendered pass-through is checked directly.
+        return
     generated = prompt_loader.get_pydantic_schema_json(model)
     rendered = prompt_loader.render_prompt(prompt_name, {})
     assert generated in rendered, (
         f"prompt {prompt_name!r} does not contain the generated example for "
         f"{model_name} verbatim"
     )
+
+
+def test_caller_schema_prompts_stay_paired_with_a_checked_model():
+    """A prompt templating output_schema must keep its response-model pairing."""
+    pairs = _collect_pairs()
+    dynamic = {name for name in pairs if _carries_caller_schema(name)}
+    assert "signals/enrichment_review" in dynamic, sorted(dynamic)
+    for name in sorted(dynamic):
+        template = (_PROMPT_ROOT / f"{name}.md").read_text()
+        assert "output_schema" in template and "tojson" in template, name
+        assert pairs[name] in _model_objects(), (name, pairs[name])
+
+
+def test_review_prompt_carries_the_supplied_schema():
+    """The review prompt renders unconditionally, so its schema is checkable."""
+    model = _model_objects()[_collect_pairs()["signals/enrichment_review"]]
+    schema = model.model_json_schema()
+    rendered = prompt_loader.render_prompt("signals/enrichment_review", {"output_schema": schema})
+    assert json.dumps(schema, sort_keys=True) in rendered
 
 
 # The scope questions the code/triage decisions prompt must carry in both arms.
