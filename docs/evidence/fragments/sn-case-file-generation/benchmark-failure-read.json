@@ -85,7 +85,30 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries disk surface, full 2\u03c0 flux, contributions, sign and Wb",
-   "my_verdict_digest": "f4f995d787a892f9"
+   "my_verdict_digest": "f4f995d787a892f9",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted record declares group 'electromagnetism' instead of the reference answer's group 'equilibrium'.",
+   "original_verdict": "wrong",
+   "group_reference": "equilibrium",
+   "group_generated": "electromagnetism",
+   "unit_reference": "Wb",
+   "unit_generated": "Wb",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "group 'electromagnetism'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "signed magnetic flux through a horizontal disk centered on the toroidal symmetry axis",
+    "full poloidal flux including the 2\u03c0 toroidal integration, not flux divided by 2\u03c0 or a normalized coordinate",
+    "includes plasma-current and external-source contributions",
+    "positive when the field threading the disk has a net component toward increasing Z (upward normal)",
+    "level sets define magnetic surfaces in axisymmetric equilibrium",
+    "unit Wb"
+   ],
+   "incumbent_definition": "Poloidal magnetic flux is the signed magnetic flux through a horizontal disk centered on the toroidal symmetry axis, labeling magnetic surfaces in axisymmetric equilibrium."
   },
   {
    "member": "radial_separatrix_distance_at_outboard_midplane",
@@ -99,7 +122,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical to the one right name; definition carries mapping, sign, \u0394R form and unit; no definition point missing",
-   "my_verdict_digest": "ee3d88fe67410015"
+   "my_verdict_digest": "ee3d88fe67410015",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted group is 'equilibrium', but the reference answer requires 'mechanical_measurement_diagnostics'.",
+   "original_verdict": "wrong",
+   "group_reference": "mechanical_measurement_diagnostics",
+   "group_generated": "equilibrium",
+   "unit_reference": "m",
+   "unit_generated": "m",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "requires 'mechanical_measurement_diagnostics'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "signed major-radius separation between the mapped measurement position and the separatrix at the outboard midplane",
+    "mapping along magnetic flux surfaces preserves the flux-surface label and moves the position to the outboard midplane",
+    "separation is in the major-radius direction, \u0394R = R_mapped \u2212 R_sep,mid",
+    "positive values correspond to the scrape-off layer / outside the separatrix; zero at the separatrix and negative on the confined-plasma side",
+    "unit: m"
+   ],
+   "incumbent_definition": "Signed major-radius separation from the separatrix after mapping a measurement position along its flux surface to the outboard midplane, with positive values in the scrape-off layer."
   },
   {
    "member": "power_at_divertor_target_due_to_recombination",
@@ -113,7 +158,27 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries the sum of the two channels at the plasma-material interface and W",
-   "my_verdict_digest": "96dc841917cb6112"
+   "my_verdict_digest": "96dc841917cb6112",
+   "judge_verdict": "right",
+   "judge_failure_class": "",
+   "judge_reason": "The submitted name matches the reference answer, all definition points (total power on divertor target due to recombination, sum of plasma-ion and neutral-particle recombination channels at the plasma-material interface, stored unit W) are fully stated, and the unit agrees.",
+   "original_verdict": "wrong",
+   "group_reference": "divertor_physics",
+   "group_generated": "Plasma-surface interactions",
+   "unit_reference": "W",
+   "unit_generated": "W",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "none: record right and judged right",
+   "quote": "The submitted name matches the reference answer, all definit",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "total power deposited on a divertor target due to recombination",
+    "sum of the plasma-ion recombination channel and the neutral-particle recombination channel at the plasma-material interface",
+    "stored unit W"
+   ],
+   "incumbent_definition": "Total power deposited on a divertor target by recombination processes, summing the plasma-ion and neutral-particle recombination channels at the plasma-material interface."
   },
   {
    "member": "plasma_current",
@@ -127,7 +192,32 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries total signed toroidal current, algebraic sum, full cross-section integral, exclusions, sign and A",
-   "my_verdict_digest": "483f28ef5cb08bed"
+   "my_verdict_digest": "483f28ef5cb08bed",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted group is 'electromagnetism', but the reference group is 'equilibrium'.",
+   "original_verdict": "wrong",
+   "group_reference": "equilibrium",
+   "group_generated": "electromagnetism",
+   "unit_reference": "A",
+   "unit_generated": "A",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "submitted group is 'electromagnetism' | reference group is 'equilibrium'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "Total signed conventional electric current carried toroidally by the entire plasma population through a complete poloidal cross-section.",
+    "Net signed current with opposite-direction contributions combined algebraically.",
+    "Toroidal projection of plasma current density integrated over the full plasma cross-section: I_p = \u222b_{A_p} j_pl \u00b7 \u03c6\u0302 dA.",
+    "Cross-section taken at fixed toroidal angle in the right-handed cylindrical (R, \u03c6, Z) frame, with positive normal +\u03c6\u0302.",
+    "Includes contributions from all plasma charge carriers over the complete cross-section; not species-resolved, not unsigned particle flow, and not current-density magnitude.",
+    "Excludes currents in external coils and passive structures.",
+    "Sign convention: positive when conventional plasma current flows in the direction of increasing toroidal angle \u03c6 (counterclockwise viewed from above +Z).",
+    "Unit: A."
+   ],
+   "incumbent_definition": "Plasma current is the total signed conventional electric current carried toroidally by the entire plasma population through a complete poloidal cross-section. Related specialized quantities retain the signed-current meaning while restricting the population, selecting a current direction, or limiting the enclosed region."
   },
   {
    "member": "loop_voltage_at_plasma_boundary",
@@ -141,7 +231,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries LCFS, circulation EMF, ohmic drive, sign and V",
-   "my_verdict_digest": "26f0aac2e714fcf5"
+   "my_verdict_digest": "26f0aac2e714fcf5",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted record assigns the group 'electromagnetism' instead of 'transport'.",
+   "original_verdict": "wrong",
+   "group_reference": "transport",
+   "group_generated": "electromagnetism",
+   "unit_reference": "V",
+   "unit_generated": "V",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "instead of 'transport'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "It is the loop voltage at the last closed flux surface (LCFS), i.e. the plasma boundary.",
+    "It is the toroidal electromotive force around a closed loop, given by the electric-field circulation.",
+    "It provides the inductive drive for ohmic plasma current.",
+    "Sign convention: a positive value drives positive ohmic current flowing anti-clockwise when viewed from above.",
+    "The unit is V."
+   ],
+   "incumbent_definition": "Loop voltage at the plasma boundary is the electromotive force around a closed toroidal loop that provides the inductive drive for ohmic plasma current."
   },
   {
    "member": "toroidal_angle_of_poloidal_magnetic_field_probe",
@@ -155,7 +267,31 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries atan2(n_phi,n_R), positive direction, use and rad",
-   "my_verdict_digest": "60c0b1c988abab15"
+   "my_verdict_digest": "60c0b1c988abab15",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted record assigns the quantity to group 'magnetics', but the reference group is 'magnetic_field_diagnostics'.",
+   "original_verdict": "wrong",
+   "group_reference": "magnetic_field_diagnostics",
+   "group_generated": "magnetics",
+   "unit_reference": "rad",
+   "unit_generated": "rad",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "but the reference group is 'magnetic_field_diagnostics'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "toroidal angle of the sensitive axis of a poloidal field (Bp) probe coil",
+    "deviation of the coil orientation from a purely poloidal plane",
+    "signed azimuthal orientation angle in the right-handed cylindrical (R, phi, Z) frame",
+    "computed as atan2(n_phi, n_R), where n is the probe sensitive-axis unit normal",
+    "positive when rotation from the positive radial direction toward the horizontal projection of the sensitive-axis normal is toward increasing toroidal angle phi",
+    "unit rad",
+    "used to project the measured field component onto the correct direction"
+   ],
+   "incumbent_definition": "Signed azimuthal orientation angle of a poloidal magnetic-field probe\u2019s sensitive-axis normal in the right-handed cylindrical (R, \u03c6, Z) frame."
   },
   {
    "member": "ethylene_source_rate",
@@ -169,7 +305,28 @@
    "generated_blocker": "collision",
    "my_verdict": "wrong",
    "my_reason": "record is a collision blocker with empty name where the reference has a sound name; case file binds no source (paths=[], missing bound_source) so the generator refused",
-   "my_verdict_digest": "06908034953b3f4a"
+   "my_verdict_digest": "06908034953b3f4a",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "other",
+   "judge_reason": "The record improperly declares a collision blocker against ethylene_equivalent_electron_source_rate rather than defining ethylene_source_rate, even though the physical concept and conversion convention are fully known and identified.",
+   "original_verdict": "wrong",
+   "group_reference": "plant_systems",
+   "group_generated": "",
+   "unit_reference": "s^-1",
+   "unit_generated": "",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "generator blocked on a name it could derive",
+   "quote": "collision",
+   "quote_source": "blocker",
+   "case_quote": "",
+   "definition_points": [
+    "instantaneous injection rate of ethylene (C2H4) gas into the plasma vessel",
+    "expressed as equivalent electrons per second",
+    "each C2H4 molecule counted as 16 equivalent electrons",
+    "unit s^-1"
+   ],
+   "incumbent_definition": "Instantaneous injection rate of ethylene (C2H4) gas into the plasma vessel, expressed as equivalent electrons per second with each molecule counted as 16 equivalent electrons."
   },
   {
    "member": "toroidal_angle_of_control_surface",
@@ -183,7 +340,30 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries frame, zero reference, 2\u03c0 periodicity, sign and rad",
-   "my_verdict_digest": "d45609ff9088cfa9"
+   "my_verdict_digest": "d45609ff9088cfa9",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "Submitted group is 'geometry', whereas the reference answer specifies group 'equilibrium'.",
+   "original_verdict": "wrong",
+   "group_reference": "equilibrium",
+   "group_generated": "geometry",
+   "unit_reference": "rad",
+   "unit_generated": "rad",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "whereas the reference answer specifies group 'equilibrium'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "Toroidal angle locating each point of the control surface about the machine symmetry axis",
+    "Right-handed cylindrical (R, \u03c6, Z) frame with \u03c6 = atan2(y, x) mod 2\u03c0 from Cartesian x and y",
+    "Facility-defined zero direction for \u03c6",
+    "Periodicity: values differing by integer multiples of 2\u03c0 represent the same toroidal direction",
+    "Sign convention: positive when \u03c6 increases counter-clockwise viewed from above the +Z direction",
+    "Unit: rad"
+   ],
+   "incumbent_definition": "Toroidal angle locating each point of a control surface about the machine symmetry axis, measured in the right-handed cylindrical frame from the facility-defined zero direction."
   },
   {
    "member": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
@@ -197,7 +377,28 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries dV/drho_tor, cumulative volume from the axis, m^2",
-   "my_verdict_digest": "6259433b104af652"
+   "my_verdict_digest": "6259433b104af652",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "other",
+   "judge_reason": "The definition fails to state that it is a geometric coefficient/metric tensor element used in flux-surface-averaged 1D transport relations.",
+   "original_verdict": "wrong",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "m^2",
+   "unit_generated": "m^2",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: a point only the incumbent's documentation states",
+   "quote": "geometric coefficient/metric tensor element used in flux-surface-averaged",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "It is the radial derivative dV/d\u03c1_tor of the volume enclosed by a flux surface with respect to the toroidal flux coordinate \u03c1_tor.",
+    "The volume is cumulative from the magnetic axis to the specified surface and carries no species weighting.",
+    "It is a geometric coefficient/metric tensor element used in flux-surface-averaged 1D transport relations.",
+    "The unit is m^2."
+   ],
+   "incumbent_definition": "Geometric rate at which the cumulative volume enclosed by a nested magnetic flux surface changes with its dimensionful toroidal-flux coordinate."
   },
   {
    "member": "poloidal_beta",
@@ -211,7 +412,31 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries the beta_p formula, volume averaging, R0, mu0, Ip, dimensionless unit",
-   "my_verdict_digest": "b7934199e125b121"
+   "my_verdict_digest": "b7934199e125b121",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted record assigns the group 'equilibrium' instead of 'core_plasma_physics', and the definition omits the requirement of a positive evaluation volume.",
+   "original_verdict": "wrong",
+   "group_reference": "core_plasma_physics",
+   "group_generated": "equilibrium",
+   "unit_reference": "1",
+   "unit_generated": "1",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group plus a point",
+   "quote": "and the definition omits the requirement of a positive evaluation volume",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "dimensionless (unit 1)",
+    "\u03b2p = 4\u222bp dV / (R0 \u03bc0 Ip\u00b2)",
+    "volume-averaged pressure p over the evaluation volume V",
+    "R0 is the reference major radius, \u03bc0 vacuum permeability, Ip plasma current",
+    "global value uses the plasma volume; profile value uses the source-specified evaluation volume",
+    "effective poloidal magnetic-pressure scale set by net plasma current and geometry, not a pointwise poloidal field",
+    "requires nonzero Ip and positive evaluation volume"
+   ],
+   "incumbent_definition": "Poloidal beta compares volume-averaged total perpendicular plasma pressure with an effective poloidal magnetic-pressure scale set by net plasma current and plasma geometry."
   },
   {
    "member": "current_of_divertor",
@@ -225,7 +450,30 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries sum over all targets, signed electron and ion contributions, integration, exclusions and A",
-   "my_verdict_digest": "5c3a1b6d0d7c1416"
+   "my_verdict_digest": "5c3a1b6d0d7c1416",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The group 'electromagnetism' does not match the reference group 'divertor_physics'.",
+   "original_verdict": "wrong",
+   "group_reference": "divertor_physics",
+   "group_generated": "electromagnetism",
+   "unit_reference": "A",
+   "unit_generated": "A",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "does not match the reference group 'divertor_physics'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "Total electric current incident on a divertor, summed over all targets",
+    "Net conventional current carried by charged particles striking the divertor surfaces",
+    "Includes signed electron and ion contributions",
+    "Integrated over the union of divertor target surfaces",
+    "Excludes neutral-particle flux and displacement current",
+    "Sign convention: positive when conventional charged-particle current flows from the plasma into the divertor material"
+   ],
+   "incumbent_definition": "Net conventional electric current carried by charged particles into all divertor target surfaces, including signed electron and ion contributions."
   },
   {
    "member": "second_local_tangential_width_of_optical_element",
@@ -239,7 +487,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries X2 full width, rectangular geometry_type=3, object-local frame and m",
-   "my_verdict_digest": "2fc789492363d4b0"
+   "my_verdict_digest": "2fc789492363d4b0",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted group is 'geometry', whereas the reference answer specifies group 'spectroscopy'.",
+   "original_verdict": "wrong",
+   "group_reference": "spectroscopy",
+   "group_generated": "geometry",
+   "unit_reference": "m",
+   "unit_generated": "m",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "whereas the reference answer specifies group 'spectroscopy'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "Full clear-aperture width along the X2 direction, i.e. the second local tangential axis",
+    "Applies to rectangular aperture geometry only (geometry_type=3)",
+    "Defined in the object-local aperture-plane coordinate system (X1, X2), with X2 as the second local tangential axis",
+    "Denotes the full width, not the half-width, and excludes opaque mounts and structures outside the aperture",
+    "Unit: m"
+   ],
+   "incumbent_definition": "Second local tangential width of the optical element is the full clear-aperture extent between opposing edges of its rectangular opening along the second object-local tangential axis."
   },
   {
    "member": "spectral_photon_radiance",
@@ -253,7 +523,31 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries photon-number radiance, direction, projected area, solid angle, wavelength, per time and plasma emission",
-   "my_verdict_digest": "aaa4162d7641293c"
+   "my_verdict_digest": "aaa4162d7641293c",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted group 'radiation' does not match the reference group 'radiation_measurement_diagnostics'.",
+   "original_verdict": "wrong",
+   "group_reference": "radiation_measurement_diagnostics",
+   "group_generated": "radiation",
+   "unit_reference": "m^-3.s^-1.sr^-1",
+   "unit_generated": "m^-3.s^-1.sr^-1",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "does not match the reference group 'radiation_measurement_diagnostics'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "photon-number radiance rather than energy radiance",
+    "directional quantity along a viewing direction",
+    "per unit projected area perpendicular to the ray",
+    "per unit viewing solid angle",
+    "per unit wavelength interval",
+    "per unit time as a rate",
+    "plasma emission, including spectral line and continuum contributions at the specified wavelength"
+   ],
+   "incumbent_definition": "Spectral photon radiance is the directional photon arrival rate from plasma emission per projected area, viewing solid angle, and wavelength interval."
   },
   {
    "member": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
@@ -267,7 +561,30 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries real part, radial component, vacuum region, one toroidal mode, linear MHD and T.m",
-   "my_verdict_digest": "0736c46e27ebf38f"
+   "my_verdict_digest": "0736c46e27ebf38f",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted group is 'linear MHD stability', but the reference answer requires 'group: gyrokinetics'.",
+   "original_verdict": "wrong",
+   "group_reference": "gyrokinetics",
+   "group_generated": "linear MHD stability",
+   "unit_reference": "T.m",
+   "unit_generated": "T.m",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "but the reference answer requires 'group: gyrokinetics'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "real part of the first-order perturbed magnetic vector-potential eigenfunction",
+    "first coordinate component, i.e. the radial (R) component",
+    "in the vacuum region, outside the plasma",
+    "for a single given toroidal mode number, not summed over toroidal modes",
+    "from linear MHD stability analysis",
+    "stored unit T.m"
+   ],
+   "incumbent_definition": "Real part of the first-order radial magnetic-vector-potential eigenfunction for a single toroidal mode in the vacuum region."
   },
   {
    "member": "toroidal_total_current_density",
@@ -281,7 +598,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries the toroidal projection, algebraic sum, per-element locality, sign and A.m^-2",
-   "my_verdict_digest": "3b8e9d41d9dc7d9c"
+   "my_verdict_digest": "3b8e9d41d9dc7d9c",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted record specifies group 'electromagnetism', but the reference answer requires group 'equilibrium'.",
+   "original_verdict": "wrong",
+   "group_reference": "equilibrium",
+   "group_generated": "electromagnetism",
+   "unit_reference": "A.m^-2",
+   "unit_generated": "A.m^-2",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "but the reference answer requires group 'equilibrium'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "signed toroidal component/projection of the total current density",
+    "algebraic sum of all included current-density contributions, not a sum of magnitudes",
+    "local scalar quantity per grid element, not a flux-surface average or spatial integral",
+    "unit A.m^-2",
+    "positive sign in the direction of increasing toroidal angle"
+   ],
+   "incumbent_definition": "Toroidal total current density is the net conventional charge flux per unit area around the symmetry axis, formed by algebraically summing all included current contributions."
   },
   {
    "member": "right_hand_circularly_polarized_wave_electric_field",
@@ -295,7 +634,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries complex E-minus, perpendicular to B, right-hand polarization, amplitude and phase, V.m^-1",
-   "my_verdict_digest": "97fac824a7864d3c"
+   "my_verdict_digest": "97fac824a7864d3c",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted group 'waves' does not agree with the reference group 'electromagnetic_wave_diagnostics'.",
+   "original_verdict": "wrong",
+   "group_reference": "electromagnetic_wave_diagnostics",
+   "group_generated": "waves",
+   "unit_reference": "V.m^-1",
+   "unit_generated": "V.m^-1",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "does not agree with the reference group 'electromagnetic_wave_diagnostics'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "complex E-minus contribution of the wave electric field",
+    "transverse/perpendicular to the static magnetic field",
+    "right-hand circular polarization",
+    "retains amplitude and phase of the circular-polarization contribution",
+    "unit V.m^-1"
+   ],
+   "incumbent_definition": "Complex E-minus contribution of a coherent electromagnetic-wave electric field, transverse to the static magnetic field and retaining the amplitude and phase of its right-hand circular polarization."
   },
   {
    "member": "flux_surface_averaged_major_radius",
@@ -309,7 +670,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries the inverse-gradient weighted flux-surface average, mean major radius and m",
-   "my_verdict_digest": "7a02bb71f76f148d"
+   "my_verdict_digest": "7a02bb71f76f148d",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "other",
+   "judge_reason": "The definition does not state that it is a geometric metric coefficient used in flux-surface-averaged transport equations.",
+   "original_verdict": "wrong",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "m",
+   "unit_generated": "m",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: a point only the incumbent's documentation states",
+   "quote": "geometric metric coefficient used in flux-surface-averaged transport equations",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "flux-surface average over a complete closed magnetic flux surface",
+    "mean major radius, i.e. mean perpendicular distance from the toroidal symmetry axis",
+    "geometric metric coefficient used in flux-surface-averaged transport equations",
+    "flux-surface-average weighting by inverse magnitude of the poloidal flux gradient",
+    "unit: m"
+   ],
+   "incumbent_definition": "Major radius averaged over a complete closed magnetic flux surface gives the mean perpendicular distance from the toroidal symmetry axis."
   },
   {
    "member": "equilibrium_weight_of_interferometer_beam",
@@ -323,7 +706,30 @@
    "generated_blocker": "collision",
    "my_verdict": "wrong",
    "my_reason": "blocker=collision with weight_of_interferometer_beam after the generator dropped the 'equilibrium' qualifier that separates this constraint weight from that existing name; the case file binds the source",
-   "my_verdict_digest": "a53613eef5c525af"
+   "my_verdict_digest": "a53613eef5c525af",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "other",
+   "judge_reason": "The reference answer 'equilibrium_weight_of_interferometer_beam' can be derived directly from the documentation provided in the record, which describes the dimensionless weight factor w_i for interferometer-beam line-integrated electron density residuals in an equilibrium reconstruction objective function.",
+   "original_verdict": "wrong",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "1",
+   "unit_generated": "1",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "generator blocked on a name it could derive",
+   "quote": "collision",
+   "quote_source": "blocker",
+   "case_quote": "",
+   "definition_points": [
+    "dimensionless (unit 1)",
+    "weight factor for the line-integrated electron-density (n_e line) constraint",
+    "weight given to the measurement",
+    "sets the relative contribution of the constraint residual in the equilibrium objective function",
+    "applies per interferometer-beam constraint, not to electron density itself",
+    "enters the weighted least-squares objective as w_i^2 (reconstructed_i - measured_i)^2 / sigma_i^2"
+   ],
+   "incumbent_definition": "Dimensionless factor controlling the relative contribution of an interferometer beam\u2019s line-integrated electron-density residual to an equilibrium objective function."
   },
   {
    "member": "total_external_heating_power",
@@ -337,7 +743,29 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "name dropped the separating qualifier: generated external_heating_power against the only right name total_external_heating_power; definition is complete",
-   "my_verdict_digest": "615f347327fd8adf"
+   "my_verdict_digest": "615f347327fd8adf",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'external_heating_power' does not match the accepted name 'total_external_heating_power'.",
+   "original_verdict": "wrong",
+   "group_reference": "auxiliary_heating",
+   "group_generated": "auxiliary_heating",
+   "unit_reference": "W",
+   "unit_generated": "W",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "generator lost a detail the case file states",
+   "quote": "Total additional external heating power",
+   "quote_source": "case_text",
+   "case_quote": "comments: {\"reader_seat\": \"C\", \"defect_classes\": [], \"rationale\": \"The shared quantity is \\u201cTotal additional external heating power coupled to the plasma, summing all auxiliary heating systems (NBI, EC, IC, and LH) excluding Ohmic power.\\u201d The stored definition agrees; W and auxiliary_heating are appropriate.\", \"audit\": \"blind-audit\", \"reader_round\": \"frontier-third-reader\"}",
+   "definition_points": [
+    "Total additional external heating power coupled to the plasma",
+    "Summed over all auxiliary heating systems: NBI, EC, IC, and LH",
+    "Excludes Ohmic power",
+    "Represents total non-inductive auxiliary power input driving plasma heating and current drive",
+    "Unit: W"
+   ],
+   "incumbent_definition": "Total non-inductive power coupled from external neutral-beam and radio-frequency heating systems to the plasma, summed over auxiliary sources and excluding Ohmic heating."
   },
   {
    "member": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
@@ -351,7 +779,31 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "name restructured and definition reverses the direction: generated says power to the co-passing fast particles from one ion state, the reference says from co-passing fast particles to fast ions of one charge state",
-   "my_verdict_digest": "ce2df036dfcd0041"
+   "my_verdict_digest": "ce2df036dfcd0041",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'co_passing_fast_power_density_due_to_coulomb_collisions_with_ion_state' is not one of the right names, and the definition reverses the direction of energy transfer (submitted specifies energy transfer to the co-passing fast particles from an ion state, whereas the reference specifies transfer from co-passing fast-particle donors to fast ions of a specified charge state).",
+   "original_verdict": "wrong",
+   "group_reference": "transport",
+   "group_generated": "collisions",
+   "unit_reference": "W.m^-3",
+   "unit_generated": "W.m^-3",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "generator lost a detail the case file states",
+   "quote": "from co-passing fast particles to fast ions of one specified species and charge state",
+   "quote_source": "case_text",
+   "case_quote": "definition: Flux-surface-averaged rate of Coulomb-collisional energy transfer per unit volume from co-passing fast particles to fast ions of one specified species and charge state.",
+   "definition_points": [
+    "flux-surface-averaged quantity (volume-shell-weighted magnetic flux-surface average)",
+    "Coulomb-collisional energy-transfer rate per unit volume, i.e. power density",
+    "transfer from co-passing fast-particle donors to fast ions of one specified recipient species and charge state",
+    "co-passing restriction applies to the donating particles' guiding-center orbits, not to the recipient ions' orbit class",
+    "no sum over recipient species or charge states; counter-passing and trapped donors are excluded",
+    "positive sign when energy transfers from co-passing fast particles to the specified fast-ion charge-state population, negative when reversed",
+    "unit W.m^-3"
+   ],
+   "incumbent_definition": "Flux-surface-averaged rate of Coulomb-collisional energy transfer per unit volume from co-passing fast particles to fast ions of one specified species and charge state."
   },
   {
    "member": "toroidal_parity",
@@ -365,7 +817,27 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "name keeps parity as its base (parity_of_toroidal_magnetic_field_at_flux_surface) where the reference requires a field-sign quantity; definition carries sgn(B_phi), +-1, undefined at zero, sign convention",
-   "my_verdict_digest": "7986754d3c117208"
+   "my_verdict_digest": "7986754d3c117208",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'parity_of_toroidal_magnetic_field_at_flux_surface' is not one of the right names (expected 'b_field_phi_sign').",
+   "original_verdict": "wrong",
+   "group_reference": "gyrokinetics",
+   "group_generated": "gyrokinetics",
+   "unit_reference": "1",
+   "unit_generated": "1",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "reference too narrow: the only right name is an opaque spelling",
+   "quote": "'b_field_phi_sign'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "The definition must state that the quantity is the sign of the toroidal magnetic-field component B_phi = B\u00b7phihat on a flux surface in local gyrokinetic geometry.",
+    "It must state that the indicator takes values +1 or -1 for nonzero B_phi and is undefined when B_phi vanishes.",
+    "It must state the sign convention that positive means B_phi points toward increasing toroidal angle phi."
+   ],
+   "incumbent_definition": "Orientation indicator equal to the sign of the toroidal magnetic-field component on a flux surface in local gyrokinetic geometry."
   },
   {
    "member": "thickness_of_breeder_blanket_layer",
@@ -380,7 +852,28 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "repairs the incumbent: name is thickness_of_breeder_blanket_layer_at_midplane, one of the two right names; definition carries midplane, single layer and m",
-   "my_verdict_digest": "485fb04d9c5fb604"
+   "my_verdict_digest": "485fb04d9c5fb604",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted group 'breeding_blanket' does not match the expected group 'structural_components'.",
+   "original_verdict": "wrong",
+   "group_reference": "structural_components",
+   "group_generated": "breeding_blanket",
+   "unit_reference": "m",
+   "unit_generated": "m",
+   "name_matches_reference": true,
+   "name_matches_incumbent": false,
+   "cause": "judge wrong: group alone",
+   "quote": "does not match the expected group 'structural_components'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "The thickness is of an individual material layer within a breeding blanket module.",
+    "The thickness is evaluated at the midplane.",
+    "The quantity characterizes the physical dimension of the layer relevant to neutronics and shielding assessment.",
+    "The unit is m."
+   ],
+   "incumbent_definition": "Non-negative geometric separation between the inner and outer material interfaces of a breeder blanket layer along the specified thickness direction."
   },
   {
    "member": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
@@ -394,7 +887,28 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "name drops the normalized-toroidal-flux-coordinate basis the source states ('in terms of the normalised toroidal flux coordinate'); definition carries it",
-   "my_verdict_digest": "cf12effab4721fd8"
+   "my_verdict_digest": "cf12effab4721fd8",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'radial_displacement_of_pellet_deposition_due_to_e_cross_b_drift' is not one of the right names (expected 'normalized_toroidal_flux_coordinate_displacement_of_pellet_deposition_relative_to_ablation_due_to_e_cross_b_drift'), and the group is 'pellets' instead of 'fueling'.",
+   "original_verdict": "wrong",
+   "group_reference": "fueling",
+   "group_generated": "pellets",
+   "unit_reference": "1",
+   "unit_generated": "1",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "generator lost a detail the case file states",
+   "quote": "in terms of the normalised toroidal flux coordinate",
+   "quote_source": "case_text",
+   "case_quote": "text: Difference to due ExB drifts between the ablation and the final deposition locations, in terms of the normalised toroidal flux coordinate",
+   "definition_points": [
+    "The quantity is the shift of the pellet deposition location relative to the ablation location.",
+    "The shift is caused by E\u00d7B drifts.",
+    "It is expressed as a difference in normalized toroidal flux coordinate (\u0394\u03c1_tor_norm), with the sign defined as deposition minus ablation.",
+    "It is not an absolute deposition coordinate, a geometric distance, or a drift velocity."
+   ],
+   "incumbent_definition": "Shift of pellet-material deposition relative to its ablation location caused by E\u00d7B drift, expressed as a difference in normalized toroidal flux coordinate."
   },
   {
    "member": "external_loop_voltage",
@@ -408,7 +922,28 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "name is the right one but the definition drops the averaged externally-applied flux operand: generated says 'external poloidal magnetic flux linked by the plasma circuit', reference requires -d(psi_external_average)/dt",
-   "my_verdict_digest": "1b5e73dea9723627"
+   "my_verdict_digest": "1b5e73dea9723627",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "definition-omits-convention",
+   "judge_reason": "The reference definition requires that the external voltage is the negative time derivative of the externally applied average poloidal flux (with averaging applied to the flux prior to differentiation), whereas the submitted record explicitly states 'no averaging prescription is specified' and differs in group ('electromagnetism' instead of 'equilibrium').",
+   "original_verdict": "wrong",
+   "group_reference": "equilibrium",
+   "group_generated": "electromagnetism",
+   "unit_reference": "V",
+   "unit_generated": "V",
+   "name_matches_reference": true,
+   "name_matches_incumbent": false,
+   "cause": "the case file lacks what the right answer needs",
+   "quote": "average poloidal flux",
+   "quote_source": "reference_point",
+   "case_quote": "",
+   "definition_points": [
+    "External voltage is the negative time derivative of the externally applied average poloidal flux: V_ext = -d(psi_external_average)/dt.",
+    "It represents the inductive voltage from external poloidal-field coils driving plasma current.",
+    "The averaging applies to the external poloidal flux before time differentiation; the quantity is not an averaged loop voltage.",
+    "The unit is V."
+   ],
+   "incumbent_definition": "Electromotive-force contribution to the plasma loop voltage caused by changing externally generated poloidal magnetic flux, including flux linked through active coils and passive conducting structures."
   },
   {
    "member": "wave_phase_of_wave_beam",
@@ -422,7 +957,30 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "name kept as wave_phase_of_wave_beam, naming neither the envelope nor the launch reference that the source states; definition carries both",
-   "my_verdict_digest": "0ab21570cba69fd9"
+   "my_verdict_digest": "0ab21570cba69fd9",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'wave_phase_of_wave_beam' does not match the reference right name 'wave_beam_envelope_phase_relative_to_launch_phase', and the group is 'electromagnetism' instead of 'electromagnetic_wave_diagnostics'.",
+   "original_verdict": "wrong",
+   "group_reference": "electromagnetic_wave_diagnostics",
+   "group_generated": "electromagnetism",
+   "unit_reference": "rad",
+   "unit_generated": "rad",
+   "name_matches_reference": false,
+   "name_matches_incumbent": true,
+   "cause": "generator lost a detail the case file states",
+   "quote": "relative to the phase at launch",
+   "quote_source": "case_text",
+   "case_quote": "comments: {\"reader_seat\": \"C\", \"defect_classes\": [\"name_omits_source\"], \"rationale\": \"Sources specify phase \\u201ccorrected from fringe jumps,\\u201d \\u201crelative to the phase at launch,\\u201d and \\u201cof the envelope of the probing signal.\\u201d The name \\u201cwave_phase_of_wave_beam\\u201d omits the fringe-jump correction, launch reference, and envelope qualifier.\", \"audit\": \"blind-audit\", \"reader_round\": \"frontier-third-reader\"}",
+   "definition_points": [
+    "The quantity is the angular argument of the complex probing-wave envelope at the wave-beam locus.",
+    "It is referenced to the launch phase, i.e. \u03c6_env \u2212 \u03c6_launch modulo 2\u03c0 for a launch-referenced value.",
+    "It is the envelope phase, not the carrier oscillation phase.",
+    "Phase values differing by an integer number of full revolutions are equivalent; an unwrapped phase selects a continuous branch, and fringe-jump correction changes that representation without changing the phase modulo one revolution.",
+    "The sign convention is positive when the envelope phase advances counterclockwise relative to launch using the positive-time-exponent phasor convention.",
+    "The unit is rad."
+   ],
+   "incumbent_definition": "Wave phase of the wave beam is the angular argument of the probing-wave envelope; when referenced to launch, it is the envelope phase offset from the launch phase."
   },
   {
    "member": "decay_time_due_to_disruption",
@@ -436,7 +994,30 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "name kept as decay_time_due_to_disruption, which does not say the decaying quantity is electric current; the source states electric-current decrease",
-   "my_verdict_digest": "6b40367e694c567d"
+   "my_verdict_digest": "6b40367e694c567d",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'decay_time_due_to_disruption' is not one of the right names ('current_decay_time_due_to_disruption').",
+   "original_verdict": "wrong",
+   "group_reference": "general",
+   "group_generated": "disruptions",
+   "unit_reference": "s",
+   "unit_generated": "s",
+   "name_matches_reference": false,
+   "name_matches_incumbent": true,
+   "cause": "generator lost a detail the case file states",
+   "quote": "electric-current decrease during a disruption",
+   "quote_source": "case_text",
+   "case_quote": "definition: Characteristic timescale of electric-current decrease during a disruption, defined by a specified linear-threshold or exponential decay convention.",
+   "definition_points": [
+    "the quantity is an electric-current decay timescale during a disruption",
+    "it covers the total plasma current and the current of a specified particle population",
+    "either a linear-threshold convention, \u03c4_lin = (t(f_low) \u2212 t(f_high))/(f_high \u2212 f_low), with the reference current magnitude and the upper/lower fractions stated, or an exponential e-folding convention, I(t) = I_0 exp[\u2212(t\u2212t_0)/\u03c4_exp], with I_0 and t_0 stated",
+    "linear-threshold and exponential times are not equal, so the convention used must be specified",
+    "it denotes neither a local current-density decay time nor an electron-temperature decay time",
+    "unit: s"
+   ],
+   "incumbent_definition": "Characteristic timescale of electric-current decrease during a disruption, defined by a specified linear-threshold or exponential decay convention."
   },
   {
    "member": "effective_turn_count_of_passive_loop",
@@ -450,7 +1031,28 @@
    "generated_blocker": "",
    "my_verdict": "alternative",
    "my_reason": "record is sound: definition carries effective turns, element-level application, positive counter-clockwise sign and unit; name turn_count_of_passive_loop_element is more precise than the reference's only name and is not listed",
-   "my_verdict_digest": "da5b29c7627e35ad"
+   "my_verdict_digest": "da5b29c7627e35ad",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'turn_count_of_passive_loop_element' is not among the acceptable right names (expected 'effective_turn_count_of_passive_loop'), and the group 'electromagnetism' does not match 'magnetic_field_systems'.",
+   "original_verdict": "wrong",
+   "group_reference": "magnetic_field_systems",
+   "group_generated": "electromagnetism",
+   "unit_reference": "1",
+   "unit_generated": "1",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "reference too narrow: a sound name the list does not allow",
+   "quote": "not among the acceptable right names",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "the signed effective number of turns in a passive conductor loop or passive-loop element",
+    "the sign convention: positive means current is counter-clockwise when seen from above, indicating current flow direction relative to the toroidal axis",
+    "that the quantity is used for computing the magnetic field contribution or current-turn source strength of the passive loop",
+    "that the effective turn count may be fractional for equivalent or homogenized passive-loop elements"
+   ],
+   "incumbent_definition": "Effective turn count of a passive loop is the signed number of equivalent windings assigned to a passive conducting loop for electromagnetic coupling. It weights the passive-loop current contribution and may be fractional for equivalent or homogenized loop elements."
   },
   {
    "member": "radial_coordinate_of_poloidal_field_coil",
@@ -466,7 +1068,28 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "name unchanged and the definition hedges 'the annulus center or the first point' over three bound paths; the source supplies a distinct point per path",
-   "my_verdict_digest": "c35b629f069c4a89"
+   "my_verdict_digest": "c35b629f069c4a89",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'radial_coordinate_of_poloidal_field_coil' is not one of the right names ('radial_coordinate_of_first_point_of_poloidal_field_coil', 'radial_coordinate_of_second_point_of_poloidal_field_coil', or 'radial_coordinate_of_annulus_centre_of_poloidal_field_coil'), and fails to identify which specific reference point is meant.",
+   "original_verdict": "wrong",
+   "group_reference": "magnetic_field_systems",
+   "group_generated": "magnetic_field_systems",
+   "unit_reference": "m",
+   "unit_generated": "m",
+   "name_matches_reference": false,
+   "name_matches_incumbent": true,
+   "cause": "generator lost a detail the case file states",
+   "quote": "a reference point in a poloidal-field coil's cross-sectional geometry",
+   "quote_source": "case_text",
+   "case_quote": "definition: Major-radius coordinate of a reference point in a poloidal-field coil's cross-sectional geometry, measured by perpendicular distance from the toroidal symmetry axis.",
+   "definition_points": [
+    "Identify which reference point is meant: first point, second point, or annulus centre in the poloidal-field coil cross-section.",
+    "Define the major-radius coordinate as R = sqrt(x^2 + y^2) in a right-handed Cartesian (x, y, z) frame whose z-axis is the toroidal symmetry axis and whose vertical coordinate is z = Z.",
+    "State that it is a nonnegative point-location coordinate, not an average over the coil and not a cross-sectional radius or the complete cross-sectional outline.",
+    "For the annulus entry, preserve the source's 'centre major radius' meaning."
+   ],
+   "incumbent_definition": "Major-radius coordinate of a reference point in a poloidal-field coil's cross-sectional geometry, measured by perpendicular distance from the toroidal symmetry axis."
   },
   {
    "member": "hydrogen_density_at_limiter",
@@ -480,7 +1103,30 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "name kept as hydrogen_density_at_limiter, which admits neutral hydrogen; the case file's enclosing source is 'Ion density per species'; definition itself says hydrogen ions",
-   "my_verdict_digest": "75845ec37e88c55b"
+   "my_verdict_digest": "75845ec37e88c55b",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'hydrogen_density_at_limiter' does not match the required reference name 'hydrogen_ion_density_at_limiter', omitting the 'ion' specification. Furthermore, the definition fails to state that it is evaluated on the plasma side of the magnetic presheath or sheath entrance and that it is defined from the hydrogen-ion velocity distribution function as an integral over velocity space.",
+   "original_verdict": "wrong",
+   "group_reference": "plasma_wall_interactions",
+   "group_generated": "plasma physics",
+   "unit_reference": "m^-3",
+   "unit_generated": "m^-3",
+   "name_matches_reference": false,
+   "name_matches_incumbent": true,
+   "cause": "generator lost a detail the case file states",
+   "quote": "hydrogen ions in the boundary plasma",
+   "quote_source": "case_text",
+   "case_quote": "definition: Local particle number density of hydrogen ions in the boundary plasma immediately adjacent to a plasma-facing limiter surface, evaluated on the plasma side of the magnetic presheath or sheath entrance.",
+   "definition_points": [
+    "hydrogen ion (H+) number density",
+    "local evaluation at a plasma-facing limiter surface",
+    "evaluation on the plasma side of the magnetic presheath or sheath entrance",
+    "excludes neutral hydrogen and other ion species",
+    "defined from the hydrogen-ion velocity distribution function as an integral over velocity space",
+    "unit m^-3"
+   ],
+   "incumbent_definition": "Local particle number density of hydrogen ions in the boundary plasma immediately adjacent to a plasma-facing limiter surface, evaluated on the plasma side of the magnetic presheath or sheath entrance."
   },
   {
    "member": "surface_temperature",
@@ -494,7 +1140,28 @@
    "generated_blocker": "grammar-gap",
    "my_verdict": "wrong",
    "my_reason": "blocker=grammar-gap stating the closed qualifier vocabulary has no 'apparent'; the reference's right name apparent_surface_temperature uses that word",
-   "my_verdict_digest": "ab5656e2d46aecfd"
+   "my_verdict_digest": "ab5656e2d46aecfd",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "other",
+   "judge_reason": "The reference answer apparent_surface_temperature can be derived from the record's statement that the distinction of apparent temperature must be retained in the name, making the declared grammar-gap blocker invalid.",
+   "original_verdict": "wrong",
+   "group_reference": "plasma_wall_interactions",
+   "group_generated": "",
+   "unit_reference": "K",
+   "unit_generated": "K",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "generator blocked on a name it could derive",
+   "quote": "grammar-gap",
+   "quote_source": "blocker",
+   "case_quote": "",
+   "definition_points": [
+    "It is an apparent (infrared-radiance-derived) surface temperature, not a thermodynamic surface temperature.",
+    "It is a processed 2D image/distribution over plasma-facing component surfaces from an infrared camera frame.",
+    "The two image dimensions are row index (horizontal orientation) and column index (vertical orientation).",
+    "The unit is K."
+   ],
+   "incumbent_definition": "Surface temperature is the thermodynamic temperature of the exposed material boundary of a plasma-facing component at a specified surface point. It refers to the surface material state, not to an area aggregate or regional extremum."
   },
   {
    "member": "lower_bound_photon_energy",
@@ -508,7 +1175,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name is the right name; definition now carries the band boundary, the upper bound's partner role, the per-pixel threshold and the strict-exceed condition",
-   "my_verdict_digest": "ce438a0a3886d17a"
+   "my_verdict_digest": "ce438a0a3886d17a",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted record specifies group \"diagnostics\", but the reference answer requires \"radiation_measurement_diagnostics\".",
+   "original_verdict": "wrong",
+   "group_reference": "radiation_measurement_diagnostics",
+   "group_generated": "diagnostics",
+   "unit_reference": "eV",
+   "unit_generated": "eV",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "the reference answer requires \"radiation_measurement_diagnostics\"",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "The quantity is a lower photon-energy bound in eV: the low-energy edge of a photon-energy window, not a central or representative photon energy.",
+    "For energy-resolved emission bands (e.g. the hard X-ray emission energy band used in the emissivity profile reconstruction, and the soft X-ray channel band), it is the lower boundary of the band",
+    "together with the upper bound it specifies the spectral window of the channel/profile.",
+    "For photon counting it is a per-detector-pixel or per-channel detection threshold: an incident photon is registered only if its energy strictly exceeds the threshold (E_gamma > E_gamma,min); the threshold applies individually to each pixel or channel and is not an average over the detector.",
+    "Exceeding the threshold is necessary for counting but does not imply unit detection probability."
+   ],
+   "incumbent_definition": "Lower-bound photon energy sets the low-energy cutoff for X-ray photon counting, admitting only photons above the threshold of the specified detector pixel or channel."
   },
   {
    "member": "radius_of_poloidal_field_coil",
@@ -522,7 +1211,31 @@
    "generated_blocker": "insufficient-source-text",
    "my_verdict": "wrong",
    "my_reason": "blocker=insufficient-source-text with no bound source, yet the case file's incumbent definition states 'Non-negative curvature radius of one arc-of-circle segment' and the right name is curvature_radius_of_poloidal_field_coil",
-   "my_verdict_digest": "33bfd46b227f40bf"
+   "my_verdict_digest": "33bfd46b227f40bf",
+   "judge_verdict": "blocked",
+   "judge_failure_class": "",
+   "judge_reason": "The submitted record declares a blocker (insufficient-source-text) and the full reference answer cannot be derived from what the record states: 'No source text is bound to this target. The incumbent describes the local curvature radius of a circular arc on a coil cross-sectional contour, whereas its name identifies a coil radius.'",
+   "original_verdict": "wrong",
+   "group_reference": "magnetic_field_systems",
+   "group_generated": "",
+   "unit_reference": "m",
+   "unit_generated": "",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "generator blocked on a name it could derive",
+   "quote": "insufficient-source-text",
+   "quote_source": "blocker",
+   "case_quote": "",
+   "definition_points": [
+    "Non-negative curvature radius of one arc-of-circle segment used to approximate the cross-sectional contour of a poloidal field coil",
+    "Measured in a poloidal plane of the right-handed cylindrical (R, \u03c6, Z) frame, where R is major radius and Z is vertical height",
+    "For a circular contour segment, the curvature radius \u03c1 is the inverse magnitude of the planar curvature \u03ba: \u03c1 = 1/|\u03ba|",
+    "A finite physical arc has \u03c1 > 0; the segment approaches a straight line as \u03c1 grows and \u03ba \u2192 0",
+    "Each arc is anchored by a start point in the poloidal plane whose major-radius coordinate is major_radius_of_poloidal_field_coil and vertical coordinate is height_of_poloidal_field_coil; the end of each arc coincides with the start of the next",
+    "The value is determined from the designed circular-arc contour, from CAD geometry, or by fitting circular arcs to surveyed boundary points",
+    "Unit: m"
+   ],
+   "incumbent_definition": "Non-negative curvature radius of one arc-of-circle segment used to approximate the cross-sectional contour of a poloidal field coil. The contour lies in a poloidal plane of the right-handed cylindrical (R, \u03c6, Z) frame, where R is major radius and Z is vertical height."
   },
   {
    "member": "normalized_collisionality",
@@ -536,7 +1249,28 @@
    "generated_blocker": "",
    "my_verdict": "alternative",
    "my_reason": "record is sound: interspecies collision frequency over characteristic transit frequency for a species pair, unit 1; name collisionality_between_species is not in the reference's list but identifies it",
-   "my_verdict_digest": "8191cb02ae418c82"
+   "my_verdict_digest": "8191cb02ae418c82",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'collisionality_between_species' is not among the right names (which is 'normalized_collisionality'), and the group is 'gyrokinetics' instead of 'turbulence'.",
+   "original_verdict": "wrong",
+   "group_reference": "turbulence",
+   "group_generated": "gyrokinetics",
+   "unit_reference": "1",
+   "unit_generated": "1",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "reference too narrow: a sound name the list does not allow",
+   "quote": "is not among the right names",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "ratio of the inter-species collision frequency to a characteristic transit frequency",
+    "for pairs of particle species in a local gyrokinetic simulation",
+    "dimensionless, with unit 1",
+    "governing collisional coupling and neoclassical effects"
+   ],
+   "incumbent_definition": "Dimensionless ratio of a specified interspecies collision frequency to the characteristic streaming, transit, or bounce frequency used for the plasma population."
   },
   {
    "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
@@ -550,7 +1284,26 @@
    "generated_blocker": "",
    "my_verdict": "alternative",
    "my_reason": "record is sound: incident angle of the magnetic field on the plasma-facing surface at the probe, rad; name surface_incident_angle_of_magnetic_field_at_langmuir_probe identifies it and is not listed",
-   "my_verdict_digest": "05b2c00b98537d20"
+   "my_verdict_digest": "05b2c00b98537d20",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "Submitted name 'surface_incident_angle_of_magnetic_field_at_langmuir_probe' does not match the reference right name 'magnetic_field_incident_angle_with_respect_to_plasma_facing_surface_of_langmuir_probe'.",
+   "original_verdict": "wrong",
+   "group_reference": "mechanical_measurement_diagnostics",
+   "group_generated": "Edge plasma physics",
+   "unit_reference": "rad",
+   "unit_generated": "rad",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "reference too narrow: a sound name the list does not allow",
+   "quote": "does not match the reference right name",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "Incident angle of the magnetic field with respect to the plasma-facing surface at the Langmuir probe measurement location.",
+    "Unit: rad."
+   ],
+   "incumbent_definition": "Angle between the magnetic field and the plasma-facing surface of a Langmuir probe."
   },
   {
    "member": "minimum_gas_flow",
@@ -564,7 +1317,27 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "name lower_bound_gas_flow still omits the volumetric pressure-volume basis the unit Pa.m^3.s^-1 states; the reference needs minimum_volumetric_gas_flow_rate",
-   "my_verdict_digest": "e91dd091bed87dc2"
+   "my_verdict_digest": "e91dd091bed87dc2",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "name-not-supported-by-source",
+   "judge_reason": "The submitted name 'lower_bound_gas_flow' is not among the right names; the reference answer requires 'minimum_volumetric_gas_flow_rate'.",
+   "original_verdict": "wrong",
+   "group_reference": "plant_systems",
+   "group_generated": "gas_injection",
+   "unit_reference": "Pa.m^3.s^-1",
+   "unit_generated": "Pa.m^3.s^-1",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "generator lost a detail the case file states",
+   "quote": "pressure-volume gas throughput",
+   "quote_source": "case_text",
+   "case_quote": "definition: Minimum gas flow is the smallest pressure-volume gas throughput that a gas injection valve can reliably deliver, defining the lower bound of its controllable range.",
+   "definition_points": [
+    "The quantity is the lower reliable operating bound of the pressure-volume gas throughput delivered by a gas injection valve.",
+    "The throughput is pressure-volume throughput, Q_g = p_g dV_g/dt, with unit Pa.m^3.s^-1, not mass flow or particle-number rate.",
+    "It applies to the aggregate gas stream across a defined flow boundary and is not restricted to a molecular species or charge state."
+   ],
+   "incumbent_definition": "Minimum gas flow is the smallest pressure-volume gas throughput that a gas injection valve can reliably deliver, defining the lower bound of its controllable range."
   },
   {
    "member": "temperature_of_sensor",
@@ -578,7 +1351,28 @@
    "generated_blocker": "",
    "my_verdict": "wrong",
    "my_reason": "definition omits the time-resolved measurement and its structural-health monitoring purpose that the reference requires; the case file's source text says only 'Temperature measured by a thermocouple'",
-   "my_verdict_digest": "4a6b7746bf84a6dc"
+   "my_verdict_digest": "4a6b7746bf84a6dc",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "other",
+   "judge_reason": "The submitted record omits essential definition points specified in the reference answer: that it is a time-resolved thermal measurement, and that it is used for structural health monitoring and machine protection.",
+   "original_verdict": "wrong",
+   "group_reference": "mechanical_measurement_diagnostics",
+   "group_generated": "mechanical_measurement_diagnostics",
+   "unit_reference": "K",
+   "unit_generated": "K",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "the case file lacks what the right answer needs",
+   "quote": "Time-resolved thermal measurement",
+   "quote_source": "reference_point",
+   "case_quote": "",
+   "definition_points": [
+    "Temperature measured by a thermocouple sensor attached to a tokamak structural component",
+    "Time-resolved thermal measurement",
+    "Used for structural health monitoring and machine protection",
+    "Unit: K"
+   ],
+   "incumbent_definition": "Thermodynamic temperature associated with a selected thermocouple sensor attached to a tokamak structural component."
   },
   {
    "member": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
@@ -592,7 +1386,28 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name says normal ... at control_surface; definition carries the normal component, the Fourier decomposition over surface points and T",
-   "my_verdict_digest": "d528d119909cd103"
+   "my_verdict_digest": "d528d119909cd103",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted name 'normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface' does not match the reference right name 'flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface', and the group 'electromagnetism' does not match the reference group 'equilibrium'.",
+   "original_verdict": "wrong",
+   "group_reference": "equilibrium",
+   "group_generated": "electromagnetism",
+   "unit_reference": "T",
+   "unit_generated": "T",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "judge wrong: group plus a name wording",
+   "quote": "does not match the reference right name",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "Fourier coefficients of B_n, the normal component of the non-axisymmetric vacuum magnetic field",
+    "evaluated on control-surface points",
+    "represents the toroidal mode decomposition of the 3D magnetic perturbation normal to each control surface",
+    "unit T"
+   ],
+   "incumbent_definition": "Fourier coefficients of the normal component of the non-axisymmetric vacuum magnetic field on control surfaces"
   },
   {
    "member": "resistivity_of_plasma_facing_component",
@@ -606,7 +1421,26 @@
    "generated_blocker": "grammar-gap",
    "my_verdict": "wrong",
    "my_reason": "blocker=grammar-gap stating the vocabulary has plasma_facing_component but no token for the mobile unit the source binds",
-   "my_verdict_digest": "eb51b5ef3dcabe4d"
+   "my_verdict_digest": "eb51b5ef3dcabe4d",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "other",
+   "judge_reason": "The record declares a grammar-gap blocker, but the reference answer 'resistivity_of_mobile_plasma_facing_component_unit' can be directly derived from what the record states in its documentation ('electrical resistivity of one mobile plasma-facing component unit'). Additionally, the group is 'electromagnetism' instead of 'structural_components'.",
+   "original_verdict": "wrong",
+   "group_reference": "structural_components",
+   "group_generated": "electromagnetism",
+   "unit_reference": "m.ohm",
+   "unit_generated": "m.ohm",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "generator blocked on a name it could derive",
+   "quote": "grammar-gap",
+   "quote_source": "blocker",
+   "case_quote": "",
+   "definition_points": [
+    "Electrical resistivity of a mobile plasma-facing component (PFC) unit in the 2D wall description.",
+    "A material property relevant for electromagnetic analysis including induced and eddy current calculations in the wall structure."
+   ],
+   "incumbent_definition": "Electrical resistivity of the material assigned to a mobile plasma-facing component unit, relating local electric field to current density and governing its conductive electromagnetic response."
   },
   {
    "member": "polarization_angle_at_constraint_position",
@@ -620,7 +1454,27 @@
    "generated_blocker": "collision",
    "my_verdict": "wrong",
    "my_reason": "blocker=collision claiming motional_stark_polarization_angle_at_constraint_position already covers it, which is exactly the reference's right name; case binds no source",
-   "my_verdict_digest": "414d1965daa650a3"
+   "my_verdict_digest": "414d1965daa650a3",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "other",
+   "judge_reason": "The record declares a collision blocker, but explicitly identifies and derives the reference answer: 'The described quantity is already covered by motional_stark_polarization_angle_at_constraint_position'.",
+   "original_verdict": "wrong",
+   "group_reference": "equilibrium",
+   "group_generated": "",
+   "unit_reference": "rad",
+   "unit_generated": "rad",
+   "name_matches_reference": false,
+   "name_matches_incumbent": false,
+   "cause": "generator blocked on a name it could derive",
+   "quote": "collision",
+   "quote_source": "blocker",
+   "case_quote": "",
+   "definition_points": [
+    "must state that it is the measured MSE polarization angle",
+    "must state that it is the reconstructed value calculated from the reconstructed equilibrium",
+    "must state the unit as rad"
+   ],
+   "incumbent_definition": "Polarization angle of motional Stark effect emission at a constraint position: the angular orientation of the linear-polarization axis of the beam emission for the specified neutral-beam and viewing geometry, whether realized as an observed angle or as the angle consistent with a reconstructed equilibrium state."
   },
   {
    "member": "ratio_of_particle_temperature_to_particle_reference_temperature",
@@ -634,7 +1488,30 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries T_p/T_ref, same flux surface, unit 1; documentation states the local gyrokinetic flux-tube setting",
-   "my_verdict_digest": "e293096b3104321c"
+   "my_verdict_digest": "e293096b3104321c",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted group is 'gyrokinetics', which does not agree with the reference group 'turbulence'.",
+   "original_verdict": "wrong",
+   "group_reference": "turbulence",
+   "group_generated": "gyrokinetics",
+   "unit_reference": "1",
+   "unit_generated": "1",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "does not agree with the reference group 'turbulence'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "dimensionless normalised temperature T_p/T_ref with unit 1",
+    "T_p is the kinetic temperature of the selected particle species",
+    "T_ref is the positive reference temperature on the same simulated magnetic flux surface",
+    "the species dependence is retained in the numerator only",
+    "the quantity is defined in a local gyrokinetic simulation / flux-tube context",
+    "it is not an absolute temperature"
+   ],
+   "incumbent_definition": "Dimensionless ratio comparing a particle species\u2019 kinetic temperature with the positive reference temperature on the same magnetic flux surface."
   },
   {
    "member": "lower_inner_squareness_of_flux_surface",
@@ -648,7 +1525,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries the Luce convention, the lower-inner quadrant, signed ellipse departure and unit 1",
-   "my_verdict_digest": "d6d14a18501e1f36"
+   "my_verdict_digest": "d6d14a18501e1f36",
+   "judge_verdict": "right",
+   "judge_failure_class": "",
+   "judge_reason": "The submitted record matches the reference name, unit, group, and covers all required definition points, including the Luce (2013) convention, lower-inner quadrant, signed departure from a reference ellipse, and dimensionless unit 1.",
+   "original_verdict": "right",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "1",
+   "unit_generated": "1",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "none: record right and judged right",
+   "quote": "The submitted record matches the reference name, unit, group",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "dimensionless coefficient, unit 1",
+    "Luce (2013) squareness definition",
+    "lower-inner / inner-lower quadrant of a flux surface",
+    "deviation from an elliptical boundary",
+    "signed departure from the reference ellipse"
+   ],
+   "incumbent_definition": "Dimensionless Luce (2013) squareness coefficient for the lower-inner, high-field-side quadrant of a nested magnetic flux surface, measuring signed departure from a reference ellipse."
   },
   {
    "member": "radial_coordinate_at_inboard_midplane",
@@ -662,7 +1561,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries the inboard midplane locus, the cylindrical R basis, one value per flux surface and m",
-   "my_verdict_digest": "39284aa8ed0530a9"
+   "my_verdict_digest": "39284aa8ed0530a9",
+   "judge_verdict": "right",
+   "judge_failure_class": "",
+   "judge_reason": "The submitted record matches the reference name, unit, group, and thoroughly covers all required definition points.",
+   "original_verdict": "right",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "m",
+   "unit_generated": "m",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "none: record right and judged right",
+   "quote": "The submitted record matches the reference name, unit, group",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "major-radius coordinate R of a magnetic flux surface at its inboard (high-field-side) midplane intersection",
+    "right-handed cylindrical (R, phi, Z) frame with R as major radius",
+    "one coordinate value for each specified magnetic flux surface, i.e. the profile element at that surface",
+    "not a flux-surface, poloidal or toroidal average, and not the outboard-midplane coordinate",
+    "unit: m"
+   ],
+   "incumbent_definition": "Major-radius coordinate of a magnetic flux surface at its inboard midplane intersection, locating the high-field-side point relative to the toroidal symmetry axis."
   },
   {
    "member": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
@@ -676,7 +1597,30 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries |grad rho_tor|^2/R^2, the pointwise (un-averaged) convention, the frame and m^-2",
-   "my_verdict_digest": "53f21bf456d6291f"
+   "my_verdict_digest": "53f21bf456d6291f",
+   "judge_verdict": "right",
+   "judge_failure_class": "",
+   "judge_reason": "The submitted name, unit, group, and definition accurately cover all required points from the reference answer.",
+   "original_verdict": "right",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "m^-2",
+   "unit_generated": "m^-2",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "none: record right and judged right",
+   "quote": "The submitted name, unit, group, and definition accurately c",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "the ratio is the squared gradient magnitude of the length-valued toroidal-flux coordinate divided by squared major radius",
+    "it is a local equilibrium metric coefficient encoding flux-surface spacing with inverse-square major-radius weighting",
+    "it is pointwise and not spatially averaged; its flux-surface-averaged counterpart is distinct",
+    "the toroidal-flux coordinate retains its prescribed scale with no boundary normalization or arbitrary flux-label substitution",
+    "in the right-handed cylindrical (R, phi, Z) frame, R is the distance from the toroidal symmetry axis",
+    "the stored unit is m^-2"
+   ],
+   "incumbent_definition": "Ratio of the squared gradient magnitude of the length-valued toroidal-flux coordinate to squared major radius, defining a local equilibrium metric coefficient."
   },
   {
    "member": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
@@ -690,7 +1634,30 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries dV/dpsi, cumulative volume, signed psi, sign convention and Wb^-1.m^3",
-   "my_verdict_digest": "f4ed317b516a4bc2"
+   "my_verdict_digest": "f4ed317b516a4bc2",
+   "judge_verdict": "right",
+   "judge_failure_class": "",
+   "judge_reason": "The submitted record matches the reference name, unit, group, and satisfies all definition points including distinction from the derivative with respect to toroidal flux.",
+   "original_verdict": "right",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "Wb^-1.m^3",
+   "unit_generated": "Wb^-1.m^3",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "none: record right and judged right",
+   "quote": "The submitted record matches the reference name, unit, group",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "the quantity is dV/d\u03c8, the radial derivative of the volume enclosed by a flux surface with respect to poloidal flux",
+    "V is the cumulative volume enclosed by the nested flux surface from the magnetic axis to that surface",
+    "\u03c8 is the signed poloidal magnetic-flux coordinate",
+    "the sign is positive when enclosed volume increases with increasing signed \u03c8",
+    "unit is Wb^-1.m^3",
+    "it is distinct from the derivative with respect to toroidal flux coordinate"
+   ],
+   "incumbent_definition": "Geometric rate of change of the cumulative volume enclosed by a nested magnetic flux surface as its signed poloidal flux coordinate varies."
   },
   {
    "member": "vertical_coordinate_of_constraint_position",
@@ -704,7 +1671,30 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries Z = x.zhat, the frame, per-point application, sign and m",
-   "my_verdict_digest": "98dd08e601f51eea"
+   "my_verdict_digest": "98dd08e601f51eea",
+   "judge_verdict": "right",
+   "judge_failure_class": "",
+   "judge_reason": "The submitted record accurately matches the right name, unit, group, and addresses all definition points including the frame definition, mathematical expression Z = x\u00b7\u1e91, sign convention, and point-coordinate nature.",
+   "original_verdict": "right",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "m",
+   "unit_generated": "m",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "none: record right and judged right",
+   "quote": "The submitted record accurately matches the right name, unit",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "signed height of the constraint position relative to the zero-height plane",
+    "coordinate axis Z parallel to the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame",
+    "defined by Z = x\u00b7\u1e91 with x the position vector from the coordinate origin and \u1e91 the upward unit vector along the symmetry axis",
+    "applies individually at each constraint position (a point coordinate, not a spatial average or the value of the constrained observable)",
+    "sign convention: positive above the zero-height plane along \u1e91",
+    "unit: m"
+   ],
+   "incumbent_definition": "Vertical coordinate of the constraint position specifies its signed height from the zero-height plane, parallel to the symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame."
   },
   {
    "member": "vertical_outline_of_plasma_boundary",
@@ -718,7 +1708,30 @@
    "generated_blocker": "registry-conflict",
    "my_verdict": "wrong",
    "my_reason": "blocker=registry-conflict on the right name itself: the registry's plasma_boundary meaning contradicts the source's fixed-boundary outline at psi_norm ~99%",
-   "my_verdict_digest": "21dd8d3df1ad5f06"
+   "my_verdict_digest": "21dd8d3df1ad5f06",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "other",
+   "judge_reason": "The reference answer can be derived from what the record states ('The source supplies the vertical Z coordinate, in m, of each point on the plasma-boundary outline'), making the declared blocker invalid, and no valid definition was provided.",
+   "original_verdict": "right",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "m",
+   "unit_generated": "m",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "generator blocked on a name it could derive",
+   "quote": "registry-conflict",
+   "quote_source": "blocker",
+   "case_quote": "",
+   "definition_points": [
+    "Signed vertical height Z of each point on the plasma-boundary outline",
+    "Defined in the right-handed cylindrical (R, \u03c6, Z) frame; Z is vertical height",
+    "Each outline point has its own Z value; not an average or extremum over the boundary",
+    "Applies to the plasma-boundary outline and not to a plasma-facing component outline",
+    "Sign convention: positive in the direction of increasing Z",
+    "Unit: m"
+   ],
+   "incumbent_definition": "Signed vertical height of each point on the plasma-boundary outline in the right-handed cylindrical (R, \u03c6, Z) frame, defining its poloidal cross-sectional shape."
   },
   {
    "member": "poloidal_length_of_flux_surface",
@@ -732,7 +1745,28 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries the closed poloidal contour perimeter, the integral form, no averaging and m",
-   "my_verdict_digest": "5e00fb557f9ff88a"
+   "my_verdict_digest": "5e00fb557f9ff88a",
+   "judge_verdict": "right",
+   "judge_failure_class": "",
+   "judge_reason": "The submitted record matches the reference name, unit, and group, and comprehensively addresses all definition points including the poloidal arc length of the closed contour, geometric property/scale, and explicit exclusions.",
+   "original_verdict": "right",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "m",
+   "unit_generated": "m",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "none: record right and judged right",
+   "quote": "The submitted record matches the reference name, unit, and g",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "poloidal arc length of the closed contour of one selected magnetic flux surface in the poloidal plane (equilibrium/time_slice/global_quantities/length_pol, unit m)",
+    "a geometric property of the equilibrium flux surface, used in flux-surface-averaged quantities",
+    "retains the absolute geometric scale of the contour (perimeter, not a scale-independent shape ratio)",
+    "excludes enclosed area, volume, toroidal circumference and local arc segments"
+   ],
+   "incumbent_definition": "Poloidal arc length of a closed magnetic-flux-surface contour in an equilibrium poloidal cross-section, measuring the perimeter of that selected surface."
   },
   {
    "member": "vertical_coordinate_of_current_center",
@@ -746,7 +1780,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries Z_c = integral(Z j_tor dS)/I_p, the weighting, sign, frame and m",
-   "my_verdict_digest": "6a7410f14c9f6044"
+   "my_verdict_digest": "6a7410f14c9f6044",
+   "judge_verdict": "right",
+   "judge_failure_class": "",
+   "judge_reason": "The submitted name matches the reference name, the unit and group match, and all required definition points are stated explicitly in the definition.",
+   "original_verdict": "right",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "m",
+   "unit_generated": "m",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "none: record right and judged right",
+   "quote": "The submitted name matches the reference name, the unit and ",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "the quantity is the signed vertical (Z) coordinate of the plasma-current centre",
+    "it is the toroidal-current-density-weighted centroid height: \u222b Z j_phi dA divided by \u222b j_phi dA over the plasma-current-carrying poloidal cross-section, equivalently normalised by the total plasma current",
+    "coordinates are in the right-handed cylindrical (R, phi, Z) frame",
+    "positive sign in the +Z direction from the coordinate origin",
+    "unit is m"
+   ],
+   "incumbent_definition": "Signed vertical position of the plasma-current centroid, obtained by weighting the toroidal current distribution by height in the right-handed cylindrical (R, \u03c6, Z) frame."
   },
   {
    "member": "toroidal_magnetic_field_at_magnetic_axis",
@@ -760,7 +1816,29 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries the total field including plasma current, projection, sign and T",
-   "my_verdict_digest": "358f207f56cd04a2"
+   "my_verdict_digest": "358f207f56cd04a2",
+   "judge_verdict": "wrong",
+   "judge_failure_class": "unit-or-group-wrong",
+   "judge_reason": "The submitted record specifies group 'magnetism', but the reference answer specifies group 'equilibrium'.",
+   "original_verdict": "right",
+   "group_reference": "equilibrium",
+   "group_generated": "magnetism",
+   "unit_reference": "T",
+   "unit_generated": "T",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "judge wrong: group alone",
+   "quote": "but the reference answer specifies group 'equilibrium'",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "total toroidal magnetic field at the magnetic axis",
+    "includes both TF-coil/external-coil and plasma-current contributions",
+    "signed toroidal projection B_axis \u00b7 \u03c6hat evaluated locally at the magnetic axis",
+    "unit T",
+    "positive when the field projects in the direction of increasing toroidal angle \u03c6"
+   ],
+   "incumbent_definition": "Toroidal magnetic field at the magnetic axis is the signed component of the total equilibrium magnetic field in the toroidal direction, including external-coil and plasma-current contributions."
   },
   {
    "member": "safety_factor_at_magnetic_axis",
@@ -774,8 +1852,118 @@
    "generated_blocker": "",
    "my_verdict": "right",
    "my_reason": "name identical; definition carries q0 = lim q, the sign convention, locus specificity and unit 1",
-   "my_verdict_digest": "890adbdb5309b933"
+   "my_verdict_digest": "890adbdb5309b933",
+   "judge_verdict": "right",
+   "judge_failure_class": "",
+   "judge_reason": "The submitted record matches the reference name, unit, and group, and covers all definition points including the limiting definition q0 = lim(rho->0) q(rho), the sign convention, the definition of the magnetic axis, and that it is locus-specific and distinct from the minimum safety factor.",
+   "original_verdict": "right",
+   "group_reference": "equilibrium",
+   "group_generated": "equilibrium",
+   "unit_reference": "1",
+   "unit_generated": "1",
+   "name_matches_reference": true,
+   "name_matches_incumbent": true,
+   "cause": "none: record right and judged right",
+   "quote": "The submitted record matches the reference name, unit, and g",
+   "quote_source": "judge_reason",
+   "case_quote": "",
+   "definition_points": [
+    "The quantity is the safety factor q at the magnetic axis, i.e. at the innermost closed flux surface / locus where the poloidal field vanishes.",
+    "It is defined by the limit q0 = lim_{rho->0} q(rho), not by direct evaluation of the poloidal-angle integral at the axis.",
+    "It is a",
+    "signed safety factor: positive when the toroidal angle advance of a field line is in the direction of increasing phi as poloidal angle theta increases.",
+    "It is a locus-specific value, not a spatial average or sum, and is distinct from the minimum safety factor.",
+    "The stored unit is 1."
+   ],
+   "incumbent_definition": "Safety factor at the magnetic axis is the limiting signed number of toroidal field-line turns per poloidal circuit as neighboring closed flux surfaces approach the axis."
   }
  ],
- "verdict_digest": "aea31915cf10892d892978c1edda84bf0910189bb2669749468abb7abd5e1f14"
+ "verdict_digest": "aea31915cf10892d892978c1edda84bf0910189bb2669749468abb7abd5e1f14",
+ "counts": {
+  "rows": 50,
+  "causes": {
+   "none: record right and judged right": 9,
+   "judge wrong: group alone": 16,
+   "judge wrong: group plus a point": 1,
+   "judge wrong: group plus a name wording": 1,
+   "judge wrong: a point only the incumbent's documentation states": 2,
+   "reference too narrow: a sound name the list does not allow": 3,
+   "reference too narrow: the only right name is an opaque spelling": 1,
+   "generator blocked on a name it could derive": 7,
+   "generator lost a detail the case file states": 8,
+   "the case file lacks what the right answer needs": 2
+  },
+  "my_verdicts": {
+   "right": 29,
+   "wrong": 18,
+   "alternative": 3
+  },
+  "judge_verdicts": {
+   "wrong": 40,
+   "right": 9,
+   "blocked": 1
+  },
+  "judge_failure_classes": {
+   "unit-or-group-wrong": 18,
+   "none": 10,
+   "other": 9,
+   "name-not-supported-by-source": 12,
+   "definition-omits-convention": 1
+  },
+  "acceptability_agreement": 30,
+  "exact_name_and_unit": 31,
+  "exact_name_and_unit_passed": 9,
+  "group_mismatch": 34,
+  "group_mismatch_passed": 1,
+  "group_match_passed": 8,
+  "name_equals_incumbent": 33,
+  "incumbent_name_already_a_right_name": 37,
+  "right_name_widths": {
+   "1": 48,
+   "2": 1,
+   "3": 1
+  },
+  "blockers_declared": 7
+ },
+ "questions": {
+  "a": {
+   "question": "Does the prompt show the incumbent and ask the generator to keep it unless it is wrong, and does the output let it say 'keep'?",
+   "shown": true,
+   "asked_to_keep": false,
+   "can_say_keep": false,
+   "answer": "Shown, not asked, and with no way to say keep. The case file opens with the block 'Incumbent name, definition, documentation:', so the text is in front of the generator. The instruction is 'You write one standard-name record for the quantity a case file describes. Return the name, the definition (the description) of the quantity, one paragraph of documentation, the unit and the physics group.' It never mentions the incumbent, and the schema the model answers with carries name, description, documentation, unit, group and blocker - no keep flag, so a generator that judged the incumbent sound could only retype it. That is what the arms measure: 37 of these 50 members have an incumbent name that the reference's own list calls right, the committed run recorded changed_incumbent on all 87 held-out rows, and this regeneration retyped the incumbent's name on 33 of 50. A retyped name then faces the group and wording gates below, which is where 40 of the 50 rows died."
+  },
+  "b": {
+   "question": "Is the judge's verdict usable, or must the judge be a blind adjudication as the plan requires?",
+   "usable": false,
+   "answer": "Not usable as committed. The judge's own rule is 'Return right when the submitted name is one of the right names and the definition states every definition point (and the unit agrees where a unit is given).' Group is not in the rule, yet judge_input hands it the reference group and the submitted group, and 18 of its 40 wrong verdicts cite group. Of 34 rows whose submitted group differs from the reference, 1 passed; of the 16 that match, 8 passed. Among the 31 rows that reproduced the reference's exact name and unit, 9 passed. It applies its own gate inconsistently: power_at_divertor_target_due_to_recombination was submitted with group 'Plasma-surface interactions' against 'divertor_physics' and passed ('The submitted name matches the reference answer'), the same mismatch it failed 33 times. It also fails a record for a point that only the incumbent's documentation states (2 rows). A blind adjudication is required, and blind must mean blind to the group as well as to the arm and the incumbent, with the name and the definition decided separately."
+  },
+  "c": {
+   "question": "Is the reference set's set of right names too narrow to score a regenerated name fairly, and how should a record be scored instead?",
+   "too_narrow": true,
+   "answer": "Too narrow. 48 of these 50 rows have exactly one right name, so the name decision is a string test: 3 rows are names I judge sound and the list does not allow (turn_count_of_passive_loop_element, collisionality_between_species, surface_incident_angle_of_magnetic_field_at_langmuir_probe), and a fourth (toroidal_parity) fails against the legacy spelling b_field_phi_sign, a name no generator can derive from the source. The record should be scored on two axes that --check keeps separate: identity (does the name denote the same base, locus and separation as the reference quantity, read against its neighbours) and specification (is each reference definition point stated, and does the unit agree). A name matching a list entry is evidence for identity, not the identity test itself; with 31 exact-name rows and 9 passes, the list is currently deciding the benchmark."
+  },
+  "d": {
+   "question": "Why the withheld-text control did not separate: was the enclosing-structure text actually in the case files the generator read, and did the members whose answer rests on it differ?",
+   "text_was_present": true,
+   "answer": "The text was there and the withholding was real: every case file renders its bound source's enclosing statements as 'enclosing <path>: <text>', and with enclosing_structure_text withheld the assembler writes no statements and prints 'the enclosing-structure text was withheld'. The control still cannot separate, for three measurable reasons. It is small: on the 87 held-out rows enclosing statements are a median 1.5% of the case-file characters (max 35%), and 20 of 87 rows have none at all, so for nearly a quarter of the population the two arms read the same input. Its effect is symmetric noise: 19 of 87 rows change verdict between the arms, 6 right-to-not-right against 5 not-right-to-right, which is a net -1 against a binomial spread of about 4 rows at 28/87. And it is not concentrated where the text is: 13 of the 19 flips carry enclosing text (median 2.1% share) against 54 of the other 68 (median 1.5%). Only 3 of the 87 reference answers rest on an enclosing structure at all, and of those the one in this read moved from wrong to blocked (hydrogen_density_at_limiter). The outcome metric is dominated by the group gate, which withholding does not touch."
+  }
+ },
+ "changes": [
+  {
+   "order": 1,
+   "change": "Judge the name and the definition as two decisions, and stop scoring the group unless the case file states it.",
+   "counts": "31 records reproduced the reference name and unit and 9 passed; 34 rows differed only in group and 1 passed; 18 of 40 wrong verdicts cite group, which the judge's own rule does not mention."
+  },
+  {
+   "order": 2,
+   "change": "Add a keep-or-repair arm: show the incumbent and let the record answer 'keep', so a sound incumbent can survive without being retyped.",
+   "counts": "37 of 50 incumbents already carry the reference's right name; the committed arm changed all 87 held-out records and this regeneration retyped the incumbent name on 33 of 50."
+  },
+  {
+   "order": 3,
+   "change": "Replace the withheld-enclosing-text control with one that moves the answer, and widen scoring to a name that denotes the same quantity.",
+   "counts": "Enclosing text is a median 1.5% of the case file and absent for 20 of 87 rows, with 19 of 87 verdict flips cancelling to -1; 3 of 50 rows are sound names the one-name lists reject, and 48 of 50 lists hold a single name."
+  }
+ ]
 }
