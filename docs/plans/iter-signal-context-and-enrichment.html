@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="80">
+<meta name="plan-version" content="81">
 <meta name="plan-modified" content="2026-11-20">
 </head>
 <body>
@@ -233,6 +233,15 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261120T045515987368-review-of-pilot-enrichment-by-group-8a70880407a8" data-who="reckon-build" data-when="2026-11-20T04:56:19.925Z">
     <div class="r-comment-body"><p>review of r-20261120T022442269568-pilot-enrichment-by-group at 8a70880407a8 (base cf48cb0e) scores goal_fidelity 18, evidence 16, scope_discipline 19, durability 15, fit 12, reuse 19, added_failure_count 0; three non-blocking findings — transient-fault retry lost on the group path, ruff I001 plus new format deviations, and the prompt-coverage test returning before its assertion for caller-schema prompts; record stored at review-records/r-20261120T022442269568-pilot-enrichment-by-group.json.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261120T053156923714-review-of-pilot-enrichment-by-group-04b35d54e902" data-who="reckon-build" data-when="2026-11-20T05:33:18.598Z">
+    <div class="r-comment-body"><p>Review of run r-20261120T022442269568-pilot-enrichment-by-group at head 04b35d54e, covering the two commits it gained since the
+previous review (8a70880..04b35d54e): ace609ef restores the single transient lane-fault retry through recovered_call
+(transient_attempts=1 on the group draft) and 04b35d54e replaces the caller-schema test&#x27;s early return with rendered-schema
+assertions for signals/enrichment, signals/enrichment_grounding and signals/enrichment_output. Scores: goal_fidelity 19,
+evidence 17, scope_discipline 20, durability 17, fit 15, reuse 20. Two non-blocking findings: the recovered_call docstring names a
+transient_counter parameter that does not exist (counting is hardcoded to the &quot;transient_retries&quot; key), and one prompt-test
+assertion compares a literal the test itself passed in. Both records pass crew check --review.</p></div>
 </div>
 </section>
 </main>

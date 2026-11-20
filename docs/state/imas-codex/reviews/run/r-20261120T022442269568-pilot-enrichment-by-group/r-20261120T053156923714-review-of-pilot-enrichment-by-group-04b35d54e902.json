@@ -1,0 +1,112 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/discover/__init__.py:discover_group_enrich",
+    "imas_codex/discovery/signals/group_enrichment.py:enrich_pilot_groups",
+    "imas_codex/discovery/signals/group_enrichment.py:describe_group",
+    "imas_codex/discovery/signals/enrichment.py:enrich_signal_batch"
+  ],
+  "completed_at": "2026-11-20T05:33:18.598Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-20T05:32:33Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/enrichment.py",
+      "line": "235",
+      "severity": "non-blocking",
+      "text": "non-blocking: the docstring says a transient fault \"is counted under transient_counter when given\", but recovered_call's signature at :226 has no transient_counter parameter and :283 hardcodes counters[\"transient_retries\"] behind an \"in counters\" guard, so a caller that follows the docstring counts nothing and the group outcome's calls under-reports retries it did make."
+    },
+    {
+      "file": "tests/llm/test_prompt_schema_coverage.py",
+      "line": "289",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert \"BASELINE TASK\" in rendered compares a literal the test itself passed into fit_enrichment_prompt against that call's output, so it guards only argument passthrough and says nothing about the schema contract the test's docstring claims; the schema assertion at :290 is the independent guard."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read ace609ef and 04b35d54e plus the full 36c1ff75..04b35d54e diff: ace609ef adds transient_attempts/transient_delay to recovered_call, passes transient_attempts=1 from group_enrichment.py:581, counts the retry into outcome.calls and formats the touched files; 04b35d54e replaces the caller-schema early return with a rendered-schema assertion and adds two dedicated prompt tests; no path outside the four named files moved.",
+    "done_when": "node.json's done_when asks for the pilot counts, calls, cost, vocabulary counts and a forty-member hand reading; the gained commits' gates (logs/discovery-suite.log 2455 passed EXIT=0, logs/graph-gate.log 11 passed EXIT=0, logs/prompt-coverage.log 1 failed 11 passed EXIT=1, all at 04b35d54e) assert regression safety, not those pilot numbers, so the measure itself is carried by the landing record.",
+    "goal": "node.json has no goal key; the deliverable is plan section 6 (docs/plans/iter-signal-context-and-enrichment.html) read with the reviewed brief, and the gained commits keep it: ace609ef restores the transient retry at imas_codex/discovery/signals/enrichment.py:219 through transient_attempts, and 04b35d54e gives the caller-schema prompts rendered assertions at tests/llm/test_prompt_schema_coverage.py:238.",
+    "manifest": "read manifest.md: status complete, fourteen commit shas, nine changed paths, a repair block naming seven acted findings with six negative-control logs, and gates pinned to 04b35d54e; baseline_suite and after_suite are null in classification.json, so the added-failure pair was measured by this review.",
+    "write_paths": "read the declared set from node.json's review dispatch; the four changed paths in 8a70880..04b35d54e are inside it and nothing outside it changed."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_group_enrichment.py:612 fails when transient_attempts=1 is removed (logs/negative-control-transient-retry.log, EXIT=1), and tests/llm/test_prompt_schema_coverage.py:268/281 fail when a template placeholder is dropped (logs/negative-control-prompt-schema-render.log, EXIT=1), but tests/llm/test_prompt_schema_coverage.py:289 asserts a literal the test passed in.",
+    "evidence": "logs/discovery-suite.log and logs/prompt-coverage.log carry revision 04b35d54e on their headers with EXIT=0 and EXIT=1, and my scratch arms reproduce them: head-arm.log 1 failed 33 passed, base-arm.log at 36c1ff75 2 failed 5 passed with the same failing id present in both.",
+    "fit": "imas_codex/discovery/signals/enrichment.py:235 names a transient_counter parameter the signature at :226 does not define, and :283 hardcodes the counter key behind a membership guard, unlike the counter argument the function takes elsewhere.",
+    "goal_fidelity": "imas_codex/discovery/signals/group_enrichment.py:581 passes transient_attempts=1 so a lane fault costs the group one retry again, and tests/llm/test_prompt_schema_coverage.py:238 renders each caller-schema prompt through the entry point its caller uses.",
+    "reuse": "the retry extends the existing owner recovered_call at imas_codex/discovery/signals/enrichment.py:219 instead of a second loop in imas_codex/discovery/signals/group_enrichment.py, and the test serialiser at tests/llm/test_prompt_schema_coverage.py:38 reuses jinja2's htmlsafe_json_dumps, the same function the templates use.",
+    "scope_discipline": "every changed path in the gained commits is inside the declared write paths, and the formatting churn is the repository's mandated ruff format on touched files."
+  },
+  "lint_evidence": {
+    "command": "uv run --no-sync ruff check --no-cache <4 files> ; uv run --no-sync ruff format --check <4 files>",
+    "detail": "All checks passed; 4 files already formatted at 04b35d54e (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T053156923714-review-of-pilot-enrichment-by-group-04b35d54e902/lint-arm.log), which answers the previous review's formatting finding.",
+    "exit_status": 0,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T053156923714-review-of-pilot-enrichment-by-group-04b35d54e902/lint-arm.log"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: node.json carries no goal key and the reviewed brief (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T022442269568-pilot-enrichment-by-group/brief.md) plus plan section 6 (docs/plans/iter-signal-context-and-enrichment.html, \"The pilot system's signals are enriched by group and the result is measured\") is the deliverable; the two gained commits keep it: ace609ef restores the transient retry through imas_codex/discovery/signals/enrichment.py:219 and 04b35d54e adds rendered-schema assertions at tests/llm/test_prompt_schema_coverage.py:238.\nVERDICT done_when: node.json's done_when asks for written counts, calls and cost, the pilot-total sum, vocabulary counts, forty hand-read members at most 2 wrong and at least 32 right; the gained commits' gate is the discovery suite plus the prompt-coverage file (reviewed logs/discovery-suite.log 2455 passed EXIT=0, logs/prompt-coverage.log 1 failed 11 passed EXIT=1 at 04b35d54e), which do not measure the pilot numbers themselves.\nVERDICT write_paths: read the declared set (imas_codex/discovery/signals, imas_codex/discovery/base, imas_codex/llm/prompts, imas_codex/schemas/facility.yaml, imas_codex/cli, tests/discovery, tests/llm, tests/graph, the pilot fragment html and its figures directory); the four paths in 8a70880..04b35d54e (enrichment.py, group_enrichment.py, tests/discovery/test_group_enrichment.py, tests/llm/test_prompt_schema_coverage.py) are all inside it.\nVERDICT manifest: read the reviewed manifest.md (status complete, 14 commit shas, nine changed paths, a repair block naming seven acted findings with six negative-control logs and the gates at 04b35d54e); its baseline_suite and after_suite keys are null in classification.json, so the added-failure pair had to be measured from the gate logs.\nVERDICT diff: read ace609ef and 04b35d54e against 8a70880 and the full 36c1ff75..04b35d54e diff; the gained change adds transient_attempts/transient_delay to recovered_call with a draft-only retry, formats the touched files, and replaces the caller-schema test's early return with a rendered assertion plus two dedicated prompt tests; no path outside the four named files changed.\nCALL_SITES: imas_codex/cli/discover/__init__.py:discover_group_enrich, imas_codex/discovery/signals/group_enrichment.py:enrich_pilot_groups, imas_codex/discovery/signals/group_enrichment.py:describe_group, imas_codex/discovery/signals/enrichment.py:enrich_signal_batch\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/group_enrichment.py:581 passes transient_attempts=1 so the draft keeps the single lane-fault retry the pre-refactor loop had, and tests/llm/test_prompt_schema_coverage.py:289 renders each caller-schema prompt through its own entry point.\nSCORE evidence: 17\nJUSTIFICATION evidence: the reviewed logs carry revision 04b35d54e on their headers with EXIT=0 for tests/discovery (2455 passed) and EXIT=1 for the prompt file (1 failed), and my own arms in head-arm.log (1 failed, 33 passed) and base-arm.log (2 failed, 5 passed) reproduce both, while the reviewed manifest's baseline_suite/after_suite keys are null.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the gained commits touch only imas_codex/discovery/signals/enrichment.py, imas_codex/discovery/signals/group_enrichment.py, tests/discovery/test_group_enrichment.py and tests/llm/test_prompt_schema_coverage.py, all inside the declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/discovery/test_group_enrichment.py:612 fails when transient_attempts=1 is dropped (logs/negative-control-transient-retry.log, EXIT=1, outcome error TimeoutError) and tests/llm/test_prompt_schema_coverage.py:268/281 fail when a template placeholder is removed (logs/negative-control-prompt-schema-render.log, EXIT=1), but tests/llm/test_prompt_schema_coverage.py:289 asserts a literal the test itself passed in.\nSCORE fit: 15\nJUSTIFICATION fit: imas_codex/discovery/signals/enrichment.py:235 documents a transient_counter parameter that the signature at :226 does not define, and :283 hardcodes the counter key behind an \"in counters\" guard, so the module's own documentation and its counting disagree.\nSCORE reuse: 20\nJUSTIFICATION reuse: the retry lives in the existing recovered_call owner at imas_codex/discovery/signals/enrichment.py:219 rather than a second loop in the group path, and the prompt tests reuse prompt_loader and jinja2's htmlsafe_json_dumps instead of a local json.dumps at tests/llm/test_prompt_schema_coverage.py:38.\nFINDING imas_codex/discovery/signals/enrichment.py:235 non-blocking: the docstring says a transient fault \"is counted under transient_counter when given\", but recovered_call's signature at :226 has no transient_counter parameter and :283 hardcodes counters[\"transient_retries\"] behind an \"in counters\" guard, so a caller that follows the docstring counts nothing and the group outcome's calls under-reports retries it did make.\nFINDING tests/llm/test_prompt_schema_coverage.py:289 non-blocking: assert \"BASELINE TASK\" in rendered compares a literal the test itself passed into fit_enrichment_prompt against that call's output, so it guards only argument passthrough and says nothing about the schema contract the test's docstring claims; the schema assertion at :290 is the independent guard.\n",
+  "review_method": "Read-only review of the commits gained since the previous review (8a70880..04b35d54e) against the reviewed brief, node.json, manifest.md, the reviewed run's gate and negative-control logs, and the whole 36c1ff75..04b35d54e diff; ruff check and ruff format --check applied to the four landed blobs in a scratch extraction; one arm pair measured in scratch trees extracted from git under the run's $TMPDIR with the shared environment, no suite rerun and no mutation of the reviewed code.",
+  "review_run_id": "r-20261120T053156923714-review-of-pilot-enrichment-by-group-04b35d54e902",
+  "reviewed_base_sha": "36c1ff753d8b976104874407e41ac09a8f00353b",
+  "reviewed_head_sha": "04b35d54e90261b14f48cc910854b6475497e619",
+  "reviewed_run_id": "r-20261120T022442269568-pilot-enrichment-by-group",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "source_commits": [
+    "ace609ef8851ec53f12e29ba430057689c3adca1",
+    "04b35d54e90261b14f48cc910854b6475497e619"
+  ],
+  "status": "parsed",
+  "suite_evidence": {
+    "added_failure_derivation": "The reviewed run's classification.json records baseline_suite and after_suite as null, so the pair was measured on the test file the prompt-coverage gate names, in scratch trees extracted from git under $TMPDIR with the shared environment and the reviewed worktree's generated models. Base 36c1ff753d8b976104874407e41ac09a8f00353b: 2 failed, 5 passed, EXIT=1 (logs/base-arm.log), ids test_walk_reaches_expected_prompts and test_prompt_carries_generated_example_verbatim[signals/enrichment_grounding]. Head 04b35d54e90261b14f48cc910854b6475497e619: 1 failed, 33 passed over tests/llm/test_prompt_schema_coverage.py plus tests/discovery/test_group_enrichment.py (logs/head-arm.log), the single id being test_walk_reaches_expected_prompts, which the base arm also fails. The set difference is empty, so added_failure_count is 0. The head arm agrees with the reviewed run's own logs/prompt-coverage.log (1 failed, 11 passed, EXIT=1 at 04b35d54e).",
+    "after_arm": {
+      "command": "PYTHONPATH=. UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync pytest tests/llm/test_prompt_schema_coverage.py tests/discovery/test_group_enrichment.py -p no:cacheprovider",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T053156923714-review-of-pilot-enrichment-by-group-04b35d54e902/head-arm.log",
+      "revision": "04b35d54e90261b14f48cc910854b6475497e619"
+    },
+    "baseline_arm": {
+      "command": "PYTHONPATH=. UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync pytest tests/llm/test_prompt_schema_coverage.py -p no:cacheprovider",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 2,
+      "failure_ids": [
+        "tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts",
+        "tests/llm/test_prompt_schema_coverage.py::test_prompt_carries_generated_example_verbatim[signals/enrichment_grounding]"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T053156923714-review-of-pilot-enrichment-by-group-04b35d54e902/base-arm.log",
+      "revision": "36c1ff753d8b976104874407e41ac09a8f00353b"
+    },
+    "cwd": "/tmp/reckon-crew-scratch/r-20261120T053156923714-review-of-pilot-enrichment-by-group-04b35d54e902/scratch/head",
+    "reviewed_run_arms": [
+      "logs/discovery-suite.log 2455 passed EXIT=0 at 04b35d54e",
+      "logs/graph-gate.log 11 passed EXIT=0 at 04b35d54e",
+      "logs/prompt-coverage.log 1 failed 11 passed EXIT=1 at 04b35d54e",
+      "logs/negative-control-transient-retry.log 1 failed EXIT=1 (transient_attempts removed)",
+      "logs/negative-control-prompt-schema-render.log 1 failed EXIT=1 x3 (schema placeholder dropped from each prompt)",
+      "logs/negative-control-reuse.log 2 failed EXIT=1",
+      "logs/negative-control-dead-query.log 1 failed EXIT=1",
+      "logs/negative-control-statement-coverage.log 1 failed EXIT=1"
+    ]
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T05:42:25.480663+00:00",
+  "total": 108
+}
