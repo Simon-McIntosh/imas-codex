@@ -2961,12 +2961,18 @@ def render_second_html(document: dict[str, Any]) -> str:
     )
 
     development_rows: list[str] = []
+    hashes = {
+        version: entry["hash"][:12]
+        for version, entry in document["prompts"]["versions"].items()
+    }
     for round_row in development:
         for arm in round_row["arms"]:
             development_rows.append(
-                "<tr><td>{}</td><td>{}</td><td>{} / {}</td>"
+                "<tr><td>{}</td><td><code>{}</code></td><td>{}</td>"
+                "<td>{} / {}</td>"
                 "<td>{:.1f}% [{:.1f}, {:.1f}]</td><td>{}</td></tr>".format(
                     round_row["prompt_version"],
+                    hashes.get(round_row["prompt_version"], ""),
                     arm["arm"],
                     arm["right"],
                     arm["members"],
@@ -3024,7 +3030,7 @@ opened until the adjudicator's verdicts are committed.</div>
 <h2>Arms and models</h2>
 <table>
 <tr><th>Arm</th><th>Structure</th><th>Model</th><th>Case file</th></tr>
-{"".join(f"<tr><td>{a['arm']}</td><td>{a['structure']}</td><td><code>{a['model']}</code></td><td>{a['case']}</td></tr>" for a in document["arms"])}
+{"".join(f"<tr><td>{a['arm']}</td><td>{a['structure']}</td><td><code>{a['model'] or 'no call: the incumbent record as it stands'}</code></td><td>{a['case']}</td></tr>" for a in document["arms"])}
 </table>
 <p>Frontier model: <code>{models["frontier"]}</code>. Local model:
 <code>{models["local"]}</code>.</p>
@@ -3037,8 +3043,8 @@ opened until the adjudicator's verdicts are committed.</div>
 development half. It is not a verdict and it says nothing about the held-out
 half.</figcaption></figure>
 <table>
-<tr><th>Version</th><th>Arm</th><th>Proxy right</th><th>Share [95%]</th>
-<th>Blocked</th></tr>
+<tr><th>Version</th><th>Prompt hash</th><th>Arm</th><th>Proxy right</th>
+<th>Share [95%]</th><th>Blocked</th></tr>
 {"".join(development_rows)}
 </table>
 <table>
@@ -3053,13 +3059,15 @@ half.</figcaption></figure>
 
 <h2>Perturbed control</h2>
 <p>{perturbed["changed_members"]} of {perturbed["compared_members"]} answers
-moved when the source description and enclosing-structure text were replaced
-({100.0 * perturbed["changed_share"]:.1f}%). {perturbed["reading"]}</p>
+changed when the source description and the enclosing-structure text were
+replaced with another physics group's ({100.0 * perturbed["changed_share"]:.1f}%), and {perturbed["decision_changed_members"]} of those changed decision too.
+{perturbed["reading"]}</p>
 
 <h2>Spend</h2>
-<p>USD {spend["spent_usd"]:.2f} spent beside a ceiling of
-USD {spend["ceiling_usd"]:.2f}. Within the ceiling:
-<strong>{spend["within_ceiling"]}</strong>.</p>
+<p>USD {spend["spent_usd"]:.2f} spent against a ceiling of USD
+{spend["ceiling_usd"]:.2f} ({spend["development_calls"]} development calls and
+{spend["held_out_generation_calls"]} held-out generation calls). Within the
+ceiling: <strong>{"yes" if spend["within_ceiling"] else "no"}</strong>.</p>
 <p>Records file <code>{document["records"]["file"]}</code>
 ({document["records"]["lines"]} lines). Packet
 <code>{document["packet"]["file"]}</code> ({document["packet"]["lines"]} lines),

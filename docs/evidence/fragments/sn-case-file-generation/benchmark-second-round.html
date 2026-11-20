@@ -27,7 +27,7 @@ opened until the adjudicator's verdicts are committed.</div>
 <h2>Arms and models</h2>
 <table>
 <tr><th>Arm</th><th>Structure</th><th>Model</th><th>Case file</th></tr>
-<tr><td>keep-or-repair/frontier</td><td>keep-or-repair</td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>full</td></tr><tr><td>keep-or-repair/local</td><td>keep-or-repair</td><td><code>local/deepseek-v4.1-flash</code></td><td>full</td></tr><tr><td>one-pass/frontier</td><td>one-pass</td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>full</td></tr><tr><td>incumbent</td><td>incumbent</td><td><code></code></td><td>full</td></tr><tr><td>perturbed/frontier</td><td>keep-or-repair</td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>perturbed</td></tr>
+<tr><td>keep-or-repair/frontier</td><td>keep-or-repair</td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>full</td></tr><tr><td>keep-or-repair/local</td><td>keep-or-repair</td><td><code>local/deepseek-v4.1-flash</code></td><td>full</td></tr><tr><td>one-pass/frontier</td><td>one-pass</td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>full</td></tr><tr><td>incumbent</td><td>incumbent</td><td><code>no call: the incumbent record as it stands</code></td><td>full</td></tr><tr><td>perturbed/frontier</td><td>keep-or-repair</td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>perturbed</td></tr>
 </table>
 <p>Frontier model: <code>openrouter/openai/gpt-6.1-sol</code>. Local model:
 <code>local/deepseek-v4.1-flash</code>.</p>
@@ -40,9 +40,9 @@ opened until the adjudicator's verdicts are committed.</div>
 development half. It is not a verdict and it says nothing about the held-out
 half.</figcaption></figure>
 <table>
-<tr><th>Version</th><th>Arm</th><th>Proxy right</th><th>Share [95%]</th>
-<th>Blocked</th></tr>
-<tr><td>v1</td><td>keep-or-repair/frontier</td><td>59 / 89</td><td>66.3% [56.0, 75.3]</td><td>12</td></tr><tr><td>v1</td><td>keep-or-repair/local</td><td>57 / 89</td><td>64.0% [53.7, 73.2]</td><td>3</td></tr><tr><td>v2</td><td>keep-or-repair/frontier</td><td>59 / 89</td><td>66.3% [56.0, 75.3]</td><td>4</td></tr><tr><td>v2</td><td>keep-or-repair/local</td><td>57 / 89</td><td>64.0% [53.7, 73.2]</td><td>1</td></tr><tr><td>v3</td><td>keep-or-repair/frontier</td><td>60 / 89</td><td>67.4% [57.1, 76.3]</td><td>6</td></tr><tr><td>v3</td><td>keep-or-repair/local</td><td>57 / 89</td><td>64.0% [53.7, 73.2]</td><td>5</td></tr>
+<tr><th>Version</th><th>Prompt hash</th><th>Arm</th><th>Proxy right</th>
+<th>Share [95%]</th><th>Blocked</th></tr>
+<tr><td>v1</td><td><code>a79991ed1758</code></td><td>keep-or-repair/frontier</td><td>59 / 89</td><td>66.3% [56.0, 75.3]</td><td>12</td></tr><tr><td>v1</td><td><code>a79991ed1758</code></td><td>keep-or-repair/local</td><td>57 / 89</td><td>64.0% [53.7, 73.2]</td><td>3</td></tr><tr><td>v2</td><td><code>a5dec95b62de</code></td><td>keep-or-repair/frontier</td><td>59 / 89</td><td>66.3% [56.0, 75.3]</td><td>4</td></tr><tr><td>v2</td><td><code>a5dec95b62de</code></td><td>keep-or-repair/local</td><td>57 / 89</td><td>64.0% [53.7, 73.2]</td><td>1</td></tr><tr><td>v3</td><td><code>8c0336eadd7b</code></td><td>keep-or-repair/frontier</td><td>60 / 89</td><td>67.4% [57.1, 76.3]</td><td>6</td></tr><tr><td>v3</td><td><code>8c0336eadd7b</code></td><td>keep-or-repair/local</td><td>57 / 89</td><td>64.0% [53.7, 73.2]</td><td>5</td></tr>
 </table>
 <table>
 <tr><th>Version</th><th>Stated detail dropped</th>
@@ -56,13 +56,15 @@ half.</figcaption></figure>
 
 <h2>Perturbed control</h2>
 <p>74 of 87 answers
-moved when the source description and enclosing-structure text were replaced
-(85.1%). At least half of the answers follow the source text the control replaced.</p>
+changed when the source description and the enclosing-structure text were
+replaced with another physics group's (85.1%), and 53 of those changed decision too.
+At least half of the answers follow the source text the control replaced.</p>
 
 <h2>Spend</h2>
-<p>USD 10.71 spent beside a ceiling of
-USD 30.00. Within the ceiling:
-<strong>True</strong>.</p>
+<p>USD 10.71 spent against a ceiling of USD
+30.00 (534 development calls and
+348 held-out generation calls). Within the
+ceiling: <strong>yes</strong>.</p>
 <p>Records file <code>benchmark-second-round-records.jsonl</code>
 (435 lines). Packet
 <code>benchmark-second-round-packet.jsonl</code> (255 lines),
