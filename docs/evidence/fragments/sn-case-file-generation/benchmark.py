@@ -2319,6 +2319,13 @@ def score_rows(
                 )
             except ValueError:
                 continue
+    member_verdicts: dict[str, dict[str, str]] = {}
+    for row in compare_rows:
+        member_verdicts.setdefault(row.member, {})[row.arm] = row.verdict
+    member_comparison = [
+        {"member": member, "arms": dict(sorted(arms_seen.items()))}
+        for member, arms_seen in sorted(member_verdicts.items())
+    ]
     undecided = sum(
         1
         for packet_id in key["packets"]
@@ -2335,6 +2342,7 @@ def score_rows(
         "means both. Group is not scored.",
         "arms": reports,
         "comparisons": comparisons,
+        "member_comparison": member_comparison,
     }
 
 
@@ -2448,6 +2456,9 @@ def score_self_test() -> list[str]:
         problems.append("score self-test: B both_right is not 0")
     if not scored["comparisons"]:
         problems.append("score self-test: no arm comparison was produced")
+    table = {entry["member"]: entry["arms"] for entry in scored["member_comparison"]}
+    if sorted(table) != ["m1", "m2"] or "A" not in table.get("m1", {}):
+        problems.append("score self-test: the member comparison is not per member")
     low, high = figures["A"]["both_interval"]
     if not (0.0 <= low <= 0.5 <= high <= 1.0):
         problems.append("score self-test: the interval does not bracket the share")
@@ -2850,7 +2861,11 @@ def build_second_document(
         "not_run": [
             {
                 "arm": "keep-or-repair/kimi",
-                "reason": "the Kimi endpoint did not answer",
+                "reason": (
+                    "no Kimi endpoint is configured in this environment: "
+                    "KIMI_BASE_URL is unset and the shared .env carries no "
+                    "such variable, so the arm was not asked"
+                ),
                 "command": KIMI_SECOND_COMMAND,
             }
         ],

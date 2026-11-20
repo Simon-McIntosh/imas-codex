@@ -1,6 +1,6 @@
 {
   "schema": "imas-codex.standard-name-record-benchmark/second-round",
-  "generated": "2026-11-20T09:34:56+00:00",
+  "generated": "2026-11-20T09:37:06+00:00",
   "seat": "Standard-name record generation, second round",
   "models": {
     "frontier": "openrouter/openai/gpt-6.1-sol",
@@ -477,7 +477,7 @@
   "not_run": [
     {
       "arm": "keep-or-repair/kimi",
-      "reason": "the Kimi endpoint did not answer",
+      "reason": "no Kimi endpoint is configured in this environment: KIMI_BASE_URL is unset and the shared .env carries no such variable, so the arm was not asked",
       "command": "KIMI_BASE_URL=\"${KIMI_BASE_URL:?set KIMI_BASE_URL to the B300 server /v1 root}\" uv run --no-sync python docs/evidence/fragments/sn-case-file-generation/benchmark.py --stage second-round"
     }
   ]
