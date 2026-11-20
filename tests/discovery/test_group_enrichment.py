@@ -499,20 +499,38 @@ async def test_review_failure_delivers_nothing_and_keeps_both_costs():
 
 
 
-def test_components_and_patterns_without_linked_context_are_awaiting():
+def test_awaiting_and_failed_groups_are_counted_from_their_own_attempts():
+    """Awaiting is not the complement of described: a failed attempt is third."""
+    described = member()
     absent = member(
         id="demo:signal:3",
         context_state="absent",
         component="demo:plant_component:DEMO-UNIT:QAZ0002",
     )
-    cohort = plan([member(), absent])
+    unattempted_component = "demo:plant_component:DEMO-UNIT:QAZ0002"
+    failed_component = "demo:plant_component:DEMO-UNIT:QAZ0003"
+    failed_member = member(
+        id="demo:signal:4",
+        component=failed_component,
+        field_code="FLOW",
+    )
+    failed_pattern = "demo:archive_field_pattern:other"
+    cohort = plan([described, absent, failed_member])
+    cohort.components[failed_component] = GroupRequest(
+        group_id=failed_component, kind="component", context=("c",)
+    )
+    cohort.patterns[failed_pattern] = GroupRequest(
+        group_id=failed_pattern, kind="field_pattern", context=("d",)
+    )
     cohort.all_components = {
-        COMPONENT: [member()],
-        "demo:plant_component:DEMO-UNIT:QAZ0002": [absent],
+        COMPONENT: [described],
+        unattempted_component: [absent],
+        failed_component: [failed_member],
     }
     cohort.all_patterns = {
         COMPONENT: PATTERN,
-        "demo:plant_component:DEMO-UNIT:QAZ0002": "demo:archive_field_pattern:other",
+        unattempted_component: "demo:archive_field_pattern:absent",
+        failed_component: failed_pattern,
     }
     composed = compose_plan(
         cohort,
@@ -520,15 +538,18 @@ def test_components_and_patterns_without_linked_context_are_awaiting():
         {PATTERN: GroupOutcome(text="Pattern.", fields={"TEMP": "temperature"})},
     )
     summary = summarise(cohort, composed)
-    assert summary["components_total"] == 2
+    assert summary["components_total"] == 3
     assert summary["components_described"] == 1
+    assert summary["components_failed"] == 1
     assert summary["components_awaiting_context"] == 1
-    assert summary["components_failed"] == 0
-    assert summary["patterns_total"] == 2
+    assert summary["patterns_total"] == 3
     assert summary["patterns_described"] == 1
+    assert summary["patterns_failed"] == 1
     assert summary["patterns_awaiting_context"] == 1
-    assert summary["patterns_failed"] == 0
-
+    assert summary["signals_described"] == 1
+    assert summary["signals_failed"] == 1
+    assert summary["signals_awaiting_context"] == 1
+    assert summary["signals_sum"] == summary["signals_total"] == 3
 
 
 @pytest.mark.asyncio
