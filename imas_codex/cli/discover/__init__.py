@@ -362,6 +362,54 @@ def discover_seed(facility: str, path: tuple[str, ...]) -> None:
 
 
 # =============================================================================
+# Group Enrichment Command
+# =============================================================================
+
+
+@discover.command("group-enrich")
+@click.argument("facility")
+@click.option(
+    "--system",
+    help="Control-system prefix of the plant system, recorded in the report only.",
+)
+@click.option("--max-workers", type=int, default=8, help="Concurrent group calls.")
+@click.option("--dry-run", is_flag=True, help="Count the groups without calling.")
+def discover_group_enrich(
+    facility: str, system: str | None, max_workers: int, dry_run: bool
+) -> None:
+    """Describe archive component groups and compose their member descriptions."""
+    import asyncio
+
+    from imas_codex.discovery.signals.group_enrichment import enrich_pilot_groups
+
+    try:
+        result = asyncio.run(
+            enrich_pilot_groups(
+                facility=facility,
+                system=system,
+                max_workers=max_workers,
+                dry_run=dry_run,
+            )
+        )
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        raise SystemExit(1) from e
+    if result.get("dry_run"):
+        click.echo(
+            f"{result['signals_total']} signals, {result['components_total']} "
+            f"components, {result['patterns_total']} field patterns (dry run)"
+        )
+        return
+    click.echo(
+        f"described {result['signals_described']} signals, "
+        f"{result['components_described']} components, "
+        f"{result['patterns_described']} patterns in {result['calls']} calls "
+        f"(${result['cost_usd']:.4f}); awaiting context "
+        f"{result['signals_awaiting_context']}, failed {result['signals_failed']}"
+    )
+
+
+# =============================================================================
 # Inspect Command
 # =============================================================================
 

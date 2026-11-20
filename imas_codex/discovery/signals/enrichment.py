@@ -130,6 +130,25 @@ class DescriptionReview(BaseModel):
     results: list[ReviewedDescription]
 
 
+class GroupStatement(BaseModel):
+    """One statement about a group, with the supplied items supporting it."""
+
+    text: str
+    context_items: list[str] = Field(default_factory=list)
+
+
+class GroupDescription(BaseModel):
+    """One component or field-pattern description and its per-field meanings."""
+
+    group_id: str
+    statements: list[GroupStatement] = Field(default_factory=list)
+    fields: dict[str, str] = Field(default_factory=dict)
+
+
+class GroupDescriptionBatch(BaseModel):
+    results: list[GroupDescription] = Field(default_factory=list)
+
+
 class GroundedEnrichmentBatch(SignalEnrichmentBatch):
     """Counts accompany the result without becoming graph properties."""
 
