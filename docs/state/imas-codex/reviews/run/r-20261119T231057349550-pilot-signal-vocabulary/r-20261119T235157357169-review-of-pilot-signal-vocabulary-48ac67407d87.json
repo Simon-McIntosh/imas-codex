@@ -9,6 +9,13 @@
     "imas_codex/graph/domain_queries.py:117 signal_vector_search_block"
   ],
   "completed_at": "2026-11-19T23:53:14.928Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "repair-of-pilot-signal-vocabulary-48ac67407d87",
+      "recorded_at": "2026-11-20T00:23:20.313898+00:00"
+    }
+  },
   "dispatched_at": "2026-11-19T23:53:01Z",
   "finding_dispositions": {
     "0": {
