@@ -35,6 +35,16 @@
       "note": "An omitted role the vocabulary decided now makes a description partly right, as for quantity and unit.",
       "reason": "",
       "when": "2026-11-20T02:00:30.268157+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0a2336458595297fb1ff9f6743750d8e6bd6c37d",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "A statement is wrong only when the specification contradicts it or when neither the specification nor the signal's recorded sources support it; a value the vocabulary decided counts as supported by its credited source.",
+      "reason": "",
+      "when": "2026-11-20T02:00:40.967900+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "An omitted role the vocabulary decided now makes a description partly right, as for quantity and unit.",
       "reason": "",
       "when": "2026-11-20T02:00:30.268157+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "0a2336458595297fb1ff9f6743750d8e6bd6c37d",
+      "commit_basis": "edit",
+      "note": "A statement is wrong only when the specification contradicts it or when neither the specification nor the signal's recorded sources support it; a value the vocabulary decided counts as supported by its credited source.",
+      "reason": "",
+      "when": "2026-11-20T02:00:40.967900+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261120T014942546710-plan-review-of-iter-signal-context-and-enrichment.json",
