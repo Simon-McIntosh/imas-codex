@@ -429,3 +429,35 @@ async def test_review_failure_delivers_nothing_and_keeps_both_costs():
     assert outcome.cost == pytest.approx(0.1)
     assert outcome.error is not None and outcome.error.startswith("Review failed:")
 
+
+
+def test_components_and_patterns_without_linked_context_are_awaiting():
+    absent = member(
+        id="demo:signal:3",
+        context_state="absent",
+        component="demo:plant_component:DEMO-UNIT:QAZ0002",
+    )
+    cohort = plan([member(), absent])
+    cohort.all_components = {
+        COMPONENT: [member()],
+        "demo:plant_component:DEMO-UNIT:QAZ0002": [absent],
+    }
+    cohort.all_patterns = {
+        COMPONENT: PATTERN,
+        "demo:plant_component:DEMO-UNIT:QAZ0002": "demo:archive_field_pattern:other",
+    }
+    composed = compose_plan(
+        cohort,
+        {COMPONENT: GroupOutcome(text="Component.")},
+        {PATTERN: GroupOutcome(text="Pattern.", fields={"TEMP": "temperature"})},
+    )
+    summary = summarise(cohort, composed)
+    assert summary["components_total"] == 2
+    assert summary["components_described"] == 1
+    assert summary["components_awaiting_context"] == 1
+    assert summary["components_failed"] == 0
+    assert summary["patterns_total"] == 2
+    assert summary["patterns_described"] == 1
+    assert summary["patterns_awaiting_context"] == 1
+    assert summary["patterns_failed"] == 0
+

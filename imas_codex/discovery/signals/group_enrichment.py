@@ -111,6 +111,13 @@ RETURN DISTINCT r.field_code AS row_field, r.description AS description,
 ORDER BY row_field, description
 """
 
+PILOT_COMPONENTS_QUERY = """
+MATCH (c:PlantComponent {facility_id: $facility})
+WHERE c.id IN $components
+OPTIONAL MATCH (c)-[:HAS_ARCHIVE_FIELD_PATTERN]->(p:ArchiveFieldPattern)
+RETURN c.id AS component, p.id AS pattern
+"""
+
 STATES_QUERY = """
 MATCH (s:FacilitySignal {facility_id: $facility})
 WHERE s.plant_context_state IS NOT NULL AND s.group_enrichment_state IS NOT NULL
@@ -176,6 +183,8 @@ class GroupPlan:
     component_pattern: dict[str, str]
     component_members: dict[str, list[PilotMember]]
     pattern_members: dict[str, list[PilotMember]]
+    all_components: dict[str, list[PilotMember]] = field(default_factory=dict)
+    all_patterns: dict[str, str] = field(default_factory=dict)
 
 
 def decisions(member: PilotMember) -> dict[str, str]:
@@ -410,9 +419,23 @@ def build_group_plan(graph, facility: str) -> GroupPlan:
         raise RuntimeError("Pilot cohort is empty; plant context was not imported")
     members = [PilotMember(**record) for record in records]
     component_members: dict[str, list[PilotMember]] = {}
+    all_components: dict[str, list[PilotMember]] = {}
     for member in members:
+        if member.component:
+            all_components.setdefault(member.component, []).append(member)
         if member.has_context and member.component:
             component_members.setdefault(member.component, []).append(member)
+    all_patterns: dict[str, str] = {}
+    component_ids = sorted(all_components)
+    for offset in range(0, len(component_ids), 500):
+        rows = graph.query(
+            PILOT_COMPONENTS_QUERY,
+            facility=facility,
+            components=component_ids[offset : offset + 500],
+        )
+        for row in rows:
+            if row["pattern"]:
+                all_patterns[row["component"]] = row["pattern"]
 
     components: dict[str, GroupRequest] = {}
     component_pattern: dict[str, str] = {}
@@ -470,6 +493,8 @@ def build_group_plan(graph, facility: str) -> GroupPlan:
         component_pattern=component_pattern,
         component_members=component_members,
         pattern_members=pattern_members,
+        all_components=all_components,
+        all_patterns=all_patterns,
     )
 
 
@@ -796,15 +821,19 @@ def _write_states(graph, facility: str, rows: Sequence[Mapping[str, Any]]) -> in
 
 def summarise(plan: GroupPlan, composed: ComposedPlan) -> dict[str, Any]:
     """Count every state so the three member counts sum to the pilot total."""
-    component_with_members = len(plan.components)
+    component_total = len(plan.all_components) or len(plan.components)
     component_described = sum(
         1 for state in composed.component_states.values() if state == DESCRIBED
     )
-    component_failed = component_with_members - component_described
-    pattern_total = len(plan.patterns)
+    component_attempted = len(plan.components)
+    component_failed = component_attempted - component_described
+    component_awaiting = component_total - component_attempted
+    pattern_total = len(set(plan.all_patterns.values())) or len(plan.patterns)
     pattern_described = sum(
         1 for state in composed.pattern_states.values() if state == DESCRIBED
     )
+    pattern_failed = len(plan.patterns) - pattern_described
+    pattern_awaiting = pattern_total - len(plan.patterns)
     values: dict[str, dict[str, int]] = {
         axis: dict.fromkeys(sorted(members), 0)
         for axis, members in VOCABULARY_MEMBERS.items()
@@ -832,14 +861,14 @@ def summarise(plan: GroupPlan, composed: ComposedPlan) -> dict[str, Any]:
         "signals_awaiting_context": awaiting,
         "signals_failed": failed,
         "signals_sum": described + awaiting + failed,
-        "components_total": component_with_members,
+        "components_total": component_total,
         "components_described": component_described,
-        "components_awaiting_context": 0,
+        "components_awaiting_context": component_awaiting,
         "components_failed": component_failed,
         "patterns_total": pattern_total,
         "patterns_described": pattern_described,
-        "patterns_awaiting_context": 0,
-        "patterns_failed": pattern_total - pattern_described,
+        "patterns_awaiting_context": pattern_awaiting,
+        "patterns_failed": pattern_failed,
         "calls": composed.calls,
         "cost_usd": composed.cost,
         "tokens": composed.tokens,
