@@ -1515,11 +1515,15 @@ PACKET_FIELDS = (
 PACKET_LEAK_TOKENS = (
     "keep-or-repair",
     "one-pass",
-    "perturbed",
-    "incumbent",
+    "perturbed/",
     "frontier",
     "kimi",
 )
+# The word "incumbent" is physics prose in a generated record ("the incumbent
+# describes ..."), so in the prose fields it identifies nothing. In a name or a
+# unit it would name a prior record, which is what the blind read must not see.
+PACKET_IDENTITY_FIELDS = ("packet_id", "name", "unit")
+PACKET_IDENTITY_LEAK_TOKENS = ("incumbent",)
 
 KEEP_OR_REPAIR_SYSTEM = (
     """\
@@ -2490,6 +2494,13 @@ def check_second_round(
                         f"packet line {line.get('packet_id', '?')} reveals "
                         f"{token!r} in {field!r}"
                     )
+            if field in PACKET_IDENTITY_FIELDS:
+                for token in PACKET_IDENTITY_LEAK_TOKENS:
+                    if token in lowered:
+                        problems.append(
+                            f"packet line {line.get('packet_id', '?')} names "
+                            f"{token!r} in {field!r}"
+                        )
 
     packet_ids = [line.get("packet_id") for line in packet]
     if len(set(packet_ids)) != len(packet_ids):
@@ -2710,6 +2721,23 @@ def arm_decision_counts(records: list[dict[str, Any]]) -> dict[str, Any]:
     return dict(sorted(counts.items()))
 
 
+def prose_incumbent_mentions(packet: list[dict[str, Any]]) -> int:
+    """Count packet lines whose generated prose says "incumbent".
+
+    The word is valid physics prose ("the incumbent describes ...") and does not
+    identify an arm, but the count is stated so a reader sees it rather than
+    having to take the blind read on trust.
+    """
+    count = 0
+    for line in packet:
+        prose = " ".join(
+            [line.get("definition") or "", line.get("documentation") or ""]
+        ).lower()
+        if "incumbent" in prose:
+            count += 1
+    return count
+
+
 def spend_report(records: list[dict[str, Any]]) -> dict[str, Any]:
     development = read_jsonl(SECOND_WORK) if SECOND_WORK.exists() else []
     spent = sum(float(row.get("cost_usd") or 0.0) for row in development)
@@ -2777,6 +2805,7 @@ def build_second_document(
             "fields": list(PACKET_FIELDS),
             "key": SECOND_KEY.name,
             "shuffled_by_seed": SECOND_SEED,
+            "prose_incumbent_mentions": prose_incumbent_mentions(packet),
         },
         "arms": [
             {"arm": name, "structure": structure, "model": model, "case": case}
