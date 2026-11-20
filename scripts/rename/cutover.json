@@ -2,6 +2,22 @@
   "version": 1,
   "inventory_source": "docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html",
   "note": "One step per surface of the consumer inventory. The tracked-tree rename is not a step here: it runs first (python -m scripts.rename apply) and this sequence covers everything the rename cannot reach by itself. Steps are ordered; each names what it changes, the check that proves it, and how it is undone.",
+  "checkout_directory": {
+    "path": "/home/ITER/mcintos/Code/imas-codex",
+    "moves_at_cutover": false,
+    "statement": "The checkout directory does not move at cutover. The repository and the import package are renamed in place, and the directory that holds them keeps its name and its absolute path, because the worktree root, every worktree's .env and .venv links, and the editable install all resolve through it. Every step that names the checkout (C0, C2, C5, C7) means this same directory. If the sequence ever needs it to move, that is its own step with its own check and its own undo, run after those consumers have been re-pointed.",
+    "consumers": [
+      "the worktree root",
+      "every worktree's .env and .venv links",
+      "the editable install"
+    ]
+  },
+  "tracked_rename": {
+    "command": "python -m scripts.rename apply",
+    "kept_list": "scripts/rename/kept_names.json",
+    "kept_scopes": ["historical-evidence", "figure-artifacts"],
+    "evidence_split": "docs/evidence keeps its data and prose bytes (.html, .json, .md) and the Python beside them is renamed like any other code, the same split made for docs/figures; the kept list is the authority for the split and this sequence only names it."
+  },
   "inventory": [
     {
       "id": "units",
@@ -138,7 +154,12 @@
       ],
       "disposition": "not measured",
       "step": "Record `git worktree list --porcelain`, `squeue -u $USER -h -o '%i|%j|%T|%M|%N'`, `scontrol show job` for each job, `systemctl --user list-units --all 'imas-codex*' 'reckon-watch-imas-codex*'` and the live pointer listing under `~/.config/reckon/crew/live/` filtered on project imas-codex. Resolve or carry every worktree that holds unmerged commits: list it, and for each either merge its commits or park them on a named branch before any path moves. Do not touch a retained worktree's files. Stop writers: no graph writer, no scheduler job using the shared environment, the graph stopped for C5/C7.",
-      "check": "Every retained worktree appears in the recorded list with a disposition (merged, carried, or abandoned with its commit sha named); the live pointer listing prints for project imas-codex; the scheduler listing shows no job whose working directory or command is the shared environment. The recorded list is committed with the cutover landing record.",
+      "queued_requests": {
+        "listing": "Read every pointer file under `~/.config/reckon/crew/live/*.json` whose top-level `project` is `imas-codex`, and list its `run_id`, `phase` and owning `session`. Take the requests whose phase is `queued` or `awaiting-upstream` (a `held` request names its `prior_phase`, and is treated as the phase it names) and group them by owner session. The listing is not the project's retained history: `~/.config/reckon/crew/run_store.db` holds that and it does not move.",
+        "rule": "Each owner drops its own queued and awaiting-upstream requests for the project before the tracked rename (C1) and re-dispatches them after C7 serves the new project key. A queued request stores the old project key, a base revision before the rename, and write paths under the old package name, so one admitted after C1 would build a pre-rename tree on top of the renamed one. Nobody else drops anyone's requests: the freeze lists them and each owner clears its own.",
+        "parked_worktree": "A retained worktree may be recorded as parked by its owner under a kept ref; it is then not carried across the cutover, and C7 re-attaches or drains it only if its owner later unparks it."
+      },
+      "check": "Every retained worktree appears in the recorded list with a disposition (merged, carried, or abandoned with its commit sha named); the live pointer listing prints for project imas-codex and names every queued and awaiting-upstream request with its owner session; each owner's drop of its own requests is recorded with the run ids it dropped, so an empty queued list is a recorded fact rather than a search that saw nothing; the scheduler listing shows no job whose working directory or command is the shared environment. The recorded list is committed with the cutover landing record.",
       "undo": "Nothing was changed: the step only records. Removing the freeze is restarting the writers, which each later step's check re-admits."
     },
     {
@@ -152,7 +173,7 @@
       ],
       "disposition": "renamed",
       "step": "On the primary branch at the quiet window, from the repository root: `python -m scripts.rename apply`, then `python -m scripts.rename check` (exit 0) and commit. The tracked change carries the distribution name, the import package, the [tool.iter-codex] settings table, the IMAS_CODEX->ITER_CODEX environment prefix, the root path constants the code resolves, unit and container names as tracked files declare them, and both tracked MCP client files (.mcp.json, .vscode/mcp.json: key iter-cx, project path and command renamed).",
-      "check": "`python -m scripts.rename check` exits 0 and reports every old-name hit under a kept path; `python -m scripts.rename cutover` reports zero unaccounted surfaces; a second `apply` reports zero changed files; `git grep -n imas_codex -- ':!docs/evidence' ':!docs/state' and the rest of the kept list` returns only kept entries. NOTE: use `git grep` on the kept list, never a bare prefix replacement, so imas_standard_names and imas-dd are not casualties.; every dotted identifier that appears in a kept path (`<old name>.<artifact>`, a stored schema or receipt identity) is unchanged in the code that reads it",
+      "check": "`python -m scripts.rename check` exits 0 and reports every old-name hit under a kept path; `python -m scripts.rename cutover` reports zero unaccounted surfaces; a second `apply` reports zero changed files; `git grep -n imas_codex -- <each kept path from scripts/rename/kept_names.json>` returns only kept entries, and `docs/evidence` is not excluded wholesale - its .html, .json and .md bytes are kept while its Python is renamed, so a bare ':!docs/evidence' would hide exactly the files this check must see. NOTE: use `git grep` on the kept list, never a bare prefix replacement, so imas_standard_names and imas-dd are not casualties.; every dotted identifier that appears in a kept path (`<old name>.<artifact>`, a stored schema or receipt identity) is unchanged in the code that reads it",
       "undo": "`git revert` the single rename commit on the primary branch; the tree returns byte-identically because the tool only rewrites text and moves paths it names in its report."
     },
     {
@@ -198,7 +219,7 @@
         "mcp"
       ],
       "disposition": "renamed",
-      "step": "In `~/.codex/config.toml` replace the `imas-cx` server key with `iter-cx`, its project path with the renamed checkout and its command with `iter-codex`. In `~/.claude.json` keep both `imas-dd` definitions unchanged and replace only a full-server `imas-cx` definition if one is present. Both tracked files (.mcp.json, .vscode/mcp.json) already moved in C1. Take a copy of each external file before editing.",
+      "step": "In `~/.codex/config.toml` replace the `imas-cx` server key with `iter-cx`, its project path with the same checkout directory (which does not move at cutover, see `checkout_directory`) and its command with `iter-codex`. In `~/.claude.json` keep both `imas-dd` definitions unchanged and replace only a full-server `imas-cx` definition if one is present. Both tracked files (.mcp.json, .vscode/mcp.json) already moved in C1. Take a copy of each external file before editing.",
       "check": "Each client's own listing (e.g. `codex mcp list`) shows `iter-cx` and `imas-dd`; a reconnected client lists the full server's tools; the DD-only definition still resolves to the same endpoint. `rg --hidden 'imas-cx' ~/.codex/config.toml ~/.claude.json` returns nothing.",
       "undo": "Restore the copied files and reconnect; server and client are independent, so no server state changed."
     },
@@ -209,7 +230,7 @@
         "graph"
       ],
       "disposition": "migrated",
-      "step": "Query the two `DataAccess.connection_template` values that embed `from imas_codex.remote.executor import run_python_script` (exact node ids in the inventory receipt) and rewrite only the import module to `iter_codex.remote.executor`, after reading the current value into the cutover receipt. Do not touch the six FacilityPath checkout descriptions or the two ancestor listings: they describe a discovery provenance at the observed path, and the checkout keeps its directory name through a repository rename, so re-discover rather than rewrite them if it moves. Leave the 17 `CHECKED_WITH.error` values alone.",
+      "step": "Query the two `DataAccess.connection_template` values that embed `from imas_codex.remote.executor import run_python_script` (exact node ids in the inventory receipt) and rewrite only the import module to `iter_codex.remote.executor`, after reading the current value into the cutover receipt. Do not touch the six FacilityPath checkout descriptions or the two ancestor listings: they describe a discovery provenance at the observed path, and the checkout directory does not move at cutover (`checkout_directory`), so the descriptions stay true; re-discover rather than rewrite them if a later step ever moves it. Leave the 17 `CHECKED_WITH.error` values alone.",
       "check": "A bounded read (`MATCH (d:DataAccess) WHERE d.connection_template CONTAINS 'imas_codex' RETURN count(d)`) returns 0, and the same query for `iter_codex` returns the same two nodes; `MATCH (n)-[r:CHECKED_WITH]->() WHERE r.error CONTAINS 'imas-codex' RETURN count(r)` still returns 17. The templates execute on a bounded trial read from a compute node.",
       "undo": "Write the two captured pre-cutover template strings back by node id; the error evidence was never changed."
     },
@@ -223,7 +244,12 @@
       ],
       "disposition": "migrated",
       "step": "Back up `~/.config/reckon/mounts.json`, then replace the project key `imas-codex` with `iter-codex`. Update `docs/state/imas-codex` to `docs/state/iter-codex` (`git mv`) and rewrite only the live project keys: `project`/`slug` in project.json, index.json and crew.json. Leave `runs/` and `reviews/` payloads byte-identical: they are the preserved history. Re-register the project with reckon (`reckon mount`/`crew` according to its CLI) and let new run ids register under the new key; the retained worktrees from C0 are re-attached or drained under the new key before this step.",
-      "check": "`reckon` lists the project under `iter-codex` and the run history count is at least the recorded 1109 plus runs made since (a drop is a failure); `python -m scripts.rename check` still exits 0 and reports `docs/state` under its kept entry; opening one historical review by id resolves.",
+      "check": "`reckon` lists the project under `iter-codex` and the run history count is at least the recorded 1109 plus runs made since (a drop is a failure); the plan slugs and run ids are unchanged across the step: the `slug` values in project.json and index.json, and the run-id directory names under `docs/state/<project>/runs/`, compare equal, one for one, to the listing taken immediately before the step, so only the project key and the state directory's name moved and no record was re-registered under a new id; `python -m scripts.rename check` still exits 0 and reports `docs/state` under its kept entry; opening one historical review by id resolves.",
+      "preserved_ids": {
+        "plans": "The `slug` values in docs/state/<project>/project.json and index.json, and the plan ids they name, read once before the step and again after it.",
+        "runs": "The run-id directory names under docs/state/<project>/runs/ read before and after the step; new runs made during the step are allowed only if each one names a run that did not exist before, taken from the run store rather than assumed.",
+        "rule": "The two listings compare equal, one for one: a plan slug or a run id that changes means a record was re-registered under a new identity, which is a failure of the step rather than a migration. New run ids minted after the key moved are listed beside the comparison, never counted into it."
+      },
       "undo": "Restore mounts.json from the backup and `git mv docs/state/iter-codex docs/state/imas-codex` with the key lines reverted; reckon reads its file at start, so a restart restores the old key."
     },
     {
@@ -237,7 +263,7 @@
         "node-briefs"
       ],
       "disposition": "migrated",
-      "step": "Rename the fork `Simon-McIntosh/imas-codex` and, once the organisation's agreement is recorded, `iterorganization/imas-codex` to `iter-codex`; update both remotes and the badges and URLs the tracked files carry. GitHub redirects the old address, but container packages do not move: publish `iter-codex-graph`, `iter-codex-graph-*` and the application image under the new owner names and keep every published old tag. Build the separate Azure image as `iterorganization/iter-codex` and confirm the workflow derives the GHCR name from the repository. Node briefs on the primary branch: those under docs/evidence are kept bytes and are not rewritten; a re-dispatched brief is regenerated by its owner from the current template, which C1 renamed.",
+      "step": "Rename the fork `Simon-McIntosh/imas-codex` and, once the organisation's agreement is recorded, `iterorganization/imas-codex` to `iter-codex`; update both remotes and the badges and URLs the tracked files carry. GitHub redirects the old address, but container packages do not move: publish `iter-codex-graph`, `iter-codex-graph-*` and the application image under the new owner names and keep every published old tag. Build the separate Azure image as `iterorganization/iter-codex` and confirm the workflow derives the GHCR name from the repository. Node briefs on the primary branch: those under docs/evidence keep their .html, .json and .md bytes, and the Python beside them is renamed with the rest of the code by C1; a re-dispatched brief is regenerated by its owner from the current template, which C1 renamed.",
       "check": "`git remote -v` shows the new URLs; `gh repo view` resolves both; `docker pull ghcr.io/<owner>/iter-codex-graph:<tag>` succeeds and the graph manifest records the new image; the old package identities still list their published tags; the Azure count is re-measured with `az` present or recorded as still not measured, never as zero.",
       "undo": "Rename the repositories back (redirects follow), restore the remotes, and leave the new images in place: neither rename destroys old package identities or tags."
     },
@@ -247,10 +273,17 @@
       "surfaces": [
         "gate-scripts"
       ],
-      "disposition": "renamed",
-      "step": "Enumerate `~/.cache/imas-codex-live-rewrite/`. Copy the directory, then run the rename's replacement rules over its text scripts because each one writes the checkout path or the package name and would otherwise drive a stale interpreter: `python -c` with scripts.rename.rules' replacement table and path tokens, restricted to that directory. A script the owning session still needs live is regenerated by its owner from the current brief instead; record per file which one applies. The directory name itself moves to `~/.cache/iter-codex-live-rewrite/` only when no saved script is still referenced by path.",
-      "check": "`rg -l 'imas[-_]codex' ~/.cache/iter-codex-live-rewrite` is empty except files recorded as owner-regenerated, and each recorded file is listed with its reason in the cutover receipt; running one rewritten script that used to fail resolves the new interpreter.",
-      "undo": "Restore the copied directory; nothing outside that directory changed."
+      "disposition": "kept",
+      "step": "`~/.cache/imas-codex-live-rewrite/` keeps its name and its bytes. Landed run records cite it by absolute path, so it is evidence of those runs, not a product surface: nothing rewrites, copies over, moves or deletes it, and no step renames it to `~/.cache/iter-codex-live-rewrite/`. Record its file listing and a per-file digest as the step's receipt. A script whose owning session still needs it live is regenerated by that owner, from the current brief and the current tool, in a new directory the owner names; the record says per file whether it was kept as evidence or regenerated, and where the regenerated copy lives.",
+      "kept_directory": {
+        "path": "~/.cache/imas-codex-live-rewrite",
+        "disposition": "kept",
+        "citation": "Landed run records cite this directory by absolute path, so its name and bytes are the record of those runs.",
+        "regenerated_by": "the owning session, in a new directory it names and records; a regenerated script is a new file, never an edit of the kept one.",
+        "rule": "Nothing rewrites, moves, copies over or deletes this directory."
+      },
+      "check": "`find ~/.cache/imas-codex-live-rewrite -type f` and its digest listing equal the pre-step receipt exactly, so every kept script is still at its cited path with its cited bytes; each script an owner still needs live is recorded with its regenerated path under a new directory and that path exists; `rg -l 'imas[-_]codex' ~/.cache/iter-codex-live-rewrite` is never run, because this step creates no such directory and a copy under the new name would be a rewrite of the evidence.",
+      "undo": "Nothing outside the new regeneration directories changed; removing a regenerated script returns the owner to the kept one at its cited path."
     },
     {
       "id": "C10-zero-consumer-check",

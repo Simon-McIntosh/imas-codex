@@ -59,10 +59,34 @@ class ApplyReport:
         return data
 
 
+def _kept_directories(tree: Path, kept: KeptList) -> set[str]:
+    """Directories that hold a file the kept list covers, as relative paths.
+
+    A kept surface is a set of file bytes, and a subtree's directory names are
+    part of where those bytes live.  `docs/evidence` now keeps only its data and
+    prose, so a directory under it is covered by no include pattern and would
+    otherwise be renamed with the code beside it - moving the kept bytes and
+    breaking the receipt that says they survived untouched.
+    """
+    directories: set[str] = set()
+    for path in tree.rglob("*"):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(tree).as_posix()
+        if kept.covering(rel) is None:
+            continue
+        parent = Path(rel).parent.as_posix()
+        while parent not in (".", ""):
+            directories.add(parent)
+            parent = Path(parent).parent.as_posix()
+    return directories
+
+
 def _rename_pass(tree: Path, kept: KeptList) -> list[dict[str, str]]:
     """Move every file and directory whose basename carries the project name."""
     moved: list[dict[str, str]] = []
     while True:
+        held = _kept_directories(tree, kept)
         candidates = [
             path
             for path in tree.rglob("*")
@@ -75,7 +99,7 @@ def _rename_pass(tree: Path, kept: KeptList) -> list[dict[str, str]]:
         progressed = False
         for path in candidates:
             rel = path.relative_to(tree).as_posix()
-            if kept.covering(rel) is not None or not path.exists():
+            if rel in held or kept.covering(rel) is not None or not path.exists():
                 continue
             new_name = path.name
             for token, replacement in PATH_RENAMES.items():

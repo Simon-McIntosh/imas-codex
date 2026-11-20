@@ -6,10 +6,11 @@
     {
       "id": "historical-evidence",
       "path": "docs/evidence",
-      "surface": "Historical evidence records: landing fragments, inventory, prototype reports",
+      "include": ["*.html", "*.json", "*.md"],
+      "surface": "Historical evidence data and prose: landing fragments, inventory, prototype reports",
       "disposition": "kept",
-      "reason": "The plan requires historical evidence to keep its bytes; these fragments are the measured record the plan and its reviews cite, and rewriting them would restate measurements as what they were not.",
-      "min_hits": 1
+      "reason": "The plan requires historical evidence to keep its bytes; these fragments are the measured record the plan and its reviews cite, and rewriting them would restate measurements as what they were not. Only the .html, .json and .md bytes are kept: the Python beside them is live code that tests and plan gates load by path, so it is renamed like any other code. This is the split already made for docs/figures, where the rendered figure and its raw measurement JSON are kept and the figure script is renamed.",
+      "min_hits": 6000
     },
     {
       "id": "plan-records",
