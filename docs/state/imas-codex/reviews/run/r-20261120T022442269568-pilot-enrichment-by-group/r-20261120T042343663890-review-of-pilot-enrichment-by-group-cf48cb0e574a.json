@@ -1,0 +1,129 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/cli/discover/__init__.py:discover_group_enrich"
+  ],
+  "completed_at": "2026-11-20T04:24:42.572Z",
+  "dispatched_at": "2026-11-20T04:24:23Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/group_enrichment.py",
+      "line": "686",
+      "severity": "non-blocking",
+      "text": "non-blocking: describe_group and _describe_once re-implement the draft-to-citation-filter-to-review loop, its draft_index validation and its cost/token accumulation that enrich_signal_batch and recovered_call at imas_codex/discovery/signals/enrichment.py:280 and :196 already own, and fork their retry behaviour - group_enrichment.py:554 returns a structured-validation ValueError as a failed group where recovered_call retries it, so the two enrichment paths now disagree about the same failure class."
+    },
+    {
+      "file": "tests/graph/test_group_enrichment_statements.py",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: STATEMENTS covers only five of the statements the module issues, omitting PILOT_COMPONENTS_QUERY at group_enrichment.py:114 and the three write statements at :804, :821 and :896, so the evidence fragment's claim at docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-enrichment-by-group.html:35 that every statement the module issues explains against the live graph is not what the gate measures and a typo in the write path would first surface in a live run."
+    },
+    {
+      "file": "imas_codex/discovery/signals/group_enrichment.py",
+      "line": "121",
+      "severity": "non-blocking",
+      "text": "non-blocking: STATES_QUERY is defined and never referenced anywhere in imas_codex or tests (git grep at cf48cb0e finds only the definition), so it is dead code carrying an unverified statement the module never issues."
+    },
+    {
+      "file": "tests/llm/test_prompt_schema_coverage.py",
+      "line": "185",
+      "severity": "non-blocking",
+      "text": "non-blocking: _carries_generated_example drops every prompt templating output_schema out of both the parametrized verbatim guard and the walk's pair map, removing the schema-pairing assertion for signals/enrichment, signals/enrichment_grounding and signals/enrichment_output with no replacement, and it turns the base-sha KeyError DescriptionReview failure green instead of diagnosing the model-name mapping that produced it."
+    },
+    {
+      "file": "tests/discovery/test_group_enrichment.py",
+      "line": "526",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert summary[\"components_failed\"] == 0 (and the patterns_failed == 0 at :530) states an arithmetic identity of summarise, which computes component_failed as attempted minus described at group_enrichment.py:923, so given the described counts asserted two lines above it can never fail and it adds no guard over the awaiting-count logic the commit 81ce0041 introduced."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-enrichment-by-group.html",
+      "line": "40",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment calls the token measurement an identical full pass, but logs/token-measure.json records delivered 84 of 85 groups while the writing run reported 0 failed groups, so the extrapolated ~210,000 tokens rest on a pass that differed from the run it stands in for."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read all eight commits against 36c1ff753: 6cc9f595d adds the module, prompt, schema enum, CLI command and 331 test lines, 1b624ceb adds the review pass and the graph statement test, 81ce0041 adds the awaiting counts, e11a8d04 returns the group id and cites shared fields, 1fb8a5bf adds the re-ask, c1269f2d changes the prompt-coverage guard, 7d0cb082 adds tokens to the CLI line and cf48cb0e5 adds the evidence fragment; the same nine files and no others.",
+    "done_when": "the done_when (same file:70) asks for written counts, call count and cost, sums to the pilot total, vocabulary counts with no invalid value, a 40-signal hand reading with digest at a bar of at most 2 wrong and 32 right, a recorded propagation search and a catalogue projection; the reviewed manifest's landing block carries every number (190/1,576/0 signals, 74/509/0 components, 11/97/0 patterns, 170 calls, $0.0000, 180/188/16 vocabulary, 38 right and 2 wrong, digest f5117f89, 31,245 groups and about 77M tokens), and logs/group-enrich.log prints the same 190/74/11/170/0, while the suite gate in logs/discovery-suite.log fixes the composition rule only and does not assert the pilot counts themselves.",
+    "goal": "plan section 6 (docs/plans/iter-signal-context-and-enrichment.html:69) asks for one component description, one field-pattern description and one composed member description per pilot signal with linked context; imas_codex/discovery/signals/group_enrichment.py:245 compose_plan and :204 compose_member_description compose exactly that, the landing record reports 74 components, 11 patterns and 190 of 190 contextualised members with 0 failed, and the vocabulary is stated only where decisions() at :191 finds state \"decided\" and a member value.",
+    "manifest": "the reviewed manifest.md reports status complete, eight commit shas, nine changed paths, a landing block with the counts and the hand reading, gate results (tests/discovery 2,452 passed, graph statements 6 passed, group suite 19 passed, prompt coverage 1 pre-existing failure), a negative control with a log and an outside_scope note; it carries no baseline_suite/after_suite JSON keys, so the added-failure derivation here is read from the arms' own logs and from the base-sha reproduction it records (stream.jsonl, TMPDIR/base-check: 2 failed, 5 passed there).",
+    "write_paths": "the declared set is imas_codex/discovery/signals, imas_codex/discovery/base, imas_codex/llm/prompts, imas_codex/schemas/facility.yaml, imas_codex/cli, tests/discovery, tests/llm, tests/graph, the pilot fragment html and its figures directory; all nine paths in 36c1ff75..cf48cb0e are inside that set and no path outside it changed."
+  },
+  "justifications": {
+    "durability": "logs/negative-control.log shows test_component_failure_fails_its_members_without_a_description failing (EXIT=1, KeyError) with the guard disabled while logs/discovery-suite.log shows 2,452 passed with it restored, but tests/discovery/test_group_enrichment.py:526 and :530 assert arithmetic identities that cannot fail.",
+    "evidence": "the landing block of the reviewed manifest.md and logs/group-enrich.log carry the written counts, calls and cost that the done_when asks for, but the pilot counts themselves come from a live run and a hand reading recorded in prose, not from any gate the suite runs.",
+    "fit": "the module follows the surrounding dataclass and module-level-Cypher idiom of imas_codex/discovery/signals/enrichment.py:105-148, but it inlines three statements at group_enrichment.py:804, :821 and :896 instead of the constant form its own file uses, and leaves STATES_QUERY at :121 unused.",
+    "goal_fidelity": "imas_codex/discovery/signals/group_enrichment.py:245 decides every member's state and :204 composes its text from both group descriptions plus only decided vocabulary values, matching docs/plans/iter-signal-context-and-enrichment.html:69.",
+    "reuse": "group_enrichment.py:686 describe_group and :527 _describe_once re-implement the draft, citation filter, review pass and cost accumulation that imas_codex/discovery/signals/enrichment.py:280 enrich_signal_batch and :196 recovered_call already own, and diverge from them on validation retry.",
+    "scope_discipline": "every path in 36c1ff75..cf48cb0e is inside the declared set, though tests/llm/test_prompt_schema_coverage.py:185 changes a shared guard for a base-sha failure the goal did not ask about."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: plan section 6 (docs/plans/iter-signal-context-and-enrichment.html:69) asks for one component description, one field-pattern description and one composed member description per pilot signal with linked context; imas_codex/discovery/signals/group_enrichment.py:245 compose_plan and :204 compose_member_description compose exactly that, the landing record reports 74 components, 11 patterns and 190 of 190 contextualised members with 0 failed, and the vocabulary is stated only where decisions() at :191 finds state \"decided\" and a member value.\nVERDICT done_when: the done_when (same file:70) asks for written counts, call count and cost, sums to the pilot total, vocabulary counts with no invalid value, a 40-signal hand reading with digest at a bar of at most 2 wrong and 32 right, a recorded propagation search and a catalogue projection; the reviewed manifest's landing block carries every number (190/1,576/0 signals, 74/509/0 components, 11/97/0 patterns, 170 calls, $0.0000, 180/188/16 vocabulary, 38 right and 2 wrong, digest f5117f89, 31,245 groups and about 77M tokens), and logs/group-enrich.log prints the same 190/74/11/170/0, while the suite gate in logs/discovery-suite.log fixes the composition rule only and does not assert the pilot counts themselves.\nVERDICT write_paths: the declared set is imas_codex/discovery/signals, imas_codex/discovery/base, imas_codex/llm/prompts, imas_codex/schemas/facility.yaml, imas_codex/cli, tests/discovery, tests/llm, tests/graph, the pilot fragment html and its figures directory; all nine paths in 36c1ff75..cf48cb0e are inside that set and no path outside it changed.\nVERDICT manifest: the reviewed manifest.md reports status complete, eight commit shas, nine changed paths, a landing block with the counts and the hand reading, gate results (tests/discovery 2,452 passed, graph statements 6 passed, group suite 19 passed, prompt coverage 1 pre-existing failure), a negative control with a log and an outside_scope note; it carries no baseline_suite/after_suite JSON keys, so the added-failure derivation here is read from the arms' own logs and from the base-sha reproduction it records (stream.jsonl, TMPDIR/base-check: 2 failed, 5 passed there).\nVERDICT diff: read all eight commits against 36c1ff753: 6cc9f595d adds the module, prompt, schema enum, CLI command and 331 test lines, 1b624ceb adds the review pass and the graph statement test, 81ce0041 adds the awaiting counts, e11a8d04 returns the group id and cites shared fields, 1fb8a5bf adds the re-ask, c1269f2d changes the prompt-coverage guard, 7d0cb082 adds tokens to the CLI line and cf48cb0e5 adds the evidence fragment; the same nine files and no others.\nCALL_SITES: imas_codex/cli/discover/__init__.py:discover_group_enrich\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/group_enrichment.py:245 decides every member's state and :204 composes its text from both group descriptions plus only decided vocabulary values, matching docs/plans/iter-signal-context-and-enrichment.html:69.\nSCORE evidence: 15\nJUSTIFICATION evidence: the landing block of the reviewed manifest.md and logs/group-enrich.log carry the written counts, calls and cost that the done_when asks for, but the pilot counts themselves come from a live run and a hand reading recorded in prose, not from any gate the suite runs.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every path in 36c1ff75..cf48cb0e is inside the declared set, though tests/llm/test_prompt_schema_coverage.py:185 changes a shared guard for a base-sha failure the goal did not ask about.\nSCORE durability: 16\nJUSTIFICATION durability: logs/negative-control.log shows test_component_failure_fails_its_members_without_a_description failing (EXIT=1, KeyError) with the guard disabled while logs/discovery-suite.log shows 2,452 passed with it restored, but tests/discovery/test_group_enrichment.py:526 and :530 assert arithmetic identities that cannot fail.\nSCORE fit: 15\nJUSTIFICATION fit: the module follows the surrounding dataclass and module-level-Cypher idiom of imas_codex/discovery/signals/enrichment.py:105-148, but it inlines three statements at group_enrichment.py:804, :821 and :896 instead of the constant form its own file uses, and leaves STATES_QUERY at :121 unused.\nSCORE reuse: 5\nJUSTIFICATION reuse: group_enrichment.py:686 describe_group and :527 _describe_once re-implement the draft, citation filter, review pass and cost accumulation that imas_codex/discovery/signals/enrichment.py:280 enrich_signal_batch and :196 recovered_call already own, and diverge from them on validation retry.\nFINDING imas_codex/discovery/signals/group_enrichment.py:686 non-blocking: describe_group and _describe_once re-implement the draft-to-citation-filter-to-review loop, its draft_index validation and its cost/token accumulation that enrich_signal_batch and recovered_call at imas_codex/discovery/signals/enrichment.py:280 and :196 already own, and fork their retry behaviour - group_enrichment.py:554 returns a structured-validation ValueError as a failed group where recovered_call retries it, so the two enrichment paths now disagree about the same failure class.\nFINDING tests/graph/test_group_enrichment_statements.py:16 non-blocking: STATEMENTS covers only five of the statements the module issues, omitting PILOT_COMPONENTS_QUERY at group_enrichment.py:114 and the three write statements at :804, :821 and :896, so the evidence fragment's claim at docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-enrichment-by-group.html:35 that every statement the module issues explains against the live graph is not what the gate measures and a typo in the write path would first surface in a live run.\nFINDING imas_codex/discovery/signals/group_enrichment.py:121 non-blocking: STATES_QUERY is defined and never referenced anywhere in imas_codex or tests (git grep at cf48cb0e finds only the definition), so it is dead code carrying an unverified statement the module never issues.\nFINDING tests/llm/test_prompt_schema_coverage.py:185 non-blocking: _carries_generated_example drops every prompt templating output_schema out of both the parametrized verbatim guard and the walk's pair map, removing the schema-pairing assertion for signals/enrichment, signals/enrichment_grounding and signals/enrichment_output with no replacement, and it turns the base-sha KeyError DescriptionReview failure green instead of diagnosing the model-name mapping that produced it.\nFINDING tests/discovery/test_group_enrichment.py:526 non-blocking: assert summary[\"components_failed\"] == 0 (and the patterns_failed == 0 at :530) states an arithmetic identity of summarise, which computes component_failed as attempted minus described at group_enrichment.py:923, so given the described counts asserted two lines above it can never fail and it adds no guard over the awaiting-count logic the commit 81ce0041 introduced.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-enrichment-by-group.html:40 non-blocking: the fragment calls the token measurement an identical full pass, but logs/token-measure.json records delivered 84 of 85 groups while the writing run reported 0 failed groups, so the extrapolated ~210,000 tokens rest on a pass that differed from the run it stands in for.",
+  "review_method": "Read-only review of the reviewed brief, plan section 6, node.json, manifest, the eight commits against 36c1ff753, the gate and negative-control logs, the evidence fragment and the production call sites; no suite rerun and no mutation.",
+  "review_run_id": "r-20261120T042343663890-review-of-pilot-enrichment-by-group-cf48cb0e574a",
+  "reviewed_base_sha": "36c1ff753d8b976104874407e41ac09a8f00353b",
+  "reviewed_head_sha": "cf48cb0e574afc18a032bb2ddb4b25c8c9501bc5",
+  "reviewed_run_id": "r-20261120T022442269568-pilot-enrichment-by-group",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 17
+  },
+  "source_commits": [
+    "6cc9f595d8e4faef14ed53514cefa83325dff54b",
+    "1b624cebbf53c960508fe69fad6786c90852243a",
+    "81ce004147209414b0cb1a1605c8db5bd4c867c7",
+    "e11a8d048d305fe212106e7b43d807266eb47996",
+    "1fb8a5bf2fef46df3b73e12d0517c63a1fb67faf",
+    "c1269f2d43c2b13858c40ad3b8a1ffa695b2adf1",
+    "7d0cb08284adea293a3046f21fa17de29f2c0675",
+    "cf48cb0e574afc18a032bb2ddb4b25c8c9501bc5"
+  ],
+  "status": "parsed",
+  "suite_evidence": {
+    "added_failure_derivation": "The reviewed run's manifest carries no baseline_suite/after_suite JSON, so the pair was re-measured by this reviewer on the same single test file from the reviewed run's gate: base 36c1ff753 fails 2 (test_walk_reaches_expected_prompts, test_prompt_carries_generated_example_verbatim[signals/enrichment_grounding]) with 5 passed, head cf48cb0e fails 1 (test_walk_reaches_expected_prompts) with 5 passed; the set difference is empty, so added_failure_count is 0. The result agrees with the reviewed run's own record, whose base arm reported 2 failed, 5 passed and whose logs/prompt-coverage.log reports 1 failed, 5 passed.",
+    "after_arm": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261120T042343663890-review-of-pilot-enrichment-by-group-cf48cb0e574a/arms/head uv run --no-sync pytest tests/llm/test_prompt_schema_coverage.py -p no:cacheprovider",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T042343663890-review-of-pilot-enrichment-by-group-cf48cb0e574a/logs/head-prompt-coverage.log",
+      "revision": "cf48cb0e574afc18a032bb2ddb4b25c8c9501bc5"
+    },
+    "baseline_arm": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261120T042343663890-review-of-pilot-enrichment-by-group-cf48cb0e574a/arms/base uv run --no-sync pytest tests/llm/test_prompt_schema_coverage.py -p no:cacheprovider",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 2,
+      "failure_ids": [
+        "tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts",
+        "tests/llm/test_prompt_schema_coverage.py::test_prompt_carries_generated_example_verbatim[signals/enrichment_grounding]"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T042343663890-review-of-pilot-enrichment-by-group-cf48cb0e574a/logs/base-prompt-coverage.log",
+      "revision": "36c1ff753d8b976104874407e41ac09a8f00353b"
+    },
+    "reviewed_run_arms": [
+      "logs/discovery-suite.log 2452 passed EXIT=0 at cf48cb0e",
+      "logs/graph-gate.log 6 passed EXIT=0 at cf48cb0e",
+      "logs/gate-early.log 113 passed EXIT=0",
+      "logs/negative-control.log 1 failed 18 passed EXIT=1",
+      "logs/prompt-coverage.log 1 failed 5 passed EXIT=1 at cf48cb0e (revision header reads 'present')"
+    ]
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T04:32:40.274363+00:00",
+  "total": 87
+}
