@@ -59,6 +59,16 @@ enums:
       ungrouped:
         description: Nonconforming selector supplies no control-node or component membership
 
+  SignalGroupEnrichmentState:
+    description: Outcome of composing a signal description from its component and field pattern
+    permissible_values:
+      described:
+        description: A description was composed from a delivered component and pattern description
+      awaiting_context:
+        description: No linked source context exists, so the signal was not described from its name
+      failed:
+        description: Its component or pattern description was not delivered, so no composed description was written
+
   ArchiveMetadataState:
     description: Outcome of the archive type and full-attribute metadata requests
     permissible_values:
@@ -3428,6 +3438,13 @@ classes:
         description: Function-level variable group, separate from physical component membership
         annotations:
           relationship_type: IN_ARCHIVE_CONTROL_NODE
+      group_enrichment_state:
+        range: SignalGroupEnrichmentState
+        description: >-
+          Outcome of composing this signal's description from its component and
+          field-pattern description: described, awaiting_context or failed
+      group_enrichment_reason:
+        description: Why this signal's group enrichment reached its state
       sampling_mode:
         description: Archive-established sampling semantics, unknown when not established
         range: ArchiveSamplingMode

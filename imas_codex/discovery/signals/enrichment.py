@@ -1,5 +1,9 @@
 """Seat-scoped controls for signal enrichment requests and output contracts."""
 
+import asyncio
+from collections.abc import Mapping, Sequence
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from imas_codex.discovery.signals.models import (
@@ -130,6 +134,25 @@ class DescriptionReview(BaseModel):
     results: list[ReviewedDescription]
 
 
+class GroupStatement(BaseModel):
+    """One statement about a group, with the supplied items supporting it."""
+
+    text: str
+    context_items: list[str] = Field(default_factory=list)
+
+
+class GroupDescription(BaseModel):
+    """One component or field-pattern description and its per-field meanings."""
+
+    group_id: str
+    statements: list[GroupStatement] = Field(default_factory=list)
+    fields: dict[str, str] = Field(default_factory=dict)
+
+
+class GroupDescriptionBatch(BaseModel):
+    results: list[GroupDescription] = Field(default_factory=list)
+
+
 class GroundedEnrichmentBatch(SignalEnrichmentBatch):
     """Counts accompany the result without becoming graph properties."""
 
@@ -193,15 +216,34 @@ def supported_source_statement(text: str, source: dict) -> bool:
     return bool(label) and normalize(text) == normalize(label)
 
 
-async def recovered_call(call, *, attempts, validate, counters, counter, **kwargs):
-    """Retry only the failed structured call, retaining its consumed telemetry."""
+async def recovered_call(
+    call,
+    *,
+    attempts,
+    validate,
+    counters,
+    counter,
+    transient_attempts=0,
+    transient_delay=5.0,
+    **kwargs,
+):
+    """Retry the failed structured call, retaining its consumed telemetry.
+
+    A validation failure is re-asked with the fault named, up to ``attempts``
+    times. A transient fault that is not a validation failure is retried
+    ``transient_attempts`` times after ``transient_delay`` seconds, and is
+    counted under ``transient_counter`` when given, because nothing about the
+    request changed and the same messages are reissued.
+    """
     from imas_codex.discovery.base.llm import (
         LLMStructuredCallError,
         ProviderBudgetExhausted,
     )
 
     cost, tokens = 0.0, 0
-    for attempt in range(attempts + 1):
+    validation_attempt = 0
+    transient_left = max(0, transient_attempts)
+    while True:
         try:
             value, call_cost, call_tokens = await call(**kwargs)
             cost += call_cost
@@ -216,8 +258,9 @@ async def recovered_call(call, *, attempts, validate, counters, counter, **kwarg
                     raise
             cost += getattr(exc, "cost", 0) or 0
             tokens += getattr(exc, "tokens", 0) or 0
-            if attempt == attempts:
+            if validation_attempt == attempts:
                 raise
+            validation_attempt += 1
             counters[counter] += 1
             kwargs = dict(kwargs)
             kwargs["messages"] = [
@@ -229,6 +272,15 @@ async def recovered_call(call, *, attempts, validate, counters, counter, **kwarg
                     + "\nReturn corrected JSON for the same supplied signals and context.",
                 },
             ]
+        except Exception as exc:
+            cost += getattr(exc, "cost", 0) or 0
+            tokens += getattr(exc, "tokens", 0) or 0
+            if transient_left == 0:
+                raise
+            transient_left -= 1
+            if "transient_retries" in counters:
+                counters["transient_retries"] += 1
+            await asyncio.sleep(transient_delay)
 
 
 def context_items(text: str) -> dict[str, str]:
@@ -259,6 +311,97 @@ def filter_statements(
     return kept, len(statements) - len(kept)
 
 
+async def review_draft_statements(
+    *,
+    call,
+    model: str,
+    items: dict[str, str],
+    drafts: Mapping[int, Sequence[Any]],
+    attempts: int,
+    counters: dict[str, int],
+    counter: str,
+    review_kwargs: Mapping[str, Any],
+) -> tuple[dict[int, list[tuple[int, str]]], float, int, int]:
+    """Verify drafted statements against their own items and keep survivors.
+
+    One implementation serves every enrichment path: the review prompt carries
+    the response schema, the call is retried through :func:`recovered_call` on a
+    structured validation failure, and every kept statement must still cite an
+    item that was supplied for its draft. Returns each draft's kept statements
+    as ``(draft_index, text)`` pairs in draft order, plus the review's cost,
+    tokens and the number of statements the review or the citation filter
+    dropped.
+    """
+    import json
+
+    review_messages = [
+        {
+            "role": "system",
+            "content": render_prompt(
+                "signals/enrichment_review",
+                {"output_schema": DescriptionReview.model_json_schema()},
+            ),
+        },
+        {
+            "role": "user",
+            "content": json.dumps(
+                {
+                    "context_items": items,
+                    "drafts": {
+                        str(index): [
+                            statement.model_dump()
+                            if hasattr(statement, "model_dump")
+                            else statement
+                            for statement in statements
+                        ]
+                        for index, statements in drafts.items()
+                    },
+                },
+                ensure_ascii=False,
+            ),
+        },
+    ]
+
+    def validate_review(value):
+        indices = [row.signal_index for row in value.results]
+        if set(indices) != set(drafts) or len(indices) != len(drafts):
+            raise ValueError("review must answer every supplied draft index once")
+        for row in value.results:
+            seen = set()
+            for statement in row.statements:
+                if (
+                    not 1 <= statement.draft_index <= len(drafts[row.signal_index])
+                    or statement.draft_index in seen
+                ):
+                    raise ValueError(
+                        "review must refer to unique existing draft statements"
+                    )
+                seen.add(statement.draft_index)
+
+    reviewed, cost, tokens = await recovered_call(
+        call,
+        attempts=attempts,
+        validate=validate_review,
+        counters=counters,
+        counter=counter,
+        model=model,
+        messages=review_messages,
+        response_model=DescriptionReview,
+        **review_kwargs,
+    )
+    kept_by_index: dict[int, list[tuple[int, str]]] = {}
+    drops = 0
+    for row in reviewed.results:
+        kept = []
+        for statement in row.statements:
+            valid, dropped = filter_statements([statement], items)
+            drops += dropped
+            if valid:
+                kept.append((statement.draft_index, valid[0]))
+        kept_by_index[row.signal_index] = sorted(kept)
+    return kept_by_index, cost, tokens, drops
+
+
 def description_statements(text: str) -> list[str]:
     """Split prose at sentence boundaries for review and the length bound."""
     import re
@@ -285,7 +428,6 @@ async def enrich_signal_batch(*, model, messages, options, call, **kwargs):
     A failed review refuses the entire batch rather than delivering its draft.
     """
     import copy
-    import json
 
     active = (
         options.grounding
@@ -381,43 +523,6 @@ async def enrich_signal_batch(*, model, messages, options, call, **kwargs):
         review_kwargs = dict(kwargs)
         review_kwargs["reasoning_effort"] = "high" if options.review_thinking else None
         review_kwargs["temperature"] = 0
-        review_messages = [
-            {
-                "role": "system",
-                "content": render_prompt(
-                    "signals/enrichment_review",
-                    {"output_schema": DescriptionReview.model_json_schema()},
-                ),
-            },
-            {
-                "role": "user",
-                "content": json.dumps(
-                    {"context_items": items, "drafts": review_statements},
-                    ensure_ascii=False,
-                ),
-            },
-        ]
-
-        def validate_review(value):
-            indices = [row.signal_index for row in value.results]
-            if set(indices) != set(review_statements) or len(indices) != len(
-                review_statements
-            ):
-                raise ValueError("review must cover every drafted signal exactly once")
-            for row in value.results:
-                seen = set()
-                for statement in row.statements:
-                    if (
-                        not 1
-                        <= statement.draft_index
-                        <= len(review_statements[row.signal_index])
-                        or statement.draft_index in seen
-                    ):
-                        raise ValueError(
-                            "review must refer to unique existing draft statements"
-                        )
-                    seen.add(statement.draft_index)
-
         review_call = call
         if options.review_batch_size > 1:
             from imas_codex.discovery.signals.enrichment_review import batched_review
@@ -425,50 +530,34 @@ async def enrich_signal_batch(*, model, messages, options, call, **kwargs):
             async def review_call(**request):
                 return await batched_review(call, options.review_batch_size, **request)
 
-        reviewed, review_cost, review_tokens = await recovered_call(
-            review_call,
+        (
+            kept_by_index,
+            review_cost,
+            review_tokens,
+            review_drops,
+        ) = await review_draft_statements(
+            call=review_call,
+            model=model,
+            items=items,
+            drafts={index: draft_statements[index] for index in review_statements},
             attempts=options.recovery_attempts,
-            validate=validate_review,
             counters=counters,
             counter="review_retries",
-            model=model,
-            messages=review_messages,
-            response_model=DescriptionReview,
-            **review_kwargs,
+            review_kwargs=review_kwargs,
         )
         cost += review_cost
         tokens += review_tokens
-        by_index = {}
-        for row in reviewed.results:
-            if row.signal_index in by_index:
-                raise ValueError("review returned a duplicate signal index")
-            by_index[row.signal_index] = row
-        if set(by_index) != set(review_statements):
-            raise ValueError("review must cover every drafted signal exactly once")
+        result.evidence_drops += review_drops
         for row in result.results:
             if row.signal_index not in review_statements:
                 continue
             original = draft_statements[row.signal_index]
-            kept = []
-            seen = set()
-            for statement in by_index[row.signal_index].statements:
-                if (
-                    not 1 <= statement.draft_index <= len(original)
-                    or statement.draft_index in seen
-                ):
-                    raise ValueError(
-                        "review must refer to unique existing draft statements"
-                    )
-                seen.add(statement.draft_index)
-                valid, dropped = filter_statements([statement], items)
-                result.evidence_drops += dropped
-                if valid:
-                    kept.append((statement.draft_index, valid[0]))
-                    result.review_revisions += (
-                        valid[0] != original[statement.draft_index - 1]
-                    )
+            kept = kept_by_index.get(row.signal_index, [])
+            result.review_revisions += sum(
+                1 for index, text in kept if text != original[index - 1]
+            )
             result.review_drops += len(original) - len(kept)
-            row.description = " ".join(text for _, text in sorted(kept))
+            row.description = " ".join(text for _, text in kept)
     for row in result.results:
         if options.description_sentences:
             statements = description_statements(row.description)

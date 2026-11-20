@@ -18,6 +18,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import pytest
+from jinja2.utils import htmlsafe_json_dumps
 
 import imas_codex.discovery as discovery_pkg
 from imas_codex.llm import prompt_loader
@@ -30,6 +31,36 @@ _RENDERERS = {"render_prompt", "render_prompt_strict"}
 # no generated example, so a function that makes a ``response_model`` call must
 # not be paired with it even when it also builds the questions.
 _DECISIONS_PROMPTS = {"code/triage"}
+
+_PROMPT_ROOT = Path(prompt_loader.__file__).parent / "prompts"
+
+
+def _as_the_template_serialises(value) -> str:
+    """The text ``{{ value | tojson }}`` produces, escaping included."""
+    return htmlsafe_json_dumps(value, sort_keys=True)
+
+
+def _carries_caller_schema(prompt_name: str) -> bool:
+    """Whether the prompt templates the JSON Schema its caller supplies."""
+    template = _PROMPT_ROOT / f"{prompt_name}.md"
+    return template.is_file() and "output_schema" in template.read_text()
+
+
+def _render_with_caller_schema(prompt_name: str, model: type) -> str:
+    """Render a prompt the way its caller does, supplying the model's schema.
+
+    A prompt that only renders the schema inside a branch is driven through
+    that branch here; a prompt with a new branch that this map does not drive
+    fails the pairing test rather than passing unrendered.
+    """
+    schema = model.model_json_schema()
+    if prompt_name == "signals/enrichment_grounding":
+        return prompt_loader.render_prompt(
+            prompt_name,
+            {"baseline": "", "claim_evidence": True, "output_schema": schema},
+        )
+    return prompt_loader.render_prompt(prompt_name, {"output_schema": schema})
+
 
 # The prompts whose call sites this walk must reach; a positive control that the
 # analysis actually follows discovery's render→builder→call dataflow rather than
@@ -177,12 +208,15 @@ def _collect_pairs() -> dict[str, str]:
 @lru_cache(maxsize=1)
 def _model_objects() -> dict[str, type]:
     """Response model name -> class, discovered by scanning the package."""
+    wanted = set(_collect_pairs().values())
     out: dict[str, type] = {}
     for path in _iter_module_files():
         tree = ast.parse(path.read_text())
         module = _module_key(path)
         for node in tree.body:
-            if isinstance(node, ast.ClassDef) and node.name.endswith("Batch"):
+            if isinstance(node, ast.ClassDef) and (
+                node.name.endswith("Batch") or node.name in wanted
+            ):
                 try:
                     obj = getattr(importlib.import_module(module), node.name)
                 except (ImportError, AttributeError):
@@ -200,15 +234,72 @@ def test_walk_reaches_expected_prompts():
 
 
 @pytest.mark.parametrize("prompt_name", sorted(_collect_pairs()))
-def test_prompt_carries_generated_example_verbatim(prompt_name):
+def test_prompt_carries_its_response_model_schema(prompt_name):
     model_name = _collect_pairs()[prompt_name]
     model = _model_objects()[model_name]
+    if _carries_caller_schema(prompt_name):
+        # The caller hands this prompt the model's JSON Schema, so that is the
+        # payload the rendered prompt must carry.
+        rendered = _render_with_caller_schema(prompt_name, model)
+        assert _as_the_template_serialises(model.model_json_schema()) in rendered, (
+            f"prompt {prompt_name!r} does not carry the supplied schema for "
+            f"{model_name}"
+        )
+        return
     generated = prompt_loader.get_pydantic_schema_json(model)
     rendered = prompt_loader.render_prompt(prompt_name, {})
     assert generated in rendered, (
         f"prompt {prompt_name!r} does not contain the generated example for "
         f"{model_name} verbatim"
     )
+
+
+def test_caller_schema_prompts_stay_paired_with_a_checked_model():
+    """A prompt templating output_schema must keep its response-model pairing."""
+    pairs = _collect_pairs()
+    dynamic = {name for name in pairs if _carries_caller_schema(name)}
+    assert "signals/enrichment_review" in dynamic, sorted(dynamic)
+    for name in sorted(dynamic):
+        template = (_PROMPT_ROOT / f"{name}.md").read_text()
+        assert "output_schema" in template and "tojson" in template, name
+        assert pairs[name] in _model_objects(), (name, pairs[name])
+
+
+def test_enrichment_prompt_carries_the_generated_example():
+    """The signal enrichment prompt carries its own response model verbatim.
+
+    Its call site passes ``response_model`` outside the rendering function, so
+    the AST walk cannot pair it and this test carries the assertion.
+    """
+    from imas_codex.discovery.signals.enrichment import SignalEnrichmentBatch
+
+    generated = prompt_loader.get_pydantic_schema_json(SignalEnrichmentBatch)
+    rendered = prompt_loader.render_prompt("signals/enrichment")
+    assert generated in rendered
+
+
+def test_enrichment_output_prompt_carries_the_schema_it_extends():
+    """The fitted-prompt contract renders the enrichment schema its caller sets."""
+    from imas_codex.discovery.signals.enrichment import (
+        SignalEnrichmentBatch,
+        fit_enrichment_prompt,
+    )
+
+    rendered = fit_enrichment_prompt("BASELINE TASK")
+    assert "BASELINE TASK" in rendered
+    assert _as_the_template_serialises(SignalEnrichmentBatch.model_json_schema()) in (
+        rendered
+    )
+
+
+def test_review_prompt_carries_the_supplied_schema():
+    """The review prompt renders unconditionally, so its schema is checkable."""
+    model = _model_objects()[_collect_pairs()["signals/enrichment_review"]]
+    schema = model.model_json_schema()
+    rendered = prompt_loader.render_prompt(
+        "signals/enrichment_review", {"output_schema": schema}
+    )
+    assert _as_the_template_serialises(schema) in rendered
 
 
 # The scope questions the code/triage decisions prompt must carry in both arms.
