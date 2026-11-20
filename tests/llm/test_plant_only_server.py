@@ -1,9 +1,8 @@
 """The plant container publishes the plant catalogue and no write tool.
 
-A plant-only package carries no data dictionary, documentation or code
-content, so the server's published listing is the whole capability an agent
-sees. The listing must be exactly the plant tools — a write tool left on it
-would be offered against a read-only package.
+The server's published listing is the whole capability an agent sees, so it
+must be exactly the plant tools named here — a write tool left on it would be
+offered against a read-only package.
 """
 
 from __future__ import annotations
@@ -26,8 +25,18 @@ def plant_server() -> AgentsServer:
     return AgentsServer(plant_only=True)
 
 
+PLANT_TOOL_NAMES = {
+    "search_signals",
+    "search_pulses",
+    "get_signal_load_recipe",
+    "signal_analytics",
+    "fetch_content",
+    "get_facility_coverage",
+}
+
+
 def test_plant_only_publishes_exactly_the_plant_tools(plant_server):
-    assert _tool_names(plant_server) == set(AgentsServer.PLANT_TOOLS)
+    assert _tool_names(plant_server) == PLANT_TOOL_NAMES
 
 
 def test_plant_only_implies_read_only(plant_server):

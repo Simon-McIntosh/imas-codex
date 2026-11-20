@@ -25,11 +25,21 @@ from pathlib import Path
 
 import click
 
+from imas_codex.graph.plant_scope import (
+    PlantPackageMismatch,
+    PlantScope,
+    verify_plant_package,
+)
+
 logger = logging.getLogger(__name__)
 
 # ============================================================================
 # Constants
 # ============================================================================
+
+# Batch size for every facility-filter deletion. One value for the local filter
+# and the SLURM script, so the two paths cannot drift.
+FACILITY_DELETE_BATCH = 50000
 
 # DD node labels to keep for --dd-only exports
 IMAS_DD_LABELS = [
@@ -447,20 +457,98 @@ def _filter_to_dd_only(bolt_port: int, neo4j_log: Path) -> None:
         driver.close()
 
 
+def _facility_filter_statements(
+    facility: str, *, without_dd: bool
+) -> list[tuple[str, str]]:
+    """Return every statement a facility filter runs, in order.
+
+    One definition serves both paths: the local filter executes these through a
+    Bolt session and the SLURM script executes the same text through
+    cypher-shell, with the same batch size and the same keep list, so a package
+    cannot depend on which path produced it. ``$facility`` and ``$plant_only``
+    are parameters.
+    """
+    keep = (
+        "NOT n:Facility AND NOT n:GraphMeta"
+        if without_dd
+        else "NOT n:IMASNode AND NOT n:DDVersion AND NOT n:Unit "
+        "AND NOT n:IMASCoordinateSpec AND NOT n:PhysicsDomain "
+        "AND NOT n:IMASSemanticCluster AND NOT n:GraphMeta"
+    )
+    statements = [
+        (
+            "nodes of other facilities",
+            "MATCH (n) WHERE n.facility_id IS NOT NULL AND n.facility_id <> $facility "
+            f"CALL {{ WITH n DETACH DELETE n }} "
+            f"IN TRANSACTIONS OF {FACILITY_DELETE_BATCH} ROWS "
+            "RETURN count(*) AS deleted",
+        ),
+    ]
+    if without_dd:
+        # Facility nodes use ``id``, not ``facility_id``, and the only
+        # facility-less kinds a plant package keeps are the facility node and
+        # GraphMeta. Two statements, two literals: a label binding in one must
+        # not become the label of the other statement's alias.
+        statements += [
+            (
+                "other facility nodes",
+                "MATCH (n:Facility) WHERE n.id <> $facility "
+                f"CALL {{ WITH n DETACH DELETE n }} "
+                f"IN TRANSACTIONS OF {FACILITY_DELETE_BATCH} ROWS "
+                "RETURN count(*) AS deleted",
+            ),
+            (
+                "facility-less nodes",
+                "MATCH (x) WHERE x.facility_id IS NULL "
+                "AND NOT x:Facility AND NOT x:GraphMeta "
+                f"CALL {{ WITH x DETACH DELETE x }} "
+                f"IN TRANSACTIONS OF {FACILITY_DELETE_BATCH} ROWS "
+                "RETURN count(*) AS deleted",
+            ),
+        ]
+    statements += [
+        (
+            "orphan nodes",
+            f"MATCH (n) WHERE NOT (n)--() AND {keep} "
+            f"CALL {{ WITH n DELETE n }} "
+            f"IN TRANSACTIONS OF {FACILITY_DELETE_BATCH} ROWS "
+            "RETURN count(*) AS deleted",
+        ),
+        (
+            "graph metadata",
+            "MATCH (m:GraphMeta {id: 'meta'}) SET m.facilities = [$facility], "
+            "m.plant_only = $plant_only, m.updated_at = datetime().epochMillis",
+        ),
+    ]
+    return statements
+
+
+def _shell_cypher(statement: str, facility: str, *, without_dd: bool) -> str:
+    """Substitute the statements' parameters for cypher-shell, which takes none."""
+    return statement.replace("$facility", f"'{facility}'").replace(
+        "$plant_only", "true" if without_dd else "false"
+    )
+
+
 def _filter_to_facility(
     bolt_port: int, facility: str, neo4j_log: Path, *, without_dd: bool = False
-) -> None:
+) -> tuple[PlantScope | None, PlantScope | None]:
     """Delete nodes not belonging to *facility* from the temp instance.
 
     With ``without_dd`` the result is a plant package: every node owned by
-    *facility* survives, and the only facility-less nodes kept are the
-    facility node itself and ``GraphMeta``, which the server reads on
-    startup. The data dictionary and every other facility-less kind are
-    removed.
+    *facility* survives, and the only facility-less nodes kept are the facility
+    node itself and ``GraphMeta``, which the server reads on startup. The data
+    dictionary and every other facility-less kind are removed.
+
+    Returns the facility's scope before and after the filter, measured through
+    the same rule the caller verifies the package against; both are ``None``
+    for a plain facility filter, whose content is not narrowed.
 
     Uses ``CALL {} IN TRANSACTIONS`` for server-side batched commits.
     """
     from neo4j import GraphDatabase
+
+    from imas_codex.graph.plant_scope import measure_plant_scope
 
     click.echo(f"  Filtering graph: keeping facility={facility}...")
 
@@ -468,64 +556,20 @@ def _filter_to_facility(
 
     try:
         with driver.session() as session:
-            # Remove nodes belonging to other facilities
-            result = session.run(
-                "MATCH (n) "
-                "WHERE n.facility_id IS NOT NULL "
-                "AND n.facility_id <> $facility "
-                "CALL { WITH n DETACH DELETE n } IN TRANSACTIONS OF 1000 ROWS "
-                "RETURN count(*) AS deleted",
-                facility=facility,
-            )
-            deleted = result.single()["deleted"]
-            click.echo(f"    Removed {deleted:,} non-{facility} nodes")
 
-            if without_dd:
-                # Facility nodes use ``id``, not ``facility_id`` — drop the
-                # other facilities' nodes explicitly.
-                result = session.run(
-                    "MATCH (n:Facility) WHERE n.id <> $facility "
-                    "CALL { WITH n DETACH DELETE n } IN TRANSACTIONS OF 1000 ROWS "
-                    "RETURN count(*) AS deleted",
-                    facility=facility,
-                )
-                click.echo(
-                    f"    Removed {result.single()['deleted']:,} other facility nodes"
-                )
+            def run(cypher: str, **params) -> list[dict]:
+                return [dict(row) for row in session.run(cypher, **params)]
 
-                # Keep only the facility-less kinds the plant server reads.
-                result = session.run(
-                    "MATCH (n) WHERE n.facility_id IS NULL "
-                    "AND NOT n:Facility AND NOT n:GraphMeta "
-                    "CALL { WITH n DETACH DELETE n } IN TRANSACTIONS OF 1000 ROWS "
-                    "RETURN count(*) AS deleted"
-                )
-                click.echo(
-                    f"    Removed {result.single()['deleted']:,} facility-less nodes"
-                )
-
-            # Remove orphaned nodes (no relationships, not core DD types)
-            result = session.run(
-                "MATCH (n) WHERE NOT (n)--() "
-                "AND NOT n:IMASNode AND NOT n:DDVersion AND NOT n:Unit "
-                "AND NOT n:IMASCoordinateSpec AND NOT n:PhysicsDomain "
-                "AND NOT n:IMASSemanticCluster "
-                "AND NOT n:GraphMeta "
-                "CALL { WITH n DELETE n } IN TRANSACTIONS OF 1000 ROWS "
-                "RETURN count(*) AS deleted"
-            )
-            orphans = result.single()["deleted"]
-            click.echo(f"    Removed {orphans:,} orphan nodes")
-
-            # Update GraphMeta to reflect the kept facility
-            session.run(
-                'MATCH (m:GraphMeta {id: "meta"}) '
-                "SET m.facilities = [$facility], "
-                "    m.plant_only = $plant_only, "
-                "    m.updated_at = datetime().epochMillis",
-                facility=facility,
-                plant_only=without_dd,
-            )
+            expected = measure_plant_scope(run, facility) if without_dd else None
+            for label, statement in _facility_filter_statements(
+                facility, without_dd=without_dd
+            ):
+                rows = run(statement, facility=facility, plant_only=without_dd)
+                if rows and "deleted" in rows[0]:
+                    click.echo(f"    Removed {rows[0]['deleted']:,} {label}")
+                else:
+                    click.echo(f"    Updated {label}")
+            actual = measure_plant_scope(run, facility) if without_dd else None
     except Exception:
         if neo4j_log.exists():
             tail = neo4j_log.read_text()[-1000:]
@@ -533,6 +577,7 @@ def _filter_to_facility(
         raise
     finally:
         driver.close()
+    return expected, actual
 
 
 def _should_use_slurm() -> bool:
@@ -561,6 +606,31 @@ def _slurm_partition() -> str:
         return _general_partition_name()
     except Exception:
         return "rigel"
+
+
+def _verify_plant_package(
+    expected: PlantScope | None, actual: PlantScope | None, facility: str
+) -> None:
+    """Refuse a package that does not hold what the filtered graph holds."""
+    if expected is None or actual is None:
+        return
+    try:
+        verify_plant_package(expected, actual)
+    except PlantPackageMismatch as exc:
+        raise click.ClickException(
+            f"Filtered {facility} package does not match the graph it was "
+            f"filtered from ({len(exc.violations)} violation(s)): "
+            + "; ".join(exc.violations)
+        ) from exc
+    nodes = sum(actual.node_labels.values())
+    relationships = sum(actual.relationship_types.values())
+    facilityless = ", ".join(
+        f"{kind} {count}" for kind, count in sorted(actual.facilityless_labels.items())
+    )
+    click.echo(
+        f"    Scope verified: {nodes:,} nodes, {relationships:,} relationships, "
+        f"{actual.foreign_nodes} foreign nodes, facility-less {facilityless}"
+    )
 
 
 def _build_filter_script(
@@ -613,48 +683,47 @@ def _build_filter_script(
     else:
         # A plant package keeps the facility's own content and nothing that
         # belongs to no facility but the facility node itself and GraphMeta.
-        # Two statements, two literals: a label binding in one statement
-        # must not become the label of the other statement's alias.
-        plant_facility_cypher = textwrap.dedent(f"""\
-            # Delete the other facilities' nodes (Facility uses id, not facility_id)
-            echo "    Deleting other facility nodes..."
-            $CYPHER "MATCH (n:Facility) WHERE n.id <> '{facility}' CALL {{ WITH n DETACH DELETE n }} IN TRANSACTIONS OF 10000 ROWS RETURN count(*) AS deleted;"
-        """)
-        plant_facilityless_cypher = textwrap.dedent("""\
-            # Delete every facility-less kind but Facility and GraphMeta
-            echo "    Deleting facility-less nodes..."
-            $CYPHER "MATCH (x) WHERE x.facility_id IS NULL AND NOT x:Facility AND NOT x:GraphMeta CALL {{ WITH x DETACH DELETE x }} IN TRANSACTIONS OF 50000 ROWS RETURN count(*) AS deleted;"
-        """)
-        plant_cypher = (
-            plant_facility_cypher + plant_facilityless_cypher if without_dd else ""
-        )
-        orphan_keep = (
-            "NOT n:Facility AND NOT n:GraphMeta"
-            if without_dd
-            else "NOT n:IMASNode AND NOT n:DDVersion AND NOT n:Unit "
-            "AND NOT n:IMASCoordinateSpec AND NOT n:PhysicsDomain "
-            "AND NOT n:IMASSemanticCluster AND NOT n:GraphMeta"
-        )
-        graph_meta = (
-            f"SET m.facilities = ['{facility}'], m.plant_only = true, "
-            "m.updated_at = datetime().epochMillis;"
-            if without_dd
-            else f"SET m.facilities = ['{facility}'], "
-            "m.updated_at = datetime().epochMillis;"
-        )
-        filter_cypher = textwrap.dedent(f"""\
-            # Delete nodes from other facilities
-            echo "    Deleting non-{facility} nodes..."
-            $CYPHER "MATCH (n) WHERE n.facility_id IS NOT NULL AND n.facility_id <> '{facility}' CALL {{ WITH n DETACH DELETE n }} IN TRANSACTIONS OF 50000 ROWS RETURN count(*) AS deleted;"
+        # The statements, their order, their batch size and the orphan keep
+        # list all come from one definition shared with the local filter.
+        statements = _facility_filter_statements(facility, without_dd=without_dd)
+        blocks = []
+        for label, statement in statements:
+            # cypher-shell takes no parameters, and the shell string must not
+            # expand braces or dollar signs of its own.
+            shell_statement = _shell_cypher(statement, facility, without_dd=without_dd)
+            blocks.append(
+                f'echo "    {label.capitalize()}..."\n$CYPHER "{shell_statement}"'
+            )
+        filter_cypher = textwrap.indent(textwrap.dedent("\n\n".join(blocks)), " " * 8)
 
-            {plant_cypher}
-            # Remove orphaned nodes
-            echo "    Cleaning orphaned nodes..."
-            $CYPHER "MATCH (n) WHERE NOT (n)--() AND {orphan_keep} CALL {{ WITH n DELETE n }} IN TRANSACTIONS OF 50000 ROWS RETURN count(*) AS deleted;"
+    measure_block = measure_after = ""
+    python_preamble = ""
+    if facility and without_dd:
+        import sys
 
-            # Update GraphMeta
-            $CYPHER "MATCH (m:GraphMeta {{id: 'meta'}}) {graph_meta}"
+        repo_root = Path(__file__).resolve().parents[2]
+        python_preamble = textwrap.dedent(f"""\
+            PYTHON="{sys.executable}"
+            export PYTHONPATH="{repo_root}"
+            FACILITY="{facility}"
+            measure_scope() {{
+                "$PYTHON" -c 'import sys; from imas_codex.graph.plant_scope import measure_plant_scope_json; measure_plant_scope_json(sys.argv[1], sys.argv[2], "-")' "bolt://localhost:$BOLT_PORT" "$FACILITY"
+            }}
         """)
+        measure_block = textwrap.dedent("""\
+            echo "  Measuring scope before filtering..."
+            SCOPE_BEFORE=$(measure_scope)
+            echo "SCOPE_BEFORE=$SCOPE_BEFORE"
+        """)
+        measure_after = textwrap.dedent("""\
+            echo "  Measuring scope after filtering..."
+            SCOPE_AFTER=$(measure_scope)
+            echo "SCOPE_AFTER=$SCOPE_AFTER"
+        """)
+
+    python_preamble = textwrap.indent(python_preamble, " " * 8)
+    measure_block = textwrap.indent(measure_block, " " * 8)
+    measure_after = textwrap.indent(measure_after, " " * 8)
 
     return textwrap.dedent(f"""\
         #!/bin/bash
@@ -666,6 +735,7 @@ def _build_filter_script(
         BOLT_PORT=27687
         HTTP_PORT=27474
         NEO4J_PID=""
+{python_preamble}
 
         # Use GPFS temp dir (accessible across nodes, no size cap)
         TEMP_DIR=$(mktemp -d "${{HOME}}/.local/share/imas-codex/.neo4j-filter-XXXXXX")
@@ -740,11 +810,12 @@ CONF
             exit 1
         fi
 
+{measure_block}
         echo "  Filtering graph ({mode})..."
         CYPHER="apptainer exec --writable-tmpfs $NEO4J_IMAGE cypher-shell -a bolt://localhost:$BOLT_PORT"
 
-        {filter_cypher}
-
+{filter_cypher}
+{measure_after}
         # Stop temp Neo4j gracefully
         kill $NEO4J_PID 2>/dev/null || true
         wait $NEO4J_PID 2>/dev/null || true
@@ -764,6 +835,16 @@ CONF
         echo "    Filtered dump: $SIZE"
         echo "FILTER_SUCCESS"
     """)
+
+
+def _scope_from_stdout(stdout: str, marker: str) -> PlantScope | None:
+    """Read one measured scope the filter script printed."""
+    import json
+
+    for line in stdout.splitlines():
+        if line.startswith(marker):
+            return PlantScope.from_dict(json.loads(line[len(marker) :]))
+    return None
 
 
 def _run_filter_via_slurm(
@@ -822,6 +903,13 @@ def _run_filter_via_slurm(
     for line in result.stdout.splitlines():
         if line.startswith("  ") or line.startswith("    "):
             click.echo(line)
+
+    if without_dd:
+        _verify_plant_package(
+            _scope_from_stdout(result.stdout, "SCOPE_BEFORE="),
+            _scope_from_stdout(result.stdout, "SCOPE_AFTER="),
+            facility,
+        )
 
     if not output_path.exists():
         raise click.ClickException(
@@ -912,11 +1000,15 @@ def create_facility_dump(
         proc, neo4j_log = start_temp_neo4j(temp_dir, temp_bolt_port, temp_http_port)
 
         try:
-            _filter_to_facility(
+            expected, actual = _filter_to_facility(
                 temp_bolt_port, facility, neo4j_log, without_dd=without_dd
             )
         finally:
             stop_temp_neo4j(proc)
+
+        # A plant package is refused before it is dumped when it does not hold
+        # what the graph it was filtered from holds.
+        _verify_plant_package(expected, actual, facility)
 
         click.echo("  Dumping filtered graph...")
         dump_temp_neo4j(temp_dir, output_path)

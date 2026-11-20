@@ -1863,21 +1863,18 @@ class AgentsServer:
         }
     )
 
-    # Tools a plant-only server publishes. A plant-only package carries no IMAS
-    # data dictionary, documentation or code content, so the server exposes
-    # exactly the plant catalogue reads and the loading recipe: a whitelist
-    # rather than a set of guards keeps a newly added write tool off the
-    # listing automatically.
-    PLANT_TOOLS: ClassVar[frozenset[str]] = frozenset(
-        {
-            "search_signals",
-            "search_pulses",
-            "get_signal_load_recipe",
-            "signal_analytics",
-            "fetch_content",
-            "get_facility_coverage",
-        }
-    )
+    # Tools a plant-only server publishes: the facility tools whose data the
+    # package holds, derived from that list rather than repeated, so a tool
+    # added to the facility catalogue is a deliberate include or exclude here
+    # and never a silent omission. The plant package holds no data dictionary
+    # and no code, so the DD-path and code reads are the two exclusions; the
+    # package does hold the facility's documents and wiki pages, and the
+    # documentation search stays off the listing because the plant server
+    # publishes the catalogue reads and the loading recipe only.
+    PLANT_TOOLS: ClassVar[frozenset[str]] = FACILITY_TOOLS - {
+        "search_docs",
+        "search_code",
+    }
 
     def __post_init__(self):
         """Initialize the MCP server with lazy REPL loading.
@@ -2033,10 +2030,9 @@ class AgentsServer:
     def _restrict_to_plant_tools(self) -> None:
         """Publish only the plant catalogue tools on a plant-only server.
 
-        The package carries no DD, documentation or code content, so every
-        other tool would fail at call time; removing them from the provider is
-        what makes the published listing the whole capability, write tools
-        included.
+        The package carries no data dictionary and no code content; every tool
+        outside the whitelist is removed from the provider, which is what makes
+        the published listing the whole capability, write tools included.
         """
         components = self.mcp._local_provider._components
         for key in list(components):

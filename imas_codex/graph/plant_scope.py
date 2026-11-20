@@ -10,7 +10,8 @@ package built from it, and a test can show the refusal.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import json
+from dataclasses import asdict, dataclass, field
 
 # Facility-less kinds a plant package is allowed to hold. ``Facility`` is the
 # facility node the server resolves by id and ``GraphMeta`` is what the server
@@ -47,6 +48,20 @@ class PlantScope:
             relationship_types={r["type"]: r["count"] for r in relationship_rows},
             foreign_nodes=foreign_nodes,
             facilityless_labels={r["label"]: r["count"] for r in facilityless_rows},
+        )
+
+    def to_dict(self) -> dict:
+        """Return the scope as JSON-serialisable data."""
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> PlantScope:
+        """Rebuild a scope from :meth:`to_dict` data."""
+        return cls(
+            node_labels=dict(data.get("node_labels", {})),
+            relationship_types=dict(data.get("relationship_types", {})),
+            foreign_nodes=int(data.get("foreign_nodes", 0)),
+            facilityless_labels=dict(data.get("facilityless_labels", {})),
         )
 
 
@@ -108,3 +123,82 @@ def compare_plant_scope(expected: PlantScope, actual: PlantScope) -> list[str]:
             )
 
     return violations
+
+
+def measure_plant_scope(query, facility: str) -> PlantScope:
+    """Measure one graph in the terms a plant package is checked.
+
+    *query* is a callable taking a Cypher statement and parameters and
+    returning row dicts, so the export path can measure the graph it loads and
+    the package it writes through the same rule.
+    """
+    node_rows = query(
+        "MATCH (n) WHERE n.facility_id = $f UNWIND labels(n) AS l "
+        "WITH l RETURN l AS label, count(*) AS count ORDER BY label",
+        f=facility,
+    )
+    relationship_rows = query(
+        "MATCH (a)-[r]->(b) WHERE a.facility_id = $f AND b.facility_id = $f "
+        "RETURN type(r) AS type, count(*) AS count ORDER BY type",
+        f=facility,
+    )
+    foreign_nodes = query(
+        "MATCH (n) WHERE n.facility_id IS NOT NULL AND n.facility_id <> $f "
+        "RETURN count(n) AS n",
+        f=facility,
+    )[0]["n"]
+    facilityless_rows = query(
+        "MATCH (n) WHERE n.facility_id IS NULL AND (NOT n:Facility OR n.id = $f) "
+        "UNWIND labels(n) AS l "
+        "WITH l RETURN l AS label, count(*) AS count ORDER BY label",
+        f=facility,
+    )
+    return PlantScope.from_counts(
+        node_rows=node_rows,
+        relationship_rows=relationship_rows,
+        foreign_nodes=foreign_nodes,
+        facilityless_rows=facilityless_rows,
+    )
+
+
+def measure_plant_scope_json(bolt_uri: str, facility: str, output: str) -> None:
+    """Measure a graph over Bolt and write the scope as JSON (``-`` = stdout).
+
+    This is the entry point the SLURM filter script calls, so the package a
+    dump build writes is measured by the same code the caller compares.
+    """
+    from neo4j import GraphDatabase
+
+    driver = GraphDatabase.driver(bolt_uri, auth=None)
+    try:
+        with driver.session() as session:
+
+            def query(cypher: str, **params) -> list[dict]:
+                return [dict(row) for row in session.run(cypher, **params)]
+
+            scope = measure_plant_scope(query, facility)
+    finally:
+        driver.close()
+    payload = json.dumps(scope.to_dict())
+    if output == "-":
+        print(payload)
+    else:
+        with open(output, "w") as handle:
+            handle.write(payload)
+
+
+class PlantPackageMismatch(Exception):
+    """A package does not hold what the graph it was exported from holds."""
+
+    def __init__(self, violations: list[str]) -> None:
+        self.violations = list(violations)
+        super().__init__(
+            "plant package does not match its export: " + "; ".join(violations)
+        )
+
+
+def verify_plant_package(expected: PlantScope, actual: PlantScope) -> None:
+    """Raise :class:`PlantPackageMismatch` unless *actual* is the package of *expected*."""
+    violations = compare_plant_scope(expected, actual)
+    if violations:
+        raise PlantPackageMismatch(violations)

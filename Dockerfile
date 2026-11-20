@@ -305,7 +305,7 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=5 --start-period=240s \
 ##   docker build -t imas-codex .
 ## Plant image — the ITER plant graph alone, read-only, private:
 ##   docker build -t imas-codex-plant \
-##     --build-arg GRAPH_REGISTRY=ghcr.io/<owner> \
+##     --build-arg GHCR_REGISTRY=ghcr.io/<owner> \
 ##     --build-arg GRAPH_PACKAGE=imas-codex-graph-iter-without-dd \
 ##     --build-arg GRAPH_TAG=<tag> \
 ##     --build-arg SERVE_MODE=--plant-only \
