@@ -526,21 +526,23 @@ def test_cutover_lists_queued_requests_and_checks_the_ids_it_preserves() -> None
     freeze = cutover_step(data, "C0-freeze")
     project_key = cutover_step(data, "C7-reckon-project-key")
 
-    assert set(freeze["queued_requests"]) == {"listing", "rule", "parked_worktree"}
-    assert "drops" in freeze["queued_requests"]["rule"]
-    assert "re-dispatches" in freeze["queued_requests"]["rule"]
-    assert set(project_key["preserved_ids"]) == {"plans", "runs", "rule"}
+    queued = freeze.get("queued_requests", {})
+    preserved = project_key.get("preserved_ids", {})
+    gate_scripts = cutover_step(data, "C9-gate-scripts").get("kept_directory", {})
+
+    assert set(queued) == {"listing", "rule", "parked_worktree"}
+    assert "drops" in queued.get("rule", "")
+    assert "re-dispatches" in queued.get("rule", "")
+    assert set(preserved) == {"plans", "runs", "rule"}
     assert "plan slugs and run ids are unchanged" in project_key["check"]
-    assert cutover_step(data, "C9-gate-scripts")["kept_directory"]["disposition"] == (
-        "kept"
-    )
+    assert gate_scripts.get("disposition") == "kept"
 
 
 def test_cutover_refuses_a_sequence_without_the_queued_request_rule(
     tmp_path: Path,
 ) -> None:
     data = cutover_data()
-    del cutover_step(data, "C0-freeze")["queued_requests"]
+    cutover_step(data, "C0-freeze").pop("queued_requests", None)
     path = tmp_path / "cutover.json"
     path.write_text(json.dumps(data))
 
@@ -557,7 +559,7 @@ def test_cutover_refuses_a_sequence_without_the_slug_and_run_id_check(
     tmp_path: Path,
 ) -> None:
     data = cutover_data()
-    del cutover_step(data, "C7-reckon-project-key")["preserved_ids"]
+    cutover_step(data, "C7-reckon-project-key").pop("preserved_ids", None)
     path = tmp_path / "cutover.json"
     path.write_text(json.dumps(data))
 
@@ -576,7 +578,7 @@ def test_cutover_refuses_a_kept_list_that_holds_evidence_python(
     evidence = next(
         entry for entry in kept["kept_paths"] if entry["id"] == "historical-evidence"
     )
-    del evidence["include"]
+    evidence.pop("include", None)
     split = tmp_path / "kept_names.json"
     split.write_text(json.dumps(kept))
     data["tracked_rename"]["kept_list"] = str(split)
