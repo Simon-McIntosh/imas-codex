@@ -32,6 +32,13 @@
       "finding": "done_when-1",
       "reason": "The node's dispatch contract carries it: described, awaiting context and failed counts sum to the pilot total of each kind. The section's endpoint is unchanged.",
       "when": "2026-11-20T02:24:08.682719+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The node's dispatch contract carries it: a statement carried from the component's or pattern's linked context counts as supported by that context when graded.",
+      "when": "2026-11-20T02:24:19.203373+00:00"
     }
   ],
   "responses": {
@@ -40,6 +47,12 @@
       "by": "",
       "reason": "The node's dispatch contract carries it: described, awaiting context and failed counts sum to the pilot total of each kind. The section's endpoint is unchanged.",
       "when": "2026-11-20T02:24:08.682719+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The node's dispatch contract carries it: a statement carried from the component's or pattern's linked context counts as supported by that context when graded.",
+      "when": "2026-11-20T02:24:19.203373+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261120T020240841121-plan-review-of-iter-signal-context-and-enrichment.json",
