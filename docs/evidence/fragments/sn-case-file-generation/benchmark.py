@@ -1490,7 +1490,7 @@ SECOND_ARMS = (
     ("keep-or-repair/frontier", "keep-or-repair", FRONTIER_MODEL, "full"),
     ("keep-or-repair/local", "keep-or-repair", LOCAL_MODEL, "full"),
     ("one-pass/frontier", "one-pass", FRONTIER_MODEL, "full"),
-    ("incumbent", "", "", "full"),
+    ("incumbent", "incumbent", "", "full"),
     ("perturbed/frontier", "keep-or-repair", FRONTIER_MODEL, "perturbed"),
 )
 SECOND_MODELS = {"frontier": FRONTIER_MODEL, "local": LOCAL_MODEL}
@@ -1721,21 +1721,26 @@ def perturb_content(
     return content
 
 
-def donor_for(
+def donor_order(
     member: dict[str, Any],
     members: list[dict[str, Any]],
     cases: dict[str, dict[str, Any]],
-) -> tuple[str, dict[str, Any]] | None:
+) -> list[tuple[str, dict[str, Any]]]:
+    """The member's donors in the order the seeded draw tries them.
+
+    A donor may carry no source text to lend, so the draw is an order rather
+    than a single pick: the round takes the first donor that has text to give
+    and moves to the next when it does not.
+    """
     candidates = sorted(
         other["id"]
         for other in members
         if other["id"] != member["id"] and other.get("group") != member.get("group")
     )
-    if not candidates:
-        return None
-    pick = random.Random(f"{SECOND_SEED}:{member['id']}  Perturbation draw")
-    donor_id = pick.choice(candidates)
-    return donor_id, cases[donor_id]
+    random.Random(f"{SECOND_SEED}:{member['id']}  Perturbation draw").shuffle(
+        candidates
+    )
+    return [(candidate, cases[candidate]) for candidate in candidates]
 
 
 def source_blocks(case: dict[str, Any]) -> dict[str, list[str]]:
@@ -2619,18 +2624,16 @@ def perturbed_cases(
     perturbed: dict[str, dict[str, Any]] = {}
     donors: dict[str, str] = {}
     for member in members:
-        choice = donor_for(member, members, cases)
-        if choice is None:
-            continue
-        donor_id, donor = choice
-        content = perturb_content(cases[member["id"]], donor)
-        if content is None:
-            continue
-        perturbed[member["id"]] = {
-            "content": content,
-            "digest": digest_json(content),
-        }
-        donors[member["id"]] = donor_id
+        for donor_id, donor in donor_order(member, members, cases):
+            content = perturb_content(cases[member["id"]], donor)
+            if content is None:
+                continue
+            perturbed[member["id"]] = {
+                "content": content,
+                "digest": digest_json(content),
+            }
+            donors[member["id"]] = donor_id
+            break
     return perturbed, donors
 
 
