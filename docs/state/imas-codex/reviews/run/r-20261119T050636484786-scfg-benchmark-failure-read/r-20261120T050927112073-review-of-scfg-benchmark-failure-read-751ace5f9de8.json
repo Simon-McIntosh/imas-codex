@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: its manifest carries no baseline_suite and no after_suite arm (the node is an implement-role evidence fragment whose only gate is the fragment's --check), so the two arm sets are both empty and their difference is 0 with no ids; benchmark-failure-read-check.log records the head arm EXIT=0 at 751ace5f9 and no pytest suite was run.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-20T05:10:42.572Z",
+  "dispatched_at": "2026-11-20T05:10:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read.py",
+      "line": "267",
+      "severity": "non-blocking",
+      "text": "non-blocking: the case_text quote check compares row[\"quote\"] with row[\"case_quote\"], two fields of the report being verified, so a quote altered together with its case_quote passes; the 8 rows classified \"generator lost a detail the case file states\" rest on that check, and I found all 8 quotes present in the archived case files so the data holds while the guard does not."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read.py",
+      "line": "272",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only check that the regenerated records came from the archived case files sits behind `if ARCHIVED_CASE_FILES.is_dir()`, so an absent archive turns it into a silent no-op and --check still prints OK on records with no verified provenance \u2014 the case this run's own first attempt hit when a run directory had been deleted at release."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read.py",
+      "line": "46",
+      "severity": "non-blocking",
+      "text": "non-blocking: load_jsonl and reference_members at :50 duplicate benchmark.py:202 read_jsonl and :224 load_reference in the same directory instead of importing or extending them, so the reference-set decode now exists twice and can drift apart."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T050636484786-scfg-benchmark-failure-read/manifest.md",
+      "line": "7",
+      "severity": "non-blocking",
+      "text": "non-blocking: the commits line names 12fb13d6d, which is a child of the reviewed head 751ace5f9 and not in the reviewed revision, and the group evidence it adds (the case file names no physics group; the only group strings are entity tokens in 13 of 50 rows) is therefore missing from the head's answer to question (b)."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read both commits against base c752333ed; 1ab28d3a9 adds the 50 records, the 50 judge verdicts and the 50 blind verdicts, and 751ace5f9 adds the 405-line checker with a pinned verdict digest and seed redraw, 1290 lines of read and causes, and an 82-line HTML fragment carrying three tables, the four question headings and the three changes.",
+    "done_when": "the done_when asks for 50 seeded rows with verdicts committed before the judge is read, causes with counts and quoted words, the four questions, three ordered changes, and --check passing then failing on an altered verdict; benchmark-failure-read.py:66-84 redraws the seed, :278 recomputes every count, :248-270 checks each quote against its named source, benchmark-failure-read-check.log records EXIT=0 and benchmark-failure-read-negative-control.log records EXIT=1 on one flipped verdict, and 1ab28d3a9 carries zero judge_reason fields against 83 at the head so the blind ordering is evidenced \u2014 but :285-287 assert only that questions a-d exist and that len(changes)==3, not their content or their order.",
+    "goal": "dispatch-detail.json records the goal as \"Hand-read 50 of the record benchmark's held-out rows blind and classify why it measured nothing\"; docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read.json:75-1880 carries 50 rows each with its own my_verdict and my_reason, and :1882-1927 the ten cause buckets whose counts sum to 50, so both halves of the goal are delivered.",
+    "manifest": "read; manifest.md:5 states status complete, :11 carries the literal --check command, :12 names the two logs whose contents I opened (EXIT=0, and EXIT=1 with three problems after one my_verdict was set to right), and :7 names commits 1ab28d3a9, 751ace5f9 and 12fb13d6d, the last of which is a child of the reviewed head and not part of the reviewed revision.",
+    "write_paths": "the reviewed node declared five paths under docs/evidence/fragments/sn-case-file-generation/; git show --stat over 1ab28d3a9 and 751ace5f9 lists exactly benchmark-failure-read-records.jsonl, -verdicts.jsonl, .json, .html and .py, so nothing was written outside the fence and nothing declared was left unused."
+  },
+  "justifications": {
+    "durability": "benchmark-failure-read.py:40 pins a digest that benchmark-failure-read-negative-control.log shows reddening at EXIT=1 on one altered verdict, but :267 checks a case quote against a second field of the same report so a quote altered together with its recorded line survives.",
+    "evidence": "benchmark-failure-read.py:193-197 and :278 pin and recompute the digest and every count against the records, the verdicts and the reference set, and benchmark-failure-read-check.log records the EXIT=0 result, though :285-287 test only that the four answers and three changes are present.",
+    "fit": "the module follows the sibling fragment idiom of docs/evidence/fragments/sn-case-file-generation/reference-set.py:1012-1046, HERE-relative paths and a --check that recounts its own report, and its names are descriptive rather than plan-facing.",
+    "goal_fidelity": "docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read.json:75 opens the 50-row array that carries the blind read and :1882 the ten cause buckets that classify it.",
+    "reuse": "benchmark-failure-read.py:46 and :50 re-implement the JSONL reader and the reference-payload decode that docs/evidence/fragments/sn-case-file-generation/benchmark.py:202 and :224 already own in the same directory, without extending them.",
+    "scope_discipline": "both commits touch only the five paths declared in the reviewed node's write list, as git show --stat at 1ab28d3a9 and 751ace5f9 reports."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: dispatch-detail.json records the goal as \"Hand-read 50 of the record benchmark's held-out rows blind and classify why it measured nothing\"; docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read.json:75-1880 carries 50 rows each with its own my_verdict and my_reason, and :1882-1927 the ten cause buckets whose counts sum to 50, so both halves of the goal are delivered.\nVERDICT done_when: the done_when asks for 50 seeded rows with verdicts committed before the judge is read, causes with counts and quoted words, the four questions, three ordered changes, and --check passing then failing on an altered verdict; benchmark-failure-read.py:66-84 redraws the seed, :278 recomputes every count, :248-270 checks each quote against its named source, benchmark-failure-read-check.log records EXIT=0 and benchmark-failure-read-negative-control.log records EXIT=1 on one flipped verdict, and 1ab28d3a9 carries zero judge_reason fields against 83 at the head so the blind ordering is evidenced \u2014 but :285-287 assert only that questions a-d exist and that len(changes)==3, not their content or their order.\nVERDICT write_paths: the reviewed node declared five paths under docs/evidence/fragments/sn-case-file-generation/; git show --stat over 1ab28d3a9 and 751ace5f9 lists exactly benchmark-failure-read-records.jsonl, -verdicts.jsonl, .json, .html and .py, so nothing was written outside the fence and nothing declared was left unused.\nVERDICT manifest: read; manifest.md:5 states status complete, :11 carries the literal --check command, :12 names the two logs whose contents I opened (EXIT=0, and EXIT=1 with three problems after one my_verdict was set to right), and :7 names commits 1ab28d3a9, 751ace5f9 and 12fb13d6d, the last of which is a child of the reviewed head and not part of the reviewed revision.\nVERDICT diff: read both commits against base c752333ed; 1ab28d3a9 adds the 50 records, the 50 judge verdicts and the 50 blind verdicts, and 751ace5f9 adds the 405-line checker with a pinned verdict digest and seed redraw, 1290 lines of read and causes, and an 82-line HTML fragment carrying three tables, the four question headings and the three changes.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read.json:75 opens the 50-row array that carries the blind read and :1882 the ten cause buckets that classify it.\nSCORE evidence: 16\nJUSTIFICATION evidence: benchmark-failure-read.py:193-197 and :278 pin and recompute the digest and every count against the records, the verdicts and the reference set, and benchmark-failure-read-check.log records the EXIT=0 result, though :285-287 test only that the four answers and three changes are present.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: both commits touch only the five paths declared in the reviewed node's write list, as git show --stat at 1ab28d3a9 and 751ace5f9 reports.\nSCORE durability: 14\nJUSTIFICATION durability: benchmark-failure-read.py:40 pins a digest that benchmark-failure-read-negative-control.log shows reddening at EXIT=1 on one altered verdict, but :267 checks a case quote against a second field of the same report so a quote altered together with its recorded line survives.\nSCORE fit: 18\nJUSTIFICATION fit: the module follows the sibling fragment idiom of docs/evidence/fragments/sn-case-file-generation/reference-set.py:1012-1046, HERE-relative paths and a --check that recounts its own report, and its names are descriptive rather than plan-facing.\nSCORE reuse: 5\nJUSTIFICATION reuse: benchmark-failure-read.py:46 and :50 re-implement the JSONL reader and the reference-payload decode that docs/evidence/fragments/sn-case-file-generation/benchmark.py:202 and :224 already own in the same directory, without extending them.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read.py:267 non-blocking: the case_text quote check compares row[\"quote\"] with row[\"case_quote\"], two fields of the report being verified, so a quote altered together with its case_quote passes; the 8 rows classified \"generator lost a detail the case file states\" rest on that check, and I found all 8 quotes present in the archived case files so the data holds while the guard does not.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read.py:272 non-blocking: the only check that the regenerated records came from the archived case files sits behind `if ARCHIVED_CASE_FILES.is_dir()`, so an absent archive turns it into a silent no-op and --check still prints OK on records with no verified provenance \u2014 the case this run's own first attempt hit when a run directory had been deleted at release.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read.py:46 non-blocking: load_jsonl and reference_members at :50 duplicate benchmark.py:202 read_jsonl and :224 load_reference in the same directory instead of importing or extending them, so the reference-set decode now exists twice and can drift apart.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T050636484786-scfg-benchmark-failure-read/manifest.md:7 non-blocking: the commits line names 12fb13d6d, which is a child of the reviewed head 751ace5f9 and not in the reviewed revision, and the group evidence it adds (the case file names no physics group; the only group strings are entity tokens in 13 of 50 rows) is therefore missing from the head's answer to question (b).",
+  "review_node": "review-of-scfg-benchmark-failure-read-751ace5f9de8",
+  "review_run_id": "r-20261120T050927112073-review-of-scfg-benchmark-failure-read-751ace5f9de8",
+  "reviewed_base_sha": "c752333edbef286e952c71fbf453bd0d11799f18",
+  "reviewed_head_sha": "751ace5f9de8784fd9b2be66733ca5086407b60a",
+  "reviewed_run_id": "r-20261119T050636484786-scfg-benchmark-failure-read",
+  "reviewer": {
+    "backend": null,
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261120T050927112073-review-of-scfg-benchmark-failure-read-751ace5f9de8"
+  },
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T05:23:05.268205+00:00",
+  "total": 92
+}
