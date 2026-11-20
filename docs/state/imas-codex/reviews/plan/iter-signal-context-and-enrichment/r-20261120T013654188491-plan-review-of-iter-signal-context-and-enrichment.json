@@ -35,6 +35,16 @@
       "note": "The partly-right grade now applies only when a description omits a quantity or unit the vocabulary decided for that signal.",
       "reason": "",
       "when": "2026-11-20T01:47:38.655409+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "48509edb60df54e611aee222ffdc5c4344ec59ab",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The pattern population is named: field patterns with at least one pilot member.",
+      "reason": "",
+      "when": "2026-11-20T01:47:47.943600+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The partly-right grade now applies only when a description omits a quantity or unit the vocabulary decided for that signal.",
       "reason": "",
       "when": "2026-11-20T01:47:38.655409+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "48509edb60df54e611aee222ffdc5c4344ec59ab",
+      "commit_basis": "edit",
+      "note": "The pattern population is named: field patterns with at least one pilot member.",
+      "reason": "",
+      "when": "2026-11-20T01:47:47.943600+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261120T013654188491-plan-review-of-iter-signal-context-and-enrichment.json",
