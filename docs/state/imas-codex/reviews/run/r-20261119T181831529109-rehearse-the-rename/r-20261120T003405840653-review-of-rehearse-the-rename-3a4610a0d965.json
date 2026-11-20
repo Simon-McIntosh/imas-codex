@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-20T00:35:34.381Z",
+  "dispatched_at": "2026-11-20T00:34:59Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html",
+      "line": 62,
+      "severity": "non-blocking",
+      "text": "the renamed arm is quoted as \"44 failed, 17,393 passed, 184 skipped, 1 xfailed in 25:38\", but its cited log logs/after-suite-v2.log ends \"44 failed, 17393 passed, 184 skipped, 1136 deselected, 48 warnings in 1538.78s (0:25:38)\" and carries no xfailed anywhere, so the landing record states a number its own log does not report."
+    },
+    {
+      "file": "scripts/rename/cutover.py",
+      "line": 48,
+      "severity": "non-blocking",
+      "text": "the origin/document_label guard added in this diff has no test that makes either violation fire: deleting the whole loop leaves the 18-test gate green, because test_cutover_reports_a_surface_the_document_does_not_carry asserts the tool does not judge labels."
+    },
+    {
+      "file": "scripts/rename/check.py",
+      "line": 119,
+      "severity": "non-blocking",
+      "text": "the counts-unreconciled violation is never made to fire by the suite; test_check_reconciles_hits_kept_protected_and_leftover only asserts it stays silent, so a regression that stops appending the violation keeps the record's \"a search that loses or double-counts a hit fails\" claim green and unproven."
+    },
+    {
+      "file": "tests/scripts/test_rename.py",
+      "line": 375,
+      "severity": "non-blocking",
+      "text": "test_cutover_reports_a_surface_the_document_does_not_carry sets a row's label to \"Invented surface\" and then asserts check_cutover(path).ok, so the test's name claims a refusal the assertion certifies is absent; it documents the gap but contributes no guard."
+    },
+    {
+      "file": "tests/scripts/test_rename.py",
+      "line": 357,
+      "severity": "non-blocking",
+      "text": "the row count is asserted as len(claimed_inventory) + len(claimed_brief) + 1, where the literal 1 encodes exactly one duplicated document label (registry and azure both claim \"Registry images\"); splitting that label or adding a second shared one reddens a correct edit."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261120T003405840653-review-of-rehearse-the-rename-3a4610a0d965",
+  "review_text": "VERDICT goal: read plan codac-uda-signals s21 (docs/plans/codac-uda-signals.html:142) and the node's brief; the delta since the prior review closes the six findings recorded at 656b6b87a \u2014 the closing search now reconciles kept/protected/leftover (scripts/rename/check.py:112-123), cutover rows carry an origin and document label (scripts/rename/cutover.json:8-11), and the landing record restates its counts (docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html:35,62,82).\nVERDICT done_when: read the manifest's tests and test_logs lines, then re-derived the measure from the cited logs: logs/base-suite-v3.log and logs/after-suite-v2.log each carry 44 distinct FAILED ids and comm over the two sorted lists is empty on both sides (0 added, 0 fixed); logs/check-v2.log and logs/later-check.log carry files_scanned 8891/8897, old_name_hits 194751/194797, kept_hits 194722/194768, protected 29, leftover_count 0, reconciled true, ok true; logs/apply-report-v2.json and logs/later-apply-report.json carry changed_file_count 1885, renamed_count 5, old_name_hits_before 213169/213215, kept_identifiers 22, kept_digests 11, kept_altered [].\nVERDICT write_paths: the declared paths are scripts/rename, tests/scripts and the two codac-uda-signals evidence paths; git diff --stat 656b6b87a..3a4610a0d touches exactly scripts/rename/cutover.json, scripts/rename/check.py, scripts/rename/cutover.py, tests/scripts/test_rename.py and docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html, all inside that set.\nVERDICT manifest: read; it states PYTHONPATH=$PWD UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync pytest tests/scripts/ -p no:cacheprovider --no-header as 18 passed and names logs/gate-test-rename.log, whose header records revision 5603af804 and whose last line is EXIT=0; the two commits after that gate change only the evidence html (git diff --stat 5603af804..3a4610a0d is 1 file, 3 insertions, 5 deletions).\nVERDICT diff: read all four commits (53c95aaac is the base side; 87f003916, 5603af804, 101c07bdb, 3a4610a0d are the delta above 656b6b87a) \u2014 they add the protected total and the reconciled identity to CheckReport, extend format_report with it, validate each cutover row's origin/document_label, tag every cutover row with one of the two, restate the evidence counts, and add four guard tests plus an inventory-label comparison.\nVERDICT manifest re-check of prior findings: the later-revision arm's report now carries kept_identifiers 22 and kept_digests 11 (logs/later-apply-report.json), the duplicated 29-occurrence sentence is gone from the html, the 21-surface claim is replaced by 16 document labels plus 4 brief surfaces, format_report prints protected, and the empty-scan, blind-search and unaccounted-receipt guards now have firing tests (tests/scripts/test_rename.py:280,294,312).\nCALL_SITES: scripts/rename/__main__.py:main (check and cutover subcommands), scripts/rename/check.py:main, scripts/rename/cutover.py:main\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/rename/check.py:112 reconciles the three totals the evidence now quotes, and scripts/rename/cutover.json:8 tags every row with an origin, which is what the delta promised.\nSCORE evidence: 16\nJUSTIFICATION evidence: the gate log logs/gate-test-rename.log records 18 passed at 5603af804 and every headline number re-derives from the cited logs, but rehearse-the-rename.html:62 quotes an xfailed line its own log does not carry.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 656b6b87a..3a4610a0d is the five declared paths and nothing else, and each carries only the delta's own subject.\nSCORE durability: 15\nJUSTIFICATION durability: tests/scripts/test_rename.py:280 and :294 make the previously unreachable empty-scan and blind-search guards fire, but the new scripts/rename/check.py:119 and scripts/rename/cutover.py:48 guards have no test that fires them and tests/scripts/test_rename.py:375 asserts a non-refusal.\nSCORE fit: 17\nJUSTIFICATION fit: the added fields follow the dataclass style of scripts/rename/check.py:24-45 and the new tests use the existing tree/kept_list fixtures; the helper name inventory_labels at tests/scripts/test_rename.py:23 is clear, though SURFACE_TABLES encodes section-id substrings.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search over scripts/, imas_codex/ and tests/ for an existing evidence-HTML table-label reader found only the wiki adapters (imas_codex/discovery/wiki/adapters.py) parsing TWiki, a different capability, so the diff neither duplicates an owner nor forks one.\nFINDING docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html:62 non-blocking: the renamed arm's summary is quoted with \"1 xfailed\" while logs/after-suite-v2.log reports \"44 failed, 17393 passed, 184 skipped, 1136 deselected, 48 warnings\" and contains no xfailed, so the landing record states a number its log does not.\nFINDING scripts/rename/cutover.py:48 non-blocking: the origin/document_label guard has no test that makes either violation fire, so deleting it leaves the 18-test gate green.\nFINDING scripts/rename/check.py:119 non-blocking: counts-unreconciled is never made to fire by the suite; tests/scripts/test_rename.py:324 only asserts it stays silent.\nFINDING tests/scripts/test_rename.py:375 non-blocking: the test named for reporting a surface the document does not carry asserts check_cutover(path).ok, certifying the tool does not check labels \u2014 the name states the opposite of the assertion.\nFINDING tests/scripts/test_rename.py:357 non-blocking: the row-count assertion hardcodes a literal +1 for the single duplicated document label (registry and azure both claim \"Registry images\"), so a correct edit that splits it reddens the gate.",
+  "reviewed_base_sha": "656b6b87ac3af32b819abd1b3b21316211be96b5",
+  "reviewed_head_sha": "3a4610a0d9652279748ae62cc3f33cb343ab823b",
+  "reviewed_run_id": "r-20261119T181831529109-rehearse-the-rename",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T00:43:56.523816+00:00",
+  "total": 106
+}
