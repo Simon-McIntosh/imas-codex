@@ -49,7 +49,30 @@
   "plan_slug": "sn-case-file-generation",
   "plan_version": 24,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ac2c8751d82ad98f753ca6cddaf90bf8ab9dcbf9",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The graph read is committed as case-file-source-census.json with its query and per-member rows, and section 8 cites it with the exact counts (59 of 286 without a source: 44 derived-producer only, 42 of them parents; 15 with no producer, 14 superseded).",
+      "reason": "",
+      "when": "2026-11-21T20:12:04.608531+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ac2c8751d82ad98f753ca6cddaf90bf8ab9dcbf9",
+      "commit_basis": "edit",
+      "note": "The graph read is committed as case-file-source-census.json with its query and per-member rows, and section 8 cites it with the exact counts (59 of 286 without a source: 44 derived-producer only, 42 of them parents; 15 with no producer, 14 superseded).",
+      "reason": "",
+      "when": "2026-11-21T20:12:04.608531+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-case-file-generation/r-20261121T155428333897-plan-review-of-sn-case-file-generation.json",
   "review_run_id": "r-20261121T155428333897-plan-review-of-sn-case-file-generation",
   "reviewed_blob_sha": "8358db5165922c42b0cd5d18bc5ecf8d06a735c5",
   "rubric": "content",
