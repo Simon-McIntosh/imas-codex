@@ -6,10 +6,10 @@
     {
       "id": "historical-evidence",
       "path": "docs/evidence",
-      "include": ["*.html", "*.json", "*.md"],
+      "exclude": ["*.py", "*.sh"],
       "surface": "Historical evidence data and prose: landing fragments, inventory, prototype reports",
       "disposition": "kept",
-      "reason": "The plan requires historical evidence to keep its bytes; these fragments are the measured record the plan and its reviews cite, and rewriting them would restate measurements as what they were not. Only the .html, .json and .md bytes are kept: the Python beside them is live code that tests and plan gates load by path, so it is renamed like any other code. This is the split already made for docs/figures, where the rendered figure and its raw measurement JSON are kept and the figure script is renamed.",
+      "reason": "The plan requires historical evidence to keep its bytes, and the default here is to keep everything under the path: these fragments are the measured record the plan and its reviews cite, and rewriting them would restate measurements as what they were not. A new evidence file type is therefore kept without a change to this list. Only the `code` beside the data is renamed, through the excluded patterns: the Python and shell files are scripts that tests and plan gates load by path, so they follow the package. This is the split already made for docs/figures, where the rendered figure and its raw measurement JSON are kept and the script that draws it is renamed.",
       "min_hits": 6000
     },
     {
@@ -48,9 +48,17 @@
       "id": "project-state",
       "path": "docs/state",
       "surface": "In-tree reckon project state, run records, reviews and crew file",
-      "disposition": "migrated",
-      "reason": "Run records and review payloads are preserved byte-for-byte here; the project key and the directory itself move to the new name in the cutover step that serves reckon, not in the tracked-tree rename.",
+      "disposition": "kept",
+      "reason": "Run records and review payloads are preserved byte-for-byte here, and so are the directory name and the project key it carries. Reckon has no supported way to rename a project key, so serving the project under a new key would re-register its history under new identities. `docs/state/imas-codex` therefore keeps its name and bytes; a later migration that gives reckon a supported key rename is out of scope for this cutover.",
       "min_hits": 1000
+    },
+    {
+      "id": "reckon-resource-records",
+      "path": "docs/.reckon",
+      "surface": "Reckon's typed-resource index, project-state migration record and locks",
+      "disposition": "kept",
+      "reason": "These files name resources by their project-qualified identifiers (`imas-codex:evidence:...`, `imas-codex:plan:...`) and record where each one lives. The identifiers are keys reckon resolves against, not the product name, so the bytes stay as they are while the project keeps its key.",
+      "min_hits": 120
     },
     {
       "id": "crew-reports",
@@ -92,6 +100,27 @@
       "disposition": "kept",
       "reason": "The tests plant an old-name reference and alter a kept-name surface to prove the checks fire; the fixtures must spell what they detect.",
       "min_hits": 2
+    }
+  ],
+  "kept_contexts": [
+    {
+      "id": "reckon-spa-mount",
+      "pattern": "(?<![\\w.~/-])/imas-codex/",
+      "reason": "A page or figure URL mounted under the key keeps the project key: the rename tool's own report links and the evidence pages serve from /imas-codex/... because that is where reckon mounts the project, not because the product is called that. The lookbehind excludes a filesystem path (~/.local/share/imas-codex/..., /home/<user>/Code/imas-codex/...), which names the product and is renamed.",
+      "min_hits": 40
+    },
+    {
+      "id": "reckon-project-argument",
+      "pattern": "--project[= ]+['\"]?imas-codex\\b",
+      "reason": "The project key passed to a reckon command names the project, not the product, and the key does not move in this cutover. `--project` passed to uv names a directory and is renamed with the checkout paths.",
+      "min_hits": 0
+    },
+    {
+      "id": "reckon-plan-reference",
+      "paths": ["docs/evidence"],
+      "pattern": "imas-codex:[a-z][a-z0-9-]+",
+      "reason": "A project-qualified plan or resource reference names a record the live plan system resolves by key, so it is kept. Scoped to the evidence tree, where such references appear in the scripts beside the kept bytes, because outside it the same spelling is a container image tag (`ghcr.io/.../imas-codex:latest`) or an application title, both the product and both renamed.",
+      "min_hits": 1
     }
   ],
   "kept_names": [

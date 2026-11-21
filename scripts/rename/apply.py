@@ -34,6 +34,7 @@ class ApplyReport:
     old_name_hits_before: int = 0
     old_name_hits_after: int = 0
     hits_by_spelling: dict[str, int] = field(default_factory=dict)
+    reckon_key_hits: dict[str, int] = field(default_factory=dict)
     changed_files: list[str] = field(default_factory=list)
     renamed: list[dict[str, str]] = field(default_factory=list)
     kept_hits: int = 0
@@ -52,10 +53,15 @@ class ApplyReport:
     def renamed_count(self) -> int:
         return len(self.renamed)
 
+    @property
+    def renamed_occurrences(self) -> int:
+        return sum(self.hits_by_spelling.values())
+
     def as_dict(self) -> dict:
         data = dict(self.__dict__)
         data["changed_file_count"] = self.changed_file_count
         data["renamed_count"] = self.renamed_count
+        data["renamed_occurrences"] = self.renamed_occurrences
         return data
 
 
@@ -143,12 +149,18 @@ def apply_rename(
             report.old_name_hits_after += hits
             continue
         report.old_name_hits_before += hits
-        guarded, stand_ins = protect(text, identifiers)
+        guarded, stand_ins, context_counts = protect(
+            text, identifiers, kept.contexts_for(rel)
+        )
         replaced, counts = rename_text(guarded)
         replaced = restore(replaced, stand_ins)
         for spelling, found in counts.items():
             report.hits_by_spelling[spelling] = (
                 report.hits_by_spelling.get(spelling, 0) + found
+            )
+        for context_id, found in context_counts.items():
+            report.reckon_key_hits[context_id] = (
+                report.reckon_key_hits.get(context_id, 0) + found
             )
         if replaced != text:
             report.changed_files.append(rel)

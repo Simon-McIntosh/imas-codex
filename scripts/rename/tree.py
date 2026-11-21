@@ -130,7 +130,13 @@ def subtree_digest(tree: Path, entry: KeptPath) -> str:
 
 @dataclass(frozen=True)
 class KeptPath:
-    """A path whose bytes the rename must not touch, with why."""
+    """A path whose bytes the rename must not touch, with why.
+
+    `include` narrows the path to the named patterns.  `exclude` keeps
+    everything under the path except the named patterns, which is the default
+    for an evidence tree: a new evidence file type is kept without a list
+    change, while the live code beside it (Python and shell) is still renamed.
+    """
 
     id: str
     path: str
@@ -138,16 +144,19 @@ class KeptPath:
     disposition: str
     surface: str
     include: tuple[str, ...] = ()
+    exclude: tuple[str, ...] = ()
     min_hits: int = 0
 
     def covers(self, rel: str) -> bool:
         root = self.path.rstrip("/")
         if not (rel == root or rel.startswith(root + "/")):
             return False
-        if not self.include:
-            return True
-        return any(
+        if self.include and not any(
             fnmatch.fnmatch(rel, f"{root}/{pattern}") for pattern in self.include
+        ):
+            return False
+        return not any(
+            fnmatch.fnmatch(rel, f"{root}/{pattern}") for pattern in self.exclude
         )
 
 
@@ -161,9 +170,36 @@ class KeptName:
 
 
 @dataclass(frozen=True)
+class KeptContext:
+    """A spelling that names something other than the product, kept in place.
+
+    The pattern matches the whole context, so one spelling is told apart by
+    what surrounds it: a page or figure URL mounted under the project key is
+    kept, while the same spelling in an import is renamed.  The context is
+    read out of the list so a new occurrence in a renamed file is covered by
+    the rule rather than by a hand edit.
+    """
+
+    id: str
+    pattern: str
+    reason: str
+    paths: tuple[str, ...] = ()
+    min_hits: int = 0
+
+    def covers(self, rel: str) -> bool:
+        if not self.paths:
+            return True
+        return any(
+            rel == path.rstrip("/") or rel.startswith(path.rstrip("/") + "/")
+            for path in self.paths
+        )
+
+
+@dataclass(frozen=True)
 class KeptList:
     kept_paths: tuple[KeptPath, ...]
     kept_names: tuple[KeptName, ...]
+    kept_contexts: tuple[KeptContext, ...]
     old_names: tuple[str, ...]
 
     def covering(self, rel: str) -> KeptPath | None:
@@ -172,11 +208,17 @@ class KeptList:
                 return entry
         return None
 
+    def contexts_for(self, rel: str) -> tuple[KeptContext, ...]:
+        return tuple(entry for entry in self.kept_contexts if entry.covers(rel))
+
 
 def load_kept_list(path: Path) -> KeptList:
     data = json.loads(path.read_text())
     return KeptList(
         kept_paths=tuple(KeptPath(**entry) for entry in data["kept_paths"]),
         kept_names=tuple(KeptName(**entry) for entry in data["kept_names"]),
+        kept_contexts=tuple(
+            KeptContext(**entry) for entry in data.get("kept_contexts", [])
+        ),
         old_names=tuple(data["old_names"]),
     )
