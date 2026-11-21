@@ -1,0 +1,96 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-21T07:48:04.735Z",
+  "dispatched_at": "2026-11-21T07:37:36Z",
+  "findings": [
+    {
+      "anchor": "plan.html:157",
+      "id": "reasoning-1",
+      "reason": "with no edge between a pulse and a system the only remaining evidence is the pulse or category name, which the same section forbids (\"never inferred from a likeness of names alone\"), so kind 1 is either computed by the rule the section bans or ships with zero links.",
+      "text": "the first link kind (\"each pulse category is linked to the plant systems its pulses cover\") names no content that associates a pulse with a plant system: `Pulse` holds facility, archive, name, start/end, status, description and `IN_PULSE_CATEGORY` only, and nothing connects a pulse or a category to `PlantStructure` (imas_codex/schemas/facility.yaml:2157-2204)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:157",
+      "id": "reasoning-2",
+      "reason": "for exactly the components the cited read leaves without a row, no establishing source is named, so the deliverable is likely vacuous while its count still reads as a completed measurement.",
+      "text": "the second link kind (\"each plant component is linked to its place in the plant structure where a source establishes it\") duplicates what the graph already declares: `PlantComponent.plant_structure` carries `COMPONENT_PLANT_STRUCTURE` and is populated from imported source rows (`ROW_PLANT_STRUCTURE`), the same signal-list-row source the section says it removes as a dependency (imas_codex/schemas/facility.yaml:1936-1941, 1999-2005)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:158",
+      "id": "reasoning-3",
+      "reason": "the worker must either widen the search tool, an undeclared second deliverable, or ship a check that can never pass.",
+      "text": "\"a pulse search for one plant system chosen beforehand returns only categories linked to it\" cannot run against the server the plan describes: the pulse search accepts `designation`, `category_id` and `test_kind` and no plant-system argument, while only the signal listing accepts `plant_system` (imas_codex/tools/plant_search.py:105-186)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:158",
+      "id": "done_when-1",
+      "reason": "the component-to-structure guard is never shown to fire, so a guessed structure link passes the whole gate.",
+      "text": "the negative controls cover kind 1 (an invented category resembling a system), kind 3 (two invented signals on different components sharing a field code) and the reading file, and none covers kind 2",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:158",
+      "id": "done_when-2",
+      "reason": "the pre-registration is what makes the hand-read meaningful, and as written a run can choose its twenty after seeing which links it wrote.",
+      "text": "\"twenty links chosen before the run and written to a private file\" cannot be satisfied as written, because the links come into existence during the run; only their subjects or candidate pairs can be registered beforehand",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "2b5c1e6992bc587ea8faa6eee2575eb14bd6953c",
+  "plan_fingerprint": "a601ed9e2a3219b5d2c02cd71d53b2c20e577745cdbd2c1d950f28693ed01ada",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 94,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261121T073649424424-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "b38de2a04f8b2af103c8c61eeb8cda75fd4dc482",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 s24 cites no file anchor, and the new `_document` comments cite `scripts/rename/`, which exists at the reviewed revision with the tool, the kept-name list and the cutover sequence.",
+    "done_when": "finding \u2014 the component-to-structure link kind has no negative control, and the twenty \"links chosen before the run\" cannot be defined before the run creates them.",
+    "evidence_paths": "pass \u2014 s24 puts its gate output in the landing record and its pre-registration lists in a private file whose digest is in the record; no scratchpad or node-local path is named.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach symbols, files or comments, and the section names no code path.",
+    "reasoning": "findings \u2014 the first link kind's establishing content does not exist in the schema, the second link kind's source is the one it claims to replace, and the plant-system pulse search the done-when requires is not a capability of the server the plan describes.",
+    "single_goal": "pass \u2014 the three link kinds share one mechanism (a rule plus recorded provenance) and one gate shape with per-kind figures, so a partial delivery shows in the counts rather than hiding.",
+    "wiring": "pass \u2014 s24's `data-links=\"codac-uda-signals#s16,codac-uda-signals#s20\"` agrees with `plan-section-depends-on.s24`, the declaration entry `s24: implementable` is present, and both dependencies resolve to sections that exist and are declared done."
+  },
+  "section_digests": {
+    "_document": "96611b7ee6bf621977c288f58603c718e1e1893211bd0b77552f8fc604b17f34",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "759b1a8a0d0172458970abb033b7b0891dbfbea4a146fe46e1d40088ad5b1e2b",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "210c417a1f066fe923870a6e8053c76cb308181f6dd40abe83ad1c825a5ee841",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "4234dc0444b89df1ba3c2fb0011becde6760366f41d1b857f7f45b9020491430",
+    "s19": "62a9fac261c2abc0b6c2cadd655ec95a4ad2338cf99289d0b35221256277cd7c",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s20": "5b6478a19c4933df522a5f65b5029c4d8c8fbaa56108cf7537380f3b2160b330",
+    "s21": "766504c3cf6d6cb5fbb80fc49533f32eb2dd8d9f7686b55ca616d9cac1f04941",
+    "s22": "6e220f5b29e47a2a3d17bfd49b65b741c49f7f976c2b12c97a1036066b587ad8",
+    "s23": "b2db24284a629203a22b94e1fd6d97616eb45f4402ca4961f80fa1017f98cf3b",
+    "s24": "c4e96f54293da58f374faf41183d9102b73bfb66e4b315c7f208170ffe09e92d",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T07:48:12.332812+00:00",
+  "total": null
+}
