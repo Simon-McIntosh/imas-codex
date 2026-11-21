@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-21T11:33:50.468Z",
+  "dispatched_at": "2026-11-21T11:17:20Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/measure-category-names-against-plant-codes.html",
+      "line": 85,
+      "severity": "non-blocking",
+      "summary": "The fragment says the deliberate negative control makes the committed classifier fail 'four' of the focused tests, while the negative-control log it points to lists five failing ids and a '5 failed, 10 passed' summary at EXIT=1, and the source manifest also says five. The control is stronger than the text claims, but a tracked evidence document that misstates its own gate by one is checkable only against the log it cites."
+    },
+    {
+      "file": "imas_codex/discovery/signals/category_codes.py",
+      "line": 156,
+      "severity": "non-blocking",
+      "summary": "select_hand_sample re-implements deterministic seeded stratified sampling that already exists privately as imas_codex/standard_names/benchmark_roles.py:283 (_stratified_sample, round-robin buckets under random.Random seeded shuffle) and imas_codex/standard_names/judgment_goldens.py:117 (_sample, round-robin buckets ordered by a rank). Neither is a shared owner and both are private to the standard-names benchmark, and the new draw is materially stronger (per-identity hash ranking, so input order cannot change the sample), so this is not a fork of an owned capability; recorded so that a future sampler gets one owner rather than a third copy."
+    }
+  ],
+  "justifications": {
+    "durability": "The recorded negative control reddens five ids including tests/discovery/test_category_codes.py:30, and the second commit's eligibility change is guarded by the ValueError leg of tests/discovery/test_category_codes.py:123-128, so a regression to link_count makes size=2 selectable somewhere and reddens the raises assertions.",
+    "evidence": "The gate at tests/discovery/test_category_codes.py reproduced 15 passed at head in this review, and the private summary.json matches the fragment, but the reviewed run armed no baseline arm and the published counts rest on a private one-off script (measure.py) that no tracked test executes.",
+    "fit": "imas_codex/discovery/signals/category_codes.py:1-19 follows the module style of imas_codex/discovery/signals/variable_names.py, frozen dataclass and pure functions, and no name is a plan or ticket identifier.",
+    "goal_fidelity": "docs/evidence/fragments/codac-uda-signals/measure-category-names-against-plant-codes.html reports every quantity the plan asks for, and imas_codex/discovery/signals/category_codes.py:56-84 only classifies, so nothing is linked.",
+    "reuse": "Search over imas_codex/ for sampling and delimited matching found no shared owner; the nearest samplers are the private standard-names helpers named in the finding, and delimited_parts has no precedent.",
+    "scope_discipline": "git diff --stat f77dd1120 bf4de0896 lists four files, all inside the declared write paths, and the fragment states zero links written and zero search behaviour changed."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261121T111649974096-review-of-measure-category-names-against-plant-codes-bf4de0896e9c",
+  "reviewed_base_sha": "f77dd11202293041dbc5b5a73ff3f47ef40e5fff",
+  "reviewed_head_sha": "bf4de0896e9c89b88b50c5cc4ccd97a50a281452",
+  "reviewed_run_id": "r-20261121T103158287430-measure-category-names-against-plant-codes",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash",
+    "reviewed_at": "2026-11-21T12:30:00Z",
+    "reviewer_run_id": "r-20261121T111649974096-review-of-measure-category-names-against-plant-codes-bf4de0896e9c"
+  },
+  "rubric": "node",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T11:34:05.119680+00:00",
+  "total": 106,
+  "verdicts": {
+    "diff": "Read both commits against f77dd1120; 5136b436a adds the module, tests, fragment and figure, and bf4de0896 narrows select_hand_sample eligibility from link_count to delimited_control or delimited_component (imas_codex/discovery/signals/category_codes.py:166-174) with a new test at tests/discovery/test_category_codes.py:123, which is the correct repair and is guarded by that test's ValueError leg.",
+    "done_when": "Every element of the plan's done_when appears in the fragment at docs/evidence/fragments/codac-uda-signals/measure-category-names-against-plant-codes.html and reconciles with the private summary.json (744; 711/6, 11/1, 17/1; 728/0/16 with 5906/0/51; digest f9c782a1cb2a636ac95237bff7178bfbcdc64ba7fc41766a2e3c4eaf425f5158 matching sha256sum of hand-sample.json; 5/0/15); the two negative-control cases are tests at tests/discovery/test_category_codes.py:30 and :37.",
+    "goal": "The node's goal is a measurement of whether and how a pulse category name identifies the plant system its pulses cover without writing a link; docs/evidence/fragments/codac-uda-signals/measure-category-names-against-plant-codes.html records 744 categories read, 711/11/17 categories by way of carrying a code with 6/1/1 distinct codes, 728/0/16 categories by codes linked holding 5906/0/51 pulses that sum to 744 and 5957, and a sealed twenty read 5 right, 0 wrong, 15 undecidable with a stated 95.565% share; imas_codex/discovery/signals/category_codes.py classifies names only and its diff contains no graph write.",
+    "manifest": "Read: status complete, two commits (5136b436a, bf4de0896), the literal gate command and its log, a negative-control log with five failing ids and EXIT=1, a SHA-256 check that the mutated module was restored, and the landing arithmetic 728+0+16=744.",
+    "write_paths": "The delivered diff f77dd1120..bf4de0896 touches exactly four paths, imas_codex/discovery/signals/category_codes.py, tests/discovery/test_category_codes.py, the evidence fragment and the figure directory's rule-and-hand-reading.svg, all inside the declared write paths; no file outside them is in the diff."
+  }
+}
