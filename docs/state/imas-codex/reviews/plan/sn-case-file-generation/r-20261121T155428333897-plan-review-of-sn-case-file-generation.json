@@ -89,6 +89,16 @@
       "note": "Section 8 no longer changes any prompt text: it reports each missing channel with the names affected, and supplying it belongs to the sections that own the prompts, so it cannot move the prompt section 3 scored.",
       "reason": "",
       "when": "2026-11-21T20:12:43.927442+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ac2c8751d82ad98f753ca6cddaf90bf8ab9dcbf9",
+      "commit_basis": "edit",
+      "finding": "done_when-3",
+      "note": "Section 8 renders each stage's prompt without sending it, calls no model, and states its metered spend as zero; section 9 states a ceiling of USD 10.",
+      "reason": "",
+      "when": "2026-11-21T20:12:56.362383+00:00"
     }
   ],
   "responses": {
@@ -109,6 +119,15 @@
       "note": "A family is fixed as the members that share one parent in the graph and no other grouping.",
       "reason": "",
       "when": "2026-11-21T20:12:29.619866+00:00"
+    },
+    "done_when-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "ac2c8751d82ad98f753ca6cddaf90bf8ab9dcbf9",
+      "commit_basis": "edit",
+      "note": "Section 8 renders each stage's prompt without sending it, calls no model, and states its metered spend as zero; section 9 states a ceiling of USD 10.",
+      "reason": "",
+      "when": "2026-11-21T20:12:56.362383+00:00"
     },
     "reasoning-1": {
       "action": "acted",
