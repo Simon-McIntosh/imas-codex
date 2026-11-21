@@ -1,0 +1,116 @@
+<section id="stop-the-graph-by-listed-pids-delivery">
+  <h3>Stopping the graph and embed services selects pids, not names</h3>
+  <p>Both stop paths used a command-line pattern as their selector. On a shared
+  login node one uid carries every project's fleet, and a shell whose own argv
+  contains the service name matches the same pattern, so a stop could signal a
+  process it never inspected. Each selection now comes from a fact attributable
+  to this service only:</p>
+  <ul>
+    <li>a scheduler job id, read from the process cgroup (<code>/job_&lt;id&gt;/</code>)
+    or from the job the scheduler lists for the service;</li>
+    <li>a pid the service's own launcher recorded (the login embed writes
+    <code>codex-embed.pid</code> at start);</li>
+    <li>a working directory or an open file inside this service's graph store
+    path.</li>
+  </ul>
+  <p>The scan prints every holder with its age and command line before any
+  signal, signals exactly those pids, sends SIGTERM first, and escalates to
+  SIGKILL only for a listed pid still alive after the stated wait. A process
+  that names the service but holds neither the store nor the job is printed as
+  left alone with the reason and is never signalled.</p>
+  <p>A stop returns success only after the job has left the scheduler and no
+  listed process still holds the store; otherwise it raises, so lock cleanup
+  cannot run while Neo4j is still flushing its shutdown checkpoint.</p>
+
+  <table>
+    <thead><tr><th>Removed form</th><th>File and function</th><th>Selector now</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>pgrep -u "$USER" -f "&lt;store-holder pattern</code> | head -1</code> then <code>kill</code></td>
+        <td><code>iter_codex/cli/services.py</code> &mdash; <code>_term_neo4j_on_node</code></td>
+        <td>store path (cwd, open fd) or the service's scheduler job id</td>
+      </tr>
+      <tr>
+        <td><code>pgrep -u $USER -f "Neo4jCommunity" | head -1</code> then <code>kill</code></td>
+        <td><code>iter_codex/cli/services.py</code> &mdash; <code>_stop_service</code></td>
+        <td>store path or the listed neo4j job id, through <code>_term_neo4j_on_node</code></td>
+      </tr>
+      <tr>
+        <td><code>ssh ... pgrep -u $USER -f 'neo4j_.*community.*\.sif' | head -1</code></td>
+        <td><code>iter_codex/cli/services.py</code> &mdash; <code>_stop_login_services</code></td>
+        <td>local process whose cwd or open file is this graph's store (<code>stop_local_store_holders</code>)</td>
+      </tr>
+      <tr>
+        <td><code>pgrep -u "$USER" -f "&lt;store-holder pattern&gt;"</code> guarding lock removal</td>
+        <td><code>iter_codex/cli/services.py</code> &mdash; <code>_clean_neo4j_locks</code></td>
+        <td>the same store/job scan; a holder raises with its listing before any file is replaced</td>
+      </tr>
+      <tr>
+        <td><code>pgrep -u "$USER" -f "&lt;store-holder pattern&gt;"</code> then TERM/KILL</td>
+        <td><code>iter_codex/cli/services.py</code> &mdash; <code>_kill_neo4j_on_node</code></td>
+        <td>store path or job id; other stores reported left alone</td>
+      </tr>
+      <tr>
+        <td><code>pgrep -u $USER -f "iter-codex embed"</code> and its survivor re-check</td>
+        <td><code>iter_codex/cli/services.py</code> &mdash; <code>_kill_embed_orphans</code></td>
+        <td>the embed job id from the process cgroup; with no job listed nothing is signalled</td>
+      </tr>
+      <tr>
+        <td><code>pgrep -u $USER -f "iter-codex embed start"</code></td>
+        <td><code>iter_codex/cli/services.py</code> &mdash; <code>_kill_login_embed</code></td>
+        <td>the pid the launcher recorded in <code>codex-embed.pid</code></td>
+      </tr>
+      <tr>
+        <td><code>pkill -15 -f "neo4j_.*community.sif"</code>, <code>pkill -15 -f "Neo4jCommunity"</code>, <code>pkill -15 -f "neo4j.*console"</code></td>
+        <td><code>iter_codex/graph/neo4j_ops.py</code> &mdash; <code>Neo4jOperation._stop_neo4j</code></td>
+        <td><code>stop_local_store_holders</code>, after the scheduler job has exited</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Two <code>pgrep</code> calls remain in <code>neo4j_ops.py</code> and one in
+  <code>_get_service_load</code>; each only reports diagnostic text or resource
+  measurement and feeds no signal. <code>iter_codex/cli/embed.py</code> keeps
+  its own <code>pgrep</code> calls and is outside this change.</p>
+
+  <table>
+    <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Base arm, <code>f13d2860addec7925209d7095d0e80b9a339df48</code>, default tier</td>
+        <td>4 failed, 1027 passed, 415 deselected; exit 1</td>
+      </tr>
+      <tr>
+        <td>Delivered arm, same tier and command</td>
+        <td>4 failed, 1037 passed, 415 deselected; exit 1</td>
+      </tr>
+      <tr>
+        <td>Added failures against base</td>
+        <td>none; the four failures are identical on both arms</td>
+      </tr>
+      <tr>
+        <td>Selection and signalling tests</td>
+        <td>9 passed in 1.08 s; a fake process table is walked by the real scan script</td>
+      </tr>
+      <tr>
+        <td>Store wait and lock tests</td>
+        <td>9 passed in 1.08 s</td>
+      </tr>
+      <tr>
+        <td>Negative control, store-path attribution removed</td>
+        <td>4 failed, 5 passed; exit 1; the other-store process is signalled</td>
+      </tr>
+      <tr>
+        <td>Negative control, job-exit wait removed</td>
+        <td>3 failed, 6 passed; exit 1; the expected-raise test does not raise</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>The tests build a fake <code>/proc</code> tree and run the real selection
+  script against it, so they exercise the selector rather than a description of
+  it. Each arm is one <code>rigel</code> job with its log on GPFS
+  (<code>~/.cache/stop-the-graph-base/logs/base.log</code> and
+  <code>head.log</code> respectively). No live service, job or process was
+  signalled, stopped, started or cancelled for these results.</p>
+</section>
