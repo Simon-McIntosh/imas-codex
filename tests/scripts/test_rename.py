@@ -12,6 +12,7 @@ from scripts.rename.__main__ import main
 from scripts.rename.apply import apply_rename, tree_digest
 from scripts.rename.check import check_tree
 from scripts.rename.cutover import check_cutover
+from scripts.rename.rules import protect, rename_text, restore
 from scripts.rename.tree import load_kept_list
 
 INVENTORY = Path(
@@ -827,3 +828,178 @@ def test_cutover_reports_an_unaccounted_surface(tmp_path: Path) -> None:
 
     assert not report.ok
     assert any("an-uncovered-surface" in v for v in report.violations)
+
+
+SHIPPED_KEPT_LIST = (
+    Path(__file__).resolve().parents[2] / "scripts" / "rename" / "kept_names.json"
+)
+
+UNMOVED_CONTEXT_IDS = (
+    "checkout-directory",
+    "reckon-worktree-root",
+    "gate-script-cache",
+)
+
+# Literal strings in an invented home directory, one per spelling of each
+# directory the cutover leaves where it is.  The directory names are the real
+# ones; the home is not the operator's.  The environment-variable samples are
+# the spellings the rename would break first: they are what the root agent
+# instructions put on the environment when a worker runs a gate.
+UNMOVED_SAMPLES = (
+    pytest.param(
+        "checkout-directory",
+        "/home/tester/Code/imas-codex",
+        id="checkout-directory-absolute",
+    ),
+    pytest.param(
+        "checkout-directory",
+        "/home/tester/Code/imas-codex/.venv",
+        id="checkout-directory-absolute-venv",
+    ),
+    pytest.param(
+        "checkout-directory", "~/Code/imas-codex", id="checkout-directory-tilde"
+    ),
+    pytest.param(
+        "checkout-directory",
+        "cd ~/Code/imas-codex && uv run --no-sync pytest",
+        id="checkout-directory-tilde-recipe",
+    ),
+    pytest.param(
+        "checkout-directory", "$HOME/Code/imas-codex", id="checkout-directory-env-home"
+    ),
+    pytest.param(
+        "checkout-directory",
+        "${HOME}/Code/imas-codex/.env",
+        id="checkout-directory-braced-home",
+    ),
+    pytest.param(
+        "checkout-directory",
+        "${userHome}/Code/imas-codex",
+        id="checkout-directory-userhome",
+    ),
+    pytest.param(
+        "reckon-worktree-root",
+        "/home/tester/Code/.reckon-worktrees/imas-codex-c994bf55fb01",
+        id="reckon-worktree-root-absolute",
+    ),
+    pytest.param(
+        "reckon-worktree-root",
+        "/home/tester/Code/.reckon-worktrees/imas-codex-c994bf55fb01/node/.env",
+        id="reckon-worktree-root-node",
+    ),
+    pytest.param(
+        "reckon-worktree-root",
+        "~/.reckon-worktrees/imas-codex-0a1b2c3d4e5f/node",
+        id="reckon-worktree-root-tilde",
+    ),
+    pytest.param(
+        "gate-script-cache",
+        "~/.cache/imas-codex-live-rewrite",
+        id="gate-script-cache-tilde",
+    ),
+    pytest.param(
+        "gate-script-cache",
+        "~/.cache/imas-codex-live-rewrite/run-gate.sh",
+        id="gate-script-cache-script",
+    ),
+    pytest.param(
+        "gate-script-cache",
+        "${HOME}/.cache/imas-codex-live-rewrite/run.sh",
+        id="gate-script-cache-braced-home",
+    ),
+)
+
+# The roots the cutover does move, and the two spellings that name the product
+# from outside a filesystem path: each must still be renamed when every
+# shipped context is applied, or a pattern has grown too wide.
+RENAMED_SAMPLES = (
+    pytest.param(
+        "~/.local/share/imas-codex/logs",
+        "~/.local/share/iter-codex/logs",
+        id="state-root",
+    ),
+    pytest.param(
+        "~/.local/state/imas-codex", "~/.local/state/iter-codex", id="local-state-root"
+    ),
+    pytest.param(
+        "~/.config/imas-codex/config.yaml",
+        "~/.config/iter-codex/config.yaml",
+        id="config-root",
+    ),
+    pytest.param(
+        "~/.cache/imas-codex/embed", "~/.cache/iter-codex/embed", id="cache-root"
+    ),
+    pytest.param(
+        "/home/tester/.cache/imas-codex/embed",
+        "/home/tester/.cache/iter-codex/embed",
+        id="cache-root-absolute",
+    ),
+    pytest.param(
+        "https://github.com/iterorganization/imas-codex",
+        "https://github.com/iterorganization/iter-codex",
+        id="repository-url",
+    ),
+    pytest.param(
+        "https://github.com/Simon-McIntosh/imas-codex.git",
+        "https://github.com/Simon-McIntosh/iter-codex.git",
+        id="repository-url-fork",
+    ),
+    pytest.param("import imas_codex", "import iter_codex", id="package-import"),
+    pytest.param(
+        "from imas_codex.cli import main",
+        "from iter_codex.cli import main",
+        id="package-import-from",
+    ),
+)
+
+
+def rename_under_shipped_contexts(text: str) -> tuple[str, dict[str, int]]:
+    """Apply the shipped kept contexts, then the rename, to one string.
+
+    The contexts come from the shipped file itself, so a context deleted from
+    the list changes what this returns rather than being replaced by a copy
+    here.
+    """
+    kept = load_kept_list(SHIPPED_KEPT_LIST)
+    guarded, stand_ins, counts = protect(text, [], kept.kept_contexts)
+    renamed, _ = rename_text(guarded)
+    return restore(renamed, stand_ins), counts
+
+
+def shipped_context(context_id: str):
+    kept = load_kept_list(SHIPPED_KEPT_LIST)
+    return next((entry for entry in kept.kept_contexts if entry.id == context_id), None)
+
+
+@pytest.mark.parametrize("context_id", UNMOVED_CONTEXT_IDS)
+def test_each_unmoved_directory_is_a_shipped_kept_context(context_id: str) -> None:
+    context = shipped_context(context_id)
+
+    assert context is not None, f"{context_id} is missing from the shipped kept list"
+    assert context.min_hits > 0, (
+        f"{context_id} declares no floor, so an alteration of its directory "
+        f"would go unreported"
+    )
+
+
+@pytest.mark.parametrize(("context_id", "sample"), UNMOVED_SAMPLES)
+def test_a_shipped_context_keeps_its_directory_in_every_spelling(
+    context_id: str, sample: str
+) -> None:
+    renamed, counts = rename_under_shipped_contexts(sample)
+
+    assert renamed == sample
+    assert counts.get(context_id) == 1, (
+        f"the {context_id} context did not claim the sample; the shipped "
+        f"contexts counted {counts}"
+    )
+
+
+@pytest.mark.parametrize(("sample", "expected"), RENAMED_SAMPLES)
+def test_the_roots_that_move_the_url_and_the_import_are_renamed(
+    sample: str, expected: str
+) -> None:
+    renamed, counts = rename_under_shipped_contexts(sample)
+
+    assert renamed == expected
+    assert counts == {}, f"a shipped context claimed a surface that moves: {counts}"
