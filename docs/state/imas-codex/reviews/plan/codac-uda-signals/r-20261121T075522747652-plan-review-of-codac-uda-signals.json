@@ -41,7 +41,30 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 96,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0692b8001be88cdf60010ec333d49a56efe4b6a1",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The premise was wrong: no designation is parsed. The category link is taken out of this section; a new measurement section first establishes from the catalogue how category names name systems, and writes no link.",
+      "reason": "",
+      "when": "2026-11-21T08:22:04.159319+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0692b8001be88cdf60010ec333d49a56efe4b6a1",
+      "commit_basis": "edit",
+      "note": "The premise was wrong: no designation is parsed. The category link is taken out of this section; a new measurement section first establishes from the catalogue how category names name systems, and writes no link.",
+      "reason": "",
+      "when": "2026-11-21T08:22:04.159319+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261121T075522747652-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261121T075522747652-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "bc289bb6eaf81200d7a63c8d6eb106b6e84774c1",
   "rubric": "content",
