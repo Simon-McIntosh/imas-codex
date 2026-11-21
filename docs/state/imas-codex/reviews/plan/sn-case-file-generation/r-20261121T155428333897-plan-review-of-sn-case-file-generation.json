@@ -59,9 +59,28 @@
       "note": "The graph read is committed as case-file-source-census.json with its query and per-member rows, and section 8 cites it with the exact counts (59 of 286 without a source: 44 derived-producer only, 42 of them parents; 15 with no producer, 14 superseded).",
       "reason": "",
       "when": "2026-11-21T20:12:04.608531+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ac2c8751d82ad98f753ca6cddaf90bf8ab9dcbf9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 9 now writes each repair as a proposed record in its evidence, applied to nothing stored; applying them is a later decision of the lead.",
+      "reason": "",
+      "when": "2026-11-21T20:12:19.005530+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ac2c8751d82ad98f753ca6cddaf90bf8ab9dcbf9",
+      "commit_basis": "edit",
+      "note": "Section 9 now writes each repair as a proposed record in its evidence, applied to nothing stored; applying them is a later decision of the lead.",
+      "reason": "",
+      "when": "2026-11-21T20:12:19.005530+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
