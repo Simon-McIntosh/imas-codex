@@ -106,7 +106,7 @@
     {
       "id": "reckon-spa-mount",
       "pattern": "(?<![\\w.~/-])/imas-codex/",
-      "reason": "A page or figure URL mounted under the key keeps the project key: the rename tool's own report links and the evidence pages serve from /imas-codex/... because that is where reckon mounts the project, not because the product is called that. The lookbehind excludes a filesystem path (~/.local/share/imas-codex/..., /home/<user>/Code/imas-codex/...), which names the product and is renamed.",
+      "reason": "A page or figure URL mounted under the key keeps the project key: the rename tool's own report links and the evidence pages serve from /imas-codex/... because that is where reckon mounts the project, not because the product is called that. The lookbehind excludes a filesystem path (~/.local/share/..., /home/<user>/Code/imas-codex/...), which names the product and is renamed; the checkout path itself keeps its name in every spelling, under its own context below.",
       "min_hits": 40
     },
     {
@@ -121,6 +121,24 @@
       "pattern": "imas-codex:[a-z][a-z0-9-]+",
       "reason": "A project-qualified plan or resource reference names a record the live plan system resolves by key, so it is kept. Scoped to the evidence tree, where such references appear in the scripts beside the kept bytes, because outside it the same spelling is a container image tag (`ghcr.io/.../imas-codex:latest`) or an application title, both the product and both renamed.",
       "min_hits": 1
+    },
+    {
+      "id": "checkout-directory",
+      "pattern": "(?:~/|\\$\\{?(?:HOME|userHome)\\}?/|(?<![:/.\\w-])/(?:[\\w.-]+/)+)Code/imas-codex(?![\\w.-])",
+      "reason": "The checkout on this workstation does not move at cutover: the repository and the import package are renamed in place, and the directory holding them keeps its name because the worktree root, every worktree's `.env` and `.venv` links and the editable install all resolve through it. Renaming the path in the agent instructions would point a worker's environment variable at a directory that does not exist, and `uv` would then build a second environment inside a worktree. The pattern matches the directory under a `Code` parent in its absolute, `~`, `$HOME`, `${HOME}` and VS Code `${userHome}` spellings, so a repository URL or a package directory of the same spelling is still renamed.",
+      "min_hits": 30
+    },
+    {
+      "id": "reckon-worktree-root",
+      "pattern": "(?<![\\w.-])imas-codex-[0-9a-f]{8,}(?![\\w.-])",
+      "reason": "Reckon's worktree root for the project carries the old name followed by a digest, and it is reckon's directory rather than a product surface: every worktree, the live and queued run pointers and the `.env` and `.venv` links resolve through it, so the cutover leaves it where it is. The digest shape distinguishes it from the cache root that moves, and from the gate-script directory, whose name carries `-live-rewrite`.",
+      "min_hits": 8
+    },
+    {
+      "id": "gate-script-cache",
+      "pattern": "(?<![\\w.-])imas-codex-live-rewrite(?![\\w.-])",
+      "reason": "The saved gate-script cache directory keeps its name and its bytes at cutover: landed run records cite it by absolute path, so it is evidence of those runs rather than a product surface, and a copy under the new name would be a rewrite of that evidence. The whole directory name is matched, which tells it apart from the cache root that moves (`~/.cache/imas-codex`), where the old name stands alone as a path component and is renamed.",
+      "min_hits": 2
     }
   ],
   "kept_names": [
