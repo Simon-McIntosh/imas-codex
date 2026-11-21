@@ -665,6 +665,23 @@ def test_cutover_refuses_a_sequence_without_the_queued_request_rule(
     )
 
 
+def test_cutover_refuses_a_freeze_that_keeps_the_block_but_loses_the_instruction(
+    tmp_path: Path,
+) -> None:
+    data = cutover_data()
+    cutover_step(data, "C0-freeze")["queued_requests"]["operator_instruction"] = ""
+    path = tmp_path / "cutover.json"
+    path.write_text(json.dumps(data))
+
+    report = check_cutover(path)
+
+    assert not report.ok
+    assert any(
+        "C0-freeze" in violation and "operator_instruction" in violation
+        for violation in report.violations
+    )
+
+
 def test_cutover_refuses_a_reckon_step_without_the_unchanged_block(
     tmp_path: Path,
 ) -> None:
