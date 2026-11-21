@@ -209,9 +209,12 @@ def test_embed_stop_signals_only_the_embed_job_cgroup(monkeypatch, proc_table):
     assert "5005" not in joined
 
 
-def test_embed_stop_signals_nothing_when_no_job_is_listed(monkeypatch):
+def test_embed_stop_reports_nothing_when_nothing_is_attributable(monkeypatch):
     signalled: list[str] = []
     monkeypatch.setattr(services, "_get_service_job", lambda name, strict=False: None)
+    monkeypatch.setattr(
+        services, "_select_recorded_pid", lambda node, path, *, word: ([], [])
+    )
     monkeypatch.setattr(
         services, "_terminate_listed_pids", lambda *a, **kw: signalled.append(str(a))
     )
@@ -219,6 +222,76 @@ def test_embed_stop_signals_nothing_when_no_job_is_listed(monkeypatch):
     services._kill_embed_orphans("gpu-node")
 
     assert signalled == []
+
+
+def test_embed_stop_signals_the_recorded_pid_when_no_job_is_listed(monkeypatch):
+    signalled: list[str] = []
+    monkeypatch.setattr(services, "_get_service_job", lambda name, strict=False: None)
+    monkeypatch.setattr(
+        services,
+        "_select_recorded_pid",
+        lambda node, path, *, word: (
+            [{"pid": "7777", "age": "12", "cmdline": "uvicorn iter-codex embed"}],
+            [],
+        ),
+    )
+    monkeypatch.setattr(
+        services, "_terminate_listed_pids", lambda *a, **kw: signalled.append(str(a))
+    )
+
+    services._kill_embed_orphans("gpu-node")
+
+    assert signalled and "7777" in signalled[0]
+
+
+def test_a_recorded_pid_is_selected_against_a_fake_proc_table(tmp_path, proc_table):
+    pid_file = tmp_path / "codex-embed-host.pid"
+    pid_file.write_text("7777\n")
+    _add_process(proc_table["proc"], 7777, "uvicorn iter_codex embed", cwd=tmp_path)
+
+    cmd = services._recorded_pid_command(str(pid_file), word="embed")
+    env = dict(os.environ)
+    env["PROC_ROOT"] = str(proc_table["proc"])
+    out = subprocess.run(
+        ["bash", "-c", cmd], env=env, capture_output=True, text=True, check=True
+    ).stdout
+
+    holders, _left = services._parse_process_lines(out)
+    assert [p["pid"] for p in holders] == ["7777"]
+
+
+def test_a_recycled_recorded_pid_is_left_alone(tmp_path, proc_table):
+    pid_file = tmp_path / "codex-embed-host.pid"
+    pid_file.write_text("8888\n")
+    _add_process(proc_table["proc"], 8888, "sleep 3000", cwd=tmp_path)
+
+    cmd = services._recorded_pid_command(str(pid_file), word="embed")
+    env = dict(os.environ)
+    env["PROC_ROOT"] = str(proc_table["proc"])
+    out = subprocess.run(
+        ["bash", "-c", cmd], env=env, capture_output=True, text=True, check=True
+    ).stdout
+
+    holders, left_alone = services._parse_process_lines(out)
+    assert holders == []
+    assert [p["pid"] for p in left_alone] == ["8888"]
+
+
+def test_the_default_store_path_reaches_the_scan_expanded():
+    cmd = services._process_scan_command(store=services._NEO4J_STORE_BASE)
+
+    assert "$HOME" not in cmd
+    assert os.path.expanduser("~/.local/share/iter-codex/neo4j") in cmd
+
+
+def test_a_process_under_the_default_store_is_selected(proc_table):
+    """The production default must match a real cwd, not a string ending in $HOME."""
+    default = Path(os.path.expanduser("~/.local/share/iter-codex/neo4j"))
+    _add_process(proc_table["proc"], 6006, "java Neo4jCommunity", cwd=default / "data")
+
+    holders, _left = _scan(proc_table, store=services._NEO4J_STORE_BASE)
+
+    assert "6006" in [p["pid"] for p in holders]
 
 
 def test_login_embed_stop_targets_the_pid_its_launcher_recorded(monkeypatch):
@@ -239,20 +312,3 @@ def test_login_embed_stop_targets_the_pid_its_launcher_recorded(monkeypatch):
     assert "4321" in signal_script
     assert "pgrep" not in signal_script
     assert "pkill" not in signal_script
-
-
-def test_the_default_store_path_reaches_the_scan_expanded():
-    cmd = services._process_scan_command(store=services._NEO4J_STORE_BASE)
-
-    assert "$HOME" not in cmd
-    assert os.path.expanduser("~/.local/share/iter-codex/neo4j") in cmd
-
-
-def test_a_process_under_the_default_store_is_selected(proc_table):
-    """The production default must match a real cwd, not a string ending in $HOME."""
-    default = Path(os.path.expanduser("~/.local/share/iter-codex/neo4j"))
-    _add_process(proc_table["proc"], 6006, "java Neo4jCommunity", cwd=default / "data")
-
-    holders, _left = _scan(proc_table, store=services._NEO4J_STORE_BASE)
-
-    assert "6006" in [p["pid"] for p in holders]

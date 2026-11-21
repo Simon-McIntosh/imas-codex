@@ -648,6 +648,13 @@ _NEO4J_STORE_BASE = "$HOME/.local/share/iter-codex/neo4j"
 _NEO4J_TERM_GRACE_SECONDS = 120
 _NEO4J_EXIT_TIMEOUT_SECONDS = 180.0
 _EMBED_PID_FILE = "$HOME/.local/share/iter-codex/services/codex-embed.pid"
+#: Per-host pid file a compute-node embed launcher writes.  A node has no
+#: store path to attribute an embed process to, and the scheduler no longer
+#: lists the job after ``scancel``, so the pid the launcher recorded is the
+#: only fact that survives both.
+_EMBED_HOST_PID_FILE_FMT = (
+    "$HOME/.local/share/iter-codex/services/codex-embed-{host}.pid"
+)
 
 # Prints one HOLD line per process attributable to the service and one LEFT
 # line per process that names the service but does not hold its store.  Runs on
@@ -769,6 +776,49 @@ def _select_processes(
         _process_scan_command(store=store, job_id=job_id, word=word),
         timeout=timeout,
     )
+    return _parse_process_lines(out)
+
+
+def _embed_host_pid_file(host: str) -> str:
+    """The pid file the embed launcher on ``host`` records itself in."""
+    return _EMBED_HOST_PID_FILE_FMT.format(host=host.split(".")[0])
+
+
+def _recorded_pid_command(pid_file: str, *, word: str) -> str:
+    """Build the read of one recorded pid, attributed by that record alone.
+
+    The pid is used only if its own command line names the service: a record
+    left behind by a crashed launcher can be recycled by an unrelated process,
+    and that process was never this service's.
+    """
+    return f"""proc_root="${{PROC_ROOT:-/proc}}"
+pid_file={shlex.quote(pid_file)}
+word={shlex.quote(word)}
+pid=$(tail -1 "$pid_file" 2>/dev/null | tr -d '[:space:]')
+case "$pid" in
+    ''|*[!0-9]*) exit 0 ;;
+esac
+d="$proc_root/$pid"
+[ -d "$d" ] || exit 0
+cmd=$(tr '\\0' ' ' < "$d/cmdline" 2>/dev/null | tr -d '\\r\\n' | cut -c1-200)
+[ -z "$cmd" ] && exit 0
+now=$(date +%s)
+start=$(stat -c %Y "$d" 2>/dev/null || echo "$now")
+age=$((now - start))
+lower=$(printf '%s' "$cmd" | tr '[:upper:]' '[:lower:]')
+case "$lower" in
+    *"$word"*) printf 'HOLD|%s|%s|%s\\n' "$pid" "$age" "$cmd" ;;
+    *) printf 'LEFT|%s|%s|recorded pid names no %s service|%s\\n' \
+        "$pid" "$age" "$word" "$cmd" ;;
+esac
+"""
+
+
+def _select_recorded_pid(
+    node: str | None, pid_file: str, *, word: str
+) -> tuple[list[dict], list[dict]]:
+    """List the process a launcher recorded, if its record still names the service."""
+    out = _run_shell(node, _recorded_pid_command(pid_file, word=word), timeout=30)
     return _parse_process_lines(out)
 
 
@@ -1186,26 +1236,34 @@ def _kill_neo4j_on_node(node: str) -> None:
 
 
 def _kill_embed_orphans(node: str) -> None:
-    """Signal only the processes inside the embed service's own scheduler job.
+    """Signal only processes attributable to the embed service on ``node``.
 
-    There is no store path to attribute an embed process to, so the service's
-    job id is the only fact that separates this server from another user's or
-    another project's.  A process outside that job is left alone because
-    nothing distinguishes it from an unrelated process.
+    Attribution is the service's own scheduler job cgroup, or the pid its
+    launcher recorded on that host.  The second matters because the callers
+    run exactly when no job is listed: after ``scancel``, when a job is
+    restarting, and for a nohup server that never had a SLURM job.  A process
+    matching neither fact is left alone: nothing distinguishes it from
+    another user's server.
     """
+    holders: list[dict] = []
+    left_alone: list[dict] = []
     job = _get_service_job(_EMBED_JOB)
-    if not job:
-        click.echo(
-            f"  no embed job is listed; no process on {node} is attributable "
-            "to this service"
+    if job:
+        found, left = _select_processes(
+            node, store="", job_id=job["job_id"], word="embed"
         )
-        return
-    job_id = job["job_id"]
-    holders, left_alone = _select_processes(node, store="", job_id=job_id, word="embed")
+        holders += found
+        left_alone += left
+    recorded, left = _select_recorded_pid(
+        node, _embed_host_pid_file(node), word="embed"
+    )
+    holders += recorded
+    left_alone += left
     _echo_left_alone(node, left_alone)
     if not holders:
         click.echo(
-            f"  no process on {node} belongs to embed job {job_id}; nothing to signal"
+            f"  no process on {node} is attributable to the embed service; "
+            "nothing to signal"
         )
         return
     _terminate_listed_pids(node, holders, grace_seconds=15)
@@ -1301,10 +1359,13 @@ def _embed_service_command(gpus: int, workers: int) -> str:
     """
     port = _embed_port()
     gpu_ids = ",".join(str(i) for i in range(gpus))
-    partition, _gpu = _embedding_target()
+    partition, gpu = _embedding_target()
     partition_name = partition["name"]
+    pid_file = _embed_host_pid_file(gpu["location"])
 
     return (
+        f"mkdir -p $(dirname {pid_file})\n"
+        f"echo $$ > {pid_file}\n"
         f"export CUDA_VISIBLE_DEVICES={gpu_ids}\n"
         "exec uv run --offline --extra gpu iter-codex embed start -f "
         f"--host 0.0.0.0 --port {port} "
@@ -1465,6 +1526,7 @@ def deploy_embed_noslurm(gpus: int = _DEFAULT_GPUS, workers: int | None = None) 
         f"{gpus_flag}--workers {workers} "
         f"--deploy-label {partition_name} "
         f">> {log_file} 2>&1 &\n"
+        f"echo $! > {_embed_host_pid_file(host)}\n"
         f"echo $!\n"
     )
 

@@ -21,6 +21,18 @@
   <p>A stop returns success only after the job has left the scheduler and no
   listed process still holds the store; otherwise it raises, so lock cleanup
   cannot run while Neo4j is still flushing its shutdown checkpoint.</p>
+  <p>The store path is expanded where the scan command is built. The constant
+  carries <code>$HOME</code>, and an environment assignment reaching
+  <code>bash -c</code> is not expanded, so the case pattern used to compare a
+  real path against the literal text and select nothing. A fake process table
+  under the production default now proves a holder is selected.</p>
+  <p>Embed has no store path, and its callers run exactly when the scheduler
+  lists no job: after <code>scancel</code>, while a job is restarting, and for
+  a nohup server that never had one. Its launcher now records the pid it
+  starts in a per-host file (<code>codex-embed-&lt;host&gt;.pid</code>), and the
+  stop signals that recorded pid in addition to any process in the service's
+  job cgroup. A record whose process no longer names the embed service is
+  reported as left alone, so a recycled pid is never signalled.</p>
 
   <table>
     <thead><tr><th>Removed form</th><th>File and function</th><th>Selector now</th></tr></thead>
@@ -85,16 +97,20 @@
         <td>4 failed, 1037 passed, 415 deselected; exit 1</td>
       </tr>
       <tr>
+        <td>Repair arm, same tier and command</td>
+        <td>4 failed, 1042 passed, 415 deselected; exit 1; the same four failures</td>
+      </tr>
+      <tr>
         <td>Added failures against base</td>
         <td>none; the four failures are identical on both arms</td>
       </tr>
       <tr>
         <td>Selection and signalling tests</td>
-        <td>9 passed in 1.08 s; a fake process table is walked by the real scan script</td>
+        <td>14 passed; a fake process table is walked by the real scan script</td>
       </tr>
       <tr>
         <td>Store wait and lock tests</td>
-        <td>9 passed in 1.08 s</td>
+        <td>9 passed</td>
       </tr>
       <tr>
         <td>Negative control, store-path attribution removed</td>
