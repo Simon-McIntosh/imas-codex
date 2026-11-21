@@ -69,6 +69,16 @@
       "note": "Section 9 now writes each repair as a proposed record in its evidence, applied to nothing stored; applying them is a later decision of the lead.",
       "reason": "",
       "when": "2026-11-21T20:12:19.005530+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ac2c8751d82ad98f753ca6cddaf90bf8ab9dcbf9",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "A family is fixed as the members that share one parent in the graph and no other grouping.",
+      "reason": "",
+      "when": "2026-11-21T20:12:29.619866+00:00"
     }
   ],
   "responses": {
@@ -80,6 +90,15 @@
       "note": "Section 9 now writes each repair as a proposed record in its evidence, applied to nothing stored; applying them is a later decision of the lead.",
       "reason": "",
       "when": "2026-11-21T20:12:19.005530+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "ac2c8751d82ad98f753ca6cddaf90bf8ab9dcbf9",
+      "commit_basis": "edit",
+      "note": "A family is fixed as the members that share one parent in the graph and no other grouping.",
+      "reason": "",
+      "when": "2026-11-21T20:12:29.619866+00:00"
     },
     "reasoning-1": {
       "action": "acted",
