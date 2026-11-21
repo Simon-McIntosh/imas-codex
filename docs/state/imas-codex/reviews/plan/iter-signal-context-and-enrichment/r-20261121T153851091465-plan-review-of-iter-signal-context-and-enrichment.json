@@ -59,9 +59,28 @@
       "note": "The full-catalogue enrichment section now waits on the field-code section.",
       "reason": "",
       "when": "2026-11-21T20:12:22.920955+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "9de770617b6d527f62780ebb5b878d2251ebc76b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The setpoint measure now requires at least one signal decided as a setpoint, or the section is delivered as failed with the reason; the search clause names a system that holds one.",
+      "reason": "",
+      "when": "2026-11-21T20:12:26.666773+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "9de770617b6d527f62780ebb5b878d2251ebc76b",
+      "commit_basis": "edit",
+      "note": "The setpoint measure now requires at least one signal decided as a setpoint, or the section is delivered as failed with the reason; the search clause names a system that holds one.",
+      "reason": "",
+      "when": "2026-11-21T20:12:26.666773+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
