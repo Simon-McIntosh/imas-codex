@@ -1,0 +1,88 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-21T08:16:07.711Z",
+  "dispatched_at": "2026-11-21T07:55:50Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261121T075522747652-plan-review-of-codac-uda-signals/plan.html:159",
+      "id": "reasoning-1",
+      "reason": "a node dispatched on this endpoint looks for a parsed field the import never writes, and the extraction rule (which part of a name is the designation) is exactly the part the section's correctness rests on, so it would have to be invented against live archive names rather than stated up front.",
+      "text": "the first link kind is computed from a designation the section says the pulse import already separates from the category name, but the import stores the whole archive-reported identity (`PulseCategory.name` is \"Exact category identity returned by the archive\", written verbatim from the archive listing in `imas_codex/remote/pulse_catalogue.py`), and the only definition of a designation in the repository is `imas_codex/remote/archive_access.py`, where it is \"a literal case-insensitive substring of a category name or description\" \u2014 search semantics, not a parsed token \u2014 so no separated designation exists and no archive category naming convention is documented anywhere the plan cites",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261121T075522747652-plan-review-of-codac-uda-signals/plan.html:160",
+      "id": "done_when-1",
+      "reason": "with no clause requiring at least one linked category per kind, the gate cannot distinguish a working rule from a rule that resolves nothing, which is the most likely failure given the designation premise.",
+      "text": "the section's only positive clause for the category link is \"a pulse search for one plant system chosen beforehand returns only categories linked to it\", which passes with an empty page, and its companion control (\"a search for a system no category is linked to returns an explicit empty result\") is then indistinguishable from the failed state, so a rule that links nothing satisfies both",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261121T075522747652-plan-review-of-codac-uda-signals/plan.html:158",
+      "id": "wiring-1",
+      "reason": "a declared wait is a sequencing edge, so a spurious one holds this node behind unrelated work, and the edge that would order it against the role vocabulary it reads is absent, so the plan misstates what must land first.",
+      "text": "the section declares `data-links=\"codac-uda-signals#s16,codac-uda-signals#s20\"`, but the work it describes consumes pulse categories and pulses (`s16`) and the pre-existing role vocabulary on signals, and nothing in the section reads a category kind or a description, which is all `s20` delivers",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261121T075522747652-plan-review-of-codac-uda-signals/plan.html:159",
+      "id": "single_goal-1",
+      "reason": "splitting the two kinds into their own sections would let the category link land on its own evidence (pulse catalogue, server search) while the sibling relation depends on the role vocabulary, which the plan changes move at different speeds.",
+      "text": "one section delivers a category-to-system link and a signal-to-sibling link, over disjoint populations (pulse categories; signals with a decided role), with disjoint rules and disjoint controls, so one verdict cannot close both and a failure in either blocks the other from landing",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0692b8001be88cdf60010ec333d49a56efe4b6a1",
+  "plan_fingerprint": "47e83b70cdf5cb3bc3f95a52b45d17bf99439969a4dc778da04b398e0d1f34ee",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 96,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261121T075522747652-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "bc289bb6eaf81200d7a63c8d6eb106b6e84774c1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the declared links to `s16` and `s20` resolve, and the component-to-plant-structure relationship the section excludes does resolve in `imas_codex/schemas/facility.yaml`.",
+    "done_when": "a finding \u2014 the pulse-search clause for the category link (\"returns only categories linked to it\") is satisfied by an empty result, so the section can pass with no link written.",
+    "evidence_paths": "pass \u2014 the counts and readings land in the landing record, and the pre-registered subjects are in a private file whose digest is recorded; nothing is written to a session scratchpad.",
+    "naming": "pass \u2014 the section names no plan label, ticket or version tag, and prescribes no symbol.",
+    "reasoning": "a finding \u2014 the first link kind rests on the claim that \"the pulse import already separates [the designation] from the rest of the name\", which the import does not do; the category name is stored whole.",
+    "single_goal": "a finding \u2014 the section carries two independent link kinds, with different subject populations, different rules and separate controls, closed on one verdict.",
+    "wiring": "a finding \u2014 section 24 declares a wait on `s20` (category kinds and descriptions) that neither of its link kinds consumes, while the edge that carries its second kind's population is not the one declared."
+  },
+  "section_digests": {
+    "_document": "96611b7ee6bf621977c288f58603c718e1e1893211bd0b77552f8fc604b17f34",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "759b1a8a0d0172458970abb033b7b0891dbfbea4a146fe46e1d40088ad5b1e2b",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "210c417a1f066fe923870a6e8053c76cb308181f6dd40abe83ad1c825a5ee841",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "4234dc0444b89df1ba3c2fb0011becde6760366f41d1b857f7f45b9020491430",
+    "s19": "62a9fac261c2abc0b6c2cadd655ec95a4ad2338cf99289d0b35221256277cd7c",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s20": "5b6478a19c4933df522a5f65b5029c4d8c8fbaa56108cf7537380f3b2160b330",
+    "s21": "766504c3cf6d6cb5fbb80fc49533f32eb2dd8d9f7686b55ca616d9cac1f04941",
+    "s22": "6e220f5b29e47a2a3d17bfd49b65b741c49f7f976c2b12c97a1036066b587ad8",
+    "s23": "b2db24284a629203a22b94e1fd6d97616eb45f4402ca4961f80fa1017f98cf3b",
+    "s24": "b2fe4236996748baaab0cbc7d4b4060e8155e60be8568cab9cf3d9faef48d234",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T08:18:45.500382+00:00",
+  "total": null
+}
