@@ -111,11 +111,21 @@ def test_hand_sample_represents_every_carried_code():
     assert set(select_hand_sample(carriages, size=3, seed=1)) == {"a", "b", "c"}
 
 
-def test_hand_sample_takes_only_categories_the_rule_when_links():
+def test_hand_sample_takes_only_categories_the_delimited_rule_would_link():
     carriages = [
         carried_codes("linked", "UNIT-one", {"UNIT"}, set()),
         carried_codes("unlinked", "nothing", {"UNIT"}, set()),
     ]
+    with pytest.raises(ValueError):
+        select_hand_sample(carriages, size=2, seed=1)
+
+
+def test_hand_sample_excludes_a_category_matched_only_inside_a_word():
+    carriages = [
+        carried_codes("linked", "UNIT-one", {"UNIT"}, set()),
+        carried_codes("inside", "UNITWIDE-two", {"UNIT"}, set()),
+    ]
+    assert select_hand_sample(carriages, size=1, seed=1) == ["linked"]
     with pytest.raises(ValueError):
         select_hand_sample(carriages, size=2, seed=1)
 

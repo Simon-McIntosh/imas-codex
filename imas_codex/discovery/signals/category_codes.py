@@ -161,19 +161,24 @@ def select_hand_sample(
 ) -> list[str]:
     """Choose a hand-reading sample deterministically, stratified by carried code.
 
-    Only categories that would receive a link are eligible: the question the
-    hand reading answers is whether that rule ever names the wrong system, so a
-    sample of categories the rule does not link would answer nothing. Category
+    Only categories the delimited-part rule would link are eligible: the question
+    the hand reading answers is whether that rule ever names the wrong system, so
+    a category it would not link, including one whose only match is inside a
+    longer word, would answer nothing. Category
     identities are drawn by a seeded shuffle so the same seed selects the same
     sample, and the selection is written before any verdict is recorded.
     """
-    eligible = [carriage for carriage in carriages if carriage.link_count]
+    eligible = [
+        carriage
+        for carriage in carriages
+        if carriage.delimited_control or carriage.delimited_component
+    ]
     if len(eligible) < size:
-        raise ValueError("fewer linkable categories than the requested sample size")
+        raise ValueError("fewer delimited-linkable categories than the sample size")
 
     by_code: dict[str, list[CategoryCodeCarriage]] = {}
     for carriage in eligible:
-        for code in carriage.codes:
+        for code in {*carriage.delimited_control, *carriage.delimited_component}:
             by_code.setdefault(code, []).append(carriage)
 
     def rank(carriage: CategoryCodeCarriage) -> bytes:
