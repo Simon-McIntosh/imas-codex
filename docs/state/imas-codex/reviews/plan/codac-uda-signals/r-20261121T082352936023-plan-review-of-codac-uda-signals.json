@@ -32,6 +32,13 @@
       "finding": "done_when-1",
       "reason": "The node's dispatch contract carries it: the walk must return the measured-against signal as a typed relation with its kind and rule, and the same walk before the run, or with the relation removed, must not return that typed relation.",
       "when": "2026-11-21T10:31:48.755759+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "The node's dispatch contract carries it: signals with an undecided or conflicting role are counted, hold zero relations, and their counts equal the vocabulary's own totals for the same population.",
+      "when": "2026-11-21T10:31:52.048417+00:00"
     }
   ],
   "responses": {
@@ -40,6 +47,12 @@
       "by": "",
       "reason": "The node's dispatch contract carries it: the walk must return the measured-against signal as a typed relation with its kind and rule, and the same walk before the run, or with the relation removed, must not return that typed relation.",
       "when": "2026-11-21T10:31:48.755759+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The node's dispatch contract carries it: signals with an undecided or conflicting role are counted, hold zero relations, and their counts equal the vocabulary's own totals for the same population.",
+      "when": "2026-11-21T10:31:52.048417+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261121T082352936023-plan-review-of-codac-uda-signals.json",
