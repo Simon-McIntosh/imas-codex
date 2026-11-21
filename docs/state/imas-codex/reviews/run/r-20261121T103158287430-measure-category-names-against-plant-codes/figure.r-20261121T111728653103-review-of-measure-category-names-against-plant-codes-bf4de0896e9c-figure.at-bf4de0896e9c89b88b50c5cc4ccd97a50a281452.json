@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachments_judged": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T111728653103-review-of-measure-category-names-against-plant-codes-bf4de0896e9c-figure/image-0.png"
+  ],
+  "completed_at": "2026-11-21T11:25:55.710Z",
+  "dispatched_at": "2026-11-21T11:17:46Z",
+  "figures": {
+    "docs/figures/codac-uda-signals/measure-category-names-against-plant-codes/rule-and-hand-reading.svg": {
+      "contrast": "pass for text \u2014 row and footer labels are #52514E on white, about 7.7:1, and the printed counts are near-black #0B0B0B, both far above the 4.5:1 text floor. Recorded as a finding below (non-blocking): the left panel's 'no plant code' bar fill #C4C4C4 is about 1.85:1 against white, below the 3:1 floor a data mark should clear.",
+      "data_ink": "pass \u2014 the fills are the ink: four solid rectangles (#2878A5 blue, #7A4FA3 purple, #C4C4C4 grey, #929292 grey) on plain white, with no gradient, no pattern, no gridline and no shadow. Recorded as a finding below: the left panel's two minority bars occupy 7 px and about 7 px, so their length carries only 'tiny' and the printed counts do the comparison.",
+      "decoration": "pass \u2014 the background is pure white (919,215 of 1,007,280 pixels are exactly white), with no background fill rectangle, no gradient, no drop shadow and no decorative shading; the only non-data elements are the two vertical axis lines and their tick marks.",
+      "label_collision": "pass \u2014 no label is clipped at any canvas edge (the widest text, the right-hand footer, ends near x=1250 of 1399), and no label overlaps another or the data: each count sits in clear space right of its bar end, and the row labels end left of the axis at x=267 and x=939. The '0' for 'wrong' sits beside the axis line with no bar under it, which reads correctly as a measured zero.",
+      "legibility": "pass \u2014 on the attached 1399x720 PNG both panels read at a glance: the left panel carries three row labels and three counts ('links one plant code' 711, 'code only inside a word' 17, 'no plant code' 16) under the footer 'category names read (744)'; the right panel carries three ('right' 5, 'wrong' 0, 'undecidable' 15) under 'sealed hand-read sample (20)'. Every glyph is drawn at a readable size and no text is lost.",
+      "table_form": "pass \u2014 this is a spatial comparison of a three-way partition in each of two populations, not a table drawn as an image; bars are the right form for showing that one group holds almost everything. The same counts also appear in two tables in the evidence fragment, which the chart summarises rather than replaces."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/codac-uda-signals/measure-category-names-against-plant-codes/rule-and-hand-reading.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two panels are drawn on independent x scales, so a count in one panel cannot be compared with a count in the other by eye. Measured on the attached PNG: the left panel's 711 spans x=267 to about x=629, about 0.51 px per name, so its 17 (x=267-273) and 16 each render about 7 px wide; the right panel's 15 spans x=939 to x=1179, about 16 px per sample, so it renders 241 px wide. The same counted quantity therefore reads roughly thirty times larger in the right panel, and a reader comparing the left panel's near-zero groups with the right panel's gets the ordering backwards from what the counts say. Separate scales are defensible because the populations differ (744 names against 20 hand reads), but nothing on the figure says the panels are not comparable. Line is null because the drawing script is not in the reviewed tree."
+    },
+    {
+      "file": "docs/figures/codac-uda-signals/measure-category-names-against-plant-codes/rule-and-hand-reading.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Colour carries no meaning a reader can carry across the two panels, and in neither panel does it encode a quantity the row labels do not already name. Blue is 'links one plant code' in the left panel and 'right' in the right; grey is 'no plant code' on the left (#C4C4C4) and 'undecidable' on the right (#929292); purple appears once, for 'code only inside a longer word'. So a reader who learns 'blue means the rule links it' from the left panel reads the right panel's five confirmed cases as linked names, which they are not in the same sense, and the two greys make the same conceptual 'not linked' read as two different things. The house plot style asks one colour per component kept constant across figures, and no per-row hue where the row label already names the row; both are broken here."
+    },
+    {
+      "file": "docs/figures/codac-uda-signals/measure-category-names-against-plant-codes/rule-and-hand-reading.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 'no plant code' bar in the left panel is filled #C4C4C4, about 1.85:1 against white, below the 3:1 ratio a data mark should clear. Combined with the bar's 7 px length, the 16-count group is the faintest mark on the canvas and is easy to miss entirely at the size the figure is read at, while its neighbour the 17-count group is drawn in a saturated purple that stands out. Both groups are the negative control the caption says the figure shows, so a reader should be able to see that both are there. The right panel's grey #929292 clears the floor at about 3.05:1, so the same neutral is drawn at two different strengths."
+    }
+  ],
+  "notes": "Read-only figure review of the single rendered PNG named in this review (image-0.png, 1399x720). Only that PNG was opened and measured for pixel colours and bar extents; no SVG and no other image was opened, read, listed, searched, rendered or shown, and no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The evidence fragment and the reviewed diff were read as text to establish what the figure intends to show and to confirm that every count matches (744 = 711 + 17 + 16; sealed sample 20 = 5 + 0 + 15). The reviewed tree carries only the SVG for this figure and no drawing script, so no finding could be anchored to a script line; every finding is anchored to the figure's repository path with a null line, and each measurement quoted is taken from the rendered PNG itself. The caption in the fragment does not merely repeat the figure's title: it names what each panel counts, the provenance and the drawing tool, so no caption finding is recorded. No suite ran for a figure review; added_failure_count is 0 by construction.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261121T111728653103-review-of-measure-category-names-against-plant-codes-bf4de0896e9c-figure",
+  "reviewed_base_sha": "f77dd11202293041dbc5b5a73ff3f47ef40e5fff",
+  "reviewed_head_sha": "bf4de0896e9c89b88b50c5cc4ccd97a50a281452",
+  "reviewed_run_id": "r-20261121T103158287430-measure-category-names-against-plant-codes",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash",
+    "reviewed_at": "2026-11-21T11:35:00Z",
+    "reviewer_run_id": "r-20261121T111728653103-review-of-measure-category-names-against-plant-codes-bf4de0896e9c-figure"
+  },
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T11:26:29.240082+00:00",
+  "total": null
+}
