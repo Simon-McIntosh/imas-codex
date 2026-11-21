@@ -86,6 +86,16 @@
       "finding": "done_when-3",
       "reason": "The pilot enrichment's run manifest and evidence fragment record both measures (the search showing one propagation path, and zero stated values the vocabulary does not hold); the plan comment summarises and is not the landing record.",
       "when": "2026-11-21T20:12:35.290449+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "9de770617b6d527f62780ebb5b878d2251ebc76b",
+      "commit_basis": "edit",
+      "finding": "done_when-4",
+      "note": "The section now names rigel for the plant-wide assignment and states the population as the facility's catalogued signals in the graph.",
+      "reason": "",
+      "when": "2026-11-21T20:12:39.080335+00:00"
     }
   ],
   "responses": {
@@ -112,6 +122,15 @@
       "by": "",
       "reason": "The pilot enrichment's run manifest and evidence fragment record both measures (the search showing one propagation path, and zero stated values the vocabulary does not hold); the plan comment summarises and is not the landing record.",
       "when": "2026-11-21T20:12:35.290449+00:00"
+    },
+    "done_when-4": {
+      "action": "acted",
+      "by": "",
+      "commit": "9de770617b6d527f62780ebb5b878d2251ebc76b",
+      "commit_basis": "edit",
+      "note": "The section now names rigel for the plant-wide assignment and states the population as the facility's catalogued signals in the graph.",
+      "reason": "",
+      "when": "2026-11-21T20:12:39.080335+00:00"
     },
     "wiring-1": {
       "action": "acted",
