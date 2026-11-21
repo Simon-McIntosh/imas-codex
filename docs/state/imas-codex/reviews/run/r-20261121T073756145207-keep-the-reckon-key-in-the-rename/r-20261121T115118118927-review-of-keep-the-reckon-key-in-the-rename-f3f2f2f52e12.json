@@ -1,0 +1,99 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/rename/__main__.py:main",
+    "scripts/rename/apply.py:apply_rename",
+    "scripts/rename/check.py:check_tree",
+    "scripts/rename/cutover.py:check_cutover"
+  ],
+  "completed_at": "2026-11-21T12:01:38.907Z",
+  "dispatched_at": "2026-11-21T11:51:43Z",
+  "findings": [
+    {
+      "file": "tests/scripts/test_rename.py",
+      "line": "464",
+      "severity": "non-blocking",
+      "text": "non-blocking: both kept-context tests (here and tests/scripts/test_rename.py:485) write their own kept_contexts into a copy of the kept list, and no test reads the shipped contexts from scripts/rename/kept_names.json:105, so deleting reckon-spa-mount or lowering its floor of 40 leaves the gate's 40 tests green and the mechanism that keeps reckon's project key has no guard."
+    },
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/keep-the-reckon-key-in-the-rename.html",
+      "line": "46",
+      "severity": "non-blocking",
+      "text": "non-blocking: the paragraph claims 'Four mutations ... against an unmutated control of 39 passed', but the run stores three control logs (ctl-A reddens one test, ctl-B two, ctl-C two) and the unmutated gate closes at 40 passed, and the same sentence's 'ten kept page URLs drove reckon-spa-mount to 31' does not subtract from the 44 it records, so a reader cannot reconcile the prose with the logs it cites."
+    },
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/keep-the-reckon-key-in-the-rename.html",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: the rehearsal measurements the done_when requires (216,051 hits before, 196,499 after, 19,552 rewritten across 2,068 files, the 80190e83 and 30fdfe44 digests, the scratch-mount reads and the printed removals) exist only as fragment prose and worker-transcript output; no log under the reviewed run's logs/ directory carries them, so they cannot be reopened the way the gate and the two arms can."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all seven commits against 2b5c1e699; rules.py:75-120 replaces the keep pass with a span-based one that claims contexts before rewriting, check.py:88-127 counts them into protected and into the reconciliation total, tree.py:173-212 adds KeptContext, kept_names.json adds three contexts and flips the evidence entry to an exclude default at kept_names.json:9, cutover.json rewrites C7 and C0 and retitles C9, cutover.py:20-46 adds required blocks, dispositions, title words and forbidden text, and tests/scripts adds thirteen test functions.",
+    "done_when": "read node.json's done_when; the gate it names is tests/scripts, whose log logs/gate-tests-scripts.log opens on revision f3f2f2f52 and closes '40 passed' with EXIT=0, and both default-tier arms are recorded as completed JSON objects whose 46 failure ids I recomputed from logs/arm-base.log and logs/arm-after.log as identical, but the rehearsal counts exist only in the fragment.",
+    "goal": "read the source goal at brief.md:3-7, to keep reckon's project key and docs/state/imas-codex through the rename and close the peer's last points on the cutover sequence; scripts/rename/kept_names.json:105-127 adds the three kept contexts, kept_names.json:49-67 marks docs/state and docs/.reckon kept, and scripts/rename/cutover.json rewrites C7 as a check with disposition kept and a seven-key unchanged block.",
+    "manifest": "read manifest.md at status complete; it names seven commits, both arms as single-line JSON with 46 completed ids each, and six test_logs, its tests line is the literal gate command matching the gate log's own header, and its artifact counts reconcile internally (216,051 - 196,499 = 19,552) and against the tree.",
+    "write_paths": "read brief.md:100-101 (scripts/rename, tests/scripts, docs/evidence/fragments/codac-uda-signals/keep-the-reckon-key-in-the-rename.html); all nine paths in 2b5c1e699..f3f2f2f52 sit inside them."
+  },
+  "justifications": {
+    "durability": "tests/scripts/test_rename.py:699 and :668 redden when the C7 move text or the freeze instruction is removed and tests/scripts/test_rename.py:411 reddens when the evidence exclude is narrowed, but no test reads the shipped kept_contexts at scripts/rename/kept_names.json:105 so the key-keeping mechanism itself carries no guard.",
+    "evidence": "logs/gate-tests-scripts.log runs tests/scripts at f3f2f2f52 and closes 40 passed with EXIT=0 while the two arms' 46 ids recompute identical, but the rehearsal figures at docs/evidence/fragments/codac-uda-signals/keep-the-reckon-key-in-the-rename.html:18 have no stored log.",
+    "fit": "the added checks follow the report.violations.append idiom of scripts/rename/cutover.py:230-272 and the dataclass-plus-loader form of scripts/rename/tree.py:173-212, though scripts/rename/cutover.py:20 now carries an unannotated dict literal where the base declared dict[str, dict[str, tuple[str, ...]]].",
+    "goal_fidelity": "scripts/rename/kept_names.json:105-127 carries the three kept contexts and scripts/rename/cutover.py:46 forbids the C7 text from moving the key or the state directory, which is what the brief's items 1 and 2 ask for.",
+    "reuse": "scripts/rename/rules.py:75 extends the existing protect/rename_text owner rather than forking it and scripts/rename/tree.py:211 reuses the KeptList loader, but KeptContext.covers at scripts/rename/tree.py:189 repeats the prefix-containment test already written at scripts/rename/tree.py:150 instead of sharing it.",
+    "scope_discipline": "every path in 2b5c1e699..f3f2f2f52 is one of the three write paths brief.md:100-101 declares."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the source goal at brief.md:3-7, to keep reckon's project key and docs/state/imas-codex through the rename and close the peer's last points on the cutover sequence; scripts/rename/kept_names.json:105-127 adds the three kept contexts, kept_names.json:49-67 marks docs/state and docs/.reckon kept, and scripts/rename/cutover.json rewrites C7 as a check with disposition kept and a seven-key unchanged block.\nVERDICT done_when: read node.json's done_when; the gate it names is tests/scripts, whose log logs/gate-tests-scripts.log opens on revision f3f2f2f52 and closes '40 passed' with EXIT=0, and both default-tier arms are recorded as completed JSON objects whose 46 failure ids I recomputed from logs/arm-base.log and logs/arm-after.log as identical, but the rehearsal counts exist only in the fragment.\nVERDICT write_paths: read brief.md:100-101 (scripts/rename, tests/scripts, docs/evidence/fragments/codac-uda-signals/keep-the-reckon-key-in-the-rename.html); all nine paths in 2b5c1e699..f3f2f2f52 sit inside them.\nVERDICT manifest: read manifest.md at status complete; it names seven commits, both arms as single-line JSON with 46 completed ids each, and six test_logs, its tests line is the literal gate command matching the gate log's own header, and its artifact counts reconcile internally (216,051 - 196,499 = 19,552) and against the tree.\nVERDICT diff: read all seven commits against 2b5c1e699; rules.py:75-120 replaces the keep pass with a span-based one that claims contexts before rewriting, check.py:88-127 counts them into protected and into the reconciliation total, tree.py:173-212 adds KeptContext, kept_names.json adds three contexts and flips the evidence entry to an exclude default at kept_names.json:9, cutover.json rewrites C7 and C0 and retitles C9, cutover.py:20-46 adds required blocks, dispositions, title words and forbidden text, and tests/scripts adds thirteen test functions.\nCALL_SITES: scripts/rename/__main__.py:main, scripts/rename/apply.py:apply_rename, scripts/rename/check.py:check_tree, scripts/rename/cutover.py:check_cutover\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/rename/kept_names.json:105-127 carries the three kept contexts and scripts/rename/cutover.py:46 forbids the C7 text from moving the key or the state directory, which is what the brief's items 1 and 2 ask for.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/gate-tests-scripts.log runs tests/scripts at f3f2f2f52 and closes 40 passed with EXIT=0 while the two arms' 46 ids recompute identical, but the rehearsal figures at docs/evidence/fragments/codac-uda-signals/keep-the-reckon-key-in-the-rename.html:18 have no stored log.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in 2b5c1e699..f3f2f2f52 is one of the three write paths brief.md:100-101 declares.\nSCORE durability: 14\nJUSTIFICATION durability: tests/scripts/test_rename.py:699 and :668 redden when the C7 move text or the freeze instruction is removed and tests/scripts/test_rename.py:411 reddens when the evidence exclude is narrowed, but no test reads the shipped kept_contexts at scripts/rename/kept_names.json:105 so the key-keeping mechanism itself carries no guard.\nSCORE fit: 17\nJUSTIFICATION fit: the added checks follow the report.violations.append idiom of scripts/rename/cutover.py:230-272 and the dataclass-plus-loader form of scripts/rename/tree.py:173-212, though scripts/rename/cutover.py:20 drops the explicit type annotation the constant carried at the base.\nSCORE reuse: 17\nJUSTIFICATION reuse: scripts/rename/rules.py:75 extends the existing protect/rename_text owner rather than forking it and scripts/rename/tree.py:211 reuses the KeptList loader, but KeptContext.covers at scripts/rename/tree.py:189 repeats the prefix-containment test already written at scripts/rename/tree.py:150 instead of sharing it.\nFINDING tests/scripts/test_rename.py:464 non-blocking: both kept-context tests (here and tests/scripts/test_rename.py:485) write their own kept_contexts into a copy of the kept list, and no test reads the shipped contexts from scripts/rename/kept_names.json:105, so deleting reckon-spa-mount or lowering its floor of 40 leaves the gate's 40 tests green and the mechanism that keeps reckon's project key has no guard.\nFINDING docs/evidence/fragments/codac-uda-signals/keep-the-reckon-key-in-the-rename.html:46 non-blocking: the paragraph claims 'Four mutations ... against an unmutated control of 39 passed', but the run stores three control logs (ctl-A reddens one test, ctl-B two, ctl-C two) and the unmutated gate closes at 40 passed, and the same sentence's 'ten kept page URLs drove reckon-spa-mount to 31' does not subtract from the 44 it records, so a reader cannot reconcile the prose with the logs it cites.\nFINDING docs/evidence/fragments/codac-uda-signals/keep-the-reckon-key-in-the-rename.html:3 non-blocking: the rehearsal measurements the done_when requires (216,051 hits before, 196,499 after, 19,552 rewritten across 2,068 files, the 80190e83 and 30fdfe44 digests, the scratch-mount reads and the printed removals) exist only as fragment prose and worker-transcript output; no log under the reviewed run's logs/ directory carries them, so they cannot be reopened the way the gate and the two arms can.",
+  "review_method": "Read-only review of brief.md, node.json's done_when, the source manifest, the nine-file diff commit by commit against 2b5c1e699, the gate log, the two arm logs (failure ids recomputed and compared), the three control logs, and the evidence fragment; no suite rerun and no mutation.",
+  "review_run_id": "r-20261121T115118118927-review-of-keep-the-reckon-key-in-the-rename-f3f2f2f52e12",
+  "reviewed_base_sha": "2b5c1e6992bc587ea8faa6eee2575eb14bd6953c",
+  "reviewed_head_sha": "f3f2f2f52e12c478869f5e8b7c6d4eb47b0960b9",
+  "reviewed_run_id": "r-20261121T073756145207-keep-the-reckon-key-in-the-rename",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "source_commits": [
+    "b4b0640ba79292c5f50ae413dfd189591f3bd293",
+    "d43190003327c5999ee57e543d55c706c60293c5",
+    "885ef56798ebedb176e4c5b42ea27645f66a064e",
+    "fc3b1a4b8093a23f7bd7a15ff55ee3aa4ae99c15",
+    "a8a31c8938ed0de8544892f87dd27ec011f4fd36",
+    "bcdc2e6c491ee4d08cd91c6d3077d02a45e6b89b",
+    "f3f2f2f52e12c478869f5e8b7c6d4eb47b0960b9"
+  ],
+  "status": "parsed",
+  "suite_evidence": {
+    "added_failure_ids": [],
+    "after": {
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 46,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T073756145207-keep-the-reckon-key-in-the-rename/logs/arm-after.log",
+      "revision": "bcdc2e6c491ee4d08cd91c6d3077d02a45e6b89b"
+    },
+    "baseline": {
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 46,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T073756145207-keep-the-reckon-key-in-the-rename/logs/arm-base.log",
+      "revision": "bcdc2e6c491ee4d08cd91c6d3077d02a45e6b89b"
+    },
+    "gate": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/keep-the-reckon-key-in-the-rename /home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest -p no:cacheprovider tests/scripts",
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T073756145207-keep-the-reckon-key-in-the-rename/logs/gate-tests-scripts.log",
+      "passed": 40,
+      "revision": "f3f2f2f52e12c478869f5e8b7c6d4eb47b0960b9"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T12:20:00.000000+00:00",
+  "total": 102
+}
