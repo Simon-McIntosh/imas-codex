@@ -45,7 +45,65 @@
 <h3 id="keep-the-reckon-key-tests">The checks fire, and the suite does not move</h3>
 <p>Four mutations of the tool each produced a failing test with a whole id, against an unmutated control of 39 passed: hand-renaming ten kept page URLs (<code>test_apply_keeps_a_mounted_url_and_renames_the_code_beside_it</code>), altering one kept state file (<code>test_check_reports_a_kept_file_altered_without_losing_a_hit</code> and <code>test_apply_leaves_reckon_state_bytes_and_check_reports_an_alteration</code>), and dropping the reckon or freeze blocks from the sequence (<code>test_cutover_accounts_for_every_inventory_surface</code>, <code>test_cutover_keeps_the_reckon_key_and_its_state_directory</code>). At the data level, a hand-renamed ten kept URLs drove <code>reckon-spa-mount</code> to 31 against its floor of 40 and the check reported <code>kept-name-missing</code>; an altered state file produced <code>kept-path-altered</code> against the pre-rename digest.</p>
 <p>Both arms of the suite were run on their own scratch clones, built with their own environment, the after arm with the rename applied to the copy. The tests that reference <code>docs/evidence</code> passed equally in both: <strong>325 passed, 3 skipped, 35 deselected</strong>, exit 0 each.</p>
-<!-- ARMS -->
+<h3 id="keep-the-reckon-key-arms">Both arms of the default tier carry the same failures and no new one</h3>
+<p>Each arm cloned the same base revision, synced its own environment and ran the default tier in full. The after arm had the rename applied to its copy first, so the two runs differ by the rename and by nothing else they were asked to differ by.</p>
+<table>
+<tr><th>Arm</th><th>Outcome</th><th>Failing ids</th></tr>
+<tr><td>base, no rename</td><td>46 failed, 17,461 passed, 255 skipped, 1,151 deselected, exit 1</td><td>46</td></tr>
+<tr><td>after, rename applied</td><td>46 failed, 17,460 passed, 256 skipped, 1,151 deselected, exit 1</td><td>46, the same 46 ids</td></tr>
+</table>
+<p>The failing-id sets are identical, so the rename adds no failure. One test moved from passing to skipped: <code>tests/llm/test_signal_load_recipe.py::test_recipe_text_carries_only_invented_identities</code> skips when <code>~/.cache/imas-codex-codac-uda/catalogue-private-config.yaml</code> is absent, and the after copy looks under the renamed cache root. The live cache is outside the copy and was not touched, which is why the file is missing there; the cutover step that moves the cache roots moves it, and the test then finds it at the new path. Every other difference between the two logs is renamed text in a log line or a traceback path.</p>
+<p>The 46 failures are pre-existing on this base: they are graph-backed and live-service tests that need a reachable database or facility, and each failure is the same in both arms. The whole list:</p>
+<details>
+<summary>46 failing ids, identical in both arms</summary>
+<pre>tests/cli/test_discover_sequence.py::test_discover_hides_the_run_command
+tests/core/test_cli.py::TestServeCLI::test_serve_default_options
+tests/core/test_cli.py::TestServeCLI::test_serve_read_only
+tests/core/test_dd_unit_resolution.py::TestDdUnitDefectCuration::test_exact_resolution_cohort_retires_legacy_graph_correction
+tests/core/test_dd_unit_resolution.py::TestDdUnitDefectCuration::test_noncohort_descendant_keeps_legacy_graph_correction
+tests/core/test_isn_pin_agreement.py::test_isn_pin_matches_the_installed_package
+tests/discovery/test_decision_fault_retry.py::test_exhausted_transport_fault_is_reported_with_its_type_name
+tests/discovery/test_llm_aborted_reply.py::test_aborted_reply_is_retried_without_growing_the_token_budget
+tests/discovery/test_llm_aborted_reply.py::test_aborted_reply_with_partial_content_raises_empty_response_error
+tests/docs/test_documentation_layout.py::test_documentation_uses_typed_resource_paths
+tests/graph/test_cypher_property_check.py::test_repository_cypher_literals_have_declared_properties
+tests/graph/test_dd_path_domain_upsert.py::test_path_upsert_keeps_classified_domain_and_defaults_unclassified_path
+tests/graph/test_dd_unit_correction_reconcile.py::test_measurement_position_flux_is_corrected_in_graph
+tests/graph/test_domain_queries.py::TestFindCode::test_reranks_the_returned_rows_to_the_limit
+tests/graph/test_gas_unit_correction.py::test_exact_scope_excludes_an_unrelated_registered_correction
+tests/graph/test_gas_unit_correction.py::test_registry_rewrites_the_two_gas_flow_paths
+tests/graph/test_rebuild_honours_resolution.py::test_rebuild_ignores_resolution_without_exact_active_authority[different-version]
+tests/graph/test_rebuild_honours_resolution.py::test_rebuild_ignores_resolution_without_exact_active_authority[retired]
+tests/graph/test_refresh_physics_domains.py::test_dry_run_reports_changes_without_writing
+tests/graph/test_refresh_physics_domains.py::test_refresh_writes_only_the_domain_and_spares_classified_paths
+tests/graph/test_updated_at_coverage.py::test_standard_name_package_matches_updated_at_debt_baseline
+tests/ids/test_candidate_judgment.py::test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered
+tests/ids/test_candidate_judgment.py::test_state_carries_facility_source_and_candidate_blocks
+tests/ids/test_map_each_home.py::TestMapWorkerMapsEveryIdsOfOneSource::test_each_ids_pass_prepares_its_own_section
+tests/ids/test_map_each_home.py::TestMapWorkerMapsEveryIdsOfOneSource::test_each_pass_releases_the_source_it_finished
+tests/ids/test_map_each_home.py::TestMapWorkerMapsFromSelectedEdges::test_selected_source_is_mapped_from_its_selected_edges
+tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts
+tests/search/test_structure_expansion.py::test_mixed_structure_and_leaf_hits
+tests/search/test_structure_expansion.py::test_non_structure_hits_have_no_children
+tests/search/test_structure_expansion.py::test_structure_expansion_capped_at_five_parents
+tests/search/test_structure_expansion.py::test_structure_hits_get_children
+tests/search/test_structure_expansion.py::test_structure_with_no_children_in_db
+tests/standard_names/test_review_cascade.py::test_shadow_records_route_and_keeps_incumbent_result
+tests/standard_names/test_review_cascade.py::test_unjudged_review_keeps_full_incumbent[False-judgment]
+tests/standard_names/test_review_cascade.py::test_unjudged_review_keeps_full_incumbent[False-lease]
+tests/standard_names/test_review_cascade.py::test_unjudged_review_keeps_full_incumbent[True-judgment]
+tests/standard_names/test_review_cascade.py::test_unjudged_review_keeps_full_incumbent[True-lease]
+tests/standard_names/test_review_cascade.py::test_unjudged_shadow_row_preserves_incumbent_and_aggregate[call-docs]
+tests/standard_names/test_review_cascade.py::test_unjudged_shadow_row_preserves_incumbent_and_aggregate[call-name]
+tests/standard_names/test_review_cascade.py::test_unjudged_shadow_row_preserves_incumbent_and_aggregate[lease-docs]
+tests/standard_names/test_review_cascade.py::test_unjudged_shadow_row_preserves_incumbent_and_aggregate[lease-name]
+tests/test_imas_search_scoring.py::TestCodeExampleVectorSearch::test_graceful_on_missing_index
+tests/wiki/test_wiki_judgments.py::test_image_vision_returns_text_before_jev_judgment
+tests/wiki/test_wiki_judgments.py::test_state_carries_only_matches_in_own_text[document-tcv]
+tests/wiki/test_wiki_judgments.py::test_state_carries_only_matches_in_own_text[image-tcv]
+tests/wiki/test_wiki_judgments.py::test_state_carries_only_matches_in_own_text[page-tcv]</pre>
+</details>
+<p>Nothing in that list belongs to the 19 files that reference <code>docs/evidence</code>. Those were also run as their own arm on both copies, and that arm has no failure at all: 325 passed and 3 skipped each.</p>
 <h3 id="keep-the-reckon-key-removals">What was removed</h3>
 <p>Each job removed its own scratch tree from node-local <code>/tmp</code> and printed the removal. The one long-lived copy from the exploratory work, <code>/tmp/rename-smoke-4Edh</code> (485 MB), was removed and printed as absent. No shared storage directory was created or removed.</p>
 </section>
