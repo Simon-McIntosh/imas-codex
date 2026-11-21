@@ -1,0 +1,81 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-21T16:05:47.250Z",
+  "dispatched_at": "2026-11-21T15:55:06Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:57",
+      "id": "reasoning-1",
+      "reason": "the author must cite where the census was run or restate the requirement as unquantified, otherwise a worker implements a channel for a population it cannot identify or recount.",
+      "text": "\u00a78 states \"The second benchmark round also found 44 derived parents whose case files show none of their children and 15 members with no producer in the graph\", but neither figure occurs in any committed second-round artifact: grep over docs/evidence/fragments/sn-case-file-generation/* returns 0 files matching \"children\" against a positive control of 22 files matching \"incumbent\", and benchmark-second-round-incumbent-defects.json carries only the held-out defect classes \u2014 so the two counts behind the children-channel and no-producer requirements cannot be traced or reproduced",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:61",
+      "id": "done_when-1",
+      "reason": "the node's central action is a text change, and where it lands decides the section's write scope; an unresolved answer sends the worker to guess on the lead's catalog.",
+      "text": "\u00a79 requires \"a flagged inconsistency is repaired once, changing only the flagged field of the flagged members\" and reports \"those repaired\", while its closing sentence says \"No stored text changes until the lead has read the 20-family comparison\"; no route says where a repair lives between the two, so a dispatched node must either write the live catalog (forbidden by the last clause) or produce repairs it cannot report as made",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:61",
+      "id": "done_when-2",
+      "reason": "without one partition the section's population and its per-family denominators are undefined, so its acceptance measure has no fixed base.",
+      "text": "\u00a79 defines a family as \"the members of one parent, and the members that differ by one grammar segment such as component, species, position or operator\"; the two groupings are different partitions, so the set of families the pass runs over and the member counts the evidence reports per family cannot be reconciled",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:20",
+      "id": "wiring-1",
+      "reason": "the plan needs either an edge making \u00a73 depend on \u00a78, or a statement that a prompt change invalidates the ruling and the held-out round is rescored.",
+      "text": "the depends-on map (plan.html:20) leaves \u00a73 free to dispatch now (it waits only on the done \u00a71 and \u00a72) and gives \u00a78 no edge to it, yet \u00a78's done-when permits changing any stage's prompt text \"to receive a channel the census shows it was missing\" and \u00a73 owns prompt tuning (\"the case file or the prompt is changed in answer to the previous round's failures\") \u2014 so \u00a73's ruling can be made on a prompt \u00a78 then changes, and \u00a76 regenerates with a prompt the benchmark never scored",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:57",
+      "id": "done_when-3",
+      "reason": "the plan's own cost discipline puts a ceiling on every model-calling section, and \u00a78 is the widest census in the plan.",
+      "text": "\u00a78 calls a model for every pipeline stage over the equilibrium group and the 87 held-out members (295 names across seven stages) and states no spend ceiling, while every other implementing section states spend beside a ceiling (\u00a73 USD 25, \u00a76 USD 30, \u00a77 USD 10); a node can therefore incur an unbounded metered cost with nothing to compare it against",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "44e991cdeed3cbf73b86a06fc09e6d22f2440726",
+  "plan_fingerprint": "3d408b7a0d0da547d0498bc851b21b4888898caa4a6ccf0863efcbe34543d5c9",
+  "plan_slug": "sn-case-file-generation",
+  "plan_version": 24,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261121T155428333897-plan-review-of-sn-case-file-generation",
+  "reviewed_blob_sha": "8358db5165922c42b0cd5d18bc5ecf8d06a735c5",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited evidence paths exist, extensionless hrefs resolve as .html, and \"the definitions plan\" in \u00a79 resolves to docs/plans/sn-definitions-by-construction.html.",
+    "done_when": "a finding \u2014 \u00a79's done-when (plan.html:61) defines \"family\" two incompatible ways, so the population its per-family counts are taken over is undefined; \u00a78's done-when is measurable and carries both a withheld-channel negative control and a positive control.",
+    "evidence_paths": "pass \u2014 \u00a78 and \u00a79 both name docs/evidence/fragments/sn-case-file-generation/ for their records, the paths exist, and \u00a77's two cited JSON files resolve there.",
+    "naming": "pass \u2014 the new sections carry no plan labels, stage names, ticket numbers or changelog prose.",
+    "reasoning": "a finding \u2014 \u00a78 attributes a 44/15 census result to the second benchmark round, and no committed second-round artifact contains either figure; the section's stated context root cause (the \u00a72 case file imported by nothing) is verified true.",
+    "single_goal": "pass \u2014 \u00a78's clauses all serve the one goal of recording and counting what each stage was given, and each other node names one deliverable.",
+    "wiring": "a finding \u2014 the depends-on map (plan.html:20) lets \u00a78 change any stage's prompt text while \u00a73, already dispatchable, rules the structure and model on the prompts as they stand, and nothing makes \u00a73 wait for \u00a78 or re-check the ruling after a prompt change."
+  },
+  "section_digests": {
+    "_document": "8046f014e2d5bc842928e44cc4e9cde56f08a3315be14206f50388c862848e62",
+    "s1": "66daa3f78292910aa399a3a7874182b6ced822cba15f461f52d7f321bfb0d49c",
+    "s2": "678940dfe8bd6d437c712fed9aac830d188a43a3a48ac6eca1c34afa21ad5cfa",
+    "s3": "7da2eb37916f38bde6478e3e6258bf73b046248fbc5a7d256ce3251c430a2d4a",
+    "s4": "d0c203a2f760ab938d4544c7f4956717f1a6a1b14ab758143abf49bbdf0beb45",
+    "s5": "6695eb1820bfd26db82bf71b88bd092e7e57b2cd09a20902ceb273188d79512f",
+    "s6": "5914118099288f7cdc28bdb5a4837999feae2391e6decaa78a12188d67aa1b7e",
+    "s7": "e72a2a8e63b73f766aff6cb9d8adb72bcd41c5b121d15160e5c82fe081e0c592",
+    "s8": "9484a940b7a1cb202fa511cd0353962e33bd8d9b7a0a08182578aed012b60009",
+    "s9": "31b4c73d5d4f4449267cf073064a59b7112e6557f8f2ca91383c7d0d6c8472c5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T16:05:51.138844+00:00",
+  "total": null
+}
