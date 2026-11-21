@@ -71,6 +71,16 @@
       "note": "Section 24 now waits on the role vocabulary it reads, and not on the category kinds it does not.",
       "reason": "",
       "when": "2026-11-21T08:22:11.462321+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0692b8001be88cdf60010ec333d49a56efe4b6a1",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "Split: section 24 delivers sibling-signal relations only; the pulse-to-system question is its own section.",
+      "reason": "",
+      "when": "2026-11-21T08:22:15.107822+00:00"
     }
   ],
   "responses": {
@@ -91,6 +101,15 @@
       "note": "The premise was wrong: no designation is parsed. The category link is taken out of this section; a new measurement section first establishes from the catalogue how category names name systems, and writes no link.",
       "reason": "",
       "when": "2026-11-21T08:22:04.159319+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0692b8001be88cdf60010ec333d49a56efe4b6a1",
+      "commit_basis": "edit",
+      "note": "Split: section 24 delivers sibling-signal relations only; the pulse-to-system question is its own section.",
+      "reason": "",
+      "when": "2026-11-21T08:22:15.107822+00:00"
     },
     "wiring-1": {
       "action": "acted",
