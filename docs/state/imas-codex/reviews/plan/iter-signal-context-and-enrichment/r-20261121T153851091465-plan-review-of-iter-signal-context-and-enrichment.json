@@ -79,6 +79,13 @@
       "note": "The pilot comparison now has a failing condition: every changed value is read by hand and none may be wrong.",
       "reason": "",
       "when": "2026-11-21T20:12:31.344574+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-3",
+      "reason": "The pilot enrichment's run manifest and evidence fragment record both measures (the search showing one propagation path, and zero stated values the vocabulary does not hold); the plan comment summarises and is not the landing record.",
+      "when": "2026-11-21T20:12:35.290449+00:00"
     }
   ],
   "responses": {
@@ -99,6 +106,12 @@
       "note": "The pilot comparison now has a failing condition: every changed value is read by hand and none may be wrong.",
       "reason": "",
       "when": "2026-11-21T20:12:31.344574+00:00"
+    },
+    "done_when-3": {
+      "action": "declined",
+      "by": "",
+      "reason": "The pilot enrichment's run manifest and evidence fragment record both measures (the search showing one propagation path, and zero stated values the vocabulary does not hold); the plan comment summarises and is not the landing record.",
+      "when": "2026-11-21T20:12:35.290449+00:00"
     },
     "wiring-1": {
       "action": "acted",
