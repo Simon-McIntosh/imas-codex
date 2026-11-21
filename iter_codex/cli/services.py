@@ -716,6 +716,11 @@ def _process_scan_command(
     *, store: str = "", job_id: str | None = None, word: str = "neo4j"
 ) -> str:
     """Build the shell command that lists a service's processes on a node."""
+    # ``SERVICE_STORE`` reaches the scan as an env assignment, not as shell
+    # text, so a ``$HOME`` in the store constant is never expanded there.  Do
+    # it here, where the path is built, or the case pattern compares a real cwd
+    # with a literal "$HOME/..." and never matches.
+    store = os.path.expanduser(os.path.expandvars(store))
     env = [
         f"SERVICE_STORE={shlex.quote(store)}",
         f"SERVICE_JOB_ID={shlex.quote(job_id or '')}",

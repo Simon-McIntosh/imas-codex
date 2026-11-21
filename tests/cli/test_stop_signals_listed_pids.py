@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+from pathlib import Path
 
 import click
 import pytest
@@ -238,3 +239,20 @@ def test_login_embed_stop_targets_the_pid_its_launcher_recorded(monkeypatch):
     assert "4321" in signal_script
     assert "pgrep" not in signal_script
     assert "pkill" not in signal_script
+
+
+def test_the_default_store_path_reaches_the_scan_expanded():
+    cmd = services._process_scan_command(store=services._NEO4J_STORE_BASE)
+
+    assert "$HOME" not in cmd
+    assert os.path.expanduser("~/.local/share/iter-codex/neo4j") in cmd
+
+
+def test_a_process_under_the_default_store_is_selected(proc_table):
+    """The production default must match a real cwd, not a string ending in $HOME."""
+    default = Path(os.path.expanduser("~/.local/share/iter-codex/neo4j"))
+    _add_process(proc_table["proc"], 6006, "java Neo4jCommunity", cwd=default / "data")
+
+    holders, _left = _scan(proc_table, store=services._NEO4J_STORE_BASE)
+
+    assert "6006" in [p["pid"] for p in holders]
