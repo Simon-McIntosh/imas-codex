@@ -1,0 +1,91 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "f13d2860addec7925209d7095d0e80b9a339df48",
+  "call_site_count": 10,
+  "call_sites": [
+    "iter_codex/graph/neo4j_ops.py:280-284 Neo4jOperation._stop_neo4j",
+    "iter_codex/cli/graph/server.py:316 stop_neo4j_job",
+    "iter_codex/cli/services.py:559 _stop_login_services",
+    "iter_codex/cli/services.py:934-935 stop_neo4j_job",
+    "iter_codex/cli/services.py:959 _stop_service",
+    "iter_codex/cli/services.py:1333-1334 deploy_neo4j",
+    "iter_codex/cli/services.py:1371 deploy_embed",
+    "iter_codex/cli/services.py:1406 deploy_embed_noslurm",
+    "iter_codex/cli/embed.py:659 _kill_login_embed",
+    "iter_codex/cli/embed.py:684 _kill_embed_orphans after scancel"
+  ],
+  "completed_at": "2026-11-21T22:44:52.208Z",
+  "dispatched_at": "2026-11-21T22:21:03Z",
+  "findings": [
+    {
+      "file": "iter_codex/cli/services.py",
+      "line": "647",
+      "severity": "blocking",
+      "text": "blocking: _NEO4J_STORE_BASE is the literal string \"$HOME/.local/share/iter-codex/neo4j\" and reaches the scan as env SERVICE_STORE='$HOME/...' with no shell expansion, so the case pattern at :666 compares a real cwd against the literal and never matches; reproduced with the landed scan script, a fake process whose cwd is .../neo4j/data yields zero HOLD lines at the production default and one HOLD line with the expanded path. Every default-store caller is therefore inert: stop_local_store_holders (:857), _kill_neo4j_on_node (:1169), _wait_for_store_release (:838), and the holder guard at the top of _clean_neo4j_locks (:1151), so deploy_neo4j (:1333-1334) will dd/replace neostore* files while a live Neo4j holds the store \u2014 the hazard the goal's third requirement exists to prevent, replacing a pgrep guard that did detect the JVM."
+    },
+    {
+      "file": "iter_codex/cli/services.py",
+      "line": "1183",
+      "severity": "blocking",
+      "text": "blocking: _kill_embed_orphans signals nothing whenever _get_service_job(_EMBED_JOB) lists nothing, but all three production callers invoke it in exactly that state: services.py:1371 deploy_embed (which returns early when a job is RUNNING and whose comment says it clears orphans surviving scancel), services.py:1406 deploy_embed_noslurm (a nohup embed has no SLURM job at all), and iter_codex/cli/embed.py:684 after scancel. The embed orphan cleanup the goal's fifth requirement covers is dead, and the callers still print 'Cleaned up N worker process(es)' / 'Killed rogue embed process(es)', so a second embed server can start on the same port with no signal sent."
+    },
+    {
+      "file": "iter_codex/cli/services.py",
+      "line": "692",
+      "severity": "non-blocking",
+      "text": "non-blocking: age is computed from stat -c %Y on the /proc/<pid> directory, whose mtime is the current time (measured: /proc/1 mtime equals now), so every listed process prints an age of 0s and the requirement to print each pid with its age is not met. iter_codex/cli/tunnel.py:808 already shows the correct idiom, ps -o uid=,etime=,args=."
+    },
+    {
+      "file": "iter_codex/cli/services.py",
+      "line": "935",
+      "severity": "non-blocking",
+      "text": "non-blocking: _run_remote(\"scancel {job_id}\", check=False) discards the scheduler cancel's output, so requirement 6 \u2014 the scheduler cancel and each signal print what they did \u2014 is unmet for this one command, though every signal does print."
+    },
+    {
+      "file": "iter_codex/cli/services.py",
+      "line": "838",
+      "severity": "non-blocking",
+      "text": "non-blocking: _wait_for_store_release calls _select_processes(node) with no job_id, so on a compute node the containerised Neo4j that can still hold the store is attributable by neither the store path nor the job cgroup; after the default-store literal at :647 is repaired this gate can still report release while the holder exits."
+    }
+  ],
+  "head_log_revision": "58a42e63106ee9a5d26fbe449f03aef546bad94c",
+  "item_aggregate": "5 of 5 checklist items read; both blocking findings are in production call paths the node rewrote.",
+  "item_verdicts": {
+    "call_sites": "iter_codex/graph/neo4j_ops.py:280-284, iter_codex/cli/graph/server.py:316, iter_codex/cli/services.py:559/934/959/1333/1371/1406, iter_codex/cli/embed.py:659/684.",
+    "diff": "58a42e631 rewrites both stop paths and deploy-time orphan helpers; 02dd39a63 adds only the evidence fragment.",
+    "done_when": "no pkill/killall remain in either module; tests/cli/test_stop_signals_listed_pids.py walks a fake /proc with the real scan; logs/base.log and logs/head.log hold 4 failures on each arm with identical ids and EXIT=1.",
+    "goal": "the goal is a graph stop that selects processes by pid and never touches the store while a process holds it; services.py:647 makes the default store selection a literal $HOME that never matches, so the store-protection half is not delivered.",
+    "manifest": "read; status complete, two commits, both suite arms with identical four failure ids, two negative-control logs, added_failure_count 0, embed.py pgrep named in outside_scope.",
+    "write_paths": "git diff f13d2860..02dd39a63 touches exactly the five declared paths and nothing else."
+  },
+  "justifications": {
+    "call_sites": "read at iter_codex/graph/neo4j_ops.py:280-284, iter_codex/cli/graph/server.py:316, iter_codex/cli/services.py:559/934/959/1333/1371/1406, iter_codex/cli/embed.py:659/684; the deploy and post-scancel embed call sites are where the job-id-only selector finds no job.",
+    "durability": "logs/negative_control_store_path.log and negative_control_job_exit.log show the new tests redden when the store attribution or the job-exit wait is removed, but the store arm supplies its own path at tests/cli/test_stop_signals_listed_pids.py:79 so it cannot fail on the literal default.",
+    "evidence": "logs/base.log and logs/head.log read 4 failed / 1027 passed and 4 failed / 1037 passed with identical failing ids and EXIT=1, but the tests pass the store path explicitly so no arm exercises the production default at services.py:647.",
+    "fit": "the added helpers at iter_codex/cli/services.py:643-860 follow the module's click.echo style and carry mechanism comments with no plan, ticket or author identifiers.",
+    "goal_fidelity": "iter_codex/cli/services.py:647 makes the default store selector a literal $HOME string that never matches a real cwd, so stop_local_store_holders (:857), _kill_*_on_node (:1169) and the _clean_neo4j_locks guard (:1151) signal and refuse nothing in production.",
+    "reuse": "no shared owner of attributable-pid termination exists to extend; iter_codex/cli/tunnel.py:752-816 is the nearest, a purpose-built inline cgroup reclaim whose age idiom (ps -o etime=) the new scan did not reuse.",
+    "scope_discipline": "every path in git diff f13d2860..02dd39a63 is inside the declared write paths and iter_codex/cli/embed.py was reported in outside_scope rather than edited."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a graph stop that selects processes by pid and never touches the store while a process holds it; iter_codex/cli/services.py:647-857 replaces every pattern selector with a /proc scan, but the default store selector is inert so the store-protection half is not delivered.\nVERDICT done_when: the done_when asks for no pattern selectors, tests over a faked process table, and both suite arms; tests/cli/test_stop_signals_listed_pids.py exercises the real scan against a fake table and logs/base.log vs logs/head.log record 4 failures on each arm with identical failure ids; grep finds no pkill/killall in either module, while services.py:1068 keeps a non-signalling pgrep for load measurement.\nVERDICT write_paths: the five declared paths are iter_codex/graph/neo4j_ops.py, iter_codex/cli/services.py, tests/cli, tests/graph and the evidence fragment; git diff f13d2860..02dd39a63 touches exactly those five and nothing else.\nVERDICT manifest: read; it records status complete, two commits, both suite arms as single-line JSON with the same four failure ids, two negative-control logs, 0 added failures, and names iter_codex/cli/embed.py pgrep usage in outside_scope.\nVERDICT diff: read commit by commit; 58a42e631 rewrites both stop paths and the deploy-time orphan helpers plus two test files, and 02dd39a63 adds only the evidence fragment docs/evidence/fragments/codac-uda-signals/stop-the-graph-by-listed-pids.html.\nCALL_SITES: iter_codex/graph/neo4j_ops.py:280-284:Neo4jOperation._stop_neo4j, iter_codex/cli/graph/server.py:316, iter_codex/cli/services.py:559 _stop_login_services, iter_codex/cli/services.py:934-935 stop_neo4j_job, iter_codex/cli/services.py:959 _stop_service, iter_codex/cli/services.py:1333-1334 deploy_neo4j, iter_codex/cli/services.py:1371 deploy_embed, iter_codex/cli/services.py:1406 deploy_embed_noslurm, iter_codex/cli/embed.py:659, iter_codex/cli/embed.py:684\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: iter_codex/cli/services.py:647 makes the default store selector a literal $HOME string that never matches a real cwd, so stop_local_store_holders (857), _kill_neo4j_on_node (1169) and the _clean_neo4j_locks guard (1151) signal and refuse nothing in production.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/base.log and logs/head.log read 4 failed / 1027 passed and 4 failed / 1037 passed with identical failing ids and EXIT=1, but the tests pass the store path explicitly so no arm exercises the production default at services.py:647.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff f13d2860..02dd39a63 is inside the declared write paths and iter_codex/cli/embed.py was correctly reported in outside_scope rather than edited.\nSCORE durability: 12\nJUSTIFICATION durability: logs/negative_control_store_path.log and negative_control_job_exit.log show the new tests redden when the store attribution or the job-exit wait is removed, but the store arm supplies its own path at tests/cli/test_stop_signals_listed_pids.py:79 so it cannot fail on the literal default.\nSCORE fit: 16\nJUSTIFICATION fit: the added helpers at iter_codex/cli/services.py:643-860 follow the module's click.echo style and carry mechanism comments with no plan, ticket or author identifiers.\nSCORE reuse: 14\nJUSTIFICATION reuse: no shared owner of attributable-pid termination exists to extend; iter_codex/cli/tunnel.py:752-816 is the nearest, a purpose-built inline cgroup reclaim whose age idiom (ps -o etime=) the new scan did not reuse and whose concept it duplicates inline at services.py:652-704.\nFINDING iter_codex/cli/services.py:647 blocking: _NEO4J_STORE_BASE is the literal string \"$HOME/.local/share/iter-codex/neo4j\" and reaches the scan as env SERVICE_STORE='$HOME/...' with no shell expansion, so the case pattern at :666 compares a real cwd against the literal and never matches; reproduced with the landed script, a fake process whose cwd is .../neo4j/data yields zero HOLD lines at the production default and one HOLD line with the expanded path, leaving the store-holder guard in _clean_neo4j_locks inert and _clean_neo4j_locks would dd/replace neostore* under a live holder.\nFINDING iter_codex/cli/services.py:1183 blocking: _kill_embed_orphans signals nothing whenever _get_service_job lists no embed job, yet every production caller runs it in exactly that state \u2014 services.py:1371 deploy_embed, services.py:1406 deploy_embed_noslurm, and iter_codex/cli/embed.py:684 after scancel \u2014 so the embed orphan cleanup is dead while the callers still print cleaned-up counts.\nFINDING iter_codex/cli/services.py:692 non-blocking: age comes from stat -c %Y on the /proc/<pid> directory, whose mtime is the current time, so every listed process prints an age of 0s and the requirement to print each pid with its age is not met; iter_codex/cli/tunnel.py:808 already shows the correct idiom, ps -o etime=.\nFINDING iter_codex/cli/services.py:935 non-blocking: _run_remote(\"scancel {job_id}\") discards the scheduler cancel's output, so requirement 6, that the scheduler cancel print what it did, is unmet for this one command while every signal does print.\nFINDING iter_codex/cli/services.py:838 non-blocking: _wait_for_store_release calls _select_processes(node) without job_id, so the containerised Neo4j that can still hold the store is attributable by neither store path nor job cgroup, and after the store path is repaired this gate can still return released while it exits.",
+  "review_run_id": "r-20261121T222012430770-review-of-stop-the-graph-by-listed-pids-02dd39a63c24",
+  "reviewed_base_sha": "f13d2860addec7925209d7095d0e80b9a339df48",
+  "reviewed_head_sha": "02dd39a63c24e18ee607f4b7002a4bea1aa99fd7",
+  "reviewed_run_id": "r-20261121T205832963647-stop-the-graph-by-listed-pids",
+  "reviewer": {},
+  "reviewer_run_id": "r-20261121T222012430770-review-of-stop-the-graph-by-listed-pids-02dd39a63c24",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 11,
+    "reuse": 14,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T22:45:22.165681+00:00",
+  "total": 85
+}
