@@ -9,7 +9,6 @@ compute node or a local process is patched here.
 
 from __future__ import annotations
 
-import re
 import subprocess
 from types import SimpleNamespace
 
@@ -51,7 +50,9 @@ def scheduler(monkeypatch):
     monkeypatch.setattr(
         services, "_get_service_job", lambda name, strict=False: dict(RUNNING_JOB)
     )
-    monkeypatch.setattr(services, "_term_neo4j_on_node", lambda node: None)
+    monkeypatch.setattr(services, "_term_neo4j_on_node", lambda node, **_kw: None)
+    # No process holds the store once the job has gone.
+    monkeypatch.setattr(services, "_run_on_node", lambda node, cmd, timeout=30: "")
     monkeypatch.setattr(services.time, "sleep", lambda _s: None)
     return state
 
@@ -67,11 +68,38 @@ def test_stop_returns_only_after_the_job_leaves_the_scheduler(scheduler):
 
 def test_stop_raises_while_the_job_is_still_listed(scheduler, monkeypatch):
     scheduler["listed_polls"] = 10**6
-    clock = iter(float(t) for t in range(0, 10**6, 50))
+    clock = iter(float(t) for t in range(74, 1_000_074, 7))
     monkeypatch.setattr(services.time, "monotonic", lambda: next(clock))
+    node_commands = []
+    monkeypatch.setattr(
+        services,
+        "_run_on_node",
+        lambda node, cmd, timeout=30: node_commands.append(cmd) or "",
+    )
 
     with pytest.raises(click.ClickException, match="still listed"):
         services.stop_neo4j_job(timeout=180)
+
+    # The wait ended in a raise, so nothing reached the store files or locks.
+    assert node_commands == []
+    assert not any(
+        token in cmd
+        for cmd in scheduler["commands"]
+        for token in ("rm ", "dd ", "kill")
+    )
+
+
+def test_store_release_raises_while_a_process_still_holds_it(monkeypatch):
+    holder = {"pid": "31337", "age": "42", "cmdline": "java Neo4jCommunity"}
+    monkeypatch.setattr(
+        services, "_select_processes", lambda node, **kwargs: ([holder], [])
+    )
+    clock = iter(float(t) for t in range(74, 1_000_074, 7))
+    monkeypatch.setattr(services.time, "monotonic", lambda: next(clock))
+    monkeypatch.setattr(services.time, "sleep", lambda _s: None)
+
+    with pytest.raises(click.ClickException, match="still held"):
+        services._wait_for_store_release("gpu-node", timeout=180)
 
 
 def test_an_unanswered_squeue_counts_as_still_listed(scheduler):
@@ -106,13 +134,18 @@ def test_export_stop_cleans_locks_only_after_the_job_has_exited(monkeypatch):
         services, "_clean_neo4j_locks", lambda node: events.append(f"clean {node}")
     )
     monkeypatch.setattr(
+        services,
+        "stop_local_store_holders",
+        lambda: events.append("local holders signalled"),
+    )
+    monkeypatch.setattr(
         "iter_codex.graph.neo4j_ops.subprocess.run",
         lambda *args, **kwargs: SimpleNamespace(returncode=0),
     )
 
     Neo4jOperation._stop_neo4j(SimpleNamespace(profile=SimpleNamespace(name="codex")))
 
-    assert events == ["exited", "clean gpu-node"]
+    assert events == ["exited", "clean gpu-node", "local holders signalled"]
 
 
 def test_a_failed_stop_stops_the_operation_before_any_cleanup(monkeypatch):
@@ -136,39 +169,33 @@ def test_a_failed_stop_stops_the_operation_before_any_cleanup(monkeypatch):
     assert cleaned == []
 
 
-def test_lock_cleanup_refuses_while_a_neo4j_jvm_is_alive(monkeypatch):
+def test_lock_cleanup_refuses_while_a_process_holds_the_store(monkeypatch):
     scripts = []
 
     def run_on_node(node, cmd, timeout=30):
         scripts.append(cmd)
-        return "neo4j_alive 31337\n"
+        if "SERVICE_STORE" in cmd:
+            return "HOLD|31337|42|java org.neo4j.server.Neo4jCommunity\n"
+        return "locks_cleaned\n"
 
     monkeypatch.setattr(services, "_run_on_node", run_on_node)
 
     with pytest.raises(click.ClickException, match="still running on gpu-node"):
         services._clean_neo4j_locks("gpu-node")
 
-    script = scripts[0]
-    guard = script.index("pgrep")
-    assert guard < script.index("rm -f")
-    assert guard < script.index("dd if=")
+    assert not any("pkill" in cmd for cmd in scripts)
 
 
-def test_the_store_holder_pattern_matches_the_jvms_and_not_its_own_script(
-    monkeypatch,
-):
-    pattern = re.compile(services._NEO4J_STORE_HOLDERS)
-    java = "/opt/java/openjdk/bin/java -cp /var/lib/neo4j/lib/*"
-    assert pattern.search(f"{java} org.neo4j.server.Neo4jCommunity --home-dir=/x")
-    assert pattern.search(f"{java} org.neo4j.cli.AdminTool database dump neo4j")
-
-    # the remote shell's argv carries the cleanup script verbatim, so a pattern
-    # that matched its own text would find the shell and never report clean
+def test_the_store_holder_scan_never_selects_by_name_pattern(monkeypatch):
     scripts = []
     monkeypatch.setattr(
         services,
         "_run_on_node",
-        lambda node, cmd, timeout=30: scripts.append(cmd) or "locks_cleaned\n",
+        lambda node, cmd, timeout=30: scripts.append(cmd) or "",
     )
     services._clean_neo4j_locks("gpu-node")
-    assert not pattern.search(scripts[0])
+
+    scan = scripts[0]
+    assert "pgrep" not in scan
+    assert "pkill" not in scan
+    assert "SERVICE_STORE" in scan

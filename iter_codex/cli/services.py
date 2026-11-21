@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import logging
 import os
+import shlex
 import subprocess
 import time
 from dataclasses import dataclass
@@ -638,11 +639,229 @@ def _cancel_service_job(job_name: str) -> bool:
         return False
 
 
-# The bracketed dot keeps the pattern from matching the remote shell whose
-# argv carries this very text, so pgrep finds only the JVMs.
-_NEO4J_STORE_HOLDERS = "org[.]neo4j[.](server[.]Neo4jCommunity|cli[.]AdminTool)"
+#: Root of the graph store the SLURM-hosted Neo4j binds into its container.
+#: A process is attributed to the graph only when its working directory or an
+#: open file resolves inside this tree, or when it runs inside the service's
+#: own scheduler job.  A command-line pattern is never a selector: on a shared
+#: login node it cannot tell another project's Neo4j apart from this one.
+_NEO4J_STORE_BASE = "$HOME/.local/share/iter-codex/neo4j"
 _NEO4J_TERM_GRACE_SECONDS = 120
 _NEO4J_EXIT_TIMEOUT_SECONDS = 180.0
+_EMBED_PID_FILE = "$HOME/.local/share/iter-codex/services/codex-embed.pid"
+
+# Prints one HOLD line per process attributable to the service and one LEFT
+# line per process that names the service but does not hold its store.  Runs on
+# the node that owns the processes: /proc is the only fact there, and
+# PROC_ROOT/SERVICE_STORE/SERVICE_JOB_ID let a test point it at a fake table.
+_PROCESS_SCAN = r"""
+proc_root="${PROC_ROOT:-/proc}"
+store="${SERVICE_STORE:-}"
+job="${SERVICE_JOB_ID:-}"
+word="${SERVICE_WORD:-neo4j}"
+self=$$
+parent=$PPID
+now=$(date +%s)
+for d in "$proc_root"/[0-9]*; do
+    [ -d "$d" ] || continue
+    pid=${d##*/}
+    [ "$pid" = "$self" ] && continue
+    [ "$pid" = "$parent" ] && continue
+    cmd=$(tr '\0' ' ' < "$d/cmdline" 2>/dev/null | tr -d '\r\n' | cut -c1-200)
+    [ -z "$cmd" ] && continue
+    holds=""
+    if [ -n "$store" ]; then
+        cwd=$(readlink "$d/cwd" 2>/dev/null || true)
+        case "$cwd" in
+            "$store"|"$store"/*) holds="cwd $cwd" ;;
+        esac
+        if [ -z "$holds" ]; then
+            for fd in "$d"/fd/*; do
+                tgt=$(readlink "$fd" 2>/dev/null || true)
+                case "$tgt" in
+                    "$store"|"$store"/*) holds="open $tgt"; break ;;
+                esac
+            done
+        fi
+    fi
+    if [ -z "$holds" ] && [ -n "$job" ]; then
+        cg=$(cat "$d/cgroup" 2>/dev/null || true)
+        case "$cg" in
+            *"/job_${job}/"*|*"/job_${job}") holds="cgroup job_${job}" ;;
+        esac
+    fi
+    start=$(stat -c %Y "$d" 2>/dev/null || echo "$now")
+    age=$((now - start))
+    if [ -n "$holds" ]; then
+        printf 'HOLD|%s|%s|%s\n' "$pid" "$age" "$cmd"
+    else
+        lower=$(printf '%s' "$cmd" | tr '[:upper:]' '[:lower:]')
+        case "$lower" in
+            *"$word"*)
+                printf 'LEFT|%s|%s|does not hold the service store|%s\n' \
+                    "$pid" "$age" "$cmd" ;;
+        esac
+    fi
+done
+"""
+
+
+def _run_shell(node: str | None, cmd: str, timeout: int = 30) -> str:
+    """Run ``cmd`` on ``node``, which is the login node when ``node`` is None."""
+    if node is None:
+        return _run_remote(cmd, timeout=timeout)
+    return _run_on_node(node, cmd, timeout=timeout)
+
+
+def _process_scan_command(
+    *, store: str = "", job_id: str | None = None, word: str = "neo4j"
+) -> str:
+    """Build the shell command that lists a service's processes on a node."""
+    env = [
+        f"SERVICE_STORE={shlex.quote(store)}",
+        f"SERVICE_JOB_ID={shlex.quote(job_id or '')}",
+        f"SERVICE_WORD={shlex.quote(word)}",
+    ]
+    return "env " + " ".join(env) + " bash -c " + shlex.quote(_PROCESS_SCAN)
+
+
+def _parse_process_lines(out: str) -> tuple[list[dict], list[dict]]:
+    """Split the scan output into attributable holders and left-alone processes."""
+    holders: list[dict] = []
+    left_alone: list[dict] = []
+    for line in out.splitlines():
+        parts = line.strip().split("|")
+        if parts[0] == "HOLD" and len(parts) >= 4:
+            holders.append(
+                {"pid": parts[1], "age": parts[2], "cmdline": "|".join(parts[3:])}
+            )
+        elif parts[0] == "LEFT" and len(parts) >= 5:
+            left_alone.append(
+                {
+                    "pid": parts[1],
+                    "age": parts[2],
+                    "reason": parts[3],
+                    "cmdline": "|".join(parts[4:]),
+                }
+            )
+    return holders, left_alone
+
+
+def _select_processes(
+    node: str | None,
+    *,
+    store: str = _NEO4J_STORE_BASE,
+    job_id: str | None = None,
+    word: str = "neo4j",
+    timeout: int = 60,
+) -> tuple[list[dict], list[dict]]:
+    """List processes attributable to the service, by store path or job id.
+
+    ``node`` is the login node when None.  Raises whatever the node runner
+    raises: an unanswered process table is not an empty one.
+    """
+    out = _run_shell(
+        node,
+        _process_scan_command(store=store, job_id=job_id, word=word),
+        timeout=timeout,
+    )
+    return _parse_process_lines(out)
+
+
+def _echo_left_alone(node: str | None, left_alone: list[dict]) -> None:
+    where = node or "this host"
+    for proc in left_alone:
+        click.echo(
+            f"  leaving PID {proc['pid']} alone on {where} ({proc['reason']}): "
+            f"{proc['cmdline']}"
+        )
+
+
+def _signal_pids(node: str | None, pids: list[str], sig: str) -> None:
+    """Signal exactly ``pids`` and print each result; nothing is discarded."""
+    if not pids:
+        return
+    script = "\n".join(
+        f'if kill -{sig} {pid} 2>/dev/null; then echo "SIG{sig} -> {pid}"; '
+        f'else echo "PID {pid} already gone"; fi'
+        for pid in pids
+    )
+    result = _run_shell(node, script, timeout=30)
+    for line in result.strip().splitlines():
+        click.echo(f"  {line}")
+
+
+def _wait_pids_gone(node: str | None, pids: list[str], timeout: float) -> list[str]:
+    """Return the listed pids still alive at the deadline."""
+    checks = "; ".join(f"kill -0 {pid} 2>/dev/null && echo {pid}" for pid in pids)
+    deadline = time.monotonic() + timeout
+    while True:
+        out = _run_shell(node, checks, timeout=30) if pids else ""
+        alive = [line.strip() for line in out.splitlines() if line.strip() in pids]
+        if not alive or time.monotonic() >= deadline:
+            return alive
+        time.sleep(1)
+
+
+def _terminate_listed_pids(
+    node: str | None,
+    holders: list[dict],
+    *,
+    grace_seconds: float = 30,
+) -> None:
+    """SIGTERM the listed holders, then SIGKILL only those still alive.
+
+    The listing is printed before anything is signalled, and so is every
+    escalation, so a reader can see exactly which pids were acted on.
+    """
+    where = node or "this host"
+    for proc in holders:
+        click.echo(f"  {where}: PID {proc['pid']} ({proc['age']}s) {proc['cmdline']}")
+    pids = [proc["pid"] for proc in holders]
+    _signal_pids(node, pids, "TERM")
+    survivors = _wait_pids_gone(node, pids, grace_seconds)
+    if not survivors:
+        click.echo(f"  all {len(pids)} listed pids exited within {grace_seconds}s")
+        return
+    click.echo(
+        f"  still alive after {grace_seconds}s: {', '.join(survivors)}; "
+        "escalating to SIGKILL"
+    )
+    _signal_pids(node, survivors, "KILL")
+    remaining = _wait_pids_gone(node, survivors, 5)
+    if remaining:
+        click.echo(
+            f"  warning: {', '.join(remaining)} survived SIGKILL; "
+            "they were listed and signalled, nothing else was touched"
+        )
+
+
+def _wait_for_store_release(node: str, timeout: float) -> None:
+    """Return once no listed process holds the store; raise at the deadline."""
+    deadline = time.monotonic() + timeout
+    while True:
+        holders, _left = _select_processes(node)
+        if not holders:
+            click.echo(f"  no process on {node} holds the graph store")
+            return
+        if time.monotonic() >= deadline:
+            listing = "; ".join(
+                f"PID {p['pid']} ({p['age']}s): {p['cmdline']}" for p in holders
+            )
+            raise click.ClickException(
+                f"Neo4j store on {node} is still held {timeout:.0f} s after the "
+                f"job exited ({listing}); refusing to touch it"
+            )
+        time.sleep(2)
+
+
+def stop_local_store_holders() -> None:
+    """Signal only the local processes shown to hold the graph store."""
+    holders, left_alone = _select_processes(None)
+    _echo_left_alone(None, left_alone)
+    if not holders:
+        click.echo("  no local process holds the graph store; nothing to signal")
+        return
+    _terminate_listed_pids(None, holders)
 
 
 def _job_listed(job_id: str) -> bool:
@@ -674,31 +893,27 @@ def _wait_for_job_exit(job_id: str, node: str, timeout: float) -> None:
 
 
 def _term_neo4j_on_node(
-    node: str, grace_seconds: int = _NEO4J_TERM_GRACE_SECONDS
+    node: str,
+    grace_seconds: int = _NEO4J_TERM_GRACE_SECONDS,
+    *,
+    job_id: str | None = None,
 ) -> None:
-    """SIGTERM the Neo4j server JVM on ``node`` and wait for it to exit.
+    """SIGTERM only the listed processes that hold the graph store on ``node``.
 
-    The scheduler's own SIGTERM is followed by SIGKILL after its KillWait,
-    which a shutdown checkpoint can outlast, so the JVM is asked first and
-    given the grace period to finish flushing.
+    Selection is by store path or by the service's own scheduler job, never by
+    a command-line pattern: another Neo4j on the same shared node is a
+    different service and is reported as left alone.
     """
-    script = (
-        f'pid=$(pgrep -u "$USER" -f "{_NEO4J_STORE_HOLDERS}" | head -1)\n'
-        'if [ -n "$pid" ]; then\n'
-        '    echo "TERM neo4j $pid"\n'
-        '    kill -TERM "$pid"\n'
-        f"    for i in $(seq 1 {grace_seconds}); do\n"
-        '        kill -0 "$pid" 2>/dev/null || { echo "neo4j exited after ${i}s"; break; }\n'
-        "        sleep 1\n"
-        "    done\n"
-        "fi\n"
-    )
     try:
-        result = _run_on_node(node, script, timeout=grace_seconds + 30)
-        if result.strip():
-            click.echo(f"  {result.strip()}")
+        holders, left_alone = _select_processes(node, job_id=job_id)
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
-        click.echo(f"  SIGTERM on {node} did not confirm exit ({exc}); cancelling")
+        click.echo(f"  could not list graph processes on {node} ({exc}); cancelling")
+        return
+    _echo_left_alone(node, left_alone)
+    if not holders:
+        click.echo(f"  no process on {node} holds the graph store; nothing to signal")
+        return
+    _terminate_listed_pids(node, holders, grace_seconds=grace_seconds)
 
 
 def stop_neo4j_job(timeout: float = _NEO4J_EXIT_TIMEOUT_SECONDS) -> str | None:
@@ -716,9 +931,10 @@ def stop_neo4j_job(timeout: float = _NEO4J_EXIT_TIMEOUT_SECONDS) -> str | None:
         return None
     job_id, node = job["job_id"], job["node"]
     if job["state"] == "RUNNING":
-        _term_neo4j_on_node(node)
+        _term_neo4j_on_node(node, job_id=job_id)
     _run_remote(f"scancel {job_id}", check=False)
     _wait_for_job_exit(job_id, node, timeout)
+    _wait_for_store_release(node, timeout)
     click.echo(f"  Neo4j job {job_id} on {node} has exited")
     return node
 
@@ -740,21 +956,7 @@ def _stop_service(node: str, name: str) -> bool:
 
     # For Neo4j, send graceful shutdown signal before scancel
     if name == "neo4j":
-        try:
-            _run_on_node(
-                node,
-                'pid=$(pgrep -u $USER -f "Neo4jCommunity" 2>/dev/null | head -1)\n'
-                'if [ -n "$pid" ]; then\n'
-                '    kill -TERM "$pid" 2>/dev/null || true\n'
-                "    for i in $(seq 1 60); do\n"
-                '        kill -0 "$pid" 2>/dev/null || break\n'
-                "        sleep 1\n"
-                "    done\n"
-                "fi\n",
-                timeout=90,
-            )
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-            pass
+        _term_neo4j_on_node(node, job_id=job["job_id"], grace_seconds=60)
 
     try:
         _run_remote(f"scancel {job['job_id']}", check=True)
@@ -825,16 +1027,9 @@ def _stop_login_services(job_name: str = "") -> None:
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
             pass
 
-        # Kill direct Neo4j apptainer processes
+        # Signal only login-node processes shown to hold this graph's store
         try:
-            result = _run_remote(
-                "pgrep -u $USER -f 'neo4j_.*community.*\\.sif' 2>/dev/null | head -1",
-                timeout=10,
-            )
-            pid = result.strip()
-            if pid and pid != "(no output)" and pid.isdigit():
-                _run_remote(f"kill {pid} 2>/dev/null || true", timeout=10)
-                click.echo(f"  Killed login Neo4j process (PID {pid})")
+            stop_local_store_holders()
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
             pass
 
@@ -936,11 +1131,18 @@ def _clean_neo4j_locks(node: str) -> None:
     running database keeps writing into the inode it opened, so replacing
     the file under it discards every later flush and tears the store.
     """
+    holders, left_alone = _select_processes(node)
+    _echo_left_alone(node, left_alone)
+    if holders:
+        listing = "; ".join(
+            f"PID {p['pid']} ({p['age']}s): {p['cmdline']}" for p in holders
+        )
+        raise click.ClickException(
+            f"Neo4j is still running on {node} ({listing}); "
+            "refusing to touch its store files"
+        )
+
     clean = (
-        f'if pids=$(pgrep -u "$USER" -f "{_NEO4J_STORE_HOLDERS}"); then\n'
-        '    echo "neo4j_alive" $pids\n'
-        "    exit 0\n"
-        "fi\n"
         "DATA=$HOME/.local/share/iter-codex/neo4j/data\n"
         "# Remove coordination lock files\n"
         'rm -f "$DATA"/databases/store_lock "$DATA"/databases/*/database_lock '
@@ -959,77 +1161,49 @@ def _clean_neo4j_locks(node: str) -> None:
         "echo locks_cleaned\n"
     )
     try:
-        result = _run_on_node(node, clean, timeout=120)
+        _run_on_node(node, clean, timeout=120)
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
         return
-    if "neo4j_alive" in result:
-        raise click.ClickException(
-            f"Neo4j is still running on {node} ({result.strip()}); "
-            "refusing to touch its store files"
-        )
 
 
 def _kill_neo4j_on_node(node: str) -> None:
-    """Kill any orphaned Neo4j processes on the compute node.
+    """Signal only the processes on ``node`` shown to hold the graph store.
 
-    Handles cases where PID file is missing but process is still running
-    (e.g. after a failed deploy with health check timeout).
+    A process serving another store is a different service: it is reported as
+    left alone and never signalled.
     """
-    kill_cmd = (
-        f'pids=$(pgrep -u "$USER" -f "{_NEO4J_STORE_HOLDERS}")\n'
-        'if [ -n "$pids" ]; then\n'
-        '    echo "Killing orphaned neo4j:" $pids\n'
-        "    kill -9 $pids 2>/dev/null || true\n"
-        "    for i in $(seq 1 30); do\n"
-        "        alive=0\n"
-        '        for p in $pids; do kill -0 "$p" 2>/dev/null && alive=1; done\n'
-        '        [ "$alive" = 0 ] && break\n'
-        "        sleep 1\n"
-        "    done\n"
-        "fi\n"
-    )
-    try:
-        result = _run_on_node(node, kill_cmd, timeout=45)
-        if "Killing" in result:
-            click.echo(f"  {result.strip()}")
-    except subprocess.CalledProcessError:
-        pass
+    holders, left_alone = _select_processes(node)
+    _echo_left_alone(node, left_alone)
+    if not holders:
+        click.echo(f"  no process on {node} holds the graph store; nothing to signal")
+        return
+    _terminate_listed_pids(node, holders, grace_seconds=30)
 
 
 def _kill_embed_orphans(node: str) -> None:
-    """Kill any orphaned embed server processes on the compute node.
+    """Signal only the processes inside the embed service's own scheduler job.
 
-    After scancel, some processes survive because:
-    - SLURM cgroup cleanup races with process exit
-    - ``uv run`` parent isn't always in the SLURM process group
-    - torch/uvicorn workers trap SIGTERM and delay exit
-
-    Uses SIGKILL for immediate cleanup, with a verify-and-retry loop.
-    Matches both ``iter-codex embed`` and ``uv run.*iter-codex embed``
-    to catch the full process tree.
+    There is no store path to attribute an embed process to, so the service's
+    job id is the only fact that separates this server from another user's or
+    another project's.  A process outside that job is left alone because
+    nothing distinguishes it from an unrelated process.
     """
-    kill_cmd = (
-        'pids=$(pgrep -u $USER -f "iter-codex embed" 2>/dev/null)\n'
-        'if [ -n "$pids" ]; then\n'
-        '    echo "$pids" | xargs kill -9 2>/dev/null || true\n'
-        "    sleep 1\n"
-        "    # Verify\n"
-        '    survivors=$(pgrep -u $USER -f "iter-codex embed" 2>/dev/null)\n'
-        '    if [ -n "$survivors" ]; then\n'
-        '        echo "$survivors" | xargs kill -9 2>/dev/null || true\n'
-        "    fi\n"
-        "fi\n"
-    )
-    try:
-        _run_on_node(node, kill_cmd, timeout=15)
-    except subprocess.TimeoutExpired:
+    job = _get_service_job(_EMBED_JOB)
+    if not job:
         click.echo(
-            f"Warning: could not reach {node} to kill orphans "
-            f"(SSH timed out after 15s — node may be down)",
-            err=True,
+            f"  no embed job is listed; no process on {node} is attributable "
+            "to this service"
         )
-    except subprocess.CalledProcessError:
-        pass
+        return
+    job_id = job["job_id"]
+    holders, left_alone = _select_processes(node, store="", job_id=job_id, word="embed")
+    _echo_left_alone(node, left_alone)
+    if not holders:
+        click.echo(
+            f"  no process on {node} belongs to embed job {job_id}; nothing to signal"
+        )
+        return
+    _terminate_listed_pids(node, holders, grace_seconds=15)
 
 
 def _neo4j_service_command() -> str:
@@ -1648,6 +1822,7 @@ def _deploy_login_embed_nohup() -> None:
         f"--host 0.0.0.0 --port {port} "
         f"--deploy-label login "
         f">> {log_file} 2>&1 &\n"
+        f"echo $! > {services_dir}/codex-embed.pid\n"
         f"echo $!\n"
     )
 
@@ -1678,23 +1853,45 @@ def _deploy_login_embed_nohup() -> None:
 
 
 def _kill_login_embed() -> None:
-    """Kill any running embed server processes on the login node.
+    """Signal the login embed process the service's own launcher recorded.
 
-    Uses ``iter-codex embed start`` as the pgrep pattern to match only
-    running server processes — not CLI management commands like
-    ``embed stop`` or ``embed restart`` (which would self-kill).
+    The launcher writes the pid it started to ``codex-embed.pid`` at start, so
+    the stop signals that pid and never a command-line pattern: the running
+    ``embed stop`` command carries the same words as the server and would be
+    found by a pattern.
     """
-    kill_cmd = (
-        'pids=$(pgrep -u $USER -f "iter-codex embed start" 2>/dev/null)\n'
-        'if [ -n "$pids" ]; then\n'
-        '    echo "$pids" | xargs kill -9 2>/dev/null || true\n'
-        "    sleep 1\n"
+    try:
+        stored = _run_remote(f"cat {_EMBED_PID_FILE} 2>/dev/null || true", timeout=10)
+    except subprocess.CalledProcessError:
+        return
+    pid = stored.strip().splitlines()[-1].strip() if stored.strip() else ""
+    if not pid.isdigit():
+        click.echo("  no recorded login embed pid; nothing to signal")
+        return
+    script = (
+        f"pid={pid}\n"
+        'if kill -0 "$pid" 2>/dev/null; then\n'
+        "    age=$(( $(date +%s) - $(stat -c %Y /proc/$pid 2>/dev/null || date +%s) ))\n"
+        "    echo \"PID $pid (${age}s): $(tr '\\0' ' ' < /proc/$pid/cmdline "
+        "2>/dev/null | tr -d '\\r\\n')\"\n"
+        '    kill -TERM "$pid" && echo "SIGTERM -> $pid"\n'
+        "    i=0\n"
+        '    while kill -0 "$pid" 2>/dev/null && [ "$i" -lt 10 ]; do\n'
+        "        sleep 1; i=$((i+1))\n"
+        "    done\n"
+        '    if kill -0 "$pid" 2>/dev/null; then\n'
+        '        kill -KILL "$pid" && echo "SIGKILL -> $pid"\n'
+        "    fi\n"
+        "else\n"
+        '    echo "PID $pid is not running"\n'
         "fi\n"
     )
     try:
-        _run_remote(kill_cmd, timeout=10)
+        result = _run_remote(script, timeout=20)
     except subprocess.CalledProcessError:
-        pass
+        return
+    if result.strip():
+        click.echo(f"  {result.strip()}")
 
 
 def _deploy_login_neo4j() -> None:
