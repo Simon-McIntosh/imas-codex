@@ -1,0 +1,73 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-21T08:44:25.433Z",
+  "dispatched_at": "2026-11-21T08:25:39Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/codac-uda-signals.html:160",
+      "id": "done_when-1",
+      "reason": "the clause is the section's only server-visible check that a relation exists, so as written a node can pass while the delivered endpoint (two signals related by what they are to each other) is absent, and the fix is to assert the relation itself (a distinct relation kind or a tool that reports it) rather than mere co-membership.",
+      "text": "the clause \"Through a running server, a walk from one setpoint signal chosen beforehand, which the private file names, returns the signal it is measured against\" cannot fail: the server's context tool (`fetch_signal_context` in imas_codex/tools/plant_search.py:255-315 as it stands today) pages siblings by `CANDIDATE_PLANT_COMPONENT` membership \u2014 `s.id <> $resource AND EXISTS { MATCH (s)-[:CANDIDATE_PLANT_COMPONENT]->(:PlantComponent {id: $component_id}) }` \u2014 so it already returns every signal on the same component, including the one measured against, before any relation is written; the section could deliver no relation of this kind and still pass that clause",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/codac-uda-signals.html:160",
+      "id": "done_when-2",
+      "reason": "adding the count of excluded signals, and requiring it to equal the decided/conflict/undecided totals the role vocabulary already computes for the same population, is what makes the exclusion checkable instead of asserted.",
+      "text": "the Delivers promises that \"a signal whose role is undecided or in conflict is related to nothing and is counted\", but the done-when's partition covers only signals whose role was decided (received at least one relation, or none), so a run that relates an undecided or conflicted signal is neither counted nor caught",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "9d5c4913d96a2e3278b60d333457c362486ab391",
+  "plan_fingerprint": "3953d4dca416f3fd6b1fa2deaa7e0bbcc9c55824f756727599441fa4ff61ba48",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 98,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261121T082352936023-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "65415f13645852919e029c7e434c42e60b76d3b8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cross-plan href `iter-signal-context-and-enrichment#s11` resolves to that plan's section 11 (id present at docs/plans/iter-signal-context-and-enrichment.html:91-92), `codac-uda-signals#s16` and `#s20` resolve within this plan, and extensionless hrefs resolve as `<path>.html`.",
+    "done_when": "a finding \u2014 section 24's server clause (\"a walk from one setpoint signal ... returns the signal it is measured against\") is satisfied by the sibling listing that already exists, so it passes without the relation being written.",
+    "evidence_paths": "pass \u2014 both sections write their figures to the landing record and keep the per-category/per-signal readings in a private file whose digest is in the record; neither sends evidence to a session scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 \"Sibling signals on one component are related\" and \"How pulse category names name the plant systems they cover is measured\" name no plan labels, stage names, ticket numbers or changelog prose.",
+    "reasoning": "pass \u2014 I checked both sections' premises against the graph: `Pulse` has only `IN_PULSE_CATEGORY` (5,957 links, no link to a control node or component), `FacilitySignal` has no signal-to-signal relationship at all, `PulseCategory.name` is stored whole (`ITER:CRYO-CBREFRIG`), and the server's `search_pulses(designation=...)` is documented and implemented as a literal case-insensitive substring match \u2014 so each section's stated starting condition matches what the system holds. Section 25's three delimiter groups also match the schema: `ControlNode.code` is the complete control path and `PlantComponent.code` the component code, which a delimited part of a category name can equal, and its 20-category hand reading has a real evidence base (all 5,957 pulses carry a non-empty description). Both sections state an endpoint and prescribe no code path or step sequence.",
+    "single_goal": "pass \u2014 section 24 delivers sibling-signal relations only, and the pulse-to-system question it used to carry is now section 25.",
+    "wiring": "pass \u2014 section 24 declares its wait on `iter-signal-context-and-enrichment#s11`, whose section exists, is done, and delivers exactly the decided role and its decided/conflict/undecided state that the section reads (`vocabulary_role_state`, \"Decided, conflict or undecided result for the role axis\"); section 25 declares its wait on `codac-uda-signals#s16`, which delivers the pulse categories and pulses it measures (744 categories and 5,957 pulses present in the graph). Section 24's `data-links` and `plan-section-depends-on` agree, as do section 25's."
+  },
+  "section_digests": {
+    "_document": "1fd71055899be4652abd726c30b76c022a6620332655a888145c54bcfd967931",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "759b1a8a0d0172458970abb033b7b0891dbfbea4a146fe46e1d40088ad5b1e2b",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "210c417a1f066fe923870a6e8053c76cb308181f6dd40abe83ad1c825a5ee841",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "4234dc0444b89df1ba3c2fb0011becde6760366f41d1b857f7f45b9020491430",
+    "s19": "62a9fac261c2abc0b6c2cadd655ec95a4ad2338cf99289d0b35221256277cd7c",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s20": "5b6478a19c4933df522a5f65b5029c4d8c8fbaa56108cf7537380f3b2160b330",
+    "s21": "766504c3cf6d6cb5fbb80fc49533f32eb2dd8d9f7686b55ca616d9cac1f04941",
+    "s22": "6e220f5b29e47a2a3d17bfd49b65b741c49f7f976c2b12c97a1036066b587ad8",
+    "s23": "b2db24284a629203a22b94e1fd6d97616eb45f4402ca4961f80fa1017f98cf3b",
+    "s24": "b69ecf7326f603765264f7f9c0dc46a97e3949b38947970eeb6cb6a547f813e5",
+    "s25": "0a9b3b08470777bdd5c7ca57f108c1536086e1a0e053a5ac4cb80654d8935a79",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T08:44:37.710975+00:00",
+  "total": null
+}
