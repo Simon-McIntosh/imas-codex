@@ -1,0 +1,638 @@
+{
+ "schema": "imas-codex.standard-name-case-file/source-census",
+ "read_at": "2026-11-21T20:11:21+00:00",
+ "case_files": 286,
+ "case_files_without_source": 59,
+ "case_file_set": "archived case files of run r-20261118T064806928346-scfg-case-file",
+ "query": "UNWIND $names AS n\nOPTIONAL MATCH (s:StandardName {id:n})\nOPTIONAL MATCH (src)-[:PRODUCED_NAME]->(s)\nOPTIONAL MATCH (s)<-[:HAS_PARENT]-(c:StandardName)\nRETURN n AS name, s IS NOT NULL AS present, s.name_stage AS stage, count(DISTINCT src) AS producers, collect(DISTINCT src.source_type)[0..3] AS source_types, count(DISTINCT c) AS children",
+ "classes": {
+  "no producer in the graph": 15,
+  "derived producer only": 44
+ },
+ "derived_with_children": 42,
+ "no_producer_by_stage": {
+  "superseded": 14,
+  "accepted": 1
+ },
+ "members": [
+  {
+   "name": "accumulated_total_gas_count",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "accumulated_total_prefill_gas_count",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "area_of_plasma_filament",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "average_external_magnetic_flux",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "back_surface_neutron_flux",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "beta",
+   "present": true,
+   "stage": "accepted",
+   "producers": 0,
+   "source_types": [],
+   "children": 5,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "coefficient_of_flux_surface",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "current_density",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 13,
+   "class": "derived producer only"
+  },
+  {
+   "name": "current_weighted_average_external_magnetic_flux",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "decay_time_due_to_disruption",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "electron_particle_flux_at_wall_due_to_pumping",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "ethylene_source_rate",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "external_loop_voltage",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "external_magnetic_flux",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "flux_surface_averaged_current_density_due_to_wave_driven_current_drive",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 0,
+   "class": "derived producer only"
+  },
+  {
+   "name": "flux_surface_normal_contravariant_flux_surface_averaged_metric",
+   "present": true,
+   "stage": "exhausted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 0,
+   "class": "derived producer only"
+  },
+  {
+   "name": "helium_4_density",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "inner_radius_of_plasma_filament",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "inner_squareness_of_flux_surface",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "inner_squareness_of_plasma_boundary",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "inverse_of_major_radius",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "inverse_of_square_of_magnetic_field_magnitude",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "inverse_of_square_of_major_radius",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "magnetic_field",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 15,
+   "class": "derived producer only"
+  },
+  {
+   "name": "magnetic_field_at_pedestal_top_high_field_side",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "magnetic_flux",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 3,
+   "class": "derived producer only"
+  },
+  {
+   "name": "magnetic_flux_due_to_diamagnetic_drift",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "major_length_of_plasma_filament",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "major_radius",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 9,
+   "class": "derived producer only"
+  },
+  {
+   "name": "maximum_magnetic_field",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "maximum_magnetic_field_magnitude",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "minor_length_of_plasma_filament",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "non_axisymmetric_magnetic_field",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 4,
+   "class": "derived producer only"
+  },
+  {
+   "name": "outer_radius_of_plasma_filament",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "outer_squareness_of_flux_surface",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "outer_squareness_of_plasma_boundary",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "parallel_current_density_at_constraint_position",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "particle_energy",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "polarization_angle_at_constraint_position",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "poloidal_magnetic_field_at_pedestal_top",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "power_at_divertor_target_due_to_recombination",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "radial_derivative_of_poloidal_magnetic_flux",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "radial_outline_of_flux_surface",
+   "present": true,
+   "stage": "superseded",
+   "producers": 0,
+   "source_types": [],
+   "children": 0,
+   "class": "no producer in the graph"
+  },
+  {
+   "name": "radius_of_poloidal_field_coil",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "sine_coefficient_of_flux_surface",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "square_of_magnetic_field_magnitude",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 3,
+   "class": "derived producer only"
+  },
+  {
+   "name": "square_of_major_radius",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "square_of_toroidal_flux_coordinate_gradient_magnitude",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 3,
+   "class": "derived producer only"
+  },
+  {
+   "name": "squareness_of_flux_surface",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "squareness_of_plasma_boundary",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "toroidal_flux_coordinate_gradient",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  },
+  {
+   "name": "toroidal_flux_coordinate_gradient_magnitude",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "toroidal_perturbed_vacuum_magnetic_field",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "triangularity_of_flux_surface",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "tungsten_density",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 2,
+   "class": "derived producer only"
+  },
+  {
+   "name": "vacuum_magnetic_field",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 3,
+   "class": "derived producer only"
+  },
+  {
+   "name": "weight_of_interferometer_beam",
+   "present": true,
+   "stage": "accepted",
+   "producers": 1,
+   "source_types": [
+    "derived"
+   ],
+   "children": 1,
+   "class": "derived producer only"
+  }
+ ]
+}
