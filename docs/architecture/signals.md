@@ -5,31 +5,31 @@
 
 ## CLI Reference
 
-### `imas-codex discover FACILITY --only signals`
+### `iter-codex discover FACILITY --only signals`
 
 Main entry point for signal discovery, enrichment, and validation.
 
 ```bash
 # Full pipeline — scan, enrich, and check
-imas-codex discover tcv --only signals
+iter-codex discover tcv --only signals
 
 # Scan only — enumerate signals without LLM enrichment
-imas-codex discover tcv --only signals --scan-only
+iter-codex discover tcv --only signals --scan-only
 
 # Enrich only — classify already-discovered signals
-imas-codex discover tcv --only signals --flush
+iter-codex discover tcv --only signals --flush
 
 # Specific scanners with cost cap
-imas-codex discover tcv --only signals --scanners tdi,mdsplus -c 2.0
+iter-codex discover tcv --only signals --scanners tdi,mdsplus -c 2.0
 
 # JET PPF signals with signal limit
-imas-codex discover jet --only signals --scanners ppf --limit 200
+iter-codex discover jet --only signals --scanners ppf --limit 200
 
 # JT-60SA EDAS signals
-imas-codex discover jt-60sa --only signals --scanners edas --scan-only
+iter-codex discover jt-60sa --only signals --scanners edas --scan-only
 
 # Focus on equilibrium signals
-imas-codex discover tcv --only signals --topic equilibrium
+iter-codex discover tcv --only signals --topic equilibrium
 ```
 
 **Options:**
@@ -48,12 +48,12 @@ imas-codex discover tcv --only signals --topic equilibrium
 | `--check-workers` | | int | `4` | Parallel check workers |
 | `--reference-shot` | | int | auto | Override reference shot for validation |
 
-### `imas-codex discover clear <facility> -d signals`
+### `iter-codex discover clear <facility> -d signals`
 
 Delete all signal discovery data for a facility (FacilitySignal,
 DataAccess, StructuralEpoch, Diagnostic nodes and relationships).
 
-### `imas-codex discover status <facility> -d signals`
+### `iter-codex discover status <facility> -d signals`
 
 Show pipeline progress: scanned, enriched, checked counts per scanner
 type, accumulated LLM cost, and check success rates.
@@ -333,9 +333,9 @@ discovery have already populated the graph:
 
 ```
 1. imas dd build          → IMASNode, DDVersion, Unit
-2. imas-codex discover FACILITY --only wiki          → WikiPage, WikiChunk (sign conventions, COCOS)
-3. imas-codex discover FACILITY --only paths,code    → FacilityPath, SourceFile, CodeChunk
-4. imas-codex discover FACILITY --only signals       → FacilitySignal, DataAccess (benefits from above)
+2. iter-codex discover FACILITY --only wiki          → WikiPage, WikiChunk (sign conventions, COCOS)
+3. iter-codex discover FACILITY --only paths,code    → FacilityPath, SourceFile, CodeChunk
+4. iter-codex discover FACILITY --only signals       → FacilitySignal, DataAccess (benefits from above)
 ```
 
 Run wiki and code discovery before signals for best enrichment context.

@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import Mock
 
-from imas_codex.cli import sn
-from imas_codex.standard_names import grammar_sync
+from iter_codex.cli import sn
+from iter_codex.standard_names import grammar_sync
 
 
 class _GrammarGraph:
@@ -64,7 +64,7 @@ def test_content_change_triggers_sync_without_version_change(
 
     graph = _GrammarGraph([{"version": "0.9.3", "content_digest": before}])
     sync = Mock()
-    monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.client.GraphClient", lambda: graph)
     monkeypatch.setattr(grammar_sync, "sync_isn_grammar_to_graph", sync)
 
     sn._auto_sync_grammar(quiet=True)
@@ -80,7 +80,7 @@ def test_identical_content_keeps_auto_sync_a_no_op(tmp_path, monkeypatch) -> Non
     digest = grammar_sync.grammar_content_digest()
     graph = _GrammarGraph([{"version": "0.9.3", "content_digest": digest}])
     sync = Mock()
-    monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.client.GraphClient", lambda: graph)
     monkeypatch.setattr(grammar_sync, "sync_isn_grammar_to_graph", sync)
 
     sn._auto_sync_grammar(quiet=True)

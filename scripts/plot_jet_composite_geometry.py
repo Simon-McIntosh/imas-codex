@@ -26,8 +26,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import FancyBboxPatch, Rectangle
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.plotting.style import save_figure
+from iter_codex.graph.client import GraphClient
+from iter_codex.plotting.style import save_figure
 
 ALL_LAYERS = {"limiter", "pf", "probes", "mcfg", "iron", "flux", "passive", "timeline"}
 

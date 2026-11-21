@@ -17,7 +17,7 @@ _PREFIX = "test_recycled_source__"
 
 @pytest.fixture()
 def _gc(disposable_neo4j_empty: str):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     client = GraphClient(uri=disposable_neo4j_empty, username="neo4j", password="")
     yield client
@@ -59,7 +59,7 @@ def _name_stage(gc, name_id: str) -> str | None:
 
 
 def _sourceless(gc, name_id: str) -> bool:
-    from imas_codex.standard_names.source_invariant import (
+    from iter_codex.standard_names.source_invariant import (
         find_sourceless_live_name_rows,
     )
 
@@ -72,7 +72,7 @@ def _sourceless(gc, name_id: str) -> bool:
 
 
 def test_exhausted_name_is_retired_when_its_source_is_recycled(_gc):
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -109,7 +109,7 @@ def test_exhausted_name_is_retired_when_its_source_is_recycled(_gc):
     "stage", ["contested", "accepted", "drafted", "pending", "refining"]
 )
 def test_source_of_a_non_exhausted_live_name_is_not_taken(_gc, stage):
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -132,7 +132,7 @@ def test_source_of_a_non_exhausted_live_name_is_not_taken(_gc, stage):
 
 
 def test_source_of_a_claimed_refining_name_is_not_taken(_gc):
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -163,7 +163,7 @@ def test_source_of_a_claimed_refining_name_is_not_taken(_gc):
 
 
 def test_superseded_history_still_releases_its_source(_gc):
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -180,7 +180,7 @@ def test_superseded_history_still_releases_its_source(_gc):
 
 
 def test_name_that_keeps_another_producer_is_not_retired(_gc):
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -214,7 +214,7 @@ def test_name_that_keeps_another_producer_is_not_retired(_gc):
 
 
 def test_recycling_all_producers_retires_name_once(_gc):
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -237,7 +237,7 @@ def test_recycling_all_producers_retires_name_once(_gc):
 
 
 def test_stale_producer_does_not_keep_a_recycled_name_live(_gc):
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -261,7 +261,7 @@ def test_stale_producer_does_not_keep_a_recycled_name_live(_gc):
 
 @pytest.mark.parametrize("protection", ["derived", "catalog"])
 def test_source_stays_bound_when_exhausted_name_cannot_be_retired(_gc, protection):
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 

@@ -6,10 +6,10 @@ import fnmatch
 
 import pytest
 
-from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
-from imas_codex.graph.dd_lifecycle import dd_path_index
-from imas_codex.units import resolve_dd_unit
-from imas_codex.units.dd_unit_exceptions import load_exceptions
+from iter_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
+from iter_codex.graph.dd_lifecycle import dd_path_index
+from iter_codex.units import resolve_dd_unit
+from iter_codex.units.dd_unit_exceptions import load_exceptions
 
 GAS_FLOW_PATHS = (
     "spi/injector/fragmentation_gas/flow_rate",

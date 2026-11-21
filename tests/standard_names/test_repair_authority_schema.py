@@ -28,12 +28,12 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.graph.models import (
+from iter_codex.graph.models import (
     RepairAuthorityArtifact,
     RepairAuthorityRow,
     RepairMutationKind,
 )
-from imas_codex.standard_names.signed_manifest import authority_artifact_wire_projection
+from iter_codex.standard_names.signed_manifest import authority_artifact_wire_projection
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _EVIDENCE_ROOT = _REPOSITORY_ROOT / "docs/evidence/sn-graph-wide-integrity"

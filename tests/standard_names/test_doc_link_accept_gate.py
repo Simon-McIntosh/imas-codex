@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_audits as _owning_graph_audits,
     graph_catalog as _owning_graph_catalog,
     graph_doc_links as _owning_graph_doc_links,
@@ -26,8 +26,8 @@ def _graph_client(responses: list[list[dict[str, Any]]]) -> MagicMock:
 
 def test_normalization_failure_refuses_docs_acceptance() -> None:
     """An unreadable reference authority cannot permit docs acceptance."""
-    import imas_codex.standard_names.graph_ops as graph_ops
-    from imas_codex.standard_names.review import holds
+    import iter_codex.standard_names.graph_ops as graph_ops
+    from iter_codex.standard_names.review import holds
 
     client = _graph_client([])
     transaction = MagicMock()
@@ -72,8 +72,8 @@ def test_normalization_failure_refuses_docs_acceptance() -> None:
 
 def test_accept_normalizer_uses_shared_reference_parser() -> None:
     """Bare-reference normalization has no graph-local parsing pattern."""
-    import imas_codex.standard_names.graph_ops as graph_ops
-    from imas_codex.standard_names.doc_links import find_name_references
+    import iter_codex.standard_names.graph_ops as graph_ops
+    from iter_codex.standard_names.doc_links import find_name_references
 
     assert not hasattr(graph_ops, "_BARE_DOC_LINK_RE")
 

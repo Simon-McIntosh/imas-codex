@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from imas_codex.standard_names.catalog_release import _freeze_review_artifact
-from imas_codex.standard_names.sources_manifest import (
+from iter_codex.standard_names.catalog_release import _freeze_review_artifact
+from iter_codex.standard_names.sources_manifest import (
     SourcesManifestError,
     load_names_file,
 )

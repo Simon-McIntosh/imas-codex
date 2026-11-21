@@ -20,9 +20,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.harmonize import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.harmonize import (
     measure_doc_call_cost,
     plan_family_applies,
     preview_recommended_refusals,

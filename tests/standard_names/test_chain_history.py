@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.chain_history import (
+from iter_codex.standard_names.chain_history import (
     _parse_comments,
     docs_chain_history,
     name_chain_history,
@@ -20,7 +20,7 @@ from imas_codex.standard_names.chain_history import (
 # Helpers
 # ---------------------------------------------------------------------------
 
-_MODULE = "imas_codex.standard_names.chain_history.GraphClient"
+_MODULE = "iter_codex.standard_names.chain_history.GraphClient"
 
 
 def _make_gc(rows: list[dict]) -> MagicMock:

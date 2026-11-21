@@ -1,6 +1,6 @@
 # LLM Client Setup
 
-Connect LLM clients to the imas-codex LiteLLM proxy for centralized
+Connect LLM clients to the iter-codex LiteLLM proxy for centralized
 routing, cost tracking, and budget management.
 
 ## Supported Clients
@@ -13,9 +13,9 @@ routing, cost tracking, and budget management.
 
 ## Prerequisites
 
-1. LiteLLM proxy running: `imas-codex llm status`
-2. A team for your client: `imas-codex llm teams create --alias <team-name>`
-3. A virtual key: `imas-codex llm keys create --team <team-id> --alias <key-name>`
+1. LiteLLM proxy running: `iter-codex llm status`
+2. A team for your client: `iter-codex llm teams create --alias <team-name>`
+3. A virtual key: `iter-codex llm keys create --team <team-id> --alias <key-name>`
 
 ---
 
@@ -134,8 +134,8 @@ ssh -f -N -L 18400:localhost:18400 tcv
 ssh -f -N -L 18400:localhost:18400 jt-60sa
 ```
 
-The port is configurable via `IMAS_CODEX_LLM_PORT` or the
-`[tool.imas-codex.llm]` section in `pyproject.toml`.
+The port is configurable via `ITER_CODEX_LLM_PORT` or the
+`[tool.iter-codex.llm]` section in `pyproject.toml`.
 
 ---
 
@@ -163,22 +163,22 @@ curl -s http://localhost:18400/v1/chat/completions \
 
 ```bash
 # Create teams
-imas-codex llm teams create --alias imas-codex --budget 500 --duration 30d
-imas-codex llm teams create --alias claude-code --budget 200 --duration 30d
+iter-codex llm teams create --alias iter-codex --budget 500 --duration 30d
+iter-codex llm teams create --alias claude-code --budget 200 --duration 30d
 
 # Generate keys
-imas-codex llm keys create --team <team-id> --alias worker-key
-imas-codex llm keys create --team <team-id> --alias claude-code-simon
+iter-codex llm keys create --team <team-id> --alias worker-key
+iter-codex llm keys create --team <team-id> --alias claude-code-simon
 
 # Monitor spend
-imas-codex llm spend
-imas-codex llm spend --team claude-code
+iter-codex llm spend
+iter-codex llm spend --team claude-code
 
 # Rotate a key
-imas-codex llm keys rotate --key sk-old-key
+iter-codex llm keys rotate --key sk-old-key
 
 # Revoke a key
-imas-codex llm keys revoke sk-compromised-key
+iter-codex llm keys revoke sk-compromised-key
 ```
 
 ## Security

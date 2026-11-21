@@ -4,8 +4,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from imas_codex.standard_names.loop import RunSummary, summary_table
-from imas_codex.standard_names.pools import (
+from iter_codex.standard_names.loop import RunSummary, summary_table
+from iter_codex.standard_names.pools import (
     classify_identity_state_groups,
     identity_state_groups,
     standard_name_pool_predicates,

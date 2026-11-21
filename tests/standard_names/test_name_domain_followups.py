@@ -40,9 +40,9 @@ def test_write_standard_names_alone_leaves_an_undecided_name_whole(
     payload domain and no stored decision, so the scalar can only come from the
     one domain its DD sources carry — the writer's derived value, not a guess.
     """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         write_standard_names,
     )
 
@@ -83,9 +83,9 @@ def test_several_source_domains_stay_unset_and_undecided(
     domains would take one of them arbitrarily, so this test's scalar
     assertion is what holds the boundary.
     """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         write_standard_names,
     )
 
@@ -122,10 +122,10 @@ def test_an_undecided_stored_decision_keeps_its_candidates(
     disposable_neo4j_empty: str,
 ) -> None:
     """A stored decision with candidates and no choice keeps the candidates."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
-    from imas_codex.standard_names.domain_decision import write_name_domain
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from iter_codex.standard_names.domain_decision import write_name_domain
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         _stored_domain_decisions,
     )
 
@@ -174,7 +174,7 @@ def test_an_undecided_stored_decision_keeps_its_candidates(
 
 def test_undecided_is_public_in_its_owner() -> None:
     """The undecided constructor is exported by ``domain_decision``."""
-    from imas_codex.standard_names import domain_decision
+    from iter_codex.standard_names import domain_decision
 
     assert hasattr(domain_decision, "undecided")
     assert "undecided" in domain_decision.__all__
@@ -191,7 +191,7 @@ def test_a_derived_parent_takes_the_domain_most_children_carry() -> None:
     an undecided decision leaves the parent's scalar at whatever it held, which
     is the behaviour this rule exists to replace.
     """
-    from imas_codex.standard_names.domain_decision import (
+    from iter_codex.standard_names.domain_decision import (
         DomainDecision,
         derived_parent_domain_decision,
         undecided,
@@ -240,7 +240,7 @@ def test_a_derived_parent_takes_the_domain_most_children_carry() -> None:
 
 def test_persist_refined_name_carries_no_source_domains_parameter() -> None:
     """A parameter no caller's value reaches is not carried."""
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
 

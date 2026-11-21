@@ -5,8 +5,8 @@ from __future__ import annotations
 import pytest
 from neo4j.exceptions import DatabaseError, ServiceUnavailable
 
-from imas_codex.discovery.base.supervision import is_infrastructure_error
-from imas_codex.graph.client import GraphClient
+from iter_codex.discovery.base.supervision import is_infrastructure_error
+from iter_codex.graph.client import GraphClient
 
 
 class TestIsConnectionError:

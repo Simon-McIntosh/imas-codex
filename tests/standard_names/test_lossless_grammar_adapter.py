@@ -6,13 +6,13 @@ import pytest
 
 pytest.importorskip("imas_standard_names")
 
-from imas_codex.standard_names.grammar_adapter import (  # noqa: E402
+from iter_codex.standard_names.grammar_adapter import (  # noqa: E402
     ParsedCanonicalName,
     compose_canonical_ir,
     is_canonical_name,
     parse_canonical_name,
 )
-from imas_codex.standard_names.models import GrammarSegments  # noqa: E402
+from iter_codex.standard_names.models import GrammarSegments  # noqa: E402
 
 METRIC_NAMES = (
     "flux_surface_averaged_inverse_of_square_of_major_radius",
@@ -177,7 +177,7 @@ def test_binary_operands_retain_their_nested_operator_order() -> None:
 
 def test_structured_locus_stays_on_binary_operand_a(monkeypatch) -> None:
     """The candidate's base fields qualify operand A, not the expression."""
-    from imas_codex.standard_names import grammar_adapter
+    from iter_codex.standard_names import grammar_adapter
 
     captured = {}
 
@@ -210,7 +210,7 @@ def test_semantic_guard_rejects_binary_operand_scope_drift() -> None:
     returning the candidate's canonical surface while changing recursive
     scope.  It is not a valid public parse result.
     """
-    from imas_codex.standard_names import grammar_adapter
+    from iter_codex.standard_names import grammar_adapter
 
     intended = _binary_ir(
         "ratio",
@@ -258,7 +258,7 @@ def test_flat_normalization_cannot_cross_an_inner_operator(monkeypatch) -> None:
     """Absorbing an outer token across an inner operator changes precedence."""
     from imas_standard_names import StandardNameIR
 
-    from imas_codex.standard_names import grammar_adapter
+    from iter_codex.standard_names import grammar_adapter
 
     intended = _with_inverse(_normalized_radial_ir(), outer=False)
     parsed_data = intended.model_dump(mode="python")
@@ -280,7 +280,7 @@ def test_unrelated_flat_semantic_drift_is_rejected(monkeypatch, drift) -> None:
     """The compatibility path cannot erase or invent unrelated semantics."""
     from imas_standard_names import StandardNameIR, compose
 
-    from imas_codex.standard_names import grammar_adapter
+    from iter_codex.standard_names import grammar_adapter
 
     intended = _normalized_radial_ir()
     parsed_data = intended.model_dump(mode="python")
@@ -491,7 +491,7 @@ def test_structured_segments_generate_exact_metric_names(
 
 
 def test_binary_derivation_reads_real_operands_not_placeholder_base() -> None:
-    from imas_codex.standard_names.derivation import derive_edges
+    from iter_codex.standard_names.derivation import derive_edges
 
     outer = [
         edge for edge in derive_edges(METRIC_NAMES[2]) if edge.edge_type == "HAS_PARENT"
@@ -515,7 +515,7 @@ def test_binary_derivation_reads_real_operands_not_placeholder_base() -> None:
 
 
 def test_ordered_metric_name_does_not_enter_grammar_retry() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _grammar_round_trip_failures,
     )
 
@@ -529,7 +529,7 @@ def test_ordered_metric_name_does_not_enter_grammar_retry() -> None:
 
 
 def test_ordered_intermediate_parent_passes_admission_identity() -> None:
-    from imas_codex.standard_names.parents import (
+    from iter_codex.standard_names.parents import (
         _has_structural_specificity,
         _has_valid_standard_name_identity,
     )
@@ -541,7 +541,7 @@ def test_ordered_intermediate_parent_passes_admission_identity() -> None:
 
 
 def test_benchmark_resolves_ordered_segments_losslessly() -> None:
-    from imas_codex.standard_names.benchmark import _resolve_name
+    from iter_codex.standard_names.benchmark import _resolve_name
 
     candidate = {
         "segments": {

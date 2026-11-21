@@ -10,7 +10,7 @@ import re
 
 import pytest
 
-from imas_codex.graph.dd_enrichment import (
+from iter_codex.graph.dd_enrichment import (
     ACCESSOR_REGEX_PATTERNS,
     ACCESSOR_TEMPLATES,
     ACCESSOR_TERMINAL_NAMES,
@@ -273,7 +273,7 @@ class TestGenerateEmbeddingTextConcise:
     """
 
     def test_returns_description_with_full_path(self) -> None:
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "eq/profiles_1d/psi",
@@ -285,7 +285,7 @@ class TestGenerateEmbeddingTextConcise:
         assert text == "Poloidal flux radial profile."
 
     def test_fallback_to_documentation(self) -> None:
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "eq/profiles_1d/psi",
@@ -294,7 +294,7 @@ class TestGenerateEmbeddingTextConcise:
         assert text == "Poloidal flux"
 
     def test_empty_description_uses_doc(self) -> None:
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "eq/profiles_1d/psi",
@@ -303,14 +303,14 @@ class TestGenerateEmbeddingTextConcise:
         assert text == "Doc text"
 
     def test_empty_both_returns_empty(self) -> None:
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text("eq/x", {})
         assert text == ""
 
     def test_no_raw_metadata_in_output(self) -> None:
         """Verify units, data_type, doc excerpts, and keywords are excluded."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "eq/profiles_1d/psi",
@@ -332,7 +332,7 @@ class TestGenerateEmbeddingTextConcise:
 
     def test_full_path_replaces_readable_ids_prefix(self) -> None:
         """Path is excluded entirely (not reformatted as a readable prefix)."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "core_profiles/profiles_1d/electrons/temperature",
@@ -344,7 +344,7 @@ class TestGenerateEmbeddingTextConcise:
 
     def test_output_contains_full_imas_path(self) -> None:
         """Path is excluded from embedding text to avoid score compression."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "equilibrium/time_slice/profiles_1d/psi",
@@ -355,7 +355,7 @@ class TestGenerateEmbeddingTextConcise:
 
     def test_documentation_excluded_even_when_different(self) -> None:
         """Doc excerpts are excluded to preserve cosine quality at dim 256."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "equilibrium/time_slice/profiles_1d/psi",
@@ -369,7 +369,7 @@ class TestGenerateEmbeddingTextConcise:
 
     def test_keywords_excluded(self) -> None:
         """Keywords are excluded to preserve cosine quality at dim 256."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "equilibrium/time_slice/profiles_1d/psi",
@@ -383,7 +383,7 @@ class TestGenerateEmbeddingTextConcise:
 
     def test_separator_is_period_space(self) -> None:
         """When both description and (at ≥512 dim) extras are included, separator is '. '."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "eq/psi",
@@ -405,7 +405,7 @@ class TestBM25ScoringConstants:
         import ast
         import inspect
 
-        from imas_codex.tools.graph_search import _text_search_dd_paths
+        from iter_codex.tools.graph_search import _text_search_dd_paths
 
         source = inspect.getsource(_text_search_dd_paths)
         # Extract all THEN score values from the CASE expression
@@ -420,7 +420,7 @@ class TestBM25ScoringConstants:
         """Verify the BM25 score floor has been removed."""
         import inspect
 
-        from imas_codex.tools.graph_search import _text_search_dd_paths
+        from iter_codex.tools.graph_search import _text_search_dd_paths
 
         source = inspect.getsource(_text_search_dd_paths)
         assert "max(raw, 0.7)" not in source, "BM25 score floor still present"
@@ -428,12 +428,12 @@ class TestBM25ScoringConstants:
     def test_path_short_circuit(self) -> None:
         """Verify path queries skip vector search.
 
-        The short-circuit lives in ``hybrid_dd_search`` (imas_codex.graph.dd_search),
+        The short-circuit lives in ``hybrid_dd_search`` (iter_codex.graph.dd_search),
         which ``GraphSearchTool.search_dd_paths`` delegates to.
         """
         import inspect
 
-        from imas_codex.graph.dd_search import hybrid_dd_search
+        from iter_codex.graph.dd_search import hybrid_dd_search
 
         source = inspect.getsource(hybrid_dd_search)
         assert '"/" in query' in source or "'/' in query" in source, (
@@ -445,7 +445,7 @@ class TestSearchHitChildren:
     """Test that SearchHit can hold children and matched_children."""
 
     def test_children_field_exists(self) -> None:
-        from imas_codex.search.search_strategy import SearchHit
+        from iter_codex.search.search_strategy import SearchHit
 
         hit = SearchHit(
             path="eq/boundary",
@@ -465,7 +465,7 @@ class TestSearchHitChildren:
         assert len(hit.children) == 1
 
     def test_matched_children_field_exists(self) -> None:
-        from imas_codex.search.search_strategy import SearchHit
+        from iter_codex.search.search_strategy import SearchHit
 
         hit = SearchHit(
             path="eq/boundary/x_point",
@@ -479,7 +479,7 @@ class TestSearchHitChildren:
         assert hit.matched_children == ["r", "z"]
 
     def test_none_by_default(self) -> None:
-        from imas_codex.search.search_strategy import SearchHit
+        from iter_codex.search.search_strategy import SearchHit
 
         hit = SearchHit(
             path="eq/psi",
@@ -502,13 +502,13 @@ class TestPromptQuality:
     """Test the enrichment prompt and Pydantic model."""
 
     def test_pydantic_model_enforces_concise(self) -> None:
-        from imas_codex.graph.dd_enrichment import IMASPathEnrichmentResult
+        from iter_codex.graph.dd_enrichment import IMASPathEnrichmentResult
 
         field_desc = IMASPathEnrichmentResult.model_fields["description"].description
         assert "150" in field_desc or "concise" in field_desc.lower()
 
     def test_enrichment_prompt_mentions_concise(self) -> None:
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         prompt_path = PROMPTS_DIR / "imas" / "enrichment.md"
         content = prompt_path.read_text()
@@ -516,7 +516,7 @@ class TestPromptQuality:
         assert "150" in content.lower()
 
     def test_enrichment_prompt_has_examples(self) -> None:
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         prompt_path = PROMPTS_DIR / "imas" / "enrichment.md"
         content = prompt_path.read_text()

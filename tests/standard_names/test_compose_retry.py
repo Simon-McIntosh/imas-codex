@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 
 def _min_item(**overrides) -> dict:
@@ -75,14 +75,14 @@ class TestRetryConstants:
     """Retry tunables resolve via settings accessors."""
 
     def test_retry_attempts_is_one(self) -> None:
-        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _retry_attempts,
         )
 
         assert _retry_attempts() == 1
 
     def test_retry_k_expansion_is_twelve(self) -> None:
-        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _retry_k_expansion,
         )
 
@@ -96,7 +96,7 @@ class TestHybridSearchKParameter:
         """Default search_k should be 10."""
         import inspect
 
-        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _hybrid_search_neighbours,
         )
 

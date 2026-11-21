@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names import search as sn_search
+from iter_codex.standard_names import search as sn_search
 
 
 def _stub_gc(rows_by_signature: dict[str, list[dict]] | None = None) -> MagicMock:

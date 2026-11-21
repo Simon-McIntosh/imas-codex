@@ -3,15 +3,15 @@
 import numpy as np
 import pytest
 
-from imas_codex.clusters.clustering import (
+from iter_codex.clusters.clustering import (
     EmbeddingClusterer,
     RelationshipBuilder,
     _compute_cluster_centroid,
     _compute_cluster_similarity,
 )
-from imas_codex.clusters.config import RelationshipExtractionConfig
-from imas_codex.clusters.models import ClusterInfo
-from imas_codex.embeddings.config import EncoderConfig
+from iter_codex.clusters.config import RelationshipExtractionConfig
+from iter_codex.clusters.models import ClusterInfo
+from iter_codex.embeddings.config import EncoderConfig
 
 
 class TestComputeClusterSimilarity:

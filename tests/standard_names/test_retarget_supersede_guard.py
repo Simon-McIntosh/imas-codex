@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from imas_codex.graph.models import RepairMutationKind
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph.models import RepairMutationKind
+from iter_codex.standard_names.signed_manifest import (
     _LoadedRow,
     _retarget_supersede_refusal,
 )

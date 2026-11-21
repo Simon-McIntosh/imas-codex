@@ -32,9 +32,9 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import discover
-from imas_codex.cli.discover.wiki import WikiStageOptions, run_wiki_stage
-from imas_codex.settings import get_wiki_ingest_threshold
+from iter_codex.cli.discover import discover
+from iter_codex.cli.discover.wiki import WikiStageOptions, run_wiki_stage
+from iter_codex.settings import get_wiki_ingest_threshold
 
 FACILITY = "jt-60sa"
 
@@ -70,8 +70,8 @@ def _graph_client() -> MagicMock:
 
 @pytest.fixture(autouse=True)
 def bare_discover_stage(monkeypatch, tmp_path):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import sequence
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import sequence
 
     monkeypatch.setattr(
         sequence,
@@ -82,7 +82,7 @@ def bare_discover_stage(monkeypatch, tmp_path):
     )
     monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: {}
     )
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
     monkeypatch.setattr(
@@ -105,58 +105,58 @@ def engine(monkeypatch: pytest.MonkeyPatch) -> dict:
         return 0
 
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.parallel.run_parallel_wiki_discovery",
+        "iter_codex.discovery.wiki.parallel.run_parallel_wiki_discovery",
         fake_engine,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.parallel.bulk_discover_pages",
+        "iter_codex.discovery.wiki.parallel.bulk_discover_pages",
         fake_bulk_pages,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda facility: FACILITY_CONFIG,
     )
     # Zero pages in the graph means the seeding half runs, so the scan/flush
     # split is measurable rather than masked by a cached scan.
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.get_wiki_stats",
+        "iter_codex.discovery.wiki.get_wiki_stats",
         lambda facility: {"pages": 0},
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.graph_ops.create_doc_source",
+        "iter_codex.discovery.wiki.graph_ops.create_doc_source",
         lambda gc, facility, **kwargs: "docsrc:1",
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.graph_ops.reset_transient_pages",
+        "iter_codex.discovery.wiki.graph_ops.reset_transient_pages",
         lambda facility, **kwargs: {},
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.graph_ops.recover_failed_pages",
+        "iter_codex.discovery.wiki.graph_ops.recover_failed_pages",
         lambda facility: 0,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.graph_ops.recover_failed_documents",
+        "iter_codex.discovery.wiki.graph_ops.recover_failed_documents",
         lambda facility: 0,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.graph_ops.defer_failed_documents",
+        "iter_codex.discovery.wiki.graph_ops.defer_failed_documents",
         lambda facility: 0,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.graph_ops.has_pending_work",
+        "iter_codex.discovery.wiki.graph_ops.has_pending_work",
         lambda facility, **kwargs: True,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.graph_ops.has_pending_document_work",
+        "iter_codex.discovery.wiki.graph_ops.has_pending_document_work",
         lambda facility, **kwargs: True,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.wiki.parallel.bulk_discover_documents",
+        "iter_codex.discovery.wiki.parallel.bulk_discover_documents",
         lambda **kwargs: (0, {}),
     )
-    monkeypatch.setattr("imas_codex.graph.client.GraphClient", _graph_client())
-    monkeypatch.setattr("imas_codex.graph.GraphClient", _graph_client())
-    monkeypatch.setattr("imas_codex.cli.rich_output.should_use_rich", lambda: False)
+    monkeypatch.setattr("iter_codex.graph.client.GraphClient", _graph_client())
+    monkeypatch.setattr("iter_codex.graph.GraphClient", _graph_client())
+    monkeypatch.setattr("iter_codex.cli.rich_output.should_use_rich", lambda: False)
 
     # Drive async_main directly, off the rich/plain harness.
     def fake_run_discovery(config, async_main, *, on_complete=None):
@@ -166,7 +166,7 @@ def engine(monkeypatch: pytest.MonkeyPatch) -> dict:
         return result
 
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.run_discovery", fake_run_discovery
+        "iter_codex.cli.discover.common.run_discovery", fake_run_discovery
     )
     return {"calls": calls, "bulk": bulk}
 
@@ -186,8 +186,8 @@ def test_cli_import_does_not_load_wiki_engine() -> None:
         [
             sys.executable,
             "-c",
-            "import sys; import imas_codex.cli.discover; "
-            "print('imas_codex.discovery.wiki' in sys.modules)",
+            "import sys; import iter_codex.cli.discover; "
+            "print('iter_codex.discovery.wiki' in sys.modules)",
         ],
         capture_output=True,
         text=True,
@@ -197,7 +197,7 @@ def test_cli_import_does_not_load_wiki_engine() -> None:
 
 
 def test_cli_default_min_score_reaches_engine(engine, monkeypatch) -> None:
-    monkeypatch.setattr("imas_codex.settings.get_embedding_location", lambda: "local")
+    monkeypatch.setattr("iter_codex.settings.get_embedding_location", lambda: "local")
     result = CliRunner().invoke(discover, [FACILITY, "--only", "wiki"])
     assert result.exit_code == 0, result.output
     assert engine["calls"]
@@ -207,7 +207,7 @@ def test_cli_default_min_score_reaches_engine(engine, monkeypatch) -> None:
 
 
 def test_cli_explicit_min_score_overrides_ingest_gate(engine, monkeypatch) -> None:
-    monkeypatch.setattr("imas_codex.settings.get_embedding_location", lambda: "local")
+    monkeypatch.setattr("iter_codex.settings.get_embedding_location", lambda: "local")
     result = CliRunner().invoke(
         discover, [FACILITY, "--only", "wiki", "--min-score", "0.3"]
     )
@@ -280,7 +280,7 @@ def test_cli_focus_is_refused(engine) -> None:
 
 
 def test_click_command_is_a_thin_wrapper() -> None:
-    with patch("imas_codex.cli.discover.wiki.run_wiki_stage") as mock_stage:
+    with patch("iter_codex.cli.discover.wiki.run_wiki_stage") as mock_stage:
         result = CliRunner().invoke(
             discover,
             [
@@ -344,27 +344,27 @@ def test_retired_score_alias_is_refused() -> None:
 
 def test_embedding_refusal_names_a_supported_bare_command(monkeypatch) -> None:
     messages: list[str] = []
-    monkeypatch.setattr("imas_codex.cli.rich_output.should_use_rich", lambda: True)
+    monkeypatch.setattr("iter_codex.cli.rich_output.should_use_rich", lambda: True)
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.setup_logging", lambda *args: MagicMock()
+        "iter_codex.cli.discover.common.setup_logging", lambda *args: MagicMock()
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.make_log_print", lambda *args: messages.append
+        "iter_codex.cli.discover.common.make_log_print", lambda *args: messages.append
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda facility: FACILITY_CONFIG,
     )
-    monkeypatch.setattr("imas_codex.settings.get_embedding_location", lambda: "remote")
+    monkeypatch.setattr("iter_codex.settings.get_embedding_location", lambda: "remote")
     monkeypatch.setattr(
-        "imas_codex.embeddings.readiness.ensure_embedding_ready",
+        "iter_codex.embeddings.readiness.ensure_embedding_ready",
         lambda **kwargs: (False, "embedding unavailable"),
     )
     with pytest.raises(SystemExit):
         run_wiki_stage(FACILITY, WikiStageOptions())
     output = "\n".join(messages)
     assert "embedding unavailable" in output
-    assert "imas-codex discover jt-60sa --only wiki --scan-only" in output
+    assert "iter-codex discover jt-60sa --only wiki --scan-only" in output
     assert "--score-only" not in output
 
 

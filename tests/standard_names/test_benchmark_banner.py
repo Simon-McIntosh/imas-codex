@@ -19,8 +19,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.benchmark_reference import REFERENCE_NAMES
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -28,7 +28,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # test: the fixture is the file, and the file's contents are the paths.
 FIXTURES: dict[bool, tuple[Path, list[str]]] = {
     False: (
-        REPO_ROOT / "imas_codex" / "standard_names" / "benchmark_reference.py",
+        REPO_ROOT / "iter_codex" / "standard_names" / "benchmark_reference.py",
         list(REFERENCE_NAMES),
     ),
     True: (
@@ -45,7 +45,7 @@ FIXTURES: dict[bool, tuple[Path, list[str]]] = {
 
 def _paths_the_extractor_reads(config: object) -> list[str]:
     """Run the real extractor on this config, recording the paths it is handed."""
-    from imas_codex.standard_names.benchmark import _extract_candidates
+    from iter_codex.standard_names.benchmark import _extract_candidates
 
     read: list[list[str]] = []
 
@@ -59,7 +59,7 @@ def _paths_the_extractor_reads(config: object) -> list[str]:
         return [batch]
 
     with patch(
-        "imas_codex.standard_names.sources.dd.extract_dd_candidates",
+        "iter_codex.standard_names.sources.dd.extract_dd_candidates",
         new=_recording_extractor,
     ):
         _extract_candidates(config)
@@ -83,10 +83,10 @@ def _drive_banner(*, physics: bool) -> tuple[str, object]:
 
     with (
         patch(
-            "imas_codex.standard_names.benchmark.run_benchmark",
+            "iter_codex.standard_names.benchmark.run_benchmark",
             new=AsyncMock(return_value=report),
         ) as run_benchmark,
-        patch("imas_codex.standard_names.benchmark.render_comparison_table"),
+        patch("iter_codex.standard_names.benchmark.render_comparison_table"),
     ):
         invocation = CliRunner().invoke(sn, argv)
 

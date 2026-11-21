@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from imas_codex.standard_names.models import StandardNameCandidate
+from iter_codex.standard_names.models import StandardNameCandidate
 
 
 class TestStandardNameCandidateDescription:

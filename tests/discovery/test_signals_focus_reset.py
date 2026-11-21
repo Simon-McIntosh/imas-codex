@@ -18,7 +18,7 @@ from __future__ import annotations
 import asyncio
 from unittest.mock import MagicMock
 
-from imas_codex.cli.discover.signals import SignalsStageOptions, run_signals_stage
+from iter_codex.cli.discover.signals import SignalsStageOptions, run_signals_stage
 
 SOURCE = "jt-60sa:mdac-pb10-source"
 UNNAMED_SOURCE = "jt-60sa:mdac-pb8-source"
@@ -107,40 +107,40 @@ def _install_stage_environment(monkeypatch, catalogue: _Catalogue) -> None:
         return asyncio.run(async_main(asyncio.Event(), None))
 
     monkeypatch.setattr(
-        "imas_codex.cli.discover.signals._validate_focus",
+        "iter_codex.cli.discover.signals._validate_focus",
         lambda facility, items: None,
         raising=True,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda facility: {"ssh_host": "jt-60sa", "data_systems": {}},
         raising=True,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.scanners.base.get_scanners_for_facility",
+        "iter_codex.discovery.signals.scanners.base.get_scanners_for_facility",
         lambda facility: [MagicMock(scanner_type="edas")],
         raising=True,
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.ensure_remote_environment",
+        "iter_codex.cli.discover.common.ensure_remote_environment",
         lambda config: None,
         raising=True,
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.use_rich_output", lambda: False, raising=True
+        "iter_codex.cli.discover.common.use_rich_output", lambda: False, raising=True
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.run_discovery",
+        "iter_codex.cli.discover.common.run_discovery",
         fake_run_discovery,
         raising=True,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.parallel.run_parallel_data_discovery",
+        "iter_codex.discovery.signals.parallel.run_parallel_data_discovery",
         fake_engine,
         raising=True,
     )
     monkeypatch.setattr(
-        "imas_codex.graph.GraphClient", lambda *a, **k: catalogue, raising=True
+        "iter_codex.graph.GraphClient", lambda *a, **k: catalogue, raising=True
     )
 
 

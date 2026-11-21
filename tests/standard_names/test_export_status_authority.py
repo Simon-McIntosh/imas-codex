@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import yaml
 
-from imas_codex.standard_names.export import GATE_CATALOG_STATUS, run_export
+from iter_codex.standard_names.export import GATE_CATALOG_STATUS, run_export
 from tests.standard_names.conftest import clean_source_audit_graph
 
 
@@ -58,23 +58,23 @@ def _candidate(name: str, *, status: str | None) -> dict:
 def _run_fixture_export(staging_dir: Path, population: list[dict]):
     with (
         patch(
-            "imas_codex.standard_names.export._fetch_export_population",
+            "iter_codex.standard_names.export._fetch_export_population",
             return_value=population,
         ),
         patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=_ReadOnlyGraphClient(),
         ),
         patch(
-            "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+            "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
             return_value=([], set()),
         ),
         patch(
-            "imas_codex.standard_names.export._get_codex_commit_sha",
+            "iter_codex.standard_names.export._get_codex_commit_sha",
             return_value="a" * 40,
         ),
         patch(
-            "imas_codex.standard_names.export._manifest_iso_timestamp",
+            "iter_codex.standard_names.export._manifest_iso_timestamp",
             return_value="2026-09-04T00:00:00Z",
         ),
     ):

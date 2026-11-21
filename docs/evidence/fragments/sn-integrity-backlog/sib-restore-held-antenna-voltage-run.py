@@ -60,7 +60,7 @@ RESTORE_OPERATION = "restore_prior_stage"
 
 
 def _graph():
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     return GraphClient()
 
@@ -202,7 +202,7 @@ def snapshot_names() -> dict:
 
 
 def build_authority(rows: list[dict], path: Path) -> dict:
-    from imas_codex.standard_names.repair_authority import build_repair_authority
+    from iter_codex.standard_names.repair_authority import build_repair_authority
 
     spec = {
         "operation_id": OPERATION_ID,
@@ -249,7 +249,7 @@ def _scope_refusal(authority: dict) -> str | None:
 
 
 def _call(apply: bool, digest: str | None, path: Path = AUTHORITY) -> dict:
-    from imas_codex.standard_names.signed_manifest import (
+    from iter_codex.standard_names.signed_manifest import (
         apply_signed_manifest,
         signed_payload_sha256,
     )
@@ -274,7 +274,7 @@ def _call(apply: bool, digest: str | None, path: Path = AUTHORITY) -> dict:
 
 def readback() -> dict:
     """The post-write state, both receipts, and whether any other name moved."""
-    from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+    from iter_codex.standard_names.source_invariant import find_sourceless_live_names
 
     raw = AUTHORITY.read_bytes()
     file_sha = hashlib.sha256(raw).hexdigest()
@@ -356,11 +356,11 @@ def gate() -> dict:
     counts a live name with no producer, so the measurement is that this name
     lands in its dormant set with no blocking source loss.
     """
-    from imas_codex.standard_names.export import (
+    from iter_codex.standard_names.export import (
         _RELEASE_IDENTITY_HOLDS,
         _classify_export_population,
     )
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
 

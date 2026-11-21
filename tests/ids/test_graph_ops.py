@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.ids.graph_ops import (
+from iter_codex.ids.graph_ops import (
     Mapping,
     SignalMapping,
     _index_from_path,
@@ -44,7 +44,7 @@ class TestLoadMapping:
                     "facility_id": "jet",
                     "ids_name": "pf_active",
                     "dd_version": "4.1.1",
-                    "provider": "imas-codex",
+                    "provider": "iter-codex",
                     "static_config": "{}",
                 }
             ],

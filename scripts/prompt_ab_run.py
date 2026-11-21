@@ -36,9 +36,9 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from imas_codex.discovery.base.llm import call_llm_structured, inject_cache_control
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_sn_benchmark_reviewer_model
+from iter_codex.discovery.base.llm import call_llm_structured, inject_cache_control
+from iter_codex.graph.client import GraphClient
+from iter_codex.settings import get_sn_benchmark_reviewer_model
 
 logger = logging.getLogger(__name__)
 

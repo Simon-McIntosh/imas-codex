@@ -2,8 +2,8 @@
 
 import pytest
 
-from imas_codex.models.error_models import ToolError
-from imas_codex.search.decorators.error_handling import (
+from iter_codex.models.error_models import ToolError
+from iter_codex.search.decorators.error_handling import (
     SearchError,
     ServiceError,
     ToolException,

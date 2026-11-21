@@ -60,7 +60,7 @@ def _make_name(
 
 
 def _make_state(target: str = "docs"):
-    from imas_codex.standard_names.review.state import StandardNameReviewState
+    from iter_codex.standard_names.review.state import StandardNameReviewState
 
     state = StandardNameReviewState(facility="dd")
     state.target = target
@@ -76,20 +76,20 @@ async def _run_extract(state, names: list[dict]):
     GraphClient and the enrichment helpers are imported lazily inside the
     function body, so patches must target the source modules, not pipeline.
     """
-    from imas_codex.standard_names.review import pipeline as review_pipeline
+    from iter_codex.standard_names.review import pipeline as review_pipeline
 
     mock_gc = MagicMock()
     mock_gc.query.return_value = names
 
     fake_client_ctx = MagicMock(__enter__=lambda s: mock_gc, __exit__=lambda *a: False)
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=fake_client_ctx),
+        patch("iter_codex.graph.client.GraphClient", return_value=fake_client_ctx),
         patch(
-            "imas_codex.standard_names.review.enrichment.reconstruct_clusters_batch",
+            "iter_codex.standard_names.review.enrichment.reconstruct_clusters_batch",
             return_value={n["id"]: [] for n in names},
         ),
         patch(
-            "imas_codex.standard_names.review.enrichment.group_into_review_batches",
+            "iter_codex.standard_names.review.enrichment.group_into_review_batches",
             side_effect=lambda targets, *args, **kw: (
                 [{"names": targets, "cluster_id": "c1", "unit": "m^-3"}]
                 if targets
@@ -191,7 +191,7 @@ def test_docs_gate_combines_with_missing_name_review_gate() -> None:
 
 def test_persist_uses_canonical_review_model() -> None:
     """state.canonical_review_model must take precedence over review_model."""
-    from imas_codex.standard_names.review import pipeline as review_pipeline
+    from iter_codex.standard_names.review import pipeline as review_pipeline
 
     state = _make_state(target="names")
     state.canonical_review_model = "openrouter/anthropic/claude-opus-4.6"
@@ -211,7 +211,7 @@ def test_persist_uses_canonical_review_model() -> None:
 
     async def _run():
         with patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=MagicMock(
                 __enter__=lambda s: mock_gc, __exit__=lambda *a: False
             ),
@@ -231,7 +231,7 @@ def test_persist_uses_canonical_review_model() -> None:
 
 def test_persist_falls_back_to_review_model() -> None:
     """When canonical is None, review_model is used."""
-    from imas_codex.standard_names.review import pipeline as review_pipeline
+    from iter_codex.standard_names.review import pipeline as review_pipeline
 
     state = _make_state(target="names")
     state.canonical_review_model = None
@@ -243,7 +243,7 @@ def test_persist_falls_back_to_review_model() -> None:
 
     async def _run():
         with patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=MagicMock(
                 __enter__=lambda s: mock_gc, __exit__=lambda *a: False
             ),
@@ -260,7 +260,7 @@ def test_persist_falls_back_to_review_model() -> None:
 
 def test_persist_uses_unknown_when_both_none() -> None:
     """Final fallback is the literal 'unknown' string."""
-    from imas_codex.standard_names.review import pipeline as review_pipeline
+    from iter_codex.standard_names.review import pipeline as review_pipeline
 
     state = _make_state(target="names")
     state.canonical_review_model = None
@@ -272,7 +272,7 @@ def test_persist_uses_unknown_when_both_none() -> None:
 
     async def _run():
         with patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=MagicMock(
                 __enter__=lambda s: mock_gc, __exit__=lambda *a: False
             ),

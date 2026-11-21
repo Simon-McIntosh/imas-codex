@@ -28,8 +28,8 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import discover
-from imas_codex.cli.discover.signals import (
+from iter_codex.cli.discover import discover
+from iter_codex.cli.discover.signals import (
     SignalsStageOptions,
     _validate_focus,
     run_signals_stage,
@@ -104,14 +104,14 @@ class _FocusCatalogue:
 
 def _install_catalogue(monkeypatch, catalogue: _FocusCatalogue) -> None:
     monkeypatch.setattr(
-        "imas_codex.graph.GraphClient", lambda *a, **k: catalogue, raising=True
+        "iter_codex.graph.GraphClient", lambda *a, **k: catalogue, raising=True
     )
 
 
 @pytest.fixture(autouse=True)
 def bare_discover_stage(monkeypatch, tmp_path):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import sequence
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import sequence
 
     monkeypatch.setattr(
         sequence,
@@ -122,7 +122,7 @@ def bare_discover_stage(monkeypatch, tmp_path):
     )
     monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: {}
     )
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
     monkeypatch.setattr(
@@ -140,23 +140,23 @@ def engine(monkeypatch: pytest.MonkeyPatch) -> dict:
         return dict(_ENGINE_RESULT)
 
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.parallel.run_parallel_data_discovery",
+        "iter_codex.discovery.signals.parallel.run_parallel_data_discovery",
         fake_engine,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda facility: FACILITY_CONFIG,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.scanners.base.get_scanners_for_facility",
+        "iter_codex.discovery.signals.scanners.base.get_scanners_for_facility",
         lambda facility: [MagicMock(scanner_type="mdsplus")],
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.scanners.base.list_scanners",
+        "iter_codex.discovery.signals.scanners.base.list_scanners",
         lambda: ["mdsplus", "tdi"],
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.ensure_remote_environment",
+        "iter_codex.cli.discover.common.ensure_remote_environment",
         lambda config: None,
     )
 
@@ -168,9 +168,9 @@ def engine(monkeypatch: pytest.MonkeyPatch) -> dict:
         return result
 
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.run_discovery", fake_run_discovery
+        "iter_codex.cli.discover.common.run_discovery", fake_run_discovery
     )
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     return captured
 
 
@@ -194,7 +194,7 @@ def test_flush_selects_the_draining_half(engine) -> None:
 
 def test_flush_opens_no_ssh(engine, monkeypatch) -> None:
     """A draining run reads only the graph and the model, so it needs no SSH."""
-    from imas_codex.cli.discover import common
+    from iter_codex.cli.discover import common
 
     seen: dict = {}
     drive = common.run_discovery
@@ -224,7 +224,7 @@ def test_reset_takes_the_category_scope(engine, monkeypatch) -> None:
         calls.append({"filter": extra_filter, "params": extra_params or {}})
         return 3
 
-    monkeypatch.setattr("imas_codex.discovery.base.reset.reset_to_status", fake_reset)
+    monkeypatch.setattr("iter_codex.discovery.base.reset.reset_to_status", fake_reset)
 
     run_signals_stage(
         FACILITY,
@@ -340,7 +340,7 @@ def test_cli_unknown_focus_is_refused(engine, monkeypatch) -> None:
 
 
 def test_click_command_is_a_thin_wrapper() -> None:
-    with patch("imas_codex.cli.discover.signals.run_signals_stage") as mock_stage:
+    with patch("iter_codex.cli.discover.signals.run_signals_stage") as mock_stage:
         result = CliRunner().invoke(
             discover,
             [

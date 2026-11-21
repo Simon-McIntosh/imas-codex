@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.sources_manifest import (
+from iter_codex.standard_names.sources_manifest import (
     SourcesManifestError,
     load_focus_file,
     load_names_file,
@@ -93,14 +93,14 @@ def test_load_names_dedups_and_orders(tmp_path):
 
 
 def test_resolve_batch_token_literal_path(tmp_path):
-    from imas_codex.standard_names.sources_manifest import resolve_batch_token
+    from iter_codex.standard_names.sources_manifest import resolve_batch_token
 
     p = _write(tmp_path, "x.yaml", SOURCES_DOC)
     assert resolve_batch_token(str(p)) == p
 
 
 def test_resolve_batch_token_short_name_finds_committed_manifest():
-    from imas_codex.standard_names.sources_manifest import resolve_batch_token
+    from iter_codex.standard_names.sources_manifest import resolve_batch_token
 
     resolved = resolve_batch_token("west_production_dd_paths")
     assert resolved is not None
@@ -109,6 +109,6 @@ def test_resolve_batch_token_short_name_finds_committed_manifest():
 
 
 def test_resolve_batch_token_unknown_returns_none():
-    from imas_codex.standard_names.sources_manifest import resolve_batch_token
+    from iter_codex.standard_names.sources_manifest import resolve_batch_token
 
     assert resolve_batch_token("no_such_manifest_anywhere") is None

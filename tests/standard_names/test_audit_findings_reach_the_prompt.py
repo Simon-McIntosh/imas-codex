@@ -1,12 +1,12 @@
 """Regression coverage for Layer 1 findings passed to name reviewers."""
 
-from imas_codex.standard_names.review.audits import (
+from iter_codex.standard_names.review.audits import (
     AuditReport,
     DuplicateComponent,
     LinkFinding,
     LintFinding,
 )
-from imas_codex.standard_names.review.pipeline import _extract_audit_findings
+from iter_codex.standard_names.review.pipeline import _extract_audit_findings
 
 
 def test_real_audit_findings_reach_the_batch_prompt() -> None:

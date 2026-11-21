@@ -10,7 +10,7 @@ non-actionable), never fabricate an ``absent`` VocabGap for it.
 
 from __future__ import annotations
 
-from imas_codex.standard_names.segments import (
+from iter_codex.standard_names.segments import (
     classify_gap,
     is_actionable_gap,
     is_known_token,

@@ -21,9 +21,9 @@ from unittest.mock import MagicMock, patch
 
 import yaml
 
-from imas_codex.standard_names.catalog_reconcile import reconcile_catalog
+from iter_codex.standard_names.catalog_reconcile import reconcile_catalog
 
-_BIND = "imas_codex.standard_names.catalog_reconcile.bind_recovery_sources"
+_BIND = "iter_codex.standard_names.catalog_reconcile.bind_recovery_sources"
 
 
 def _make_catalog(

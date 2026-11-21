@@ -19,7 +19,7 @@ import pytest
 
 class TestSearchEmptyQueryEarlyReturn:
     def test_empty_query_no_filters_returns_prompt(self):
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         gc = MagicMock()
         out = _search_standard_names("", gc=gc)
@@ -28,7 +28,7 @@ class TestSearchEmptyQueryEarlyReturn:
         gc.query.assert_not_called()
 
     def test_whitespace_query_no_filters_returns_prompt(self):
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         gc = MagicMock()
         out = _search_standard_names("   ", gc=gc)
@@ -37,7 +37,7 @@ class TestSearchEmptyQueryEarlyReturn:
 
     def test_empty_query_with_filter_proceeds(self):
         """Empty query is fine if a grammar filter narrows the space."""
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         gc = MagicMock()
         gc.query.return_value = []
@@ -55,7 +55,7 @@ class TestSearchEmptyQueryEarlyReturn:
 
 class TestSegmentFilterUsesBareColumns:
     def test_backing_segment_filter_queries_bare_column(self):
-        from imas_codex.standard_names.search import _segment_filter_search
+        from iter_codex.standard_names.search import _segment_filter_search
 
         gc = MagicMock()
         gc.query.return_value = []
@@ -75,7 +75,7 @@ class TestSegmentFilterUsesBareColumns:
         assert "sn.physical_base" in cypher
 
     def test_mcp_segment_filter_queries_bare_column(self):
-        from imas_codex.standard_names.search import _segment_filter_search
+        from iter_codex.standard_names.search import _segment_filter_search
 
         gc = MagicMock()
         gc.query.return_value = []
@@ -95,7 +95,7 @@ class TestSegmentFilterUsesBareColumns:
         assert "sn.subject" in cypher
 
     def test_unknown_segment_skipped(self):
-        from imas_codex.standard_names.search import _segment_filter_search
+        from iter_codex.standard_names.search import _segment_filter_search
 
         gc = MagicMock()
         gc.query.return_value = []
@@ -114,7 +114,7 @@ class TestSegmentFilterUsesBareColumns:
 
     def test_empty_query_segment_filter_hits_backing(self):
         """Canonical backing accepts empty query when filters narrow the space."""
-        from imas_codex.standard_names.search import search_standard_names
+        from iter_codex.standard_names.search import search_standard_names
 
         gc = MagicMock()
         gc.query.return_value = [
@@ -153,7 +153,7 @@ class TestSegmentFilterUsesBareColumns:
 
 class TestFindRelatedMissingAnchor:
     def test_missing_anchor_reports_not_found(self):
-        from imas_codex.llm.sn_tools import _find_related_standard_names
+        from iter_codex.llm.sn_tools import _find_related_standard_names
 
         gc = MagicMock()
         # First query (existence check) returns empty
@@ -165,7 +165,7 @@ class TestFindRelatedMissingAnchor:
         assert gc.query.call_count == 1
 
     def test_existing_anchor_invokes_backing(self, monkeypatch):
-        from imas_codex.llm import sn_tools
+        from iter_codex.llm import sn_tools
 
         gc = MagicMock()
         gc.query.return_value = [{"id": "plasma_current"}]
@@ -188,7 +188,7 @@ class TestFindRelatedMissingAnchor:
 
 
 def test_tokenise_query_drops_punctuation_and_stopwords():
-    from imas_codex.standard_names.grammar_query import tokenise_query
+    from iter_codex.standard_names.grammar_query import tokenise_query
 
     assert tokenise_query("x_magnetic_field") == [
         "x",
@@ -214,7 +214,7 @@ def test_tokenise_query_drops_punctuation_and_stopwords():
 
 def _graph_available() -> bool:
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         gc = GraphClient()
         try:
@@ -232,8 +232,8 @@ def _graph_available() -> bool:
 class TestLiveGraphSmoke:
     def test_segment_filter_returns_results_on_live_graph(self):
         """End-to-end: open-vocab physical_base filter must surface SNs."""
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.search import search_standard_names
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.standard_names.search import search_standard_names
 
         gc = GraphClient()
         try:

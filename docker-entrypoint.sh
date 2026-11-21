@@ -1,5 +1,5 @@
 #!/bin/bash
-# Entrypoint for the IMAS Codex MCP server with embedded Neo4j.
+# Entrypoint for the ITER Codex MCP server with embedded Neo4j.
 #
 # Starts Neo4j in the background, waits for it to become available,
 # then starts the MCP server. On shutdown (SIGTERM/SIGINT), stops
@@ -82,8 +82,8 @@ if [ "$DB_READY" -eq 0 ]; then
 fi
 
 # Start MCP server
-echo "Starting IMAS Codex MCP server..."
-imas-codex "$@" &
+echo "Starting ITER Codex MCP server..."
+iter-codex "$@" &
 MCP_PID=$!
 
 # Wait for either process to exit

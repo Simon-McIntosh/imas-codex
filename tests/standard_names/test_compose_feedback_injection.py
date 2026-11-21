@@ -1,7 +1,7 @@
 """compose_dd.md renders the ``item.review_feedback`` block.
 
 These tests don't exercise the LLM — they just render the Jinja template
-through ``imas_codex.llm.prompt_loader.render_prompt`` and assert that the
+through ``iter_codex.llm.prompt_loader.render_prompt`` and assert that the
 feedback payload is surfaced when present, and that the block is absent
 otherwise.
 """
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 
 def _min_item(**overrides) -> dict:

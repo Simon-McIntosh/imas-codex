@@ -19,7 +19,7 @@ import re
 
 import pytest
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR
+from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
 
 def _load(relpath: str) -> str:
@@ -205,7 +205,7 @@ class TestRenderedPromptIncludesCocosProhibition:
     def test_generate_docs_system_render_includes_prohibition(self) -> None:
         # generate_docs_system.md `{% include %}`s the fragment; rendering should
         # interpolate it.
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         rendered = render_prompt("sn/generate_docs_system", {})
         normalized = re.sub(r"\s+", " ", rendered)
@@ -213,8 +213,8 @@ class TestRenderedPromptIncludesCocosProhibition:
         assert "MUST NEVER appear" in normalized
 
     def test_compose_system_render_includes_prohibition(self) -> None:
-        from imas_codex.llm.prompt_loader import render_prompt
-        from imas_codex.standard_names.context import (
+        from iter_codex.llm.prompt_loader import render_prompt
+        from iter_codex.standard_names.context import (
             build_compose_context,
             clear_context_cache,
         )

@@ -8,14 +8,14 @@ from collections.abc import Iterator
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient as RealGraphClient
+from iter_codex.graph.client import GraphClient as RealGraphClient
 
 
 @pytest.mark.graph
 def test_reconcile_refuses_terminal_parent_and_source_bound_to_live_target(
     disposable_neo4j: tuple[str, str],
 ) -> None:
-    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+    from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
         find_orphan_parent_source_candidates,
         reconcile_orphan_parent_sources,
     )

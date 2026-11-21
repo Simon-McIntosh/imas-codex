@@ -22,8 +22,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.graph_store import (
     owner_module_path as _owner_module_path,
 )
 
@@ -31,12 +31,12 @@ from imas_codex.standard_names.graph_store import (
 # Helpers
 # =====================================================================
 
-_GO = "imas_codex.standard_names.graph_ops"
+_GO = "iter_codex.standard_names.graph_ops"
 
 
 def _build_specs(min_score: float = 0.75) -> list:
     """Build pool specs with a stopped event and budget manager."""
-    from imas_codex.standard_names.loop import _build_pool_specs
+    from iter_codex.standard_names.loop import _build_pool_specs
 
     mgr = BudgetManager(total_budget=10.0)
     stop = asyncio.Event()
@@ -94,13 +94,13 @@ class TestPoolWeightsSumToOne:
         assert abs(total - 1.0) < 1e-9, f"Weights sum to {total}, expected 1.0"
 
     def test_pool_weights_dict_sums_to_one(self) -> None:
-        from imas_codex.standard_names.pools import POOL_WEIGHTS
+        from iter_codex.standard_names.pools import POOL_WEIGHTS
 
         total = sum(POOL_WEIGHTS.values())
         assert abs(total - 1.0) < 1e-9, f"POOL_WEIGHTS sum to {total}"
 
     def test_pool_weights_match_specs(self) -> None:
-        from imas_codex.standard_names.pools import POOL_WEIGHTS
+        from iter_codex.standard_names.pools import POOL_WEIGHTS
 
         specs = _build_specs()
         for spec in specs:
@@ -132,7 +132,7 @@ class TestPoolIdsKwarg:
 
         # Patch BEFORE building specs so the closure captures the mock
         with patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release.release_generate_name_claims",
+            "iter_codex.standard_names.graph_store.graph_claim_release.release_generate_name_claims",
             return_value=2,
         ) as mock_release:
             specs = _build_specs()
@@ -197,13 +197,13 @@ class TestPendingCountsQuery:
                 "refine_docs": 1,
             }
         ]
-        with patch("imas_codex.graph.client.GraphClient") as MockGC:
+        with patch("iter_codex.graph.client.GraphClient") as MockGC:
             mock_gc = MagicMock()
             mock_gc.query.return_value = mock_result
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+            from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
                 pool_pending_counts,
             )
 
@@ -227,13 +227,13 @@ class TestPendingCountsQuery:
 
     def test_pending_counts_empty_graph_returns_zeros(self) -> None:
         """Empty graph returns all zeros."""
-        with patch("imas_codex.graph.client.GraphClient") as MockGC:
+        with patch("iter_codex.graph.client.GraphClient") as MockGC:
             mock_gc = MagicMock()
             mock_gc.query.return_value = []
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+            from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
                 pool_pending_counts,
             )
 
@@ -250,7 +250,7 @@ class TestPendingCountsQuery:
 class TestPendingCountsSingleQuery:
     def test_single_query_call(self) -> None:
         """pool_pending_counts makes exactly one query call."""
-        with patch("imas_codex.graph.client.GraphClient") as MockGC:
+        with patch("iter_codex.graph.client.GraphClient") as MockGC:
             mock_gc = MagicMock()
             mock_gc.query.return_value = [
                 {
@@ -265,7 +265,7 @@ class TestPendingCountsSingleQuery:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+            from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
                 pool_pending_counts,
             )
 
@@ -284,7 +284,7 @@ class TestThrottlePausesGenerateName:
     @pytest.mark.asyncio
     async def test_throttle_pauses_generate_name_when_review_backlog(self) -> None:
         """generate_name claim returns None when review_name backlog > cap."""
-        from imas_codex.standard_names.defaults import REVIEW_NAME_BACKLOG_CAP
+        from iter_codex.standard_names.defaults import REVIEW_NAME_BACKLOG_CAP
 
         specs = _build_specs()
         specs_by_name = {s.name: s for s in specs}
@@ -294,7 +294,7 @@ class TestThrottlePausesGenerateName:
 
         # generate_name's throttled claim should return None
         with patch(
-            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
+            "iter_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
             return_value=[{"id": "x", "claim_token": "t"}],
         ):
             result = await specs_by_name["generate_name"].claim()
@@ -316,7 +316,7 @@ class TestThrottlePausesGenerateDocs:
         self,
     ) -> None:
         """generate_docs claim returns None when review_docs backlog > cap."""
-        from imas_codex.standard_names.defaults import REVIEW_DOCS_BACKLOG_CAP
+        from iter_codex.standard_names.defaults import REVIEW_DOCS_BACKLOG_CAP
 
         specs = _build_specs()
         specs_by_name = {s.name: s for s in specs}
@@ -325,7 +325,7 @@ class TestThrottlePausesGenerateDocs:
         specs_by_name["review_docs"].health.pending_count = REVIEW_DOCS_BACKLOG_CAP + 1
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
+            "iter_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
             return_value=[{"id": "x", "claim_token": "t"}],
         ):
             result = await specs_by_name["generate_docs"].claim()
@@ -344,12 +344,12 @@ class TestThrottleAllowsBelowCap:
     @pytest.mark.asyncio
     async def test_throttle_does_not_pause_when_backlog_below_cap(self) -> None:
         """Upstream claims proceed when downstream backlog <= cap."""
-        from imas_codex.standard_names.defaults import REVIEW_NAME_BACKLOG_CAP
+        from iter_codex.standard_names.defaults import REVIEW_NAME_BACKLOG_CAP
 
         fake_items = [{"id": "src-1", "claim_token": "tok"}]
         # Patch BEFORE building specs so the closure captures the mock
         with patch(
-            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
+            "iter_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
             return_value=fake_items,
         ):
             specs = _build_specs()
@@ -370,12 +370,12 @@ class TestThrottleAllowsBelowCap:
     @pytest.mark.asyncio
     async def test_throttle_allows_at_exact_cap(self) -> None:
         """At exactly cap (not >) throttle does NOT pause."""
-        from imas_codex.standard_names.defaults import REVIEW_NAME_BACKLOG_CAP
+        from iter_codex.standard_names.defaults import REVIEW_NAME_BACKLOG_CAP
 
         fake_items = [{"id": "src-1", "claim_token": "tok"}]
         # Patch BEFORE building specs so the closure captures the mock
         with patch(
-            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
+            "iter_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
             return_value=fake_items,
         ):
             specs = _build_specs()
@@ -393,7 +393,7 @@ class TestThrottleAllowsBelowCap:
     @pytest.mark.asyncio
     async def test_refine_name_throttled_by_review_name_backlog(self) -> None:
         """refine_name is also throttled by review_name backlog."""
-        from imas_codex.standard_names.defaults import REVIEW_NAME_BACKLOG_CAP
+        from iter_codex.standard_names.defaults import REVIEW_NAME_BACKLOG_CAP
 
         specs = _build_specs()
         specs_by_name = {s.name: s for s in specs}
@@ -402,7 +402,7 @@ class TestThrottleAllowsBelowCap:
         specs_by_name["review_name"].health.pending_count = REVIEW_NAME_BACKLOG_CAP + 10
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch",
+            "iter_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch",
             return_value=[{"id": "sn-1", "claim_token": "t"}],
         ):
             result = await specs_by_name["refine_name"].claim()
@@ -411,7 +411,7 @@ class TestThrottleAllowsBelowCap:
     @pytest.mark.asyncio
     async def test_refine_docs_throttled_by_review_docs_backlog(self) -> None:
         """refine_docs is throttled by review_docs backlog."""
-        from imas_codex.standard_names.defaults import REVIEW_DOCS_BACKLOG_CAP
+        from iter_codex.standard_names.defaults import REVIEW_DOCS_BACKLOG_CAP
 
         specs = _build_specs()
         specs_by_name = {s.name: s for s in specs}
@@ -419,7 +419,7 @@ class TestThrottleAllowsBelowCap:
         specs_by_name["review_docs"].health.pending_count = REVIEW_DOCS_BACKLOG_CAP + 5
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch",
+            "iter_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch",
             return_value=[{"id": "sn-2", "claim_token": "t"}],
         ):
             result = await specs_by_name["refine_docs"].claim()
@@ -444,7 +444,7 @@ class TestPoolStateIncludesPendingCounts:
     @pytest.mark.asyncio
     async def test_pending_watchdog_updates_pool_health(self) -> None:
         """_pending_count_watchdog updates each pool's health.pending_count."""
-        from imas_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
+        from iter_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
 
         async def _noop_claim() -> dict[str, Any] | None:
             return None
@@ -478,7 +478,7 @@ class TestPoolStateIncludesPendingCounts:
 
         Verifies the display integration point exists.
         """
-        from imas_codex.standard_names.loop import _build_pool_specs
+        from iter_codex.standard_names.loop import _build_pool_specs
 
         mgr = BudgetManager(total_budget=10.0)
         stop = asyncio.Event()

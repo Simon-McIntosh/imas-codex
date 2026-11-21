@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.tools.version_tool import VersionTool, _version_sort_key
+from iter_codex.tools.version_tool import VersionTool, _version_sort_key
 
 
 def _make_gc(query_return=None, side_effect=None):

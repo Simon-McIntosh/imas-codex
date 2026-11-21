@@ -64,19 +64,19 @@ def _patch_common(
     """Yield a single ``patch.multiple``-style context for review-pool tests."""
 
     persist_target = (
-        "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name"
+        "iter_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name"
         if review_axis == "name"
-        else "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_docs"
+        else "iter_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_docs"
     )
     release_target = (
-        "imas_codex.standard_names.graph_store.graph_claim_release.release_review_names_failed_claims"
+        "iter_codex.standard_names.graph_store.graph_claim_release.release_review_names_failed_claims"
         if review_axis == "name"
-        else "imas_codex.standard_names.graph_store.graph_claim_release.release_review_docs_failed_claims"
+        else "iter_codex.standard_names.graph_store.graph_claim_release.release_review_docs_failed_claims"
     )
     models_getter = (
-        "imas_codex.settings.get_sn_review_names_models"
+        "iter_codex.settings.get_sn_review_names_models"
         if review_axis == "name"
-        else "imas_codex.settings.get_sn_review_docs_models"
+        else "iter_codex.settings.get_sn_review_docs_models"
     )
 
     def _capture_persist(**kwargs):
@@ -88,25 +88,25 @@ def _patch_common(
         return len(records)
 
     return [
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", new=llm_mock),
+        patch("iter_codex.discovery.base.llm.acall_llm_structured", new=llm_mock),
         patch(models_getter, return_value=models),
         # The docs path sizes its escalation prompt against the third reviewer's
         # published input allowance. These placeholder model names appear in no
         # catalog, so that allowance has to be supplied alongside them.
         patch(
-            "imas_codex.discovery.base.llm.get_catalog_model_info",
+            "iter_codex.discovery.base.llm.get_catalog_model_info",
             return_value={"max_input_tokens": 128_000},
         ),
         patch(
-            "imas_codex.settings.get_sn_review_disagreement_threshold",
+            "iter_codex.settings.get_sn_review_disagreement_threshold",
             return_value=0.20,
         ),
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             return_value="mock prompt",
         ),
         patch(
-            "imas_codex.standard_names.context.fetch_review_neighbours",
+            "iter_codex.standard_names.context.fetch_review_neighbours",
             return_value={
                 "vector_neighbours": [],
                 "same_base_neighbours": [],
@@ -114,17 +114,17 @@ def _patch_common(
             },
         ),
         patch(
-            "imas_codex.standard_names.context._build_enum_lists",
+            "iter_codex.standard_names.context._build_enum_lists",
             return_value={},
         ),
         patch(persist_target, side_effect=_capture_persist),
         patch(release_target),
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
+            "iter_codex.standard_names.graph_store.graph_catalog.write_reviews",
             side_effect=_capture_write_reviews,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog.update_review_aggregates",
+            "iter_codex.standard_names.graph_store.graph_catalog.update_review_aggregates",
         ),
     ]
 
@@ -152,7 +152,7 @@ async def test_names_batch_response_is_unwrapped() -> None:
     Pydantic validation failed with ``source_id Field required`` on every
     cycle-1 (gpt-5.4) call, leaving ZERO secondary reviews in the graph.
     """
-    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    from iter_codex.standard_names.worker_tasks.worker_review_names import (
         process_review_name_batch,
     )
 
@@ -200,7 +200,7 @@ async def test_names_empty_reviews_batch_is_a_failed_cycle() -> None:
     into refine/exhausted. The cycle must instead return None so the claim is
     released and the name stays 'drafted' (retryable), with NO review written.
     """
-    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    from iter_codex.standard_names.worker_tasks.worker_review_names import (
         process_review_name_batch,
     )
 
@@ -235,7 +235,7 @@ async def test_names_empty_reviews_batch_is_a_failed_cycle() -> None:
 @pytest.mark.asyncio
 async def test_names_single_model_chain_uses_single_review() -> None:
     """1-model chain → 1 cycle, ``single_review`` resolution method."""
-    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    from iter_codex.standard_names.worker_tasks.worker_review_names import (
         process_review_name_batch,
     )
 
@@ -271,7 +271,7 @@ async def test_names_single_model_chain_uses_single_review() -> None:
 @pytest.mark.asyncio
 async def test_names_quarantined_item_skips_llm() -> None:
     """Quarantined name → no LLM calls, persist via fast-path with score=0."""
-    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    from iter_codex.standard_names.worker_tasks.worker_review_names import (
         process_review_name_batch,
     )
 

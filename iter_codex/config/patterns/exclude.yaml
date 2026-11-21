@@ -1,0 +1,290 @@
+# Exclusion patterns for discovery scanning
+# These paths are filtered BEFORE SSH calls to avoid wasting resources
+#
+# Loaded by: iter_codex.discovery.config.DiscoveryConfig.load()
+# Applied by: iter_codex.discovery.scanner.scan_paths()
+#
+# DESIGN PHILOSOPHY:
+# 1. Deterministic exclusions happen BEFORE scanning (this file)
+# 2. LLM scoring happens AFTER scanning for nuanced decisions
+# 3. Facility-specific excludes in *_private.yaml are merged at runtime
+#
+# WHAT TO EXCLUDE (definitely no scientific value):
+# - System dirs: /proc, /sys, /var/log - OS internals
+# - Build artifacts: __pycache__, node_modules - generated files
+# - Caches: .cache, .local - user environment state
+# - Scratch/temp: /scratch, /tmp - transient job files
+# - Personal media: Desktop, Downloads, Music, Pictures, Videos - XDG user dirs
+#
+# WHAT TO NEVER EXCLUDE (potentially valuable scientific data):
+# - Video diagnostics: videodata, fast_camera - fusion diagnostic data!
+# - Simulation outputs: large_runs, run_outputs - physics results
+# - Data directories: Documents (may have code), data, results
+# - Archive directories: old, backup - may have valuable legacy code
+#
+# When in doubt: LET THE SCANNER FIND IT, let the LLM SCORE IT.
+# A high score doesn't mean we download everything - just that it's valuable.
+
+version: "1.1"
+
+# =============================================================================
+# DIRECTORY NAMES (matched against basename - deterministic exclusion)
+# =============================================================================
+directories:
+  # Version control internals (metadata, not source)
+  - ".git"
+  - ".svn"
+  - ".hg"
+  - ".bzr"
+  
+  # Python build/cache
+  - "__pycache__"
+  - ".venv"
+  - "venv"
+  - ".eggs"
+  - "*.egg-info"
+  - ".pytest_cache"
+  - ".mypy_cache"
+  - ".ruff_cache"
+  - ".tox"
+  - ".nox"
+  - "site-packages"  # Usually in venvs, rarely interesting
+  
+  # JavaScript/Node
+  - "node_modules"
+  - ".npm"
+  - ".yarn"
+  - "bower_components"
+  
+  # Build artifacts
+  - "build"
+  - "dist"
+  - "_build"
+  - "target"  # Rust/Java
+  - "cmake-build-*"
+  - "CMakeFiles"
+  - "*.dSYM"  # macOS debug
+  
+  # IDE/Editor metadata
+  - ".idea"
+  - ".vscode"
+  - ".eclipse"
+  - ".project"
+  - ".settings"
+  - "*.xcodeproj"
+  - "*.xcworkspace"
+  
+  # System/User caches (NEVER contain scientific code)
+  - ".cache"
+  - ".local"
+  - ".config"
+  - ".gnome"
+  - ".gnome2"
+  - ".kde"
+  - ".kde4"
+  - ".dbus"
+  - ".gconf"
+  - ".gconfd"
+  
+  # XDG user directories (desktop/media - never contain scientific code)
+  # These appear in home directories copied from Windows or created by Linux DEs
+  # NOTE: We exclude personal media dirs but NOT Documents (may have code)
+  - "Desktop"
+  - "Downloads"
+  - "Music"
+  - "Pictures"
+  - "Public"
+  - "Templates"
+  - "Videos"
+  
+  # Trash and recovery
+  - ".Trash"
+  - ".Trash-*"
+  - "lost+found"
+  - ".ORCLdeleted_files"  # Oracle NFS deleted files
+  
+  # Application data
+  - ".mozilla"
+  - ".thunderbird"
+  - ".chrome"
+  - ".chromium"
+  - ".firefox"
+  - ".steam"
+  
+  # Container/VM artifacts
+  - ".docker"
+  - ".vagrant"
+  - ".virtualbox"
+  
+  # Jupyter/notebook checkpoints
+  - ".ipynb_checkpoints"
+
+# =============================================================================
+# SCRATCH DIRECTORIES (special handling - usually temporary/disposable)
+# =============================================================================
+# These are matched against full path components, not just basename
+scratch_patterns:
+  # Exact directory names indicating scratch/temp space
+  names:
+    - "scratch"
+    - "tmp"
+    - "temp"
+    - "temporary"
+    - "SCRATCH"
+    - "TMP"
+    - "TEMP"
+  
+  # Path patterns (fnmatch against full path)
+  # These prevent scanning entirely, not just scoring low
+  path_patterns:
+    - "*/scratch/*"
+    - "*/SCRATCH/*"
+    - "*/tmp/*"
+    - "*/temp/*"
+  
+  # Exception: scratch dirs can be scanned if explicitly in facility config
+  # with "scan: true" in the path definition
+  allow_if_configured: true
+
+# =============================================================================
+# DOTFILE PATTERNS
+# =============================================================================
+dotfile_patterns:
+  # Exclude most dotfiles (user configs, not code)
+  exclude: true
+  # But allow these specific ones (may contain useful configs/workflows)
+  allow:
+    - ".github"    # GitHub workflows/actions
+    - ".gitlab"    # GitLab CI
+    - ".circleci"  # CircleCI
+    - ".travis"    # Travis CI
+    - ".jenkins"   # Jenkins
+    - ".gitignore" # (file, not dir, but for reference)
+    - ".env"       # Environment configs
+
+# =============================================================================
+# DIRECTORY NAME PATTERNS (fnmatch against basename)
+# =============================================================================
+patterns:
+  # Conda environments (contain binaries, not source)
+  - "anaconda*"
+  - "miniconda*"
+  - "conda-*"
+  - "mambaforge*"
+  
+  # Explicitly marked as old/deprecated
+  - "*_deprecated"
+  - "*_obsolete"
+  - "*_OBSOLETE"
+  
+  # Log directories (just logs, no code)
+  - "*_logs"
+  - "*_log"
+  - "logs"
+  - "log"
+  
+  # Java log files (common at JET from user listing)
+  - "java.log.*"
+  
+  # Snapshots (filesystem snapshots, not useful)
+  - ".snapshots"
+  - ".snapshot"
+
+# =============================================================================
+# ABSOLUTE PATH PREFIXES (never scan, never create FacilityPath nodes)
+# =============================================================================
+path_prefixes:
+  # System directories (never contain user code)
+  - "/proc"
+  - "/sys"
+  - "/dev"
+  - "/run"
+  - "/boot"
+  - "/sbin"
+  - "/bin"        # System binaries
+  - "/lib"
+  - "/lib64"
+  
+  # System temp directories
+  - "/tmp"
+  - "/var/tmp"
+  - "/var/cache"
+  - "/var/log"
+  - "/var/spool"
+  - "/var/run"
+  
+  # Package management
+  - "/var/lib/dpkg"
+  - "/var/lib/rpm"
+  - "/var/lib/apt"
+  - "/var/lib/yum"
+  
+  # Lost+found (filesystem recovery)
+  - "/lost+found"
+
+# =============================================================================
+# FACILITY-SPECIFIC PATH PREFIXES (merged from *_private.yaml at runtime)
+# =============================================================================
+# These are loaded by get_facility_exclusions(facility) and merged
+# Example from iter_private.yaml:
+#   excludes:
+#     path_prefixes:
+#       - "/mnt/HPC_T2/ITER/HPC/scratch"
+#     directories:
+#       - "videodata"
+
+# =============================================================================
+# ARCHIVE EXTENSIONS (opaque containers)
+# =============================================================================
+archive_extensions:
+  - ".tar"
+  - ".tar.gz"
+  - ".tgz"
+  - ".tar.bz2"
+  - ".tbz2"
+  - ".tar.xz"
+  - ".txz"
+  - ".zip"
+  - ".7z"
+  - ".rar"
+  - ".gz"
+  - ".bz2"
+  - ".xz"
+  - ".iso"
+  - ".img"
+  - ".dmg"
+
+# =============================================================================
+# VCS ACCESSIBLE REMOTES (repos available elsewhere — skip expansion)
+# =============================================================================
+# URL patterns for VCS remotes that are known to be accessible. When a scanned
+# directory has a VCS remote matching any of these patterns, it is treated as
+# "accessible elsewhere" — expansion is blocked and the code is available via
+# clone/checkout from the remote.
+#
+# This is a fast shortcut that avoids per-repo network checks (git ls-remote,
+# svn info). The on-facility accessibility check is the primary mechanism;
+# these patterns are a fallback when the scanner didn't run the check.
+#
+# Format: substring match against the lowercase VCS remote URL.
+# Use "host/org" to match a specific organization on a hosting service.
+#
+# IMPORTANT: Only list remotes where we have access or can clone the code.
+# If a remote requires credentials we don't have, do NOT list it here —
+# the on-facility check will determine accessibility.
+vcs_accessible_remotes:
+  - "git.iter.org"
+  - "github.com/iterorganization"
+
+# =============================================================================
+# SCANNING LIMITS (prevent runaway recursion)
+# =============================================================================
+
+# Maximum depth to scan 
+max_depth: 15
+
+# Directories with more than this many entries trigger size_skipped
+large_dir_threshold: 10000
+
+# Maximum time (seconds) for a single directory scan before timeout
+scan_timeout: 30

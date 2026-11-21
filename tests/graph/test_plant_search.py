@@ -7,10 +7,10 @@ import json
 import pytest
 from fastmcp import Client
 
-from imas_codex.discovery.signals.variable_name_graph import persist_name_parses
-from imas_codex.graph.client import GraphClient
-from imas_codex.llm.server import AgentsServer
-from imas_codex.tools.plant_search import (
+from iter_codex.discovery.signals.variable_name_graph import persist_name_parses
+from iter_codex.graph.client import GraphClient
+from iter_codex.llm.server import AgentsServer
+from iter_codex.tools.plant_search import (
     fetch_signal_context,
     list_plant_signals,
     search_pulse_catalogue,

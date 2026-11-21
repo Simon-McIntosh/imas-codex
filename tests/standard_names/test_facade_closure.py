@@ -17,8 +17,8 @@ from pathlib import Path
 
 import pytest
 
-_STORE_PACKAGE = "imas_codex.standard_names.graph_store"
-_TASK_PACKAGE = "imas_codex.standard_names.worker_tasks"
+_STORE_PACKAGE = "iter_codex.standard_names.graph_store"
+_TASK_PACKAGE = "iter_codex.standard_names.worker_tasks"
 
 #: Logger objects every module defines for itself; they carry no behaviour and
 #: resolving one through the owner map would name the wrong module's logger.
@@ -38,7 +38,7 @@ def _store_modules() -> dict[str, object]:
     unmapped unnoticed, so taking the set from the map would hide the defect
     this check exists to find.
     """
-    from imas_codex.standard_names import graph_store
+    from iter_codex.standard_names import graph_store
 
     modules: dict[str, object] = {}
     for path in sorted(Path(graph_store.__file__).parent.glob("*.py")):
@@ -59,7 +59,7 @@ def _moved_callables() -> dict[str, str]:
     holds is what makes a symbol its own, so a partial counts when the owner
     module's namespace carries that name.
     """
-    from imas_codex.standard_names.graph_store import _OWNERS_BY_MODULE
+    from iter_codex.standard_names.graph_store import _OWNERS_BY_MODULE
 
     moved: dict[str, str] = {}
     for module_name, names in _OWNERS_BY_MODULE.items():
@@ -190,7 +190,7 @@ def _import_aliases(tree: ast.Module) -> dict[str, str]:
     """Map a local import alias to the symbol it brings in.
 
     An import may be relative (``from .graph_store.graph_catalog import x``) or
-    absolute (``from imas_codex.standard_names.graph_store.graph_catalog``
+    absolute (``from iter_codex.standard_names.graph_store.graph_catalog``
     ``import x``). The absolute spelling is the common one in this repository,
     so a scan that understood only the relative form would accept a forwarder.
     """
@@ -246,7 +246,7 @@ def _delegated_name(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
 
 def test_owner_map_entries_resolve_at_their_owner() -> None:
     """A map entry may name only a module that actually carries the symbol."""
-    from imas_codex.standard_names.graph_store import (
+    from iter_codex.standard_names.graph_store import (
         _OWNERS_BY_MODULE,
         resolve_owned_name,
     )
@@ -264,7 +264,7 @@ def test_owner_map_entries_resolve_at_their_owner() -> None:
 
 def test_owner_map_covers_every_public_definition() -> None:
     """A store module, and every public symbol in it, must enter the map."""
-    from imas_codex.standard_names.graph_store import _OWNERS_BY_MODULE
+    from iter_codex.standard_names.graph_store import _OWNERS_BY_MODULE
 
     modules = _store_modules()
     assert modules, "the store package enumerated no modules"
@@ -287,7 +287,7 @@ def test_owner_map_covers_every_public_definition() -> None:
 
 def test_entrypoint_refuses_moved_symbols() -> None:
     """Neither entrypoint resolves a moved symbol, and it names the owner."""
-    from imas_codex.standard_names import graph_ops, workers
+    from iter_codex.standard_names import graph_ops, workers
 
     moved = _moved_callables()
     assert moved, "the owner map named no moved callable; the check would pass blind"
@@ -310,8 +310,8 @@ def test_entrypoint_refuses_moved_symbols() -> None:
 
 def test_service_bridge_resolves_only_wired_names() -> None:
     """The bridge serves the wired collaborators and nothing else."""
-    from imas_codex.standard_names import graph_ops
-    from imas_codex.standard_names.graph_store import graph_foundation
+    from iter_codex.standard_names import graph_ops
+    from iter_codex.standard_names.graph_store import graph_foundation
 
     store = Path(importlib.import_module(_STORE_PACKAGE).__file__).parent
     requested: set[str] = set()
@@ -332,7 +332,7 @@ def test_service_bridge_resolves_only_wired_names() -> None:
 
 def test_facades_define_no_delegating_forwarder() -> None:
     """A one-line delegation is a forwarder however it is described."""
-    from imas_codex.standard_names import graph_ops, workers
+    from iter_codex.standard_names import graph_ops, workers
 
     targets = set(_moved_callables()) | _worker_task_names()
     assert targets, "the owner map named no delegable symbol; the check is blind"
@@ -357,7 +357,7 @@ def test_forwarder_scan_catches_absolute_import_delegation() -> None:
     targets = {"write_standard_names"}
 
     absolute = ast.parse(
-        "from imas_codex.standard_names.graph_store.graph_catalog import (\n"
+        "from iter_codex.standard_names.graph_store.graph_catalog import (\n"
         "    write_standard_names as _impl,\n"
         ")\n"
         "\n"

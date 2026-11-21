@@ -47,7 +47,7 @@ from pathlib import Path
 
 import yaml
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 ROOT = Path(__file__).resolve().parents[4]
 HERE = Path(__file__).resolve().parent
@@ -61,8 +61,8 @@ SEVERITY = ("dropped", "moved", "stale_source", "pending_composition")
 NON_CARRIED = ("moved", "stale_source", "pending_composition", "dropped")
 CONTROL_SAMPLE = 20
 CONTROL_SEED = 20261028
-EXPORT_PY = ROOT / "imas_codex/standard_names/export.py"
-SUPERSESSION_PY = ROOT / "imas_codex/standard_names/graph_store/graph_supersession.py"
+EXPORT_PY = ROOT / "iter_codex/standard_names/export.py"
+SUPERSESSION_PY = ROOT / "iter_codex/standard_names/graph_store/graph_supersession.py"
 
 
 def git(*args: str) -> str:
@@ -488,12 +488,12 @@ def main() -> None:
     )
     audit = {
         "population_selector": {
-            "file": "imas_codex/standard_names/export.py",
+            "file": "iter_codex/standard_names/export.py",
             "line": audit_line[0],
             "text": audit_line[1],
         },
         "terminal_exclusion": {
-            "file": "imas_codex/standard_names/graph_store/graph_supersession.py",
+            "file": "iter_codex/standard_names/graph_store/graph_supersession.py",
             "line": terminal_line[0],
             "text": terminal_line[1],
         },

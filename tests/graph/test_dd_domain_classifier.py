@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.graph.dd_domain_classifier import (
+from iter_codex.graph.dd_domain_classifier import (
     CATEGORY_QUESTION,
     CLASSIFIABLE_CATEGORIES,
     DEFAULT_BATCH_SIZE,
@@ -57,7 +57,7 @@ from imas_codex.graph.dd_domain_classifier import (
 
 GOLD_SET_PATH = (
     Path(__file__).parent.parent.parent
-    / "imas_codex"
+    / "iter_codex"
     / "definitions"
     / "physics"
     / "domain_gold_set.json"
@@ -684,7 +684,7 @@ class TestClassifyTier1Llm:
 
     @pytest.mark.asyncio
     async def test_classifies_single_path(self, mock_gc):
-        from imas_codex.graph.dd_domain_classifier import classify_tier1_llm
+        from iter_codex.graph.dd_domain_classifier import classify_tier1_llm
 
         mock_gc.query.return_value = [
             {
@@ -704,16 +704,16 @@ class TestClassifyTier1Llm:
 
         with (
             patch(
-                "imas_codex.graph.dd_domain_classifier.decide_batch",
+                "iter_codex.graph.dd_domain_classifier.decide_batch",
                 new=tree,
             ),
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 return_value=llm_return,
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="system-prompt",
             ),
         ):
@@ -736,7 +736,7 @@ class TestClassifyTier1Llm:
 
     @pytest.mark.asyncio
     async def test_invalid_domain_falls_back_to_general(self, mock_gc):
-        from imas_codex.graph.dd_domain_classifier import classify_tier1_llm
+        from iter_codex.graph.dd_domain_classifier import classify_tier1_llm
 
         mock_gc.query.return_value = [
             {
@@ -761,16 +761,16 @@ class TestClassifyTier1Llm:
 
         with (
             patch(
-                "imas_codex.graph.dd_domain_classifier.decide_batch",
+                "iter_codex.graph.dd_domain_classifier.decide_batch",
                 new=scripted_tree(),
             ),
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 return_value=(bad_result, 0.001, {}),
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="system-prompt",
             ),
         ):
@@ -783,7 +783,7 @@ class TestClassifyTier1Llm:
     @pytest.mark.asyncio
     async def test_general_paths_trigger_retry(self, mock_gc):
         """Paths that get 'general' on first pass should trigger a retry batch."""
-        from imas_codex.graph.dd_domain_classifier import classify_tier1_llm
+        from iter_codex.graph.dd_domain_classifier import classify_tier1_llm
 
         context_row = {
             "id": "eq/ts/psi",
@@ -819,15 +819,15 @@ class TestClassifyTier1Llm:
 
         with (
             patch(
-                "imas_codex.graph.dd_domain_classifier.decide_batch",
+                "iter_codex.graph.dd_domain_classifier.decide_batch",
                 new=scripted_tree(),
             ),
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 side_effect=fake_llm,
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="system-prompt",
             ),
         ):
@@ -842,7 +842,7 @@ class TestClassifyTier1Llm:
 
     @pytest.mark.asyncio
     async def test_on_cost_callback_called(self, mock_gc):
-        from imas_codex.graph.dd_domain_classifier import classify_tier1_llm
+        from iter_codex.graph.dd_domain_classifier import classify_tier1_llm
 
         mock_gc.query.return_value = [
             {
@@ -863,16 +863,16 @@ class TestClassifyTier1Llm:
 
         with (
             patch(
-                "imas_codex.graph.dd_domain_classifier.decide_batch",
+                "iter_codex.graph.dd_domain_classifier.decide_batch",
                 new=scripted_tree(),
             ),
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 return_value=llm_return,
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="system-prompt",
             ),
         ):
@@ -897,7 +897,7 @@ class TestClassifyDomains:
 
     def _patch_settings(self, model="test-model"):
         return patch(
-            "imas_codex.settings.get_model",
+            "iter_codex.settings.get_model",
             return_value=model,
         )
 
@@ -905,19 +905,19 @@ class TestClassifyDomains:
     async def test_stats_keys_present(self, mock_gc):
         with self._patch_settings():
             with patch(
-                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                "iter_codex.graph.dd_domain_classifier.classify_tier3_none",
                 return_value=10,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    "iter_codex.graph.dd_domain_classifier._query_unclassified_paths",
                     return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        "iter_codex.graph.dd_domain_classifier.classify_tier2_inherit",
                         return_value=20,
                     ):
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            "iter_codex.graph.dd_domain_classifier._count_residual_unclassified",
                             return_value=0,
                         ):
                             stats = await classify_domains(mock_gc)
@@ -935,19 +935,19 @@ class TestClassifyDomains:
     async def test_stats_counts_correct(self, mock_gc):
         with self._patch_settings():
             with patch(
-                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                "iter_codex.graph.dd_domain_classifier.classify_tier3_none",
                 return_value=7,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    "iter_codex.graph.dd_domain_classifier._query_unclassified_paths",
                     return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        "iter_codex.graph.dd_domain_classifier.classify_tier2_inherit",
                         return_value=13,
                     ):
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            "iter_codex.graph.dd_domain_classifier._count_residual_unclassified",
                             return_value=0,
                         ):
                             stats = await classify_domains(mock_gc)
@@ -970,19 +970,19 @@ class TestClassifyDomains:
 
         with self._patch_settings():
             with patch(
-                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                "iter_codex.graph.dd_domain_classifier.classify_tier3_none",
                 return_value=0,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    "iter_codex.graph.dd_domain_classifier._query_unclassified_paths",
                     side_effect=track_tier1,
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        "iter_codex.graph.dd_domain_classifier.classify_tier2_inherit",
                         side_effect=track_tier2,
                     ):
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            "iter_codex.graph.dd_domain_classifier._count_residual_unclassified",
                             return_value=0,
                         ):
                             await classify_domains(mock_gc)
@@ -994,24 +994,24 @@ class TestClassifyDomains:
         """dry_run=True skips the LLM tier entirely."""
         with self._patch_settings():
             with patch(
-                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                "iter_codex.graph.dd_domain_classifier.classify_tier3_none",
                 return_value=0,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    "iter_codex.graph.dd_domain_classifier._query_unclassified_paths",
                     return_value=[{"id": "eq/psi", "node_category": "quantity"}],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        "iter_codex.graph.dd_domain_classifier.classify_tier2_inherit",
                         return_value=0,
                     ):
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            "iter_codex.graph.dd_domain_classifier._count_residual_unclassified",
                             return_value=0,
                         ):
                             llm_mock = AsyncMock()
                             with patch(
-                                "imas_codex.graph.dd_domain_classifier.classify_tier1_llm",
+                                "iter_codex.graph.dd_domain_classifier.classify_tier1_llm",
                                 llm_mock,
                             ):
                                 await classify_domains(mock_gc, dry_run=True)
@@ -1021,23 +1021,23 @@ class TestClassifyDomains:
     @pytest.mark.asyncio
     async def test_model_default_used_from_settings(self, mock_gc):
         with patch(
-            "imas_codex.settings.get_model",
+            "iter_codex.settings.get_model",
             return_value="settings-model",
         ) as mock_get:
             with patch(
-                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                "iter_codex.graph.dd_domain_classifier.classify_tier3_none",
                 return_value=0,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    "iter_codex.graph.dd_domain_classifier._query_unclassified_paths",
                     return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        "iter_codex.graph.dd_domain_classifier.classify_tier2_inherit",
                         return_value=0,
                     ):
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            "iter_codex.graph.dd_domain_classifier._count_residual_unclassified",
                             return_value=0,
                         ):
                             stats = await classify_domains(mock_gc)
@@ -1047,21 +1047,21 @@ class TestClassifyDomains:
 
     @pytest.mark.asyncio
     async def test_model_override_bypasses_settings(self, mock_gc):
-        with patch("imas_codex.settings.get_model") as mock_get:
+        with patch("iter_codex.settings.get_model") as mock_get:
             with patch(
-                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                "iter_codex.graph.dd_domain_classifier.classify_tier3_none",
                 return_value=0,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    "iter_codex.graph.dd_domain_classifier._query_unclassified_paths",
                     return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        "iter_codex.graph.dd_domain_classifier.classify_tier2_inherit",
                         return_value=0,
                     ):
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            "iter_codex.graph.dd_domain_classifier._count_residual_unclassified",
                             return_value=0,
                         ):
                             stats = await classify_domains(
@@ -1076,19 +1076,19 @@ class TestClassifyDomains:
         counts: list[int] = []
         with self._patch_settings():
             with patch(
-                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                "iter_codex.graph.dd_domain_classifier.classify_tier3_none",
                 return_value=3,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    "iter_codex.graph.dd_domain_classifier._query_unclassified_paths",
                     return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        "iter_codex.graph.dd_domain_classifier.classify_tier2_inherit",
                         return_value=5,
                     ):
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            "iter_codex.graph.dd_domain_classifier._count_residual_unclassified",
                             return_value=0,
                         ):
                             await classify_domains(mock_gc, on_items=counts.append)
@@ -1101,20 +1101,20 @@ class TestClassifyDomains:
         """force=True must be forwarded to classify_tier2_inherit."""
         with self._patch_settings():
             with patch(
-                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                "iter_codex.graph.dd_domain_classifier.classify_tier3_none",
                 return_value=0,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    "iter_codex.graph.dd_domain_classifier._query_unclassified_paths",
                     return_value=[],
                 ):
                     tier2_mock = MagicMock(return_value=0)
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        "iter_codex.graph.dd_domain_classifier.classify_tier2_inherit",
                         tier2_mock,
                     ):
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            "iter_codex.graph.dd_domain_classifier._count_residual_unclassified",
                             return_value=0,
                         ):
                             await classify_domains(mock_gc, force=True)
@@ -1131,19 +1131,19 @@ class TestClassifyDomains:
             query_mock = MagicMock(return_value=[])
             residual_mock = MagicMock(return_value=0)
             with patch(
-                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                "iter_codex.graph.dd_domain_classifier.classify_tier3_none",
                 tier3_mock,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    "iter_codex.graph.dd_domain_classifier._query_unclassified_paths",
                     query_mock,
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        "iter_codex.graph.dd_domain_classifier.classify_tier2_inherit",
                         tier2_mock,
                     ):
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            "iter_codex.graph.dd_domain_classifier._count_residual_unclassified",
                             residual_mock,
                         ):
                             await classify_domains(mock_gc, ids_filter={"equilibrium"})
@@ -1157,19 +1157,19 @@ class TestClassifyDomains:
         """Residual unclassified count must appear in stats."""
         with self._patch_settings():
             with patch(
-                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                "iter_codex.graph.dd_domain_classifier.classify_tier3_none",
                 return_value=0,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    "iter_codex.graph.dd_domain_classifier._query_unclassified_paths",
                     return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        "iter_codex.graph.dd_domain_classifier.classify_tier2_inherit",
                         return_value=0,
                     ):
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            "iter_codex.graph.dd_domain_classifier._count_residual_unclassified",
                             return_value=42,
                         ):
                             stats = await classify_domains(mock_gc)
@@ -1441,7 +1441,7 @@ class TestPathDomainOverride:
         # Integration: the production _classify_batch path must apply the
         # deterministic override on top of the LLM result and stamp
         # domain_source accordingly.
-        from imas_codex.graph.dd_domain_classifier import _classify_batch
+        from iter_codex.graph.dd_domain_classifier import _classify_batch
 
         batch = [
             {"id": "distributions/distribution/ggd/orbit_frequency_pol/values"},
@@ -1457,11 +1457,11 @@ class TestPathDomainOverride:
         )
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new=AsyncMock(return_value=(llm_result, 0.0, 0)),
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="system",
             ),
         ):

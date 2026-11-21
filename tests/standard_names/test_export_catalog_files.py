@@ -21,13 +21,13 @@ from pathlib import Path
 import pytest
 import yaml
 
-from imas_codex.standard_names.catalog_release import (
+from iter_codex.standard_names.catalog_release import (
     ExclusionLedgerLinkError,
     _write_and_verify_review_preview_link,
     body_with_exclusion_ledger_link,
     exclusion_ledger_path,
 )
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     _write_domain_yaml,
     _write_manifest,
     assemble_review_catalog,
@@ -232,7 +232,7 @@ def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
 def manifest_checkout(tmp_path: Path) -> tuple[Path, Path]:
     """A committed manifest plus its exclusion ledger, with a github origin."""
     root = tmp_path / "codex"
-    manifests = root / "imas_codex" / "standard_names" / "manifests"
+    manifests = root / "iter_codex" / "standard_names" / "manifests"
     manifests.mkdir(parents=True)
     _git("init", "-q", cwd=root)
     _git("config", "user.email", "release@example.invalid", cwd=root)
@@ -241,7 +241,7 @@ def manifest_checkout(tmp_path: Path) -> tuple[Path, Path]:
         "remote",
         "add",
         "origin",
-        "git@github.com:test-owner/imas-codex.git",
+        "git@github.com:test-owner/iter-codex.git",
         cwd=root,
     )
     manifest = manifests / "batch_dd_paths.yaml"
@@ -263,8 +263,8 @@ def manifest_checkout(tmp_path: Path) -> tuple[Path, Path]:
     )
     _git(
         "add",
-        "imas_codex/standard_names/manifests/batch_dd_paths.yaml",
-        "imas_codex/standard_names/manifests/batch_dd_paths.exclusions.json",
+        "iter_codex/standard_names/manifests/batch_dd_paths.yaml",
+        "iter_codex/standard_names/manifests/batch_dd_paths.exclusions.json",
         cwd=root,
     )
     _git("commit", "-q", "-m", "add batch manifest and ledger", cwd=root)
@@ -281,9 +281,9 @@ class TestReviewBodyCarriesExclusionLedger:
 
         body = body_with_exclusion_ledger_link("Review candidate.", manifest)
 
-        relative = "imas_codex/standard_names/manifests/batch_dd_paths.exclusions.json"
+        relative = "iter_codex/standard_names/manifests/batch_dd_paths.exclusions.json"
         sha = _git("log", "-1", "--format=%H", "--", relative, cwd=root).stdout.strip()
-        expected = f"https://github.com/test-owner/imas-codex/blob/{sha}/{relative}"
+        expected = f"https://github.com/test-owner/iter-codex/blob/{sha}/{relative}"
         expected_link = (
             "[ledger of excluded source paths and their withholding data "
             f"dictionary node categories]({expected})"

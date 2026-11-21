@@ -22,7 +22,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[4]
-PACKAGE = REPO / "imas_codex/standard_names"
+PACKAGE = REPO / "iter_codex/standard_names"
 RULE_TEST = (
     "tests/standard_names/test_package_import_boundaries.py"
     "::test_no_private_name_imports_between_top_level_modules"
@@ -31,19 +31,19 @@ REUSE_TEST = (
     "tests/standard_names/test_fallback_pr_body_links.py"
     "::test_release_notes_does_not_define_a_second_git_helper_copy"
 )
-CACHE = Path("~/.cache/imas-codex-s19").expanduser()
+CACHE = Path("~/.cache/iter-codex-s19").expanduser()
 RULE_LOG = CACHE / "sph-private-imports-negative-control.log"
 REUSE_LOG = CACHE / "sph-private-imports-reuse-control.log"
 CLOSED = (
-    "from imas_codex.standard_names.unit_overrides import load_rules as _load_rules"
+    "from iter_codex.standard_names.unit_overrides import load_rules as _load_rules"
 )
-RESTORED = "from imas_codex.standard_names.unit_overrides import _load_rules"
+RESTORED = "from iter_codex.standard_names.unit_overrides import _load_rules"
 PRE_REPAIR = "611ba81d3197474abf0f11979f634d4dcc53a5e7"
 GENERATED = (
-    "imas_codex/graph/models.py",
-    "imas_codex/graph/dd_models.py",
-    "imas_codex/config/models.py",
-    "imas_codex/graph/schema_context_data.py",
+    "iter_codex/graph/models.py",
+    "iter_codex/graph/dd_models.py",
+    "iter_codex/config/models.py",
+    "iter_codex/graph/schema_context_data.py",
     "agents/schema-reference.md",
 )
 
@@ -69,7 +69,7 @@ def _pytest(target: str, *, cwd: Path, env: dict[str, str], log: Path) -> int:
 
 def rule_control(scratch: Path) -> int:
     """Restore a closed private import; the rule must name the site."""
-    target = scratch / "imas_codex/standard_names"
+    target = scratch / "iter_codex/standard_names"
     target.mkdir(parents=True)
     for path in PACKAGE.glob("*.py"):
         shutil.copy2(path, target / path.name)

@@ -13,12 +13,12 @@ from pathlib import Path
 import pytest
 import yaml
 
-from imas_codex.discovery.signals.parallel import _facility_scanner_config
-from imas_codex.remote import tools as remote_tools
-from imas_codex.remote.environment import resolve_remote_environment
+from iter_codex.discovery.signals.parallel import _facility_scanner_config
+from iter_codex.remote import tools as remote_tools
+from iter_codex.remote.environment import resolve_remote_environment
 
 FACILITIES_DIR = (
-    Path(__file__).parent.parent.parent / "imas_codex" / "config" / "facilities"
+    Path(__file__).parent.parent.parent / "iter_codex" / "config" / "facilities"
 )
 
 
@@ -105,7 +105,7 @@ class TestToolsFacilityWrapper:
             return "ok"
 
         monkeypatch.setattr(
-            "imas_codex.remote.tools._executor_run_python_script", fake_executor
+            "iter_codex.remote.tools._executor_run_python_script", fake_executor
         )
         monkeypatch.setattr(
             remote_tools, "_facility_config", lambda _f: synthetic_config
@@ -133,7 +133,7 @@ class TestToolsFacilityWrapper:
             return "ok"
 
         monkeypatch.setattr(
-            "imas_codex.remote.tools._executor_run_python_script", fake_executor
+            "iter_codex.remote.tools._executor_run_python_script", fake_executor
         )
         monkeypatch.setattr(
             remote_tools, "_facility_config", lambda _f: synthetic_config

@@ -23,15 +23,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.defaults import (
+from iter_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER as PLACEHOLDER,
 )
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_cost_and_claims as _owning_graph_cost_and_claims,
     graph_foundation as _owning_graph_foundation,
     graph_parent_lifecycle as _owning_graph_parent_lifecycle,
 )
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_enrich_parents as _owning_worker_enrich_parents,
 )
 
@@ -65,7 +65,7 @@ class TestVerifyEnrichParentsClaimWinners:
     re-reads committed state and drops nodes whose token was overwritten."""
 
     def test_drops_items_whose_token_lost(self):
-        import imas_codex.standard_names.graph_ops as g
+        import iter_codex.standard_names.graph_ops as g
 
         items = [
             {"id": "won_a", "claim_token": "tok-1"},
@@ -88,7 +88,7 @@ class TestVerifyEnrichParentsClaimWinners:
         assert gc.query.call_args_list[0][1]["token"] == "tok-1"
 
     def test_all_survive_returns_unchanged(self):
-        import imas_codex.standard_names.graph_ops as g
+        import iter_codex.standard_names.graph_ops as g
 
         items = [{"id": "a", "claim_token": "t"}, {"id": "b", "claim_token": "t"}]
         gc = _verify_gc([{"id": "a"}, {"id": "b"}])
@@ -101,7 +101,7 @@ class TestVerifyEnrichParentsClaimWinners:
             )
 
     def test_empty_items_short_circuit(self):
-        import imas_codex.standard_names.graph_ops as g
+        import iter_codex.standard_names.graph_ops as g
 
         gc = _verify_gc([])
         with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
@@ -119,7 +119,7 @@ class TestVerifyEnrichParentsClaimWinners:
 
 def test_claim_eligibility_predicate():
     """The claim WHERE gates on derived-origin + placeholder + a live child."""
-    import imas_codex.standard_names.graph_ops as g
+    import iter_codex.standard_names.graph_ops as g
 
     captured: dict[str, Any] = {}
 
@@ -206,7 +206,7 @@ def test_persist_accepts_structurally():
     """A derived parent skips REVIEW_NAME — accepted directly with the
     structural-inheritance marker and NO fabricated name score (the name is a
     deterministic peel, never reviewed, so scoring it is meaningless)."""
-    import imas_codex.standard_names.graph_ops as g
+    import iter_codex.standard_names.graph_ops as g
 
     gc = _persist_gc("accepted")
     with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
@@ -240,7 +240,7 @@ def test_persist_accepts_structurally():
 
 
 def test_persist_noop_when_node_unmatched():
-    import imas_codex.standard_names.graph_ops as g
+    import iter_codex.standard_names.graph_ops as g
 
     gc = _persist_gc(None)  # The child-closure snapshot matched nothing.
     with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
@@ -262,7 +262,7 @@ def test_persist_noop_when_node_unmatched():
 @pytest.mark.asyncio
 async def test_worker_skips_and_releases_childless_parent():
     """A claimed parent with no live children is released, never enriched."""
-    from imas_codex.standard_names import workers as w
+    from iter_codex.standard_names import workers as w
 
     mgr = _mock_budget_manager()
     stop = asyncio.Event()
@@ -278,19 +278,19 @@ async def test_worker_skips_and_releases_childless_parent():
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.fetch_derived_parent_children",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.fetch_derived_parent_children",
             return_value={"orphan_parent": []},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.release_enrich_parents_claims",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.release_enrich_parents_claims",
             side_effect=_release,
         ),
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.persist_enriched_parent"
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.persist_enriched_parent"
         ) as persist,
     ):
         count = await _owning_worker_enrich_parents.process_enrich_parents_batch(
@@ -305,7 +305,7 @@ async def test_worker_skips_and_releases_childless_parent():
 @pytest.mark.asyncio
 async def test_worker_enriches_parent_with_children():
     """Happy path: children grounded → LLM desc → embed → persist (drafted)."""
-    from imas_codex.standard_names import workers as w
+    from iter_codex.standard_names import workers as w
 
     mgr = _mock_budget_manager()
     stop = asyncio.Event()
@@ -348,23 +348,23 @@ async def test_worker_enriches_parent_with_children():
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.fetch_derived_parent_children",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.fetch_derived_parent_children",
             return_value=children,
         ),
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             new=AsyncMock(return_value=(llm_result, 0.001, 120)),
         ),
         patch(
-            "imas_codex.embeddings.description.embed_description",
+            "iter_codex.embeddings.description.embed_description",
             return_value=[0.1, 0.2, 0.3],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.persist_enriched_parent",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.persist_enriched_parent",
             side_effect=_persist,
         ),
     ):

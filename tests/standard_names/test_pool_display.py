@@ -14,7 +14,7 @@ import time
 import pytest
 from rich.text import Text
 
-from imas_codex.standard_names.display import (
+from iter_codex.standard_names.display import (
     BAR_WIDTH,
     POOL_LABELS,
     POOL_ORDER,

@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.review_triage import (
+from iter_codex.standard_names.review_triage import (
     CommentClass,
     CommentDisposition,
     ingest_and_triage,
@@ -128,7 +128,7 @@ def test_wording_comment_preserves_text_and_comment_provenance(
     plan = SimpleNamespace(blocked=None)
 
     with patch(
-        "imas_codex.standard_names.review_triage.apply_edit", return_value=plan
+        "iter_codex.standard_names.review_triage.apply_edit", return_value=plan
     ) as apply:
         route_triage(report, gc=graph)
 
@@ -163,7 +163,7 @@ def test_physics_objection_reuses_contested_state(catalog_root: Path) -> None:
     )
     graph = MagicMock()
 
-    with patch("imas_codex.standard_names.review_triage._contest") as contest:
+    with patch("iter_codex.standard_names.review_triage._contest") as contest:
         route_triage(report, gc=graph)
 
     contest.assert_called_once()

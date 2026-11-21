@@ -12,8 +12,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-from imas_codex.plotting import save_figure
-from imas_codex.plotting.style import BASE_STYLE, CANVAS, REFERENCE, STYLE, SUBJECT
+from iter_codex.plotting import save_figure
+from iter_codex.plotting.style import BASE_STYLE, CANVAS, REFERENCE, STYLE, SUBJECT
 
 
 def draw(report: dict, output: Path, preview: Path):

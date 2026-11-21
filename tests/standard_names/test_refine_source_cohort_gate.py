@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.attachment_audit import AttachmentPairingGuardResult
-from imas_codex.standard_names.graph_store.graph_refinement import (
+from iter_codex.standard_names.attachment_audit import AttachmentPairingGuardResult
+from iter_codex.standard_names.graph_store.graph_refinement import (
     RefinedNamePersistenceRefusal,
     RefinedNamePersistenceRefusalReason,
     persist_refined_name,
@@ -73,22 +73,22 @@ def test_empty_authoritative_source_cohort_refuses_successor() -> None:
     admitted = AttachmentPairingGuardResult((), ())
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ),
         patch(
-            "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+            "iter_codex.standard_names.attachment_audit.guard_source_pairings",
             return_value=admitted,
         ) as guard,
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "retarget_standard_name_sources",
             return_value=0,
         ) as retarget,
         patch(
-            "imas_codex.standard_names.provenance_lifecycle.record_standard_name_change"
+            "iter_codex.standard_names.provenance_lifecycle.record_standard_name_change"
         ) as record,
-        patch("imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
     ):
         with pytest.raises(RefinedNamePersistenceRefusal) as refusal:
             persist_refined_name(
@@ -192,22 +192,22 @@ def test_a_governed_edit_of_an_unsourced_name_persists_an_unsourced_successor() 
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ),
         patch(
-            "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+            "iter_codex.standard_names.attachment_audit.guard_source_pairings",
             return_value=admitted,
         ),
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "retarget_standard_name_sources",
             return_value=0,
         ) as retarget,
         patch(
-            "imas_codex.standard_names.provenance_lifecycle.record_standard_name_change"
+            "iter_codex.standard_names.provenance_lifecycle.record_standard_name_change"
         ),
-        patch("imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
     ):
         result = persist_refined_name(
             old_name="electron_density",

@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 
 class _ReadOnlyGraphClient:
@@ -46,25 +46,25 @@ def test_export_over_empty_candidate_set_exits_non_zero(tmp_path: Path) -> None:
     with ExitStack() as stack:
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_export_population",
+                "iter_codex.standard_names.export._fetch_export_population",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
                 return_value=_ReadOnlyGraphClient(),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_deprecation_stubs",
+                "iter_codex.standard_names.export._fetch_deprecation_stubs",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+                "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
                 return_value=([], set()),
             )
         )

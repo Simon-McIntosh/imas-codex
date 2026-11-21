@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.graph import registry
+from iter_codex.cli.graph import registry
 
 
 def test_pull_requires_target_name() -> None:
@@ -24,11 +24,11 @@ def test_pull_refuses_target_mismatch_before_destructive_steps() -> None:
     profile = SimpleNamespace(name="codex")
 
     with (
-        patch("imas_codex.graph.profiles.resolve_neo4j", return_value=profile),
+        patch("iter_codex.graph.profiles.resolve_neo4j", return_value=profile),
         patch.object(registry, "get_git_info") as git_info,
         patch.object(registry, "backup_graph_dump") as backup,
         patch.object(registry, "require_oras") as require_oras,
-        patch("imas_codex.cli.graph.data.graph_load") as graph_load,
+        patch("iter_codex.cli.graph.data.graph_load") as graph_load,
     ):
         result = CliRunner().invoke(
             registry.graph_pull,
@@ -57,8 +57,8 @@ def test_pull_forwards_target_to_local_load(tmp_path: Path) -> None:
 
     runner = CliRunner()
     with (
-        patch("imas_codex.graph.profiles.resolve_neo4j", return_value=profile),
-        patch("imas_codex.graph.remote.is_remote_location", return_value=False),
+        patch("iter_codex.graph.profiles.resolve_neo4j", return_value=profile),
+        patch("iter_codex.graph.remote.is_remote_location", return_value=False),
         patch.object(registry, "get_git_info", return_value={}),
         patch.object(registry, "get_registry", return_value="registry.example"),
         patch.object(registry, "get_package_name", return_value="graph"),
@@ -66,10 +66,10 @@ def test_pull_forwards_target_to_local_load(tmp_path: Path) -> None:
         patch.object(registry, "check_graph_exists", return_value=False),
         patch.object(registry, "login_to_ghcr"),
         patch(
-            "imas_codex.cli.graph_progress.run_oras_with_progress",
+            "iter_codex.cli.graph_progress.run_oras_with_progress",
             side_effect=create_archive,
         ),
-        patch("imas_codex.cli.graph_progress.GraphProgress"),
+        patch("iter_codex.cli.graph_progress.GraphProgress"),
         patch("click.testing.CliRunner", return_value=nested_runner),
         patch.object(registry.tarfile, "open") as tar_open,
     ):

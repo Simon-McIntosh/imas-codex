@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 5a04c220eb3e8670fd5342efd270e2dc16fd5bbd, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.classify_sourceless_standard_names.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Remove signed recovery bindings after checking their live graph closure."""
@@ -19,10 +19,10 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
-from imas_codex.graph import GraphClient
-from imas_codex.graph.offsite import live_graph_activity
-from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
-from imas_codex.standard_names.signed_manifest import apply_signed_manifest
+from iter_codex.graph import GraphClient
+from iter_codex.graph.offsite import live_graph_activity
+from iter_codex.standard_names.graph_ops import classify_sourceless_standard_names
+from iter_codex.standard_names.signed_manifest import apply_signed_manifest
 
 HERE = Path(__file__).resolve().parent
 INPUT = HERE / "sib-restore-lineage-sources.json"

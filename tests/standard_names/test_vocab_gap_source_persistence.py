@@ -15,12 +15,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog_reset as _owning_graph_catalog_reset,
     graph_foundation as _owning_graph_foundation,
     graph_source_bindings as _owning_graph_source_bindings,
 )
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _consume_claimed_vocab_gaps,
 )
 
@@ -39,17 +39,17 @@ def _run_marker(gaps, *, actionable_tokens, open_segments=()):
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.persist_claimed_vocab_gaps",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.persist_claimed_vocab_gaps",
             side_effect=lambda _gaps, outcomes, **_kwargs: [
                 item["sns_id"] for item in outcomes
             ],
         ) as persist,
         patch(
-            "imas_codex.standard_names.segments.is_actionable_gap",
+            "iter_codex.standard_names.segments.is_actionable_gap",
             side_effect=lambda seg, tok: tok in actionable_tokens,
         ),
         patch(
-            "imas_codex.standard_names.segments.is_open_segment",
+            "iter_codex.standard_names.segments.is_open_segment",
             side_effect=lambda seg: seg in open_segments,
         ),
     ):
@@ -112,7 +112,7 @@ def test_open_segment_gap_ignored():
 
 def test_gap_writer_failure_rolls_back_source_outcome():
     """A gap-writer failure cannot strand a source in a terminal state."""
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     tx = MagicMock()
     tx.closed = False
@@ -169,7 +169,7 @@ def test_gap_writer_failure_rolls_back_source_outcome():
 
 def test_write_vocab_gaps_links_source_to_node():
     """write_vocab_gaps must MERGE a direct StandardNameSource→VocabGap edge."""
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     gc = MagicMock()
     gc.__enter__ = MagicMock(return_value=gc)
@@ -186,9 +186,9 @@ def test_write_vocab_gaps_links_source_to_node():
     ]
     with (
         patch.object(_owning_graph_foundation, "GraphClient", return_value=gc),
-        patch("imas_codex.standard_names.segments.is_valid_segment", return_value=True),
+        patch("iter_codex.standard_names.segments.is_valid_segment", return_value=True),
         patch(
-            "imas_codex.standard_names.segments.classify_gap",
+            "iter_codex.standard_names.segments.classify_gap",
             return_value=("absent", []),
         ),
     ):

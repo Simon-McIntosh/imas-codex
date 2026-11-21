@@ -132,7 +132,7 @@ def snapshot(gc: Any, sn_id: str, revision_id: str) -> dict[str, Any] | None:
 
 
 def census(gc: Any, drain_run_dir: Path) -> dict[str, Any]:
-    from imas_codex.standard_names.source_refresh import (
+    from iter_codex.standard_names.source_refresh import (
         detect_source_drift,
         refresh_drifted_sources,
     )
@@ -225,7 +225,7 @@ def restore(gc: Any, census_data: dict[str, Any], out_dir: Path) -> dict[str, An
     ``docs_stage='accepted'``, so it is admitted on names that own a live
     structural child where ``set_properties`` is refused.
     """
-    from imas_codex.standard_names.signed_manifest import (
+    from iter_codex.standard_names.signed_manifest import (
         _DOCS_RESTORE_ADAPTER,
         _DOCS_RESTORE_GUARDS,
         _DOCS_RESTORE_MUTATION,
@@ -261,7 +261,7 @@ def restore(gc: Any, census_data: dict[str, Any], out_dir: Path) -> dict[str, An
     for index, offset in enumerate(range(0, len(rows), 90)):
         batch = rows[offset : offset + 90]
         authority: dict[str, Any] = {
-            "schema": "imas-codex.docs-revision-restore.v1",
+            "schema": "iter-codex.docs-revision-restore.v1",
             "operation_id": OPERATION,
             "rows": batch,
             "selection": SELECTION,
@@ -346,7 +346,7 @@ def main() -> int:
     ap.add_argument("--work-dir", default=None)
     args = ap.parse_args()
 
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     out = Path(args.out)
     work = Path(args.work_dir) if args.work_dir else out.parent

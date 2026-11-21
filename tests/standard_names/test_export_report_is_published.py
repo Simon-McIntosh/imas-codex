@@ -17,8 +17,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
-from imas_codex.standard_names.publish import run_publish
+from iter_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
+from iter_codex.standard_names.publish import run_publish
 
 
 @pytest.fixture()
@@ -159,7 +159,7 @@ class TestExportReportIsPublished:
         from unittest.mock import patch
 
         with patch(
-            "imas_codex.standard_names.publish._fetch_expected_domains",
+            "iter_codex.standard_names.publish._fetch_expected_domains",
             return_value=None,
         ):
             report = run_publish(staging_dir, isnc_repo)
@@ -176,7 +176,7 @@ class TestExportReportIsPublished:
         from unittest.mock import patch
 
         with patch(
-            "imas_codex.standard_names.publish._fetch_expected_domains",
+            "iter_codex.standard_names.publish._fetch_expected_domains",
             return_value=None,
         ):
             report = run_publish(staging_dir, isnc_repo, dry_run=True)
@@ -199,7 +199,7 @@ class TestExportReportIsPublished:
         from unittest.mock import patch
 
         with patch(
-            "imas_codex.standard_names.publish._fetch_expected_domains",
+            "iter_codex.standard_names.publish._fetch_expected_domains",
             return_value=None,
         ):
             run_publish(staging_dir, isnc_repo)
@@ -224,7 +224,7 @@ class TestExportReportIsPublished:
 
         (staging_dir / ".export_report.json").unlink()
         with patch(
-            "imas_codex.standard_names.publish._fetch_expected_domains",
+            "iter_codex.standard_names.publish._fetch_expected_domains",
             return_value=None,
         ):
             report = run_publish(staging_dir, isnc_repo)

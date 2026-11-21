@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at c598c47f94583bdd8cc71831c8095905dc5d35fa, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.workers._DD_CONTEXT_QUERY.
+# Names the tree no longer defines: iter_codex.standard_names.workers._DD_CONTEXT_QUERY.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Measure source-backed name review against the frozen golden labels."""
@@ -18,18 +18,18 @@ import lzma
 import os
 from pathlib import Path
 
-from imas_codex.discovery.base.evaluation import bootstrap_interval
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.audits import repeated_token_check
-from imas_codex.standard_names.review.checks import (
+from iter_codex.discovery.base.evaluation import bootstrap_interval
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.audits import repeated_token_check
+from iter_codex.standard_names.review.checks import (
     JevQuestion,
     JevQuestionKind,
     ReviewCheck,
     load_review_checks,
 )
-from imas_codex.standard_names.review.jev_review import _owner_segment
-from imas_codex.standard_names.workers import _DD_CONTEXT_QUERY
-from imas_codex.tools.graph_search import GraphStructureTool
+from iter_codex.standard_names.review.jev_review import _owner_segment
+from iter_codex.standard_names.workers import _DD_CONTEXT_QUERY
+from iter_codex.tools.graph_search import GraphStructureTool
 
 HERE = Path(__file__).resolve().parent
 RESULTS = HERE / "srtj-evidence-supply-results.json"

@@ -15,7 +15,7 @@ import pytest
 
 @pytest.fixture(scope="module")
 def compose_ctx():
-    from imas_codex.standard_names.context import build_compose_context
+    from iter_codex.standard_names.context import build_compose_context
 
     return build_compose_context()
 
@@ -34,7 +34,7 @@ def test_compose_context_carries_the_full_base_registry(compose_ctx):
 
 def test_review_names_system_injects_the_full_registry(compose_ctx):
     """The active review-name system prompt renders the full token registry."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     out = render_prompt("sn/review_names_system", compose_ctx)
     # A registered base the composer can legitimately use must be visible to
@@ -47,7 +47,7 @@ def test_review_names_system_injects_the_full_registry(compose_ctx):
 @pytest.mark.parametrize("seat", ["sn/review_names_system", "sn/refine_name_system"])
 def test_active_name_seats_inject_public_advisory_aliases(compose_ctx, seat):
     """Every active name critic/repair seat sees the grammar-owned aliases."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     aliases = compose_ctx["grammar"]["advisory_aliases"]
     out = render_prompt(seat, compose_ctx)

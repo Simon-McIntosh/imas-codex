@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from imas_codex.config import discovery_config as discovery_config_module
-from imas_codex.config.discovery_config import ExclusionConfig
-from imas_codex.discovery.base import facility as facility_module
+from iter_codex.config import discovery_config as discovery_config_module
+from iter_codex.config.discovery_config import ExclusionConfig
+from iter_codex.discovery.base import facility as facility_module
 
 
 def test_get_facility_reads_public_yaml_only(tmp_path, monkeypatch):

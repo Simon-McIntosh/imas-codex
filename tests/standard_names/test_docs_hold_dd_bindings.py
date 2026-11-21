@@ -14,9 +14,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names import workers
-from imas_codex.standard_names.review import pipeline
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names import workers
+from iter_codex.standard_names.review import pipeline
+from iter_codex.standard_names.worker_tasks import (
     worker_review_docs as _owning_worker_review_docs,
 )
 

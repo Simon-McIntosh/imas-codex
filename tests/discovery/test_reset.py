@@ -12,9 +12,9 @@ def _import_reset():
     import importlib.util
     import pathlib
 
-    # Navigate: tests/discovery/test_reset.py -> ../../imas_codex/discovery/base/reset.py
+    # Navigate: tests/discovery/test_reset.py -> ../../iter_codex/discovery/base/reset.py
     repo_root = pathlib.Path(__file__).resolve().parents[2]
-    mod_path = repo_root / "imas_codex" / "discovery" / "base" / "reset.py"
+    mod_path = repo_root / "iter_codex" / "discovery" / "base" / "reset.py"
 
     import sys
 
@@ -211,7 +211,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 42}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.SIGNAL_RESET_SPECS["discovered"]
             count = reset_mod.reset_to_status(spec, "jet")
 
@@ -230,7 +230,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 10}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.PATH_RESET_SPECS["triaged"]
             count = reset_mod.reset_to_status(spec, "tcv")
 
@@ -244,7 +244,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 5}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.SIGNAL_RESET_SPECS["discovered"]
             count = reset_mod.reset_to_status(
                 spec,
@@ -262,7 +262,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = []
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.WIKI_RESET_SPECS["scanned"]
             count = reset_mod.reset_to_status(spec, "jt-60sa")
 
@@ -273,7 +273,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 3}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.SIGNAL_RESET_SPECS["enriched"]
             reset_mod.reset_to_status(spec, "jet")
 
@@ -286,7 +286,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 12}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.PATH_RESET_SPECS["scanned"]
             reset_mod.reset_to_status(spec, "jt-60sa")
 
@@ -304,7 +304,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 7}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.CODE_RESET_SPECS["discovered"]
             count = reset_mod.reset_to_status(
                 spec,
@@ -322,7 +322,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 3}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.CODE_RESET_SPECS["discovered"]
             reset_mod.reset_to_status(spec, "jt-60sa")
 
@@ -337,7 +337,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 3}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.PATH_RESET_SPECS["scanned"]
             count = reset_mod.reset_to_status(spec, "jt-60sa")
 
@@ -354,7 +354,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 0}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.PATH_RESET_SPECS["scanned"]
             reset_mod.reset_to_status(spec, "jt-60sa")
 
@@ -368,7 +368,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 1}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.PATH_RESET_SPECS["triaged"]
             reset_mod.reset_to_status(spec, "jt-60sa")
 
@@ -387,7 +387,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 4}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.CODE_RESET_SPECS["ingested"]
             count = reset_mod.reset_to_status(spec, "jt-60sa")
 
@@ -414,7 +414,7 @@ class TestResetToStatus:
         mock_gc, mock_gc_ctx = self._mock_gc()
         mock_gc.query.return_value = [{"reset_count": 9}]
 
-        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=mock_gc_ctx):
             spec = reset_mod.CODE_RESET_SPECS["name"]
             count = reset_mod.reset_to_status(spec, "jt-60sa")
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.enrichment import (
+from iter_codex.standard_names.enrichment import (
     build_batch_context,
     build_name_only_context,
     enrich_paths,
@@ -16,7 +16,7 @@ from imas_codex.standard_names.enrichment import (
     group_for_name_only,
     select_primary_cluster,
 )
-from imas_codex.standard_names.sources.base import ExtractionBatch
+from iter_codex.standard_names.sources.base import ExtractionBatch
 
 # ============================================================================
 # Helpers
@@ -806,7 +806,7 @@ class TestMagneticsDomainReclassification:
 
     def test_bpol_probe_reclassified(self):
         """magnetics/bpol_probe/* → magnetic_field_diagnostics."""
-        from imas_codex.standard_names.enrichment import reclassify_magnetics_domain
+        from iter_codex.standard_names.enrichment import reclassify_magnetics_domain
 
         row = _make_row(
             path="magnetics/bpol_probe/field",
@@ -821,7 +821,7 @@ class TestMagneticsDomainReclassification:
 
     def test_flux_loop_reclassified(self):
         """magnetics/flux_loop/* → magnetic_field_diagnostics."""
-        from imas_codex.standard_names.enrichment import reclassify_magnetics_domain
+        from iter_codex.standard_names.enrichment import reclassify_magnetics_domain
 
         row = _make_row(
             path="magnetics/flux_loop/flux/data",
@@ -836,7 +836,7 @@ class TestMagneticsDomainReclassification:
 
     def test_rogowski_coil_reclassified(self):
         """magnetics/rogowski_coil/* → magnetic_field_diagnostics."""
-        from imas_codex.standard_names.enrichment import reclassify_magnetics_domain
+        from iter_codex.standard_names.enrichment import reclassify_magnetics_domain
 
         row = _make_row(
             path="magnetics/rogowski_coil/current",
@@ -851,7 +851,7 @@ class TestMagneticsDomainReclassification:
 
     def test_ip_reclassified(self):
         """magnetics/ip/* → magnetic_field_diagnostics."""
-        from imas_codex.standard_names.enrichment import reclassify_magnetics_domain
+        from iter_codex.standard_names.enrichment import reclassify_magnetics_domain
 
         row = _make_row(
             path="magnetics/ip/data",
@@ -866,7 +866,7 @@ class TestMagneticsDomainReclassification:
 
     def test_diamagnetic_flux_reclassified(self):
         """magnetics/diamagnetic_flux/* → magnetic_field_diagnostics."""
-        from imas_codex.standard_names.enrichment import reclassify_magnetics_domain
+        from iter_codex.standard_names.enrichment import reclassify_magnetics_domain
 
         row = _make_row(
             path="magnetics/diamagnetic_flux/data",
@@ -881,7 +881,7 @@ class TestMagneticsDomainReclassification:
 
     def test_non_magnetics_ids_not_reclassified(self):
         """equilibrium IDS paths are NOT reclassified."""
-        from imas_codex.standard_names.enrichment import reclassify_magnetics_domain
+        from iter_codex.standard_names.enrichment import reclassify_magnetics_domain
 
         row = _make_row(
             path="equilibrium/time_slice/profiles_1d/psi",
@@ -896,7 +896,7 @@ class TestMagneticsDomainReclassification:
 
     def test_already_correct_domain_unchanged(self):
         """Paths already in magnetic_field_diagnostics stay unchanged."""
-        from imas_codex.standard_names.enrichment import reclassify_magnetics_domain
+        from iter_codex.standard_names.enrichment import reclassify_magnetics_domain
 
         row = _make_row(
             path="magnetics/bpol_probe/field",

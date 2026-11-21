@@ -1,0 +1,21 @@
+"""IDS assembly from facility graph data.
+
+Assembles complete IMAS IDS instances by querying the knowledge graph
+for SignalNode properties and populating imas-python IDS objects.
+
+Two modes:
+  - Graph-driven: IMASMapping + IMASMapping nodes in the graph define
+    structure and field transformations.
+  - YAML fallback: YAML recipe files with embedded Cypher queries.
+
+Usage:
+    from iter_codex.ids import IDSAssembler
+
+    assembler = IDSAssembler("jet", "pf_active")
+    ids = assembler.assemble(epoch="p68613")
+    assembler.export(Path("jet_pf_active.h5"), epoch="p68613")
+"""
+
+from iter_codex.ids.assembler import IDSAssembler
+
+__all__ = ["IDSAssembler"]

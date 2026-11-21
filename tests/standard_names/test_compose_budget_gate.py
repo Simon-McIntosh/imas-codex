@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
 
 
 def _ce(lease, amount, phase=None):

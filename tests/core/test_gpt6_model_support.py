@@ -5,8 +5,8 @@ from __future__ import annotations
 import pytest
 from pydantic import BaseModel
 
-from imas_codex import settings
-from imas_codex.discovery.base import llm
+from iter_codex import settings
+from iter_codex.discovery.base import llm
 
 
 class Answer(BaseModel):
@@ -75,7 +75,7 @@ def test_unpriced_model_is_refused_by_call_layer(model, monkeypatch):
 )
 def test_reasoning_model_uses_direct_structured_request(model, monkeypatch):
     monkeypatch.setattr(settings, "get_model_endpoint", lambda _model: None)
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-direct-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-direct-key")
     request = llm._build_kwargs(
         model=model,
         api_key="fallback-key",

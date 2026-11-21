@@ -10,12 +10,12 @@ from pathlib import Path
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_ops import (
     apply_adjudicated_source_dispositions,
     repair_scalar_projection_mismatches,
 )
-from imas_codex.standard_names.graph_store.graph_supersession import (
+from iter_codex.standard_names.graph_store.graph_supersession import (
     SemanticMirrorRepairConflict,
     SignedSourceDispositionConflict,
     _catalog_edit_adjudication_signature_hash,

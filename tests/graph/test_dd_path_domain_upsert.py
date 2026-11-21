@@ -2,7 +2,7 @@
 
 import re
 
-from imas_codex.graph.build_dd import _batch_create_path_nodes
+from iter_codex.graph.build_dd import _batch_create_path_nodes
 from tests.recording_graph_client import RecordingGraphClient
 
 

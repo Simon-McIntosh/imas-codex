@@ -44,9 +44,9 @@ ENV PYTHONPATH="/app" \
     OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 
 # Labels for image provenance
-LABEL imas_codex.git_sha=${GIT_SHA} \
-      imas_codex.git_tag=${GIT_TAG} \
-      imas_codex.git_ref=${GIT_REF}
+LABEL iter_codex.git_sha=${GIT_SHA} \
+      iter_codex.git_tag=${GIT_TAG} \
+      iter_codex.git_ref=${GIT_REF}
 
 ## Copy git metadata first so hatch-vcs sees repository state exactly as on tag
 COPY .git/ ./.git/
@@ -77,7 +77,7 @@ RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked \
 # Expand sparse checkout to include project sources, scripts, and build hooks (phase 2)
 # Include hatch_build_hooks.py even though HATCH_BUILD_NO_HOOKS=true, because
 # hatchling validates file existence before checking the env var
-RUN git sparse-checkout set pyproject.toml uv.lock README.md imas_codex scripts hatch_build_hooks.py \
+RUN git sparse-checkout set pyproject.toml uv.lock README.md iter_codex scripts hatch_build_hooks.py \
     && git reset --hard HEAD \
     && echo "Sparse checkout (phase 2) paths:" \
     && git sparse-checkout list \
@@ -87,7 +87,7 @@ RUN git sparse-checkout set pyproject.toml uv.lock README.md imas_codex scripts 
 ## Install project. Using --reinstall-package to ensure wheel build picks up version.
 RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked \
     echo "Pre-install (project) git status (should be clean):" && git status --porcelain && \
-    uv sync --no-dev --reinstall-package imas-codex --no-editable --frozen --extra cpu && \
+    uv sync --no-dev --reinstall-package iter-codex --no-editable --frozen --extra cpu && \
     if [ -n "$(git status --porcelain uv.lock)" ]; then echo "uv.lock changed during project install (lock out of date). Run 'uv lock' and recommit." >&2; exit 1; fi && \
     echo "Post-install git status (should still be clean):" && git status --porcelain && \
     if [ -n "$(git status --porcelain)" ]; then \
@@ -130,7 +130,7 @@ RUN curl -sLO "https://github.com/oras-project/oras/releases/download/v${ORAS_VE
 # Pull graph from GHCR (optional — builds without graph if unavailable)
 ARG GHCR_REGISTRY="ghcr.io/iterorganization"
 ARG GRAPH_TAG="latest"
-ARG GRAPH_PACKAGE="imas-codex-graph-dd"
+ARG GRAPH_PACKAGE="iter-codex-graph-dd"
 RUN --mount=type=secret,id=GHCR_TOKEN \
     mkdir -p /tmp/graph-pull && \
     GHCR_TOKEN=$(cat /run/secrets/GHCR_TOKEN 2>/dev/null || echo "") && \
@@ -277,8 +277,8 @@ ENV PYTHONPATH="/app" \
     NEO4J_URI="bolt://127.0.0.1:7687" \
     NEO4J_USERNAME="neo4j" \
     NEO4J_PASSWORD="neo4j" \
-    IMAS_CODEX_GRAPH_LOCATION=local \
-    IMAS_CODEX_EMBEDDING_LOCATION=local \
+    ITER_CODEX_GRAPH_LOCATION=local \
+    ITER_CODEX_EMBEDDING_LOCATION=local \
     HF_HOME=/app/.cache/huggingface
 
 # Expose MCP server port (Neo4j ports are internal only)
@@ -295,15 +295,15 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=5 --start-period=240s \
 ## Entrypoint starts Neo4j then MCP server
 ##
 ## Data-dictionary image (unchanged default):
-##   docker build -t imas-codex .
+##   docker build -t iter-codex .
 ## Plant image — the ITER plant graph alone, read-only, private. The image is
 ## the same build; its serve mode is the service's own command, not a build
 ## argument, so nothing here changes how the data-dictionary image starts:
-##   docker build -t imas-codex-plant \
+##   docker build -t iter-codex-plant \
 ##     --build-arg GHCR_REGISTRY=ghcr.io/<owner> \
-##     --build-arg GRAPH_PACKAGE=imas-codex-graph-iter-without-dd \
+##     --build-arg GRAPH_PACKAGE=iter-codex-graph-iter-without-dd \
 ##     --build-arg GRAPH_TAG=<tag> \
 ##     --secret id=GHCR_TOKEN .
-##   docker run ... imas-codex-plant serve --plant-only --host 0.0.0.0 --port 8000
+##   docker run ... iter-codex-plant serve --plant-only --host 0.0.0.0 --port 8000
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["serve", "--dd-only", "--host", "0.0.0.0", "--port", "8000"]

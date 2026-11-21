@@ -7,8 +7,8 @@ import time
 
 import pytest
 
-from imas_codex.ids import models, workers
-from imas_codex.ids.models import (
+from iter_codex.ids import models, workers
+from iter_codex.ids.models import (
     SignalMappingBatch,
     TargetAssignment,
     TargetAssignmentBatch,
@@ -113,8 +113,8 @@ def test_bounded_run_persists_mapped_source_and_next_run_skips_it(
         state.stop_requested = True
 
     monkeypatch.setattr(workers, "run_discovery_engine", stop_after_one_map)
-    monkeypatch.setattr("imas_codex.ids.mapping.adiscover_assembly", no_assembly)
-    monkeypatch.setattr("imas_codex.ids.mapping.validate_mappings", validate)
+    monkeypatch.setattr("iter_codex.ids.mapping.adiscover_assembly", no_assembly)
+    monkeypatch.setattr("iter_codex.ids.mapping.validate_mappings", validate)
 
     first = workers.MappingDiscoveryState(
         facility="jet", target_ids_list=["magnetics"], skip_errors=True

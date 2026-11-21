@@ -1,7 +1,7 @@
 """Name-only source text is not presented as a semantic description."""
 
-from imas_codex.llm.search_formatters import format_signals_report
-from imas_codex.llm.search_tools import _signal_rerank_state
+from iter_codex.llm.search_formatters import format_signals_report
+from iter_codex.llm.search_tools import _signal_rerank_state
 
 
 def test_name_only_description_is_withheld_from_reranking_and_display():

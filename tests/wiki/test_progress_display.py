@@ -10,7 +10,7 @@ import time
 
 import pytest
 
-from imas_codex.discovery.wiki.progress import (
+from iter_codex.discovery.wiki.progress import (
     DocsItem,
     ImageItem,
     IngestItem,
@@ -331,7 +331,7 @@ class TestWikiProgressDisplayConstruction:
 
     def test_width_calculation(self):
         """Width should be at least MIN_WIDTH."""
-        from imas_codex.discovery.base.progress import MIN_WIDTH
+        from iter_codex.discovery.base.progress import MIN_WIDTH
 
         display = WikiProgressDisplay(facility="tcv", cost_limit=1.0)
         assert display.width >= MIN_WIDTH
@@ -410,20 +410,20 @@ class TestStreamQueue:
     """Tests for StreamQueue rate-limiting behavior."""
 
     def test_initially_empty(self):
-        from imas_codex.discovery.base.progress import StreamQueue
+        from iter_codex.discovery.base.progress import StreamQueue
 
         q = StreamQueue(rate=1.0)
         assert q.is_empty()
 
     def test_add_and_not_empty(self):
-        from imas_codex.discovery.base.progress import StreamQueue
+        from iter_codex.discovery.base.progress import StreamQueue
 
         q = StreamQueue(rate=1.0, max_rate=10.0, min_display_time=0.0)
         q.add(["item1"])
         assert not q.is_empty()
 
     def test_len(self):
-        from imas_codex.discovery.base.progress import StreamQueue
+        from iter_codex.discovery.base.progress import StreamQueue
 
         q = StreamQueue(rate=1.0, max_rate=10.0, min_display_time=0.0)
         q.add(["a", "b"])

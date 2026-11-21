@@ -16,11 +16,11 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_store.graph_audits import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_store.graph_audits import (
     reconcile_descriptionless_composed_names,
 )
-from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+from iter_codex.standard_names.source_invariant import find_sourceless_live_names
 
 pytestmark = pytest.mark.graph
 

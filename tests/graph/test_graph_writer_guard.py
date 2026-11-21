@@ -43,14 +43,14 @@ def _refuse(items) -> None:
 
 
 def _planted_bare_client_writer():
-    from imas_codex.graph import GraphClient
+    from iter_codex.graph import GraphClient
 
     with GraphClient() as client:
         client.query("CREATE (:PlantedProbe {id: 'direct'})")
 
 
 def _planted_delegating_writer():
-    from imas_codex.graph import GraphClient
+    from iter_codex.graph import GraphClient
 
     with GraphClient() as client:
         _planted_seed_nodes(client)
@@ -61,14 +61,14 @@ def _planted_seed_nodes(client):
 
 
 def _planted_disposable_writer(disposable_graph):
-    from imas_codex.graph import GraphClient
+    from iter_codex.graph import GraphClient
 
     with GraphClient() as client:
         client.query("CREATE (:PlantedProbe {id: 'routed'})")
 
 
 def _planted_reader():
-    from imas_codex.graph import GraphClient
+    from iter_codex.graph import GraphClient
 
     with GraphClient() as client:
         client.query("MATCH (p:PlantedProbe) RETURN p.id AS id")
@@ -76,7 +76,7 @@ def _planted_reader():
 
 def _planted_reader_with_prose():
     """A reader whose documentation happens to SET out what it measures."""
-    from imas_codex.graph import GraphClient
+    from iter_codex.graph import GraphClient
 
     with GraphClient() as client:
         client.query("MATCH (p:PlantedProbe) RETURN count(p) AS n")

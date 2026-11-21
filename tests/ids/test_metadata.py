@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.ids.metadata import (
+from iter_codex.ids.metadata import (
     IDSMetadataResult,
     MetadataContext,
     _format_signals_summary,
@@ -16,13 +16,13 @@ from imas_codex.ids.metadata import (
     populate_deterministic_fields,
     populate_metadata,
 )
-from imas_codex.ids.models import MetadataPopulationResponse
+from iter_codex.ids.models import MetadataPopulationResponse
 
 
 @pytest.fixture(autouse=True)
 def _block_unpatched_llm():
     with patch(
-        "imas_codex.discovery.base.llm.call_llm_structured",
+        "iter_codex.discovery.base.llm.call_llm_structured",
         side_effect=AssertionError("Unpatched LLM call in metadata test"),
     ) as unpatched_call:
         yield
@@ -41,7 +41,7 @@ class TestMetadataContext:
 
         assert ctx.dd_version == "4.0.0"
         assert ctx.provider == "jet"
-        assert ctx.source.startswith("imas-codex v")
+        assert ctx.source.startswith("iter-codex v")
         assert ctx.creation_date  # non-empty ISO timestamp
         assert isinstance(ctx.library_deps, list)
 
@@ -102,10 +102,10 @@ class TestDeterministicFields:
             "access_layer_version": "5.2.0",
             "creation_date": "2025-01-01T00:00:00+00:00",
             "provider": "jet",
-            "source": "imas-codex v4.1.0",
+            "source": "iter-codex v4.1.0",
             "pipeline_version": "4.1.0",
             "pipeline_commit": "abc123",
-            "pipeline_repo": "https://github.com/iterorganization/imas-codex",
+            "pipeline_repo": "https://github.com/iterorganization/iter-codex",
             "pipeline_description": "IMAS mapping pipeline",
             "pipeline_config": {"test": True},
             "library_deps": [
@@ -152,7 +152,7 @@ class TestDeterministicFields:
         assert fields["ids_properties/version_put/access_layer"] == "5.2.0"
         assert fields["ids_properties/version_put/access_layer_language"] == "python"
         assert fields["ids_properties/provider"] == "jet"
-        assert fields["code/name"] == "imas-codex"
+        assert fields["code/name"] == "iter-codex"
         assert fields["code/version"] == "4.1.0"
         assert fields["code/commit"] == "abc123"
 
@@ -192,10 +192,10 @@ class TestDeterministicFields:
 
     def test_source_value(self):
         """Verify source field is passed through from context."""
-        ctx = self._make_ctx(source="imas-codex v99.0.0")
+        ctx = self._make_ctx(source="iter-codex v99.0.0")
         fields = populate_deterministic_fields(ctx, "core_profiles")
 
-        assert fields["ids_properties/source"] == "imas-codex v99.0.0"
+        assert fields["ids_properties/source"] == "iter-codex v99.0.0"
 
     def test_creation_date_passthrough(self):
         """Verify creation_date is passed through from context."""
@@ -307,12 +307,12 @@ class TestPopulateMetadata:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.call_llm_structured",
+                "iter_codex.discovery.base.llm.call_llm_structured",
                 return_value=(mock_response, 0.05, 500),
             ),
-            patch("imas_codex.settings.get_model", return_value="test-model"),
+            patch("iter_codex.settings.get_model", return_value="test-model"),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="test prompt content",
             ),
         ):
@@ -348,7 +348,7 @@ class TestPopulateMetadata:
         gc.query.return_value = []
 
         with patch(
-            "imas_codex.discovery.base.llm.call_llm_structured",
+            "iter_codex.discovery.base.llm.call_llm_structured",
             side_effect=Exception("LLM timeout"),
         ):
             result = populate_metadata(
@@ -368,7 +368,7 @@ class TestPopulateMetadata:
         gc.query.return_value = []
 
         with patch(
-            "imas_codex.discovery.base.llm.call_llm_structured",
+            "iter_codex.discovery.base.llm.call_llm_structured",
             side_effect=Exception("skip LLM"),
         ):
             result = populate_metadata(
@@ -383,7 +383,7 @@ class TestPopulateMetadata:
         assert params["custom"] == "config"
 
     @patch(
-        "imas_codex.discovery.base.llm.call_llm_structured",
+        "iter_codex.discovery.base.llm.call_llm_structured",
         return_value=(MetadataPopulationResponse(comment="Test metadata"), 0.0, 0),
     )
     def test_populate_returns_ids_metadata_result(self, _mock_llm):
@@ -404,7 +404,7 @@ class TestPopulateMetadata:
         assert result.dd_version == "4.0.0"
 
     @patch(
-        "imas_codex.discovery.base.llm.call_llm_structured",
+        "iter_codex.discovery.base.llm.call_llm_structured",
         side_effect=Exception("test LLM unavailable"),
     )
     def test_populate_deterministic_fields_always_present(self, _mock_llm):
@@ -441,12 +441,12 @@ class TestPopulateMetadata:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.call_llm_structured",
+                "iter_codex.discovery.base.llm.call_llm_structured",
                 return_value=(mock_response, 0.01, 100),
             ),
-            patch("imas_codex.settings.get_model", return_value="test-model"),
+            patch("iter_codex.settings.get_model", return_value="test-model"),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="test prompt",
             ),
         ):
@@ -480,12 +480,12 @@ class TestPopulateMetadata:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.call_llm_structured",
+                "iter_codex.discovery.base.llm.call_llm_structured",
                 return_value=(mock_response, 0.01, 100),
             ),
-            patch("imas_codex.settings.get_model", return_value="test-model"),
+            patch("iter_codex.settings.get_model", return_value="test-model"),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="test prompt",
             ),
         ):
@@ -515,12 +515,12 @@ class TestPopulateMetadata:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.call_llm_structured",
+                "iter_codex.discovery.base.llm.call_llm_structured",
                 return_value=(mock_response, 0.01, 100),
             ),
-            patch("imas_codex.settings.get_model", return_value="test-model"),
+            patch("iter_codex.settings.get_model", return_value="test-model"),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="test prompt",
             ),
         ):
@@ -559,11 +559,11 @@ class TestPopulateMetadata:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.call_llm_structured",
+                "iter_codex.discovery.base.llm.call_llm_structured",
                 return_value=(mock_response, 0.0, 0),
             ),
-            patch("imas_codex.settings.get_model", return_value="test-model"),
-            patch("imas_codex.llm.prompt_loader.render_prompt", _fake_render),
+            patch("iter_codex.settings.get_model", return_value="test-model"),
+            patch("iter_codex.llm.prompt_loader.render_prompt", _fake_render),
         ):
             result = populate_metadata(
                 "jet",
@@ -582,7 +582,7 @@ class TestPopulateMetadata:
         assert result.ids_name == "pf_active"
 
     @patch(
-        "imas_codex.discovery.base.llm.call_llm_structured",
+        "iter_codex.discovery.base.llm.call_llm_structured",
         side_effect=Exception("test LLM unavailable"),
     )
     def test_populate_dd_version_in_result(self, _mock_llm):
@@ -613,7 +613,7 @@ class TestPersistMetadata:
             dd_version="4.0.0",
             deterministic_fields={
                 "ids_properties/provider": "jet",
-                "code/name": "imas-codex",
+                "code/name": "iter-codex",
                 "_library_entries": [{"name": "numpy", "version": "1.26.0"}],
             },
             llm_fields={
@@ -646,7 +646,7 @@ class TestPersistMetadata:
             dd_version="4.0.0",
             deterministic_fields={
                 "ids_properties/provider": "jet",
-                "code/name": "imas-codex",
+                "code/name": "iter-codex",
                 "_library_entries": [{"name": "numpy", "version": "1.26.0"}],
             },
             llm_fields={},

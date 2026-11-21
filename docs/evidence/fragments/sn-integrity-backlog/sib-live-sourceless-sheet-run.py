@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 8ad5c42747d4fa9b0e3fb0b1d07609f18a026838, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.classify_sourceless_standard_names.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Build a read-only adjudication sheet for live names without DD sources."""
@@ -18,10 +18,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
-from imas_codex.tools.graph_search import GraphSearchTool
-from imas_codex.units import units_are_equivalent
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_ops import classify_sourceless_standard_names
+from iter_codex.tools.graph_search import GraphSearchTool
+from iter_codex.units import units_are_equivalent
 
 HERE = Path(__file__).resolve().parent
 SHEET = HERE / "sib-live-sourceless-sheet.json"

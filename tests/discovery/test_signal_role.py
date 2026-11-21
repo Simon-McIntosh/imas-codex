@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.discovery.base import judgment
-from imas_codex.discovery.signals import role
+from iter_codex.discovery.base import judgment
+from iter_codex.discovery.signals import role
 
 # The closed role vocabulary, written once here so a production role set that
 # drops one is compared against a value the test supplies.

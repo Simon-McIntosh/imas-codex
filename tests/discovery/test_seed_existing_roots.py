@@ -14,9 +14,9 @@ import re
 
 import pytest
 
-from imas_codex.discovery.paths.frontier import seed_facility_roots
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.schema import get_schema
+from iter_codex.discovery.paths.frontier import seed_facility_roots
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.schema import get_schema
 
 _MERGE_RE = re.compile(
     r"MERGE \(n:(\w+) \{id: item\.id\}\)\s+"
@@ -92,13 +92,13 @@ def graph(monkeypatch):
         client.session = make_session  # type: ignore[method-assign]
         return client
 
-    monkeypatch.setattr("imas_codex.graph.GraphClient", factory)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", factory)
     monkeypatch.setattr(
-        "imas_codex.discovery.paths.frontier._dedupe_paths_by_inode",
+        "iter_codex.discovery.paths.frontier._dedupe_paths_by_inode",
         lambda facility, paths: (list(paths), []),
     )
     monkeypatch.setattr(
-        "imas_codex.config.discovery_config.get_exclusion_config_for_facility",
+        "iter_codex.config.discovery_config.get_exclusion_config_for_facility",
         lambda facility: _NoExclusion(),
     )
     store["_sessions"] = sessions

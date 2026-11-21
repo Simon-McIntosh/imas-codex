@@ -36,7 +36,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from imas_codex.standard_names import benchmark as bench
+from iter_codex.standard_names import benchmark as bench
 
 ROOT = Path(__file__).resolve().parent
 REPO = ROOT.parents[3]
@@ -254,8 +254,8 @@ def save_case_cache(cache: dict[str, Any]) -> None:
 def build_case_cache(
     members: list[dict[str, Any]], *, withhold: bool = False
 ) -> dict[str, Any]:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.case_file import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.case_file import (
         build_name_case_file,
         render_case_file,
     )
@@ -326,7 +326,7 @@ async def call_model(
     user: str,
     schema: type[BaseModel],
 ) -> tuple[BaseModel, dict[str, Any]]:
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     started = time.time()
     out = await acall_llm_structured(
@@ -971,7 +971,7 @@ def build_document(
 
     generation_cost = sum(float(row.get("cost", 0.0)) for row in read_jsonl(RECORD_LOG))
     judging_cost = sum(float(row.get("cost", 0.0)) for row in read_jsonl(VERDICT_LOG))
-    from imas_codex.standard_names.advisory_benchmark import summarize_costs
+    from iter_codex.standard_names.advisory_benchmark import summarize_costs
 
     spend = summarize_costs(generation_cost, judging_cost, SPEND_CEILING_USD)
 
@@ -1657,8 +1657,8 @@ def load_second_cases(members: list[dict[str, Any]]) -> dict[str, dict[str, Any]
         else:
             missing.append(member["id"])
     if missing:
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.case_file import build_name_case_file
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.standard_names.case_file import build_name_case_file
 
         with GraphClient() as client:
             for member_id in missing:
@@ -1669,7 +1669,7 @@ def load_second_cases(members: list[dict[str, Any]]) -> dict[str, dict[str, Any]
 
 
 def second_case_text(case: dict[str, Any]) -> str:
-    from imas_codex.standard_names.case_file import render_case_file
+    from iter_codex.standard_names.case_file import render_case_file
 
     return render_case_file(case)
 

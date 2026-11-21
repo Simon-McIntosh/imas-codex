@@ -8,14 +8,14 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from imas_codex.cli.sn import _compute_pool_progress
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.export import (
+from iter_codex.cli.sn import _compute_pool_progress
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.export import (
     _classify_export_population,
     _fetch_candidates,
     _fetch_export_population,
 )
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_audits as _owning_graph_audits,
     graph_catalog as _owning_graph_catalog,
     graph_cost_and_claims as _owning_graph_cost_and_claims,
@@ -69,13 +69,13 @@ def test_winning_methods_are_derived_from_schema() -> None:
 
 def test_export_gate_and_population_use_shared_traversal() -> None:
     candidate_graph = _Graph()
-    with patch("imas_codex.graph.client.GraphClient", return_value=candidate_graph):
+    with patch("iter_codex.graph.client.GraphClient", return_value=candidate_graph):
         assert _fetch_candidates() == []
     _assert_shared_eligibility(*candidate_graph.calls[0])
 
     population_graph = _Graph()
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=population_graph),
+        patch("iter_codex.graph.client.GraphClient", return_value=population_graph),
         patch.object(
             _owning_graph_catalog, "docs_review_property_coverage", return_value={}
         ),

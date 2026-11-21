@@ -23,15 +23,15 @@ def _load_test_environment(dotenv_path=None) -> bool:
 
 _load_test_environment()
 
-from imas_codex.clusters.search import ClusterSearchResult  # noqa: E402
-from imas_codex.embeddings.encoder import Encoder  # noqa: E402
-from imas_codex.search.document_store import (  # noqa: E402
+from iter_codex.clusters.search import ClusterSearchResult  # noqa: E402
+from iter_codex.embeddings.encoder import Encoder  # noqa: E402
+from iter_codex.search.document_store import (  # noqa: E402
     Document,
     DocumentMetadata,
     DocumentStore,
 )
-from imas_codex.search.engines.base_engine import MockSearchEngine  # noqa: E402
-from imas_codex.tools import Tools  # noqa: E402
+from iter_codex.search.engines.base_engine import MockSearchEngine  # noqa: E402
+from iter_codex.tools import Tools  # noqa: E402
 
 _TEST_EXTRA_DEPENDENT_SUITES = frozenset(
     {
@@ -81,9 +81,9 @@ _neo4j_available: bool | None = None
 
 def _neo4j_probe_client():
     """Build a client for the selected test endpoint without profile resolution."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
-    if test_uri := os.environ.get("IMAS_CODEX_TEST_NEO4J_URI"):
+    if test_uri := os.environ.get("ITER_CODEX_TEST_NEO4J_URI"):
         return GraphClient(
             uri=test_uri,
             username=os.environ.get("NEO4J_USERNAME", "neo4j"),
@@ -110,10 +110,10 @@ def _graph_credential_is_configured() -> bool:
     ``auto_tunnel=False`` is the documented side-effect-free path — so asking
     this question never opens a connection.
     """
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_URI"):
+    if os.environ.get("ITER_CODEX_TEST_NEO4J_URI"):
         return True
     try:
-        from imas_codex.graph.profiles import DEFAULT_PASSWORD, resolve_neo4j
+        from iter_codex.graph.profiles import DEFAULT_PASSWORD, resolve_neo4j
 
         credential = resolve_neo4j(auto_tunnel=False).password or ""
     except Exception:
@@ -123,7 +123,7 @@ def _graph_credential_is_configured() -> bool:
 
 def _neo4j_unavailable_reason() -> str:
     """Describe the selected graph endpoint without triggering resolution."""
-    if test_uri := os.environ.get("IMAS_CODEX_TEST_NEO4J_URI"):
+    if test_uri := os.environ.get("ITER_CODEX_TEST_NEO4J_URI"):
         return f"Explicit Neo4j test endpoint is not available: {test_uri}"
     if not _graph_credential_is_configured():
         return (
@@ -165,7 +165,7 @@ def _check_neo4j() -> bool:
 
     import threading
 
-    timeout_s = float(os.environ.get("IMAS_CODEX_TEST_NEO4J_PROBE_TIMEOUT", "20"))
+    timeout_s = float(os.environ.get("ITER_CODEX_TEST_NEO4J_PROBE_TIMEOUT", "20"))
     result: dict[str, bool] = {}
 
     def _probe() -> None:
@@ -245,11 +245,11 @@ def configure_embedding_model(embedding_model_name):
     Uses direct assignment (not setdefault) to ensure deterministic test values
     regardless of developer defaults loaded from ``.env``.
     """
-    os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = "local"
+    os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = "local"
     if embedding_model_name:
-        os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = embedding_model_name
+        os.environ["ITER_CODEX_EMBEDDING_MODEL"] = embedding_model_name
     else:
-        os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = "all-MiniLM-L6-v2"
+        os.environ["ITER_CODEX_EMBEDDING_MODEL"] = "all-MiniLM-L6-v2"
 
 
 # Standard test IDS set for consistency across all tests
@@ -373,14 +373,14 @@ def temporary_embedding_cache_dir(tmp_path_factory, monkeypatch):
 def isolated_reviewer_profile_env():
     """Confine a reviewer-profile selection to the test that made it.
 
-    ``IMAS_CODEX_SN_REVIEW_PROFILE`` is the environment channel a reviewer
+    ``ITER_CODEX_SN_REVIEW_PROFILE`` is the environment channel a reviewer
     profile can arrive on, and it is process-wide. A ``CliRunner`` invocation
     runs inside this process, so without this restore a single test that sets
     it re-seats the reviewer chain for every later test. A one-reviewer
     profile's model carries no checked-in pricing row, so the damage surfaces
     far from its cause as unpriceable routes and empty quorums.
     """
-    name = "IMAS_CODEX_SN_REVIEW_PROFILE"
+    name = "ITER_CODEX_SN_REVIEW_PROFILE"
     before = os.environ.get(name)
     yield
     if before is None:
@@ -393,9 +393,9 @@ def isolated_reviewer_profile_env():
 def disable_caching():
     """Automatically disable caching for all tests by making cache always miss."""
     # Patch the cache get method to always return None (cache miss)
-    with patch("imas_codex.search.decorators.cache._cache.get", return_value=None):
+    with patch("iter_codex.search.decorators.cache._cache.get", return_value=None):
         # Also patch the set method to do nothing
-        with patch("imas_codex.search.decorators.cache._cache.set"):
+        with patch("iter_codex.search.decorators.cache._cache.set"):
             yield
 
 
@@ -408,7 +408,7 @@ def _decisions_key(monkeypatch):
     or a booking rather than the skip requests this fixture; it is not autouse
     because a suite that asserts the absent-key path needs the variable unset.
     """
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
 
 
 @pytest.fixture(autouse=True)
@@ -514,20 +514,20 @@ def mock_heavy_operations():
         mock_engine = MockSearchEngine()
         with (
             patch(
-                "imas_codex.search.engines.semantic_engine.SemanticSearchEngine.search",
+                "iter_codex.search.engines.semantic_engine.SemanticSearchEngine.search",
                 side_effect=mock_engine.search,
             ),
             patch(
-                "imas_codex.search.engines.lexical_engine.LexicalSearchEngine.search",
+                "iter_codex.search.engines.lexical_engine.LexicalSearchEngine.search",
                 side_effect=mock_engine.search,
             ),
             patch(
-                "imas_codex.search.engines.hybrid_engine.HybridSearchEngine.search",
+                "iter_codex.search.engines.hybrid_engine.HybridSearchEngine.search",
                 side_effect=mock_engine.search,
             ),
         ):
             mock_clusters = create_mock_clusters()
-            with patch("imas_codex.core.clusters.Clusters") as mock_clusters_class:
+            with patch("iter_codex.core.clusters.Clusters") as mock_clusters_class:
                 mock_clusters_instance = MagicMock()
                 mock_clusters_instance.is_available.return_value = True
                 mock_clusters_instance.get_clusters.return_value = mock_clusters

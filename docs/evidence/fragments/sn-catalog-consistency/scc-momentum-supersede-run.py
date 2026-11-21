@@ -28,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 
-from imas_codex.graph.client import GraphClient  # noqa: E402
+from iter_codex.graph.client import GraphClient  # noqa: E402
 
 STEM = Path(__file__).stem.removesuffix("-run")
 
@@ -151,7 +151,7 @@ def drop_stale_successor(dry_run: bool) -> dict:
 
 
 def signed(argv: list[str]) -> dict:
-    command = [str(Path(sys.executable).parent / "imas-codex"), *argv]
+    command = [str(Path(sys.executable).parent / "iter-codex"), *argv]
     done = subprocess.run(command, capture_output=True, text=True, cwd=ROOT)
     print(done.stdout, end="", flush=True)
     if done.stderr:

@@ -320,7 +320,7 @@ def _examples(receipts, canonical, context, limit=10):
 
 
 def _comments(examples):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     names = sorted({row["name"] for rows in examples.values() for row in rows})
     query = """
@@ -382,12 +382,12 @@ def main():
     parser.add_argument("--out", default=str(RESULTS))
     args = parser.parse_args()
 
-    from imas_codex.discovery.base.evaluation import (
+    from iter_codex.discovery.base.evaluation import (
         bootstrap_interval,
         load_labelled_fixture,
     )
-    from imas_codex.standard_names.review.checks import load_review_checks
-    from imas_codex.standard_names.review.jev_review import (
+    from iter_codex.standard_names.review.checks import load_review_checks
+    from iter_codex.standard_names.review.jev_review import (
         NAME_AXIS,
         name_question_table,
     )
@@ -544,7 +544,7 @@ def render_fragment(result):
         "<p><strong>The state builder drops nothing.</strong> Every field these "
         "five checks declare reaches the state: <code>build_name_state</code> "
         "wraps each one through <code>_observed</code> "
-        "(<code>imas_codex/standard_names/review/jev_review.py:213-218</code>, "
+        "(<code>iter_codex/standard_names/review/jev_review.py:213-218</code>, "
         "with the flag set at <code>:152-161</code>), so a field the item does "
         "not carry is recorded as observed-and-absent rather than omitted. No "
         "declared field is never filled; what varies is whether the review item "

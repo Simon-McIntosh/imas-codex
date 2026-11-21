@@ -39,9 +39,9 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
-from imas_codex.standard_names.families import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
+from iter_codex.standard_names.families import (
     fetch_pattern_families,
     score_family_anchor,
     select_anchor,

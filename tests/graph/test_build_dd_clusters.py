@@ -1,4 +1,4 @@
-from imas_codex.graph.build_dd import _compute_cluster_centroid_embeddings
+from iter_codex.graph.build_dd import _compute_cluster_centroid_embeddings
 
 
 class _FakeClient:

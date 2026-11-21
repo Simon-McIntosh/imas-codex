@@ -9,8 +9,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.search.fuzzy_matcher import PathFuzzyMatcher, reset_fuzzy_matcher
-from imas_codex.tools.graph_search import GraphPathTool
+from iter_codex.search.fuzzy_matcher import PathFuzzyMatcher, reset_fuzzy_matcher
+from iter_codex.tools.graph_search import GraphPathTool
 
 # ---------------------------------------------------------------------------
 # Helpers

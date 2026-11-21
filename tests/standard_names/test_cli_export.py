@@ -18,8 +18,8 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.export import ExportReport, GateResult
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.export import ExportReport, GateResult
 
 
 def _success_report(**overrides) -> ExportReport:
@@ -61,7 +61,7 @@ def _failing_report(**overrides) -> ExportReport:
     return report
 
 
-MOCK_TARGET = "imas_codex.standard_names.export.run_export"
+MOCK_TARGET = "iter_codex.standard_names.export.run_export"
 
 
 @pytest.fixture
@@ -278,7 +278,7 @@ class TestGateCCatalogLineage:
         }
 
     def test_catalog_edit_without_score_passes(self):
-        from imas_codex.standard_names.export import _run_gate_c
+        from iter_codex.standard_names.export import _run_gate_c
 
         _, filtered, below, unreviewed = _run_gate_c(
             [self._cand("catalog_edit")],
@@ -290,7 +290,7 @@ class TestGateCCatalogLineage:
         assert unreviewed == 0
 
     def test_pipeline_name_without_score_still_excluded(self):
-        from imas_codex.standard_names.export import _run_gate_c
+        from iter_codex.standard_names.export import _run_gate_c
 
         _, filtered, below, unreviewed = _run_gate_c(
             [self._cand("dd")],

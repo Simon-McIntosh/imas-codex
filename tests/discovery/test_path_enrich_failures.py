@@ -4,9 +4,9 @@ import asyncio
 import subprocess
 from types import SimpleNamespace
 
-from imas_codex.discovery.base import reachability
-from imas_codex.discovery.code import workers
-from imas_codex.discovery.paths import enrichment, frontier, parallel
+from iter_codex.discovery.base import reachability
+from iter_codex.discovery.code import workers
+from iter_codex.discovery.paths import enrichment, frontier, parallel
 
 
 def test_code_scan_and_path_enrichment_share_host_reachability():
@@ -184,7 +184,7 @@ class PathGraph:
 
 def test_reachable_failure_sets_path_aside_with_reason(monkeypatch):
     graph = PathGraph()
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: graph)
     for attempt in range(1, 6):
         parallel.mark_enrichment_complete(
             "sample", [{"path": "/source", "error": "script failed"}]
@@ -202,7 +202,7 @@ def test_reachable_failure_sets_path_aside_with_reason(monkeypatch):
 
 def test_relevance_auto_enrich_keeps_triage_decision_through_budget(monkeypatch):
     graph = PathGraph(should_enrich=False)
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: graph)
     assert parallel.has_pending_work("sample") is True
     assert parallel._has_pending_enrich_work("sample") is True
     assert parallel.claim_paths_for_enriching("sample") == [
@@ -233,7 +233,7 @@ def test_relevance_auto_enrich_keeps_triage_decision_through_budget(monkeypatch)
 
 def test_set_aside_path_is_neither_pending_nor_claimable(monkeypatch):
     graph = PathGraph()
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: graph)
     assert parallel.has_pending_work("sample") is True
     assert parallel._has_pending_enrich_work("sample") is True
     assert frontier.get_discovery_stats("sample")["enrichment_ready"] == 1
@@ -248,7 +248,7 @@ def test_set_aside_path_is_neither_pending_nor_claimable(monkeypatch):
 
 def test_set_aside_path_counts_as_terminal_at_failure_limit(monkeypatch):
     graph = PathGraph()
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: graph)
     state = parallel.DiscoveryState(facility="sample")
 
     graph.failures = parallel.ENRICH_FAILURE_LIMIT - 1

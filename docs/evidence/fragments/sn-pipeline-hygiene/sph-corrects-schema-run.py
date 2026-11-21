@@ -62,7 +62,7 @@ def save(name: str, payload) -> None:
 
 
 def declared_endpoint_pairs() -> list[tuple[str, str]]:
-    from imas_codex.graph.schema_context_data import RELATIONSHIPS
+    from iter_codex.graph.schema_context_data import RELATIONSHIPS
 
     return sorted(
         (from_label, to_label)
@@ -72,7 +72,7 @@ def declared_endpoint_pairs() -> list[tuple[str, str]]:
 
 
 def phase_live() -> dict:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     declared = declared_endpoint_pairs()
     client = GraphClient()
@@ -128,8 +128,8 @@ def _run_test(uri: str, log_path: Path) -> int:
         {
             "NEO4J_URI": uri,
             "NEO4J_PASSWORD": "",
-            "IMAS_CODEX_TEST_NEO4J_URI": uri,
-            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+            "ITER_CODEX_TEST_NEO4J_URI": uri,
+            "ITER_CODEX_TEST_NEO4J_EPHEMERAL": "1",
             "PYTHONPATH": str(REPO),
         }
     )
@@ -173,7 +173,7 @@ def _revision() -> str:
 
 
 def phase_negative_control() -> dict:
-    from imas_codex.graph import temp_neo4j
+    from iter_codex.graph import temp_neo4j
     from tests.standard_names.conftest import (
         _detach_store_removal,
         _start_empty_neo4j,

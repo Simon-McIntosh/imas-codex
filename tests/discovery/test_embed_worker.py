@@ -12,7 +12,7 @@ import re
 from datetime import UTC, datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
-from imas_codex.discovery.base.embed_worker import (
+from iter_codex.discovery.base.embed_worker import (
     DEFAULT_EMBED_RETRY_HOURS,
     _count_unembedded,
     _fetch_unembedded,
@@ -117,7 +117,7 @@ class TestFetchUnembedded:
         """A row with an old embed_failed_at is fetched; a fresh one is not."""
         frag = pending_embed_predicate("n")
         _gc, ctx = _fake_gc(_rows(), "n", frag)
-        with patch("imas_codex.graph.GraphClient", return_value=ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=ctx):
             fetched = _fetch_unembedded("FakeLabel", None, 10)
         got = {r["id"] for r in fetched}
         assert "stale" in got
@@ -138,7 +138,7 @@ class TestFetchUnembedded:
         ctx = MagicMock()
         ctx.__enter__ = MagicMock(return_value=gc)
         ctx.__exit__ = MagicMock(return_value=False)
-        with patch("imas_codex.graph.GraphClient", return_value=ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=ctx):
             _fetch_unembedded("FakeLabel", None, 10)
         assert pending_embed_predicate("n") in captured["sql"]
         assert "embed_retry_cutoff" in captured["params"]
@@ -156,7 +156,7 @@ class TestCountUnembedded:
         ctx = MagicMock()
         ctx.__enter__ = MagicMock(return_value=gc)
         ctx.__exit__ = MagicMock(return_value=False)
-        with patch("imas_codex.graph.GraphClient", return_value=ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=ctx):
             total = _count_unembedded("FakeLabel", None)
         assert total == 7
 
@@ -172,7 +172,7 @@ class TestMarkEmbedFailed:
         ctx = MagicMock()
         ctx.__enter__ = MagicMock(return_value=mock_gc)
         ctx.__exit__ = MagicMock(return_value=False)
-        with patch("imas_codex.graph.GraphClient", return_value=ctx):
+        with patch("iter_codex.graph.GraphClient", return_value=ctx):
             _mark_embed_failed("FakeLabel", ["a", "b"])
         sql = mock_gc.query.call_args[0][0]
         assert "embed_failed_at = datetime()" in sql

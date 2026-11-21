@@ -20,8 +20,8 @@ import os
 import sys
 from collections import defaultdict
 
-from imas_codex.graph import GraphClient
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph import GraphClient
+from iter_codex.standard_names.signed_manifest import (
     apply_signed_manifest,
     signed_payload_sha256,
 )

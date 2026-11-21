@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli import main
+from iter_codex.cli import main
 
 
 class TestCLI:
@@ -52,7 +52,7 @@ class TestServeCLI:
         assert "--transport" in result.output
         assert "--read-only" in result.output
 
-    @patch("imas_codex.llm.server.AgentsServer")
+    @patch("iter_codex.llm.server.AgentsServer")
     def test_serve_default_options(self, mock_server_cls, runner):
         mock_server = MagicMock()
         mock_server_cls.return_value = mock_server
@@ -62,7 +62,7 @@ class TestServeCLI:
         )
         mock_server.run.assert_called_once()
 
-    @patch("imas_codex.llm.server.AgentsServer")
+    @patch("iter_codex.llm.server.AgentsServer")
     def test_serve_read_only(self, mock_server_cls, runner):
         mock_server = MagicMock()
         mock_server_cls.return_value = mock_server
@@ -71,7 +71,7 @@ class TestServeCLI:
             read_only=True, dd_only=None, no_embed=False, include_standard_names=True
         )
 
-    @patch("imas_codex.llm.server.AgentsServer")
+    @patch("iter_codex.llm.server.AgentsServer")
     def test_serve_transport_options(self, mock_server_cls, runner):
         mock_server = MagicMock()
         mock_server_cls.return_value = mock_server
@@ -81,7 +81,7 @@ class TestServeCLI:
         result = runner.invoke(main, ["serve", "--transport", "invalid"])
         assert result.exit_code != 0
 
-    @patch("imas_codex.llm.server.AgentsServer")
+    @patch("iter_codex.llm.server.AgentsServer")
     def test_serve_host_port(self, mock_server_cls, runner):
         mock_server = MagicMock()
         mock_server_cls.return_value = mock_server
@@ -101,7 +101,7 @@ class TestReadOnlyServer:
 
     def test_read_only_suppresses_write_tools(self):
         """Read-only mode suppresses write tools and REPL."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(read_only=True)
         comps = server.mcp._local_provider._components
@@ -127,7 +127,7 @@ class TestReadOnlyServer:
 
     def test_default_mode_has_all_tools(self):
         """Default mode includes all tools."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer()
         comps = server.mcp._local_provider._components
@@ -148,17 +148,17 @@ class TestReadOnlyServer:
 
     def test_read_only_server_name(self):
         """Read-only mode uses distinct server name."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         ro_server = AgentsServer(read_only=True)
         rw_server = AgentsServer(read_only=False)
 
-        assert ro_server.mcp.name == "imas-codex-readonly"
-        assert rw_server.mcp.name == "imas-codex"
+        assert ro_server.mcp.name == "iter-codex-readonly"
+        assert rw_server.mcp.name == "iter-codex"
 
     def test_read_only_fewer_tools(self):
         """Read-only mode has strictly fewer tools than default."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         ro_server = AgentsServer(read_only=True)
         rw_server = AgentsServer(read_only=False)
@@ -184,7 +184,7 @@ class TestReadOnlyServer:
 
     def test_dd_only_excludes_facility_tools(self):
         """DD-only mode does not register any facility tools."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(dd_only=True)
         comps = server.mcp._local_provider._components
@@ -213,11 +213,11 @@ class TestReadOnlyServer:
 
     def test_dd_only_implies_read_only(self):
         """DD-only mode automatically sets read_only=True."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(dd_only=True)
         assert server.read_only is True
-        assert server.mcp.name == "imas-codex-readonly"
+        assert server.mcp.name == "iter-codex-readonly"
 
 
 class TestFacilitiesCLI:

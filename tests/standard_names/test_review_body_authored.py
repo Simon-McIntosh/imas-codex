@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 
-from imas_codex.standard_names.catalog_release import run_review_release
+from iter_codex.standard_names.catalog_release import run_review_release
 
 
 def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:

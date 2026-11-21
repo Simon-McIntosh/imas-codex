@@ -18,13 +18,13 @@ from __future__ import annotations
 import pytest
 from pydantic import BaseModel
 
-from imas_codex.discovery.base.llm import _LOCAL_MODEL_PREFIXES
-from imas_codex.settings import (
+from iter_codex.discovery.base.llm import _LOCAL_MODEL_PREFIXES
+from iter_codex.settings import (
     get_model,
     get_openrouter_pricing,
     get_sn_review_names_models,
 )
-from imas_codex.standard_names.budget import EPSILON, model_provider_exposure
+from iter_codex.standard_names.budget import EPSILON, model_provider_exposure
 
 #: Upper bound for one representative attempt on every launch seat.  Set just
 #: above what the seats price today so an inflated term is caught here rather
@@ -142,7 +142,7 @@ def test_seat_enumeration_is_not_silently_empty() -> None:
 
 def _configured_paid_routes() -> list[tuple[str, str]]:
     """Every paid route a Standard Names run can dispatch to, with its seat."""
-    from imas_codex.settings import get_sn_review_docs_models
+    from iter_codex.settings import get_sn_review_docs_models
 
     routes: dict[str, str] = {}
     for seat in (
@@ -182,7 +182,7 @@ def test_every_paid_seat_is_priced_from_the_project_catalog(
     """
     pricing = get_openrouter_pricing(model)
     assert pricing, (
-        f"{seat} ({model}) has no [tool.imas-codex.llm.openrouter-pricing] entry"
+        f"{seat} ({model}) has no [tool.iter-codex.llm.openrouter-pricing] entry"
     )
     assert pricing["prompt"] and pricing["completion"], f"{seat} lacks token rates"
     assert pricing["source"].startswith("https://openrouter.ai/api/v1/model/")

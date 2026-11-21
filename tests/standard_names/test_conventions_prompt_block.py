@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names.context import conventions_context_for
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.standard_names.context import conventions_context_for
 
 NAME = "flux_surface_averaged_argon_density_at_plasma_boundary"
 UNSELECTED = "vacuum_toroidal_field_strength"

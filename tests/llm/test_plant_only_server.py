@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.server import AgentsServer
+from iter_codex.llm.server import AgentsServer
 
 
 def _tool_names(server: AgentsServer) -> set[str]:

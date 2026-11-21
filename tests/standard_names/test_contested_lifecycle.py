@@ -15,9 +15,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import promote as approval_mod
-from imas_codex.standard_names.promote import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import promote as approval_mod
+from iter_codex.standard_names.promote import (
     ApprovalChange,
     list_contested,
     resolve_contested_override,
@@ -190,10 +190,10 @@ def test_resolution_noop_on_non_contested(clean):
 
 @pytest.mark.graph
 def test_contested_child_not_live_for_enrich(clean):
-    from imas_codex.standard_names.defaults import (
+    from iter_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     )
-    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+    from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
         claim_enrich_parents_batch,
     )
 
@@ -233,7 +233,7 @@ def test_contested_child_not_live_for_enrich(clean):
 
 @pytest.mark.graph
 def test_undo_approval_demotes_and_reverts(clean):
-    from imas_codex.standard_names.promote import undo_approval
+    from iter_codex.standard_names.promote import undo_approval
 
     approved = f"{PREFIX}_undo_approved"
     other_pr = f"{PREFIX}_undo_other_pr"

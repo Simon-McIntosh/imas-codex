@@ -16,8 +16,8 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
-from imas_codex.standard_names.review.pipeline import _build_review_record
+from iter_codex.standard_names.graph_store.graph_catalog import write_reviews
+from iter_codex.standard_names.review.pipeline import _build_review_record
 
 
 def test_build_review_record_preserves_cost_and_tokens() -> None:
@@ -62,7 +62,7 @@ def test_write_reviews_forwards_cost_and_tokens() -> None:
     ]
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     ) as MockGC:  # noqa: N806
         MockGC.return_value.__enter__.return_value.query.return_value = []
         n = write_reviews(records)

@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import run_export
+from iter_codex.standard_names.export import run_export
 from tests.standard_names.conftest import clean_source_audit_graph
 
 
@@ -87,29 +87,29 @@ def test_export_resolves_accepting_docs_review_method_and_keeps_absence_closed(
 
     with ExitStack() as stack:
         stack.enter_context(
-            patch("imas_codex.graph.client.GraphClient", return_value=graph)
+            patch("iter_codex.graph.client.GraphClient", return_value=graph)
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog.docs_review_property_coverage",
+                "iter_codex.standard_names.graph_store.graph_catalog.docs_review_property_coverage",
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._validate_entry",
+                "iter_codex.standard_names.export._validate_entry",
                 side_effect=lambda entry: entry,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_deprecation_stubs",
+                "iter_codex.standard_names.export._fetch_deprecation_stubs",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+                "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
                 return_value=([], set()),
             )
         )

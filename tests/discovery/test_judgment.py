@@ -1,4 +1,4 @@
-"""Tests for the batch decision core in imas_codex.discovery.base.judgment.
+"""Tests for the batch decision core in iter_codex.discovery.base.judgment.
 
 ``decide_batch`` is driven through the call layer it imports
 (``acall_decisions``), so no test here opens the live decisions endpoint.
@@ -15,7 +15,7 @@ import asyncio
 
 import pytest
 
-from imas_codex.discovery.base import judgment
+from iter_codex.discovery.base import judgment
 
 # The decision core skips its calls when the decisions key is absent, so every
 # test here that measures an ordering or a booking requests the shared key
@@ -252,7 +252,7 @@ import sys
 
 class _ForbidSearchLlm(importlib.abc.MetaPathFinder):
     def find_spec(self, name, path=None, target=None):
-        if name == "imas_codex.llm" or name.startswith("imas_codex.llm."):
+        if name == "iter_codex.llm" or name.startswith("iter_codex.llm."):
             raise ImportError("forbidden search-side package reached: " + name)
         return None
 
@@ -263,11 +263,11 @@ __import__("__TARGET__")
 
 
 def _import_under_block(target: str):
-    """Import ``target`` in a fresh interpreter that refuses imas_codex.llm."""
+    """Import ``target`` in a fresh interpreter that refuses iter_codex.llm."""
     import subprocess
     import sys
 
-    repo_root = str(judgment.__file__).rsplit("/imas_codex/", 1)[0]
+    repo_root = str(judgment.__file__).rsplit("/iter_codex/", 1)[0]
     return subprocess.run(
         [sys.executable, "-c", _IMPORT_BLOCK_PROGRAM.replace("__TARGET__", target)],
         capture_output=True,
@@ -280,17 +280,17 @@ def test_judgment_imports_nothing_from_the_search_llm_package():
     """The discovery core must not depend on the search-side llm package.
 
     The guard is behavioural: a fresh interpreter installs an import hook that
-    raises on ``imas_codex.llm`` and then imports the judgment module. A module
+    raises on ``iter_codex.llm`` and then imports the judgment module. A module
     that reached the package through any import — direct or a re-export — makes
     that interpreter fail, which the source-text check this replaced could not
     see. The second run is the control: the hook refuses a package that does
-    reach ``imas_codex.llm``, so a clean first run means absence, not a hook
+    reach ``iter_codex.llm``, so a clean first run means absence, not a hook
     that never fires.
     """
-    result = _import_under_block("imas_codex.discovery.base.judgment")
+    result = _import_under_block("iter_codex.discovery.base.judgment")
     assert result.returncode == 0, result.stderr
 
-    control = _import_under_block("imas_codex.llm.search_tools")
+    control = _import_under_block("iter_codex.llm.search_tools")
     assert control.returncode != 0
     assert "forbidden search-side package reached" in control.stderr
 
@@ -325,7 +325,7 @@ async def test_judge_rows_applies_only_answers_and_returns_reported_cost(monkeyp
 
 
 def test_rerank_pool_is_larger_than_the_returned_search_window():
-    from imas_codex.llm.search_tools import RERANK_POOL
+    from iter_codex.llm.search_tools import RERANK_POOL
 
     assert RERANK_POOL > 30
 
@@ -340,7 +340,7 @@ async def test_both_entry_points_share_one_fault_classification(monkeypatch):
     lives in one place, teaching the shared unit to read a malformed answer as
     a transport fault turns this test red.
     """
-    from imas_codex.discovery.base.llm import DecisionsValidationError
+    from iter_codex.discovery.base.llm import DecisionsValidationError
 
     raised: list[Exception] = []
 

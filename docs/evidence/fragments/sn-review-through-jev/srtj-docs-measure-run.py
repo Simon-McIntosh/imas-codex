@@ -15,7 +15,7 @@ from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
 
-from imas_codex.discovery.base.evaluation import (
+from iter_codex.discovery.base.evaluation import (
     bootstrap_interval,
     choose_operating_point,
     cost_latency_summary,
@@ -23,11 +23,11 @@ from imas_codex.discovery.base.evaluation import (
     option_order_stability,
     paired_auc,
 )
-from imas_codex.discovery.base.judgment import decide_batch
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_model
-from imas_codex.standard_names.review.checks import load_review_checks
-from imas_codex.standard_names.review.jev_review import (
+from iter_codex.discovery.base.judgment import decide_batch
+from iter_codex.graph.client import GraphClient
+from iter_codex.settings import get_model
+from iter_codex.standard_names.review.checks import load_review_checks
+from iter_codex.standard_names.review.jev_review import (
     DOCS_AXIS,
     SERVICE,
     aggregate_docs_review,

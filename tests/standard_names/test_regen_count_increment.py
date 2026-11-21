@@ -18,7 +18,7 @@ import pytest
 def _no_approved_names():
     """Make the approval-backed protection lookup explicit for this suite."""
     with patch(
-        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        "iter_codex.standard_names.protection._fetch_catalog_edit_names",
         return_value=set(),
     ):
         yield
@@ -30,11 +30,11 @@ class TestRegenCountIncrement:
     def _call_write(self, names: list[dict], mock_gc: MagicMock) -> int:
         """Call write_standard_names with a mocked GraphClient."""
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 write_standard_names,
             )
 
@@ -152,14 +152,14 @@ class TestFetchLowScoreSourcesGate:
     def test_gate_clause_present(self) -> None:
         """fetch_low_score_sources Cypher must gate on regen_count < 1."""
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             mock_gc = MagicMock()
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
             mock_gc.query = MagicMock(return_value=[])
 
-            from imas_codex.standard_names.graph_store.graph_lineage import (
+            from iter_codex.standard_names.graph_store.graph_lineage import (
                 fetch_low_score_sources,
             )
 

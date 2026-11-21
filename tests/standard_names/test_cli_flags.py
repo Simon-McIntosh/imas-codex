@@ -20,8 +20,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.defaults import (
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DEFAULT_MIN_SCORE,
     DEFAULT_REFINE_ROTATIONS,
@@ -53,7 +53,7 @@ def test_release_refine_claim_default_emits_json_dry_run() -> None:
         "manifest_sha256": "a" * 64,
     }
     with patch(
-        "imas_codex.standard_names.graph_store.graph_claim_release.release_stranded_refine_claim",
+        "iter_codex.standard_names.graph_store.graph_claim_release.release_stranded_refine_claim",
         return_value=receipt,
     ) as release:
         result = CliRunner().invoke(
@@ -167,7 +167,7 @@ def _invoke(*extra_args: str) -> tuple[object, dict | None]:
     def _fake_loop_cmd(**kwargs):
         captured.update(kwargs)
 
-    with patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd):
+    with patch("iter_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd):
         result = runner.invoke(
             sn, _MINIMAL_ARGS + list(extra_args), catch_exceptions=False
         )
@@ -316,7 +316,7 @@ def test_no_obsolete_flags(obsolete_flag: str):
     # Provide a dummy value to avoid "option requires an argument" masking the
     # "no such option" error for flags that take a value.
     args = _MINIMAL_ARGS + [obsolete_flag, "dummy"]
-    with patch("imas_codex.cli.sn._run_sn_cmd"):
+    with patch("iter_codex.cli.sn._run_sn_cmd"):
         result = runner.invoke(sn, args, catch_exceptions=True)
     assert result.exit_code != 0, (
         f"Obsolete flag {obsolete_flag!r} should have caused a non-zero exit"

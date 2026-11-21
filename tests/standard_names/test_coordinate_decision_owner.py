@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names import derivation, docs_gates
-from imas_codex.standard_names.docs_gates import (
+from iter_codex.standard_names import derivation, docs_gates
+from iter_codex.standard_names.docs_gates import (
     DocumentationGateOutcome,
     DocumentationPhysicsContext,
     score_documentation,
 )
-from imas_codex.standard_names.docs_holdout_eval import evaluate_docs_holdout
-from imas_codex.standard_names.review.audits import run_documentation_gate_checks
+from iter_codex.standard_names.docs_holdout_eval import evaluate_docs_holdout
+from iter_codex.standard_names.review.audits import run_documentation_gate_checks
 
 COORDINATE_DOCUMENT = (
     "The radial position of the magnetic axis in the right-handed cylindrical "

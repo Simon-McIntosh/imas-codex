@@ -6,7 +6,7 @@
 
 **Architecture:** A new `physics_judge.py` module scores composed names against their DD documentation on a measurement-principle rubric (structured LLM call). A calibration gate validates the judge against a human gold set before its scores count. The existing `benchmark.py` compose loop supplies the candidates for all 6 models; a thin CLI flag wires it together and renders a comparison table.
 
-**Tech Stack:** Python 3.12, pydantic (structured output), `call_llm_structured`/`render_prompt` (imas_codex LLM layer), pytest, the existing `imas_codex/standard_names/benchmark.py`.
+**Tech Stack:** Python 3.12, pydantic (structured output), `call_llm_structured`/`render_prompt` (iter_codex LLM layer), pytest, the existing `iter_codex/standard_names/benchmark.py`.
 
 **Spec:** `docs/superpowers/specs/2026-06-15-sn-composer-physics-benchmark-design.md`
 
@@ -15,11 +15,11 @@
 ## File Structure
 
 - **Create** `research/physics_bench_paths.json` — fixed ~30 DD source paths (the test set), version-controlled.
-- **Create** `imas_codex/standard_names/physics_judge.py` — `PhysicsVerdict` model, `judge_name_physics()` (one name → verdict), `run_calibration_gate()` (gold set vs judge), `score_physics_batch()`.
-- **Create** `imas_codex/llm/prompts/sn/judge_physics_correctness_system.md` + `judge_physics_correctness_user.md` — the measurement-principle rubric prompt.
+- **Create** `iter_codex/standard_names/physics_judge.py` — `PhysicsVerdict` model, `judge_name_physics()` (one name → verdict), `run_calibration_gate()` (gold set vs judge), `score_physics_batch()`.
+- **Create** `iter_codex/llm/prompts/sn/judge_physics_correctness_system.md` + `judge_physics_correctness_user.md` — the measurement-principle rubric prompt.
 - **Create** `research/physics_bench_gold.json` — human gold labels (authored during execution, Task 7).
-- **Modify** `imas_codex/standard_names/benchmark.py` — add physics fields to `ModelResult` + a `physics_judge_model`/`gold_set_path` to `BenchmarkConfig`; invoke physics scoring after compose; add report aggregation.
-- **Modify** `imas_codex/cli/sn.py` — add `--physics` flag (+ `--gold-set`, `--physics-judge-model`) to `sn bench`; render the physics comparison table.
+- **Modify** `iter_codex/standard_names/benchmark.py` — add physics fields to `ModelResult` + a `physics_judge_model`/`gold_set_path` to `BenchmarkConfig`; invoke physics scoring after compose; add report aggregation.
+- **Modify** `iter_codex/cli/sn.py` — add `--physics` flag (+ `--gold-set`, `--physics-judge-model`) to `sn bench`; render the physics comparison table.
 - **Create** `tests/standard_names/test_physics_judge.py` — unit tests (stub judge, calibration gate, batch scoring) — all mock-only, no live LLM.
 
 ---
@@ -27,7 +27,7 @@
 ## Task 1: Physics verdict model + test-set loader
 
 **Files:**
-- Create: `imas_codex/standard_names/physics_judge.py`
+- Create: `iter_codex/standard_names/physics_judge.py`
 - Create: `research/physics_bench_paths.json`
 - Test: `tests/standard_names/test_physics_judge.py`
 
@@ -65,7 +65,7 @@ non-control category for judge calibration balance.)
 from __future__ import annotations
 import json
 from pathlib import Path
-from imas_codex.standard_names.physics_judge import PhysicsVerdict, load_bench_paths
+from iter_codex.standard_names.physics_judge import PhysicsVerdict, load_bench_paths
 
 
 def test_physics_verdict_fields():
@@ -92,12 +92,12 @@ def test_load_bench_paths():
 - [ ] **Step 3: Run it to verify failure**
 
 Run: `uv run --no-sync pytest tests/standard_names/test_physics_judge.py -q`
-Expected: FAIL — `ModuleNotFoundError: imas_codex.standard_names.physics_judge`.
+Expected: FAIL — `ModuleNotFoundError: iter_codex.standard_names.physics_judge`.
 
 - [ ] **Step 4: Implement the model + loader**
 
 ```python
-# imas_codex/standard_names/physics_judge.py
+# iter_codex/standard_names/physics_judge.py
 """Physics-correctness judging for SN composer benchmarking.
 
 A measurement-principle rubric judge: scores a composed standard name against
@@ -148,9 +148,9 @@ Expected: PASS (2 tests).
 - [ ] **Step 6: Commit**
 
 ```bash
-uv run --no-sync ruff check --fix imas_codex/standard_names/physics_judge.py tests/standard_names/test_physics_judge.py
-uv run --no-sync ruff format imas_codex/standard_names/physics_judge.py tests/standard_names/test_physics_judge.py
-git add imas_codex/standard_names/physics_judge.py tests/standard_names/test_physics_judge.py research/physics_bench_paths.json
+uv run --no-sync ruff check --fix iter_codex/standard_names/physics_judge.py tests/standard_names/test_physics_judge.py
+uv run --no-sync ruff format iter_codex/standard_names/physics_judge.py tests/standard_names/test_physics_judge.py
+git add iter_codex/standard_names/physics_judge.py tests/standard_names/test_physics_judge.py research/physics_bench_paths.json
 git commit -m "feat(sn): physics-judge verdict model + benchmark test-set loader"
 ```
 
@@ -159,8 +159,8 @@ git commit -m "feat(sn): physics-judge verdict model + benchmark test-set loader
 ## Task 2: Physics-correctness judge prompt
 
 **Files:**
-- Create: `imas_codex/llm/prompts/sn/judge_physics_correctness_system.md`
-- Create: `imas_codex/llm/prompts/sn/judge_physics_correctness_user.md`
+- Create: `iter_codex/llm/prompts/sn/judge_physics_correctness_system.md`
+- Create: `iter_codex/llm/prompts/sn/judge_physics_correctness_user.md`
 - Test: `tests/standard_names/test_physics_judge.py` (add render test)
 
 - [ ] **Step 1: Write the system prompt (the rubric)**
@@ -216,7 +216,7 @@ Return the structured PhysicsVerdict.
 
 ```python
 # add to tests/standard_names/test_physics_judge.py
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 
 def test_judge_prompts_render():
@@ -238,7 +238,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add imas_codex/llm/prompts/sn/judge_physics_correctness_system.md imas_codex/llm/prompts/sn/judge_physics_correctness_user.md tests/standard_names/test_physics_judge.py
+git add iter_codex/llm/prompts/sn/judge_physics_correctness_system.md iter_codex/llm/prompts/sn/judge_physics_correctness_user.md tests/standard_names/test_physics_judge.py
 git commit -m "feat(sn): physics-correctness judge rubric prompt"
 ```
 
@@ -247,7 +247,7 @@ git commit -m "feat(sn): physics-correctness judge rubric prompt"
 ## Task 3: Judge call + batch scoring (with a stub-injectable LLM)
 
 **Files:**
-- Modify: `imas_codex/standard_names/physics_judge.py`
+- Modify: `iter_codex/standard_names/physics_judge.py`
 - Test: `tests/standard_names/test_physics_judge.py`
 
 - [ ] **Step 1: Write the failing test (stub judge fn injected)**
@@ -255,7 +255,7 @@ git commit -m "feat(sn): physics-correctness judge rubric prompt"
 ```python
 # add to tests/standard_names/test_physics_judge.py
 import anyio
-from imas_codex.standard_names.physics_judge import score_physics_batch
+from iter_codex.standard_names.physics_judge import score_physics_batch
 
 
 def _stub_judge(name, path, unit, documentation):
@@ -291,9 +291,9 @@ Add to `physics_judge.py`:
 ```python
 from collections.abc import Awaitable, Callable
 
-from imas_codex.discovery.base.llm import acall_llm_structured
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.settings import get_reasoning_effort
+from iter_codex.discovery.base.llm import acall_llm_structured
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.settings import get_reasoning_effort
 
 
 async def judge_name_physics(
@@ -341,8 +341,8 @@ Expected: PASS (all tests).
 - [ ] **Step 5: Commit**
 
 ```bash
-uv run --no-sync ruff check --fix imas_codex/standard_names/physics_judge.py
-git add imas_codex/standard_names/physics_judge.py tests/standard_names/test_physics_judge.py
+uv run --no-sync ruff check --fix iter_codex/standard_names/physics_judge.py
+git add iter_codex/standard_names/physics_judge.py tests/standard_names/test_physics_judge.py
 git commit -m "feat(sn): physics judge call + batch scorer"
 ```
 
@@ -351,14 +351,14 @@ git commit -m "feat(sn): physics judge call + batch scorer"
 ## Task 4: Calibration gate
 
 **Files:**
-- Modify: `imas_codex/standard_names/physics_judge.py`
+- Modify: `iter_codex/standard_names/physics_judge.py`
 - Test: `tests/standard_names/test_physics_judge.py`
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # add to tests/standard_names/test_physics_judge.py
-from imas_codex.standard_names.physics_judge import run_calibration_gate
+from iter_codex.standard_names.physics_judge import run_calibration_gate
 
 
 def test_calibration_gate_trusts_when_hardcases_caught():
@@ -444,8 +444,8 @@ Expected: PASS (2 tests).
 - [ ] **Step 5: Commit**
 
 ```bash
-uv run --no-sync ruff check --fix imas_codex/standard_names/physics_judge.py
-git add imas_codex/standard_names/physics_judge.py tests/standard_names/test_physics_judge.py
+uv run --no-sync ruff check --fix iter_codex/standard_names/physics_judge.py
+git add iter_codex/standard_names/physics_judge.py tests/standard_names/test_physics_judge.py
 git commit -m "feat(sn): physics-judge calibration gate (gold-set gated trust)"
 ```
 
@@ -454,7 +454,7 @@ git commit -m "feat(sn): physics-judge calibration gate (gold-set gated trust)"
 ## Task 5: Benchmark integration — physics fields + orchestration
 
 **Files:**
-- Modify: `imas_codex/standard_names/benchmark.py` (`ModelResult` ~74, `BenchmarkConfig` ~37, `run_benchmark` ~889)
+- Modify: `iter_codex/standard_names/benchmark.py` (`ModelResult` ~74, `BenchmarkConfig` ~37, `run_benchmark` ~889)
 - Test: `tests/standard_names/test_physics_bench_integration.py` (create)
 
 - [ ] **Step 1: Add physics fields to `ModelResult` and config**
@@ -485,8 +485,8 @@ Add to `BenchmarkConfig` (~44):
 ```python
 # tests/standard_names/test_physics_bench_integration.py
 from __future__ import annotations
-from imas_codex.standard_names.benchmark import ModelResult, apply_physics_metrics
-from imas_codex.standard_names.physics_judge import PhysicsVerdict
+from iter_codex.standard_names.benchmark import ModelResult, apply_physics_metrics
+from iter_codex.standard_names.physics_judge import PhysicsVerdict
 
 
 def test_apply_physics_metrics():
@@ -538,10 +538,10 @@ In `run_benchmark` (~889), after the per-model compose+review results are built 
 ```python
     if config.physics_judge:
         from functools import partial
-        from imas_codex.standard_names.physics_judge import (
+        from iter_codex.standard_names.physics_judge import (
             judge_name_physics, score_physics_batch, load_bench_paths,
         )
-        from imas_codex.standard_names.benchmark import _resolve_name  # local helper
+        from iter_codex.standard_names.benchmark import _resolve_name  # local helper
         judge_model = config.physics_judge_model or "openrouter/anthropic/claude-opus-4.8"
         bench_paths = {p["path"]: p for p in load_bench_paths()}
         hardcase = {p["path"] for p in bench_paths.values() if p["category"] != "control"}
@@ -572,8 +572,8 @@ Expected: PASS.
 - [ ] **Step 7: Commit**
 
 ```bash
-uv run --no-sync ruff check --fix imas_codex/standard_names/benchmark.py tests/standard_names/test_physics_bench_integration.py
-git add imas_codex/standard_names/benchmark.py tests/standard_names/test_physics_bench_integration.py
+uv run --no-sync ruff check --fix iter_codex/standard_names/benchmark.py tests/standard_names/test_physics_bench_integration.py
+git add iter_codex/standard_names/benchmark.py tests/standard_names/test_physics_bench_integration.py
 git commit -m "feat(sn): wire physics judging + metrics into run_benchmark"
 ```
 
@@ -582,8 +582,8 @@ git commit -m "feat(sn): wire physics judging + metrics into run_benchmark"
 ## Task 6: CLI flag + comparison table
 
 **Files:**
-- Modify: `imas_codex/cli/sn.py` (`sn bench` ~1805–1868)
-- Modify: `imas_codex/standard_names/benchmark.py` (`render_comparison_table` ~1631)
+- Modify: `iter_codex/cli/sn.py` (`sn bench` ~1805–1868)
+- Modify: `iter_codex/standard_names/benchmark.py` (`render_comparison_table` ~1631)
 
 - [ ] **Step 1: Add `--physics` / `--gold-set` / `--physics-judge-model` options to `sn bench`**
 
@@ -602,7 +602,7 @@ In `sn_bench(...)` signature add `physics: bool, gold_set: str | None, physics_j
 ```python
     if physics and gold_set:
         import json as _json
-        from imas_codex.standard_names.physics_judge import run_calibration_gate, judge_name_physics
+        from iter_codex.standard_names.physics_judge import run_calibration_gate, judge_name_physics
         from functools import partial
         gold = _json.loads(open(gold_set).read())
         jmodel = physics_judge_model or "openrouter/anthropic/claude-opus-4.8"
@@ -641,17 +641,17 @@ populate; do not invent.)
 
 - [ ] **Step 3: Verify CLI help + table wiring (smoke)**
 
-Run: `uv run --no-sync imas-codex sn bench --help`
+Run: `uv run --no-sync iter-codex sn bench --help`
 Expected: shows `--physics`, `--gold-set`, `--physics-judge-model`.
 
-Run: `uv run --no-sync python -c "import imas_codex.cli.sn, imas_codex.standard_names.benchmark; print('import ok')"`
+Run: `uv run --no-sync python -c "import iter_codex.cli.sn, iter_codex.standard_names.benchmark; print('import ok')"`
 Expected: `import ok`.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-uv run --no-sync ruff check --fix imas_codex/cli/sn.py imas_codex/standard_names/benchmark.py
-git add imas_codex/cli/sn.py imas_codex/standard_names/benchmark.py
+uv run --no-sync ruff check --fix iter_codex/cli/sn.py iter_codex/standard_names/benchmark.py
+git add iter_codex/cli/sn.py iter_codex/standard_names/benchmark.py
 git commit -m "feat(sn): sn bench --physics flag + physics-correctness comparison table"
 ```
 
@@ -671,8 +671,8 @@ principle / DD doc. Pull each path's current DD doc + unit to ground the label:
 
 ```bash
 uv run --no-sync python -c "
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.physics_judge import load_bench_paths
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.physics_judge import load_bench_paths
 with GraphClient() as gc:
     for p in load_bench_paths():
         r = gc.query('MATCH (n:IMASNode {id:\$id}) RETURN n.unit AS u, n.description AS d', id=p['path'])
@@ -689,7 +689,7 @@ verdict. Include the rogowski/iron_core/x_point hard cases with `faithful:false`
 - [ ] **Step 2: Run the benchmark**
 
 ```bash
-IMAS_CODEX_SN_DEDUP_THRESHOLD=0.85 uv run --no-sync imas-codex sn bench \
+ITER_CODEX_SN_DEDUP_THRESHOLD=0.85 uv run --no-sync iter-codex sn bench \
   --physics --gold-set research/physics_bench_gold.json \
   --models "hosted_vllm/deepseek-v4-flash openrouter/anthropic/claude-opus-4.8 openrouter/openai/gpt-5.5 openrouter/google/gemini-3.1-pro-preview openrouter/anthropic/claude-sonnet-4.6 openrouter/moonshotai/kimi-k2.6"
 ```

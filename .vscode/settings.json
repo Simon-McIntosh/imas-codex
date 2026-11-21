@@ -29,10 +29,10 @@
   "python.analysis.typeCheckingMode": "basic",
   "python.envFile": "${workspaceFolder}/.env",
   "chat.mcp.serverSampling": {
-    "imas-codex/.vscode/mcp.json: imas": {
+    "iter-codex/.vscode/mcp.json: imas": {
       "allowedDuringChat": true
     },
-    "imas-codex/.vscode/mcp.json: imas-test": {
+    "iter-codex/.vscode/mcp.json: imas-test": {
       "allowedDuringChat": true
     }
   },

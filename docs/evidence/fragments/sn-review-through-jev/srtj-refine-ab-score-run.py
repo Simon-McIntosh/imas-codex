@@ -21,8 +21,8 @@ from pathlib import Path
 
 import numpy as np
 
-from imas_codex.discovery.base import evaluation
-from imas_codex.discovery.base.evaluation import bootstrap_interval
+from iter_codex.discovery.base import evaluation
+from iter_codex.discovery.base.evaluation import bootstrap_interval
 
 HERE = Path(__file__).resolve().parent
 SHEET = HERE / "srtj-refine-ab-label-sheet.json"
@@ -257,7 +257,7 @@ def main() -> int:
             "graph_updates": 0,
             "arm_read_from": "arm key only; no row position or sheet order read",
             "bootstrap": (
-                "imas_codex.discovery.base.evaluation.bootstrap_interval, "
+                "iter_codex.discovery.base.evaluation.bootstrap_interval, "
                 f"{RESAMPLES} seeded paired draws"
             ),
         },
@@ -323,7 +323,7 @@ def main() -> int:
         "case figures coincide here: each contributing case reaches the sheet once per "
         "arm, so an accepted count is the same per row and per case. The interval is the "
         f"{int(LEVEL * 100)}% percentile bootstrap over cases ({RESAMPLES} seeded draws, "
-        "<code>imas_codex.discovery.base.evaluation.bootstrap_interval</code>).</p>\n"
+        "<code>iter_codex.discovery.base.evaluation.bootstrap_interval</code>).</p>\n"
         "<table><thead><tr><th>Route</th><th>Arm</th><th>Rows</th><th>Accepted</th>"
         "<th>Acceptance</th><th>95% interval</th><th>Arm spend [USD]</th>"
         "<th>Cost per accepted</th></tr></thead><tbody>"

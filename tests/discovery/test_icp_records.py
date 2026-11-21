@@ -6,7 +6,7 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from imas_codex.discovery.icp import (
+from iter_codex.discovery.icp import (
     ICPClient,
     ICPNotFound,
     ICPPermissionDenied,

@@ -6,10 +6,10 @@ COCOS computation, unit normalization, schema context generation.
 
 from __future__ import annotations
 
-from imas_codex.cocos import cocos_to_parameters, determine_cocos
-from imas_codex.cocos.transforms import path_needs_cocos_transform
-from imas_codex.graph.schema_context import schema_for
-from imas_codex.units import normalize_unit_symbol
+from iter_codex.cocos import cocos_to_parameters, determine_cocos
+from iter_codex.cocos.transforms import path_needs_cocos_transform
+from iter_codex.graph.schema_context import schema_for
+from iter_codex.units import normalize_unit_symbol
 
 UNIT_BATCH = [
     "eV",

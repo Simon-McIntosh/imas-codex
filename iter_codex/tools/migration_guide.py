@@ -1,0 +1,1286 @@
+"""DD migration guide generator.
+
+Assembles structured code-migration guides between DD versions using
+graph-stored change data, COCOS transformations, and breaking change
+classifications. Produces language-agnostic advice with search patterns.
+"""
+
+from __future__ import annotations
+
+import logging
+import re
+from typing import TYPE_CHECKING
+
+from iter_codex.core.node_categories import SEARCHABLE_CATEGORIES
+from iter_codex.models.migration_models import (
+    CocosMigrationAdvice,
+    CodeMigrationGuide,
+    CodeUpdateAction,
+    PathUpdateAdvice,
+    TypeUpdateAdvice,
+    generate_search_patterns,
+)
+
+if TYPE_CHECKING:
+    from iter_codex.graph.client import GraphClient
+
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Graph query helpers
+# ---------------------------------------------------------------------------
+
+
+def _version_sort_key(version_id: str) -> tuple[int, ...]:
+    """Parse a DD version string into a tuple of integers for sorting."""
+    try:
+        return tuple(int(x) for x in version_id.split("."))
+    except (ValueError, AttributeError):
+        return (0,)
+
+
+def _resolve_version_range(gc: GraphClient, from_ver: str, to_ver: str) -> list[str]:
+    """Get ordered list of all versions between from_ver and to_ver (exclusive of from, inclusive of to)."""
+    result = gc.query(
+        """
+        MATCH (v:DDVersion)
+        RETURN v.id AS version
+        """,
+    )
+    all_versions = sorted((r["version"] for r in result), key=_version_sort_key)
+    from_key = _version_sort_key(from_ver)
+    to_key = _version_sort_key(to_ver)
+    return [v for v in all_versions if from_key < _version_sort_key(v) <= to_key]
+
+
+def _get_change_summary(
+    gc: GraphClient, version_range: list[str], ids_filter: str | None = None
+) -> list[dict]:
+    """Get aggregated change counts by type and breaking level."""
+    ids_clause = ""
+    params: dict = {"versions": version_range}
+    if ids_filter:
+        ids_clause = (
+            "MATCH (c)-[:FOR_IMAS_PATH]->(p:IMASNode) WHERE p.ids = $ids_filter WITH c"
+        )
+        params["ids_filter"] = ids_filter
+
+    return gc.query(
+        f"""
+        MATCH (c:IMASNodeChange)-[:IN_VERSION]->(v:DDVersion)
+        WHERE v.id IN $versions
+        {ids_clause}
+        WITH c.change_type AS type,
+             coalesce(c.breaking_level, 'informational') AS level,
+             count(c) AS cnt
+        RETURN type, level, cnt
+        ORDER BY cnt DESC
+        """,
+        **params,
+    )
+
+
+def _get_cocos_table(
+    gc: GraphClient,
+    to_versions: list[str],
+    ids_filter: str | None = None,
+) -> list[dict]:
+    """Get COCOS-labeled paths from the graph.
+
+    IMASNode stores COCOS data directly as properties — no version
+    relationship needed (labels don't change between versions).
+    """
+    ids_clause = "AND p.ids = $ids_filter" if ids_filter else ""
+
+    result = gc.query(
+        f"""
+        MATCH (p:IMASNode)
+        WHERE (p.cocos_transformation_type IS NOT NULL
+               OR p.cocos_transformation_expression IS NOT NULL)
+          AND p.node_category IN $categories
+          {ids_clause}
+        RETURN p.ids AS ids, p.id AS path,
+               p.cocos_transformation_type AS label,
+               p.cocos_transformation_expression AS expr,
+               coalesce(p.cocos_label_source, 'xml') AS source
+        ORDER BY p.ids, p.id
+        """,
+        to_versions=to_versions,
+        ids_filter=ids_filter,
+        categories=list(SEARCHABLE_CATEGORIES),
+    )
+
+    # For paths with expression but no label, infer from expression
+    for row in result:
+        if not row.get("label") and row.get("expr"):
+            m = re.search(r"\{(\w+_like)\}", row["expr"])
+            if m:
+                row["label"] = m.group(1)
+            elif "fact_psi" in (row["expr"] or ""):
+                row["label"] = "psi_like"
+            elif "sigma_ip" in (row["expr"] or ""):
+                row["label"] = "ip_like"
+            elif "sigma_b0" in (row["expr"] or ""):
+                row["label"] = "b0_like"
+
+    return [r for r in result if r.get("label")]
+
+
+def _get_renames(
+    gc: GraphClient, version_range: list[str], ids_filter: str | None = None
+) -> list[dict]:
+    """Get path renames in the version range.
+
+    Queries RENAMED_TO edges directly (the authoritative rename source).
+    Version-scoped by checking if the old path was deprecated or the new
+    path was introduced within the version range.
+    """
+    ids_clause = ""
+    params: dict = {"versions": version_range}
+    if ids_filter:
+        ids_clause = "AND old.ids = $ids_filter"
+        params["ids_filter"] = ids_filter
+    return gc.query(
+        f"""
+        MATCH (old:IMASNode)-[:RENAMED_TO]->(new:IMASNode)
+        WHERE true {ids_clause}
+        OPTIONAL MATCH (old)-[:DEPRECATED_IN]->(dv:DDVersion)
+        OPTIONAL MATCH (new)-[:INTRODUCED_IN]->(iv:DDVersion)
+        WITH old, new, dv, iv
+        WHERE dv.id IN $versions OR iv.id IN $versions
+           OR (dv IS NULL AND iv IS NULL)
+        RETURN old.ids AS ids, old.id AS old_path, new.id AS new_path
+        ORDER BY old.ids, old.id
+        """,
+        **params,
+    )
+
+
+def _get_rename_lineages(
+    gc: GraphClient,
+    from_version: str,
+    to_version: str,
+    ids_filter: str | None = None,
+) -> list[dict]:
+    """Get multi-hop rename lineages (chains of length >= 2) in the version range.
+
+    A lineage qualifies when:
+    - The start node existed in *from_version*
+      (introduced_in <= from_version AND deprecated_in is NULL or > from_version)
+    - The end node exists in *to_version*
+      (introduced_in <= to_version AND deprecated_in is NULL or > to_version)
+    - The chain length is >= 2 hops (direct renames already covered elsewhere)
+
+    For each hop i → i+1, the rename version is the ``introduced_in`` of the
+    successor node (the most reliable per-hop version indicator available,
+    since RENAMED_TO edges carry no version property).
+
+    Returns:
+        List of dicts, each with keys:
+        - ``ids``: IDS name
+        - ``start_path``: original path (beginning of chain)
+        - ``end_path``: final path (end of chain)
+        - ``hops``: number of rename steps
+        - ``chain``: list of ``{"path": str, "introduced": str | None}``
+    """
+    ids_clause = "AND a.ids = $ids_filter" if ids_filter else ""
+    params: dict = {}
+    if ids_filter:
+        params["ids_filter"] = ids_filter
+
+    try:
+        rows = gc.query(
+            f"""
+            MATCH path_var=(a:IMASNode)-[:RENAMED_TO*2..10]->(z:IMASNode)
+            WHERE true {ids_clause}
+            WITH a, z, [n IN nodes(path_var) | n.id] AS chain_ids, length(path_var) AS hops
+            OPTIONAL MATCH (a)-[:INTRODUCED_IN]->(aiv:DDVersion)
+            OPTIONAL MATCH (a)-[:DEPRECATED_IN]->(adv:DDVersion)
+            OPTIONAL MATCH (z)-[:INTRODUCED_IN]->(ziv:DDVersion)
+            OPTIONAL MATCH (z)-[:DEPRECATED_IN]->(zdv:DDVersion)
+            RETURN a.id AS start_path, z.id AS end_path, a.ids AS ids,
+                   chain_ids, hops,
+                   aiv.id AS start_introduced, adv.id AS start_deprecated,
+                   ziv.id AS end_introduced, zdv.id AS end_deprecated
+            ORDER BY a.ids, a.id
+            """,
+            **params,
+        )
+    except Exception as e:
+        logger.warning("Failed to query rename lineages: %s", e)
+        return []
+
+    from_key = _version_sort_key(from_version)
+    to_key = _version_sort_key(to_version)
+
+    filtered_rows = []
+    all_intermediate_ids: set[str] = set()
+
+    for row in rows or []:
+        start_intro = row.get("start_introduced")
+        start_depr = row.get("start_deprecated")
+        end_intro = row.get("end_introduced")
+        end_depr = row.get("end_deprecated")
+
+        # Start node must have existed at from_version
+        if start_intro and _version_sort_key(start_intro) > from_key:
+            continue  # not introduced yet at from_version
+        if start_depr and _version_sort_key(start_depr) <= from_key:
+            continue  # already deprecated by from_version
+
+        # End node must exist at to_version
+        if end_intro and _version_sort_key(end_intro) > to_key:
+            continue  # not yet introduced by to_version
+        if end_depr and _version_sort_key(end_depr) <= to_key:
+            continue  # deprecated before to_version
+
+        filtered_rows.append(dict(row))
+        for nid in (row.get("chain_ids") or [])[1:]:
+            all_intermediate_ids.add(nid)
+
+    if not filtered_rows:
+        return []
+
+    # Batch-query introduced_in for all intermediate/end nodes
+    node_versions: dict[str, str | None] = {}
+    if all_intermediate_ids:
+        try:
+            version_rows = gc.query(
+                """
+                UNWIND $node_ids AS nid
+                MATCH (n:IMASNode {id: nid})
+                OPTIONAL MATCH (n)-[:INTRODUCED_IN]->(iv:DDVersion)
+                RETURN n.id AS id, iv.id AS introduced_in
+                """,
+                node_ids=list(all_intermediate_ids),
+            )
+            for vr in version_rows or []:
+                node_versions[vr["id"]] = vr.get("introduced_in")
+        except Exception as e:
+            logger.warning("Failed to query intermediate node versions: %s", e)
+
+    results = []
+    for row in filtered_rows:
+        chain_ids: list[str] = row.get("chain_ids") or []
+        chain = []
+        for i, nid in enumerate(chain_ids):
+            if i == 0:
+                chain.append({"path": nid, "introduced": row.get("start_introduced")})
+            else:
+                chain.append({"path": nid, "introduced": node_versions.get(nid)})
+
+        results.append(
+            {
+                "ids": row.get("ids", ""),
+                "start_path": row.get("start_path", ""),
+                "end_path": row.get("end_path", ""),
+                "hops": row.get("hops", len(chain_ids) - 1),
+                "chain": chain,
+            }
+        )
+
+    return results
+
+
+def _render_rename_lineages_section(
+    lineages: list[dict],
+    from_version: str,
+    to_version: str,
+    include_recipes: bool = True,
+) -> str:
+    """Render a Rename Lineages (Multi-Hop) markdown section.
+
+    Produces a table where each row shows the original path, the
+    intermediate chain with version annotations, and the final path.
+
+    Returns an empty string if *lineages* is empty.
+    """
+    if not lineages:
+        return ""
+
+    lines: list[str] = []
+    lines.append(f"### Rename Lineages (Multi-Hop) ({len(lineages)})\n")
+    lines.append(
+        "These paths were renamed more than once between the two versions. "
+        "Update code to the **Final** path in one step (direct jump), "
+        "or follow the chain incrementally."
+    )
+    lines.append("")
+    lines.append(f"| Original ({from_version}) | Chain | Final ({to_version}) |")
+    lines.append("|--------------------|-------|----------------|")
+
+    for entry in lineages:
+        chain = entry.get("chain", [])
+        start_path = entry.get("start_path", "")
+        end_path = entry.get("end_path", "")
+
+        # Build chain column: intermediate nodes with their version annotations
+        chain_parts = []
+        for hop in chain[1:]:
+            ver_label = f"v{hop['introduced']}" if hop.get("introduced") else ""
+            prefix = f"→ {ver_label} " if ver_label else "→ "
+            chain_parts.append(f"{prefix}`{hop['path']}`")
+        chain_str = " ".join(chain_parts)
+
+        lines.append(f"| `{start_path}` | {chain_str} | `{end_path}` |")
+
+    lines.append("")
+
+    if include_recipes and lineages:
+        lines.append("#### Multi-Hop Rename Recipe\n")
+        lines.append("```python")
+        lines.append("# Option A: Direct jump (recommended)")
+        example = lineages[0]
+        ex_chain = example.get("chain", [])
+        if len(ex_chain) >= 2:
+            lines.append(f"# {ex_chain[0]['path']!r}  →  {ex_chain[-1]['path']!r}")
+            lines.append(
+                f'data = ids.get("{ex_chain[-1]["path"]}")  # skip intermediate names'
+            )
+        lines.append("")
+        lines.append(
+            "# Option B: Incremental (mirrors rename history, useful for audits)"
+        )
+        if len(ex_chain) >= 3:
+            for i in range(len(ex_chain) - 1):
+                src = ex_chain[i]["path"]
+                dst = ex_chain[i + 1]["path"]
+                ver = ex_chain[i + 1].get("introduced", "?")
+                lines.append(f"# Step {i + 1} (v{ver}): {src!r} → {dst!r}")
+        lines.append("```\n")
+
+    return "\n".join(lines)
+
+
+def _get_unit_changes(
+    gc: GraphClient, version_range: list[str], ids_filter: str | None = None
+) -> list[dict]:
+    """Get unit changes (non-cosmetic) in the version range."""
+    ids_clause = ""
+    params: dict = {"versions": version_range}
+    if ids_filter:
+        ids_clause = "AND p.ids = $ids_filter"
+        params["ids_filter"] = ids_filter
+    return gc.query(
+        f"""
+        MATCH (c:IMASNodeChange)-[:IN_VERSION]->(v:DDVersion)
+        WHERE v.id IN $versions AND c.change_type = 'units'
+        MATCH (c)-[:FOR_IMAS_PATH]->(p:IMASNode)
+        WHERE true {ids_clause}
+        RETURN p.ids AS ids, p.id AS path, c.old_value AS old_unit,
+               c.new_value AS new_unit,
+               coalesce(c.unit_change_subtype, 'unknown') AS subtype,
+               coalesce(c.breaking_level, 'informational') AS level
+        ORDER BY c.breaking_level DESC, p.ids, p.id
+        """,
+        **params,
+    )
+
+
+def _get_type_changes(
+    gc: GraphClient, version_range: list[str], ids_filter: str | None = None
+) -> list[dict]:
+    """Get data type changes in the version range."""
+    ids_clause = ""
+    params: dict = {"versions": version_range}
+    if ids_filter:
+        ids_clause = "AND p.ids = $ids_filter"
+        params["ids_filter"] = ids_filter
+    return gc.query(
+        f"""
+        MATCH (c:IMASNodeChange)-[:IN_VERSION]->(v:DDVersion)
+        WHERE v.id IN $versions AND c.change_type = 'data_type'
+        MATCH (c)-[:FOR_IMAS_PATH]->(p:IMASNode)
+        WHERE true {ids_clause}
+        RETURN p.ids AS ids, p.id AS path, c.old_value AS old_type,
+               c.new_value AS new_type
+        ORDER BY p.ids, p.id
+        """,
+        **params,
+    )
+
+
+def _get_removals(
+    gc: GraphClient, version_range: list[str], ids_filter: str | None = None
+) -> list[dict]:
+    """Get removed paths that are NOT renames.
+
+    Excludes paths that have a RENAMED_TO successor OR whose ancestor
+    (path prefix) was renamed — those are reported by _get_renames()
+    instead. Only returns genuine removals.
+
+    The renamed-ancestor prefixes are collected once up front rather than
+    re-derived inside a per-row subquery: correlating the prefix test with
+    each candidate re-scans every IMASNode for each removal, which is
+    quadratic in graph size and pushes a whole-DD version range past a
+    minute.
+    """
+    ids_clause = ""
+    params: dict = {"versions": version_range}
+    if ids_filter:
+        ids_clause = "AND p.ids = $ids_filter"
+        params["ids_filter"] = ids_filter
+    return gc.query(
+        f"""
+        MATCH (ancestor:IMASNode)-[:RENAMED_TO]->()
+        WITH collect(DISTINCT ancestor.id + '/') AS renamed_prefixes
+        MATCH (c:IMASNodeChange)-[:IN_VERSION]->(v:DDVersion)
+        WHERE v.id IN $versions AND c.change_type = 'path_removed'
+        MATCH (c)-[:FOR_IMAS_PATH]->(p:IMASNode)
+        WHERE NOT EXISTS {{ (p)-[:RENAMED_TO]->() }}
+        AND none(prefix IN renamed_prefixes WHERE p.id STARTS WITH prefix)
+        {ids_clause}
+        RETURN p.ids AS ids, p.id AS path
+        ORDER BY p.ids, p.id
+        """,
+        **params,
+    )
+
+
+def _get_additions(
+    gc: GraphClient, version_range: list[str], ids_filter: str | None = None
+) -> list[dict]:
+    """Get added paths in the version range."""
+    ids_clause = ""
+    params: dict = {"versions": version_range}
+    if ids_filter:
+        ids_clause = "AND p.ids = $ids_filter"
+        params["ids_filter"] = ids_filter
+    return gc.query(
+        f"""
+        MATCH (c:IMASNodeChange)-[:IN_VERSION]->(v:DDVersion)
+        WHERE v.id IN $versions AND c.change_type = 'path_added'
+        MATCH (c)-[:FOR_IMAS_PATH]->(p:IMASNode)
+        WHERE true {ids_clause}
+        RETURN p.ids AS ids, p.id AS path
+        ORDER BY p.ids, p.id
+        """,
+        **params,
+    )
+
+
+def _get_semantic_doc_changes(
+    gc: GraphClient, version_range: list[str], ids_filter: str | None = None
+) -> list[dict]:
+    """Get documentation changes with physics significance (sign/coordinate/format conventions)."""
+    ids_clause = ""
+    params: dict = {"versions": version_range}
+    if ids_filter:
+        ids_clause = "AND p.ids = $ids_filter"
+        params["ids_filter"] = ids_filter
+    return gc.query(
+        f"""
+        MATCH (c:IMASNodeChange)-[:IN_VERSION]->(v:DDVersion)
+        WHERE v.id IN $versions
+          AND c.change_type = 'documentation'
+          AND c.semantic_type IN ['sign_convention', 'coordinate_convention', 'data_format_change']
+        MATCH (c)-[:FOR_IMAS_PATH]->(p:IMASNode)
+        WHERE true {ids_clause}
+        RETURN p.ids AS ids, p.id AS path,
+               c.semantic_type AS semantic_type,
+               c.old_value AS old_doc, c.new_value AS new_doc,
+               coalesce(c.breaking_level, 'informational') AS level,
+               c.keywords_detected AS keywords,
+               v.id AS version
+        ORDER BY c.breaking_level DESC, c.semantic_type, p.ids, p.id
+        """,
+        **params,
+    )
+
+
+def _compute_cocos_factors(
+    labeled_paths: list[dict], from_cocos: int | None, to_cocos: int | None
+) -> list[dict]:
+    """Compute sign/scale factors for COCOS-labeled paths."""
+    if not labeled_paths:
+        return []
+
+    can_compute = (
+        from_cocos is not None and to_cocos is not None and from_cocos != to_cocos
+    )
+
+    results = []
+    for p in labeled_paths:
+        if can_compute:
+            try:
+                from iter_codex.ids.transforms import cocos_sign
+
+                factor = cocos_sign(p["label"], cocos_in=from_cocos, cocos_out=to_cocos)
+            except Exception:
+                factor = None
+        else:
+            factor = None
+
+        action = (
+            "Unknown (COCOS IDs not set)"
+            if factor is None
+            else ("No change needed" if factor == 1 else f"Multiply by {factor}")
+        )
+        results.append({**p, "factor": factor, "action": action})
+
+    return results
+
+
+def _get_version_cocos(gc: GraphClient, version: str) -> int | None:
+    """Get COCOS convention for a specific version."""
+    result = gc.query(
+        "MATCH (v:DDVersion {id: $ver}) RETURN v.cocos AS cocos",
+        ver=version,
+    )
+    if result and result[0].get("cocos"):
+        return result[0]["cocos"]
+    # Fallback: DD 3.x uses COCOS 11, DD 4.x uses COCOS 17
+    if version.startswith("3."):
+        return 11
+    if version.startswith("4."):
+        return 17
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Legacy rendering (kept for backward compatibility with existing tests)
+# ---------------------------------------------------------------------------
+
+
+def _render_guide(
+    from_ver: str,
+    to_ver: str,
+    version_range: list[str],
+    summary: list[dict],
+    cocos_table: list[dict],
+    renames: list[dict],
+    unit_changes: list[dict],
+    type_changes: list[dict],
+    removals: list[dict],
+    additions: list[dict],
+    from_cocos: int | None,
+    to_cocos: int | None,
+    ids_filter: str | None,
+    include_recipes: bool,
+    rename_lineages: list[dict] | None = None,
+) -> str:
+    """Render the migration guide as structured markdown (legacy format)."""
+    lines = [f"# DD Migration Guide: {from_ver} \u2192 {to_ver}\n"]
+
+    if ids_filter:
+        cocos_table = [r for r in cocos_table if r["ids"] == ids_filter]
+        renames = [r for r in renames if r["ids"] == ids_filter]
+        unit_changes = [r for r in unit_changes if r["ids"] == ids_filter]
+        type_changes = [r for r in type_changes if r["ids"] == ids_filter]
+        removals = [r for r in removals if r["ids"] == ids_filter]
+        additions = [r for r in additions if r["ids"] == ids_filter]
+
+    total_breaking = sum(r["cnt"] for r in summary if r["level"] == "breaking")
+    total_advisory = sum(r["cnt"] for r in summary if r["level"] == "advisory")
+    total_info = sum(r["cnt"] for r in summary if r["level"] == "informational")
+
+    # Count COCOS sign flips as breaking changes
+    sign_flip_count = sum(
+        1 for p in cocos_table if p.get("factor") is not None and p["factor"] != 1
+    )
+    total_breaking += sign_flip_count
+    total = total_breaking + total_advisory + total_info
+
+    lines.append("## Summary\n")
+    if from_cocos and to_cocos and from_cocos != to_cocos:
+        lines.append(f"- **COCOS convention change:** {from_cocos} \u2192 {to_cocos}")
+    lines.append(f"- **Versions spanned:** {len(version_range)}")
+    lines.append(f"- **Total changes:** {total}")
+    lines.append(f"- **Breaking changes:** {total_breaking}")
+    if sign_flip_count:
+        lines.append(
+            f"- **{sign_flip_count} COCOS sign flips** (breaking \u2014 codes must multiply affected quantities)"
+        )
+    lines.append(f"- **Advisory changes:** {total_advisory}")
+    lines.append(f"- **Informational:** {total_info}")
+    lines.append(f"- **Path renames:** {len(renames)}")
+    lines.append(f"- **Paths removed:** {len(removals)}")
+    lines.append(f"- **Paths added:** {len(additions)}")
+
+    affected_ids: dict[str, int] = {}
+    for section in [renames, unit_changes, type_changes, removals]:
+        for r in section:
+            ids_name = r.get("ids", "unknown")
+            affected_ids[ids_name] = affected_ids.get(ids_name, 0) + 1
+    if affected_ids:
+        top_ids = sorted(affected_ids.items(), key=lambda x: -x[1])[:10]
+        ids_str = ", ".join(f"{name} ({cnt})" for name, cnt in top_ids)
+        lines.append(f"- **IDS most affected:** {ids_str}")
+    lines.append("")
+
+    if cocos_table:
+        if from_cocos and to_cocos and from_cocos != to_cocos:
+            lines.append(
+                f"\n## COCOS Sign-Flip Table (COCOS {from_cocos} \u2192 {to_cocos})\n"
+            )
+        else:
+            lines.append("\n## COCOS-Sensitive Paths\n")
+            lines.append(
+                "*COCOS convention IDs not set on DDVersion nodes \u2014 factors not computed.*\n"
+            )
+        lines.append("| IDS | Path | Label | Factor | Action |")
+        lines.append("|-----|------|-------|--------|--------|")
+        for r in cocos_table:
+            factor = r.get("factor") if r.get("factor") is not None else "?"
+            action = r.get("action", "Check manually")
+            path_short = r["path"].split("/", 1)[-1] if "/" in r["path"] else r["path"]
+            lines.append(
+                f"| {r['ids']} | {path_short} | {r['label']} | {factor} | {action} |"
+            )
+        lines.append("")
+
+    if removals:
+        lines.append(f"## Removed Paths ({len(removals)})\n")
+        lines.append("| IDS | Path |")
+        lines.append("|-----|------|")
+        for r in removals:
+            lines.append(f"| {r['ids']} | {r['path']} |")
+        lines.append("")
+
+    if renames:
+        lines.append(f"## Path Renames ({len(renames)})\n")
+        lines.append("| IDS | Old Path | New Path |")
+        lines.append("|-----|----------|----------|")
+        for r in renames:
+            lines.append(f"| {r['ids']} | {r['old_path']} | {r['new_path']} |")
+        lines.append("")
+
+    breaking_units = [r for r in unit_changes if r["level"] == "breaking"]
+    advisory_units = [r for r in unit_changes if r["level"] == "advisory"]
+    if breaking_units or advisory_units:
+        lines.append(
+            f"## Unit Changes ({len(breaking_units)} breaking, {len(advisory_units)} advisory)\n"
+        )
+        lines.append("| IDS | Path | Old Unit | New Unit | Severity |")
+        lines.append("|-----|------|----------|----------|----------|")
+        for r in breaking_units + advisory_units:
+            lines.append(
+                f"| {r['ids']} | {r['path']} | {r['old_unit']} | {r['new_unit']} | **{r['level']}** |"
+            )
+        lines.append("")
+
+    if type_changes:
+        lines.append(f"## Type Changes ({len(type_changes)})\n")
+        lines.append("| IDS | Path | Old Type | New Type |")
+        lines.append("|-----|------|----------|----------|")
+        for r in type_changes:
+            lines.append(
+                f"| {r['ids']} | {r['path']} | {r['old_type']} | {r['new_type']} |"
+            )
+        lines.append("")
+
+    if include_recipes and (renames or cocos_table):
+        lines.append("## Code Update Recipes\n")
+
+        if cocos_table:
+            lines.append("### COCOS Sign Flip\n")
+            lines.append("```python")
+            lines.append("from iter_codex.ids.transforms import cocos_sign")
+            lines.append("")
+            example = cocos_table[0] if cocos_table else None
+            if example and from_cocos and to_cocos:
+                lines.append(
+                    f'factor = cocos_sign("{example["label"]}", cocos_in={from_cocos}, cocos_out={to_cocos})'
+                )
+                lines.append(f"# factor = {example.get('factor', '...')}")
+                lines.append(
+                    f"# Apply: ids.{example['path'].replace('/', '.')} *= factor"
+                )
+            elif example:
+                lines.append(
+                    f'factor = cocos_sign("{example["label"]}", cocos_in=<FROM>, cocos_out=<TO>)'
+                )
+                lines.append(
+                    f"# Apply: ids.{example['path'].replace('/', '.')} *= factor"
+                )
+            lines.append("```\n")
+
+        if renames:
+            lines.append("### Path Renames\n")
+            lines.append("```python")
+            for r in renames[:5]:
+                lines.append(f"# {r['old_path']}  \u2192  {r['new_path']}")
+            if len(renames) > 5:
+                lines.append(f"# ... and {len(renames) - 5} more renames")
+            lines.append("```\n")
+
+    if rename_lineages:
+        lines.append("## Rename Lineages\n")
+        lineage_section = _render_rename_lineages_section(
+            rename_lineages, from_ver, to_ver, include_recipes=include_recipes
+        )
+        lines.append(lineage_section)
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# New structured migration guide
+# ---------------------------------------------------------------------------
+
+
+def build_migration_guide(
+    gc: GraphClient,
+    from_version: str,
+    to_version: str,
+    ids_filter: str | None = None,
+    include_recipes: bool = True,
+) -> CodeMigrationGuide:
+    """Build a structured code migration guide.
+
+    Queries graph for COCOS changes, path renames, unit changes, type
+    changes, removals and additions, then classifies each as required
+    or optional and attaches language-agnostic search patterns.
+    """
+    version_range = _resolve_version_range(gc, from_version, to_version)
+
+    from_cocos = _get_version_cocos(gc, from_version)
+    to_cocos = _get_version_cocos(gc, to_version)
+    cocos_change = None
+    if from_cocos and to_cocos and from_cocos != to_cocos:
+        cocos_change = f"{from_cocos} \u2192 {to_cocos}"
+
+    required_actions: list[CodeUpdateAction] = []
+    optional_actions: list[CodeUpdateAction] = []
+    ids_affected: set[str] = set()
+    search_patterns: dict[str, list[str]] = {}
+
+    # --- COCOS sign flip actions ---
+    cocos_advice = None
+    if cocos_change:
+        cocos_paths = _get_cocos_table(gc, version_range, ids_filter)
+        cocos_table = _compute_cocos_factors(cocos_paths, from_cocos, to_cocos)
+        sign_flips: list[dict] = []
+        no_change: list[dict] = []
+
+        for entry in cocos_table:
+            path = entry.get("path", "")
+            factor = entry.get("factor", 1)
+            ids_name = entry.get("ids", path.split("/")[0] if "/" in path else "")
+            ids_affected.add(ids_name)
+
+            patterns = generate_search_patterns(path, "cocos_sign_flip")
+            search_patterns.setdefault(ids_name, []).extend(patterns)
+
+            action = CodeUpdateAction(
+                path=path,
+                ids=ids_name,
+                change_type="cocos_sign_flip",
+                severity="required"
+                if factor is not None and factor != 1
+                else "optional",
+                search_patterns=patterns,
+                path_fragments=path.split("/")[1:],
+                description=f"COCOS {from_cocos}\u2192{to_cocos}: multiply by {factor}",
+                before=f"Value in COCOS {from_cocos}",
+                after=f"Value in COCOS {to_cocos}, factor={factor}",
+                cocos_label=entry.get("label", ""),
+                cocos_factor=float(factor) if factor is not None else None,
+            )
+
+            if factor is not None and factor != 1:
+                required_actions.append(action)
+                sign_flips.append(
+                    {
+                        "path": path,
+                        "factor": factor,
+                        "label": entry.get("label", ""),
+                    }
+                )
+            else:
+                optional_actions.append(action)
+                no_change.append(
+                    {
+                        "path": path,
+                        "factor": factor,
+                        "label": entry.get("label", ""),
+                    }
+                )
+
+        cocos_advice = CocosMigrationAdvice(
+            from_cocos=from_cocos,
+            to_cocos=to_cocos,
+            sign_flips=sign_flips,
+            no_change=no_change,
+        )
+
+    # --- Path renames ---
+    renames = _get_renames(gc, version_range, ids_filter)
+    renamed_list: list[dict] = []
+    removed_list: list[dict] = []
+    new_list: list[dict] = []
+
+    for r in renames:
+        old_path = r.get("old_path", "")
+        new_path_val = r.get("new_path", "")
+        ids_name = r.get("ids", old_path.split("/")[0] if "/" in old_path else "")
+        ids_affected.add(ids_name)
+        patterns = generate_search_patterns(old_path, "path_rename")
+        search_patterns.setdefault(ids_name, []).extend(patterns)
+
+        required_actions.append(
+            CodeUpdateAction(
+                path=old_path,
+                ids=ids_name,
+                change_type="path_rename",
+                severity="required",
+                search_patterns=patterns,
+                path_fragments=old_path.split("/")[1:],
+                description=f"Path renamed: {old_path} \u2192 {new_path_val}",
+                before=f"Access {old_path}",
+                after=f"Access {new_path_val}",
+                old_path=old_path,
+                new_path=new_path_val,
+            )
+        )
+        renamed_list.append({"old_path": old_path, "new_path": new_path_val})
+
+    # --- Removals (true removals only — renames excluded by _get_removals) ---
+    removals = _get_removals(gc, version_range, ids_filter)
+    for rm in removals:
+        path = rm.get("path", "")
+        ids_name = rm.get("ids", path.split("/")[0] if "/" in path else "")
+        ids_affected.add(ids_name)
+        patterns = generate_search_patterns(path, "path_removed")
+        search_patterns.setdefault(ids_name, []).extend(patterns)
+
+        required_actions.append(
+            CodeUpdateAction(
+                path=path,
+                ids=ids_name,
+                change_type="path_removed",
+                severity="required",
+                search_patterns=patterns,
+                path_fragments=path.split("/")[1:],
+                description=f"Path removed: {path}",
+                before=f"Access {path}",
+                after="Path no longer exists",
+                old_path=path,
+            )
+        )
+        removed_list.append({"path": path})
+
+    # --- Additions ---
+    additions = _get_additions(gc, version_range, ids_filter)
+    for add in additions:
+        path = add.get("path", "")
+        ids_name = add.get("ids", path.split("/")[0] if "/" in path else "")
+        ids_affected.add(ids_name)
+
+        optional_actions.append(
+            CodeUpdateAction(
+                path=path,
+                ids=ids_name,
+                change_type="new_path",
+                severity="optional",
+                description=f"New path available: {path}",
+                after=f"New field {path} is now available",
+            )
+        )
+        new_list.append({"path": path})
+
+    path_update_advice = None
+    if renamed_list or removed_list or new_list:
+        path_update_advice = PathUpdateAdvice(
+            renamed_paths=renamed_list,
+            removed_paths=removed_list,
+            new_paths=new_list,
+        )
+
+    # --- Unit changes ---
+    unit_changes = _get_unit_changes(gc, version_range, ids_filter)
+    for uc in unit_changes:
+        path = uc.get("path", "")
+        ids_name = uc.get("ids", path.split("/")[0] if "/" in path else "")
+        ids_affected.add(ids_name)
+        patterns = generate_search_patterns(path, "unit_change")
+        search_patterns.setdefault(ids_name, []).extend(patterns)
+        level = uc.get("level", "informational")
+
+        action = CodeUpdateAction(
+            path=path,
+            ids=ids_name,
+            change_type="unit_change",
+            severity="required" if level == "breaking" else "optional",
+            search_patterns=patterns,
+            path_fragments=path.split("/")[1:],
+            description=f"Unit change: {uc.get('old_unit', '?')} \u2192 {uc.get('new_unit', '?')}",
+            before=f"Units: {uc.get('old_unit', '?')}",
+            after=f"Units: {uc.get('new_unit', '?')}",
+            old_units=uc.get("old_unit"),
+            new_units=uc.get("new_unit"),
+        )
+        if level == "breaking":
+            required_actions.append(action)
+        else:
+            optional_actions.append(action)
+
+    # --- Type changes ---
+    type_changes = _get_type_changes(gc, version_range, ids_filter)
+    type_advice = None
+    if type_changes:
+        tc_list: list[dict] = []
+        for tc in type_changes:
+            path = tc.get("path", "")
+            ids_name = tc.get("ids", path.split("/")[0] if "/" in path else "")
+            ids_affected.add(ids_name)
+            patterns = generate_search_patterns(path, "type_change")
+            search_patterns.setdefault(ids_name, []).extend(patterns)
+
+            required_actions.append(
+                CodeUpdateAction(
+                    path=path,
+                    ids=ids_name,
+                    change_type="type_change",
+                    severity="required",
+                    search_patterns=patterns,
+                    path_fragments=path.split("/")[1:],
+                    description=f"Type change: {tc.get('old_type', '?')} \u2192 {tc.get('new_type', '?')}",
+                    before=f"Type: {tc.get('old_type', '?')}",
+                    after=f"Type: {tc.get('new_type', '?')}",
+                    old_type=tc.get("old_type"),
+                    new_type=tc.get("new_type"),
+                )
+            )
+            tc_list.append(
+                {
+                    "path": path,
+                    "old_type": tc.get("old_type"),
+                    "new_type": tc.get("new_type"),
+                }
+            )
+        type_advice = TypeUpdateAdvice(type_changes=tc_list)
+
+    # --- Semantic documentation changes (sign/coordinate conventions) ---
+    semantic_doc_changes = _get_semantic_doc_changes(gc, version_range, ids_filter)
+    for sdc in semantic_doc_changes:
+        path = sdc.get("path", "")
+        ids_name = sdc.get("ids", path.split("/")[0] if "/" in path else "")
+        ids_affected.add(ids_name)
+        patterns = generate_search_patterns(path, "definition_change")
+        search_patterns.setdefault(ids_name, []).extend(patterns)
+        level = sdc.get("level", "informational")
+        semantic = sdc.get("semantic_type", "")
+
+        desc = f"Convention change ({semantic}): {path}"
+        old_excerpt = (sdc.get("old_doc") or "")[:200]
+        new_excerpt = (sdc.get("new_doc") or "")[:200]
+
+        action = CodeUpdateAction(
+            path=path,
+            ids=ids_name,
+            change_type="definition_change",
+            severity="required" if level == "breaking" else "optional",
+            search_patterns=patterns,
+            path_fragments=path.split("/")[1:],
+            description=desc,
+            before=old_excerpt,
+            after=new_excerpt,
+        )
+        if level == "breaking":
+            required_actions.append(action)
+        else:
+            optional_actions.append(action)
+
+    # Deduplicate search patterns per IDS
+    for ids_name in search_patterns:
+        search_patterns[ids_name] = list(dict.fromkeys(search_patterns[ids_name]))
+
+    # --- Multi-hop rename lineages ---
+    rename_lineages = _get_rename_lineages(gc, from_version, to_version, ids_filter)
+
+    return CodeMigrationGuide(
+        from_version=from_version,
+        to_version=to_version,
+        cocos_change=cocos_change,
+        required_actions=required_actions,
+        optional_actions=optional_actions,
+        total_actions=len(required_actions) + len(optional_actions),
+        required_count=len(required_actions),
+        optional_count=len(optional_actions),
+        ids_affected=sorted(ids_affected - {""}),
+        global_search_patterns=search_patterns,
+        include_recipes=include_recipes,
+        cocos_advice=cocos_advice,
+        path_update_advice=path_update_advice,
+        type_update_advice=type_advice,
+        rename_lineages=rename_lineages,
+    )
+
+
+def format_migration_guide(guide: CodeMigrationGuide) -> str:
+    """Render a *CodeMigrationGuide* to markdown.
+
+    Sections:
+      1. Executive summary (versions, COCOS, action counts)
+      2. Required updates (grouped by IDS)
+      3. COCOS migration table
+      4. Search strategy with grep patterns
+      5. Optional improvements
+      6. Verification checklist
+    """
+    lines: list[str] = []
+
+    # -- Executive summary --
+    lines.append(
+        f"# Code Migration Guide: DD {guide.from_version} \u2192 {guide.to_version}"
+    )
+    lines.append("")
+    lines.append("## Summary")
+    lines.append(f"- **Total actions:** {guide.total_actions}")
+    lines.append(f"- **Required (breaking):** {guide.required_count}")
+    lines.append(f"- **Optional (best practice):** {guide.optional_count}")
+    if guide.cocos_change:
+        lines.append(f"- **COCOS change:** {guide.cocos_change}")
+    if guide.ids_affected:
+        lines.append(f"- **IDS affected:** {', '.join(guide.ids_affected)}")
+    lines.append("")
+
+    # -- Required updates --
+    if guide.required_actions:
+        lines.append("## Required Updates")
+        lines.append("")
+        lines.append(
+            "These changes **must** be applied or code will produce incorrect results."
+        )
+        lines.append("")
+
+        # Group by IDS
+        by_ids: dict[str, list[CodeUpdateAction]] = {}
+        for action in guide.required_actions:
+            by_ids.setdefault(action.ids, []).append(action)
+
+        for ids_name in sorted(by_ids):
+            lines.append(f"### {ids_name}")
+            lines.append("")
+            for action in by_ids[ids_name]:
+                lines.append(f"**{action.change_type}:** `{action.path}`")
+                lines.append(f"  - {action.description}")
+                if guide.include_recipes and action.search_patterns:
+                    patterns_str = ", ".join(
+                        f"`{p}`" for p in action.search_patterns[:3]
+                    )
+                    lines.append(f"  - Search for: {patterns_str}")
+                lines.append("")
+
+    # -- COCOS section --
+    if guide.cocos_advice:
+        ca = guide.cocos_advice
+        lines.append(f"## COCOS Migration ({ca.from_cocos} \u2192 {ca.to_cocos})")
+        lines.append("")
+        if ca.sign_flips:
+            lines.append("### Sign Flips Required")
+            lines.append("")
+            lines.append("| Path | Label | Factor |")
+            lines.append("|------|-------|--------|")
+            for sf in ca.sign_flips:
+                lines.append(
+                    f"| `{sf['path']}` | {sf.get('label', '')} | {sf['factor']} |"
+                )
+            lines.append("")
+        if ca.no_change:
+            lines.append(f"### No Change Required ({len(ca.no_change)} paths)")
+            lines.append("")
+            lines.append(
+                "These COCOS-dependent paths have factor=1 (no sign change needed)."
+            )
+            lines.append("")
+
+    # -- Convention changes --
+    convention_actions = [
+        a
+        for a in guide.required_actions + guide.optional_actions
+        if a.change_type == "definition_change"
+    ]
+    if convention_actions:
+        lines.append("## Convention Changes")
+        lines.append("")
+        lines.append(
+            "These changes affect data interpretation without changing path names or types."
+        )
+        lines.append(
+            "Code that reads these fields may produce **silently incorrect results**"
+        )
+        lines.append("if not updated.")
+        lines.append("")
+        for action in convention_actions:
+            severity_badge = (
+                "**BREAKING**" if action.severity == "required" else "advisory"
+            )
+            lines.append(f"### `{action.path}` ({severity_badge})")
+            lines.append("")
+            lines.append(f"  {action.description}")
+            if action.before:
+                lines.append(f"  - **Before:** {action.before}")
+            if action.after:
+                lines.append(f"  - **After:** {action.after}")
+            if guide.include_recipes and action.search_patterns:
+                patterns_str = ", ".join(f"`{p}`" for p in action.search_patterns[:3])
+                lines.append(f"  - **Search for:** {patterns_str}")
+            lines.append("")
+
+    # -- Search strategy --
+    if guide.include_recipes and guide.global_search_patterns:
+        lines.append("## Search Strategy")
+        lines.append("")
+        lines.append("Use these patterns to find affected code in your codebase:")
+        lines.append("")
+        for ids_name in sorted(guide.global_search_patterns):
+            patterns = guide.global_search_patterns[ids_name]
+            if patterns:
+                lines.append(f"### {ids_name}")
+                lines.append("```")
+                for p in patterns[:10]:
+                    lines.append(f"grep -r '{p}' /path/to/code/")
+                lines.append("```")
+                lines.append("")
+
+    # -- Optional updates --
+    if guide.optional_actions:
+        lines.append("## Optional Updates")
+        lines.append("")
+        lines.append("Best-practice changes for full DD compliance:")
+        lines.append("")
+        for action in guide.optional_actions[:20]:
+            lines.append(f"- `{action.path}`: {action.description}")
+        if len(guide.optional_actions) > 20:
+            lines.append(f"- ... and {len(guide.optional_actions) - 20} more")
+        lines.append("")
+
+    # -- Rename lineages (multi-hop) --
+    if guide.rename_lineages:
+        lines.append("## Rename Lineages\n")
+        lineage_section = _render_rename_lineages_section(
+            guide.rename_lineages,
+            guide.from_version,
+            guide.to_version,
+            include_recipes=guide.include_recipes,
+        )
+        lines.append(lineage_section)
+
+    # -- Verification checklist --
+    lines.append("## Verification Checklist")
+    lines.append("")
+    lines.append("After applying changes:")
+    lines.append("- [ ] Run your test suite to verify no regressions")
+    if guide.cocos_advice:
+        lines.append(
+            f"- [ ] Verify sign conventions match COCOS {guide.cocos_advice.to_cocos}"
+        )
+    lines.append("- [ ] Update DD version reference in your code configuration")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Public entry point
+# ---------------------------------------------------------------------------
+
+
+def generate_migration_guide(
+    gc: GraphClient,
+    from_version: str,
+    to_version: str,
+    ids_filter: str | None = None,
+    include_recipes: bool = True,
+    summary_only: bool = False,
+) -> str:
+    """Generate a DD migration guide between two versions.
+
+    Args:
+        gc: Graph client
+        from_version: Source DD version (e.g. "3.39.0")
+        to_version: Target DD version (e.g. "4.0.0")
+        ids_filter: Optional IDS name to restrict output
+        include_recipes: Whether to include code update snippets
+        summary_only: If True, return only aggregate statistics without per-path details
+
+    Returns:
+        Structured markdown migration guide
+    """
+    for ver in (from_version, to_version):
+        check = gc.query("MATCH (v:DDVersion {id: $v}) RETURN v.id", v=ver)
+        if not check:
+            return f"Error: DD version '{ver}' not found in graph."
+
+    version_range = _resolve_version_range(gc, from_version, to_version)
+    if not version_range:
+        return f"Error: No versions found between {from_version} and {to_version}."
+
+    if summary_only:
+        change_summary = _get_change_summary(gc, version_range, ids_filter)
+        from_cocos = _get_version_cocos(gc, from_version)
+        to_cocos = _get_version_cocos(gc, to_version)
+
+        # Aggregate change statistics
+        by_type: dict[str, dict] = {}
+        total_changes = 0
+        breaking_total = 0
+        for row in change_summary:
+            ctype = row["type"]
+            level = row["level"]
+            cnt = row["cnt"]
+            total_changes += cnt
+            if ctype not in by_type:
+                by_type[ctype] = {"count": 0, "breaking": 0}
+            by_type[ctype]["count"] += cnt
+            if level in ("required", "breaking"):
+                by_type[ctype]["breaking"] += cnt
+                breaking_total += cnt
+
+        # Get affected IDS list
+        ids_query = gc.query(
+            """
+            MATCH (c:IMASNodeChange)-[:IN_VERSION]->(v:DDVersion)
+            WHERE v.id IN $versions
+            MATCH (c)-[:FOR_IMAS_PATH]->(p:IMASNode)
+            RETURN DISTINCT p.ids AS ids
+            ORDER BY ids
+            """,
+            versions=version_range,
+        )
+        ids_affected = [r["ids"] for r in ids_query]
+
+        cocos_change = None
+        if from_cocos and to_cocos and from_cocos != to_cocos:
+            cocos_change = f"{from_cocos} → {to_cocos}"
+
+        # Format as readable summary
+        lines = [
+            f"# Migration Summary: {from_version} → {to_version}",
+            "",
+            f"**COCOS change:** {cocos_change or 'None'}",
+            f"**Total changes:** {total_changes:,}",
+            f"**Breaking changes:** {breaking_total:,}",
+            f"**IDS affected:** {len(ids_affected)}",
+            "",
+            "## Changes by Type",
+            "",
+            "| Change Type | Count | Breaking |",
+            "|------------|------:|--------:|",
+        ]
+        for ctype in sorted(by_type, key=lambda t: by_type[t]["count"], reverse=True):
+            info = by_type[ctype]
+            lines.append(f"| {ctype} | {info['count']:,} | {info['breaking']:,} |")
+
+        if ids_affected:
+            lines.extend(["", "## IDS Affected", ""])
+            lines.append(", ".join(ids_affected))
+
+        if breaking_total > 1000:
+            lines.extend(
+                [
+                    "",
+                    f"**Recommendation:** Major migration — {breaking_total:,} breaking changes. "
+                    f"Use full guide with `ids_filter` for per-IDS migration.",
+                ]
+            )
+
+        return "\n".join(lines)
+
+    guide = build_migration_guide(
+        gc, from_version, to_version, ids_filter, include_recipes
+    )
+    return format_migration_guide(guide)

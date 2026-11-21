@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from imas_codex.standard_names.attachment_audit import (
+from iter_codex.standard_names.attachment_audit import (
     count_unattributed_detachments,
     reconcile_attachment_consistency,
 )
@@ -38,7 +38,7 @@ def _row(dd_path: str, sn_id: str, *, name_stage: str = "drafted") -> dict:
 
 def _client(rows: list[dict]) -> MagicMock:
     """A client answering the audit read with *rows* and every write with a count."""
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     def _query(q: str, **params):
         if "AS other_live_names" in q:

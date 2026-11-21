@@ -16,8 +16,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import domain_decision as dd, families as fam
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import domain_decision as dd, families as fam
 from tests.standard_names.conftest import (
     disposable_neo4j as disposable_neo4j,  # noqa: F401
 )

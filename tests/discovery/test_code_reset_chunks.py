@@ -12,9 +12,9 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.discovery.base import reset as reset_module
-from imas_codex.discovery.base.reset import CODE_RESET_SPECS, reset_to_status
-from imas_codex.discovery.code import scorer
+from iter_codex.discovery.base import reset as reset_module
+from iter_codex.discovery.base.reset import CODE_RESET_SPECS, reset_to_status
+from iter_codex.discovery.code import scorer
 
 FACILITY = "jt-60sa"
 
@@ -46,7 +46,7 @@ class _CapturingGraph:
 @pytest.fixture
 def captured(monkeypatch):
     graph = _CapturingGraph()
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: graph)
     return graph
 
 

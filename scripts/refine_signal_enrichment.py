@@ -15,11 +15,11 @@ import re
 from collections import Counter
 from pathlib import Path
 
-from imas_codex.discovery.signals.enrichment import (
+from iter_codex.discovery.signals.enrichment import (
     EnrichmentOptions,
     fit_enrichment_prompt,
 )
-from imas_codex.settings import get_model
+from iter_codex.settings import get_model
 from scripts import benchmark_signal_enrichment as bench
 
 GROUP = re.compile(

@@ -7,13 +7,13 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from imas_codex.config.codac_uda import (
+from iter_codex.config.codac_uda import (
     archive_host_key,
     resolve_archive_endpoint,
     validate_codac_uda_config,
 )
-from imas_codex.config.models import CodacUDAConfig, FacilityConfig
-from imas_codex.discovery.base.facility import _deep_merge
+from iter_codex.config.models import CodacUDAConfig, FacilityConfig
+from iter_codex.discovery.base.facility import _deep_merge
 
 
 @pytest.fixture
@@ -101,7 +101,7 @@ def test_readable_role_requires_available_endpoint(
 
 def test_public_config_validates_but_cannot_resolve_private_hosts() -> None:
     path = (
-        Path(__file__).resolve().parents[2] / "imas_codex/config/facilities/iter.yaml"
+        Path(__file__).resolve().parents[2] / "iter_codex/config/facilities/iter.yaml"
     )
     public = yaml.safe_load(path.read_text())
     config = FacilityConfig.model_validate(public).data_systems.codac_uda

@@ -11,7 +11,7 @@ from unittest.mock import patch
 import pytest
 from neo4j.exceptions import ServiceUnavailable
 
-from imas_codex.discovery.signals import parallel
+from iter_codex.discovery.signals import parallel
 
 
 class _DownGraph:

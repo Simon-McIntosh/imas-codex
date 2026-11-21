@@ -21,15 +21,15 @@ import logging
 
 import pytest
 
-from imas_codex.discovery.base import llm
-from imas_codex.discovery.code.scorer import (
+from iter_codex.discovery.base import llm
+from iter_codex.discovery.code.scorer import (
     SCOPE_NOULS,
     FileScoreBatch,
     FileScoreResult,
     build_triage_questions,
     scope_relevance,
 )
-from imas_codex.discovery.code.state import FileDiscoveryState
+from iter_codex.discovery.code.state import FileDiscoveryState
 
 FACILITY = "jt-60sa"
 COST = 1.0e-4
@@ -218,26 +218,26 @@ def _stub_common(monkeypatch, claims: list[dict], claim_calls: list | None = Non
         counter["n"] += 1
         return claims if counter["n"] == 1 else []
 
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: {}
     )
-    monkeypatch.setattr("imas_codex.settings.get_model", lambda section: "fake-model")
+    monkeypatch.setattr("iter_codex.settings.get_model", lambda section: "fake-model")
     monkeypatch.setattr(
-        "imas_codex.settings.get_reasoning_effort", lambda section: None
+        "iter_codex.settings.get_reasoning_effort", lambda section: None
     )
-    monkeypatch.setattr("imas_codex.settings.get_code_ingest_threshold", lambda: 0.6)
+    monkeypatch.setattr("iter_codex.settings.get_code_ingest_threshold", lambda: 0.6)
     monkeypatch.setattr(
-        "imas_codex.settings.get_code_facet_admission_threshold", lambda: 0.8
-    )
-    monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.claim_files_for_triage", claim_once
+        "iter_codex.settings.get_code_facet_admission_threshold", lambda: 0.8
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.claim_files_for_scoring", claim_once
+        "iter_codex.discovery.code.graph_ops.claim_files_for_triage", claim_once
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.code.scorer._group_files_by_parent",
+        "iter_codex.discovery.code.graph_ops.claim_files_for_scoring", claim_once
+    )
+    monkeypatch.setattr(
+        "iter_codex.discovery.code.scorer._group_files_by_parent",
         lambda files, include_siblings=False: [
             {
                 "parent_path_id": "dir",
@@ -256,11 +256,11 @@ def _run_triage(monkeypatch, files, answers_by_path, *, released=None):
     _stub_common(monkeypatch, list(files))
     monkeypatch.setattr(llm, "_apost_decisions", _post_by_path(answers_by_path))
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.release_file_triage_claims",
+        "iter_codex.discovery.code.graph_ops.release_file_triage_claims",
         lambda ids: released.extend(ids),
     )
-    monkeypatch.setattr("imas_codex.settings.get_code_triage_threshold", lambda: 0.4)
-    monkeypatch.setattr("imas_codex.discovery.code.scorer.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.settings.get_code_triage_threshold", lambda: 0.4)
+    monkeypatch.setattr("iter_codex.discovery.code.scorer.GraphClient", lambda: graph)
 
     state = FileDiscoveryState(facility=FACILITY)
     seen: dict = {}
@@ -270,7 +270,7 @@ def _run_triage(monkeypatch, files, answers_by_path, *, released=None):
             seen["results"] = results
         state.stop_requested = True
 
-    from imas_codex.discovery.code.workers import triage_worker
+    from iter_codex.discovery.code.workers import triage_worker
 
     asyncio.run(triage_worker(state, on_progress=on_progress))
     return graph, released, state, seen
@@ -312,14 +312,14 @@ def _run_score(
 
     monkeypatch.setattr(llm, "call_llm_structured", fake_description)
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.release_file_score_claims",
+        "iter_codex.discovery.code.graph_ops.release_file_score_claims",
         lambda ids: released.extend(ids),
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.code.scorer._build_score_system_prompt",
+        "iter_codex.discovery.code.scorer._build_score_system_prompt",
         lambda facility=None, focus=None: "system",
     )
-    monkeypatch.setattr("imas_codex.discovery.code.scorer.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.discovery.code.scorer.GraphClient", lambda: graph)
 
     state = FileDiscoveryState(facility=FACILITY, path_prefixes=path_prefixes)
     state.cost_limit = 1000.0
@@ -327,7 +327,7 @@ def _run_score(
     def on_progress(message, stats, results):
         state.stop_requested = True
 
-    from imas_codex.discovery.code.workers import score_worker
+    from iter_codex.discovery.code.workers import score_worker
 
     asyncio.run(score_worker(state, on_progress=on_progress))
     return graph, state, released, description_calls
@@ -474,16 +474,16 @@ def test_scoped_stale_ingested_judgment_uses_chunks_without_remote_executor(
     requests = []
     claim_calls = []
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.fetch_file_chunk_text",
+        "iter_codex.discovery.code.graph_ops.fetch_file_chunk_text",
         lambda ids: {path: [{"start_line": 1, "text": "stored diagnostic source"}]},
     )
 
     def refuse_remote(*args, **kwargs):
         raise AssertionError("remote executor must not be invoked")
 
-    monkeypatch.setattr("imas_codex.remote.executor.run_python_script", refuse_remote)
+    monkeypatch.setattr("iter_codex.remote.executor.run_python_script", refuse_remote)
     monkeypatch.setattr(
-        "imas_codex.remote.executor.async_run_python_script", refuse_remote
+        "iter_codex.remote.executor.async_run_python_script", refuse_remote
     )
     graph, state, released, descriptions = _run_score(
         monkeypatch,
@@ -652,7 +652,7 @@ def test_content_arm_reports_batch_failures_once(monkeypatch, caplog):
     files = [_file(a, preview_text="x"), _file(b, preview_text="y")]
     bad = _answers(0.9, 0.1, 0.1, 0.1)
     bad["loads_diagnostic_data"] = {"type": "noul", "noul": 1.5}
-    with caplog.at_level(logging.INFO, logger="imas_codex.discovery.code.workers"):
+    with caplog.at_level(logging.INFO, logger="iter_codex.discovery.code.workers"):
         _run_score(monkeypatch, files, {a: bad, b: bad})
 
     failures = [
@@ -762,7 +762,7 @@ class _IngestStub:
 def test_ingest_claims_highest_relevance_first_and_refuses_below_threshold(
     monkeypatch,
 ):
-    from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
+    from iter_codex.discovery.code.workers import _claim_code_files_for_ingestion
 
     rows = [
         _file(
@@ -784,7 +784,7 @@ def test_ingest_claims_highest_relevance_first_and_refuses_below_threshold(
             relevance_loads=0.95,
         ),
     ]
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: _IngestStub(rows))
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: _IngestStub(rows))
 
     claimed = _claim_code_files_for_ingestion(FACILITY, limit=10, min_relevance=0.5)
 
@@ -797,7 +797,7 @@ def test_ingest_claims_highest_relevance_first_and_refuses_below_threshold(
 
 def test_ingest_claim_orders_by_relevance_desc(monkeypatch):
     """The rendered claim orders by the shared relevance expression."""
-    from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
+    from iter_codex.discovery.code.workers import _claim_code_files_for_ingestion
 
     captured: list[str] = []
 
@@ -814,7 +814,7 @@ def test_ingest_claim_orders_by_relevance_desc(monkeypatch):
             relevance_imas=0.8,
         )
     ]
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: _Recording(rows))
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: _Recording(rows))
 
     _claim_code_files_for_ingestion(FACILITY, limit=10, min_relevance=0.5)
 
@@ -825,7 +825,7 @@ def test_ingest_claim_orders_by_relevance_desc(monkeypatch):
 
 def test_ingest_claim_refuses_name_stage_relevance(monkeypatch):
     """A name-arm relevance never carries a file into ingestion."""
-    from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
+    from iter_codex.discovery.code.workers import _claim_code_files_for_ingestion
 
     rows = [
         _file(
@@ -835,7 +835,7 @@ def test_ingest_claim_refuses_name_stage_relevance(monkeypatch):
             relevance_loads=0.9,
         )
     ]
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: _IngestStub(rows))
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: _IngestStub(rows))
 
     claimed = _claim_code_files_for_ingestion(FACILITY, limit=10, min_relevance=0.5)
 

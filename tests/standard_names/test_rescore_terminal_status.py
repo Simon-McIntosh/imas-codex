@@ -10,12 +10,12 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_claim_release as _owning_graph_claim_release,
 )
-from imas_codex.standard_names.graph_store.graph_claim_release import (
+from iter_codex.standard_names.graph_store.graph_claim_release import (
     stage_name_for_rescore,
 )
 
@@ -83,7 +83,7 @@ def test_terminal_status_is_refused_without_mutation(status: str) -> None:
     graph = _GuardedGraph(stage="exhausted", status=status)
     before = graph.node.copy()
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         result = stage_name_for_rescore("plasma_current")
@@ -99,7 +99,7 @@ def test_terminal_status_is_refused_without_mutation(status: str) -> None:
 def test_draft_status_still_rescores() -> None:
     graph = _GuardedGraph(stage="exhausted", status="draft")
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         result = stage_name_for_rescore("plasma_current", run_id="review-run")
@@ -115,7 +115,7 @@ def test_draft_status_still_rescores() -> None:
 def test_superseded_stage_names_signed_transition_and_existing_successor() -> None:
     graph = _GuardedGraph(stage="superseded", status="draft", successor="replacement")
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         result = stage_name_for_rescore("plasma_current")

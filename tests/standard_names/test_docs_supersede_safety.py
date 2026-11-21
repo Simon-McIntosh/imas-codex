@@ -47,7 +47,7 @@ def _mock_gc_tx():
 
 def _patch_gc(mock_gc):
     return patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -75,7 +75,7 @@ class TestClaimFiltersExcludeSuperseded:
         """The seed Cypher WHERE clause must contain a guard against
         superseded/exhausted name_stage so that terminal-state nodes
         are never claimed."""
-        from imas_codex.standard_names.graph_store import resolve_owned_name
+        from iter_codex.standard_names.graph_store import resolve_owned_name
 
         func = resolve_owned_name(func_name)
 
@@ -102,7 +102,7 @@ class TestClaimFiltersExcludeSuperseded:
     def test_claim_generate_docs_skips_superseded_names(self):
         """When all eligible nodes have name_stage='superseded', the claim
         returns an empty batch (the WHERE clause filters them out)."""
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             claim_generate_docs_batch,
         )
 
@@ -118,7 +118,7 @@ class TestClaimFiltersExcludeSuperseded:
     def test_claim_review_name_skips_superseded_names(self):
         """When all eligible nodes have name_stage='superseded', the claim
         returns an empty batch."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_review_name_batch,
         )
 
@@ -144,7 +144,7 @@ class TestPersistGuardsNameStage:
         """persist_generated_docs raises ValueError when the node's
         name_stage has been changed from 'accepted' to 'superseded'
         between claim and persist (0 rows returned)."""
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             persist_generated_docs,
         )
 
@@ -167,7 +167,7 @@ class TestPersistGuardsNameStage:
     def test_persist_generated_docs_cypher_contains_name_stage_guard(self):
         """The persist_generated_docs Cypher must include
         ``sn.name_stage = 'accepted'`` in its WHERE clause."""
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             persist_generated_docs,
         )
 
@@ -190,7 +190,7 @@ class TestPersistGuardsNameStage:
     def test_persist_reviewed_name_rejects_superseded(self):
         """persist_reviewed_name returns '' when the node's name_stage has
         been changed from 'drafted' (0 rows from the chain_length read)."""
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -213,7 +213,7 @@ class TestPersistGuardsNameStage:
     def test_persist_reviewed_name_cypher_contains_name_stage_guard(self):
         """Both queries in persist_reviewed_name include
         ``sn.name_stage = 'drafted'`` in their WHERE clause."""
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -231,7 +231,7 @@ class TestPersistGuardsNameStage:
 
         with (
             _patch_gc(gc),
-            patch("imas_codex.standard_names.graph_store.graph_catalog.write_reviews"),
+            patch("iter_codex.standard_names.graph_store.graph_catalog.write_reviews"),
         ):
             persist_reviewed_name(
                 sn_id="test_sn",
@@ -249,7 +249,7 @@ class TestPersistGuardsNameStage:
 
     def test_persist_reviewed_docs_rejects_superseded(self):
         """persist_reviewed_docs returns '' when name_stage is not 'accepted'."""
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_docs,
         )
 
@@ -271,7 +271,7 @@ class TestPersistGuardsNameStage:
     def test_persist_refined_docs_returns_noop_for_superseded(self):
         """persist_refined_docs returns no-op dict when name_stage guard
         filters out the node (concurrent supersession)."""
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             persist_refined_docs,
         )
 
@@ -309,7 +309,7 @@ class TestNoInfiniteLoopOnSupersede:
         then persist fails (node superseded between claim and persist).
         Verify: persist raises ValueError, and a subsequent claim returns
         empty (the claim filter excludes the superseded node)."""
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             claim_generate_docs_batch,
             persist_generated_docs,
         )
@@ -354,7 +354,7 @@ class TestNoInfiniteLoopOnSupersede:
         with (
             _patch_gc(gc_claim),
             patch(
-                "imas_codex.standard_names.chain_history.name_chain_history",
+                "iter_codex.standard_names.chain_history.name_chain_history",
                 return_value=[],
             ),
         ):

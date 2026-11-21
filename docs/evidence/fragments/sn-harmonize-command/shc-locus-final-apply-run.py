@@ -74,7 +74,7 @@ RUN_DIR = Path(
     )
 )
 LOGS = RUN_DIR / "logs"
-CONSOLE = "/home/ITER/mcintos/Code/imas-codex/.venv/bin/imas-codex"
+CONSOLE = "/home/ITER/mcintos/Code/imas-codex/.venv/bin/iter-codex"
 
 
 def _prior():
@@ -159,8 +159,8 @@ def _member_state(graph, members: list[str]) -> dict[str, dict]:
 
 def preflight() -> dict:
     """Read the family, and reproduce the two named eligibility surfaces."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.harmonize import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.harmonize import (
         mark_members_for_regen,
         plan_family_applies,
     )
@@ -205,7 +205,7 @@ def preflight() -> dict:
         "member_scores": plan["member_scores"],
         "member_state": states,
         "scoped_reset_preview": reset_preview,
-        "scoped_reset_surface": "imas_codex.standard_names.harmonize.mark_members_for_regen",
+        "scoped_reset_surface": "iter_codex.standard_names.harmonize.mark_members_for_regen",
         "docs_edit_refusal": {
             "log": str(edit_log),
             "lines": blocked,
@@ -297,7 +297,7 @@ def rescore() -> dict:
     edited on the name axis, so a second failure leaves the stored verdict and
     its checks untouched and is recorded verbatim.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as graph:
         before = _name_state(graph, WALL)
@@ -381,11 +381,11 @@ def wall_drain() -> dict:
     snapshots the current docs and sets ``docs_stage='pending'`` under a fresh
     scope id, then a drain restricted to that id.
     """
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         aggregate_calls_per_phase,
         aggregate_spend_per_phase,
     )
-    from imas_codex.standard_names.harmonize import mark_members_for_regen
+    from iter_codex.standard_names.harmonize import mark_members_for_regen
 
     scope = mark_members_for_regen([WALL])
     payload = read_results()
@@ -411,7 +411,7 @@ def wall_drain() -> dict:
             "wall-drain.log",
         )
         started, ended = _prior()._window(str(log))
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         with GraphClient() as graph:
             rows = graph.query(
@@ -502,8 +502,8 @@ def finalize_family() -> dict:
 
 def rescore_cost() -> dict:
     """Read the rescore's own cost rows, selected by its window and the name."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         aggregate_calls_per_phase,
         aggregate_spend_per_phase,
     )
@@ -556,8 +556,8 @@ def rescore_cost() -> dict:
 
 def _run_cost(run_id: str) -> tuple[int, float]:
     """One run's calls and spend, read from its own cost rows."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         aggregate_calls_per_phase,
         aggregate_spend_per_phase,
     )

@@ -33,7 +33,7 @@ import uuid
 
 import pytest
 
-from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+from iter_codex.standard_names.graph_store.graph_catalog_reset import (
     clear_standard_names,
 )
 
@@ -49,7 +49,7 @@ _TEST_ID_PREFIX = "__cleartest__"
 def _gc():
     """Function-scoped real GraphClient; skip if Neo4j is unreachable."""
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()

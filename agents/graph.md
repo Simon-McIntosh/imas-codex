@@ -24,7 +24,7 @@ their own names. Traversal direction likewise comes from the LinkML slot, not
 from the English relationship name: it is
 `(StandardName)-[:DOCS_REVISION_OF]->(DocsRevision)`, not the reverse. The full
 per-label and per-relationship tables are in
-[`imas_codex/standard_names/AGENTS.md`](../imas_codex/standard_names/AGENTS.md#graph-identity-and-joins),
+[`iter_codex/standard_names/AGENTS.md`](../iter_codex/standard_names/AGENTS.md#graph-identity-and-joins),
 and the repo-wide rule with its incident record is in
 [AGENTS.md](../AGENTS.md#a-wrong-property-name-returns-zero-rows-not-an-error-binding).
 
@@ -56,15 +56,15 @@ Neo4j runs as a systemd user service (auto-starts on login):
 
 ```bash
 # Check status
-uv run imas-codex neo4j status
+uv run iter-codex neo4j status
 
 # Service management
-uv run imas-codex neo4j service status
-systemctl --user restart imas-codex-neo4j
-journalctl --user -u imas-codex-neo4j -f
+uv run iter-codex neo4j service status
+systemctl --user restart iter-codex-neo4j
+journalctl --user -u iter-codex-neo4j -f
 
 # Interactive Cypher shell
-uv run imas-codex neo4j shell
+uv run iter-codex neo4j shell
 
 # Neo4j Browser
 open http://localhost:7474
@@ -76,16 +76,16 @@ Always dump before destructive operations:
 
 ```bash
 # Dump current graph
-uv run imas-codex neo4j dump
+uv run iter-codex neo4j dump
 
 # Load a dump
-uv run imas-codex neo4j load graph.dump
+uv run iter-codex neo4j load graph.dump
 
 # Pull latest from GHCR
-uv run imas-codex neo4j pull
+uv run iter-codex neo4j pull
 
 # Push to GHCR (requires GHCR_TOKEN)
-uv run imas-codex neo4j push v1.0.0
+uv run iter-codex neo4j push v1.0.0
 ```
 
 ## Schema Evolution
@@ -121,7 +121,7 @@ query('''
 
 ```bash
 # 1. Prepare PR (pushes tag to fork)
-uv run imas-codex release v4.0.0 -m 'Release message' --remote origin
+uv run iter-codex release v4.0.0 -m 'Release message' --remote origin
 
 # 2. Create PR on GitHub, merge to upstream
 
@@ -129,17 +129,17 @@ uv run imas-codex release v4.0.0 -m 'Release message' --remote origin
 git pull upstream main
 
 # 4. Finalize release (graph to GHCR, tag to upstream)
-uv run imas-codex release v4.0.0 -m 'Release message'
+uv run iter-codex release v4.0.0 -m 'Release message'
 ```
 
 Options:
 
 ```bash
 # Preview changes
-uv run imas-codex release v4.0.0 -m 'Test' --dry-run
+uv run iter-codex release v4.0.0 -m 'Test' --dry-run
 
 # Skip git tag (test graph push without tagging)
-uv run imas-codex release v4.0.0 -m 'Graph only' --skip-git
+uv run iter-codex release v4.0.0 -m 'Graph only' --skip-git
 ```
 
 ## Vector Indexes

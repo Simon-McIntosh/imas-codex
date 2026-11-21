@@ -26,8 +26,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.edit import EditPlan
-from imas_codex.standard_names.promote import (
+from iter_codex.standard_names.edit import EditPlan
+from iter_codex.standard_names.promote import (
     ApprovalChange,
     ApprovalReport,
     read_pr_changes,
@@ -35,7 +35,7 @@ from imas_codex.standard_names.promote import (
     undo_approval,
 )
 
-APPROVAL = "imas_codex.standard_names.promote"
+APPROVAL = "iter_codex.standard_names.promote"
 
 
 # ---------------------------------------------------------------------------
@@ -397,16 +397,16 @@ class TestRunApprovalContestPath:
             patch(f"{APPROVAL}.persist_reviewed_docs", return_value="reviewed"),
             patch(f"{APPROVAL}.stage_docs_for_rescore", return_value={"ok": True}),
             patch(
-                "imas_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch"
+                "iter_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch"
             ) as m_rn,
             patch(
-                "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch"
+                "iter_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch"
             ) as m_rd,
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_refine_names.process_refine_name_batch"
+                "iter_codex.standard_names.worker_tasks.worker_refine_names.process_refine_name_batch"
             ) as m_prn,
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_refine_docs.process_refine_docs_batch"
+                "iter_codex.standard_names.worker_tasks.worker_refine_docs.process_refine_docs_batch"
             ) as m_prd,
         ):
             report = run_approval(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)
@@ -618,12 +618,12 @@ def _patch_rest(status=200, payload=None, recorder=None):
 
     fake_call.status = status
     fake_call.body = payload
-    return patch("imas_codex.graph.ghcr.github_api_call", fake_call)
+    return patch("iter_codex.graph.ghcr.github_api_call", fake_call)
 
 
 class TestResolveMergedPr:
     def test_resolves_merged_pr(self):
-        from imas_codex.standard_names.promote import resolve_merged_pr
+        from iter_codex.standard_names.promote import resolve_merged_pr
 
         seen: list[tuple[str, str]] = []
         with _patch_rest(payload=_rest_pull(), recorder=seen):
@@ -636,14 +636,14 @@ class TestResolveMergedPr:
 
     def test_merged_state_is_read_off_the_merge_record_not_the_state_field(self):
         """REST reports a merged pull request as ``closed``."""
-        from imas_codex.standard_names.promote import resolve_merged_pr
+        from iter_codex.standard_names.promote import resolve_merged_pr
 
         payload = _rest_pull(merged=False, merged_at="2026-09-01T00:00:00Z")
         with _patch_rest(payload=payload):
             assert resolve_merged_pr("https://github.com/o/r/pull/7").number == 7
 
     def test_unmerged_pr_rejected(self):
-        from imas_codex.standard_names.promote import resolve_merged_pr
+        from iter_codex.standard_names.promote import resolve_merged_pr
 
         payload = _rest_pull(
             state="open", merged=False, merged_at=None, merge_commit_sha=None
@@ -655,7 +655,7 @@ class TestResolveMergedPr:
             resolve_merged_pr("https://github.com/o/r/pull/7")
 
     def test_rejected_read_surfaces_what_github_said(self):
-        from imas_codex.standard_names.promote import resolve_merged_pr
+        from iter_codex.standard_names.promote import resolve_merged_pr
 
         with (
             _patch_rest(status=401, payload={"message": "Bad credentials"}),
@@ -664,20 +664,20 @@ class TestResolveMergedPr:
             resolve_merged_pr("https://github.com/o/r/pull/7")
 
     def test_url_that_is_not_a_pull_request_is_refused(self):
-        from imas_codex.standard_names.promote import resolve_merged_pr
+        from iter_codex.standard_names.promote import resolve_merged_pr
 
         with pytest.raises(ValueError, match="pull-request URL"):
             resolve_merged_pr("https://github.com/o/r/issues/7")
 
     def test_no_pull_request_call_shells_out(self):
-        from imas_codex.standard_names.promote import resolve_merged_pr
+        from iter_codex.standard_names.promote import resolve_merged_pr
 
         def fail(*args, **kwargs):
             raise AssertionError(f"pull-request work shelled out to {args[0]!r}")
 
         with (
             _patch_rest(payload=_rest_pull()),
-            patch("imas_codex.standard_names.promote.subprocess.run", fail),
+            patch("iter_codex.standard_names.promote.subprocess.run", fail),
         ):
             assert resolve_merged_pr("https://github.com/o/r/pull/7").number == 7
 
@@ -696,7 +696,7 @@ class TestBatchLabelledVersionRoundTrip:
     """
 
     def test_approval_tag_name_keeps_the_label(self):
-        from imas_codex.standard_names.promote import approval_tag_name
+        from iter_codex.standard_names.promote import approval_tag_name
 
         assert (
             approval_tag_name("review/v0.2.0rc65+west-task-2e")
@@ -704,13 +704,13 @@ class TestBatchLabelledVersionRoundTrip:
         )
 
     def test_plain_and_release_branches_are_unaffected(self):
-        from imas_codex.standard_names.promote import approval_tag_name
+        from iter_codex.standard_names.promote import approval_tag_name
 
         assert approval_tag_name("review/v0.2.0rc65") == "v0.2.0rc65"
         assert approval_tag_name("release/v1.0.0") == "v1.0.0"
 
     def test_resolve_merged_pr_carries_a_labelled_head_ref(self):
-        from imas_codex.standard_names.promote import resolve_merged_pr
+        from iter_codex.standard_names.promote import resolve_merged_pr
 
         payload = _rest_pull(
             number=9,
@@ -724,12 +724,12 @@ class TestBatchLabelledVersionRoundTrip:
 
     def test_release_branch_name_resolves_back_to_the_frozen_artifact(self, tmp_path):
         """release → branch name → merge locates the same artifact file."""
-        from imas_codex.standard_names.catalog_release import (
+        from iter_codex.standard_names.catalog_release import (
             _format_tag,
             _freeze_review_artifact,
         )
-        from imas_codex.standard_names.promote import approval_tag_name
-        from imas_codex.standard_names.sources_manifest import load_names_file
+        from iter_codex.standard_names.promote import approval_tag_name
+        from iter_codex.standard_names.sources_manifest import load_names_file
 
         tag = _format_tag(0, 2, 0, 65, build="west_task_2e")
         artifact = _freeze_review_artifact(
@@ -775,10 +775,10 @@ class TestFetchPrEvidenceOverRest:
                     return status, body
             return 404, {"message": f"unrouted {path}"}
 
-        return patch("imas_codex.graph.ghcr.github_api_call", fake_call)
+        return patch("iter_codex.graph.ghcr.github_api_call", fake_call)
 
     def test_assembles_body_conversation_and_commits(self):
-        from imas_codex.standard_names.promote import fetch_pr_evidence
+        from iter_codex.standard_names.promote import fetch_pr_evidence
 
         responses = [
             ("/issues/7/comments", 200, [{"user": {"login": "rev"}, "body": "ok"}]),
@@ -805,12 +805,12 @@ class TestFetchPrEvidenceOverRest:
         assert evidence["commits"][0]["messageBody"] == "why"
 
     def test_a_rejected_read_returns_empty_and_never_raises(self):
-        from imas_codex.standard_names.promote import fetch_pr_evidence
+        from iter_codex.standard_names.promote import fetch_pr_evidence
 
         with self._transport([("/pulls/7", 401, {"message": "Bad credentials"})]):
             assert fetch_pr_evidence("https://github.com/o/r/pull/7") == {}
 
     def test_a_url_that_is_not_a_pull_request_returns_empty(self):
-        from imas_codex.standard_names.promote import fetch_pr_evidence
+        from iter_codex.standard_names.promote import fetch_pr_evidence
 
         assert fetch_pr_evidence("not-a-url") == {}

@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.standard_names.segments import (
+from iter_codex.standard_names.segments import (
     NON_ACTIONABLE_GAP_CATEGORIES,
     classify_gap,
     dd_indexed_field_words,
@@ -363,7 +363,7 @@ class TestSymbolShorthandInAQuotient:
         ],
     )
     def test_quotient_resolves_to_two_registered_operands(self, token, left, right):
-        from imas_codex.standard_names.segments import operator_composition
+        from iter_codex.standard_names.segments import operator_composition
 
         comp = operator_composition(token)
         assert comp is not None, f"{token} should resolve as a quotient"
@@ -388,7 +388,7 @@ class TestSymbolShorthandInAQuotient:
         "token", ["velocity_per_magnetic_field", "vorticity_per_major_radius"]
     )
     def test_per_is_the_other_spelling_of_the_same_division(self, token):
-        from imas_codex.standard_names.segments import operator_composition
+        from iter_codex.standard_names.segments import operator_composition
 
         comp = operator_composition(token)
         assert comp is not None
@@ -396,7 +396,7 @@ class TestSymbolShorthandInAQuotient:
 
     def test_a_division_word_inside_a_registered_operator_is_not_a_division(self):
         """``per_toroidal_mode`` is one registered operator, not a quotient."""
-        from imas_codex.standard_names.segments import operator_composition
+        from iter_codex.standard_names.segments import operator_composition
 
         comp = operator_composition("density_per_toroidal_mode")
         assert comp is not None
@@ -415,7 +415,7 @@ class TestSymbolShorthandInAQuotient:
         assert "'over'" not in guidance and "'per'" not in guidance
 
     def test_every_symbol_expansion_targets_a_registered_token(self):
-        from imas_codex.standard_names.segments import (
+        from iter_codex.standard_names.segments import (
             _symbol_expansions,
             is_known_token,
         )

@@ -7,7 +7,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
-from imas_codex.remote import codac_uda as service
+from iter_codex.remote import codac_uda as service
 
 
 @pytest.fixture

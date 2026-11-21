@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at c9bb3c280bb41384e8588a733b41a5d45e87fde3, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.graph.temp_neo4j.
+# Names the tree no longer defines: iter_codex.graph.temp_neo4j.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Re-measure chain-cap identities with no sourced ancestor, and the share a
@@ -48,7 +48,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 
-from imas_codex.graph.client import GraphClient  # noqa: E402
+from iter_codex.graph.client import GraphClient  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 STEM = Path(__file__).resolve().stem.removesuffix("-run")
@@ -207,7 +207,7 @@ def check_census(reading: dict) -> list[str]:
 
 def run_published(gc) -> dict:
     """What a whole-catalog cut publishes, through the export gate's own rules."""
-    from imas_codex.standard_names.export import (
+    from iter_codex.standard_names.export import (
         DEFAULT_BOUND_ADJACENT_HALF_WIDTH,
         _classify_export_population,
         _fetch_export_population,
@@ -217,7 +217,7 @@ def run_published(gc) -> dict:
     def client():
         return gc
 
-    with patch("imas_codex.graph.client.GraphClient", client):
+    with patch("iter_codex.graph.client.GraphClient", client):
         population = _fetch_export_population(batch=None, require_docs_review=True)
         candidates, eligibility = _classify_export_population(
             population, domain=None, names_only=False
@@ -347,7 +347,7 @@ def plant(gc) -> None:
 
 
 def run_control() -> int:
-    from imas_codex.graph import temp_neo4j
+    from iter_codex.graph import temp_neo4j
 
     def port() -> int:
         with socket.socket() as sock:

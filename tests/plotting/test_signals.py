@@ -13,11 +13,11 @@ import numpy as np
 import pytest
 from matplotlib.ticker import MaxNLocator
 
-from imas_codex.plotting import save_figure, signals as signal_plot, style
+from iter_codex.plotting import save_figure, signals as signal_plot, style
 
 
 def test_public_guard_and_packaged_style_are_importable():
-    resource = files("imas_codex.plotting").joinpath("data-ink.mplstyle")
+    resource = files("iter_codex.plotting").joinpath("data-ink.mplstyle")
     assert resource.is_file()
     assert Path(str(resource)).resolve() == style.BASE_STYLE.resolve()
     assert save_figure is style.save_figure

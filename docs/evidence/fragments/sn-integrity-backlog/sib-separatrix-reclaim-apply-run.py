@@ -18,8 +18,8 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import edit
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import edit
 
 HERE = Path(__file__).resolve().parent
 AUTHORITY = HERE / "sib-separatrix-reclaim-apply-authority.json"
@@ -233,7 +233,7 @@ def apply_one(name):
 
 
 def tritium_authority():
-    from imas_codex.standard_names.repair_authority import build_repair_authority
+    from iter_codex.standard_names.repair_authority import build_repair_authority
 
     guards = [
         {
@@ -292,7 +292,7 @@ def tritium_authority():
             ],
         }
     )
-    from imas_codex.graph.models import RepairGuard, RepairMutation, RepairParticipant
+    from iter_codex.graph.models import RepairGuard, RepairMutation, RepairParticipant
 
     for row in json.loads(built.content)["rows"]:
         for key, model in (
@@ -332,21 +332,21 @@ def tritium_authority():
 
 
 async def tritium():
-    from imas_codex.standard_names.budget import BudgetManager
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.budget import BudgetManager
+    from iter_codex.standard_names.graph_store.graph_audits import (
         create_sn_run_open,
         finalize_sn_run,
     )
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         retry_failed_sources,
         set_source_compose_hint,
     )
-    from imas_codex.standard_names.pool_adapter import _seed_explicit_paths
-    from imas_codex.standard_names.signed_manifest import (
+    from iter_codex.standard_names.pool_adapter import _seed_explicit_paths
+    from iter_codex.standard_names.signed_manifest import (
         apply_signed_manifest,
         signed_payload_sha256,
     )
-    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+    from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
         compose_batch,
     )
 
@@ -460,9 +460,9 @@ async def tritium():
 
 async def compose_held_sources():
     """Compose the persisted source cohort while preserving its claim fences."""
-    from imas_codex.standard_names.budget import BudgetManager
-    from imas_codex.standard_names.graph_store.graph_audits import finalize_sn_run
-    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+    from iter_codex.standard_names.budget import BudgetManager
+    from iter_codex.standard_names.graph_store.graph_audits import finalize_sn_run
+    from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
         compose_batch,
     )
 

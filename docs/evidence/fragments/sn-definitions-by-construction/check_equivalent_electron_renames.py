@@ -6,8 +6,8 @@ import argparse
 import json
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.source_reads import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.source_reads import (
     count_live_names_without_source,
     read_source_paths_by_name,
 )

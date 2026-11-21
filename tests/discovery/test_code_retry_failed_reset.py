@@ -1,6 +1,6 @@
 """A failed code fetch can be retried without reprocessing ingested files."""
 
-from imas_codex.discovery.base.reset import (
+from iter_codex.discovery.base.reset import (
     CODE_RESET_SPECS,
     reset_to_status,
 )
@@ -31,7 +31,7 @@ def test_retry_failed_resets_only_failed_files(monkeypatch):
                 file["error"] = None
             return [{"reset_count": len(selected)}]
 
-    monkeypatch.setattr("imas_codex.graph.GraphClient", Graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", Graph)
     assert (
         reset_to_status(
             CODE_RESET_SPECS["retry-failed"], "jt-60sa", path_prefixes=["/home/"]

@@ -2,8 +2,8 @@
 
 import pytest
 
-from imas_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
-from imas_codex.units.dd_unit_exceptions import (
+from iter_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
+from iter_codex.units.dd_unit_exceptions import (
     canonical_or_none,
     dd_unit_bug_globs,
     graph_unit_correction,

@@ -23,14 +23,14 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
-from imas_codex.discovery.base import llm
-from imas_codex.discovery.base.facility import get_facility
-from imas_codex.discovery.signals import parallel
-from imas_codex.discovery.signals.models import SignalEnrichmentBatch
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_model
+from iter_codex.discovery.base import llm
+from iter_codex.discovery.base.facility import get_facility
+from iter_codex.discovery.signals import parallel
+from iter_codex.discovery.signals.models import SignalEnrichmentBatch
+from iter_codex.graph.client import GraphClient
+from iter_codex.settings import get_model
 
-MODEL_OVERRIDE = "IMAS_CODEX_DISCOVERY_DESCRIBE_MODEL"
+MODEL_OVERRIDE = "ITER_CODEX_DISCOVERY_DESCRIBE_MODEL"
 
 
 def encoded(value) -> str:
@@ -190,8 +190,8 @@ async def replay_batch(
     """Exercise production prompting or replay one exact captured request."""
     import litellm
 
-    from imas_codex.discovery.signals import enrichment
-    from imas_codex.discovery.signals.enrichment import EnrichmentOptions
+    from iter_codex.discovery.signals import enrichment
+    from iter_codex.discovery.signals.enrichment import EnrichmentOptions
 
     if enrichment_options is None:
         enrichment_options = EnrichmentOptions()
@@ -313,7 +313,7 @@ async def replay_batch(
     with ExitStack() as stack:
         stack.enter_context(
             patch(
-                "imas_codex.discovery.signals.enrichment.get_enrichment_options",
+                "iter_codex.discovery.signals.enrichment.get_enrichment_options",
                 return_value=enrichment_options,
             )
         )
@@ -336,7 +336,7 @@ async def replay_batch(
             )
             stack.enter_context(
                 patch(
-                    "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+                    "iter_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
                     return_value=[],
                 )
             )

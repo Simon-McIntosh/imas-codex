@@ -6,8 +6,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import graph_ops  # noqa: F401 — wires the services
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops  # noqa: F401 — wires the services
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
 )
 

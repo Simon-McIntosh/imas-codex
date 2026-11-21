@@ -1,0 +1,769 @@
+"""
+Remote Python environment management.
+
+This module provides Python version and venv management on local and remote facilities
+using uv (astral-sh/uv). It enables modern Python development across facilities with
+different system Python versions.
+
+Key capabilities:
+- Detect Python versions (system and uv-managed)
+- Install modern Python via uv (no root required)
+- Create project venvs for iter-codex
+- Handle airgapped facilities (pre-cached Python binaries)
+
+Strategy per facility type:
+1. PyPI accessible (TCV, ITER, JET): Install uv, then uv python install
+2. Airgapped (JT-60SA): uv already installed, Python pre-cached from GitHub releases
+
+Usage:
+    from iter_codex.remote.python import get_python_status, install_python, create_venv
+
+    # Check what's available
+    status = get_python_status(facility='tcv')
+
+    # Install modern Python
+    result = install_python(facility='tcv', version='3.12')
+
+    # Create project venv
+    result = create_venv(facility='tcv')
+"""
+
+import logging
+import re
+from dataclasses import dataclass
+
+from iter_codex.remote.tools import (
+    check_tool,
+    install_tool,
+    probe_remote_environment,
+    run,
+)
+
+logger = logging.getLogger(__name__)
+
+# Recommended Python version for iter-codex
+RECOMMENDED_PYTHON = "3.12"
+
+# Minimum Python version for iter-codex features
+MIN_PYTHON = "3.10"
+
+# Default venv path on remotes
+DEFAULT_VENV_PATH = "~/.local/share/iter-codex/venv"
+
+
+@dataclass
+class PythonVersion:
+    """Parsed Python version info."""
+
+    major: int
+    minor: int
+    patch: int
+    source: str  # 'system', 'uv', or path
+
+    @property
+    def version_string(self) -> str:
+        return f"{self.major}.{self.minor}.{self.patch}"
+
+    @property
+    def short_version(self) -> str:
+        return f"{self.major}.{self.minor}"
+
+    def meets_minimum(self, min_version: str = MIN_PYTHON) -> bool:
+        """Check if this version meets the minimum requirement."""
+        min_parts = [int(p) for p in min_version.split(".")]
+        current = [self.major, self.minor, self.patch]
+        return current[:2] >= min_parts[:2]
+
+
+@dataclass
+class PythonStatus:
+    """Python environment status for a facility."""
+
+    facility: str
+    uv_available: bool
+    uv_version: str | None
+    system_python: PythonVersion | None
+    uv_pythons: list[PythonVersion]
+    recommended_action: str
+    has_modern_python: bool
+    venv_path: str | None
+    venv_python: PythonVersion | None
+    # Remote environment block probe (None when the facility declares none)
+    environment: dict | None = None
+    active_python: PythonVersion | None = None
+    min_python_version: str | None = None
+    meets_floor: bool | None = None
+
+
+def _parse_python_version(
+    version_output: str, source: str = "system"
+) -> PythonVersion | None:
+    """Parse Python version from --version output.
+
+    Args:
+        version_output: Output from python3 --version
+        source: Source identifier
+
+    Returns:
+        PythonVersion or None if parsing fails
+    """
+    match = re.search(r"(\d+)\.(\d+)\.(\d+)", version_output)
+    if match:
+        return PythonVersion(
+            major=int(match.group(1)),
+            minor=int(match.group(2)),
+            patch=int(match.group(3)),
+            source=source,
+        )
+    return None
+
+
+def _parse_uv_python_list(output: str) -> list[PythonVersion]:
+    """Parse uv python list output to find installed versions.
+
+    uv python list shows:
+    - cpython-3.12.12-linux-x86_64-gnu    /home/user/.local/share/uv/python/cpython-3.12.12-linux-x86_64-gnu/bin/python3
+    - cpython-3.13.9-linux-x86_64-gnu     .local/share/uv/python/cpython-3.13.9-linux-x86_64-gnu/bin/python3  (relative)
+
+    Returns:
+        List of installed Python versions
+    """
+    versions = []
+    seen = set()  # Dedupe by version
+    for line in output.splitlines():
+        # Look for cpython-X.Y.Z patterns with a path (absolute or relative)
+        # Path can start with / or . (for relative paths like .local/)
+        match = re.search(r"cpython-(\d+)\.(\d+)\.(\d+)-\S+\s+([/.]\S+)", line)
+        if match:
+            version_key = (
+                int(match.group(1)),
+                int(match.group(2)),
+                int(match.group(3)),
+            )
+            if version_key not in seen:
+                seen.add(version_key)
+                versions.append(
+                    PythonVersion(
+                        major=version_key[0],
+                        minor=version_key[1],
+                        patch=version_key[2],
+                        source=match.group(4),
+                    )
+                )
+    return versions
+
+
+def _probe_facility_environment(facility: str | None) -> dict | None:
+    """Probe a remote facility's declared environment once.
+
+    Returns the probe mapping for a remote facility and None for the local
+    path, which has no remote environment to open. Callers that resolve a
+    facility pass this to :func:`get_python_status` so a single probe judges
+    the interpreter floor for the whole invocation.
+    """
+    if facility is None or str(facility).lower() == "local":
+        return None
+    return probe_remote_environment(facility)
+
+
+def get_python_status(
+    facility: str | None = None,
+    *,
+    environment: dict | None = None,
+) -> PythonStatus:
+    """Get comprehensive Python environment status for a facility.
+
+    Checks:
+    - System Python version
+    - uv availability and version
+    - uv-managed Python installations
+    - Existing iter-codex venv
+    - The ``remote_environment`` block's interpreter, judged against its floor
+    - Recommended action
+
+    Args:
+        facility: Facility ID (None = local)
+        environment: The already-resolved ``remote_environment`` probe, as
+            returned by :func:`iter_codex.remote.tools.probe_remote_environment`
+            (or carried on ``check_all_tools``'s ``environment`` entry). Passed
+            in rather than probed here so one CLI invocation opens the remote
+            environment exactly once; every facility-resolving caller supplies
+            it, and it is None only on the local path, which has no facility to
+            probe.
+
+    Returns:
+        PythonStatus with complete environment info
+    """
+    facility_name = facility or "local"
+
+    # Check uv availability
+    uv_status = check_tool("uv", facility=facility)
+    uv_available = uv_status.get("available", False)
+    uv_version = uv_status.get("version")
+
+    # Get system Python version
+    system_python = None
+    try:
+        output = run(
+            "python3 --version 2>/dev/null || python --version 2>/dev/null",
+            facility=facility,
+            timeout=10,
+        )
+        if output and "Python" in output:
+            system_python = _parse_python_version(output, source="system")
+    except Exception as e:
+        logger.debug(f"Failed to get system Python: {e}")
+
+    # Get uv-managed Pythons
+    uv_pythons: list[PythonVersion] = []
+    if uv_available:
+        try:
+            output = run(
+                "uv python list --only-installed 2>/dev/null || true",
+                facility=facility,
+                timeout=15,
+            )
+            uv_pythons = _parse_uv_python_list(output)
+        except Exception as e:
+            logger.debug(f"Failed to list uv Pythons: {e}")
+
+    # Check for existing venv
+    venv_path = None
+    venv_python = None
+    try:
+        venv_check = run(
+            f"test -f {DEFAULT_VENV_PATH}/bin/python && echo exists || echo missing",
+            facility=facility,
+            timeout=5,
+        )
+        if "exists" in venv_check:
+            venv_path = DEFAULT_VENV_PATH
+            # Get venv Python version
+            venv_version_output = run(
+                f"{DEFAULT_VENV_PATH}/bin/python --version 2>/dev/null || true",
+                facility=facility,
+                timeout=5,
+            )
+            if venv_version_output:
+                venv_python = _parse_python_version(
+                    venv_version_output, source=DEFAULT_VENV_PATH
+                )
+    except Exception as e:
+        logger.debug(f"Failed to check venv: {e}")
+
+    # Determine if we have modern Python
+    has_modern = False
+    if system_python and system_python.meets_minimum():
+        has_modern = True
+    if any(p.meets_minimum() for p in uv_pythons):
+        has_modern = True
+
+    # Determine recommended action
+    if venv_python and venv_python.meets_minimum():
+        recommended_action = "ready"
+    elif has_modern and not venv_path:
+        recommended_action = "create_venv"
+    elif not uv_available:
+        recommended_action = "install_uv"
+    elif not has_modern:
+        recommended_action = "install_python"
+    else:
+        recommended_action = "create_venv"
+
+    # Judge the facility's declared remote environment from the probe the
+    # caller already resolved: the interpreter a scan actually uses, against
+    # the block's floor.
+    active_python = None
+    min_python_version = None
+    meets_floor = None
+    if environment and environment.get("declared"):
+        version_output = environment.get("python_version")
+        if version_output:
+            active_python = _parse_python_version(
+                version_output, source="remote_environment"
+            )
+        min_python_version = environment.get("floor") or MIN_PYTHON
+        if active_python is not None:
+            meets_floor = active_python.meets_minimum(min_python_version)
+
+    return PythonStatus(
+        facility=facility_name,
+        uv_available=uv_available,
+        uv_version=uv_version,
+        system_python=system_python,
+        uv_pythons=uv_pythons,
+        recommended_action=recommended_action,
+        has_modern_python=has_modern,
+        venv_path=venv_path,
+        venv_python=venv_python,
+        environment=environment,
+        active_python=active_python,
+        min_python_version=min_python_version,
+        meets_floor=meets_floor,
+    )
+
+
+def install_uv(facility: str | None = None, force: bool = False) -> dict:
+    """Install uv on a facility.
+
+    Args:
+        facility: Facility ID (None = local)
+        force: Reinstall even if already present
+
+    Returns:
+        Dict with success status and details
+    """
+    return install_tool("uv", facility=facility, force=force)
+
+
+def ensure_python3_symlink(
+    facility: str | None = None,
+    version: str = RECOMMENDED_PYTHON,
+) -> None:
+    """Ensure ``python3`` in ~/.local/bin points to the uv-managed Python.
+
+    uv installs Python to its own managed directory and creates a versioned
+    symlink (e.g. ``~/.local/bin/python3.12``) but NOT an unversioned
+    ``python3`` symlink.  Since ``run_python_script`` and other callers
+    default to ``python3``, we need this symlink to exist.
+
+    Idempotent — only creates/updates if the target is missing or stale.
+    """
+    major_minor = version if "." in version else f"3.{version}"
+    check = f"test -e ~/.local/bin/python{major_minor} && echo yes || echo no"
+    try:
+        result = run(check, facility=facility, timeout=5)
+        if result.strip() != "yes":
+            return  # No versioned python in .local/bin, nothing to link
+    except Exception:
+        return
+
+    # Create python3 → python{major_minor} symlink
+    cmd = f"ln -sf ~/.local/bin/python{major_minor} ~/.local/bin/python3"
+    try:
+        run(cmd, facility=facility, timeout=5)
+        logger.info("Created ~/.local/bin/python3 -> python%s symlink", major_minor)
+    except Exception as e:
+        logger.debug("Could not create python3 symlink: %s", e)
+
+
+def install_python(
+    facility: str | None = None,
+    version: str = RECOMMENDED_PYTHON,
+) -> dict:
+    """Install Python via uv on a facility.
+
+    uv downloads Python from python-build-standalone (GitHub releases),
+    not PyPI, so this works even on PyPI-airgapped facilities as long
+    as GitHub is accessible.
+
+    After installation, creates a ``~/.local/bin/python3`` symlink to the
+    versioned binary so that ``python3`` resolves to the uv-managed
+    interpreter (instead of the system Python).
+
+    Args:
+        facility: Facility ID (None = local)
+        version: Python version to install (e.g., "3.12")
+
+    Returns:
+        Dict with success status and details
+    """
+    # Ensure uv is available
+    uv_status = check_tool("uv", facility=facility)
+    if not uv_status.get("available"):
+        return {
+            "success": False,
+            "error": "uv not installed. Run 'iter-codex tools install <facility> --tool uv' first.",
+        }
+
+    # Check if Python is already cached
+    try:
+        existing = run(
+            f"uv python list --only-installed 2>/dev/null | grep 'cpython-{version}' || true",
+            facility=facility,
+            timeout=15,
+        )
+        if f"cpython-{version}" in existing:
+            # Extract exact version
+            match = re.search(rf"cpython-({version}\.\d+)", existing)
+            exact_version = match.group(1) if match else version
+            # Ensure python3 symlink exists even if Python was already installed
+            ensure_python3_symlink(facility=facility, version=version)
+            return {
+                "success": True,
+                "action": "already_installed",
+                "version": exact_version,
+            }
+    except Exception:
+        pass
+
+    # Install Python via uv
+    try:
+        output = run(
+            f"uv python install {version} 2>&1", facility=facility, timeout=300
+        )
+        logger.info(f"uv python install output: {output}")
+
+        # Verify installation
+        verify = run(
+            f"uv python list --only-installed 2>/dev/null | grep 'cpython-{version}' || true",
+            facility=facility,
+            timeout=15,
+        )
+        if f"cpython-{version}" in verify:
+            match = re.search(rf"cpython-({version}\.\d+)", verify)
+            exact_version = match.group(1) if match else version
+            # Create python3 symlink for newly installed Python
+            ensure_python3_symlink(facility=facility, version=version)
+            return {
+                "success": True,
+                "action": "installed",
+                "version": exact_version,
+                "output": output,
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Installation completed but Python not found in uv list",
+                "output": output,
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+        }
+
+
+def create_venv(
+    facility: str | None = None,
+    python_version: str = RECOMMENDED_PYTHON,
+    venv_path: str = DEFAULT_VENV_PATH,
+    force: bool = False,
+    environment: dict | None = None,
+) -> dict:
+    """Create a venv for iter-codex on a facility.
+
+    Uses uv venv for fast creation with the best available Python.
+
+    Args:
+        facility: Facility ID (None = local)
+        python_version: Preferred Python version
+        venv_path: Path for the venv
+        force: Recreate even if exists
+        environment: The already-resolved ``remote_environment`` probe. A
+            caller that has probed it does not open the remote environment
+            again; omitted, it is probed here so one invocation still probes
+            once.
+
+    Returns:
+        Dict with success status and details
+    """
+    # Check if venv already exists
+    if not force:
+        try:
+            check = run(
+                f"test -f {venv_path}/bin/python && echo exists || echo missing",
+                facility=facility,
+                timeout=5,
+            )
+            if "exists" in check:
+                # Get version
+                version_out = run(
+                    f"{venv_path}/bin/python --version 2>/dev/null || true",
+                    facility=facility,
+                    timeout=5,
+                )
+                version = _parse_python_version(version_out, source=venv_path)
+                return {
+                    "success": True,
+                    "action": "already_exists",
+                    "venv_path": venv_path,
+                    "python_version": version.version_string if version else "unknown",
+                }
+        except Exception:
+            pass
+
+    # Ensure uv is available
+    uv_status = check_tool("uv", facility=facility)
+    if not uv_status.get("available"):
+        return {
+            "success": False,
+            "error": "uv not installed. Run 'iter-codex tools install <facility> --tool uv' first.",
+        }
+
+    # Check available Pythons, judging the facility's declared remote
+    # environment. A caller that already resolved it hands it in, so one
+    # invocation probes once.
+    if environment is None:
+        environment = _probe_facility_environment(facility)
+    status = get_python_status(facility=facility, environment=environment)
+
+    # Determine which Python to use
+    python_arg = ""
+    used_version = None
+
+    # Prefer uv-managed Python at requested version
+    matching_uv = [p for p in status.uv_pythons if p.short_version == python_version]
+    if matching_uv:
+        used_version = matching_uv[0]
+        python_arg = f"--python {python_version}"
+    # Fall back to any modern uv Python
+    elif status.uv_pythons:
+        modern_uv = [p for p in status.uv_pythons if p.meets_minimum()]
+        if modern_uv:
+            used_version = modern_uv[0]
+            python_arg = f"--python {used_version.short_version}"
+    # Fall back to system Python if modern
+    elif status.system_python and status.system_python.meets_minimum():
+        used_version = status.system_python
+        python_arg = "--python python3"
+
+    if not used_version:
+        return {
+            "success": False,
+            "error": f"No Python >= {MIN_PYTHON} available. Run 'iter-codex tools python install <facility>' first.",
+        }
+
+    # Create parent directory
+    parent_dir = "/".join(venv_path.split("/")[:-1])
+    run(f"mkdir -p {parent_dir}", facility=facility)
+
+    # Create venv with uv
+    try:
+        cmd = f"uv venv {python_arg} {venv_path} 2>&1"
+        output = run(cmd, facility=facility, timeout=60)
+        logger.info(f"uv venv output: {output}")
+
+        # Verify
+        check = run(
+            f"test -f {venv_path}/bin/python && echo exists || echo missing",
+            facility=facility,
+            timeout=5,
+        )
+        if "exists" in check:
+            version_out = run(
+                f"{venv_path}/bin/python --version 2>/dev/null || true",
+                facility=facility,
+                timeout=5,
+            )
+            version = _parse_python_version(version_out, source=venv_path)
+            return {
+                "success": True,
+                "action": "created",
+                "venv_path": venv_path,
+                "python_version": version.version_string
+                if version
+                else used_version.version_string,
+                "output": output,
+            }
+        else:
+            return {
+                "success": False,
+                "error": "venv creation completed but venv not found",
+                "output": output,
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+        }
+
+
+def setup_python_env(
+    facility: str | None = None,
+    python_version: str = RECOMMENDED_PYTHON,
+    force: bool = False,
+) -> dict:
+    """Complete Python environment setup for a facility.
+
+    This is the main entry point for setting up a modern Python environment.
+    It performs all necessary steps:
+    1. Install uv (if missing)
+    2. Install Python via uv (if no modern Python available)
+    3. Create iter-codex venv
+
+    Args:
+        facility: Facility ID (None = local)
+        python_version: Preferred Python version
+        force: Force reinstall/recreate
+
+    Returns:
+        Dict with complete setup status
+    """
+    results = {
+        "facility": facility or "local",
+        "steps": [],
+    }
+
+    # Step 1: Check/install uv
+    uv_status = check_tool("uv", facility=facility)
+    if not uv_status.get("available") or force:
+        uv_result = install_uv(facility=facility, force=force)
+        results["steps"].append(
+            {
+                "step": "install_uv",
+                "result": uv_result,
+            }
+        )
+        if not uv_result.get("success"):
+            results["success"] = False
+            results["error"] = "Failed to install uv"
+            return results
+    else:
+        results["steps"].append(
+            {
+                "step": "install_uv",
+                "result": {
+                    "success": True,
+                    "action": "already_installed",
+                    "version": uv_status.get("version"),
+                },
+            }
+        )
+
+    # Step 2: Check/install Python
+    environment = _probe_facility_environment(facility)
+    status = get_python_status(facility=facility, environment=environment)
+
+    # A facility whose declared remote interpreter is below its floor is
+    # refused before any install: the block's own setup commands raise the
+    # interpreter, and building a venv under a below-floor interpreter would
+    # report success while scans keep running the unmet one.
+    if environment and environment.get("declared") and status.meets_floor is False:
+        results["success"] = False
+        results["environment"] = environment
+        results["error"] = (
+            f"declared remote interpreter {environment.get('python_version')} "
+            f"is below the floor {environment.get('floor')}"
+        )
+        return results
+
+    needs_python = not status.has_modern_python
+
+    if needs_python or force:
+        python_result = install_python(facility=facility, version=python_version)
+        results["steps"].append(
+            {
+                "step": "install_python",
+                "result": python_result,
+            }
+        )
+        if not python_result.get("success"):
+            results["success"] = False
+            results["error"] = "Failed to install Python"
+            return results
+    else:
+        # Report what Python is available
+        best_python = None
+        if status.system_python and status.system_python.meets_minimum():
+            best_python = status.system_python
+        for p in status.uv_pythons:
+            if p.meets_minimum():
+                if best_python is None or p.minor > best_python.minor:
+                    best_python = p
+        results["steps"].append(
+            {
+                "step": "install_python",
+                "result": {
+                    "success": True,
+                    "action": "already_available",
+                    "version": best_python.version_string if best_python else "unknown",
+                    "source": best_python.source if best_python else "unknown",
+                },
+            }
+        )
+
+    # Step 3: Create venv
+    venv_result = create_venv(
+        facility=facility,
+        python_version=python_version,
+        force=force,
+        environment=environment,
+    )
+    results["steps"].append(
+        {
+            "step": "create_venv",
+            "result": venv_result,
+        }
+    )
+
+    results["success"] = venv_result.get("success", False)
+    if venv_result.get("success"):
+        results["venv_path"] = venv_result.get("venv_path")
+        results["python_version"] = venv_result.get("python_version")
+    else:
+        results["error"] = venv_result.get("error", "Failed to create venv")
+
+    # Clean uv cache to avoid accumulating GBs on remote hosts
+    try:
+        run("uv cache clean", facility=facility, timeout=120)
+        results["steps"].append({"step": "cache_clean", "result": {"success": True}})
+    except Exception as e:
+        logger.warning("Failed to clean uv cache: %s", e)
+        results["steps"].append(
+            {"step": "cache_clean", "result": {"success": False, "error": str(e)}}
+        )
+
+    return results
+
+
+# E2E extraction dependencies that should be in the remote venv
+EXTRACTION_DEPS = ["msgpack", "numpy"]
+
+
+def install_extraction_deps(
+    facility: str | None = None,
+    venv_path: str = DEFAULT_VENV_PATH,
+) -> dict:
+    """Install E2E extraction dependencies in the remote venv.
+
+    Installs msgpack and numpy (if not already present) for binary
+    data transfer and signal extraction support.
+
+    Args:
+        facility: Facility ID (None = local).
+        venv_path: Path to the venv.
+
+    Returns:
+        Dict with installation results per package.
+    """
+    results: dict = {"facility": facility or "local", "packages": {}}
+
+    for pkg in EXTRACTION_DEPS:
+        try:
+            # Check if already installed
+            check = run(
+                f"{venv_path}/bin/python -c 'import {pkg}; print({pkg}.__version__)' 2>/dev/null",
+                facility=facility,
+                timeout=10,
+            )
+            if check and "Error" not in check and "Traceback" not in check:
+                results["packages"][pkg] = {
+                    "success": True,
+                    "action": "already_installed",
+                    "version": check.strip(),
+                }
+                continue
+        except Exception:
+            pass
+
+        # Install via uv pip
+        try:
+            output = run(
+                f"uv pip install --python {venv_path}/bin/python {pkg} 2>&1",
+                facility=facility,
+                timeout=120,
+            )
+            results["packages"][pkg] = {
+                "success": True,
+                "action": "installed",
+                "output": output[:200],
+            }
+        except Exception as e:
+            results["packages"][pkg] = {
+                "success": False,
+                "error": str(e)[:200],
+            }
+
+    results["success"] = all(p.get("success") for p in results["packages"].values())
+    return results

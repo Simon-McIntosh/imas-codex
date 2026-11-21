@@ -11,8 +11,8 @@ import click
 # Add the project root to the path so we can import from benchmarks
 # Get project root using importlib.resources
 try:
-    imas_codex_package = resources.files("imas_codex")
-    project_root = Path(str(imas_codex_package)).parent
+    iter_codex_package = resources.files("iter_codex")
+    project_root = Path(str(iter_codex_package)).parent
     sys.path.insert(0, str(project_root))
 except ImportError:
     # Fallback for development
@@ -44,7 +44,7 @@ def main(benchmark_filter) -> int:
     if is_ci:
         print("🔧 Running in CI environment")
 
-    print("🚀 Establishing Performance Baseline for IMAS Codex Tools")
+    print("🚀 Establishing Performance Baseline for ITER Codex Tools")
     print("=" * 60)
 
     runner = BenchmarkRunner()

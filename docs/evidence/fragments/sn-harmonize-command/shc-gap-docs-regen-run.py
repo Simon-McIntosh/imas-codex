@@ -60,7 +60,7 @@ _LOGS = os.path.join(_RUNS, "logs")
 #: The first steering edit: it reset gap's docs out of ``exhausted`` and
 #: regenerated them under the documentation seat.
 GAP_EDIT_COMMAND = (
-    "uv run --no-sync imas-codex sn edit gap_at_outboard_midplane "
+    "uv run --no-sync iter-codex sn edit gap_at_outboard_midplane "
     "--hint '<locus text in physics terms: the separation between the inner and "
     "outer separatrices at the outboard midplane, naming no DD field, IDS path "
     "or option value>' --axis docs --scope self --reason '<the lead's "
@@ -79,7 +79,7 @@ GAP_EDIT_NOTE = (
 #: edit's own run id (the rolling iteration over the ``--name`` form was
 #: refused while the interrupted edit still held a worker claim).
 GAP_DOCS_COMMAND = (
-    "uv run --no-sync imas-codex sn run --docs-only "
+    "uv run --no-sync iter-codex sn run --docs-only "
     "--scope-run-id sn-edit-20261020T205652Z --cost-limit 0.45 "
     "--skip-global-maintenance"
 )
@@ -88,7 +88,7 @@ GAP_DOCS_LOG = os.path.join(_LOGS, "gap-scoped-review.log")
 #: The second steering edit, staged without the inline review so the whole
 #: review runs once inside a single cost-capped scope.
 GAP_STEER2_EDIT_COMMAND = (
-    "uv run --no-sync imas-codex sn edit gap_at_outboard_midplane "
+    "uv run --no-sync iter-codex sn edit gap_at_outboard_midplane "
     "--hint '<reconcile the locus sentence: Z* is how the outboard midplane is "
     "located for this quantity, so the trailing midplane sentence describes "
     "that same height and never a second one; keep the opening, equation and "
@@ -111,7 +111,7 @@ GAP_SWEEP_LOG = os.path.join(_LOGS, "gap-orphan-sweep-tick.log")
 
 #: gap's second documentation review: one scope over the re-edit's run id.
 GAP_STEER2_DOCS_COMMAND = (
-    "uv run --no-sync imas-codex sn run --docs-only "
+    "uv run --no-sync iter-codex sn run --docs-only "
     "--scope-run-id sn-edit-20261020T215855Z --cost-limit 0.28 "
     "--skip-global-maintenance"
 )
@@ -155,7 +155,7 @@ GAP_STEER2_OUTCOME = {
 #: text must go; the writer restores that paragraph regardless, which is what
 #: makes this the last edit this node attempts.
 GAP_STEER3_EDIT_COMMAND = (
-    "uv run --no-sync imas-codex sn edit gap_at_outboard_midplane "
+    "uv run --no-sync iter-codex sn edit gap_at_outboard_midplane "
     "--hint '<delete the quoted trailing paragraph in full; replace it with one "
     "sentence locating the outboard midplane for this quantity at Z*, the height "
     "where the inner separatrix reaches its maximum major radius on the "
@@ -181,7 +181,7 @@ GAP_STEER3_EDIT_NOTE = (
 #: run id, with the cost limit set from the three-seat quorum's per-seat need
 #: rather than from the whole-run estimate.
 GAP_STEER3_DOCS_COMMAND = (
-    "uv run --no-sync imas-codex sn run --docs-only "
+    "uv run --no-sync iter-codex sn run --docs-only "
     "--scope-run-id sn-edit-20261021T033930Z --cost-limit 0.45 "
     "--skip-global-maintenance"
 )
@@ -243,8 +243,8 @@ WRITER_MECHANISM = {
         "Removing it needs a change to the writer or to the registry entry, "
         "not another edit."
     ),
-    "appender": "imas_codex/standard_names/workers.py:9742 _documentation_with_registry_form",
-    "appender_loop": "imas_codex/standard_names/workers.py:9809-9816",
+    "appender": "iter_codex/standard_names/workers.py:9742 _documentation_with_registry_form",
+    "appender_loop": "iter_codex/standard_names/workers.py:9809-9816",
     "appender_loop_code": (
         "locus_tokens = _locus_registry_tokens()\n"
         "for concept in applied.concepts:\n"
@@ -256,11 +256,11 @@ WRITER_MECHANISM = {
         "    break"
     ),
     "appender_callers": [
-        "imas_codex/standard_names/workers.py:10034",
-        "imas_codex/standard_names/workers.py:11528",
+        "iter_codex/standard_names/workers.py:10034",
+        "iter_codex/standard_names/workers.py:11528",
     ],
-    "token_source": "imas_codex/standard_names/docs_gates.py:656 _locus_registry_tokens",
-    "sentence_renderer": "imas_codex/standard_names/docs_gates.py:664 locus_definition_sentence",
+    "token_source": "iter_codex/standard_names/docs_gates.py:656 _locus_registry_tokens",
+    "sentence_renderer": "iter_codex/standard_names/docs_gates.py:664 locus_definition_sentence",
     "registry": (
         "imas_standard_names.grammar.vocab_loaders.load_locus_registry(), an "
         "external library (imas-standard-names), not this repository's source: "
@@ -313,7 +313,7 @@ LOCUS_DEFINITION_CHECK = {
 #: The fourth steering edit: the registry has changed, so this regenerates the
 #: text so the current sentence is the one that lands, and changes nothing else.
 GAP_STEER4_EDIT_COMMAND = (
-    "uv run --no-sync imas-codex sn edit gap_at_outboard_midplane "
+    "uv run --no-sync iter-codex sn edit gap_at_outboard_midplane "
     "--hint '<keep Z* as the measurement height, the inner separatrix maximum-R "
     "height; preserve the opening, equation, definitions, frame and both "
     "cross-references exactly, dropping nothing; the appended locus sentence "
@@ -331,7 +331,7 @@ GAP_STEER4_RUN_ID = "sn-edit-20261022T142002Z"
 #: carrying headroom above the summed three-seat reservation so that no seat is
 #: deferred for want of budget.
 GAP_STEER4_DOCS_COMMAND = (
-    "uv run --no-sync imas-codex sn run --docs-only "
+    "uv run --no-sync iter-codex sn run --docs-only "
     "--scope-run-id sn-edit-20261022T142002Z --cost-limit 0.60 "
     "--skip-global-maintenance"
 )
@@ -389,7 +389,7 @@ GAP_STEER4_OUTCOME = {
 #: radial's name: no ``sn edit`` mode re-reviews a name in place, so the name
 #: was re-reviewed through the pipeline's own rotation.
 RADIAL_NAME_COMMAND = (
-    "uv run --no-sync imas-codex sn run --names-only "
+    "uv run --no-sync iter-codex sn run --names-only "
     "--name radial_separatrix_distance_at_outboard_midplane --cost-limit 0.30 "
     "--skip-global-maintenance"
 )
@@ -401,7 +401,7 @@ RADIAL_COMMENTS_AFTER = os.path.join(_LOGS, "radial-name-reviewer-comments-after
 
 #: radial's documentation: the docs-only scope over the now-accepted name.
 RADIAL_DOCS_COMMAND = (
-    "uv run --no-sync imas-codex sn run --docs-only "
+    "uv run --no-sync iter-codex sn run --docs-only "
     "--name radial_separatrix_distance_at_outboard_midplane --cost-limit 0.45 "
     "--skip-global-maintenance"
 )
@@ -519,7 +519,7 @@ def _load(path: str) -> dict:
 
 def snapshot() -> dict:
     """Read both names' lifecycle, scores and documentation from the graph."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         rows = list(

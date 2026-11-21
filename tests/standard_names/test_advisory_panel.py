@@ -8,8 +8,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import advisory_panel
-from imas_codex.standard_names.advisory_panel import (
+from iter_codex.standard_names import advisory_panel
+from iter_codex.standard_names.advisory_panel import (
     adjudicate_with_production_panel,
 )
 
@@ -176,9 +176,9 @@ def test_adapter_has_no_graph_write_dependency() -> None:
     assert not any(
         module.startswith(
             (
-                "imas_codex.graph",
-                "imas_codex.standard_names.graph_ops",
-                "imas_codex.standard_names.review.pipeline",
+                "iter_codex.graph",
+                "iter_codex.standard_names.graph_ops",
+                "iter_codex.standard_names.review.pipeline",
             )
         )
         for module in imported_modules

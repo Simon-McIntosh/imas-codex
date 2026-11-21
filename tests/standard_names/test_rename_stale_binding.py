@@ -16,9 +16,9 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.edit import apply_edit
-from imas_codex.standard_names.source_invariant import MissingStandardNameSource
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.edit import apply_edit
+from iter_codex.standard_names.source_invariant import MissingStandardNameSource
 
 pytestmark = pytest.mark.graph
 

@@ -4,9 +4,9 @@ from datetime import UTC, datetime
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names import dd_resolutions
-from imas_codex.standard_names.dd_resolutions import (
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names import dd_resolutions
+from iter_codex.standard_names.dd_resolutions import (
     DDResolutionManifest,
     DDResolutionRecord,
     DDResolutionValue,

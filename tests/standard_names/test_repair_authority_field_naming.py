@@ -22,7 +22,7 @@ def test_generated_models_import_without_field_shadow_warning() -> None:
             sys.executable,
             "-c",
             "import warnings; warnings.simplefilter('always'); "
-            "import imas_codex.graph.models",
+            "import iter_codex.graph.models",
         ],
         capture_output=True,
         text=True,
@@ -35,14 +35,14 @@ def test_generated_models_import_without_field_shadow_warning() -> None:
 
 
 def test_repair_authority_artifact_schema_field_is_renamed() -> None:
-    from imas_codex.graph.models import RepairAuthorityArtifact
+    from iter_codex.graph.models import RepairAuthorityArtifact
 
     assert "schema_id" in RepairAuthorityArtifact.model_fields
     assert "schema" not in RepairAuthorityArtifact.model_fields
 
 
 def test_repair_authority_artifact_schema_field_is_not_an_identifier() -> None:
-    from imas_codex.graph.models import RepairAuthorityArtifact
+    from iter_codex.graph.models import RepairAuthorityArtifact
 
     field = RepairAuthorityArtifact.model_fields["schema_id"]
     extra = field.json_schema_extra or {}

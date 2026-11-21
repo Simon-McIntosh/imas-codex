@@ -17,10 +17,10 @@ import pytest
 class TestMinePromotionCandidates:
     """Threshold logic: only tokens meeting both count AND score pass."""
 
-    @patch("imas_codex.standard_names.vocab_promotion.GraphClient")
-    @patch("imas_codex.standard_names.vocab_promotion._existing_tokens")
+    @patch("iter_codex.standard_names.vocab_promotion.GraphClient")
+    @patch("iter_codex.standard_names.vocab_promotion._existing_tokens")
     def test_threshold_count_filters(self, mock_existing, mock_gc):
-        from imas_codex.standard_names.vocab_promotion import (
+        from iter_codex.standard_names.vocab_promotion import (
             mine_promotion_candidates,
         )
 
@@ -37,10 +37,10 @@ class TestMinePromotionCandidates:
         )
         assert out == []
 
-    @patch("imas_codex.standard_names.vocab_promotion.GraphClient")
-    @patch("imas_codex.standard_names.vocab_promotion._existing_tokens")
+    @patch("iter_codex.standard_names.vocab_promotion.GraphClient")
+    @patch("iter_codex.standard_names.vocab_promotion._existing_tokens")
     def test_candidate_shape(self, mock_existing, mock_gc):
-        from imas_codex.standard_names.vocab_promotion import (
+        from iter_codex.standard_names.vocab_promotion import (
             mine_promotion_candidates,
         )
 
@@ -68,10 +68,10 @@ class TestMinePromotionCandidates:
         assert c["uses"] == 5
         assert c["min_review_score"] >= 0.75
 
-    @patch("imas_codex.standard_names.vocab_promotion.GraphClient")
-    @patch("imas_codex.standard_names.vocab_promotion._existing_tokens")
+    @patch("iter_codex.standard_names.vocab_promotion.GraphClient")
+    @patch("iter_codex.standard_names.vocab_promotion._existing_tokens")
     def test_excludes_existing_by_default(self, mock_existing, mock_gc):
-        from imas_codex.standard_names.vocab_promotion import (
+        from iter_codex.standard_names.vocab_promotion import (
             mine_promotion_candidates,
         )
 
@@ -104,9 +104,9 @@ class TestMinePromotionCandidates:
 class TestPersistCandidates:
     """persist_candidates writes PromotionCandidate nodes + evidence edges."""
 
-    @patch("imas_codex.standard_names.vocab_promotion.GraphClient")
+    @patch("iter_codex.standard_names.vocab_promotion.GraphClient")
     def test_writes_expected_nodes(self, mock_gc):
-        from imas_codex.standard_names.vocab_promotion import persist_candidates
+        from iter_codex.standard_names.vocab_promotion import persist_candidates
 
         mock_client = MagicMock()
         mock_gc.return_value.__enter__.return_value = mock_client
@@ -127,7 +127,7 @@ class TestPersistCandidates:
         assert mock_client.query.called
 
     def test_empty_list_returns_zero(self):
-        from imas_codex.standard_names.vocab_promotion import persist_candidates
+        from iter_codex.standard_names.vocab_promotion import persist_candidates
 
         assert persist_candidates([]) == 0
 
@@ -136,7 +136,7 @@ class TestFormatISNPRSnippet:
     """format_isn_pr_snippet renders ISN-compatible YAML."""
 
     def test_snippet_contains_tokens(self):
-        from imas_codex.standard_names.vocab_promotion import (
+        from iter_codex.standard_names.vocab_promotion import (
             format_isn_pr_snippet,
         )
 
@@ -158,7 +158,7 @@ class TestFormatISNPRSnippet:
         yaml.safe_load(snippet)
 
     def test_empty_candidates_renders(self):
-        from imas_codex.standard_names.vocab_promotion import (
+        from iter_codex.standard_names.vocab_promotion import (
             format_isn_pr_snippet,
         )
 
@@ -177,11 +177,11 @@ class TestSnVocabCliRetired:
     """
 
     def test_no_sn_gaps_command(self):
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         assert "gaps" not in sn.commands
 
     def test_no_sn_vocab_group(self):
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         assert "vocab" not in sn.commands

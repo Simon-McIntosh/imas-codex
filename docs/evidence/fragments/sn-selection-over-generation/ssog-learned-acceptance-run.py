@@ -10,7 +10,7 @@ epsilon, which serves only to reorder exact ties by the mean.
 
 A logistic regression is fitted on the calibration split alone and read once on
 the validation split. The split membership and the copy-group bootstrap are the
-shared owner's (``imas_codex.discovery.base.evaluation``); no resampling loop
+shared owner's (``iter_codex.discovery.base.evaluation``); no resampling loop
 is written here.
 
 Subcommands:
@@ -170,7 +170,7 @@ def _instrument_check(labels) -> dict:
     """The AUC reader must see a perfect rank when handed one, and its inverse."""
     import numpy as np
 
-    from imas_codex.discovery.base.evaluation import roc_auc
+    from iter_codex.discovery.base.evaluation import roc_auc
 
     y = np.asarray(labels)
     oracle = roc_auc(y, y.astype(float))
@@ -201,7 +201,7 @@ def _null_control(X_cal, y_cal, X_val, y_val) -> dict:
     """Shuffled-label refits must sit at chance: their interval must contain 0.5."""
     import numpy as np
 
-    from imas_codex.discovery.base.evaluation import roc_auc
+    from iter_codex.discovery.base.evaluation import roc_auc
 
     aucs = []
     for draw in range(NULL_SHUFFLES):
@@ -324,7 +324,7 @@ def _taxonomy_feature_ids() -> list[str]:
     taxonomy rather than from the inputs, so a check the taxonomy adds or drops
     shows up as a failing feature-count check rather than as a silent widening.
     """
-    from imas_codex.standard_names.review.checks import load_review_checks
+    from iter_codex.standard_names.review.checks import load_review_checks
 
     question_ids = {
         check.id
@@ -440,7 +440,7 @@ C={C_REGULARIZATION}, lbfgs) is fitted on the calibration split alone
 ({report["splits"]["validation"]} rows: {report["labels"]["validation_accept"]}
 accepted, {report["labels"]["validation_defect"]} defects). The split
 membership and the copy-group bootstrap are
-<code>imas_codex.discovery.base.evaluation</code>'s; the split labels come from
+<code>iter_codex.discovery.base.evaluation</code>'s; the split labels come from
 the fixture, not from a split drawn here.</p>
 <p id="ssog-learned-acceptance-result">On validation the learned model scores
 AUC {_interval_text(learned)} and the hand-set composite AUC
@@ -516,7 +516,7 @@ USD {spend["ceiling_usd"]:.2f} ceiling. {spend["reason"]}</p>
 def measure() -> dict:
     import numpy as np
 
-    from imas_codex.discovery.base.evaluation import bootstrap_interval
+    from iter_codex.discovery.base.evaluation import bootstrap_interval
 
     items = _items()
     feature_ids = _feature_ids(items)

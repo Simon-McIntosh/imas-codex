@@ -13,7 +13,7 @@ import json
 import numpy as np
 import pytest
 
-from imas_codex.discovery.base import evaluation as ev
+from iter_codex.discovery.base import evaluation as ev
 
 
 def _fixture_row(**overrides):

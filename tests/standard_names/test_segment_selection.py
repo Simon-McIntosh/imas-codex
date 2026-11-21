@@ -30,7 +30,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import (
+from iter_codex.standard_names import (
     segment_selection as ss,
     vocabulary_definitions as vocabulary_source,
 )

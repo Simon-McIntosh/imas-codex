@@ -45,7 +45,7 @@ class _LineageGraph:
         }
 
     def query(self, statement: str, **params: Any) -> list[dict[str, Any]]:
-        from imas_codex.standard_names import edit
+        from iter_codex.standard_names import edit
 
         if statement == edit._LINEAGE_REMOVAL_PREFLIGHT_QUERY:
             return [self._preflight(**params)]
@@ -115,7 +115,7 @@ class _LineageGraph:
 
 def test_removes_misdirected_beta_lineage_and_records_reason() -> None:
     """The motivating reverse edge is removed with its judgement retained."""
-    from imas_codex.standard_names.edit import remove_refined_from_relationship
+    from iter_codex.standard_names.edit import remove_refined_from_relationship
 
     graph = _LineageGraph()
     before_count = graph.relationship_count()
@@ -137,7 +137,7 @@ def test_removes_misdirected_beta_lineage_and_records_reason() -> None:
 
 
 def test_dry_run_reports_same_directed_intent_and_writes_nothing() -> None:
-    from imas_codex.standard_names.edit import remove_refined_from_relationship
+    from iter_codex.standard_names.edit import remove_refined_from_relationship
 
     graph = _LineageGraph()
     before = graph.shape()
@@ -157,7 +157,7 @@ def test_dry_run_reports_same_directed_intent_and_writes_nothing() -> None:
 
 
 def test_refuses_nonexistent_endpoint_without_changing_relationship_count() -> None:
-    from imas_codex.standard_names.edit import remove_refined_from_relationship
+    from iter_codex.standard_names.edit import remove_refined_from_relationship
 
     graph = _LineageGraph()
     before_count = graph.relationship_count()
@@ -174,7 +174,7 @@ def test_refuses_nonexistent_endpoint_without_changing_relationship_count() -> N
 
 
 def test_refuses_reversed_direction_and_names_the_checked_direction() -> None:
-    from imas_codex.standard_names.edit import remove_refined_from_relationship
+    from iter_codex.standard_names.edit import remove_refined_from_relationship
 
     graph = _LineageGraph()
     before_count = graph.relationship_count()
@@ -194,7 +194,7 @@ def test_refuses_reversed_direction_and_names_the_checked_direction() -> None:
 
 
 def test_refuses_to_strand_superseded_predecessor_and_keeps_edge() -> None:
-    from imas_codex.standard_names.edit import remove_refined_from_relationship
+    from iter_codex.standard_names.edit import remove_refined_from_relationship
 
     graph = _LineageGraph(alternate_successor=False)
     before_count = graph.relationship_count()
@@ -212,7 +212,7 @@ def test_refuses_to_strand_superseded_predecessor_and_keeps_edge() -> None:
 
 
 def test_allows_last_successor_edge_removal_when_predecessor_is_live() -> None:
-    from imas_codex.standard_names.edit import remove_refined_from_relationship
+    from iter_codex.standard_names.edit import remove_refined_from_relationship
 
     graph = _LineageGraph(predecessor_stage="accepted", alternate_successor=False)
     before_count = graph.relationship_count()
@@ -228,8 +228,8 @@ def test_allows_last_successor_edge_removal_when_predecessor_is_live() -> None:
 
 
 def test_cli_exposes_required_reason_and_dry_run() -> None:
-    from imas_codex.cli.sn import sn
-    from imas_codex.standard_names.edit import remove_refined_from_relationship
+    from iter_codex.cli.sn import sn
+    from iter_codex.standard_names.edit import remove_refined_from_relationship
 
     graph = _LineageGraph()
     before_count = graph.relationship_count()
@@ -240,7 +240,7 @@ def test_cli_exposes_required_reason_and_dry_run() -> None:
         )
 
     with patch(
-        "imas_codex.standard_names.edit.remove_refined_from_relationship",
+        "iter_codex.standard_names.edit.remove_refined_from_relationship",
         side_effect=_remove,
     ):
         result = CliRunner().invoke(

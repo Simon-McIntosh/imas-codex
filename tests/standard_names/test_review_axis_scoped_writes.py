@@ -60,13 +60,13 @@ class TestReviewerScoreIsAxisScoped:
     def test_name_writer_does_not_set_sn_reviewer_score(self) -> None:
         """write_name_review_results maps reviewer_score → reviewer_score_name,
         never writes a generic ``sn.reviewer_score`` property."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_name_review_results,
         )
 
         mock_gc, cm = _mock_graph_client()
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_name_review_results([_review_entry()])
@@ -82,7 +82,7 @@ class TestReviewerScoreIsAxisScoped:
     def test_docs_writer_does_not_set_sn_reviewer_score(self) -> None:
         """write_docs_review_results maps reviewer_score → reviewer_score_docs,
         never writes a generic ``sn.reviewer_score`` property."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_docs_review_results,
         )
 
@@ -96,7 +96,7 @@ class TestReviewerScoreIsAxisScoped:
             ]
         )
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_docs_review_results([_review_entry()])
@@ -109,13 +109,13 @@ class TestReviewerScoreIsAxisScoped:
 
     def test_batch_dict_carries_reviewer_score_name_key(self) -> None:
         """The batch dict sent to Cypher must use reviewer_score_name, not reviewer_score."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_name_review_results,
         )
 
         mock_gc, cm = _mock_graph_client()
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_name_review_results([_review_entry(reviewer_score=0.9)])
@@ -138,7 +138,7 @@ class TestReviewCliSetsUpLogging:
         """The ``sn review`` Click command must call ``setup_logging``."""
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn_review
+        from iter_codex.cli.sn import sn_review
 
         runner = CliRunner()
 
@@ -148,10 +148,10 @@ class TestReviewCliSetsUpLogging:
         mock_gc.query = MagicMock(return_value=[])
 
         with (
-            patch("imas_codex.cli.discover.common.setup_logging") as mock_setup,
-            patch("imas_codex.standard_names.budget.BudgetManager"),
-            patch("imas_codex.standard_names.review.state.StandardNameReviewState"),
-            patch("imas_codex.graph.client.GraphClient", return_value=mock_gc),
+            patch("iter_codex.cli.discover.common.setup_logging") as mock_setup,
+            patch("iter_codex.standard_names.budget.BudgetManager"),
+            patch("iter_codex.standard_names.review.state.StandardNameReviewState"),
+            patch("iter_codex.graph.client.GraphClient", return_value=mock_gc),
         ):
             # --dry-run to avoid the full pipeline running
             runner.invoke(sn_review, ["--dry-run"], catch_exceptions=False)
@@ -173,13 +173,13 @@ class TestPerNameReviewCost:
 
     def test_name_writer_includes_cost_in_set_clause(self) -> None:
         """Cypher SET must include llm_cost_review_name accumulation."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_name_review_results,
         )
 
         mock_gc, cm = _mock_graph_client()
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_name_review_results([_review_entry(llm_cost=0.005)])
@@ -194,7 +194,7 @@ class TestPerNameReviewCost:
 
     def test_name_writer_cost_defaults_to_zero(self) -> None:
         """When no llm_cost key, batch dict defaults to 0.0."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_name_review_results,
         )
 
@@ -204,7 +204,7 @@ class TestPerNameReviewCost:
         assert "llm_cost" not in entry
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_name_review_results([entry])
@@ -214,7 +214,7 @@ class TestPerNameReviewCost:
 
     def test_docs_writer_includes_cost_in_set_clause(self) -> None:
         """Docs-axis writer also propagates per-name cost."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_docs_review_results,
         )
 
@@ -227,7 +227,7 @@ class TestPerNameReviewCost:
         )
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_docs_review_results([_review_entry(llm_cost=0.01)])
@@ -241,7 +241,7 @@ class TestPerNameReviewCost:
 
     def test_write_reviews_skip_cost_prevents_accumulation(self) -> None:
         """write_reviews(skip_cost=True) must NOT run the SN cost query."""
-        from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
+        from iter_codex.standard_names.graph_store.graph_catalog import write_reviews
 
         mock_gc, cm = _mock_graph_client()
         records = [
@@ -260,7 +260,7 @@ class TestPerNameReviewCost:
         ]
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_reviews(records, skip_cost=True)
@@ -274,7 +274,7 @@ class TestPerNameReviewCost:
 
     def test_write_reviews_default_does_accumulate_cost(self) -> None:
         """write_reviews() without skip_cost runs the cost accumulation."""
-        from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
+        from iter_codex.standard_names.graph_store.graph_catalog import write_reviews
 
         mock_gc, cm = _mock_graph_client()
         records = [
@@ -294,7 +294,7 @@ class TestPerNameReviewCost:
         ]
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_reviews(records, skip_cost=False)

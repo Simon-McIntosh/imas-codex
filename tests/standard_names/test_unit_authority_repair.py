@@ -8,7 +8,7 @@ import pytest
 
 
 def test_derived_parent_identity_rejects_bare_state_without_subject() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         _validate_derived_parent_identity,
     )
 
@@ -26,7 +26,7 @@ def test_derived_parent_identity_rejects_bare_state_without_subject() -> None:
 
 
 def test_reviewed_unit_repair_is_ledgered_and_updates_edge() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         stamp_standard_name_units,
     )
 
@@ -54,7 +54,7 @@ def test_reviewed_unit_repair_is_ledgered_and_updates_edge() -> None:
 
 
 def test_reviewed_unit_repair_refuses_missing_target_before_write() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         stamp_standard_name_units,
     )
 
@@ -75,7 +75,7 @@ def test_reviewed_unit_repair_refuses_missing_target_before_write() -> None:
 
 
 def test_reviewed_unit_repair_requires_reason() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         stamp_standard_name_units,
     )
 

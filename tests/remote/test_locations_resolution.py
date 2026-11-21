@@ -13,8 +13,8 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.remote import locations as loc
-from imas_codex.remote.locations import LocationInfo
+from iter_codex.remote import locations as loc
+from iter_codex.remote.locations import LocationInfo
 
 GPU_NODE = "98dci4-gpu-0002"
 COMPUTE_CALLER = "98dci4-clu-2018"
@@ -52,7 +52,7 @@ def _resolve(location, info, *, local, hostname, discovered=None, compute_host=N
         patch.object(loc, "is_location_local", return_value=local),
         patch.object(loc, "_resolve_compute_host", return_value=compute_host),
         patch(
-            "imas_codex.remote.tunnel.discover_compute_node_local",
+            "iter_codex.remote.tunnel.discover_compute_node_local",
             return_value=discovered,
         ) as discover,
         patch.object(loc.socket, "gethostname", return_value=hostname),
@@ -158,7 +158,7 @@ def test_graph_and_embedding_jobs_may_sit_on_different_nodes():
         patch.object(loc, "_resolve_compute_host", return_value=None),
         patch.object(loc.socket, "gethostname", return_value=COMPUTE_CALLER),
         patch(
-            "imas_codex.remote.tunnel.discover_compute_node_local",
+            "iter_codex.remote.tunnel.discover_compute_node_local",
             side_effect=node_for,
         ),
     ):
@@ -179,7 +179,7 @@ def test_facility_import_error_propagates(resolver):
     original_import = builtins.__import__
 
     def fail_facility_import(name, *args, **kwargs):
-        if name == "imas_codex.discovery.base.facility":
+        if name == "iter_codex.discovery.base.facility":
             raise ImportError("injected facility import failure")
         return original_import(name, *args, **kwargs)
 
@@ -207,10 +207,10 @@ def test_compute_location_propagates_facility_read_error():
     """A present facility with a broken config read is not an unknown one."""
     with (
         patch(
-            "imas_codex.discovery.base.facility.list_facilities", return_value=["iter"]
+            "iter_codex.discovery.base.facility.list_facilities", return_value=["iter"]
         ),
         patch(
-            "imas_codex.discovery.base.facility.get_facility",
+            "iter_codex.discovery.base.facility.get_facility",
             side_effect=RuntimeError("facility read failed"),
         ),
         pytest.raises(RuntimeError, match="facility read failed") as error,
@@ -225,7 +225,7 @@ def test_direct_location_propagates_facility_read_error():
     with (
         patch.object(loc, "_find_compute_location", return_value=None),
         patch(
-            "imas_codex.discovery.base.facility.get_facility",
+            "iter_codex.discovery.base.facility.get_facility",
             side_effect=RuntimeError("facility read failed"),
         ),
         pytest.raises(RuntimeError, match="facility read failed") as error,

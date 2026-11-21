@@ -15,7 +15,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.context import conventions_context_for
+from iter_codex.standard_names.context import conventions_context_for
 
 # A name the grammar cannot parse: it is not a valid lowercase snake_case token,
 # so ``select_conventions`` raises the parser's ParseError.
@@ -56,8 +56,8 @@ async def test_review_batch_completes_without_conventions_for_unparseable_name(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """The docs batch reviewer drives an unparseable name to completion."""
-    from imas_codex.llm import prompt_loader
-    from imas_codex.standard_names.review import pipeline as pl
+    from iter_codex.llm import prompt_loader
+    from iter_codex.standard_names.review import pipeline as pl
 
     calls: list[tuple[str, dict]] = []
 
@@ -70,7 +70,7 @@ async def test_review_batch_completes_without_conventions_for_unparseable_name(
     async def fake_call_llm_structured(**kwargs: Any):
         return kwargs["response_model"](reviews=[]), 0.0, 0
 
-    import imas_codex.discovery.base.llm as dbllm
+    import iter_codex.discovery.base.llm as dbllm
 
     monkeypatch.setattr(dbllm, "acall_llm_structured", fake_call_llm_structured)
 

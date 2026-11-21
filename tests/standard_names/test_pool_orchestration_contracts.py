@@ -36,10 +36,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.graph_store import owner_module_path
-from imas_codex.standard_names.pools import PoolSpec, pool_loop
+from iter_codex.standard_names.attachment_audit import AttachmentAuditResult
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.graph_store import owner_module_path
+from iter_codex.standard_names.pools import PoolSpec, pool_loop
 
 
 @contextmanager
@@ -56,7 +56,7 @@ def _patch_owned(**replacements):
 def _no_approved_names():
     """Make the approval-backed protection lookup explicit for this suite."""
     with patch(
-        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        "iter_codex.standard_names.protection._fetch_catalog_edit_names",
         return_value=set(),
     ):
         yield
@@ -65,60 +65,60 @@ def _no_approved_names():
 @pytest.fixture(autouse=True)
 def _stub_parent_lifecycle_startup():
     """Stub the graph-backed derived-parent startup sweeps of run_sn_pools."""
-    _go = "imas_codex.standard_names.graph_ops"
+    _go = "iter_codex.standard_names.graph_ops"
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_vocab_gaps",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_vocab_gaps",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_source_status_liveness",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_source_status_liveness",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.retire_unreachable_hint_edits",
+            "iter_codex.standard_names.graph_store.graph_audits.retire_unreachable_hint_edits",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_catalog_status",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_catalog_status",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
+            "iter_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
+            "iter_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
+            "iter_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.structural_accept_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.structural_accept_derived_parents",
             return_value=0,
         ),
         # Always-on stranded-reviewed promotion builds its own GraphClient;
         # stub it so the startup path stays graph-free.
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.promote_stranded_reviewed",
+            "iter_codex.standard_names.graph_store.graph_audits.promote_stranded_reviewed",
             return_value={"name": 0, "docs": 0},
         ),
         # Always-on orphaned-SNRun sweep builds its own GraphClient; stub it.
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.mark_orphaned_standard_name_runs_stale",
+            "iter_codex.standard_names.graph_store.graph_audits.mark_orphaned_standard_name_runs_stale",
             return_value=0,
         ),
         # The retroactive attachment re-validation opens its own GraphClient;
         # stub it so the startup path stays graph-free.
         patch(
-            "imas_codex.standard_names.attachment_audit.reconcile_attachment_consistency",
+            "iter_codex.standard_names.attachment_audit.reconcile_attachment_consistency",
             return_value=AttachmentAuditResult(),
         ),
         # The DD-unit correction reconcile opens its own GraphClient; stub it.
         patch(
-            "imas_codex.graph.dd_graph_ops.reconcile_dd_unit_corrections",
+            "iter_codex.graph.dd_graph_ops.reconcile_dd_unit_corrections",
             return_value={"checked": 0, "corrected": 0},
         ),
     ):
@@ -162,7 +162,7 @@ def _mock_gc() -> MagicMock:
 
 def _patch_gc(mock_gc: MagicMock):
     return patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -215,7 +215,7 @@ class TestClaimReturnScalarPhysicsDomain:
     # ── claim_enrich ──────────────────────────────────────────────────
 
     def test_claim_enrich_returns_scalar_physics_domain(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_enrich_seed_and_expand,
         )
 
@@ -247,7 +247,7 @@ class TestClaimReturnScalarPhysicsDomain:
     # ── claim_review_names ────────────────────────────────────────────
 
     def test_claim_review_names_returns_scalar_physics_domain(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_review_names_seed_and_expand,
         )
 
@@ -280,7 +280,7 @@ class TestClaimReturnScalarPhysicsDomain:
     # ── claim_review_docs ─────────────────────────────────────────────
 
     def test_claim_review_docs_returns_scalar_physics_domain(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             claim_review_docs_batch,
         )
 
@@ -314,7 +314,7 @@ class TestClaimReturnScalarPhysicsDomain:
     # ── claim_refine_name ─────────────────────────────────────────────
 
     def test_claim_refine_name_returns_scalar_physics_domain(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -339,7 +339,7 @@ class TestClaimReturnScalarPhysicsDomain:
                 "regen_count": 0,
             },
             extra_patches={
-                "imas_codex.standard_names.chain_history.name_chain_history": MagicMock(
+                "iter_codex.standard_names.chain_history.name_chain_history": MagicMock(
                     return_value=[]
                 )
             },
@@ -358,7 +358,7 @@ class TestClaimReturnScalarPhysicsDomain:
         The seed query returns imas.physics_domain directly: head(coalesce(...))
         would treat the scalar as a list and raise.
         """
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_generate_name_batch,
         )
 
@@ -408,7 +408,7 @@ class TestClaimReturnScalarPhysicsDomain:
         raising: 'Expected String("equilibrium") to be a list' — so the
         comparison must be `imas.physics_domain = $fallback_domain`.
         """
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_generate_name_batch,
         )
 
@@ -804,7 +804,7 @@ class TestSkeletonSweepNoUseAfterClose:
 
     def test_sweep_does_not_raise_after_close(self) -> None:
         """The sweep must execute inside its own GraphClient context."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -817,7 +817,7 @@ class TestSkeletonSweepNoUseAfterClose:
             return gc_main if call_count == 1 else gc_sweep
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=gc_factory,
         ):
             # Must not raise RuntimeError: GraphClient is closed
@@ -827,7 +827,7 @@ class TestSkeletonSweepNoUseAfterClose:
 
     def test_sweep_returns_count(self) -> None:
         """The function returns the number of names written (not swept)."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -840,7 +840,7 @@ class TestSkeletonSweepNoUseAfterClose:
             return gc_main if call_count == 1 else gc_sweep
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=gc_factory,
         ):
             result = write_standard_names([self._make_minimal_name()])
@@ -850,7 +850,7 @@ class TestSkeletonSweepNoUseAfterClose:
 
     def test_sweep_query_called_on_open_client(self) -> None:
         """The sweep gc.query() must be called while the sweep client is open."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -883,7 +883,7 @@ class TestSkeletonSweepNoUseAfterClose:
             return gc_main if call_count == 1 else gc_sweep
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=gc_factory,
         ):
             write_standard_names([self._make_minimal_name()])
@@ -912,7 +912,7 @@ class TestFairnessDeadlockBreaker:
     @pytest.mark.asyncio
     async def test_consecutive_empty_claims_increments_on_empty_claim(self) -> None:
         """consecutive_empty_claims increments each time claim returns None."""
-        from imas_codex.standard_names.pools import PoolHealth
+        from iter_codex.standard_names.pools import PoolHealth
 
         health = PoolHealth(pool="test")
         assert health.consecutive_empty_claims == 0
@@ -984,7 +984,7 @@ class TestFairnessDeadlockBreaker:
         """
         import asyncio
 
-        from imas_codex.standard_names.pools import (
+        from iter_codex.standard_names.pools import (
             _EMPTY_CLAIM_EXCLUDE_THRESHOLD,
             PoolSpec,
         )
@@ -993,7 +993,7 @@ class TestFairnessDeadlockBreaker:
         pools: list[PoolSpec] = []
 
         def active_pools_fn() -> set[str]:
-            from imas_codex.standard_names.pools import _EMPTY_CLAIM_EXCLUDE_THRESHOLD
+            from iter_codex.standard_names.pools import _EMPTY_CLAIM_EXCLUDE_THRESHOLD
 
             return {
                 p.name
@@ -1029,7 +1029,7 @@ class TestFairnessDeadlockBreaker:
 
     def test_below_threshold_pool_remains_active(self) -> None:
         """Pool stays in active_pools_fn until threshold is reached."""
-        from imas_codex.standard_names.pools import (
+        from iter_codex.standard_names.pools import (
             _EMPTY_CLAIM_EXCLUDE_THRESHOLD,
             PoolSpec,
         )
@@ -1037,7 +1037,7 @@ class TestFairnessDeadlockBreaker:
         pools: list[PoolSpec] = []
 
         def active_pools_fn() -> set[str]:
-            from imas_codex.standard_names.pools import _EMPTY_CLAIM_EXCLUDE_THRESHOLD
+            from iter_codex.standard_names.pools import _EMPTY_CLAIM_EXCLUDE_THRESHOLD
 
             return {
                 p.name
@@ -1079,7 +1079,7 @@ class TestPoolAdmitRecoverWhenPendingIncreases:
 
     def _make_active_pools_fn(self, pools):
         """Replicate the production active_pools_fn closure."""
-        from imas_codex.standard_names.pools import _EMPTY_CLAIM_EXCLUDE_THRESHOLD
+        from iter_codex.standard_names.pools import _EMPTY_CLAIM_EXCLUDE_THRESHOLD
 
         def active_pools_fn() -> set[str]:
             result: set[str] = set()
@@ -1103,7 +1103,7 @@ class TestPoolAdmitRecoverWhenPendingIncreases:
 
     def test_excluded_pool_re_enters_when_pending_grows(self) -> None:
         """Pool excluded by consecutive_empty_claims re-enters when pending grows."""
-        from imas_codex.standard_names.pools import (
+        from iter_codex.standard_names.pools import (
             _EMPTY_CLAIM_EXCLUDE_THRESHOLD,
             PoolSpec,
         )
@@ -1141,7 +1141,7 @@ class TestPoolAdmitRecoverWhenPendingIncreases:
 
     def test_no_reset_when_pending_unchanged(self) -> None:
         """Excluded pool stays excluded when pending count doesn't change."""
-        from imas_codex.standard_names.pools import (
+        from iter_codex.standard_names.pools import (
             _EMPTY_CLAIM_EXCLUDE_THRESHOLD,
             PoolSpec,
         )
@@ -1245,13 +1245,13 @@ class TestRunSnPoolsFinalizePopulatesCounters:
     async def test_finalize_populates_counter_fields(self) -> None:
         """run_sn_pools assigns names_composed/enriched/reviewed/regenerated
         from pool total_processed values."""
-        from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
+        from iter_codex.standard_names.attachment_audit import AttachmentAuditResult
 
-        _AA = "imas_codex.standard_names.attachment_audit"
-        _BM = "imas_codex.standard_names.budget.BudgetManager"
+        _AA = "iter_codex.standard_names.attachment_audit"
+        _BM = "iter_codex.standard_names.budget.BudgetManager"
 
         # We need run_pools to return a health_map with known total_processed.
-        from imas_codex.standard_names.pools import PoolHealth
+        from iter_codex.standard_names.pools import PoolHealth
 
         health_generate = PoolHealth(pool="generate_name")
         health_generate.total_processed = 7
@@ -1312,32 +1312,32 @@ class TestRunSnPoolsFinalizePopulatesCounters:
                 reconcile_orphan_parent_sources=MagicMock(return_value=0),
             ),
             patch(
-                "imas_codex.standard_names.pools.run_pools",
+                "iter_codex.standard_names.pools.run_pools",
                 new_callable=AsyncMock,
                 return_value=fake_health_map,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+                "iter_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
             ),
-            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
+            patch("iter_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
             patch(
-                "imas_codex.standard_names.graph_store.graph_parent_lifecycle.release_all_orphan_claims",
+                "iter_codex.standard_names.graph_store.graph_parent_lifecycle.release_all_orphan_claims",
                 return_value={"sn": 0, "sns": 0},
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
+                "iter_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
                 return_value={},
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
+                "iter_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
                 return_value=0,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
+                "iter_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
                 return_value=0,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_doc_links.resolve_doc_links",
+                "iter_codex.standard_names.graph_store.graph_doc_links.resolve_doc_links",
                 return_value={},
             ),
             # Mock the always-on source-drift refresh: it builds its own
@@ -1345,7 +1345,7 @@ class TestRunSnPoolsFinalizePopulatesCounters:
             # by the graph.client patch below once that module is imported), so
             # the startup path stays graph-free regardless of import order.
             patch(
-                "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+                "iter_codex.standard_names.source_refresh.refresh_drifted_sources",
                 return_value={},
             ),
             patch(f"{_BM}.start", new_callable=AsyncMock),
@@ -1354,11 +1354,11 @@ class TestRunSnPoolsFinalizePopulatesCounters:
             patch(f"{_BM}.exhausted", return_value=True),
             patch(f"{_BM}.phase_spent", new_callable=lambda: property(lambda self: {})),
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
                 return_value=_mock_gc_ctx,
             ),
         ):
-            from imas_codex.standard_names.loop import run_sn_pools
+            from iter_codex.standard_names.loop import run_sn_pools
 
             stop = asyncio.Event()
             stop.set()  # immediate stop
@@ -1384,10 +1384,10 @@ class TestReleaseAllOrphanClaims:
         )
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=gc,
         ):
-            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+            from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
                 release_all_orphan_claims,
             )
 
@@ -1409,10 +1409,10 @@ class TestReleaseAllOrphanClaims:
         gc.query = MagicMock(return_value=[{"released": 0}])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=gc,
         ):
-            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+            from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
                 release_all_orphan_claims,
             )
 
@@ -1432,7 +1432,7 @@ class TestPendingCountWatchdog:
     @pytest.mark.asyncio
     async def test_watchdog_sets_pending_counts_on_first_poll(self) -> None:
         """Watchdog sets pending_count on all pools immediately."""
-        from imas_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
+        from iter_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
 
         spec_a = PoolSpec(
             name="generate_docs",
@@ -1475,7 +1475,7 @@ class TestPendingCountWatchdog:
     @pytest.mark.asyncio
     async def test_watchdog_polls_repeatedly(self) -> None:
         """Watchdog keeps polling while stop_event is not set."""
-        from imas_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
+        from iter_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
 
         spec = PoolSpec(
             name="generate_docs",
@@ -1508,7 +1508,7 @@ class TestPendingCountWatchdog:
     @pytest.mark.asyncio
     async def test_watchdog_ignores_unknown_pool_names(self) -> None:
         """pending_fn keys not matching any pool are silently ignored."""
-        from imas_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
+        from iter_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
 
         spec = PoolSpec(
             name="generate_docs",
@@ -1536,7 +1536,7 @@ class TestPendingCountWatchdog:
     @pytest.mark.asyncio
     async def test_watchdog_fails_closed_on_pending_fn_exception(self) -> None:
         """A pending read failure stops immediately with no stale update."""
-        from imas_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
+        from iter_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
 
         spec = PoolSpec(
             name="generate_docs",
@@ -1567,7 +1567,7 @@ class TestPendingCountWatchdog:
         """run_pools with pending_fn updates pool pending_count from the watchdog."""
         import asyncio
 
-        from imas_codex.standard_names.pools import PoolSpec, run_pools
+        from iter_codex.standard_names.pools import PoolSpec, run_pools
 
         stop = asyncio.Event()
         mgr = _mock_mgr()

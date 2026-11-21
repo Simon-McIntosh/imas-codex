@@ -15,8 +15,8 @@ so a rule that renamed what was right would fail here too.
 
 from __future__ import annotations
 
-from imas_codex.standard_names import attachment_audit
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from iter_codex.standard_names import attachment_audit
+from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _is_attachment_consistent,
 )
 

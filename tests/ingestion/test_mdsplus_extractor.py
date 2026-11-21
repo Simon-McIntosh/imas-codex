@@ -2,12 +2,12 @@
 
 import pytest
 
-from imas_codex.ingestion.extractors.mdsplus import (
+from iter_codex.ingestion.extractors.mdsplus import (
     MDSplusReference,
     extract_mdsplus_paths,
     normalize_mdsplus_path,
 )
-from imas_codex.mdsplus.ingestion import compute_canonical_path
+from iter_codex.mdsplus.ingestion import compute_canonical_path
 
 
 class TestNormalizeMDSplusPath:

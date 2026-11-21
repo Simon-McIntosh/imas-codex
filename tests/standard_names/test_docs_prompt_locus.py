@@ -8,8 +8,8 @@ and must not invite a paraphrased second definition.
 
 from __future__ import annotations
 
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names.context import (
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.standard_names.context import (
     build_compose_context,
     conventions_context_for,
     locus_context_for,

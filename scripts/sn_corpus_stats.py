@@ -22,7 +22,7 @@ def _section(title: str) -> None:
 
 def run() -> None:  # noqa: C901 – single reporting function, intentionally flat
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         gc = GraphClient()
     except Exception as exc:

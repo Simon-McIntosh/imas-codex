@@ -10,10 +10,10 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import RepairMutationKind
-from imas_codex.standard_names import signed_manifest as operator
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.models import RepairMutationKind
+from iter_codex.standard_names import signed_manifest as operator
+from iter_codex.standard_names.signed_manifest import (
     SignedManifestAuthorityError,
     apply_signed_manifest,
     signed_payload_sha256,

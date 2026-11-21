@@ -353,7 +353,7 @@ def main() -> int:
     args = ap.parse_args()
     run_dir = Path(args.run_dir)
 
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         attribution = attribute(gc, run_dir)

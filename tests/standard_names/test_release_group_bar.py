@@ -18,7 +18,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     GATE_GROUP_BAR,
     GROUP_AUDIT_DEFECT_CLASSES,
     RULED_GROUP_RELEASE_BAR,
@@ -32,7 +32,7 @@ from imas_codex.standard_names.export import (
     load_group_release_ruling,
     run_export,
 )
-from imas_codex.standard_names.families import family_identifier
+from iter_codex.standard_names.families import family_identifier
 from tests.standard_names.conftest import clean_source_audit_graph
 
 PLAIN_DOCUMENTATION = "A quantity stated plainly, counted once for the plasma."
@@ -789,37 +789,37 @@ def test_domain_scoped_cut_refuses_and_writes_no_catalog(tmp_path: Path) -> None
     with ExitStack() as stack:
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_export_population",
+                "iter_codex.standard_names.export._fetch_export_population",
                 return_value=list(candidates.values()),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_retired_batch_ids",
+                "iter_codex.standard_names.export._fetch_retired_batch_ids",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_group_live_members",
+                "iter_codex.standard_names.export._fetch_group_live_members",
                 return_value={"plasma_current": "reviewed"},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_group_family_paths",
+                "iter_codex.standard_names.export._fetch_group_family_paths",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._run_gate_a",
+                "iter_codex.standard_names.export._run_gate_a",
                 return_value=GateResult(gate="graph_tests", passed=True, skipped=True),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
                 return_value=_ReadOnlyGraphClient(),
             )
         )
@@ -827,13 +827,13 @@ def test_domain_scoped_cut_refuses_and_writes_no_catalog(tmp_path: Path) -> None
         # package, which is the bar every checkout sees.
         stack.enter_context(
             patch(
-                "imas_codex.settings.get_sn_group_release_bar",
+                "iter_codex.settings.get_sn_group_release_bar",
                 return_value=None,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.settings.get_sn_group_audit_dir",
+                "iter_codex.settings.get_sn_group_audit_dir",
                 return_value=audit_dir,
             )
         )

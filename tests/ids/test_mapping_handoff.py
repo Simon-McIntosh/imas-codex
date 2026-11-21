@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.map import map_cmd
-from imas_codex.ids.handoff import build_mapping_handoff, check_handoff_document
+from iter_codex.cli.map import map_cmd
+from iter_codex.ids.handoff import build_mapping_handoff, check_handoff_document
 
 FIXTURE = Path(__file__).parents[1] / "fixtures" / "mapping_handoff_example.json"
 DOCUMENT_KEYS = {
@@ -58,7 +58,7 @@ def _graph() -> MagicMock:
                     "ids_name": "magnetics",
                     "dd_version": "4.1.1",
                     "status": "generated",
-                    "provider": "imas-codex",
+                    "provider": "iter-codex",
                 }
             ]
         if "-[r:POPULATES]->(ip:IMASNode)" in statement:
@@ -200,7 +200,7 @@ def test_builder_expands_members_and_carries_cocos_labels():
 
     check_handoff_document(document)
     assert set(document) == DOCUMENT_KEYS
-    assert document["format"] == "imas-codex-mapping-handoff"
+    assert document["format"] == "iter-codex-mapping-handoff"
     assert document["format_version"] == 1
     assert document["facility"] == "jt-60sa"
     assert document["dd_version"] == "4.1.1"
@@ -291,7 +291,7 @@ def test_cocos_label_prefers_the_target_itself_over_its_parent():
                     "ids_name": "magnetics",
                     "dd_version": "4.1.1",
                     "status": "generated",
-                    "provider": "imas-codex",
+                    "provider": "iter-codex",
                 }
             ]
         if "-[r:POPULATES]->(ip:IMASNode)" in statement:
@@ -361,7 +361,7 @@ def test_time_coordinate_carries_no_cocos_label():
                     "ids_name": "pf_active",
                     "dd_version": "4.1.1",
                     "status": "generated",
-                    "provider": "imas-codex",
+                    "provider": "iter-codex",
                 }
             ]
         if "-[r:POPULATES]->(ip:IMASNode)" in statement:
@@ -480,7 +480,7 @@ def test_checker_rejects_a_missing_key():
 def test_export_command_writes_checked_json(tmp_path):
     graph = _graph()
     output = tmp_path / "handoff.json"
-    with patch("imas_codex.graph.client.GraphClient", return_value=graph):
+    with patch("iter_codex.graph.client.GraphClient", return_value=graph):
         result = CliRunner().invoke(
             map_cmd,
             ["export", "jt-60sa", "-i", "magnetics", "--out", str(output)],

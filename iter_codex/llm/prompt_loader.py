@@ -1,0 +1,1477 @@
+"""Prompt loading for agentic workflows.
+
+Prompts are markdown files with YAML frontmatter:
+- name: Prompt identifier (can include path like "paths/scorer")
+- description: Short description
+- task: Task type for model selection (optional)
+- schema_needs: List of schema providers to include (optional)
+
+Prompts support Jinja2 templating:
+- Includes: {% include "safety.md" %} (resolved from shared/)
+- Variables: {{ facility }} (from render context)
+- Schema loops: {% for cat in discovery_categories %}...{% endfor %}
+
+Schema Provider Architecture:
+    Each prompt declares what schema context it needs via schema_needs frontmatter.
+    Providers are cached and only loaded when requested:
+
+    - path_purposes: PathPurpose enum values (grouped by category)
+    - discovery_categories: DiscoveryRootCategory enum values
+    - score_dimensions: score_* fields from FacilityPath schema
+    - scoring_schema: TriageBatch Pydantic schema (first-pass triage)
+    - score_schema: ScoreBatch Pydantic schema (second-pass scoring)
+    - data_access_fields: DataAccess schema fields
+    - data_access_graph: Existing DataAccess nodes from graph
+
+    Providers use @lru_cache so schema is loaded once per process.
+
+Rendering modes:
+1. Static: parse_prompt_file() - includes only, for MCP registration
+2. Dynamic: render_prompt() - full Jinja2 with schema context
+
+Directory structure:
+    prompts/
+    ├── shared/           # Reusable includes
+    │   ├── safety.md
+    │   └── schema/       # Schema-derived templates
+    ├── paths/            # Path discovery prompts
+    │   ├── triage.md     # Triage directories (first pass)
+    │   └── scorer.md     # Score with enrichment evidence (second pass)
+    ├── code/             # Code file scoring prompts
+    │   ├── triage.md     # Per-dimension file triage (first pass)
+    │   └── scorer.md     # Multi-dimensional file scoring (second pass)
+    ├── signals/          # Signal discovery prompts
+    │   └── enrichment.md # Signal enrichment and classification
+    ├── discovery/        # Discovery pipeline prompts
+    │   ├── roots.md      # Seed discovery frontier
+    │   └── enricher.md   # Extract metadata
+    ├── exploration/      # Interactive exploration
+    │   └── facility.md   # Facility exploration agent
+    └── wiki/             # Wiki operations
+        ├── scout.md      # Discover wiki pages
+        └── scorer.md     # Score wiki pages
+"""
+
+from __future__ import annotations
+
+import hashlib
+import re
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
+from functools import lru_cache
+from pathlib import Path
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any
+
+import yaml
+
+if TYPE_CHECKING:
+    from jinja2 import Environment
+
+# Pattern for include directives: {% include "filename.md" %}
+INCLUDE_PATTERN = re.compile(r'\{%\s*include\s+"([^"]+)"\s*%\}')
+
+# Canonical location of prompt templates — import this instead of hardcoding paths
+PROMPTS_DIR = Path(__file__).parent / "prompts"
+
+
+@dataclass
+class PromptDefinition:
+    """A loaded prompt definition."""
+
+    name: str
+    description: str
+    content: str
+    task: str = "default"
+    metadata: dict = field(default_factory=dict)
+
+
+def _resolve_includes(text: str, prompts_dir: Path) -> str:
+    """Resolve include directives in prompt content.
+
+    Args:
+        text: Prompt content with potential includes
+        prompts_dir: Base directory for prompts (shared/ is relative to this)
+
+    Returns:
+        Content with includes resolved
+    """
+    shared_dir = prompts_dir / "shared"
+
+    def replace_include(match: re.Match) -> str:
+        include_name = match.group(1)
+        include_path = shared_dir / include_name
+        if include_path.exists():
+            return include_path.read_text().strip()
+        return f"<!-- Include not found: {include_name} -->"
+
+    return INCLUDE_PATTERN.sub(replace_include, text)
+
+
+def parse_prompt_file(path: Path, prompts_dir: Path | None = None) -> PromptDefinition:
+    """Parse a markdown prompt file with YAML frontmatter.
+
+    Args:
+        path: Path to the prompt file
+        prompts_dir: Base directory for resolving includes (default: path.parent)
+
+    Returns:
+        Parsed PromptDefinition
+    """
+    if prompts_dir is None:
+        prompts_dir = path.parent
+
+    text = path.read_text()
+
+    match = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.DOTALL)
+    if not match:
+        content = _resolve_includes(text.strip(), prompts_dir)
+        return PromptDefinition(name=path.stem, description="", content=content)
+
+    frontmatter_text, content = match.groups()
+    frontmatter = yaml.safe_load(frontmatter_text)
+
+    # Resolve includes in content
+    resolved_content = _resolve_includes(content.strip(), prompts_dir)
+
+    return PromptDefinition(
+        name=frontmatter.get("name", path.stem),
+        description=frontmatter.get("description", ""),
+        content=resolved_content,
+        task=frontmatter.get("task", "default"),
+        metadata={
+            k: v
+            for k, v in frontmatter.items()
+            if k not in ("name", "description", "task")
+        },
+    )
+
+
+def load_prompts(prompts_dir: Path | None = None) -> dict[str, PromptDefinition]:
+    """Load all prompts from a directory and subdirectories.
+
+    Loads .md files from:
+    - prompts_dir/*.md (root level prompts)
+    - prompts_dir/<subdir>/*.md (categorized prompts, excluding shared/)
+
+    Prompt names include the subdirectory path (e.g., "paths/scorer").
+    """
+    if prompts_dir is None:
+        prompts_dir = PROMPTS_DIR
+
+    prompts = {}
+    if prompts_dir.exists():
+        # Load root-level prompts
+        for md_file in sorted(prompts_dir.glob("*.md")):
+            if md_file.is_file():
+                try:
+                    prompt = parse_prompt_file(md_file, prompts_dir)
+                    prompts[prompt.name] = prompt
+                except Exception as e:
+                    import logging
+
+                    logging.getLogger(__name__).warning(
+                        f"Failed to parse {md_file}: {e}"
+                    )
+
+        # Load prompts from subdirectories (excluding shared/)
+        for subdir in sorted(prompts_dir.iterdir()):
+            if subdir.is_dir() and subdir.name != "shared":
+                for md_file in sorted(subdir.glob("*.md")):
+                    if md_file.is_file():
+                        try:
+                            prompt = parse_prompt_file(md_file, prompts_dir)
+                            # Use subdir/name as the key if name doesn't include it
+                            key = prompt.name
+                            if "/" not in key:
+                                key = f"{subdir.name}/{prompt.name}"
+                            prompts[key] = prompt
+                        except Exception as e:
+                            import logging
+
+                            logging.getLogger(__name__).warning(
+                                f"Failed to parse {md_file}: {e}"
+                            )
+
+    return prompts
+
+
+def list_prompts_summary(prompts_dir: Path | None = None) -> list[dict[str, str]]:
+    """Get a summary list of available prompts."""
+    prompts = load_prompts(prompts_dir)
+    return [
+        {"name": p.name, "description": p.description, "task": p.task}
+        for p in prompts.values()
+    ]
+
+
+# =============================================================================
+# Schema Context for Dynamic Rendering
+# =============================================================================
+
+
+def get_pydantic_schema_json(
+    model_class: type, *, indent: int = 2, example: bool = True
+) -> str:
+    """Generate a JSON representation of a Pydantic model schema for prompts.
+
+    This creates a human-readable JSON example that shows the expected structure
+    and field descriptions, suitable for embedding in LLM prompts.
+
+    Args:
+        model_class: Pydantic model class to generate schema for
+        indent: JSON indentation level
+        example: If True, generate an example instance; if False, generate JSON Schema
+
+    Returns:
+        JSON string suitable for embedding in prompts
+    """
+    import json
+    from typing import get_args, get_origin
+
+    def generate_example_value(field_info, field_type) -> Any:
+        """Generate a reasonable example value for a field type."""
+        # Use explicit examples from json_schema_extra if provided
+        extra = getattr(field_info, "json_schema_extra", None) or {}
+        examples = extra.get("examples") if isinstance(extra, dict) else None
+        if examples:
+            return examples[0]
+
+        # Handle Optional types
+        origin = get_origin(field_type)
+        args = get_args(field_type)
+
+        if origin is list:
+            # List type - return example list
+            inner_type = args[0] if args else str
+            if hasattr(inner_type, "model_fields"):
+                return [generate_example_for_model(inner_type)]
+            return []
+
+        if origin in (type(None) | str, str | None):
+            # Optional[str] or str | None
+            inner = args[0] if args else str
+            if inner is type(None):
+                inner = args[1] if len(args) > 1 else str
+            if inner is str:
+                return None
+            return generate_example_value(field_info, inner)
+
+        # Check if it's an enum
+        if hasattr(field_type, "__members__"):
+            # Return first enum value as example
+            members = list(field_type.__members__.values())
+            return members[0].value if members else "unknown"
+
+        # Primitive types
+        if field_type is str:
+            desc = getattr(field_info, "description", "") or ""
+            if "path" in desc.lower():
+                return "/absolute/path/to/directory"
+            if "description" in desc.lower():
+                return "Concise description (1-2 sentences)"
+            return ""
+        if field_type is bool:
+            return True
+        if field_type is float:
+            return 0.0
+        if field_type is int:
+            return 0
+
+        # Nested Pydantic model
+        if hasattr(field_type, "model_fields"):
+            return generate_example_for_model(field_type)
+
+        return None
+
+    def generate_example_for_model(model: type) -> dict[str, Any]:
+        """Generate example dict for a Pydantic model."""
+        result = {}
+        for field_name, field_info in model.model_fields.items():
+            field_type = field_info.annotation
+            result[field_name] = generate_example_value(field_info, field_type)
+        return result
+
+    if example:
+        # Generate an example instance
+        example_data = generate_example_for_model(model_class)
+        return json.dumps(example_data, indent=indent)
+    else:
+        # Return the JSON Schema
+        schema = model_class.model_json_schema()
+        return json.dumps(schema, indent=indent)
+
+
+def get_pydantic_schema_description(model_class: type) -> str:
+    """Generate a human-readable field description for a Pydantic model.
+
+    Creates a markdown-formatted list of fields with their types and descriptions,
+    suitable for embedding in LLM prompts.
+
+    Args:
+        model_class: Pydantic model class
+
+    Returns:
+        Markdown string describing all fields
+    """
+    from typing import get_args, get_origin
+
+    lines = []
+
+    def format_type(field_type) -> str:
+        """Format a type annotation as a readable string."""
+        origin = get_origin(field_type)
+        args = get_args(field_type)
+
+        if origin is list:
+            inner = args[0] if args else "Any"
+            inner_name = getattr(inner, "__name__", str(inner))
+            return f"list[{inner_name}]"
+
+        if origin in (type(None) | str, str | None):
+            # Union with None (Optional)
+            non_none = [a for a in args if a is not type(None)]
+            if non_none:
+                inner_name = getattr(non_none[0], "__name__", str(non_none[0]))
+                return f"{inner_name} | null"
+            return "string | null"
+
+        if hasattr(field_type, "__members__"):
+            # Enum - list allowed values
+            values = [m.value for m in field_type.__members__.values()]
+            if len(values) <= 5:
+                return f"enum: {values}"
+            return f"enum: {values[:5]}..."
+
+        return getattr(field_type, "__name__", str(field_type))
+
+    for field_name, field_info in model_class.model_fields.items():
+        field_type = field_info.annotation
+        type_str = format_type(field_type)
+        desc = field_info.description or ""
+        required = field_info.is_required()
+        req_str = "(required)" if required else "(optional)"
+
+        lines.append(f"- **{field_name}**: `{type_str}` {req_str}")
+        if desc:
+            lines.append(f"  - {desc}")
+
+    return "\n".join(lines)
+
+
+# =============================================================================
+# Cached Schema Providers
+# =============================================================================
+#
+# Each provider is cached with @lru_cache so schema data is loaded once per process.
+# Prompts declare what they need via schema_needs frontmatter, and only those
+# providers are invoked.
+
+
+@lru_cache(maxsize=1)
+def _get_linkml_schema():
+    """Cached LinkML schema accessor."""
+    from iter_codex.graph.schema import get_schema
+
+    return get_schema()
+
+
+@lru_cache(maxsize=1)
+def _provide_path_purposes() -> dict[str, Any]:
+    """Provide ResourcePurpose enum values grouped by category."""
+    schema = _get_linkml_schema()
+    path_purposes = schema.get_enum_with_descriptions("ResourcePurpose") or []
+
+    # Group path purposes for convenience in templates
+    code_purposes = [
+        p
+        for p in path_purposes
+        if p["value"] in ("modeling_code", "analysis_code", "operations_code")
+    ]
+    data_purposes = [
+        p for p in path_purposes if p["value"] in ("modeling_data", "experimental_data")
+    ]
+    infra_purposes = [
+        p
+        for p in path_purposes
+        if p["value"] in ("data_access", "workflow", "visualization")
+    ]
+    support_purposes = [
+        p
+        for p in path_purposes
+        if p["value"] in ("documentation", "configuration", "test_suite")
+    ]
+    structural_purposes = [
+        p
+        for p in path_purposes
+        if p["value"] in ("container", "archive", "build_artifact", "system")
+    ]
+
+    return {
+        "path_purposes": path_purposes,
+        "path_purposes_code": code_purposes,
+        "path_purposes_data": data_purposes,
+        "path_purposes_infra": infra_purposes,
+        "path_purposes_support": support_purposes,
+        "path_purposes_structural": structural_purposes,
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_discovery_categories() -> dict[str, Any]:
+    """Provide DiscoveryRootCategory enum values grouped."""
+    schema = _get_linkml_schema()
+    discovery_categories = (
+        schema.get_enum_with_descriptions("DiscoveryRootCategory") or []
+    )
+
+    return {
+        "discovery_categories": discovery_categories,
+        "discovery_categories_modeling": [
+            c
+            for c in discovery_categories
+            if c["value"] in ("modeling_code", "modeling_data")
+        ],
+        "discovery_categories_experimental": [
+            c
+            for c in discovery_categories
+            if c["value"] in ("analysis_code", "experimental_data")
+        ],
+        "discovery_categories_shared": [
+            c
+            for c in discovery_categories
+            if c["value"] in ("data_access", "workflow", "documentation")
+        ],
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_score_dimensions() -> dict[str, Any]:
+    """Provide score_* field definitions from FacilityPath schema."""
+    schema = _get_linkml_schema()
+    facility_path_slots = schema.get_all_slots("FacilityPath")
+
+    score_dimensions = []
+    for slot_name, slot_info in facility_path_slots.items():
+        if slot_name.startswith("score_") and slot_info.get("type") == "float":
+            desc = slot_info.get("description", "")
+            score_dimensions.append(
+                {
+                    "field": slot_name,
+                    "label": slot_name.replace("score_", "").replace("_", " ").title(),
+                    "description": desc,
+                }
+            )
+
+    return {"score_dimensions": score_dimensions}
+
+
+@lru_cache(maxsize=1)
+def _provide_scoring_schema() -> dict[str, Any]:
+    """Provide TriageBatch Pydantic schema for LLM prompts (first pass)."""
+    from iter_codex.discovery.paths.models import (
+        TriageBatch,
+        TriageResult,
+    )
+
+    return {
+        "scoring_schema_example": get_pydantic_schema_json(TriageBatch),
+        "scoring_schema_fields": get_pydantic_schema_description(TriageResult),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_score_schema() -> dict[str, Any]:
+    """Provide ScoreBatch Pydantic schema for LLM prompts (second pass)."""
+    from iter_codex.discovery.paths.models import ScoreBatch, ScoreResult
+
+    return {
+        "score_schema_example": get_pydantic_schema_json(ScoreBatch),
+        "score_schema_fields": get_pydantic_schema_description(ScoreResult),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_data_access_fields() -> dict[str, Any]:
+    """Provide DataAccess schema fields grouped by purpose."""
+    schema = _get_linkml_schema()
+    data_access_slots = schema.get_all_slots("DataAccess")
+
+    data_access_fields = {
+        "required": [],
+        "environment": [],
+        "templates": [],
+        "validation": [],
+        "documentation": [],
+    }
+
+    # Categorize fields by purpose
+    required_fields = {"id", "facility_id", "method_type", "library", "access_type"}
+    env_fields = {"setup_commands", "environment_variables"}
+    template_fields = {
+        "imports_template",
+        "connection_template",
+        "data_template",
+        "time_template",
+        "cleanup_template",
+        "decimation_template",
+    }
+    validation_fields = {
+        "data_source",
+        "data_source_pattern",
+        "discovery_shot",
+        "discovery_template",
+        "full_example",
+        "verified_date",
+    }
+    doc_fields = {"name", "documentation_url", "documentation_local", "output_format"}
+
+    for slot_name, slot_info in data_access_slots.items():
+        field_info = {
+            "name": slot_name,
+            "description": slot_info.get("description", ""),
+            "required": slot_info.get("required", False),
+            "type": slot_info.get("type", "string"),
+        }
+        if slot_name in required_fields:
+            data_access_fields["required"].append(field_info)
+        elif slot_name in env_fields:
+            data_access_fields["environment"].append(field_info)
+        elif slot_name in template_fields:
+            data_access_fields["templates"].append(field_info)
+        elif slot_name in validation_fields:
+            data_access_fields["validation"].append(field_info)
+        elif slot_name in doc_fields:
+            data_access_fields["documentation"].append(field_info)
+
+    return {"data_access_fields": data_access_fields}
+
+
+@lru_cache(maxsize=1)
+def _provide_format_patterns() -> dict[str, Any]:
+    """Provide enrichment patterns organized by score dimension.
+
+    These patterns are what the enricher searches for with rg.
+    Injecting them into prompts lets the LLM understand what was searched.
+    """
+    from iter_codex.discovery.paths.enrichment import PATTERN_REGISTRY
+
+    # Build dimension-organized pattern display
+    patterns_by_dimension = []
+    all_categories = []
+
+    for group_name, (patterns_dict, score_dim) in PATTERN_REGISTRY.items():
+        patterns_by_dimension.append(f"\n**{group_name.title()}** → `{score_dim}`:")
+        for name, pattern in patterns_dict.items():
+            patterns_by_dimension.append(f"- `{name}`: `{pattern}`")
+            all_categories.append(name)
+
+    return {
+        "enrichment_patterns": "\n".join(patterns_by_dimension),
+        "pattern_categories": all_categories,
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_physics_domains() -> dict[str, Any]:
+    """Provide the physics domain vocabulary and its classification guidance.
+
+    Domain values, one-line descriptions and categories are canonical in
+    imas-standard-names. The scope, includes and excludes for each domain and
+    the scope for each category come from
+    ``iter_codex/definitions/physics/domains.yaml``. Returning the guidance here
+    lets a prompt match a path against what a domain covers rather than against
+    a bare label, and keeps the guidance in one place that both the classifier
+    prompt and the chat prompt read.
+    """
+    from iter_codex.core.physics_domain import PhysicsDomain
+    from iter_codex.definitions.physics import (
+        load_domain_guidance,
+        load_isn_physics_domains,
+    )
+    from iter_codex.graph.dd_domain_classifier import (
+        _category_precedence_rank,
+        _precedence_rank,
+    )
+
+    isn_vocabulary = load_isn_physics_domains()
+    guidance = load_domain_guidance()
+    domain_guidance = guidance["domains"]
+    category_guidance = guidance["categories"]
+
+    domains = []
+    for member in PhysicsDomain:
+        value = member.value
+        meta = isn_vocabulary.get(value, {})
+        guide = domain_guidance.get(value, {})
+        domains.append(
+            {
+                "value": value,
+                "description": meta.get("description", ""),
+                "category": meta.get("category") or "uncategorized",
+                "scope": guide.get("scope", ""),
+                "includes": list(guide.get("includes") or ()),
+                "excludes": list(guide.get("excludes") or ()),
+            }
+        )
+
+    category_rank = _category_precedence_rank(_precedence_rank())
+    categories = [
+        {"value": name, "scope": entry.get("scope", "")}
+        for name, entry in sorted(
+            category_guidance.items(),
+            key=lambda item: (category_rank.get(item[0], len(category_rank)), item[0]),
+        )
+    ]
+
+    return {
+        "physics_domains": domains,
+        "physics_domain_categories": categories,
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_diagnostic_categories() -> dict[str, Any]:
+    """Provide DiagnosticCategory enum values for signal enrichment prompts.
+
+    Loads categories from the LinkML facility schema so the LLM outputs
+    canonical lowercase diagnostic names rather than freeform strings.
+    """
+    from pathlib import Path
+
+    try:
+        from linkml_runtime.utils.schemaview import SchemaView
+
+        schema_path = Path(__file__).parent.parent / "schemas/facility.yaml"
+        if schema_path.exists():
+            sv = SchemaView(str(schema_path))
+            enum_def = sv.get_enum("DiagnosticCategory")
+            if enum_def and enum_def.permissible_values:
+                categories = [
+                    {
+                        "value": name,
+                        "description": pv.description or "",
+                    }
+                    for name, pv in enum_def.permissible_values.items()
+                ]
+                return {"diagnostic_categories": categories}
+    except Exception:
+        pass
+
+    return {"diagnostic_categories": []}
+
+
+@lru_cache(maxsize=1)
+def _provide_wiki_page_purposes() -> dict[str, Any]:
+    """Provide ContentPurpose enum values grouped by priority."""
+    from iter_codex.graph.models import ContentPurpose
+
+    # Group by value tier
+    high_value = {
+        ContentPurpose.data_source,
+        ContentPurpose.diagnostic,
+        ContentPurpose.code,
+        ContentPurpose.calibration,
+        ContentPurpose.data_access,
+    }
+    medium_value = {
+        ContentPurpose.physics_analysis,
+        ContentPurpose.experimental_procedure,
+        ContentPurpose.tutorial,
+        ContentPurpose.reference,
+    }
+    low_value = {
+        ContentPurpose.administrative,
+        ContentPurpose.personal,
+        ContentPurpose.other,
+    }
+
+    # Descriptions from the LinkML schema (stored in enum docstrings)
+    _descriptions: dict[ContentPurpose, str] = {
+        ContentPurpose.data_source: "Signal tables, node lists, shot databases — direct IMAS mapping targets",
+        ContentPurpose.diagnostic: "Diagnostic documentation (Thomson, CXRS, ECE, bolometry, etc.)",
+        ContentPurpose.code: "Software/code documentation (LIUQE, ASTRA, CHEASE, etc.)",
+        ContentPurpose.calibration: "Calibration procedures, conversion factors, sensor specifications",
+        ContentPurpose.data_access: "How to access data — MDSplus paths, TDI expressions, APIs",
+        ContentPurpose.physics_analysis: "Physics methodology, analysis techniques, interpretation guides",
+        ContentPurpose.experimental_procedure: "Experimental procedures, operational guides, safety protocols",
+        ContentPurpose.tutorial: "Tutorials, how-tos, getting started guides",
+        ContentPurpose.reference: "General reference material, tables, constants",
+        ContentPurpose.administrative: "Meeting notes, schedules, project management",
+        ContentPurpose.personal: "User pages, personal notes, sandboxes",
+        ContentPurpose.other: "Uncategorized content",
+    }
+
+    def purpose_to_dict(p: ContentPurpose) -> dict[str, str]:
+        return {"value": p.value, "description": _descriptions.get(p, p.value)}
+
+    return {
+        "wiki_purposes": [purpose_to_dict(p) for p in ContentPurpose],
+        "wiki_purposes_high": [purpose_to_dict(p) for p in high_value],
+        "wiki_purposes_medium": [purpose_to_dict(p) for p in medium_value],
+        "wiki_purposes_low": [purpose_to_dict(p) for p in low_value],
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_wiki_score_dimensions() -> dict[str, Any]:
+    """Provide wiki score dimensions from WikiScoreResult model."""
+    from iter_codex.discovery.wiki.models import WikiScoreResult
+
+    score_dimensions = []
+    for field_name, field_info in WikiScoreResult.model_fields.items():
+        if field_name.startswith("score_"):
+            desc = field_info.description or ""
+            score_dimensions.append(
+                {
+                    "field": field_name,
+                    "label": field_name.replace("score_", "").replace("_", " ").title(),
+                    "description": desc,
+                }
+            )
+
+    return {"wiki_score_dimensions": score_dimensions}
+
+
+@lru_cache(maxsize=1)
+def _provide_wiki_scoring_schema() -> dict[str, Any]:
+    """Provide WikiScoreBatch Pydantic schema for LLM prompts."""
+    from iter_codex.discovery.wiki.models import WikiScoreBatch, WikiScoreResult
+
+    return {
+        "wiki_scoring_schema_example": get_pydantic_schema_json(WikiScoreBatch),
+        "wiki_scoring_schema_fields": get_pydantic_schema_description(WikiScoreResult),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_description_review_schema() -> dict[str, Any]:
+    """Provide the compose-time description review Pydantic schema."""
+    from iter_codex.standard_names.models import (
+        StandardNameQualityReviewDescriptionBatch,
+    )
+
+    return {
+        "description_review_schema_example": get_pydantic_schema_json(
+            StandardNameQualityReviewDescriptionBatch
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_document_scoring_schema() -> dict[str, Any]:
+    """Provide DocumentScoreBatch Pydantic schema for LLM prompts."""
+    from iter_codex.discovery.wiki.models import DocumentScoreBatch, DocumentScoreResult
+
+    return {
+        "document_scoring_schema_example": get_pydantic_schema_json(DocumentScoreBatch),
+        "document_scoring_schema_fields": get_pydantic_schema_description(
+            DocumentScoreResult
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_image_caption_schema() -> dict[str, Any]:
+    """Provide ImageScoreBatch Pydantic schema for VLM prompts."""
+    from iter_codex.discovery.wiki.models import ImageScoreBatch, ImageScoreResult
+
+    return {
+        "image_caption_schema_example": get_pydantic_schema_json(ImageScoreBatch),
+        "image_caption_schema_fields": get_pydantic_schema_description(
+            ImageScoreResult
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_signal_enrichment_schema() -> dict[str, Any]:
+    """Provide SignalEnrichmentBatch Pydantic schema for LLM prompts.
+
+    Used by discovery/signal-enrichment prompt for batch signal classification.
+    """
+    from iter_codex.discovery.signals.models import (
+        SignalEnrichmentBatch,
+        SignalEnrichmentResult,
+    )
+
+    return {
+        "signal_enrichment_schema_example": get_pydantic_schema_json(
+            SignalEnrichmentBatch
+        ),
+        "signal_enrichment_schema_fields": get_pydantic_schema_description(
+            SignalEnrichmentResult
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_signal_source_unwind_schema() -> dict[str, Any]:
+    """Provide SignalSourceCodeUnwindBatch Pydantic schema for LLM prompts.
+
+    Used by the signals/source_unwind prompt, which generates name/description
+    templates for signal source group members.
+    """
+    from iter_codex.discovery.signals.models import (
+        SignalSourceCodeUnwind,
+        SignalSourceCodeUnwindBatch,
+    )
+
+    return {
+        "signal_source_unwind_schema_example": get_pydantic_schema_json(
+            SignalSourceCodeUnwindBatch
+        ),
+        "signal_source_unwind_schema_fields": get_pydantic_schema_description(
+            SignalSourceCodeUnwind
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_cluster_vocabularies() -> dict[str, Any]:
+    """Provide controlled vocabularies for cluster labeling prompts.
+
+    Loads physics concepts, data types, tags, and mapping relevance levels
+    from LinkML schema definitions in iter_codex/definitions/clusters/.
+    """
+    from linkml_runtime.utils.schemaview import SchemaView
+
+    from iter_codex.definitions.clusters import (
+        CONCEPTS_SCHEMA,
+        DATA_TYPES_SCHEMA,
+        MAPPING_RELEVANCE_SCHEMA,
+        TAGS_SCHEMA,
+    )
+
+    def load_enum_values(schema_path: Path, enum_name: str) -> list[dict[str, str]]:
+        """Load enum values with descriptions from a LinkML schema."""
+        if not schema_path.exists():
+            return []
+        try:
+            sv = SchemaView(str(schema_path))
+            enum_def = sv.get_enum(enum_name)
+            if not enum_def or not enum_def.permissible_values:
+                return []
+            return [
+                {"value": name, "description": pv.description or ""}
+                for name, pv in enum_def.permissible_values.items()
+            ]
+        except Exception:
+            return []
+
+    return {
+        "cluster_physics_concepts": load_enum_values(CONCEPTS_SCHEMA, "PhysicsConcept"),
+        "cluster_data_types": load_enum_values(DATA_TYPES_SCHEMA, "DataTypeHint"),
+        "cluster_tags": load_enum_values(TAGS_SCHEMA, "ClusterTag"),
+        "cluster_mapping_relevance": load_enum_values(
+            MAPPING_RELEVANCE_SCHEMA, "MappingRelevance"
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_cluster_label_schema() -> dict[str, Any]:
+    """Provide ClusterLabelBatch Pydantic schema for LLM prompts."""
+    from iter_codex.clusters.models import ClusterLabelBatch, ClusterLabelResult
+
+    return {
+        "cluster_label_schema_example": get_pydantic_schema_json(ClusterLabelBatch),
+        "cluster_label_schema_fields": get_pydantic_schema_description(
+            ClusterLabelResult
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_static_enrichment_schema() -> dict[str, Any]:
+    """Provide StaticNodeBatch Pydantic schema for LLM prompts."""
+    from iter_codex.discovery.mdsplus.enrichment import (
+        StaticNodeBatch,
+        StaticNodeResult,
+    )
+
+    return {
+        "static_enrichment_schema_example": get_pydantic_schema_json(StaticNodeBatch),
+        "static_enrichment_schema_fields": get_pydantic_schema_description(
+            StaticNodeResult
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_imas_enrichment_schema() -> dict[str, Any]:
+    """Provide IMASPathEnrichmentBatch Pydantic schema for LLM prompts.
+
+    Used by imas/enrichment prompt for batch IMAS path description generation.
+    """
+    from iter_codex.graph.dd_enrichment import (
+        IMASPathEnrichmentBatch,
+        IMASPathEnrichmentResult,
+    )
+
+    return {
+        "imas_enrichment_schema_example": get_pydantic_schema_json(
+            IMASPathEnrichmentBatch
+        ),
+        "imas_enrichment_schema_fields": get_pydantic_schema_description(
+            IMASPathEnrichmentResult
+        ),
+    }
+
+
+# Registry mapping schema_needs names to provider functions
+_SCHEMA_PROVIDERS: dict[str, Any] = {
+    "path_purposes": _provide_path_purposes,
+    "discovery_categories": _provide_discovery_categories,
+    "score_dimensions": _provide_score_dimensions,
+    "scoring_schema": _provide_scoring_schema,
+    "physics_domains": _provide_physics_domains,
+    "refine_schema": _provide_score_schema,  # backwards compat alias
+    "score_schema": _provide_score_schema,
+    "data_access_fields": _provide_data_access_fields,
+    "format_patterns": _provide_format_patterns,
+    # Wiki providers
+    "wiki_page_purposes": _provide_wiki_page_purposes,
+    "wiki_score_dimensions": _provide_wiki_score_dimensions,
+    "wiki_scoring_schema": _provide_wiki_scoring_schema,
+    "document_scoring_schema": _provide_document_scoring_schema,
+    "description_review_schema": _provide_description_review_schema,
+    # Image captioning
+    "image_caption_schema": _provide_image_caption_schema,
+    # Signal enrichment
+    "signal_enrichment_schema": _provide_signal_enrichment_schema,
+    "signal_source_unwind_schema": _provide_signal_source_unwind_schema,
+    "diagnostic_categories": _provide_diagnostic_categories,
+    # Static tree enrichment
+    "static_enrichment_schema": _provide_static_enrichment_schema,
+    # IMAS DD enrichment
+    "imas_enrichment_schema": _provide_imas_enrichment_schema,
+    # Cluster labeling
+    "cluster_vocabularies": _provide_cluster_vocabularies,
+    "cluster_label_schema": _provide_cluster_label_schema,
+}
+
+
+@lru_cache(maxsize=1)
+def _provide_file_scoring_schema() -> dict[str, Any]:
+    """Provide FileScoreBatch Pydantic schema for LLM prompts."""
+    from iter_codex.discovery.code.scorer import FileScoreBatch, FileScoreResult
+
+    return {
+        "file_scoring_schema_example": get_pydantic_schema_json(FileScoreBatch),
+        "file_scoring_schema_fields": get_pydantic_schema_description(FileScoreResult),
+    }
+
+
+# Register file scoring providers
+_SCHEMA_PROVIDERS["file_scoring_schema"] = _provide_file_scoring_schema
+
+
+@lru_cache(maxsize=1)
+def _provide_signal_mapping_schema() -> dict[str, Any]:
+    """Provide the SignalMappingBatch field lists for the signal-mapping prompt.
+
+    The local lane sends no response_format, so the field names and which of
+    them are required reach the model only through the prompt.
+    """
+    from iter_codex.ids.models import (
+        EscalationFlag,
+        SignalMappingBatch,
+        SignalMappingEntry,
+        UnmappedSignal,
+    )
+
+    return {
+        "signal_mapping_batch_fields": get_pydantic_schema_description(
+            SignalMappingBatch
+        ),
+        "signal_mapping_entry_fields": get_pydantic_schema_description(
+            SignalMappingEntry
+        ),
+        "unmapped_signal_fields": get_pydantic_schema_description(UnmappedSignal),
+        "escalation_flag_fields": get_pydantic_schema_description(EscalationFlag),
+    }
+
+
+@lru_cache(maxsize=1)
+def _provide_assembly_schema() -> dict[str, Any]:
+    """Provide the AssemblyConfig field list for the assembly prompt."""
+    from iter_codex.ids.models import AssemblyConfig
+
+    return {
+        "assembly_config_fields": get_pydantic_schema_description(AssemblyConfig),
+    }
+
+
+_SCHEMA_PROVIDERS["signal_mapping_schema"] = _provide_signal_mapping_schema
+_SCHEMA_PROVIDERS["assembly_schema"] = _provide_assembly_schema
+
+
+def get_schema_for_prompt(
+    prompt_name: str, schema_needs: list[str] | None = None
+) -> dict[str, Any]:
+    """Get only the schema context needed for a specific prompt.
+
+    A prompt owns its schema context through its own ``schema_needs``
+    frontmatter; the caller passes that list here. When it is ``None`` there is
+    no schema context to load.
+
+    Args:
+        prompt_name: Prompt identifier (e.g., "paths/scorer")
+        schema_needs: The prompt's declared needs (from its frontmatter)
+
+    Returns:
+        Dict with only the requested schema context
+    """
+    if schema_needs is None:
+        schema_needs = []
+
+    context: dict[str, Any] = {}
+    for need in schema_needs:
+        provider = _SCHEMA_PROVIDERS.get(need)
+        if provider:
+            context.update(provider())
+
+    return context
+
+
+def get_data_access_context() -> dict[str, Any]:
+    """Get existing DataAccess nodes from the graph for prompt context.
+
+    Queries the graph for all DataAccess nodes and returns them in a format
+    suitable for Jinja2 templates. Used by discovery/data_access prompt to
+    provide working examples from other facilities.
+
+    Returns:
+        Dict with 'existing_data_access' list containing node properties.
+    """
+    try:
+        from iter_codex.graph import GraphClient
+
+        with GraphClient() as client:
+            # Query existing methods with key fields for examples
+            result = client.query("""
+                MATCH (m:DataAccess)-[:AT_FACILITY]->(f:Facility)
+                RETURN m.id AS id,
+                       m.name AS name,
+                       f.id AS facility,
+                       m.method_type AS method_type,
+                       m.library AS library,
+                       m.data_template AS data_template,
+                       m.setup_commands AS setup_commands,
+                       m.full_example AS full_example
+                ORDER BY f.id, m.method_type
+            """)
+
+            methods = []
+            for row in result:
+                methods.append(
+                    {
+                        "id": row["id"],
+                        "name": row["name"] or row["id"],
+                        "facility": row["facility"],
+                        "method_type": row["method_type"],
+                        "library": row["library"],
+                        "data_template": row["data_template"],
+                        "setup_commands": row["setup_commands"],
+                        "full_example": row["full_example"],
+                    }
+                )
+
+            return {"existing_data_access": methods}
+
+    except Exception:
+        # Graph not available - return empty context
+        return {"existing_data_access": []}
+
+
+def _get_jinja_env(prompts_dir: Path) -> Environment:
+    """Create Jinja2 environment with custom loader for includes."""
+    from jinja2 import BaseLoader, Environment, TemplateNotFound
+
+    class PromptsLoader(BaseLoader):
+        """Loader that resolves includes from shared/ directory."""
+
+        def get_source(
+            self, environment: Environment, template: str
+        ) -> tuple[str, str, Any]:
+            # Try shared/ first, then root
+            for base in [prompts_dir / "shared", prompts_dir]:
+                path = base / template
+                if path.exists():
+                    source = path.read_text()
+                    return source, str(path), lambda: True
+            raise TemplateNotFound(template)
+
+    import json as _json
+
+    env = Environment(loader=PromptsLoader())
+    # Add fromjson filter so templates can parse JSON-string fields
+    # (e.g. reviewer_comments_per_dim_name stored as a JSON string on graph nodes).
+    env.filters["fromjson"] = _json.loads
+    return env
+
+
+class StrictPromptError(ValueError):
+    """Base error for a registered prompt that cannot render exactly."""
+
+
+class UnregisteredPromptError(StrictPromptError):
+    """A prompt name does not resolve to one canonical template file."""
+
+
+class PromptContextError(StrictPromptError):
+    """A strict render has missing or caller-supplied unknown context keys."""
+
+
+@dataclass(frozen=True, slots=True)
+class StrictPromptSource:
+    """Resolved source identity for one strict prompt and all of its includes."""
+
+    name: str
+    content: str
+    metadata: Mapping[str, Any]
+    source_digest: str
+    required_context: frozenset[str]
+    source_files: tuple[str, ...]
+    source_texts: tuple[tuple[str, str], ...]
+    provider_names: tuple[str, ...]
+
+
+def _safe_template_name(name: str) -> str:
+    candidate = name.strip()
+    path = Path(candidate)
+    if (
+        not candidate
+        or candidate.startswith("inline:")
+        or path.is_absolute()
+        or ".." in path.parts
+        or path.suffix
+    ):
+        raise UnregisteredPromptError(f"Invalid registered prompt name {name!r}")
+    return candidate
+
+
+def _prompt_file_index(prompts_dir: Path) -> dict[str, Path]:
+    """Return an exact prompt-name index without swallowing parse failures."""
+    index: dict[str, Path] = {}
+    for path in sorted(prompts_dir.rglob("*.md")):
+        if "shared" in path.relative_to(prompts_dir).parts:
+            continue
+        relative_name = path.relative_to(prompts_dir).with_suffix("").as_posix()
+        text = path.read_text()
+        match = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.DOTALL)
+        if match:
+            frontmatter = yaml.safe_load(match.group(1)) or {}
+            if not isinstance(frontmatter, dict):
+                raise StrictPromptError(f"Prompt frontmatter must be a mapping: {path}")
+            declared_name = str(frontmatter.get("name") or relative_name)
+            name = (
+                declared_name
+                if "/" in declared_name
+                else f"{Path(relative_name).parent.as_posix()}/{declared_name}"
+                if Path(relative_name).parent.as_posix() != "."
+                else declared_name
+            )
+        else:
+            name = relative_name
+        if name in index:
+            raise UnregisteredPromptError(
+                f"Duplicate registered prompt name {name!r}: {index[name]} and {path}"
+            )
+        index[name] = path
+    return index
+
+
+def _prompt_body(path: Path) -> tuple[dict[str, Any], str]:
+    text = path.read_text()
+    match = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.DOTALL)
+    if not match:
+        return {}, text.strip()
+    frontmatter = yaml.safe_load(match.group(1)) or {}
+    if not isinstance(frontmatter, dict):
+        raise StrictPromptError(f"Prompt frontmatter must be a mapping: {path}")
+    return frontmatter, match.group(2).strip()
+
+
+def _strict_jinja_env(prompts_dir: Path) -> Environment:
+    """Create a fail-closed environment rooted only in registered prompt assets."""
+    from jinja2 import ChoiceLoader, Environment, FileSystemLoader, StrictUndefined
+
+    env = Environment(
+        loader=ChoiceLoader(
+            [
+                FileSystemLoader(prompts_dir / "shared"),
+                FileSystemLoader(prompts_dir),
+            ]
+        ),
+        undefined=StrictUndefined,
+        autoescape=False,
+    )
+    env.filters["fromjson"] = __import__("json").loads
+    return env
+
+
+def _referenced_sources(
+    *,
+    env: Environment,
+    content: str,
+    prompts_dir: Path,
+) -> tuple[dict[str, str], frozenset[str]]:
+    """Resolve every static include and collect its undeclared variables."""
+    from jinja2 import TemplateNotFound, meta
+
+    sources: dict[str, str] = {"<root>": content}
+    required: set[str] = set()
+    pending: list[tuple[str, str]] = [("<root>", content)]
+    while pending:
+        source_name, source = pending.pop()
+        parsed = env.parse(source)
+        required.update(meta.find_undeclared_variables(parsed))
+        referenced = meta.find_referenced_templates(parsed)
+        if referenced is None:
+            raise StrictPromptError(
+                f"Dynamic include is forbidden in registered prompt {source_name!r}"
+            )
+        for include_name in referenced:
+            if include_name is None:
+                raise StrictPromptError(
+                    f"Dynamic include is forbidden in registered prompt {source_name!r}"
+                )
+            include_path = Path(include_name)
+            if include_path.is_absolute() or ".." in include_path.parts:
+                raise StrictPromptError(
+                    f"Include escapes the registered prompt roots: {include_name!r}"
+                )
+            if include_name in sources:
+                continue
+            try:
+                include_source, include_filename, _ = env.loader.get_source(
+                    env, include_name
+                )
+            except TemplateNotFound as exc:
+                raise StrictPromptError(
+                    f"Missing registered include {include_name!r}"
+                ) from exc
+            resolved = Path(include_filename).resolve()
+            allowed_roots = (
+                (prompts_dir / "shared").resolve(),
+                prompts_dir.resolve(),
+            )
+            if not any(resolved.is_relative_to(root) for root in allowed_roots):
+                raise StrictPromptError(
+                    f"Include escapes the registered prompt roots: {include_name!r}"
+                )
+            sources[include_name] = include_source
+            pending.append((include_name, include_source))
+    return sources, frozenset(required)
+
+
+def _freeze_static_value(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return MappingProxyType(
+            {str(key): _freeze_static_value(item) for key, item in value.items()}
+        )
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
+        return tuple(_freeze_static_value(item) for item in value)
+    return value
+
+
+def _freeze_static_mapping(value: Mapping[str, Any]) -> Mapping[str, Any]:
+    return MappingProxyType(
+        {str(key): _freeze_static_value(item) for key, item in value.items()}
+    )
+
+
+def load_strict_prompt(
+    name: str,
+    prompts_dir: Path | None = None,
+) -> StrictPromptSource:
+    """Load one registered template with a digest over every static include."""
+
+    root = prompts_dir or PROMPTS_DIR
+    registered_name = _safe_template_name(name)
+    index = _prompt_file_index(root)
+    path = index.get(registered_name)
+    return _load_strict_prompt_from_path(registered_name, path, root)
+
+
+def _load_strict_prompt_from_path(
+    registered_name: str,
+    path: Path | None,
+    root: Path,
+) -> StrictPromptSource:
+    """Load one strict source from a catalog snapshot without re-indexing."""
+    import json
+
+    if path is None:
+        raise UnregisteredPromptError(
+            f"Prompt {registered_name!r} is not registered under {root}"
+        )
+    if not path.resolve().is_relative_to(root.resolve()):
+        raise UnregisteredPromptError(
+            f"Prompt {registered_name!r} escapes the registered prompt root"
+        )
+    metadata, content = _prompt_body(path)
+    env = _strict_jinja_env(root)
+    sources, required_context = _referenced_sources(
+        env=env,
+        content=content,
+        prompts_dir=root,
+    )
+    digest_payload = json.dumps(
+        {"metadata": metadata, "sources": sources},
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+    source_digest = hashlib.sha256(digest_payload.encode("utf-8")).hexdigest()
+    source_files = tuple(
+        str(path) if key == "<root>" else key for key in sorted(sources)
+    )
+    schema_needs = metadata.get("schema_needs")
+    if schema_needs is None:
+        schema_needs = []
+    if not isinstance(schema_needs, list) or any(
+        not isinstance(need, str) for need in schema_needs
+    ):
+        raise StrictPromptError(f"Prompt {registered_name!r} has invalid schema_needs")
+    return StrictPromptSource(
+        name=registered_name,
+        content=content,
+        metadata=_freeze_static_mapping(metadata),
+        source_digest=source_digest,
+        required_context=required_context,
+        source_files=source_files,
+        source_texts=tuple(sorted(sources.items())),
+        provider_names=tuple(schema_needs),
+    )
+
+
+def render_prompt_strict(
+    name: str,
+    context: dict[str, Any] | None = None,
+    prompts_dir: Path | None = None,
+) -> str:
+    """Render one registered prompt with exact keys and ``StrictUndefined``.
+
+    Schema-provider values declared by prompt frontmatter remain static inputs.
+    Caller values may satisfy declared variables but cannot add an unused key.
+    Missing values and missing includes are fatal.
+    """
+    root = prompts_dir or PROMPTS_DIR
+    prompt = load_strict_prompt(name, root)
+    supplied = dict(context or {})
+    unknown = set(supplied) - prompt.required_context
+    if unknown:
+        raise PromptContextError(
+            f"Prompt {name!r} received unknown context keys: {sorted(unknown)}"
+        )
+    schema_needs = prompt.metadata.get("schema_needs")
+    if schema_needs is not None and (
+        not isinstance(schema_needs, (list, tuple))
+        or any(not isinstance(need, str) for need in schema_needs)
+    ):
+        raise StrictPromptError(f"Prompt {name!r} has invalid schema_needs")
+    unknown_needs = set(schema_needs or ()) - set(_SCHEMA_PROVIDERS)
+    if unknown_needs:
+        raise StrictPromptError(
+            f"Prompt {name!r} names unknown schema providers: {sorted(unknown_needs)}"
+        )
+    full_context = get_schema_for_prompt(name, list(schema_needs or ()))
+    collisions = set(supplied) & set(full_context)
+    if collisions:
+        raise PromptContextError(
+            f"Prompt {name!r} caller context overrides static schema keys: "
+            f"{sorted(collisions)}"
+        )
+    full_context.update(supplied)
+    missing = prompt.required_context - set(full_context)
+    if missing:
+        raise PromptContextError(
+            f"Prompt {name!r} is missing context keys: {sorted(missing)}"
+        )
+    env = _strict_jinja_env(root)
+    return env.from_string(prompt.content).render(full_context)
+
+
+def render_prompt(
+    name: str,
+    context: dict[str, Any] | None = None,
+    prompts_dir: Path | None = None,
+) -> str:
+    """Render a prompt with full Jinja2 templating and schema context.
+
+    This is the dynamic rendering mode that injects schema-derived values
+    and custom context variables into the prompt template.
+
+    Args:
+        name: Prompt name (e.g., "discovery/roots", "paths/scorer")
+        context: Additional context variables (e.g., {"facility": "tcv"})
+        prompts_dir: Base directory for prompts
+
+    Returns:
+        Fully rendered prompt content
+
+    Example:
+        >>> render_prompt("discovery/roots", {"facility": "tcv"})
+        # Returns prompt with {{ facility }} replaced and schema loops expanded
+    """
+    if prompts_dir is None:
+        prompts_dir = PROMPTS_DIR
+
+    # Load the raw prompt (with frontmatter)
+    prompts = load_prompts(prompts_dir)
+    if name not in prompts:
+        raise KeyError(f"Prompt '{name}' not found. Available: {list(prompts.keys())}")
+
+    prompt_def = prompts[name]
+
+    # Build targeted context: only load schema providers the prompt needs
+    # Check frontmatter for explicit schema_needs, otherwise use defaults
+    schema_needs = prompt_def.metadata.get("schema_needs")
+    full_context = get_schema_for_prompt(name, schema_needs)
+
+    # Add prompt-specific context (backwards compat)
+    if name == "discovery/data_access":
+        full_context.update(get_data_access_context())
+
+    if context:
+        full_context.update(context)
+
+    # Render with Jinja2
+    env = _get_jinja_env(prompts_dir)
+    template = env.from_string(prompt_def.content)
+    return template.render(full_context)
+
+
+def get_prompt_content_hash(name: str, prompts_dir: Path | None = None) -> str:
+    """Get a hash of prompt content for cache invalidation."""
+    if prompts_dir is None:
+        prompts_dir = PROMPTS_DIR
+
+    prompts = load_prompts(prompts_dir)
+    if name not in prompts:
+        raise KeyError(f"Prompt '{name}' not found")
+
+    content = prompts[name].content
+    return hashlib.sha256(content.encode()).hexdigest()[:16]
+
+
+# =============================================================================
+# Prompt Config Loader
+# =============================================================================
+
+
+def load_prompt_config(name: str) -> dict:
+    """Load YAML config from iter_codex/llm/config/{name}.yaml.
+
+    Used for structured prompt configuration (e.g., review scoring criteria).
+    """
+    config_dir = Path(__file__).parent / "config"
+    config_path = config_dir / f"{name}.yaml"
+    if not config_path.exists():
+        raise FileNotFoundError(f"Prompt config not found: {config_path}")
+
+    with open(config_path) as f:
+        return yaml.safe_load(f)

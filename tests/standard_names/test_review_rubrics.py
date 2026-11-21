@@ -22,7 +22,7 @@ import pytest
 
 
 def test_docs_score_total_and_tier() -> None:
-    from imas_codex.standard_names.models import StandardNameQualityScoreDocs
+    from iter_codex.standard_names.models import StandardNameQualityScoreDocs
 
     s = StandardNameQualityScoreDocs(
         description_quality=20,
@@ -70,7 +70,7 @@ def test_docs_score_total_and_tier() -> None:
 
 
 def test_docs_batch_model_parses_minimal_json() -> None:
-    from imas_codex.standard_names.models import StandardNameQualityReviewDocsBatch
+    from iter_codex.standard_names.models import StandardNameQualityReviewDocsBatch
 
     batch = StandardNameQualityReviewDocsBatch.model_validate(
         {
@@ -99,7 +99,7 @@ def test_docs_batch_model_parses_minimal_json() -> None:
 
 
 def _make_docs_review(source_id: str, name: str, **scores: int):
-    from imas_codex.standard_names.models import (
+    from iter_codex.standard_names.models import (
         StandardNameQualityScoreDocs,
     )
 
@@ -114,7 +114,7 @@ def _make_docs_review(source_id: str, name: str, **scores: int):
 
 
 def test_match_docs_entries_for_target_docs() -> None:
-    from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+    from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
     wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
     names = [{"id": "electron_temperature", "source_id": "electron_temperature"}]
@@ -138,8 +138,8 @@ def test_match_docs_entries_for_target_docs() -> None:
 
 
 def test_match_name_entries_for_target_names() -> None:
-    from imas_codex.standard_names.models import StandardNameQualityScoreNameOnly
-    from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+    from iter_codex.standard_names.models import StandardNameQualityScoreNameOnly
+    from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
     wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
     names = [{"id": "x", "source_id": "x"}]
@@ -174,8 +174,8 @@ class _DispatchStub:
 @pytest.mark.asyncio
 async def test_single_batch_dispatch_selects_prompt_per_target(monkeypatch) -> None:
     """Each target value must pick the paired prompt name + response model."""
-    from imas_codex.standard_names import models as sn_models
-    from imas_codex.standard_names.review import pipeline as pl
+    from iter_codex.standard_names import models as sn_models
+    from iter_codex.standard_names.review import pipeline as pl
 
     captured: dict[str, object] = {}
 
@@ -190,12 +190,12 @@ async def test_single_batch_dispatch_selects_prompt_per_target(monkeypatch) -> N
 
     monkeypatch.setattr(pl, "render_prompt", fake_render_prompt, raising=False)
 
-    import imas_codex.discovery.base.llm as dbllm
+    import iter_codex.discovery.base.llm as dbllm
 
     monkeypatch.setattr(dbllm, "acall_llm_structured", fake_call_llm_structured)
 
     # Also patch the local re-import used inside _review_single_batch.
-    from imas_codex.llm import prompt_loader
+    from iter_codex.llm import prompt_loader
 
     monkeypatch.setattr(prompt_loader, "render_prompt", fake_render_prompt)
 
@@ -242,7 +242,7 @@ async def test_single_batch_dispatch_selects_prompt_per_target(monkeypatch) -> N
 
 
 def test_docs_prompt_scores_docs_dimensions_only() -> None:
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     rendered = render_prompt(
         "sn/review_docs",
@@ -284,7 +284,7 @@ def test_docs_prompt_scores_docs_dimensions_only() -> None:
 
 def test_downgrade_guard_skips_lower_fidelity_without_force() -> None:
     """A target=names run must not overwrite a prior docs review."""
-    from imas_codex.standard_names.review.state import StandardNameReviewState
+    from iter_codex.standard_names.review.state import StandardNameReviewState
 
     state = StandardNameReviewState(
         facility="dd",

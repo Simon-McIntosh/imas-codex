@@ -84,14 +84,14 @@ def _free_port():
 
 def pipeline(*, dry_run):
     """Run the scoped pipeline in this process's tree, bounded to the budget."""
-    import imas_codex.standard_names.loop as loop
+    import iter_codex.standard_names.loop as loop
 
     print(f"# module: {loop.__file__}", flush=True)
     command = [
         "uv",
         "run",
         "--no-sync",
-        "imas-codex",
+        "iter-codex",
         "sn",
         "run",
         "--focus",
@@ -132,7 +132,7 @@ def plant():
     """
     import tempfile
 
-    from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
+    from iter_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
 
     scratch = Path(
         tempfile.mkdtemp(prefix="sfdc-plant-", dir=os.environ.get("TMPDIR", "/tmp"))
@@ -144,7 +144,7 @@ def plant():
     os.environ["NEO4J_URI"] = uri
     result = {"graph_uri": uri, "log": str(log_path)}
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         with GraphClient() as gc:
             gc.query(
@@ -194,7 +194,7 @@ def plant():
 
 def approval():
     """Read every run under the full-DD approval and the remaining balance."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     approval_cap = 350.0
     with GraphClient() as gc:

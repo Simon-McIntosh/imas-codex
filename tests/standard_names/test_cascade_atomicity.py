@@ -7,7 +7,7 @@ descendant is renamed (full rollback, nothing persisted).  The auto-commit
 graph primitive cannot span the acceptance write and the rename write in a
 single Neo4j transaction, so atomicity is realised by gating the acceptance
 on a clean cascade preflight (see
-:func:`imas_codex.standard_names.graph_ops.persist_reviewed_name`).
+:func:`iter_codex.standard_names.graph_ops.persist_reviewed_name`).
 
 The report-vs-persistence contract closes the gap that gating leaves open:
 a cascade that is NOT applied must not read as performed.  ``CascadeResult.
@@ -29,8 +29,8 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.standard_names.cascade import cascade_descendants_of, rename_cascade
-from imas_codex.standard_names.graph_store.graph_review_persistence import (
+from iter_codex.standard_names.cascade import cascade_descendants_of, rename_cascade
+from iter_codex.standard_names.graph_store.graph_review_persistence import (
     persist_reviewed_name,
 )
 from tests.standard_names.test_edit_engine import FakeGraph, _patched_graph
@@ -295,8 +295,8 @@ class TestReportMatchesPersistence:
         descendant rows the contract defers, and never calls them done."""
         from rich.console import Console
 
-        from imas_codex.cli import sn as sn_cli
-        from imas_codex.standard_names.edit import EditPlan
+        from iter_codex.cli import sn as sn_cli
+        from iter_codex.standard_names.edit import EditPlan
 
         plan = EditPlan(
             target="emissivity_due_to_fusion",

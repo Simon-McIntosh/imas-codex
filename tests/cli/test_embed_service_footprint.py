@@ -8,7 +8,7 @@ from click.testing import CliRunner
 
 
 def _deploy_request(**deploy_kwargs: int) -> dict[str, object]:
-    from imas_codex.cli import services
+    from iter_codex.cli import services
 
     request: dict[str, object] = {}
 
@@ -34,7 +34,7 @@ def _deploy_request(**deploy_kwargs: int) -> dict[str, object]:
 
 
 def _submission_script(request: dict[str, object]) -> str:
-    from imas_codex.cli import services
+    from iter_codex.cli import services
 
     commands: list[str] = []
 
@@ -96,7 +96,7 @@ def test_explicit_multi_gpu_embed_submission_retains_its_larger_footprint() -> N
 
 
 def test_embed_start_forwards_explicit_gpu_count_to_the_deployer() -> None:
-    from imas_codex.cli import embed
+    from iter_codex.cli import embed
 
     with (
         patch.object(embed, "_is_compute_target", return_value=True),

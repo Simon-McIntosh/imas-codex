@@ -3,7 +3,7 @@
 import ast
 from pathlib import Path
 
-import imas_codex.discovery.paths as paths
+import iter_codex.discovery.paths as paths
 
 
 def test_path_gates_do_not_read_retired_discovery_threshold():
@@ -15,7 +15,7 @@ def test_path_gates_do_not_read_retired_discovery_threshold():
         retired_imports = {
             alias.asname or alias.name
             for node in ast.walk(tree)
-            if isinstance(node, ast.ImportFrom) and node.module == "imas_codex.settings"
+            if isinstance(node, ast.ImportFrom) and node.module == "iter_codex.settings"
             for alias in node.names
             if alias.name == "get_discovery_threshold"
         }

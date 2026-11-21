@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.standard_names import domain_priority
+from iter_codex.standard_names import domain_priority
 
 
 def test_domain_key_none_returns_fallback():

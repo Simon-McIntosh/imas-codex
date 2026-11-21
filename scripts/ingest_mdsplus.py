@@ -32,7 +32,7 @@ import sys
 
 import click
 
-from imas_codex.graph import GraphClient
+from iter_codex.graph import GraphClient
 
 logger = logging.getLogger(__name__)
 

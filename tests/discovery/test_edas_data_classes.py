@@ -9,11 +9,11 @@ from uuid import uuid4
 
 import pytest
 
-from imas_codex.discovery.signals import parallel
-from imas_codex.discovery.signals.scanners.edas import EDASScanner
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import FacilitySignal
-from imas_codex.remote.scripts.check_edas import main as check_main
+from iter_codex.discovery.signals import parallel
+from iter_codex.discovery.signals.scanners.edas import EDASScanner
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.models import FacilitySignal
+from iter_codex.remote.scripts.check_edas import main as check_main
 
 
 @pytest.mark.parametrize(
@@ -42,7 +42,7 @@ async def test_catalogue_class_selects_reader(letter, data_class, reader):
         "categories": ["CAM"],
     }
     remote = AsyncMock(return_value=json.dumps(payload))
-    with patch("imas_codex.remote.executor.async_run_python_script", remote):
+    with patch("iter_codex.remote.executor.async_run_python_script", remote):
         result = await EDASScanner().scan(
             "jt-60sa",
             "jt-60sa",
@@ -63,7 +63,7 @@ async def test_unclassified_signal_keeps_catalogue_letter(letter):
         "categories": ["CAM"],
     }
     remote = AsyncMock(return_value=json.dumps(payload))
-    with patch("imas_codex.remote.executor.async_run_python_script", remote):
+    with patch("iter_codex.remote.executor.async_run_python_script", remote):
         result = await EDASScanner().scan(
             "jt-60sa",
             "jt-60sa",
@@ -88,7 +88,7 @@ async def test_check_payload_keeps_catalogue_letter(letter):
         data_class_letter=letter,
     )
     remote = AsyncMock(return_value=json.dumps({"results": []}))
-    with patch("imas_codex.remote.executor.async_run_python_script", remote):
+    with patch("iter_codex.remote.executor.async_run_python_script", remote):
         await EDASScanner().check(
             "jt-60sa",
             "jt-60sa",

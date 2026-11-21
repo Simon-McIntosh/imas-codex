@@ -13,9 +13,9 @@ from unittest.mock import patch
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_graph_uri
-from imas_codex.standard_names import edit
+from iter_codex.graph.client import GraphClient
+from iter_codex.settings import get_graph_uri
+from iter_codex.standard_names import edit
 
 pytestmark = pytest.mark.graph
 
@@ -33,12 +33,12 @@ class _EphemeralNeo4j:
 
 @pytest.fixture(scope="module")
 def ephemeral_neo4j() -> Iterator[_EphemeralNeo4j]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    uri = os.environ.get("ITER_CODEX_TEST_NEO4J_URI")
     if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.skip("ITER_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("ITER_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
         pytest.fail("stateful identity-fold tests require an ephemeral graph")
-    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
+    project_uri = os.environ.get("ITER_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
     if uri == project_uri:
         pytest.fail("identity-fold tests refuse the configured project graph")
     driver = GraphDatabase.driver(uri, auth=None)

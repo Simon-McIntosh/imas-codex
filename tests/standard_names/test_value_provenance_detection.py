@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.provenance import detect_value_provenance
+from iter_codex.standard_names.provenance import detect_value_provenance
 
 
 @pytest.mark.parametrize(
@@ -78,7 +78,7 @@ class _FakeCand:
 
 
 def test_canonicalizer_collapses_drifted_estimators():
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         provenance_canonical_names,
     )
 
@@ -99,7 +99,7 @@ def test_canonicalizer_collapses_drifted_estimators():
 
 
 def test_canonicalizer_noop_when_estimators_agree():
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         provenance_canonical_names,
     )
 
@@ -114,7 +114,7 @@ def test_canonicalizer_noop_when_estimators_agree():
 
 
 def test_canonicalizer_ignores_non_provenance_candidates():
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         provenance_canonical_names,
     )
 

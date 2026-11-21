@@ -53,7 +53,7 @@ class TestExtractWorkerErrorHandling:
     @pytest.mark.anyio
     async def test_extraction_returned_error_calls_mark_failed(self):
         """When extraction returns an error in ver_data, mark_version_failed is called."""
-        from imas_codex.discovery.mdsplus.workers import extract_worker
+        from iter_codex.discovery.mdsplus.workers import extract_worker
 
         state = _make_state()
 
@@ -90,19 +90,19 @@ class TestExtractWorkerErrorHandling:
 
         with (
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction",
+                "iter_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction",
                 side_effect=mock_claim,
             ),
             patch(
-                "imas_codex.mdsplus.extraction.async_extract_tree_version",
+                "iter_codex.mdsplus.extraction.async_extract_tree_version",
                 side_effect=mock_extract,
             ),
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.mark_version_failed",
+                "iter_codex.discovery.mdsplus.graph_ops.mark_version_failed",
                 mock_mark_failed,
             ),
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.release_version_claim",
+                "iter_codex.discovery.mdsplus.graph_ops.release_version_claim",
                 mock_release,
             ),
         ):
@@ -120,7 +120,7 @@ class TestExtractWorkerErrorHandling:
     @pytest.mark.anyio
     async def test_ssh_exception_calls_release_claim(self):
         """When SSH extraction raises an exception, release_version_claim is called."""
-        from imas_codex.discovery.mdsplus.workers import extract_worker
+        from iter_codex.discovery.mdsplus.workers import extract_worker
 
         state = _make_state()
 
@@ -150,19 +150,19 @@ class TestExtractWorkerErrorHandling:
 
         with (
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction",
+                "iter_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction",
                 side_effect=mock_claim,
             ),
             patch(
-                "imas_codex.mdsplus.extraction.async_extract_tree_version",
+                "iter_codex.mdsplus.extraction.async_extract_tree_version",
                 side_effect=mock_extract,
             ),
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.release_version_claim",
+                "iter_codex.discovery.mdsplus.graph_ops.release_version_claim",
                 mock_release,
             ),
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.mark_version_failed",
+                "iter_codex.discovery.mdsplus.graph_ops.mark_version_failed",
                 mock_mark_failed,
             ),
         ):
@@ -176,7 +176,7 @@ class TestExtractWorkerErrorHandling:
     @pytest.mark.anyio
     async def test_successful_extraction_marks_extracted(self):
         """Successful extraction calls mark_version_extracted, not failed or release."""
-        from imas_codex.discovery.mdsplus.workers import extract_worker
+        from iter_codex.discovery.mdsplus.workers import extract_worker
 
         state = _make_state()
 
@@ -213,31 +213,31 @@ class TestExtractWorkerErrorHandling:
 
         with (
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction",
+                "iter_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction",
                 side_effect=mock_claim,
             ),
             patch(
-                "imas_codex.mdsplus.extraction.async_extract_tree_version",
+                "iter_codex.mdsplus.extraction.async_extract_tree_version",
                 side_effect=mock_extract,
             ),
             patch(
-                "imas_codex.mdsplus.extraction.merge_version_results",
+                "iter_codex.mdsplus.extraction.merge_version_results",
                 return_value={},
             ),
             patch(
-                "imas_codex.mdsplus.extraction.ingest_static_tree",
+                "iter_codex.mdsplus.extraction.ingest_static_tree",
                 return_value=MagicMock(nodes_merged=42, relationships_created=10),
             ),
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.mark_version_extracted",
+                "iter_codex.discovery.mdsplus.graph_ops.mark_version_extracted",
                 mock_mark_extracted,
             ),
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.mark_version_failed",
+                "iter_codex.discovery.mdsplus.graph_ops.mark_version_failed",
                 mock_mark_failed,
             ),
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.release_version_claim",
+                "iter_codex.discovery.mdsplus.graph_ops.release_version_claim",
                 mock_release,
             ),
         ):

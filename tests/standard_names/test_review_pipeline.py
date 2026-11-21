@@ -6,7 +6,7 @@ mocked where needed.
 
 from __future__ import annotations
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_parent_lifecycle as _owning_graph_parent_lifecycle,
 )
 
@@ -17,7 +17,7 @@ from imas_codex.standard_names.graph_store import (
 
 def test_audit_embedding_preflight():
     """run_embedding_preflight detects missing and stale embeddings."""
-    from imas_codex.standard_names.review.audits import (
+    from iter_codex.standard_names.review.audits import (
         compute_review_input_hash,
         run_embedding_preflight,
     )
@@ -72,7 +72,7 @@ def test_audit_duplicate_candidates():
     ``electron_temperature_profile_core_*`` names each have 9 shared tokens
     and one unique terminal token, giving overlap ≈ 0.818.
     """
-    from imas_codex.standard_names.review.audits import run_duplicate_detection
+    from iter_codex.standard_names.review.audits import run_duplicate_detection
 
     # These two names share 9 of 11 tokens → Jaccard ≈ 0.818 > 0.8 threshold
     names = [
@@ -120,7 +120,7 @@ def test_audit_duplicate_candidates():
 
 def test_audit_link_integrity():
     """Dead links, unresolved status, and missing reverses are all detected."""
-    from imas_codex.standard_names.review.audits import run_link_integrity
+    from iter_codex.standard_names.review.audits import run_link_integrity
 
     names = [
         {
@@ -160,7 +160,7 @@ def test_review_cluster_reconstruction():
     """reconstruct_clusters_batch selects dominant cluster per name."""
     from unittest.mock import MagicMock
 
-    from imas_codex.standard_names.review.enrichment import reconstruct_clusters_batch
+    from iter_codex.standard_names.review.enrichment import reconstruct_clusters_batch
 
     gc = MagicMock()
     gc.query = MagicMock(
@@ -214,7 +214,7 @@ def test_review_cluster_reconstruction():
 
 def test_review_batch_token_budget():
     """group_into_review_batches splits on token budget, not just item count."""
-    from imas_codex.standard_names.review.enrichment import (
+    from iter_codex.standard_names.review.enrichment import (
         estimate_name_tokens,
         group_into_review_batches,
     )
@@ -260,7 +260,7 @@ def test_review_neighborhood_enrichment():
     """build_neighborhood_context excludes batch members from results."""
     from unittest.mock import patch
 
-    from imas_codex.standard_names.review.enrichment import build_neighborhood_context
+    from iter_codex.standard_names.review.enrichment import build_neighborhood_context
 
     batch = {
         "names": [
@@ -306,7 +306,7 @@ def test_review_neighborhood_enrichment():
     ]
 
     with patch(
-        "imas_codex.standard_names.search.search_standard_names_vector",
+        "iter_codex.standard_names.search.search_standard_names_vector",
         return_value=mock_results,
     ):
         neighborhood = build_neighborhood_context(batch, all_names, k=10)
@@ -326,7 +326,7 @@ def test_review_neighborhood_enrichment():
 
 def test_review_budget_manager():
     """BudgetManager (formerly ReviewBudgetManager) tracks leases and exhaustion."""
-    from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
+    from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
 
     def _ce(lease, amount):
         return lease.charge_event(
@@ -361,7 +361,7 @@ def test_review_budget_manager():
 
 def test_review_budget_manager_reconcile_in_finally():
     """Budget lease auto-releases in a context manager on failure."""
-    from imas_codex.standard_names.budget import BudgetManager
+    from iter_codex.standard_names.budget import BudgetManager
 
     mgr = BudgetManager(total_budget=1.0)
 
@@ -384,7 +384,7 @@ def test_review_budget_manager_reconcile_in_finally():
 
 def test_review_consolidation_drift():
     """detect_convention_drift finds mixed position suffixes in a domain."""
-    from imas_codex.standard_names.review.consolidation import detect_convention_drift
+    from iter_codex.standard_names.review.consolidation import detect_convention_drift
 
     names = [
         {
@@ -427,7 +427,7 @@ def test_review_consolidation_drift():
 
 def test_review_staleness_policy():
     """compute_review_input_hash is deterministic and content-sensitive."""
-    from imas_codex.standard_names.review.audits import compute_review_input_hash
+    from iter_codex.standard_names.review.audits import compute_review_input_hash
 
     name = {
         "id": "electron_temperature",
@@ -472,7 +472,7 @@ def test_review_cli_dry_run():
 
     from click.testing import CliRunner
 
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     mock_names = [
         {
@@ -511,7 +511,7 @@ def test_review_cli_dry_run():
     mock_gc.__enter__ = MagicMock(return_value=mock_gc)
     mock_gc.__exit__ = MagicMock(return_value=False)
 
-    with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
+    with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
         runner = CliRunner()
         result = runner.invoke(sn, ["review", "--dry-run"])
 
@@ -526,7 +526,7 @@ def test_review_cli_dry_run():
 
 def test_compute_review_input_hash_deterministic():
     """Hash is deterministic across calls and handles missing fields."""
-    from imas_codex.standard_names.review.audits import compute_review_input_hash
+    from iter_codex.standard_names.review.audits import compute_review_input_hash
 
     name = {"id": "test_name", "description": "A test", "kind": "scalar"}
 
@@ -549,11 +549,11 @@ def test_match_reviews_all_matched():
     """When LLM returns reviews for all entries, unmatched list is empty."""
     import logging
 
-    from imas_codex.standard_names.models import (
+    from iter_codex.standard_names.models import (
         StandardNameQualityReview,
         StandardNameQualityScore,
     )
-    from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+    from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
     wlog = logging.getLogger("test")
 
@@ -605,11 +605,11 @@ def test_match_reviews_partial_response():
     """When LLM omits entries, they appear in the unmatched list."""
     import logging
 
-    from imas_codex.standard_names.models import (
+    from iter_codex.standard_names.models import (
         StandardNameQualityReview,
         StandardNameQualityScore,
     )
-    from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+    from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
     wlog = logging.getLogger("test")
 
@@ -655,11 +655,11 @@ def test_match_reviews_fallback_to_standard_name():
     """Matching falls back to standard_name when source_id is None."""
     import logging
 
-    from imas_codex.standard_names.models import (
+    from iter_codex.standard_names.models import (
         StandardNameQualityReview,
         StandardNameQualityScore,
     )
-    from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+    from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
     wlog = logging.getLogger("test")
 
@@ -701,12 +701,12 @@ def test_review_single_batch_retries_unmatched():
     import logging
     from unittest.mock import AsyncMock, patch
 
-    from imas_codex.standard_names.models import (
+    from iter_codex.standard_names.models import (
         StandardNameQualityReview,
         StandardNameQualityReviewBatch,
         StandardNameQualityScore,
     )
-    from imas_codex.standard_names.review.pipeline import _review_single_batch
+    from iter_codex.standard_names.review.pipeline import _review_single_batch
 
     wlog = logging.getLogger("test")
 
@@ -759,11 +759,11 @@ def test_review_single_batch_retries_unmatched():
 
     with (
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             return_value="mocked prompt",
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=mock_acall_llm_structured,
         ),
     ):
@@ -800,12 +800,12 @@ def test_review_single_batch_no_retry_when_all_matched():
     import logging
     from unittest.mock import patch
 
-    from imas_codex.standard_names.models import (
+    from iter_codex.standard_names.models import (
         StandardNameQualityReview,
         StandardNameQualityReviewBatch,
         StandardNameQualityScore,
     )
-    from imas_codex.standard_names.review.pipeline import _review_single_batch
+    from iter_codex.standard_names.review.pipeline import _review_single_batch
 
     wlog = logging.getLogger("test")
 
@@ -840,11 +840,11 @@ def test_review_single_batch_no_retry_when_all_matched():
 
     with (
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             return_value="mocked prompt",
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=mock_acall_llm_structured,
         ),
     ):
@@ -874,7 +874,7 @@ def test_review_single_batch_no_retry_when_all_matched():
 
 def test_build_summary_report_scored_unscored_split():
     """build_summary_report separates scored and unscored entries correctly."""
-    from imas_codex.standard_names.review.consolidation import build_summary_report
+    from iter_codex.standard_names.review.consolidation import build_summary_report
 
     all_names = [{"id": f"name_{i}"} for i in range(100)]
 
@@ -937,7 +937,7 @@ def test_build_summary_report_scored_unscored_split():
 
 def test_build_summary_report_all_scored():
     """When all entries are scored, total_unscored is 0."""
-    from imas_codex.standard_names.review.consolidation import build_summary_report
+    from iter_codex.standard_names.review.consolidation import build_summary_report
 
     all_names = [{"id": f"name_{i}"} for i in range(10)]
 
@@ -975,7 +975,7 @@ def test_build_summary_report_all_scored():
 
 def test_derived_parent_peel_note_names_dropped_axis():
     """The peel note surfaces the distinguishing tokens the parent drops."""
-    from imas_codex.standard_names.review.pipeline import _derived_parent_peel_note
+    from iter_codex.standard_names.review.pipeline import _derived_parent_peel_note
 
     note = _derived_parent_peel_note(
         "internal_state_energy_flux",
@@ -991,8 +991,8 @@ def test_derived_parent_peel_note_names_dropped_axis():
 
 def test_fetch_review_derived_children_only_enriches_derived(monkeypatch):
     """Only origin='derived' items get derived_children + a peel note."""
-    import imas_codex.standard_names.graph_ops as graph_ops
-    import imas_codex.standard_names.review.pipeline as pipeline
+    import iter_codex.standard_names.graph_ops as graph_ops
+    import iter_codex.standard_names.review.pipeline as pipeline
 
     def _fake_fetch(parent_ids):
         assert parent_ids == ["internal_state_energy_flux"]
@@ -1029,8 +1029,8 @@ def test_fetch_review_derived_children_only_enriches_derived(monkeypatch):
 
 def test_fetch_review_derived_children_noop_without_derived(monkeypatch):
     """No derived items → the fetch helper is never called."""
-    import imas_codex.standard_names.graph_ops as graph_ops
-    import imas_codex.standard_names.review.pipeline as pipeline
+    import iter_codex.standard_names.graph_ops as graph_ops
+    import iter_codex.standard_names.review.pipeline as pipeline
 
     def _boom(parent_ids):  # pragma: no cover - must not run
         raise AssertionError("fetch should not be called without derived parents")

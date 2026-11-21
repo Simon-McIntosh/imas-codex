@@ -1,9 +1,9 @@
 ---
 name: project-dev
-description: How to develop, test, lint, and build the imas-codex project. Use when making code changes, running tests, or building the project.
+description: How to develop, test, lint, and build the iter-codex project. Use when making code changes, running tests, or building the project.
 ---
 
-# imas-codex Development
+# iter-codex Development
 
 ## Essential Commands
 
@@ -15,7 +15,7 @@ All commands use `uv run` — never bare `python` or `pytest`.
 uv run pytest                                        # Default (excludes slow/graph)
 uv run pytest tests/standard_names/                  # SN tests (~3300, ~90s)
 uv run pytest tests/path/to/test.py::test_func -v    # Specific test
-uv run pytest --cov=imas_codex --cov-report=term     # With coverage
+uv run pytest --cov=iter_codex --cov-report=term     # With coverage
 uv run pytest -m graph                               # Graph tests (needs Neo4j)
 ```
 
@@ -33,7 +33,7 @@ uv run ruff format .          # Format
 
 ### Schema Workflow
 
-When modifying LinkML schemas (`imas_codex/schemas/*.yaml`):
+When modifying LinkML schemas (`iter_codex/schemas/*.yaml`):
 
 ```bash
 uv run build-models --force   # Rebuild generated models
@@ -100,14 +100,14 @@ parity with the generate pipeline, calibration dataset integrity, and reference 
 
 | Directory | Purpose |
 |-----------|---------|
-| `imas_codex/cli/` | CLI commands (entry point: `imas-codex`) |
-| `imas_codex/schemas/` | LinkML schema definitions (source of truth) |
-| `imas_codex/graph/` | Graph client, generated models |
-| `imas_codex/discovery/` | Discovery pipelines (wiki, code, signals, paths) |
-| `imas_codex/tools/` | MCP tool implementations |
-| `imas_codex/remote/` | Remote execution (SSH, scripts) |
-| `imas_codex/llm/` | LLM integration and prompt templates |
-| `imas_codex/standard_names/` | Standard name pipeline (generate, benchmark, graph ops) |
+| `iter_codex/cli/` | CLI commands (entry point: `iter-codex`) |
+| `iter_codex/schemas/` | LinkML schema definitions (source of truth) |
+| `iter_codex/graph/` | Graph client, generated models |
+| `iter_codex/discovery/` | Discovery pipelines (wiki, code, signals, paths) |
+| `iter_codex/tools/` | MCP tool implementations |
+| `iter_codex/remote/` | Remote execution (SSH, scripts) |
+| `iter_codex/llm/` | LLM integration and prompt templates |
+| `iter_codex/standard_names/` | Standard name pipeline (generate, benchmark, graph ops) |
 | `tests/` | Test suite (mirrors source structure) |
 | `tests/sn/` | Standard name test suite (mostly mock-based) |
 | `plans/features/` | Active feature plans |
@@ -115,17 +115,17 @@ parity with the generate pipeline, calibration dataset integrity, and reference 
 
 ## Key Patterns
 
-- **Import from generated models**: `from imas_codex.graph.models import SourceFile, SourceFileStatus`
-- **LLM calls**: Use `call_llm_structured()` from `imas_codex.discovery.base.llm`
-- **Prompt rendering**: Use `render_prompt()` from `imas_codex.llm.prompt_loader`
-- **Model selection**: Use `get_model(section)` from `imas_codex.settings`
+- **Import from generated models**: `from iter_codex.graph.models import SourceFile, SourceFileStatus`
+- **LLM calls**: Use `call_llm_structured()` from `iter_codex.discovery.base.llm`
+- **Prompt rendering**: Use `render_prompt()` from `iter_codex.llm.prompt_loader`
+- **Model selection**: Use `get_model(section)` from `iter_codex.settings`
 - **Facility config**: Use `get_facility(facility)` — never hardcode facility values
-- **Remote execution**: Use `run_python_script()` from `imas_codex.remote.executor`
+- **Remote execution**: Use `run_python_script()` from `iter_codex.remote.executor`
 
 ### SN Key Files
 
 | File | Purpose |
 |------|---------|
-| `imas_codex/standard_names/benchmark_reference.py` | Gold reference set (52 entries across 8 IDSs) |
-| `imas_codex/standard_names/benchmark_calibration.yaml` | Known-quality examples for reviewer consistency |
-| `imas_codex/llm/prompts/sn/` | LLM prompt templates for generate, review, and benchmark |
+| `iter_codex/standard_names/benchmark_reference.py` | Gold reference set (52 entries across 8 IDSs) |
+| `iter_codex/standard_names/benchmark_calibration.yaml` | Known-quality examples for reviewer consistency |
+| `iter_codex/llm/prompts/sn/` | LLM prompt templates for generate, review, and benchmark |

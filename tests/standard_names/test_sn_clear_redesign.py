@@ -14,8 +14,8 @@ from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.graph_store import (
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.graph_store import (
     graph_catalog_reset as _owning_graph_catalog_reset,
     graph_foundation as _owning_graph_foundation,
 )
@@ -130,7 +130,7 @@ class TestClearSnSubsystemLabels:
     }
 
     def test_counts_only_pipeline_output_labels(self):
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = MagicMock()
         fake_gc.__enter__.return_value = fake_gc
@@ -147,7 +147,7 @@ class TestClearSnSubsystemLabels:
         assert not (set(result.keys()) & self._GRAMMAR_LABELS)
 
     def test_dry_run_does_not_touch_graph(self):
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = MagicMock()
         fake_gc.__enter__.return_value = fake_gc
@@ -163,7 +163,7 @@ class TestClearSnSubsystemLabels:
         assert not any("DETACH DELETE" in q for q in queries)
 
     def test_wipe_deletes_only_pipeline_labels(self):
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         ledger_rows = [0.5, 1.25, 3.75]
         ledger_before = len(ledger_rows), sum(ledger_rows)
@@ -207,7 +207,7 @@ class TestClearSnSubsystemLabels:
         not the low-level graph op (so callers that only want the wipe
         get exactly that).
         """
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = MagicMock()
         fake_gc.__enter__.return_value = fake_gc
@@ -217,7 +217,7 @@ class TestClearSnSubsystemLabels:
         with (
             patch.object(_owning_graph_foundation, "GraphClient", return_value=fake_gc),
             patch(
-                "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+                "iter_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
             ) as mock_sync,
         ):
             _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=False)
@@ -230,7 +230,7 @@ class TestClearCliReseed:
 
     def _patch_clear(self, preview_count: int):
         """Patch clear_sn_subsystem so it reports/deletes ``preview_count`` nodes."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         def _fake_clear(*, dry_run: bool):
             return {"StandardName": preview_count}
@@ -244,7 +244,7 @@ class TestClearCliReseed:
         with (
             self._patch_clear(3),
             patch(
-                "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+                "iter_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
             ) as mock_sync,
         ):
             mock_sync.return_value = MagicMock(
@@ -259,7 +259,7 @@ class TestClearCliReseed:
         with (
             self._patch_clear(3),
             patch(
-                "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+                "iter_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
             ) as mock_sync,
         ):
             result = runner.invoke(
@@ -276,7 +276,7 @@ class TestClearCliReseed:
         even in the absence of HAS_STANDARD_NAME edges (pathological data)
         no orphan StandardNameReviews are left behind.
         """
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = MagicMock()
         fake_gc.__enter__.return_value = fake_gc

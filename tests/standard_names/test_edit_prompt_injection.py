@@ -1,6 +1,6 @@
 """Expert-steering (edit) injection into SN generate/refine/review prompts.
 
-``imas-codex sn edit`` lets a human or agent attach a proposal to a
+``iter-codex sn edit`` lets a human or agent attach a proposal to a
 StandardName that rides the normal generate -> review -> score pipeline:
 
 * **hint** mode injects a direction into generate(regen)/refine prompts.
@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 GOLDEN_DIR = Path(__file__).parent / "golden_edit_prompts"
 

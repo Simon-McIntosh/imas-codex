@@ -2,7 +2,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at d51fab8796fce69f72f485f63317c9997ec52549, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops._normalize_bare_doc_links.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops._normalize_bare_doc_links.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Read the live documentation pool and preview exact-link normalization."""
@@ -17,14 +17,14 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.doc_links import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.doc_links import (
     _is_prose_bracket,
     find_prose_bracket_phrases,
     find_prose_bracket_spans,
     find_self_links,
 )
-from imas_codex.standard_names.graph_ops import _normalize_bare_doc_links
+from iter_codex.standard_names.graph_ops import _normalize_bare_doc_links
 
 OUTPUT = Path(__file__).with_suffix(".json")
 FULL_OUTPUT = Path(os.environ["RECKON_RUN_DIR"]) / "dryrun-full.json"

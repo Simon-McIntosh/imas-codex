@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.promote import (
+from iter_codex.standard_names.promote import (
     ApprovalChange,
     resolve_merged_pr,
     run_approval,
@@ -66,7 +66,7 @@ def test_accepted_catalog_edit_persists_actor_from_pull_request_evidence():
         "base": {"ref": "main"},
     }
     with patch(
-        "imas_codex.graph.ghcr.github_api_call",
+        "iter_codex.graph.ghcr.github_api_call",
         return_value=(200, payload),
     ):
         evidence = resolve_merged_pr("https://github.com/o/r/pull/12")
@@ -79,20 +79,20 @@ def test_accepted_catalog_edit_persists_actor_from_pull_request_evidence():
     graph = RecordingGraph()
     with (
         patch(
-            "imas_codex.standard_names.promote.read_pr_changes",
+            "iter_codex.standard_names.promote.read_pr_changes",
             return_value=[change],
         ),
         patch(
-            "imas_codex.standard_names.promote.apply_edit",
+            "iter_codex.standard_names.promote.apply_edit",
             return_value=SimpleNamespace(
                 blocked=None,
                 successor="electron_thermal_energy",
                 run_id="catalog-edit",
             ),
         ),
-        patch("imas_codex.standard_names.promote._score_proposal", return_value=0.95),
+        patch("iter_codex.standard_names.promote._score_proposal", return_value=0.95),
         patch(
-            "imas_codex.standard_names.promote._apply_passing_review",
+            "iter_codex.standard_names.promote._apply_passing_review",
             return_value="accepted",
         ),
     ):

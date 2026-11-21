@@ -12,8 +12,8 @@ from unittest.mock import MagicMock
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.provenance_lifecycle import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.provenance_lifecycle import (
     StaleSourceDetachConflict,
     detach_signed_stale_source_bindings,
     load_signed_stale_source_rows,

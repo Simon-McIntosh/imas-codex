@@ -6,8 +6,8 @@ Tests keyword tokenization, scoring, and integration with the graph.
 
 import pytest
 
-from imas_codex.models.result_models import GetIdentifiersResult
-from imas_codex.tools.graph_search import GraphIdentifiersTool
+from iter_codex.models.result_models import GetIdentifiersResult
+from iter_codex.tools.graph_search import GraphIdentifiersTool
 
 pytestmark = pytest.mark.graph_mcp
 

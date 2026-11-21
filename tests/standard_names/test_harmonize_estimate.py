@@ -25,8 +25,8 @@ from typing import Any
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
 )
 
@@ -142,13 +142,13 @@ class _RecordedCostGraph:
 
 def _install_graph(monkeypatch: Any, graph: Any) -> None:
     """Point the CLI's ``GraphClient`` at *graph*."""
-    from imas_codex.graph import client as graph_client
+    from iter_codex.graph import client as graph_client
 
     monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
 
 
 def _invoke_dry_run(graph: Any) -> Any:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     return CliRunner().invoke(
         sn, ["harmonize", "--family", _ANCHOR, "--apply", "--dry-run"]
@@ -227,7 +227,7 @@ def _runner_kwargs() -> dict[str, Any]:
 
 def _install_family_edges(monkeypatch: Any) -> None:
     """Replace the per-family graph edges apply_families touches with no-ops."""
-    from imas_codex.standard_names import harmonize
+    from iter_codex.standard_names import harmonize
 
     monkeypatch.setattr(harmonize, "_record_family_anchor", lambda *a, **k: None)
     monkeypatch.setattr(harmonize, "refuse_recommended_members", lambda *a, **k: {})
@@ -237,8 +237,8 @@ def _install_family_edges(monkeypatch: Any) -> None:
 
 
 def _run_stubbed_apply(drain: _RecordingDrain):
-    from imas_codex.standard_names.campaign import CampaignBudget
-    from imas_codex.standard_names.harmonize import apply_families
+    from iter_codex.standard_names.campaign import CampaignBudget
+    from iter_codex.standard_names.harmonize import apply_families
 
     budget = CampaignBudget(
         per_batch_cost_cap=_FAMILY_CEILING, campaign_cost_ceiling=_FAMILY_CEILING
@@ -353,7 +353,7 @@ def _oversized_run_ledger() -> list[dict[str, Any]]:
 
 def test_estimate_counts_a_run_whose_rows_exceed_the_row_cap() -> None:
     """A run with more rows than the row cap is counted whole, not cut."""
-    from imas_codex.standard_names.harmonize import measure_doc_call_cost
+    from iter_codex.standard_names.harmonize import measure_doc_call_cost
 
     rows = _oversized_run_ledger()
     graph = _LedgerGraph(rows)
@@ -432,8 +432,8 @@ def test_fallback_batch_cost_counts_against_family_cap(monkeypatch: Any) -> None
 
     drain = _RecordingDrain([None, 0.0])  # the anchor cannot measure its own spend
 
-    from imas_codex.standard_names.campaign import CampaignBudget
-    from imas_codex.standard_names.harmonize import apply_families
+    from iter_codex.standard_names.campaign import CampaignBudget
+    from iter_codex.standard_names.harmonize import apply_families
 
     budget = CampaignBudget(per_batch_cost_cap=5.0, campaign_cost_ceiling=5.0)
     outcome = apply_families(
@@ -474,15 +474,15 @@ def test_cli_apply_wires_a_measuring_cost_fn(monkeypatch: Any) -> None:
     unmeasurable batch would be charged nothing to the family cap. The CLI
     must inject the recorded-spend hook the campaign path already uses.
     """
-    from imas_codex.standard_names import graph_ops
-    from imas_codex.standard_names.campaign import default_cost
+    from iter_codex.standard_names import graph_ops
+    from iter_codex.standard_names.campaign import default_cost
 
     graph = _RecordedCostGraph(_family_nodes(), [], run_spend={f"scope-{_ANCHOR}": 2.5})
     _install_graph(monkeypatch, graph)
     # ``aggregate_spend_for_run`` resolves GraphClient from its own module.
     monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda *a, **k: graph)
 
-    from imas_codex.standard_names import harmonize
+    from iter_codex.standard_names import harmonize
 
     captured: dict[str, Any] = {}
 
@@ -498,7 +498,7 @@ def test_cli_apply_wires_a_measuring_cost_fn(monkeypatch: Any) -> None:
 
     monkeypatch.setattr(harmonize, "apply_families", spy)
 
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     result = CliRunner().invoke(sn, ["harmonize", "--family", _ANCHOR, "--apply"])
     assert result.exit_code == 0, result.output

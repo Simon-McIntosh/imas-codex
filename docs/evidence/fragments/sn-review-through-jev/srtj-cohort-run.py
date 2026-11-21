@@ -20,29 +20,29 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
-from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
-from imas_codex.settings import _load_pyproject_settings
-from imas_codex.standard_names.dd_resolutions import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.models import DDResolutionField, DDResolutionValueKind
+from iter_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
+from iter_codex.settings import _load_pyproject_settings
+from iter_codex.standard_names.dd_resolutions import (
     DDResolutionError,
     DDResolutionValue,
     load_dd_resolution_manifest,
     read_graph_dd_field,
 )
-from imas_codex.standard_names.loop import run_sn_pools
+from iter_codex.standard_names.loop import run_sn_pools
 
 HERE = Path(__file__).resolve().parent
 COHORT = HERE / "srtj-cohort-estimate.json"
 THRESHOLDS = (
     Path(__file__).resolve().parents[4]
-    / "imas_codex/standard_names/review/cascade_thresholds.json"
+    / "iter_codex/standard_names/review/cascade_thresholds.json"
 )
 ZE = 1.959963984540054
 AUDIT_ROLE = "audit"
 ARCHIVE = (
     Path.home()
-    / ".local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
+    / ".local/share/iter-codex/exports/iter-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
 )
 RESULTS = HERE / "srtj-cohort"
 DRY_RUN_RECORD = HERE / "srtj-jev-only-dry-run.json"

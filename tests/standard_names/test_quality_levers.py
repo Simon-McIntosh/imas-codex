@@ -16,19 +16,19 @@ class TestDomainVocabularyPreseed:
 
     def test_none_domain_returns_empty(self):
         """None domain returns empty string."""
-        from imas_codex.standard_names.context import build_domain_vocabulary_preseed
+        from iter_codex.standard_names.context import build_domain_vocabulary_preseed
 
         assert build_domain_vocabulary_preseed(None) == ""
 
     def test_empty_domain_returns_empty(self):
         """Empty string domain returns empty string."""
-        from imas_codex.standard_names.context import build_domain_vocabulary_preseed
+        from iter_codex.standard_names.context import build_domain_vocabulary_preseed
 
         assert build_domain_vocabulary_preseed("") == ""
 
     def test_returns_formatted_vocabulary(self):
         """With mocked graph, returns formatted vocabulary lines."""
-        from imas_codex.standard_names.context import build_domain_vocabulary_preseed
+        from iter_codex.standard_names.context import build_domain_vocabulary_preseed
 
         mock_rows = [
             {
@@ -43,7 +43,7 @@ class TestDomainVocabularyPreseed:
             },
         ]
 
-        with patch("imas_codex.graph.client.GraphClient") as MockGC:
+        with patch("iter_codex.graph.client.GraphClient") as MockGC:
             mock_gc = MagicMock()
             mock_gc.query.return_value = mock_rows
             mock_gc.__enter__ = MagicMock(return_value=mock_gc)
@@ -59,10 +59,10 @@ class TestDomainVocabularyPreseed:
 
     def test_graceful_failure(self):
         """Returns empty string on graph failure."""
-        from imas_codex.standard_names.context import build_domain_vocabulary_preseed
+        from iter_codex.standard_names.context import build_domain_vocabulary_preseed
 
         with patch(
-            "imas_codex.graph.client.GraphClient", side_effect=Exception("no graph")
+            "iter_codex.graph.client.GraphClient", side_effect=Exception("no graph")
         ):
             result = build_domain_vocabulary_preseed("magnetics")
 
@@ -79,7 +79,7 @@ class TestReferenceSNRetrieval:
 
     def test_empty_query_returns_empty(self):
         """Empty query returns empty list."""
-        from imas_codex.standard_names.search import (
+        from iter_codex.standard_names.search import (
             search_standard_names_with_documentation,
         )
 
@@ -88,7 +88,7 @@ class TestReferenceSNRetrieval:
 
     def test_excludes_specified_ids(self):
         """Excluded IDs are filtered from results."""
-        from imas_codex.standard_names.search import (
+        from iter_codex.standard_names.search import (
             search_standard_names_with_documentation,
         )
 
@@ -114,9 +114,9 @@ class TestReferenceSNRetrieval:
         mock_embedding = np.zeros(384)
 
         with (
-            patch("imas_codex.embeddings.config.EncoderConfig"),
-            patch("imas_codex.embeddings.encoder.Encoder") as MockEnc,
-            patch("imas_codex.graph.client.GraphClient") as MockGC,
+            patch("iter_codex.embeddings.config.EncoderConfig"),
+            patch("iter_codex.embeddings.encoder.Encoder") as MockEnc,
+            patch("iter_codex.graph.client.GraphClient") as MockGC,
         ):
             enc_instance = MagicMock()
             enc_instance.embed_texts.return_value = [mock_embedding]
@@ -139,7 +139,7 @@ class TestReferenceSNRetrieval:
 
     def test_returns_full_docs(self):
         """Results include documentation and tags."""
-        from imas_codex.standard_names.search import (
+        from iter_codex.standard_names.search import (
             search_standard_names_with_documentation,
         )
 
@@ -158,9 +158,9 @@ class TestReferenceSNRetrieval:
         mock_embedding = np.zeros(384)
 
         with (
-            patch("imas_codex.embeddings.config.EncoderConfig"),
-            patch("imas_codex.embeddings.encoder.Encoder") as MockEnc,
-            patch("imas_codex.graph.client.GraphClient") as MockGC,
+            patch("iter_codex.embeddings.config.EncoderConfig"),
+            patch("iter_codex.embeddings.encoder.Encoder") as MockEnc,
+            patch("iter_codex.graph.client.GraphClient") as MockGC,
         ):
             enc_instance = MagicMock()
             enc_instance.embed_texts.return_value = [mock_embedding]
@@ -189,13 +189,13 @@ class TestReviewerThemes:
 
     def test_none_domain_returns_empty(self):
         """None domain returns empty list."""
-        from imas_codex.standard_names.review.themes import extract_reviewer_themes
+        from iter_codex.standard_names.review.themes import extract_reviewer_themes
 
         assert extract_reviewer_themes(None) == []
 
     def test_returns_themes_from_comments(self):
         """Themes are extracted from mocked reviewer comments."""
-        from imas_codex.standard_names.review.themes import _extract_themes_from_texts
+        from iter_codex.standard_names.review.themes import _extract_themes_from_texts
 
         comments = [
             "Missing sign convention in documentation",
@@ -210,16 +210,16 @@ class TestReviewerThemes:
 
     def test_empty_comments_returns_empty(self):
         """No comments produces empty themes."""
-        from imas_codex.standard_names.review.themes import _extract_themes_from_texts
+        from iter_codex.standard_names.review.themes import _extract_themes_from_texts
 
         assert _extract_themes_from_texts([]) == []
 
     def test_graceful_graph_failure(self):
         """Returns empty list on graph failure."""
-        from imas_codex.standard_names.review.themes import extract_reviewer_themes
+        from iter_codex.standard_names.review.themes import extract_reviewer_themes
 
         with patch(
-            "imas_codex.graph.client.GraphClient", side_effect=Exception("no graph")
+            "iter_codex.graph.client.GraphClient", side_effect=Exception("no graph")
         ):
             result = extract_reviewer_themes("magnetics")
 
@@ -239,7 +239,7 @@ class TestGrammarRetry:
         """Successful retry returns a revised name."""
         from pydantic import BaseModel, Field
 
-        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _grammar_retry,
         )
 
@@ -261,7 +261,7 @@ class TestGrammarRetry:
     @pytest.mark.asyncio
     async def test_retry_returns_none_on_failure(self):
         """Failed retry returns None."""
-        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _grammar_retry,
         )
 
@@ -287,7 +287,7 @@ class TestStateFields:
 
     def test_state_has_quality_lever_fields(self):
         """StandardNameBuildState has retry, revision, and audit counters."""
-        from imas_codex.standard_names.state import StandardNameBuildState
+        from iter_codex.standard_names.state import StandardNameBuildState
 
         state = StandardNameBuildState(facility="dd")
         assert state.grammar_retries == 0
@@ -299,7 +299,7 @@ class TestStateFields:
 
     def test_state_fields_are_mutable(self):
         """State tracking fields can be incremented."""
-        from imas_codex.standard_names.state import StandardNameBuildState
+        from iter_codex.standard_names.state import StandardNameBuildState
 
         state = StandardNameBuildState(facility="dd")
         state.grammar_retries += 1

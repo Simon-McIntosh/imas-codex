@@ -7,7 +7,7 @@ from pathlib import Path
 import yaml
 from imas_standard_names.models import create_standard_name_entry
 
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     _graph_node_to_entry_dict,
     _validate_entry,
     _write_domain_yaml,

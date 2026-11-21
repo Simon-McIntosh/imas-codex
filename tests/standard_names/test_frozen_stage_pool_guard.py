@@ -10,8 +10,8 @@ from unittest.mock import patch
 import pytest
 
 from .graph_transaction_doubles import transaction_double
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_cost_and_claims as _owning_graph_cost_and_claims,
     graph_docs_persistence as _owning_graph_docs_persistence,
@@ -19,7 +19,7 @@ from imas_codex.standard_names.graph_store import (
     graph_refinement as _owning_graph_refinement,
     graph_review_persistence as _owning_graph_review_persistence,
 )
-from imas_codex.standard_names.promote import (
+from iter_codex.standard_names.promote import (
     mark_catalog_name_approved,
     resolve_contested_override,
 )
@@ -79,7 +79,7 @@ def test_atomic_claim_binds_every_referenced_parameter() -> None:
     transaction = _ClaimTransaction()
     graph = _ClaimGraph(transaction)
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         claimed = _owning_graph_cost_and_claims._claim_sn_atomic(
@@ -124,7 +124,7 @@ def test_standard_name_pool_claims_share_the_frozen_stage_guard(claim: Any) -> N
 
 def test_generate_name_excludes_sources_bound_to_frozen_names() -> None:
     """The source pool applies the same guard before and after its write lock."""
-    from imas_codex.standard_names.graph_store.graph_foundation import (
+    from iter_codex.standard_names.graph_store.graph_foundation import (
         source_claim_predicate,
     )
 
@@ -173,7 +173,7 @@ class _ReviewGraph:
 def test_review_persistence_and_aggregates_skip_frozen_names(stage: str) -> None:
     graph = _ReviewGraph(stage)
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         assert (

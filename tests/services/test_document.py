@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.services.document import DocumentService
+from iter_codex.services.document import DocumentService
 
 
 class TestDocumentService:

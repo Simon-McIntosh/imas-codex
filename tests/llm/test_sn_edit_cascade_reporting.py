@@ -27,7 +27,7 @@ CASCADE = [
 
 
 def _plan(**overrides: Any) -> Any:
-    from imas_codex.standard_names.edit import EditPlan
+    from iter_codex.standard_names.edit import EditPlan
 
     fields: dict[str, Any] = {
         "target": "emissivity_due_to_fusion",
@@ -45,9 +45,9 @@ def _plan(**overrides: Any) -> Any:
 
 
 def _call(plan: Any, **kwargs: Any) -> dict:
-    from imas_codex.llm import sn_tools
+    from iter_codex.llm import sn_tools
 
-    with patch("imas_codex.standard_names.edit.apply_edit", return_value=plan):
+    with patch("iter_codex.standard_names.edit.apply_edit", return_value=plan):
         return sn_tools._edit_standard_name(
             "emissivity_due_to_fusion",
             reason="the per-volume per-steradian base is source_rate, not emissivity",
@@ -67,7 +67,7 @@ def _flat(text: str) -> str:
 
 
 def _mcp_tool_description() -> str:
-    from imas_codex.llm.server import AgentsServer
+    from iter_codex.llm.server import AgentsServer
 
     server = AgentsServer(dd_only=False, include_standard_names=True, read_only=False)
     components = server.mcp._local_provider._components
@@ -136,7 +136,7 @@ class TestSurfaceDocumentationStatesTheDeferral:
     """Both agent-facing descriptions must carry the same true statement."""
 
     def test_tool_wrapper_docstring_states_nothing_is_written(self) -> None:
-        from imas_codex.llm.sn_tools import _edit_standard_name
+        from iter_codex.llm.sn_tools import _edit_standard_name
 
         doc = _flat(_edit_standard_name.__doc__ or "")
         assert "this call writes none of" in doc
@@ -158,7 +158,7 @@ class TestSurfaceDocumentationStatesTheDeferral:
 
     def test_both_surfaces_share_the_deferral_vocabulary(self) -> None:
         """One wording for one fact, so the surfaces read alike."""
-        from imas_codex.llm.sn_tools import _edit_standard_name
+        from iter_codex.llm.sn_tools import _edit_standard_name
 
         wrapper = _flat(_edit_standard_name.__doc__ or "")
         described = _flat(_mcp_tool_description())

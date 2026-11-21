@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_store import graph_audits as _owning_graph_audits
+from iter_codex.standard_names.graph_store import graph_audits as _owning_graph_audits
 
 
 def _captured_query(gc: MagicMock) -> str:
@@ -25,7 +25,7 @@ def _captured_query(gc: MagicMock) -> str:
 
 def test_find_provenance_orphans_reports_three_source_loss_populations():
     """The probe reports source loss at every stage and leaves orphans to retirement."""
-    from imas_codex.standard_names.ledger import find_provenance_orphans
+    from iter_codex.standard_names.ledger import find_provenance_orphans
 
     gc = MagicMock()
     rows = [
@@ -40,7 +40,7 @@ def test_find_provenance_orphans_reports_three_source_loss_populations():
         },
     ]
     with patch(
-        "imas_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
+        "iter_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
         return_value=rows,
     ) as audit:
         orphans = find_provenance_orphans(gc=gc)
@@ -69,11 +69,11 @@ def test_find_provenance_orphans_reports_three_source_loss_populations():
 def test_find_provenance_orphans_uses_population_not_stage(
     population, stage, expected_ids
 ):
-    from imas_codex.standard_names.ledger import find_provenance_orphans
+    from iter_codex.standard_names.ledger import find_provenance_orphans
 
     gc = MagicMock()
     with patch(
-        "imas_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
+        "iter_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
         return_value=[
             {"id": "candidate", "name_stage": stage, "population": population}
         ],
@@ -92,7 +92,7 @@ def test_reattach_produced_name_edges_merges_missing_edge_for_live_scalar():
     """The reattach pass MERGEs a PRODUCED_NAME edge for every source whose
     ``produced_sn_id`` names a LIVE name but whose edge is missing.
     """
-    from imas_codex.standard_names.ledger import reattach_produced_name_edges
+    from iter_codex.standard_names.ledger import reattach_produced_name_edges
 
     gc = MagicMock()
     gc.query.return_value = [{"reattached": 3}]
@@ -115,14 +115,14 @@ def test_reconcile_provenance_reports_edges_reattached():
     """reconcile_provenance runs the reattach pass and surfaces its count
     alongside the existing scalar-clear / orphan-delete counts.
     """
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC,
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.reattach_produced_name_edges",
+            "iter_codex.standard_names.graph_store.graph_foundation.reattach_produced_name_edges",
             return_value=7,
         ) as m_reattach,
     ):
@@ -150,11 +150,11 @@ def test_reconcile_provenance_reports_edges_reattached():
 
 @pytest.mark.graph
 def test_live_source_loss_probe_matches_independent_count():
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
-    from imas_codex.standard_names.ledger import find_provenance_orphans
+    from iter_codex.standard_names.ledger import find_provenance_orphans
 
     with GraphClient() as gc:
         sourced = gc.query(
@@ -182,7 +182,7 @@ def test_live_source_loss_probe_matches_independent_count():
 
 @pytest.mark.graph
 def test_live_ledger_has_no_edge_scalar_desyncs():
-    from imas_codex.standard_names.ledger import find_edge_scalar_desyncs
+    from iter_codex.standard_names.ledger import find_edge_scalar_desyncs
 
     desyncs = find_edge_scalar_desyncs()
     assert desyncs == [], (

@@ -8,9 +8,9 @@ from typing import Any
 
 import yaml
 
-from imas_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
-from imas_codex.standard_names.promote import mark_catalog_name_approved
-from imas_codex.standard_names.publish import run_publish
+from iter_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
+from iter_codex.standard_names.promote import mark_catalog_name_approved
+from iter_codex.standard_names.publish import run_publish
 
 
 class RecordingGraph:

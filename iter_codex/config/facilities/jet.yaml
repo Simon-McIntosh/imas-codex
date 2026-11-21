@@ -1,0 +1,815 @@
+# JET - Joint European Torus
+#
+# Public facility configuration for graph and mappings.
+# Infrastructure data is in jet_private.yaml (gitignored).
+
+facility: jet
+name: JET (Joint European Torus)
+machine: JET
+description: Joint European Torus - EUROfusion operated tokamak
+location: Culham, United Kingdom
+
+# SSH connection (user configures ~/.ssh/config with this alias)
+ssh_host: jet
+
+# Lower the priority of codex SSH workloads on shared JET hosts.
+nice_level: 19
+
+# Data system configuration for signal discovery
+# Used by: iter-codex discover jet --only signals
+data_systems:
+  # PPF is JET's primary processed data system.
+  # Organized as Owner/DDA/Dtype. Accessed via SAL REST API, ppfget, or getdat.
+  ppf:
+    sal_endpoint: https://sal.jet.uk  # SAL REST API
+    reference_pulse: 99896
+    default_owner: jetppf
+    # Additional shots to try when ier=210002 (data not available for specific shot).
+    # Spread across different campaigns for coverage.
+    check_shots: [99896, 99000, 96000, 92000]
+    # Python interpreter with numpy for ppf array handling
+    python_command: /common/software/micromamba/root/envs/python-3.12-minibundle/bin/python3
+    # Module loads for PPF library access
+    setup_commands:
+      - source /etc/profile.d/modules.sh
+      - module load jet/1.0
+    # Exclude DDAs with raw/engineering data (high volume, low physics value)
+    exclude_ddas: []
+    # PPF signals containing static machine description data.
+    # Accessible via MDSplus thin-client: ppf("DDA/DTYPE", shot).
+    static_signals:
+      - name: EFIT/RLIM
+        description: Limiter R coordinates (251 points, static across ILW)
+        static: true
+        expected_shape: [1, 251]
+      - name: EFIT/ZLIM
+        description: Limiter Z coordinates (251 points, static across ILW)
+        static: true
+        expected_shape: [1, 251]
+      - name: EFIT/RBND
+        description: Plasma boundary R (time-resolved, 947×105)
+        static: false
+        expected_shape: [947, 105]
+      - name: EFIT/ZBND
+        description: Plasma boundary Z (time-resolved, 947×105)
+        static: false
+        expected_shape: [947, 105]
+      - name: LIDR/Z
+        description: LIDAR Thomson scattering Z positions (50 points, static)
+        static: true
+        expected_shape: [50]
+      - name: VESL/CROS
+        description: Vessel cross-section contour
+        static: true
+    # DDA descriptions for enrichment prompt context
+    dda_descriptions:
+      - code: EFIT
+        description: Equilibrium reconstruction (magnetic equilibrium)
+      - code: EHTR
+        description: Equilibrium high time resolution
+      - code: MAGN
+        description: Magnetics — plasma current, loop voltage, flux loops
+      - code: HRTS
+        description: High Resolution Thomson Scattering — Te, ne profiles
+      - code: KK3
+        description: Electron Cyclotron Emission (ECE) — Te profiles
+      - code: KG1V
+        description: Far-infrared interferometry — line-integrated density
+      - code: KG1L
+        description: Lateral interferometry — line-integrated density
+      - code: KG10
+        description: Interferometry channel 10
+      - code: BOLO
+        description: Bolometry — radiated power
+      - code: BOLP
+        description: Bolometry profiles
+      - code: B5NN
+        description: Bolometry neutron-normalized
+      - code: NBI
+        description: Neutral Beam Injection heating
+      - code: ICRH
+        description: Ion Cyclotron Resonance Heating
+      - code: LHCD
+        description: Lower Hybrid Current Drive
+      - code: SXR
+        description: Soft X-ray emission
+      - code: KS3
+        description: ECE radiometry
+      - code: KS3A
+        description: ECE radiometry (A channel)
+      - code: EDG7
+        description: Edge reflectometry
+      - code: EDG8
+        description: Edge reflectometry
+      - code: GASH
+        description: Gas supply and fuelling
+      - code: CXSE
+        description: Charge Exchange Spectroscopy — ion temperature, rotation
+      - code: KAD
+        description: ECE Michelson interferometer
+      - code: MAGF
+        description: Magnetics Far — far-field magnetic measurements
+      - code: MAGS
+        description: Magnetics Saddle — saddle coil measurements
+      - code: MAGA
+        description: Magnetics Analogue — analogue magnetic measurements
+      - code: MAGG
+        description: Magnetics — general magnetic measurements
+      - code: LIDL
+        description: LIDAR Thomson Scattering — Te, ne profiles
+      - code: IDAM
+        description: Integrated Data Access Manager
+      - code: CXHM
+        description: Charge Exchange — H-alpha monitor
+
+  # MDSplus thin-client access via TDI functions.
+  # JET's MDSplus server does NOT use traditional tree-based access.
+  # All data is accessed via TDI function calls over a thin-client
+  # connection (MDSplus.Connection). JPF raw hardware signals and
+  # PPF processed data are both accessible through this interface.
+  mdsplus:
+    server: mdsplus.jet.uk
+    connection_type: thin_client  # Remote via MDSplus.Connection (vs TCV's local tree access)
+    reference_shot: 99896
+    python_command: /common/software/micromamba/root/envs/python-3.12-minibundle/bin/python3
+    setup_commands:
+      - source /etc/profile.d/modules.sh
+      - module load jet/1.0
+    # TDI data access functions (documentary only, used by scanners):
+    #   dpf("{subsystem}/{signal}", {shot})      — Raw JPF signals
+    #   ppf("{dda}/{dtype}", {shot})              — Processed PPF data
+    #   jpfsubsystems()                           — List all JPF subsystem codes
+    #   jpfincludedsubsystems({shot})             — Active subsystems for a shot
+    #   ppfsignalinfo("{dda}")                    — PPF DDA metadata
+
+  # IMAS data available post-migration
+  imas:
+    backends:
+      - mdsplus
+    db_name: jet
+
+  # JPF (JET Processing Facility) raw hardware diagnostic signals.
+  # Organized by 2-char subsystem code + signal name (e.g., DA/C2-IPLA).
+  # Accessed via MDSplus thin-client TDI function: dpf("subsystem/signal", shot).
+  # Enumerated via getdat module: zadop() opens pulse file, adlnod() lists nodes.
+  jpf:
+    server: mdsplus.jet.uk
+    reference_shot: 99896
+    python_command: /common/software/micromamba/root/envs/python-3.12-minibundle/bin/python3
+    setup_commands:
+      - source /etc/profile.d/modules.sh
+      - module load jet/1.0
+    subsystems:
+      - code: DA
+        description: Diagnostics A — magnetics, plasma current, flux loops
+        physics_domain: magnetic_field_diagnostics
+      - code: DB
+        description: Diagnostics B — interferometry, polarimetry
+        physics_domain: particle_measurement_diagnostics
+      - code: DC
+        description: Diagnostics C — ECE, reflectometry
+        physics_domain: electromagnetic_wave_diagnostics
+      - code: DD
+        description: Diagnostics D — bolometry, soft X-ray
+        physics_domain: radiation_measurement_diagnostics
+      - code: DE
+        description: Diagnostics E — charge exchange, beam emission
+        physics_domain: particle_measurement_diagnostics
+      - code: DF
+        description: Diagnostics F — microwave diagnostics
+        physics_domain: electromagnetic_wave_diagnostics
+      - code: DG
+        description: Diagnostics G — visible spectroscopy, Langmuir probes
+        physics_domain: particle_measurement_diagnostics
+      - code: DH
+        description: Diagnostics H — IR cameras, thermocouples
+        physics_domain: electromagnetic_wave_diagnostics
+      - code: DI
+        description: Diagnostics I — neutron diagnostics, gamma cameras
+        physics_domain: radiation_measurement_diagnostics
+      - code: DJ
+        description: Diagnostics J
+        physics_domain: general
+      - code: PF
+        description: Poloidal Field coil system
+        physics_domain: magnetic_field_diagnostics
+      - code: TF
+        description: Toroidal Field coil system
+        physics_domain: magnetic_field_diagnostics
+      - code: PL
+        description: Plasma control (inactive for recent shots)
+        physics_domain: magnetics
+      - code: GS
+        description: Gas supply and fuelling system
+        physics_domain: plant_systems
+      - code: VC
+        description: Vacuum vessel and pumping
+        physics_domain: plant_systems
+      - code: AH
+        description: Additional Heating — NBI, ICRH power systems
+        physics_domain: auxiliary_heating
+      - code: RF
+        description: Radio Frequency heating — ICRH antennas
+        physics_domain: auxiliary_heating
+      - code: SA
+        description: Safety systems A
+        physics_domain: plant_systems
+      - code: SC
+        description: Safety systems C
+        physics_domain: plant_systems
+      - code: CC
+        description: Central Control (inactive for recent shots)
+        physics_domain: plant_systems
+      - code: LH
+        description: Lower Hybrid heating (inactive for recent shots)
+        physics_domain: auxiliary_heating
+      - code: MC
+        description: Machine Control (inactive for recent shots)
+        physics_domain: plant_systems
+      - code: NM
+        description: Neutron Monitoring
+        physics_domain: radiation_measurement_diagnostics
+      - code: YC
+        description: YC subsystem
+        physics_domain: plant_systems
+
+  # Machine description — geometry data for JET's tokamak components.
+  # Accessed via the DeviceXMLScanner plugin (scanner_type: device_xml).
+  # Geometry lives in EFIT device XMLs, Fortran namelists, and R,Z contour
+  # files, versioned in a git repo. EFIT's PulseDependencyDB provides the
+  # epoch boundaries. The data itself is machine geometry, not EFIT-specific.
+  device_xml:
+    # Git bare repo containing versioned geometry files
+    git_repo: /home/chain1/git/efit_f90.git
+    # Source repo tree path prefix for input files
+    input_prefix: JET/input
+    # Machine configuration epochs. Each represents a hardware state
+    # valid for a pulse range. Epoch boundaries come from EFIT's
+    # PulseDependencyDB but describe machine state, not EFIT config.
+    # Only base configurations listed (EFCC sessions reuse geometry).
+    # snap_file tracks which probes were enabled/disabled per epoch.
+    # Machine configuration epochs. Each represents a hardware state
+    # valid for a pulse range. Epoch boundaries from EFIT's PulseDependencyDB
+    # (configurationsMAGN). All 14 base configurations listed — EFCC sessions
+    # (p68967_efcc1, p70468_efcc2, p78814_efcc2, p79854_efcc1/efcc2) reuse
+    # the same device XML and limiter, changing only snap_file and Green's.
+    versions:
+      # Pre-EFIT++ epochs — no device XMLs, limiter contour geometry only.
+      # Shot ranges from /usr/local/data/flush/limiter_list.dat (SCAL/FLUSH
+      # database — the authoritative source for JET wall geometry history).
+      - version: limiter_era
+        first_shot: 1
+        last_shot: 28791
+        description: "Pre-divertor carbon wall + belt limiter (1983-1991)"
+        uses_limiter: Limiter
+        wall_configuration: limiter
+        # No divertor PF coils — limiter-only configuration
+      - version: mk1_era
+        first_shot: 28792
+        last_shot: 35778
+        description: "Mark I divertor — JET's first divertor (1994-1995)"
+        uses_limiter: Mk1
+        wall_configuration: divertor
+        pf_configuration: pre-EFIT
+      - version: mk2a_era
+        first_shot: 35779
+        last_shot: 45155
+        description: "Mark IIA Gas Box divertor (1996-1998)"
+        uses_limiter: Mk2A
+        wall_configuration: divertor
+        pf_configuration: pre-EFIT
+      - version: mk2gb_era
+        first_shot: 45156
+        last_shot: 54549
+        description: "Mark II Gas Box divertor (1999-2001)"
+        uses_limiter: Mk2GB
+        wall_configuration: divertor
+        pf_configuration: pre-EFIT
+      - version: mk2gb_sr_era
+        first_shot: 54550
+        last_shot: 63445
+        description: "Mark IIGB septum removed (2002-2005)"
+        uses_limiter: Mk2GB-SR
+        wall_configuration: divertor
+        pf_configuration: pre-EFIT
+      - version: mk2hd_pre
+        first_shot: 63446
+        last_shot: 68612
+        description: "Mark II High Delta pre-EFIT++ (2005-2006)"
+        uses_limiter: Mk2HD
+        wall_configuration: divertor
+        pf_configuration: pre-EFIT
+      # EFIT++ epochs — full device XML + limiter + coils + probes.
+      - version: p68613
+        first_shot: 68613
+        last_shot: 74386
+        description: "Baseline — 71 pick-ups, DMSS=91, Mk2HD limiter"
+        device_xml: Devices/device_p68613.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2hd_cc
+        greens: Greens/DMSS_091_T_200C/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p68613_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=091
+      - version: p74387
+        first_shot: 74387
+        last_shot: 78167
+        description: "FLME(3) out of order — timing issue"
+        device_xml: Devices/device_p68613.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2hd_cc
+        greens: Greens/DMSS_091_T_200C/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p74387_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=091
+      - version: p78168
+        first_shot: 78168
+        last_shot: 78358
+        description: "P801B probe broken, still DMSS=91"
+        device_xml: Devices/device_p68613.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2hd_cc
+        greens: Greens/DMSS_091_T_200C/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p78168_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=091
+      - version: p78359
+        first_shot: 78359
+        last_shot: 78460
+        description: "New PFC config DMSS=105 trial, P801B still broken"
+        device_xml: Devices/device_p68613.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2hd_cc
+        greens: Greens/DMSS_105_T_200C/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p78359_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=105
+      - version: p78461
+        first_shot: 78461
+        last_shot: 79853
+        description: "DMSS=108 transition (pending p78461 snap), P801B broken"
+        device_xml: Devices/device_p68613.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2hd_cc
+        greens: Greens/DMSS_091_T_200C/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p78168_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=091
+      - version: p79854
+        first_shot: 79854
+        last_shot: 81133
+        description: "2011 ILW restart — Mk2ILW first wall, DMSS=105"
+        device_xml: Devices/device_p68613.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2ilw_cc
+        greens: Greens/DMSS_105_T_200C/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p79854_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=105
+      - version: p81134
+        first_shot: 81134
+        last_shot: 87026
+        description: "P804B probe reinstated"
+        device_xml: Devices/device_p68613.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2ilw_cc
+        greens: Greens/DMSS_105_T_200C/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p81134_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=105
+      - version: p87027
+        first_shot: 87027
+        last_shot: 87721
+        description: "P804B/P805B broken, removed from fit"
+        device_xml: Devices/device_p68613.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2ilw_cc
+        greens: Greens/DMSS_105_T_200C/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p87027_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=105
+      - version: p87722
+        first_shot: 87722
+        last_shot: 88367
+        description: "P803B→P803A probe replacement, new device XML and Green's"
+        device_xml: Devices/device_p87722.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2ilw_cc
+        greens: Greens/DMSS_105_T_200C_P803A/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p87722_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=105
+      - version: p88368
+        first_shot: 88368
+        last_shot: 89430
+        description: "UP4E4 coordinates for BPME(91), new device XML"
+        device_xml: Devices/device_p88368.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2ilw_cc
+        greens: Greens/DMSS_105_T_200C_UP4E4/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p88368_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=105
+      - version: p89431
+        first_shot: 89431
+        last_shot: 89439
+        description: "P802B broke, BPME(42) disabled"
+        device_xml: Devices/device_p88368.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2ilw_cc
+        greens: Greens/DMSS_105_T_200C_UP4E4/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p81134_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=105
+      - version: p89440
+        first_shot: 89440
+        last_shot: 90539
+        description: "P802B→P802A, new calibration, new device XML and Green's"
+        device_xml: Devices/device_p89440.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2ilw_cc
+        greens: Greens/DMSS_105_T_200C_P802A/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p89440_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=105
+      - version: p90540
+        first_shot: 90540
+        last_shot: 90625
+        description: "I803/BPME(57) failed and disabled"
+        device_xml: Devices/device_p89440.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2ilw_cc
+        greens: Greens/DMSS_105_T_200C_P802A/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p90540_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=105
+      - version: p90626
+        first_shot: 90626
+        description: "I802+I803 failed, disabled — FINAL config through end of JET"
+        device_xml: Devices/device_p89440.xml
+        device_ppfs: Devices/MAGN/device_ppfs
+        limiter: Limiters/limiter.mk2ilw_cc
+        greens: Greens/DMSS_105_T_200C_P802A/
+        snap_file: Snap_files/EFITSNAP/efitsnap_p90626_bound0
+        wall_configuration: divertor
+        pf_configuration: DMSS=105
+    # Systems extracted from device XMLs — analogous to TCV static tree systems
+    systems:
+      - symbol: PF
+        name: Poloidal field coils
+        description: "22 PF coils: P1-P4 (central solenoid), DSH/DSV (divertor shaping), and circuit groups"
+        size: 22
+        parameters: [R, Z, W, H, TURNS, RESISTANCE]
+      - symbol: PS
+        name: Passive structures
+        description: "48 passive conducting elements (vessel wall, stabilizing plates)"
+        size: 48
+        parameters: [R, Z, W, H, RESISTANCE]
+      - symbol: MP
+        name: Magnetic probes (pick-up coils)
+        description: "BPME saddle coils — count varies by config (71-95 fitted pick-ups)"
+        parameters: [R, Z, ANG, AREA, TURNS]
+      - symbol: FL
+        name: Flux loops
+        description: "36 diamagnetic/saddle flux loops (SX/SY naming)"
+        size: 36
+        parameters: [R, Z, ANG, AREA]
+      - symbol: CI
+        name: Circuit-to-coil mappings
+        description: "10 PF circuits mapping coils to power supply connections"
+        size: 10
+        parameters: [COILS, TURNS_RATIO]
+      - symbol: LIM
+        name: Limiter contour
+        description: "First wall R,Z contour — 7 versions: Limiter (pre-divertor, shots 1-28791), Mk1, Mk2A, Mk2GB, Mk2GB-SR, Mk2HD, Mk2ILW"
+        parameters: [R, Z]
+    # Limiter contour versions (independent of device XML structural epochs).
+    # Each entry is a first-wall geometry that was physically installed.
+    # The R,Z contour files define the plasma-facing boundary shape.
+    #
+    # Sources:
+    #   - SCAL/FLUSH database: /usr/local/data/flush/ (authoritative history)
+    #     Includes all 7 eras from pre-divertor to ILW. Shot ranges taken from
+    #     /usr/local/data/flush/limiter_list.dat — the definitive mapping.
+    #   - EFIT legacy: /home/chain1/input/efit/Limiters/ (4 files: mk2a, mk2gb, mk2gb_ns, mk2hd)
+    #   - Git repo: /home/chain1/git/efit_f90.git (3 files: mk2gb_ns_cc, mk2hd_cc, mk2ilw_cc)
+    #   - EFIT limiter_list: /home/chain1/input/efit/limiter_list
+    #     Only covers Mk2A→Mk2HD (retroactively maps all pre-Mk2GB shots to mk2a).
+    #
+    # The FLUSH files are 2-column (R,Z) plain-text format, one segment each.
+    # EFIT files are 3-column (R,Z,segment) with up to 3 segments;
+    # parse_limiter_file() handles both formats transparently.
+    limiter_dir: /home/chain1/input/efit/Limiters
+    flush_dir: /usr/local/data/flush
+    limiter_versions:
+      - name: Limiter
+        first_shot: 1
+        last_shot: 28791
+        description: >-
+          Pre-divertor JET first wall — large symmetric limiter contour
+          (102 R,Z points, R∈[1.73, 4.15], Z∈[-2.07, 2.07]).
+          Carbon wall + belt limiter configuration (1983-1991).
+          File "L91NEW" in /usr/local/data/flush/.
+        file: L91NEW
+        source_dir: /usr/local/data/flush
+        n_points: 102
+      - name: Mk1
+        first_shot: 28792
+        last_shot: 35778
+        description: >-
+          Mark I divertor — JET's first divertor (78 R,Z points,
+          R∈[1.81, 3.90], Z∈[-1.78, 2.02]). Installed 1994.
+          File "mark1" in /usr/local/data/flush/.
+        file: mark1
+        source_dir: /usr/local/data/flush
+        n_points: 78
+      - name: Mk2A
+        first_shot: 35779
+        last_shot: 45155
+        description: >-
+          Mark IIA Gas Box divertor (110 R,Z points). Installed 1996.
+          FLUSH file "mark2ap". Also available as limiter.mk2a in EFIT
+          Limiters (3-segment format, 108 pts in segment 0).
+        file: mark2ap
+        source_dir: /usr/local/data/flush
+        n_points: 110
+      - name: Mk2GB
+        first_shot: 45156
+        last_shot: 54549
+        description: "Mark 2 Gas Box (1999). 142 R,Z points."
+        file: mark2gb
+        source_dir: /usr/local/data/flush
+        n_points: 142
+      - name: Mk2GB-SR
+        first_shot: 54550
+        last_shot: 63445
+        description: "Mark 2 Gas Box septum removed (2002). 126 R,Z points."
+        file: mark2gb-sr
+        source_dir: /usr/local/data/flush
+        n_points: 126
+      - name: Mk2HD
+        first_shot: 63446
+        last_shot: 79853
+        description: "Mark 2 High Delta divertor (2005). 115 R,Z points."
+        file: mark2hd
+        source_dir: /usr/local/data/flush
+        n_points: 115
+      - name: Mk2ILW
+        first_shot: 79854
+        description: "ITER-Like Wall — beryllium/tungsten (2011-2023). 251 R,Z points."
+        file: mark2ilw
+        source_dir: /usr/local/data/flush
+        n_points: 251
+
+  # Static file-based data sources for machine description.
+  # Each entry is typed via StaticSourceConfig — validated against schema.
+  static_sources:
+    # JEC2020 — EFIT++ equilibrium code input XMLs.
+    # Next-generation geometry files with richer metadata than legacy device XMLs.
+    # Symlinked from /home/chain1/jec2020/ → live_chain1/source/jec2020/input_jec2020/active/
+    - name: jec2020_geometry
+      description: EFIT++ equilibrium code geometry files (XML format)
+      format: xml
+      base_dir: /home/chain1/jec2020
+      reference_shot: 79951
+      files:
+        - path: limiter.xml
+          role: limiter
+          description: ILW first wall contour at T=200°C (248+ R,Z points)
+          expected_count: 248
+        - path: magnetics.xml
+          role: magnetics
+          description: 95 magnetic probes + 36 flux loops with dual PPF/JPF sources
+          expected_count: 131
+        - path: pfSystems.xml
+          role: pf_coils
+          description: 20 PF coils + 10 circuits with multi-element sub-coil geometry
+          expected_count: 20
+        - path: ironBoundaries3.xml
+          role: iron_core
+          description: 96 iron core boundary segments with permeabilities
+          expected_count: 96
+
+    # MCFG — Magnetics calibration and sensor configuration system.
+    # Managed by MAGNW group. Tracks sensor positions (CATIA CAD) and
+    # calibration gains/offsets per-pulse.
+    - name: sensor_calibration
+      description: Magnetics sensor positions and calibration epochs
+      format: text
+      base_dir: /home/MAGNW/chain1/input
+      files:
+        - path: PPFcfg/sensors_200c_2019-03-11.txt
+          role: sensors
+          description: Canonical sensor R,Z,angle positions from CATIA CAD (238 coils)
+          expected_count: 238
+        - path: magn_ep_2019-05-14/MCFG.ix
+          role: calibration_index
+          description: 77 calibration epoch entries (pulse 54283–93563)
+          expected_count: 77
+      # Historical sensor position file versions.
+      # Tracks sensor geometry refinements over 14 years (2005–2019).
+      # Each version supersedes the previous. The parser ingests all
+      # versions and creates SUPERSEDES relationships between them.
+      sensor_versions:
+        - file: sensors-200c-12-05-04.txt
+          path: /home/chain1/input/magn90/
+          date: "2005-10-12"
+        - file: sensors_200c_15-09-04_3.txt
+          path: /home/MAGNW/chain1/input/PPFcfg/
+          date: "2015-09-04"
+        - file: sensors_200c_15-10-05.txt
+          path: /home/MAGNW/chain1/input/PPFcfg/
+          date: "2015-10-05"
+        - file: sensors_200c_2019-03-11.txt
+          path: /home/MAGNW/chain1/input/PPFcfg/
+          date: "2019-03-11"
+
+    # Magnetics PPF sensor configuration — maps shot ranges to sensor sets.
+    # Each config file defines which magnetic sensors are active for a
+    # range of pulses, with JPF addresses, PPF signal names, geometry
+    # (R, Z, angle), and calibration factors. The indexr file provides
+    # the shot-range → config-file mapping. Covers the full operational
+    # history from shot 1 (1983) through shot 90538 (pre-final EFIT++ era).
+    - name: magnetics_config
+      description: Magnetics sensor configuration per epoch (JPF→PPF mapping, geometry, calibration)
+      format: text
+      base_dir: /home/chain1/input/magn/config
+      index_file: /home/chain1/input/magn/config/indexr
+      files:
+        - path: indexr
+          role: index
+          description: Shot-range to config file mapping (12 entries covering shots 1–90538)
+          expected_count: 12
+
+    # PF coil circuit turns — defines turns ratios for PF coil circuits.
+    # Used by equilibrium codes to compute coil currents from circuit currents.
+    - name: pf_coil_turns
+      description: PF coil circuit-to-turns mapping for current calculations
+      format: text
+      base_dir: /home/chain1/input/pfcu
+      files:
+        - path: cturns
+          role: coil_turns
+          description: PF coil turns ratios per circuit
+
+    # Greens table version-to-shot mapping — maps shot ranges to precomputed
+    # Green's function tables used by EFIT for the magnetic equilibrium solve.
+    - name: greens_table
+      description: Green's function table version-to-shot mapping for EFIT
+      format: text
+      base_dir: /home/chain1/input/efit
+      files:
+        - path: green_list
+          role: greens_index
+          description: Shot-range to Green's table version mapping
+
+
+excludes:
+  directories:
+    - /scratch
+    - /tmp
+    - /var/tmp
+  patterns:
+    - '*.dat.old'
+    - '*.backup'
+    - '*.bak'
+
+# Data access patterns discovered during facility exploration.
+data_access_patterns:
+  primary_method: ppf
+  shot_identifier: pulse
+  signal_naming: >-
+    PPF hierarchy: owner/dda/dtype (e.g., jetppf/EFIT/Q95).
+    Python PPF API: ppf.ppfdata(pulse, dda, dtype, uid=owner) returns (data, x, t, ier).
+    PPF function catalog: ppfget (single signal), ppfdata (full signal with time),
+    ppfdda (list DDAs for pulse), ppfdti (list dtypes in DDA), ppfdsq (list sequences),
+    ppfgo (open pulse context), ppfuid (set default user), ppfssr (set signal read),
+    ppfgsf (get scale factor), pdauth (authenticate write access).
+    JPF (raw) access via getdat CLI: getdat <pulse> <system>/<node> (e.g., getdat 99896 da/c2-ipla).
+  tree_organization: >-
+    PPF by Diagnostic Data Area (DDA): EFIT (equilibrium), KK3 (ECE),
+    KG1V (interferometer), BOLO (bolometry), MAGN (magnetics), etc.
+    Each DDA contains typed data items (Dtypes) like Q95, TE, NE.
+    JPF system provides raw hardware signals organized by system/node path.
+  key_tools:
+    - ppfget
+    - ppfdata
+    - ppfdda
+    - ppfdti
+    - ppfdsq
+    - ppfgo
+    - ppfuid
+    - getdat
+    - sal
+    - efit
+    - jpf
+  wiki_signal_patterns:
+    - DDA/Dtype catalog tables
+    - diagnostic signal listings
+    - EFIT equilibrium quantities
+    - PPF owner/DDA/Dtype references
+    - JPF system/node path tables
+    - getdat command examples
+  code_import_patterns:
+    - from jet.data import sal
+    - import ppf
+    - ppfget(
+    - ppfdata(
+    - ppfdda(
+    - ppfdti(
+    - ppfgo(
+    - getdat
+    - import sal
+    - jet.data.sal
+    - ppf.ppfget
+    - ppf.ppfdata
+  notes:
+    - "PPF via ppfget/ppfdata (libppf.so ctypes), getdat for JPF raw signals"
+    - "MDSplus thin-client at mdsplus.jet.uk — TDI functions only, no trees"
+    - "1448 TDI functions, 287 JET-specific across jpf/ppf/cmg/dgm/flush"
+    - "Machine description in EFIT device XMLs + chain1 files, not MDSplus"
+    - "SAL REST at sal.jet.uk — not responding as of exploration (2026)"
+    - "IMAS modules exist but import fails on current Python (dead end)"
+
+# Discovery root paths for path discovery pipeline
+# These are seeded as starting points for directory scanning
+discovery_roots:
+  - /home                          # User home directories
+  - /work                          # Work area (shared scratch/projects)
+  - /common                        # Shared resources
+  - /common/IMAS                   # IMAS installation and tools
+  - /common/EFDA-CODES             # EUROfusion shared codes
+  - /jet/share                     # JET shared codes and tools
+  - /jet/share/src                 # JET source code repository
+
+# User info discovery configuration
+# GECOS = General Comprehensive Operating System (5th field in /etc/passwd)
+user_info:
+  name_format: first_last  # Standard "First Last" format
+  lookup_tools:  # Ordered fallback list
+    - getent   # POSIX standard, includes LDAP/NIS/SSSD
+    - passwd   # /etc/passwd fallback
+    - id       # existence check only
+
+# Wiki/documentation sites
+# JET Data Centre hosts 16 separate MediaWiki instances at wiki.jetdata.eu
+# Each is a distinct site for different task forces/groups
+
+# Common defaults for all JET wiki sites
+_wiki_defaults: &wiki_defaults
+  portal_page: Main_Page
+  site_type: mediawiki
+  access_method: direct      # Accessible via browser with login
+  auth_type: keycloak        # Keycloak OIDC via oauth2-proxy at auth.jetdata.eu
+  credential_service: jet
+  ssh_available: true        # SSH tunnel also possible via JET host
+
+wiki_sites:
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/pog
+    description: Plasma Operations Group - operational procedures and session logs
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/ia
+    description: Integrated Analysis - analysis tools and workflows
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/ek
+    description: Electron Kinetics
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/open
+    description: OpenWiki - general documentation
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/rtmc
+    description: Real Time Measurement and Control
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/seed
+    description: SeedWiki
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/tf
+    description: TFWiki - Task Force general
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/tfd
+    description: Task Force D - diagnostics
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/tfe
+    description: Task Force E - exhaust
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/tfe1
+    description: Task Force E1
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/tfe2
+    description: Task Force E2
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/tfh
+    description: Task Force H - heating and current drive
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/tfm
+    description: Task Force M - MHD
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/tfs1
+    description: Task Force S1 - scenario 1
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/tfs2
+    description: Task Force S2 - scenario 2
+  - <<: *wiki_defaults
+    url: https://wiki.jetdata.eu/tft
+    description: Task Force Transport

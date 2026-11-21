@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.graph.domain_queries import (
+from iter_codex.graph.domain_queries import (
     facility_overview,
     find_code,
     find_data_nodes,
@@ -298,7 +298,7 @@ class TestFindCode:
 
     def test_pools_beyond_the_limit(self, mock_gc, mock_embed):
         """The embedding retrieves a pool larger than the limit."""
-        from imas_codex.llm.search_tools import RERANK_POOL
+        from iter_codex.llm.search_tools import RERANK_POOL
 
         find_code(query="test", facility="tcv", limit=5, gc=mock_gc, embed_fn=mock_embed)
 
@@ -308,7 +308,7 @@ class TestFindCode:
         self, mock_gc, mock_embed, monkeypatch
     ):
         """Rows come back in rerank order, cut to the limit."""
-        from imas_codex.discovery.base import judgment
+        from iter_codex.discovery.base import judgment
 
         mock_gc.query.return_value = [
             {"text": "a", "function_name": "fa", "source_file": "a.py", "score": 0.9},
@@ -417,7 +417,7 @@ class TestFunctionSignatures:
         assert find_dd_paths.__doc__ is not None
 
     def test_all_functions_importable(self):
-        from imas_codex.graph.domain_queries import (
+        from iter_codex.graph.domain_queries import (
             facility_overview,
             find_code,
             find_data_nodes,

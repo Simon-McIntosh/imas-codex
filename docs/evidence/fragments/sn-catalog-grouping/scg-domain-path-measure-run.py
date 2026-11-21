@@ -36,7 +36,7 @@ RESULTS = HERE / "scg-domain-path-measure-results.json"
 FRAGMENT = HERE / "scg-domain-path-measure.html"
 FIGDIR = ROOT / "docs/figures/sn-catalog-grouping/scg-domain-path-measure"
 FIGURE = FIGDIR / "path_confusion.svg"
-DOMAINS_YAML = ROOT / "imas_codex/definitions/physics/domains.yaml"
+DOMAINS_YAML = ROOT / "iter_codex/definitions/physics/domains.yaml"
 BANDS = (("above 0.8", 0.8, 1.01), ("0.5 to 0.8", 0.5, 0.8), ("below 0.5", -0.01, 0.5))
 SPLITS = ("calibration", "validation", "reference")
 
@@ -271,7 +271,7 @@ def render_fragment(payload, path):
         "<p>Eleven validation names carry no source path at all, so both classifiers "
         "derive no domain for them. The cause is the name binding, not the classifier: "
         "<code>select_primary_domain</code> in "
-        "<code>imas_codex/standard_names/domain_ranking.py</code> returns <code>None</code> "
+        "<code>iter_codex/standard_names/domain_ranking.py</code> returns <code>None</code> "
         "for an empty domain set (line 65, <code>return min(...) if unique else None</code>), "
         "and an empty set is what a name with no bound source path supplies. No path was "
         "missing from the classified set and no path was classified to no domain, so the "

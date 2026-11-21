@@ -2,10 +2,10 @@
 
 import pytest
 
-from imas_codex.config.codac_uda import create_archive_pulse
-from imas_codex.discovery.signals.archive_pulses import import_pulses
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import ArchiveEndpoint, PulseCategory
+from iter_codex.config.codac_uda import create_archive_pulse
+from iter_codex.discovery.signals.archive_pulses import import_pulses
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.models import ArchiveEndpoint, PulseCategory
 
 pytestmark = pytest.mark.graph
 

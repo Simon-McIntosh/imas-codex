@@ -7,8 +7,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_cost_and_claims as _owning_graph_cost_and_claims,
     graph_refinement as _owning_graph_refinement,
@@ -47,7 +47,7 @@ class _BackfillGraph:
 
 def test_similarity_method_is_declared_without_expanding_winning_authority() -> None:
     schema_path = (
-        Path(__file__).parents[2] / "imas_codex" / "schemas" / "standard_name.yaml"
+        Path(__file__).parents[2] / "iter_codex" / "schemas" / "standard_name.yaml"
     )
     _owning_graph_catalog._winning_review_resolution_methods.cache_clear()
 
@@ -73,29 +73,29 @@ def test_similarity_method_keeps_acceptance_and_refine_claims_closed() -> None:
 
 
 def test_similarity_gate_persists_only_the_measured_dimension() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    from iter_codex.standard_names.worker_tasks.worker_review_names import (
         process_review_name_batch,
     )
 
     persist = MagicMock(return_value="reviewed")
     with (
         patch(
-            "imas_codex.settings.get_sn_review_names_models",
+            "iter_codex.settings.get_sn_review_names_models",
             return_value=["unused-reviewer"],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_review_names._enrich_name_review_items",
+            "iter_codex.standard_names.worker_tasks.worker_review_names._enrich_name_review_items",
         ),
         patch(
-            "imas_codex.standard_names.audits.semantic_similarity_check",
+            "iter_codex.standard_names.audits.semantic_similarity_check",
             return_value=(0.20, []),
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name",
+            "iter_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name",
             persist,
         ),
         patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=_SimilarityGraph(),
         ),
     ):
@@ -122,7 +122,7 @@ def test_similarity_gate_persists_only_the_measured_dimension() -> None:
 
 
 def test_similarity_gate_backfill_uses_model_identity_and_is_idempotent() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         backfill_semantic_similarity_gate_resolution_method,
     )
 

@@ -7,19 +7,19 @@ import json
 import pytest
 import yaml
 
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names import benchmark_roles
-from imas_codex.standard_names.fanout.config import FanoutSettings
-from imas_codex.standard_names.fanout.trigger import (
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.standard_names import benchmark_roles
+from iter_codex.standard_names.fanout.config import FanoutSettings
+from iter_codex.standard_names.fanout.trigger import (
     should_trigger_fanout,
     should_trigger_fanout_from_checks,
 )
-from imas_codex.standard_names.review.checks import (
+from iter_codex.standard_names.review.checks import (
     JevQuestion,
     ReviewCheck,
     load_review_checks,
 )
-from imas_codex.standard_names.review.jev_review import check_failure_probability
+from iter_codex.standard_names.review.jev_review import check_failure_probability
 
 
 def _question_check(*, retrieval: bool) -> ReviewCheck:

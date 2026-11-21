@@ -7,9 +7,9 @@ from unittest.mock import MagicMock, Mock
 import numpy as np
 import pytest
 
-from imas_codex.discovery.signals import parallel
-from imas_codex.discovery.signals.scanners import codac_uda as catalogue
-from imas_codex.remote import codac_uda as transport
+from iter_codex.discovery.signals import parallel
+from iter_codex.discovery.signals.scanners import codac_uda as catalogue
+from iter_codex.remote import codac_uda as transport
 
 
 @pytest.fixture
@@ -74,8 +74,8 @@ def scanner_io(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_scanner_is_registered_and_preserves_exact_metadata(config, scanner_io):
-    from imas_codex.discovery.signals.parallel import get_signal_scanner_type
-    from imas_codex.discovery.signals.scanners import get_scanner
+    from iter_codex.discovery.signals.parallel import get_signal_scanner_type
+    from iter_codex.discovery.signals.scanners import get_scanner
 
     scanner = get_scanner("codac_uda")
     result = await scanner.scan("demo", "local", config)
@@ -323,7 +323,7 @@ def test_transport_refuses_unbounded_or_connection_override(
 
 
 def test_compute_host_resolves_facility_scripts_locally(monkeypatch):
-    from imas_codex.remote import executor
+    from iter_codex.remote import executor
 
     monkeypatch.setattr(executor.socket, "getfqdn", lambda: "98dci4-clu-9999.iter.org")
     monkeypatch.setattr(executor.socket, "gethostname", lambda: "98dci4-clu-9999")

@@ -359,7 +359,7 @@ def test_plot_saves_internal_svg_and_prints_statistics(capsys):
         np.arange(8, dtype=float),
         {"time_base": "pulse_seconds", "unit": "K", "mode": "raw"},
     )
-    path = Path.home() / ".cache/imas-codex-codac-uda/fake-signal.svg"
+    path = Path.home() / ".cache/iter-codex-codac-uda/fake-signal.svg"
     result = loader.plot(signal, path)
     assert result["count"] == 8
     assert json.loads(capsys.readouterr().out)["mean"] == 3.5

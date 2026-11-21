@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from imas_codex.discovery.base import request_pacer as module
-from imas_codex.discovery.base.request_pacer import RequestPacer
+from iter_codex.discovery.base import request_pacer as module
+from iter_codex.discovery.base.request_pacer import RequestPacer
 
 
 @pytest.mark.parametrize("interval", (-1, float("inf"), float("nan")))
@@ -73,8 +73,8 @@ async def test_cancelled_async_wait_does_not_consume_slot(monkeypatch):
 @pytest.mark.parametrize("client_kind", ("confluence", "mediawiki", "async_mediawiki"))
 @pytest.mark.asyncio
 async def test_wiki_clients_delegate_spacing(client_kind):
-    from imas_codex.discovery.wiki.confluence import ConfluenceClient
-    from imas_codex.discovery.wiki.mediawiki import (
+    from iter_codex.discovery.wiki.confluence import ConfluenceClient
+    from iter_codex.discovery.wiki.mediawiki import (
         AsyncMediaWikiClient,
         MediaWikiClient,
     )

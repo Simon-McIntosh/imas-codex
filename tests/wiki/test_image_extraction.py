@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.discovery.wiki.workers import _extract_image_refs
+from iter_codex.discovery.wiki.workers import _extract_image_refs
 
 
 class TestExtractImageRefs:

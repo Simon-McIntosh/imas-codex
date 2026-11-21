@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 
 class TestSnHelpCatalogVerbs:

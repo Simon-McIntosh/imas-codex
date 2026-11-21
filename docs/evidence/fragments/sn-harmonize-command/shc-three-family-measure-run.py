@@ -10,8 +10,8 @@ import argparse
 import json
 from pathlib import Path
 
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.harmonize import docs_score_regressions
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.harmonize import docs_score_regressions
 
 RESULTS = Path(__file__).with_name("shc-three-family-measure-results.json")
 BOUNDARY_SEED = "flux_surface_averaged_argon_density_at_plasma_boundary"
@@ -28,8 +28,8 @@ def write_results(payload: dict) -> None:
 
 
 def snapshot(seed: str, phase: str) -> None:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.harmonize import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.harmonize import (
         measure_doc_call_cost,
         plan_family_applies,
         preview_recommended_refusals,

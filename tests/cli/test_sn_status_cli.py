@@ -1,4 +1,4 @@
-"""Tests for ``imas-codex sn status`` CLI command.
+"""Tests for ``iter-codex sn status`` CLI command.
 
 Validates:
 - Name Stage table is rendered with all stages
@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 
 @pytest.fixture
@@ -79,13 +79,13 @@ def _patch_sn_status(name_stage_rows=None, docs_stage_rows=None, **kw):
     )
     gc_cls = MagicMock(return_value=gc_instance)
     return (
-        patch("imas_codex.graph.client.GraphClient", gc_cls),
+        patch("iter_codex.graph.client.GraphClient", gc_cls),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.get_standard_name_source_stats",
+            "iter_codex.standard_names.graph_store.graph_audits.get_standard_name_source_stats",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.get_skipped_source_counts",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.get_skipped_source_counts",
             return_value={},
         ),
     )
@@ -155,7 +155,7 @@ class TestSnStatusNameStage:
             patches[1],
             patches[2],
             patch(
-                "imas_codex.standard_names.dd_gaps.get_dd_gap_stats",
+                "iter_codex.standard_names.dd_gaps.get_dd_gap_stats",
                 return_value={
                     "total": 4,
                     "by_status": {

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.standard_names import benchmark_roles
+from iter_codex.standard_names import benchmark_roles
 
 _CORPUS_PATH = Path(__file__).parent / "eval_sets" / "advisory_paired_corpus.json"
 

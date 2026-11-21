@@ -8,8 +8,8 @@ grammar segments, and up to two DD source bindings. It carries an empty
 ``physics_domain`` or the source domains. Those two go to the incumbent file.
 
 The sampling and the fixed seed come from
-:mod:`imas_codex.standard_names.judgment_goldens`; the pattern family comes
-from :mod:`imas_codex.standard_names.families`, the single definition of a
+:mod:`iter_codex.standard_names.judgment_goldens`; the pattern family comes
+from :mod:`iter_codex.standard_names.families`, the single definition of a
 family. The physics-domain option list is read from the installed ISN
 package's ``physics_domains.yml`` rather than copied.
 """
@@ -25,9 +25,9 @@ from typing import Any
 
 import yaml
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.families import pattern_signature
-from imas_codex.standard_names.judgment_goldens import _sample, assign_group_splits
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.families import pattern_signature
+from iter_codex.standard_names.judgment_goldens import _sample, assign_group_splits
 
 FRAGMENTS = Path(__file__).resolve().parent
 ROOT = FRAGMENTS.parents[3]
@@ -35,7 +35,7 @@ ROOT = FRAGMENTS.parents[3]
 SHEET_PATH = FRAGMENTS / "scg-domain-label-sheet.json"
 INCUMBENT_PATH = FRAGMENTS / "scg-domain-incumbent.json"
 FRAGMENT_PATH = FRAGMENTS / "scg-domain-label-sheet.html"
-SCHEMA_PATH = ROOT / "imas_codex" / "schemas" / "standard_name.yaml"
+SCHEMA_PATH = ROOT / "iter_codex" / "schemas" / "standard_name.yaml"
 
 REFERENCE_FIXED = (
     "electron_temperature",
@@ -261,8 +261,8 @@ def check_blindness(sheet: dict[str, Any]) -> int:
 
 def check_query_properties() -> list[str]:
     """Audit this driver's Cypher literals against the LinkML schema."""
-    from imas_codex.graph.cypher_property_check import audit_cypher_properties
-    from imas_codex.graph.schema import GraphSchema
+    from iter_codex.graph.cypher_property_check import audit_cypher_properties
+    from iter_codex.graph.schema import GraphSchema
 
     report = audit_cypher_properties(
         Path(__file__).resolve(), schemas=(GraphSchema(SCHEMA_PATH),)

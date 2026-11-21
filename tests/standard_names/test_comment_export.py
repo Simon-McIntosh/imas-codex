@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -68,14 +68,14 @@ class TestExportReviewComments:
 
     def test_export_dumps_jsonl(self, tmp_path: Path) -> None:
         """Three Review rows should produce three JSONL lines with expected keys."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             export_review_comments,
         )
 
         output = tmp_path / "comments.jsonl"
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             instance = MagicMock()
             instance.__enter__ = MagicMock(return_value=instance)
@@ -102,14 +102,14 @@ class TestExportReviewComments:
 
     def test_export_empty_returns_zero(self, tmp_path: Path) -> None:
         """No Review rows → returns 0, no file written."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             export_review_comments,
         )
 
         output = tmp_path / "empty.jsonl"
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             instance = MagicMock()
             instance.__enter__ = MagicMock(return_value=instance)
@@ -124,7 +124,7 @@ class TestExportReviewComments:
 
     def test_export_domain_filter_passes_to_query(self, tmp_path: Path) -> None:
         """Domain parameter should appear in the Cypher query call."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             export_review_comments,
         )
 
@@ -136,7 +136,7 @@ class TestExportReviewComments:
             return _REVIEW_ROWS[:1]
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             instance = MagicMock()
             instance.__enter__ = MagicMock(return_value=instance)
@@ -150,14 +150,14 @@ class TestExportReviewComments:
 
     def test_export_creates_parent_dirs(self, tmp_path: Path) -> None:
         """Parent directory is created if it doesn't exist."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             export_review_comments,
         )
 
         nested = tmp_path / "deep" / "nested" / "out.jsonl"
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             instance = MagicMock()
             instance.__enter__ = MagicMock(return_value=instance)
@@ -171,14 +171,14 @@ class TestExportReviewComments:
 
     def test_export_parses_json_string_comments(self, tmp_path: Path) -> None:
         """comments_per_dim_json string is parsed into a dict in the output."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             export_review_comments,
         )
 
         output = tmp_path / "parsed.jsonl"
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             instance = MagicMock()
             instance.__enter__ = MagicMock(return_value=instance)
@@ -225,11 +225,11 @@ class TestSnClearCommentExport:
         """sn clear with StandardNameReview nodes exports JSONL before deleting."""
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.clear_sn_subsystem",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.clear_sn_subsystem",
                 side_effect=[_PREVIEW, _DELETED],
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_audits.export_review_comments",
+                "iter_codex.standard_names.graph_store.graph_audits.export_review_comments",
                 return_value=3,
             ) as mock_export,
             runner.isolated_filesystem(temp_dir=tmp_path),
@@ -249,11 +249,11 @@ class TestSnClearCommentExport:
         """--no-comment-export prevents the JSONL dump."""
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.clear_sn_subsystem",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.clear_sn_subsystem",
                 side_effect=[_PREVIEW, _DELETED],
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_audits.export_review_comments",
+                "iter_codex.standard_names.graph_store.graph_audits.export_review_comments",
             ) as mock_export,
             runner.isolated_filesystem(temp_dir=tmp_path),
         ):
@@ -273,11 +273,11 @@ class TestSnClearCommentExport:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.clear_sn_subsystem",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.clear_sn_subsystem",
                 side_effect=[preview_no_reviews, deleted_no_reviews],
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_audits.export_review_comments",
+                "iter_codex.standard_names.graph_store.graph_audits.export_review_comments",
             ) as mock_export,
             runner.isolated_filesystem(temp_dir=tmp_path),
         ):
@@ -292,11 +292,11 @@ class TestSnClearCommentExport:
         """An export error is warned but clear still proceeds."""
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.clear_sn_subsystem",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.clear_sn_subsystem",
                 side_effect=[_PREVIEW, _DELETED],
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_audits.export_review_comments",
+                "iter_codex.standard_names.graph_store.graph_audits.export_review_comments",
                 side_effect=OSError("disk full"),
             ),
             runner.isolated_filesystem(temp_dir=tmp_path),

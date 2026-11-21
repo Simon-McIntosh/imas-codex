@@ -9,13 +9,13 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.offsite import live_graph_activity
-from imas_codex.standard_names.export import run_export
-from imas_codex.standard_names.graph_store.graph_supersession import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.offsite import live_graph_activity
+from iter_codex.standard_names.export import run_export
+from iter_codex.standard_names.graph_store.graph_supersession import (
     classify_sourceless_standard_names,
 )
-from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+from iter_codex.standard_names.source_invariant import find_sourceless_live_names
 
 
 def read_back(

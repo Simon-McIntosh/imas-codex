@@ -16,7 +16,7 @@ from types import SimpleNamespace
 import click
 import pytest
 
-from imas_codex.standard_names.catalog_release import run_release
+from iter_codex.standard_names.catalog_release import run_release
 
 
 def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -58,18 +58,18 @@ def _staging(tmp_path: Path, *, export_report: bool = False) -> Path:
 
 def _isolate_preflight(monkeypatch, tag: str = "v1.0.0rc1") -> None:
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release._check_on_main", lambda _path: None
+        "iter_codex.standard_names.catalog_release._check_on_main", lambda _path: None
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release._check_clean_tree",
+        "iter_codex.standard_names.catalog_release._check_clean_tree",
         lambda _path, **_kwargs: [],
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release._check_synced",
+        "iter_codex.standard_names.catalog_release._check_synced",
         lambda _path, _remote, **_kwargs: [],
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release.compute_next_version",
+        "iter_codex.standard_names.catalog_release.compute_next_version",
         lambda *_args, **_kwargs: (tag, tag.lstrip("v")),
     )
 
@@ -194,7 +194,7 @@ def test_a_whole_catalog_candidate_refuses_an_upstream_remote(
 def test_the_cli_target_guard_refuses_upstream_for_a_candidate(
     catalog_repo, monkeypatch
 ):
-    from imas_codex.cli.release import _check_release_target
+    from iter_codex.cli.release import _check_release_target
 
     _git(
         "remote",

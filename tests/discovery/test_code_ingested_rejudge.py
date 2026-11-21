@@ -26,7 +26,7 @@ import json
 
 import pytest
 
-from imas_codex.discovery.base import llm
+from iter_codex.discovery.base import llm
 
 FACILITY = "jt-60sa"
 COST = 1.0e-4
@@ -205,29 +205,29 @@ def _run_rejudge(
         path = body["state"]["file"]["path"]
         return _FakeResponse(_payload(answers_by_path[path]))
 
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: {}
     )
-    monkeypatch.setattr("imas_codex.settings.get_model", lambda section: "fake-model")
-    monkeypatch.setattr("imas_codex.settings.get_code_ingest_threshold", lambda: 0.6)
+    monkeypatch.setattr("iter_codex.settings.get_model", lambda section: "fake-model")
+    monkeypatch.setattr("iter_codex.settings.get_code_ingest_threshold", lambda: 0.6)
     monkeypatch.setattr(
-        "imas_codex.settings.get_code_facet_admission_threshold", lambda: 0.8
-    )
-    monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.claim_files_for_scoring", claim_once
+        "iter_codex.settings.get_code_facet_admission_threshold", lambda: 0.8
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.release_file_score_claims",
+        "iter_codex.discovery.code.graph_ops.claim_files_for_scoring", claim_once
+    )
+    monkeypatch.setattr(
+        "iter_codex.discovery.code.graph_ops.release_file_score_claims",
         lambda ids: released.extend(ids),
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.GraphClient", lambda: graph
+        "iter_codex.discovery.code.graph_ops.GraphClient", lambda: graph
     )
-    monkeypatch.setattr("imas_codex.discovery.code.scorer.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.discovery.code.scorer.GraphClient", lambda: graph)
     monkeypatch.setattr(llm, "_apost_decisions", fake_post)
 
-    from imas_codex.discovery.code.workers import rejudge_ingested_files
+    from iter_codex.discovery.code.workers import rejudge_ingested_files
 
     result = asyncio.run(rejudge_ingested_files(FACILITY))
     return graph, result, claim_calls, released
@@ -370,9 +370,9 @@ def _claim_query(monkeypatch, **claim_kwargs) -> str:
             return []
 
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.GraphClient", lambda: _Recording()
+        "iter_codex.discovery.code.graph_ops.GraphClient", lambda: _Recording()
     )
-    from imas_codex.discovery.code.graph_ops import claim_files_for_scoring
+    from iter_codex.discovery.code.graph_ops import claim_files_for_scoring
 
     claim_files_for_scoring(FACILITY, **claim_kwargs)
     assert captured, "the claim issued a query"
@@ -409,7 +409,7 @@ def test_claim_without_rejudge_still_selects_triaged_enriched(monkeypatch):
 
 def test_chunk_content_head_orders_by_start_line_and_cuts_to_the_fetched_length():
     """Chunks are joined in reading order and cut to the fetched path's length."""
-    from imas_codex.discovery.code.scorer import (
+    from iter_codex.discovery.code.scorer import (
         CONTENT_HEAD_CHARS,
         chunk_content_head,
     )
@@ -511,7 +511,7 @@ class _MemoryRejudge:
         """
         if not ingested_rejudge:
             return []
-        from imas_codex.discovery.code.graph_ops import ingested_rejudge_selection
+        from iter_codex.discovery.code.graph_ops import ingested_rejudge_selection
 
         clause = ingested_rejudge_selection()
         drains_on_absence = "IS NULL" in clause
@@ -554,7 +554,7 @@ def _drive_passes(
     decision is requested, so the failure is transient: its answer is left
     unwritten on the first pass and the next pass can take it again.
     """
-    from imas_codex.discovery.code import graph_ops
+    from iter_codex.discovery.code import graph_ops
 
     requests: list[str] = []
     seen: dict[str, int] = {}
@@ -568,23 +568,23 @@ def _drive_passes(
             raise RuntimeError("simulated decision failure")
         return _FakeResponse(_payload(answers_by_path[path]))
 
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: {}
     )
-    monkeypatch.setattr("imas_codex.settings.get_model", lambda section: "fake-model")
-    monkeypatch.setattr("imas_codex.settings.get_code_ingest_threshold", lambda: 0.6)
+    monkeypatch.setattr("iter_codex.settings.get_model", lambda section: "fake-model")
+    monkeypatch.setattr("iter_codex.settings.get_code_ingest_threshold", lambda: 0.6)
     monkeypatch.setattr(
-        "imas_codex.settings.get_code_facet_admission_threshold", lambda: 0.8
+        "iter_codex.settings.get_code_facet_admission_threshold", lambda: 0.8
     )
     monkeypatch.setattr(graph_ops, "claim_files_for_scoring", memory.claim)
     monkeypatch.setattr(graph_ops, "release_file_score_claims", memory.release)
     monkeypatch.setattr(graph_ops, "GraphClient", lambda: memory)
-    monkeypatch.setattr("imas_codex.discovery.code.scorer.GraphClient", lambda: memory)
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: memory)
+    monkeypatch.setattr("iter_codex.discovery.code.scorer.GraphClient", lambda: memory)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: memory)
     monkeypatch.setattr(llm, "_apost_decisions", fake_post)
 
-    from imas_codex.discovery.code.workers import rejudge_ingested_files
+    from iter_codex.discovery.code.workers import rejudge_ingested_files
 
     results: list[dict] = []
     per_pass: list[list[str]] = []
@@ -684,8 +684,8 @@ def _invoke_rejudge_cli(monkeypatch, tmp_path, args: list[str]):
     """
     from click.testing import CliRunner
 
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import discover, sequence
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import discover, sequence
 
     monkeypatch.setattr(
         sequence,
@@ -704,20 +704,20 @@ def _invoke_rejudge_cli(monkeypatch, tmp_path, args: list[str]):
     rejudge_calls: list = []
 
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda facility: {"ssh_host": "host"},
     )
-    monkeypatch.setattr("imas_codex.settings.get_discovery_threshold", lambda: 0.5)
+    monkeypatch.setattr("iter_codex.settings.get_discovery_threshold", lambda: 0.5)
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.setup_logging", lambda *a, **k: None
+        "iter_codex.cli.discover.common.setup_logging", lambda *a, **k: None
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.make_log_print",
+        "iter_codex.cli.discover.common.make_log_print",
         lambda *a, **k: lambda msg: None,
     )
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.reset.reset_to_status",
+        "iter_codex.discovery.base.reset.reset_to_status",
         lambda *a, **k: (reset_calls.append((a, k)), 0)[1],
     )
 
@@ -726,10 +726,10 @@ def _invoke_rejudge_cli(monkeypatch, tmp_path, args: list[str]):
         return {"rejudged": 0, "below_gate": [], "cost": 0.0, "batches": 0}
 
     monkeypatch.setattr(
-        "imas_codex.discovery.code.workers.rejudge_ingested_files", fake_rejudge
+        "iter_codex.discovery.code.workers.rejudge_ingested_files", fake_rejudge
     )
     monkeypatch.setattr(
-        "imas_codex.cli.shutdown.safe_asyncio_run", lambda coro: asyncio.run(coro)
+        "iter_codex.cli.shutdown.safe_asyncio_run", lambda coro: asyncio.run(coro)
     )
 
     result = CliRunner().invoke(discover, [args[0], "--only", "code", *args[1:]])
@@ -749,7 +749,7 @@ def test_rejudge_ingested_alone_does_not_reset(monkeypatch, tmp_path):
 
 def test_rejudge_ingested_with_reset_to_ingested_resets_once(monkeypatch, tmp_path):
     """The fresh-request reset rides the explicit ``--reset-to ingested`` step."""
-    from imas_codex.discovery.base.reset import CODE_RESET_SPECS
+    from iter_codex.discovery.base.reset import CODE_RESET_SPECS
 
     result, reset_calls, rejudge_calls = _invoke_rejudge_cli(
         monkeypatch,

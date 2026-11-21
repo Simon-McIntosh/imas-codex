@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at b5f7791aabcd1dcc3ba30ef1b1113f18967b1646, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.aggregate_calls_per_phase, imas_codex.standard_names.graph_ops.aggregate_spend_per_name, imas_codex.standard_names.graph_ops.aggregate_spend_per_phase.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.aggregate_calls_per_phase, iter_codex.standard_names.graph_ops.aggregate_spend_per_name, iter_codex.standard_names.graph_ops.aggregate_spend_per_phase.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Re-measure one non-WEST locus family through ``sn harmonize``.
@@ -36,13 +36,13 @@ import json
 import re
 from pathlib import Path
 
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.harmonize import docs_score_regressions
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.harmonize import docs_score_regressions
 
 RESULTS = Path(__file__).with_name("shc-locus-remeasure-rerun.json")
 HTML = Path(__file__).with_name("shc-locus-remeasure-rerun.html")
 REPO_ROOT = Path(__file__).resolve().parents[4]
-REVIEWS_DIR = REPO_ROOT / "imas_codex/standard_names/manifests/reviews"
+REVIEWS_DIR = REPO_ROOT / "iter_codex/standard_names/manifests/reviews"
 
 SEED = "electrostatic_potential"
 # A name the roster search is known to find, so a zero member count is shown
@@ -105,8 +105,8 @@ def roster_check(members: list[str]) -> dict:
 
 
 def snapshot(phase: str) -> None:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.harmonize import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.harmonize import (
         measure_doc_call_cost,
         plan_family_applies,
         preview_recommended_refusals,
@@ -331,7 +331,7 @@ def record_cost() -> None:
     ``planned_calls`` is what it would do and ``estimate_basis`` describes
     prior runs, so neither answers what the apply itself did.
     """
-    from imas_codex.standard_names.graph_ops import (
+    from iter_codex.standard_names.graph_ops import (
         aggregate_calls_per_phase,
         aggregate_spend_per_name,
         aggregate_spend_per_phase,
@@ -639,8 +639,8 @@ def main() -> None:
     subcommands.add_parser("render")
     args = parser.parse_args()
     if args.command == "roster":
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.harmonize import plan_family_applies
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.standard_names.harmonize import plan_family_applies
 
         with GraphClient() as graph:
             plan = plan_family_applies(graph, seeds=[SEED])[0]

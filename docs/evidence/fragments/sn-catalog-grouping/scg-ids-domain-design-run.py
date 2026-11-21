@@ -18,7 +18,7 @@ from time import perf_counter
 import matplotlib.pyplot as plt
 import yaml
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
@@ -32,8 +32,8 @@ STEM = Path(__file__).stem.removesuffix("-run")
 RESULTS = HERE / f"{STEM}-results.json"
 FRAGMENT = HERE / f"{STEM}.html"
 FIGURE = ROOT / "docs/figures/sn-catalog-grouping" / STEM / "ids_domain_mix.svg"
-GUIDANCE = ROOT / "imas_codex/definitions/physics/domains.yaml"
-IDS_MAP = ROOT / "imas_codex/definitions/physics/ids_domains.json"
+GUIDANCE = ROOT / "iter_codex/definitions/physics/domains.yaml"
+IDS_MAP = ROOT / "iter_codex/definitions/physics/ids_domains.json"
 RANK = base.RANK
 CONTROLS = ("set_precedence", "ids_then_paths")
 VARIANTS = ("ids_first_tier_then_band", "ids_first_band_then_tier")
@@ -393,45 +393,45 @@ def render(payload: dict) -> None:
         "<h3>1. The use case</h3>",
         "<p>A domain is read by five kinds of consumer.</p><ul>"
         "<li><strong>Graph build and classification.</strong> "
-        "<code>imas_codex/graph/build_dd.py:3495,3528,3583</code> sets a path's "
+        "<code>iter_codex/graph/build_dd.py:3495,3528,3583</code> sets a path's "
         "domain from its IDS default on the rebuild, and preserves a classified "
-        "value. <code>imas_codex/graph/dd_domain_classifier.py:1589,1601</code> "
-        "classifies the paths. <code>imas_codex/graph/dd_graph_ops.py:125</code> "
+        "value. <code>iter_codex/graph/dd_domain_classifier.py:1589,1601</code> "
+        "classifies the paths. <code>iter_codex/graph/dd_graph_ops.py:125</code> "
         "coalesces on upsert. "
-        "<code>imas_codex/standard_names/graph_ops.py:3387-3409</code> merges one "
+        "<code>iter_codex/standard_names/graph_ops.py:3387-3409</code> merges one "
         "<code>HAS_PHYSICS_DOMAIN</code> edge per <code>source_domains</code> entry.</li>"
         "<li><strong>Catalog export and grouping.</strong> "
-        "<code>imas_codex/standard_names/export.py:2164-2189</code> groups entries "
+        "<code>iter_codex/standard_names/export.py:2164-2189</code> groups entries "
         "into per-domain buckets and records <code>domains_included</code>; "
         "<code>:844-864,3299-3327</code> excludes an entry with no domain. "
-        "<code>imas_codex/standard_names/batching.py:11</code> keys a name-only "
+        "<code>iter_codex/standard_names/batching.py:11</code> keys a name-only "
         "batch by domain and unit. "
-        "<code>imas_codex/standard_names/consolidation.py:49-117</code> merges a "
+        "<code>iter_codex/standard_names/consolidation.py:49-117</code> merges a "
         "group's domains into one scalar plus a union. "
-        "<code>imas_codex/standard_names/families.py:665</code> prints the domain "
+        "<code>iter_codex/standard_names/families.py:665</code> prints the domain "
         "as a family column.</li>"
         "<li><strong>MCP search filters.</strong> "
-        "<code>imas_codex/llm/server.py:2414,2508,2559,2611,2792,3184,3302</code> "
+        "<code>iter_codex/llm/server.py:2414,2508,2559,2611,2792,3184,3302</code> "
         "take a domain filter per name and per signal; "
-        "<code>imas_codex/llm/sn_tools.py:345-414</code> matches a name's scalar "
+        "<code>iter_codex/llm/sn_tools.py:345-414</code> matches a name's scalar "
         "<em>or</em> any value in <code>source_domains</code>. "
-        "<code>imas_codex/llm/search_tools.py:327,751-785,1012,1750</code> "
+        "<code>iter_codex/llm/search_tools.py:327,751-785,1012,1750</code> "
         "post-filters signals, docs and code. "
-        "<code>imas_codex/graph/domain_queries.py:85,98,459</code> holds the "
-        "Cypher. <code>imas_codex/llm/search_formatters.py:649</code> renders "
+        "<code>iter_codex/graph/domain_queries.py:85,98,459</code> holds the "
+        "Cypher. <code>iter_codex/llm/search_formatters.py:649</code> renders "
         "the domain into result text.</li>"
         "<li><strong>Documentation and review prompts.</strong> "
-        "<code>imas_codex/llm/prompt_loader.py:576-629,928</code> renders the "
+        "<code>iter_codex/llm/prompt_loader.py:576-629,928</code> renders the "
         "domain vocabulary and the per-category scope into every prompt "
         "declaring <code>physics_domains</code>; "
-        "<code>imas_codex/standard_names/review/consolidation.py:189-323</code> "
+        "<code>iter_codex/standard_names/review/consolidation.py:189-323</code> "
         "groups review items by domain; "
-        "<code>imas_codex/standard_names/harmonize.py:519-653</code> attributes "
+        "<code>iter_codex/standard_names/harmonize.py:519-653</code> attributes "
         "domain-scoped lint findings to a family.</li>"
         "<li><strong>Name derivation.</strong> "
-        "<code>imas_codex/standard_names/domain_ranking.py:19-29</code>, "
-        "<code>imas_codex/standard_names/domain_priority.py:10-29</code>, and "
-        "<code>imas_codex/standard_names/enrichment.py:78-117</code>.</li></ul>",
+        "<code>iter_codex/standard_names/domain_ranking.py:19-29</code>, "
+        "<code>iter_codex/standard_names/domain_priority.py:10-29</code>, and "
+        "<code>iter_codex/standard_names/enrichment.py:78-117</code>.</li></ul>",
         "<p>Three properties follow, and the design is judged against them. A "
         "name needs <em>exactly one</em> scalar domain, because a filter has one "
         "value to match and export opens one bucket; it may carry several "
@@ -443,7 +443,7 @@ def render(payload: dict) -> None:
         "rendered into prompts a person reads, and the chat category list is "
         "ordered by the same precedence.</p>",
         "<h3>2. Where a domain comes from today</h3>",
-        f"<p>The IDS map <code>imas_codex/definitions/physics/ids_domains.json</code> "
+        f"<p>The IDS map <code>iter_codex/definitions/physics/ids_domains.json</code> "
         f"holds {payload['ids_map_summary']['entries']} entries, one domain each, "
         f"over {payload['ids_map_summary']['domains']} distinct domains, created "
         f"{escape(payload['ids_map_summary']['generated'][:10])}. "
@@ -451,7 +451,7 @@ def render(payload: dict) -> None:
         "<code>summary</code> to <code>general</code>; both are entries the paths "
         "below contradict.</p>",
         "<p>The build reads that map through "
-        "<code>imas_codex/core/physics_categorization.py:23-42</code> and applies "
+        "<code>iter_codex/core/physics_categorization.py:23-42</code> and applies "
         "it at <code>build_dd.py:3583-3588</code>, preserving an existing value "
         "when <code>domain_source</code> is set. The classifier "
         "(<code>dd_domain_classifier.py</code>) decides in four tiers: "

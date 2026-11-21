@@ -11,7 +11,7 @@ from uuid import uuid4
 
 import pytest
 
-from imas_codex.discovery.signals.vocabulary_graph import (
+from iter_codex.discovery.signals.vocabulary_graph import (
     COHORT_QUERY,
     COHORT_ROWS_QUERY,
     VOCABULARY_KEYS,
@@ -20,7 +20,7 @@ from imas_codex.discovery.signals.vocabulary_graph import (
     assign_cohort,
     verify_assignment,
 )
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 pytestmark = pytest.mark.graph
 
@@ -219,6 +219,6 @@ def test_the_write_lands_every_value_and_a_repeat_changes_nothing(
 
 
 def _snapshot(view, facility):
-    from imas_codex.discovery.signals.vocabulary_graph import snapshot_cohort
+    from iter_codex.discovery.signals.vocabulary_graph import snapshot_cohort
 
     return snapshot_cohort(view, facility)

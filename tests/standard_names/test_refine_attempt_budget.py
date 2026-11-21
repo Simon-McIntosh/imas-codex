@@ -19,8 +19,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
-_GC_WORKERS_PATH = "imas_codex.graph.client.GraphClient"
+_GC_PATH = "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_GC_WORKERS_PATH = "iter_codex.graph.client.GraphClient"
 
 
 def _mock_gc(rows: list[dict[str, Any]] | None = None):
@@ -85,7 +85,7 @@ class TestBudgetIsChargedOnTheClaim:
     """Every verified claim spends a rotation before any model call."""
 
     def test_charge_is_fenced_on_the_claim_and_returns_the_attempt_number(self):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             _charge_refine_name_attempts,
         )
 
@@ -106,7 +106,7 @@ class TestBudgetIsChargedOnTheClaim:
         )
 
     def test_uncharged_claim_is_dropped_before_the_model_call(self):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             _charge_refine_name_attempts,
         )
 
@@ -117,7 +117,7 @@ class TestBudgetIsChargedOnTheClaim:
         assert items == []
 
     def test_one_query_per_claim_token(self):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             _charge_refine_name_attempts,
         )
 
@@ -143,7 +143,7 @@ class TestEligibilityReadsTheBudget:
     """The claim predicate gates on rotations spent, not on lineage depth."""
 
     def test_predicate_gates_on_the_attempt_counter(self):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             REFINE_NAME_ATTEMPTS_SPENT,
             REFINE_NAME_ELIGIBILITY_WHERE,
         )
@@ -161,7 +161,7 @@ class TestBudgetFollowsTheLineage:
     """A successor inherits the rotations its predecessor spent."""
 
     def test_successor_inherits_the_predecessor_count(self):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             RefinedNamePersistenceRefusal,
             persist_refined_name,
         )
@@ -203,7 +203,7 @@ class TestExhaustionIsDecidedByTheBudget:
         [(0, "reviewed"), (2, "reviewed"), (3, "exhausted"), (4, "exhausted")],
     )
     def test_stage_follows_the_rotations_spent(self, attempts: int, expected: str):
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -252,7 +252,7 @@ class TestDecidedConflictsDoNotSpendTheRest:
         ],
     )
     def test_terminal_reasons_park_regardless_of_remaining_budget(self, reason: str):
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             stop_refine_name_attempt,
         )
 
@@ -263,7 +263,7 @@ class TestDecidedConflictsDoNotSpendTheRest:
         assert gc.query.call_args.kwargs["terminal"] is True
 
     def test_transient_failure_keeps_the_remaining_budget(self):
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             stop_refine_name_attempt,
         )
 
@@ -274,7 +274,7 @@ class TestDecidedConflictsDoNotSpendTheRest:
         assert gc.query.call_args.kwargs["terminal"] is False
 
     def test_the_reason_is_queryable_and_names_the_occupied_identity(self):
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             stop_refine_name_attempt,
         )
 
@@ -295,7 +295,7 @@ class TestDecidedConflictsDoNotSpendTheRest:
 
     def test_spent_budget_parks_with_its_own_reason(self):
         """A stop that is not itself decided still parks at the cap."""
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             stop_refine_name_attempt,
         )
 
@@ -325,8 +325,8 @@ class TestEscalationFiresOnTheLastRotation:
     async def test_last_rotation_uses_the_escalation_seat(
         self, attempts: int, escalates: bool
     ):
-        from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
-        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        from iter_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
+        from iter_codex.standard_names.worker_tasks.worker_refine_names import (
             process_refine_name_batch,
         )
 
@@ -341,11 +341,11 @@ class TestEscalationFiresOnTheLastRotation:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured", side_effect=_llm
+                "iter_codex.discovery.base.llm.acall_llm_structured", side_effect=_llm
             ),
-            patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
+            patch("iter_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             # The worker resolves each seat through this one accessor, so a
@@ -353,11 +353,11 @@ class TestEscalationFiresOnTheLastRotation:
             # indistinguishable and the escalation assertion would compare a
             # value with itself. Key the model on the seat name instead.
             patch(
-                "imas_codex.settings.get_model",
+                "iter_codex.settings.get_model",
                 side_effect=_model_by_seat(DEFAULT_ESCALATION_MODEL),
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
+                "iter_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="reviewed",
             ),
             patch(_GC_WORKERS_PATH, return_value=_mock_gc()),
@@ -373,7 +373,7 @@ class TestEscalationFiresOnTheLastRotation:
 
     @pytest.mark.asyncio
     async def test_attempt_number_and_prior_reason_are_logged(self, caplog):
-        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        from iter_codex.standard_names.worker_tasks.worker_refine_names import (
             process_refine_name_batch,
         )
 
@@ -381,17 +381,17 @@ class TestEscalationFiresOnTheLastRotation:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 side_effect=RuntimeError("boom"),
             ),
-            patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
+            patch("iter_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
-            patch("imas_codex.settings.get_model", return_value="refine-seat"),
+            patch("iter_codex.settings.get_model", return_value="refine-seat"),
             patch(
-                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
+                "iter_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="reviewed",
             ),
             patch(_GC_WORKERS_PATH, return_value=_mock_gc()),
@@ -409,7 +409,7 @@ class TestRecoveryRules:
     """Who gets the rotations back, and who does not."""
 
     def test_rescore_clears_the_diagnosis_but_not_the_rotations(self):
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             stage_name_for_rescore,
         )
 
@@ -424,7 +424,7 @@ class TestRecoveryRules:
         assert "sn.refine_attempts" not in cypher
 
     def test_a_name_steering_edit_refunds_the_rotations(self):
-        from imas_codex.standard_names.edit import _stamp_edit_fields
+        from iter_codex.standard_names.edit import _stamp_edit_fields
 
         gc = _mock_gc([])
         _stamp_edit_fields(
@@ -454,7 +454,7 @@ class TestAttachmentRefusalOfARefineProduct:
     async def test_attachment_rejection_counts_the_attempt_and_stays_retryable(
         self,
     ):
-        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        from iter_codex.standard_names.worker_tasks.worker_refine_names import (
             process_refine_name_batch,
         )
 
@@ -473,29 +473,29 @@ class TestAttachmentRefusalOfARefineProduct:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 return_value=(refined, 0.01, {"input_tokens": 10, "output_tokens": 5}),
             ),
-            patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
+            patch("iter_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
-            patch("imas_codex.settings.get_model", return_value="refine-seat"),
+            patch("iter_codex.settings.get_model", return_value="refine-seat"),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_refine_names._compose_refined_candidate_name",
+                "iter_codex.standard_names.worker_tasks.worker_refine_names._compose_refined_candidate_name",
                 return_value="radial_outline_of_poloidal_field_coil",
             ),
             patch(
-                "imas_codex.standard_names.canonical.find_name_key_duplicate",
+                "iter_codex.standard_names.canonical.find_name_key_duplicate",
                 return_value=None,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
+                "iter_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
                 side_effect=rejection,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
+                "iter_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="reviewed",
             ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_gc()),

@@ -9,9 +9,9 @@ Variants:
   exemplars, and review feedback.
 - **B (name-only):** lean per-batch context without front-loaded examples.
 - **C (tool-calling):** lean prompt plus tool definitions from
-  ``imas_codex.standard_names.prompt_tools`` for on-demand context.
+  ``iter_codex.standard_names.prompt_tools`` for on-demand context.
 
-The harness uses :func:`imas_codex.discovery.base.llm.call_llm_structured`
+The harness uses :func:`iter_codex.discovery.base.llm.call_llm_structured`
 with the model from ``get_model('sn-generate')``. Output is one JSON
 file per variant plus a summary diff table.
 
@@ -123,10 +123,10 @@ def main() -> int:
     #
     # Runner skeleton for reference:
     #
-    #   from imas_codex.discovery.base.llm import call_llm_structured
-    #   from imas_codex.llm.prompt_loader import render_prompt
-    #   from imas_codex.settings import get_model
-    #   from imas_codex.standard_names.prompt_tools import TOOLS, dispatch_tool_call
+    #   from iter_codex.discovery.base.llm import call_llm_structured
+    #   from iter_codex.llm.prompt_loader import render_prompt
+    #   from iter_codex.settings import get_model
+    #   from iter_codex.standard_names.prompt_tools import TOOLS, dispatch_tool_call
     #
     #   model = get_model("sn-generate")
     #   for item in items:

@@ -3,9 +3,9 @@
 import pytest
 from pydantic import ValidationError
 
-from imas_codex.config.codac_uda import create_archive_pulse
-from imas_codex.graph.models import ArchiveEndpoint, DataSource, Pulse, PulseCategory
-from imas_codex.graph.schema import GraphSchema
+from iter_codex.config.codac_uda import create_archive_pulse
+from iter_codex.graph.models import ArchiveEndpoint, DataSource, Pulse, PulseCategory
+from iter_codex.graph.schema import GraphSchema
 
 
 def test_pulse_and_categories_round_trip_without_losing_nanoseconds() -> None:

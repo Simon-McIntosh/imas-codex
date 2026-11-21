@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import BaseModel, Field
 
-from imas_codex.discovery.base.llm import (
+from iter_codex.discovery.base.llm import (
     _ensure_json_in_messages,
     _extract_balanced_json,
     _find_json_start,
@@ -33,7 +33,7 @@ class NestedResponse(BaseModel):
 
 def test_request_seed_is_additive_and_reaches_local_provider(monkeypatch):
     """Omitting seed preserves kwargs; an explicit seed reaches the endpoint."""
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     base = {
         "model": "local/advisory-candidate",
@@ -143,7 +143,7 @@ def test_to_json_schema_format_strips_constraints():
 )
 def test_build_kwargs_wraps_pydantic_for_all_models(model_name, monkeypatch):
     """All models get Pydantic→json_schema conversion, not just GPT-5."""
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     # Stub out settings/proxy lookups
 
@@ -165,7 +165,7 @@ def test_build_kwargs_wraps_pydantic_for_all_models(model_name, monkeypatch):
 
 def test_build_kwargs_passes_dict_response_format_unchanged(monkeypatch):
     """Non-Pydantic response_format (e.g., raw dict) is passed through."""
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     raw_format = {"type": "json_object"}
     kwargs = llm._build_kwargs(
@@ -320,13 +320,13 @@ class TestBuildKwargsServiceTag:
     """Tests for service= parameter in _build_kwargs."""
 
     def _build(self, monkeypatch, service="untagged", **overrides):
-        from imas_codex.discovery.base import llm
+        from iter_codex.discovery.base import llm
 
         # Paid Standard Names routing is admitted only on the direct OpenRouter
         # path, which needs a resolvable credential. Supply a placeholder so
         # header construction is asserted identically whether or not the
         # checkout happens to carry a developer .env.
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "placeholder-key")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "placeholder-key")
         defaults = {
             "model": "anthropic/claude-sonnet-4.6",
             "api_key": "test-key",
@@ -342,7 +342,7 @@ class TestBuildKwargsServiceTag:
     def test_default_service_is_untagged(self, monkeypatch):
         kwargs = self._build(monkeypatch)
         assert kwargs["metadata"]["service"] == "untagged"
-        assert kwargs["extra_headers"]["X-Title"] == "imas-codex:untagged"
+        assert kwargs["extra_headers"]["X-Title"] == "iter-codex:untagged"
 
     def test_service_sets_metadata(self, monkeypatch):
         kwargs = self._build(monkeypatch, service="facility-discovery")
@@ -350,7 +350,7 @@ class TestBuildKwargsServiceTag:
 
     def test_service_sets_xtitle(self, monkeypatch):
         kwargs = self._build(monkeypatch, service="data-dictionary")
-        assert kwargs["extra_headers"]["X-Title"] == "imas-codex:data-dictionary"
+        assert kwargs["extra_headers"]["X-Title"] == "iter-codex:data-dictionary"
 
     @pytest.mark.parametrize(
         "service",
@@ -365,13 +365,13 @@ class TestBuildKwargsServiceTag:
     )
     def test_all_valid_services_produce_correct_headers(self, monkeypatch, service):
         kwargs = self._build(monkeypatch, service=service)
-        assert kwargs["extra_headers"]["X-Title"] == f"imas-codex:{service}"
+        assert kwargs["extra_headers"]["X-Title"] == f"iter-codex:{service}"
         assert kwargs["metadata"]["service"] == service
 
     def test_http_referer_always_present(self, monkeypatch):
         kwargs = self._build(monkeypatch, service="imas-mapping")
         assert "HTTP-Referer" in kwargs["extra_headers"]
-        assert "imas-codex" in kwargs["extra_headers"]["HTTP-Referer"]
+        assert "iter-codex" in kwargs["extra_headers"]["HTTP-Referer"]
 
 
 # ---------------------------------------------------------------------------
@@ -523,7 +523,7 @@ class TestBuildKwargsJsonGuard:
     """_build_kwargs must wire json injection only when response_format is set."""
 
     def _build(self, monkeypatch, **overrides):
-        from imas_codex.discovery.base import llm
+        from iter_codex.discovery.base import llm
 
         defaults = {
             "model": "openrouter/qwen/qwen3.7-max",

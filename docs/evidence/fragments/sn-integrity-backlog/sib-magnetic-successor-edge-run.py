@@ -24,17 +24,17 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from imas_codex.graph import GraphClient
-from imas_codex.standard_names.export import (
+from iter_codex.graph import GraphClient
+from iter_codex.standard_names.export import (
     _RELEASE_IDENTITY_HOLDS,
     _SHIPPING_NAME_STAGES,
 )
-from imas_codex.standard_names.repair_authority import build_repair_authority
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.standard_names.repair_authority import build_repair_authority
+from iter_codex.standard_names.signed_manifest import (
     apply_signed_manifest,
     signed_payload_sha256,
 )
-from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+from iter_codex.standard_names.source_invariant import find_sourceless_live_names
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]

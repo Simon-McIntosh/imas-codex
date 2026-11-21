@@ -20,7 +20,7 @@ class TestEmbedFailureDoesNotQuarantine:
     def test_embed_failure_does_not_quarantine(self) -> None:
         """When inline embedding is skipped (deferred to embed worker),
         validation_status is not 'quarantined' and embed_text_hash is None."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -39,7 +39,7 @@ class TestEmbedFailureDoesNotQuarantine:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=mock_gc,
         ):
             persist_generated_name_batch(
@@ -57,7 +57,7 @@ class TestEmbedFailureDoesNotQuarantine:
     def test_embed_success_sets_embedded_at(self) -> None:
         """Embedding is deferred — embedded_at is NOT set inline.
         The embed worker pool handles it asynchronously."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -76,7 +76,7 @@ class TestEmbedFailureDoesNotQuarantine:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=mock_gc,
         ):
             persist_generated_name_batch(

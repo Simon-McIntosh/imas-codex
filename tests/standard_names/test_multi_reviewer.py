@@ -24,7 +24,7 @@ import pytest
 
 def test_get_sn_review_names_models_default():
     """get_sn_review_names_models() returns at least one string model."""
-    from imas_codex.settings import get_sn_review_names_models
+    from iter_codex.settings import get_sn_review_names_models
 
     models = get_sn_review_names_models()
     assert isinstance(models, list)
@@ -36,7 +36,7 @@ def test_get_sn_review_names_models_default():
 
 def test_get_sn_review_names_models_override(monkeypatch):
     """get_sn_review_names_models() reads from [sn-review.names].models override."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
         if name == "sn-review":
@@ -45,14 +45,14 @@ def test_get_sn_review_names_models_override(monkeypatch):
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)
     settings_mod._load_pyproject_settings.cache_clear()
-    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
+    monkeypatch.delenv("ITER_CODEX_SN_REVIEW_PROFILE", raising=False)
     models = settings_mod.get_sn_review_names_models()
     assert models == ["a", "b", "c"]
 
 
 def test_get_sn_review_docs_models_override(monkeypatch):
     """get_sn_review_docs_models() reads from [sn-review.docs].models override."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
         if name == "sn-review":
@@ -61,7 +61,7 @@ def test_get_sn_review_docs_models_override(monkeypatch):
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)
     settings_mod._load_pyproject_settings.cache_clear()
-    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
+    monkeypatch.delenv("ITER_CODEX_SN_REVIEW_PROFILE", raising=False)
     models = settings_mod.get_sn_review_docs_models()
     assert models == ["x", "y"]
 
@@ -73,7 +73,7 @@ def test_get_sn_review_docs_models_override(monkeypatch):
 
 def test_state_has_review_models_default():
     """StandardNameReviewState initializes new fields with correct defaults."""
-    from imas_codex.standard_names.review.state import StandardNameReviewState
+    from iter_codex.standard_names.review.state import StandardNameReviewState
 
     state = StandardNameReviewState(facility="dd")
     assert state.review_models == []
@@ -90,7 +90,7 @@ def test_state_has_review_models_default():
 
 def test_build_review_record_canonical_and_model_family():
     """_build_review_record returns a correct record for a canonical review."""
-    from imas_codex.standard_names.review.pipeline import _build_review_record
+    from iter_codex.standard_names.review.pipeline import _build_review_record
 
     reviewed_at = datetime.now(UTC).isoformat()
     item = {
@@ -133,14 +133,14 @@ def test_build_review_record_canonical_and_model_family():
 )
 def test_derive_model_family_mappings(model_id: str, expected_family: str):
     """_derive_model_family maps model ids to correct family labels."""
-    from imas_codex.standard_names.review.pipeline import _derive_model_family
+    from iter_codex.standard_names.review.pipeline import _derive_model_family
 
     assert _derive_model_family(model_id) == expected_family
 
 
 def test_model_slug_normalizes():
     """_model_slug converts model ids to safe slugs."""
-    from imas_codex.standard_names.review.pipeline import _model_slug
+    from iter_codex.standard_names.review.pipeline import _model_slug
 
     slug = _model_slug("openrouter/anthropic/claude-opus-4.6")
     assert slug == "openrouter-anthropic-claude-opus-4-6"

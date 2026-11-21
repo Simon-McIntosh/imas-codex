@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from imas_codex.ids.models import (
+from iter_codex.ids.models import (
     MappingDisposition,
     ValidatedMappingResult,
     ValidatedSignalMapping,
@@ -134,7 +134,7 @@ def test_derive_error_mappings_value_target_with_error_children_is_unmapped(
     The graph offers error children for the value target, but no error
     signal stands behind them, so the stage binds none.
     """
-    from imas_codex.ids.mapping import derive_error_mappings
+    from iter_codex.ids.mapping import derive_error_mappings
 
     parent = "equilibrium/time_slice/global_quantities/ip"
     mock_gc.query.return_value = [
@@ -166,7 +166,7 @@ def test_derive_error_mappings_error_signal_yields_binding(mock_gc):
     the caller passes; the graph supplies only the HAS_ERROR children, not
     the data bindings, so this holds on a first pass after map clear.
     """
-    from imas_codex.ids.mapping import derive_error_mappings
+    from iter_codex.ids.mapping import derive_error_mappings
 
     parent = "equilibrium/time_slice/global_quantities/ip"
     mock_gc.query.side_effect = [
@@ -203,7 +203,7 @@ def test_derive_error_mappings_error_signal_yields_binding(mock_gc):
 
 def test_derive_error_mappings_empty(mock_gc):
     """Returns empty list for empty input without querying the graph."""
-    from imas_codex.ids.mapping import derive_error_mappings
+    from iter_codex.ids.mapping import derive_error_mappings
 
     result = derive_error_mappings([], gc=mock_gc, facility="jet")
     assert result == []
@@ -217,7 +217,7 @@ def test_derive_error_mappings_empty(mock_gc):
 
 def test_classify_error_signals_identifies_uncertainty(mock_gc):
     """Signals with uncertainty keywords are classified as error signals."""
-    from imas_codex.ids.mapping import classify_error_signals
+    from iter_codex.ids.mapping import classify_error_signals
 
     mock_gc.query.return_value = [
         {
@@ -238,7 +238,7 @@ def test_classify_error_signals_identifies_uncertainty(mock_gc):
 
 def test_classify_error_signals_excludes_physics_error_fields(mock_gc):
     """Signals about 'error field correction coils' are excluded."""
-    from imas_codex.ids.mapping import classify_error_signals
+    from iter_codex.ids.mapping import classify_error_signals
 
     mock_gc.query.return_value = [
         {
@@ -257,7 +257,7 @@ def test_classify_error_signals_excludes_physics_error_fields(mock_gc):
 
 def test_classify_error_signals_excludes_plain_signals(mock_gc):
     """Signals without uncertainty keywords are not returned."""
-    from imas_codex.ids.mapping import classify_error_signals
+    from iter_codex.ids.mapping import classify_error_signals
 
     mock_gc.query.return_value = [
         {
@@ -275,7 +275,7 @@ def test_classify_error_signals_excludes_plain_signals(mock_gc):
 
 def test_classify_error_signals_mixed(mock_gc):
     """Mixed input: only uncertainty signals are returned."""
-    from imas_codex.ids.mapping import classify_error_signals
+    from iter_codex.ids.mapping import classify_error_signals
 
     mock_gc.query.return_value = [
         {
@@ -311,7 +311,7 @@ def test_classify_error_signals_mixed(mock_gc):
 
 def test_classify_error_signals_lower_keyword(mock_gc):
     """Signals with 'lower' keyword classified as lower error type."""
-    from imas_codex.ids.mapping import classify_error_signals
+    from iter_codex.ids.mapping import classify_error_signals
 
     mock_gc.query.return_value = [
         {
@@ -330,7 +330,7 @@ def test_classify_error_signals_lower_keyword(mock_gc):
 
 def test_classify_error_signals_upper_keyword(mock_gc):
     """Signals with 'upper' keyword classified as upper error type."""
-    from imas_codex.ids.mapping import classify_error_signals
+    from iter_codex.ids.mapping import classify_error_signals
 
     mock_gc.query.return_value = [
         {
@@ -349,7 +349,7 @@ def test_classify_error_signals_upper_keyword(mock_gc):
 
 def test_classify_error_signals_sigma_keyword(mock_gc):
     """'sigma' in group_key triggers error classification (symmetric)."""
-    from imas_codex.ids.mapping import classify_error_signals
+    from iter_codex.ids.mapping import classify_error_signals
 
     mock_gc.query.return_value = [
         {
@@ -368,7 +368,7 @@ def test_classify_error_signals_sigma_keyword(mock_gc):
 
 def test_classify_error_signals_returns_required_keys(mock_gc):
     """Each returned dict contains all required keys."""
-    from imas_codex.ids.mapping import classify_error_signals
+    from iter_codex.ids.mapping import classify_error_signals
 
     mock_gc.query.return_value = [
         {
@@ -394,7 +394,7 @@ def test_classify_error_signals_returns_required_keys(mock_gc):
 
 def test_classify_error_signals_empty_graph(mock_gc):
     """Returns empty list when graph has no signal sources."""
-    from imas_codex.ids.mapping import classify_error_signals
+    from iter_codex.ids.mapping import classify_error_signals
 
     mock_gc.query.return_value = []
     result = classify_error_signals("jet", gc=mock_gc)
@@ -413,7 +413,7 @@ def test_match_error_signals_to_imas_basic(mock_gc):
     the HAS_ERROR children of the matched target, so the cross-reference
     must read the passed data_mappings rather than persisted edges.
     """
-    from imas_codex.ids.mapping import match_error_signals_to_imas
+    from iter_codex.ids.mapping import match_error_signals_to_imas
 
     parent = "equilibrium/time_slice/global_quantities/ip"
     # Sole query: HAS_ERROR children of the matched target.
@@ -462,7 +462,7 @@ def test_match_error_signals_to_imas_basic(mock_gc):
 
 def test_match_error_signals_to_imas_empty_signals(mock_gc):
     """Returns empty list when no error signals provided."""
-    from imas_codex.ids.mapping import match_error_signals_to_imas
+    from iter_codex.ids.mapping import match_error_signals_to_imas
 
     result = match_error_signals_to_imas("jet", [], [], gc=mock_gc)
     assert result == []
@@ -471,7 +471,7 @@ def test_match_error_signals_to_imas_empty_signals(mock_gc):
 
 def test_match_error_signals_to_imas_missing_data_mappings(mock_gc):
     """No bindings to cross-reference yields no error binding."""
-    from imas_codex.ids.mapping import match_error_signals_to_imas
+    from iter_codex.ids.mapping import match_error_signals_to_imas
 
     error_signals = [
         {
@@ -490,7 +490,7 @@ def test_match_error_signals_to_imas_missing_data_mappings(mock_gc):
 
 def test_match_error_signals_to_imas_unmatched_parent(mock_gc):
     """An error signal whose parent is not among the run's bindings binds none."""
-    from imas_codex.ids.mapping import match_error_signals_to_imas
+    from iter_codex.ids.mapping import match_error_signals_to_imas
 
     error_signals = [
         {
@@ -518,7 +518,7 @@ def test_match_error_signals_to_imas_unmatched_parent(mock_gc):
 
 def test_match_error_signals_confidence_reduced(mock_gc):
     """Direct error signal mappings have confidence slightly reduced from parent."""
-    from imas_codex.ids.mapping import match_error_signals_to_imas
+    from iter_codex.ids.mapping import match_error_signals_to_imas
 
     parent_confidence = 1.0
     parent = "equilibrium/time_slice/global_quantities/ip"
@@ -701,7 +701,7 @@ def test_map_run_help_includes_stage():
     """CLI help text includes --stage flag with valid choices."""
     from click.testing import CliRunner
 
-    from imas_codex.cli.map import map_cmd
+    from iter_codex.cli.map import map_cmd
 
     runner = CliRunner()
     result = runner.invoke(map_cmd, ["run", "--help"])
@@ -714,7 +714,7 @@ def test_map_run_help_omits_retired_skip_flags():
     first and the second was parsed but never read."""
     from click.testing import CliRunner
 
-    from imas_codex.cli.map import map_cmd
+    from iter_codex.cli.map import map_cmd
 
     runner = CliRunner()
     result = runner.invoke(map_cmd, ["run", "--help"])
@@ -727,7 +727,7 @@ def test_map_run_help_stage_choices():
     """Stage flag documents all three valid choices: all, data, error."""
     from click.testing import CliRunner
 
-    from imas_codex.cli.map import map_cmd
+    from iter_codex.cli.map import map_cmd
 
     runner = CliRunner()
     result = runner.invoke(map_cmd, ["run", "--help"])
@@ -746,7 +746,7 @@ def test_map_run_help_stage_choices():
 
 def test_run_error_derivation_only_no_existing_mappings(mock_gc):
     """Returns empty list when no direct mappings exist in graph."""
-    from imas_codex.ids.mapping import run_error_derivation_only
+    from iter_codex.ids.mapping import run_error_derivation_only
 
     mock_gc.query.return_value = []  # No existing MAPS_TO_IMAS
 
@@ -756,7 +756,7 @@ def test_run_error_derivation_only_no_existing_mappings(mock_gc):
 
 def test_run_error_derivation_only_matches_error_signals(mock_gc):
     """Fetches existing data mappings then binds error fields from error signals."""
-    from imas_codex.ids.mapping import run_error_derivation_only
+    from iter_codex.ids.mapping import run_error_derivation_only
 
     parent = "equilibrium/time_slice/global_quantities/ip"
     mock_gc.query.side_effect = [

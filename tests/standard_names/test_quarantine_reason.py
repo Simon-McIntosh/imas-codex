@@ -5,14 +5,14 @@ from __future__ import annotations
 from typing import Any
 from unittest.mock import patch
 
-from imas_codex.standard_names import (
+from iter_codex.standard_names import (
     campaign,
     edit,
     graph_ops,
     promote,
     signed_manifest,
 )
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog_reset as _owning_graph_catalog_reset,
     graph_claim_release as _owning_graph_claim_release,
     graph_foundation as _owning_graph_foundation,
@@ -117,7 +117,7 @@ def test_edit_validation_already_pairs_status_and_reason() -> None:
     issues = ["grammar: invalid canonical name"]
 
     with patch(
-        "imas_codex.standard_names.worker_tasks.worker_compose_and_validate.validate_name_candidate",
+        "iter_codex.standard_names.worker_tasks.worker_compose_and_validate.validate_name_candidate",
         return_value=(issues, {}, "quarantined"),
     ):
         edit._stamp_successor_validation(

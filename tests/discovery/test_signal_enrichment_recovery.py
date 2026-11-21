@@ -6,12 +6,12 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from imas_codex.discovery.signals.enrichment import (
+from iter_codex.discovery.signals.enrichment import (
     DescriptionReview,
     EnrichmentOptions,
     enrich_signal_batch,
 )
-from imas_codex.discovery.signals.enrichment_review import ReviewBatcher
+from iter_codex.discovery.signals.enrichment_review import ReviewBatcher
 from tests.discovery.test_signal_enrichment_grounding import draft, messages
 
 
@@ -236,7 +236,7 @@ async def test_failed_pooled_call_preserves_consumed_tokens_once():
 
 @pytest.mark.asyncio
 async def test_budget_refusal_is_never_retried_or_replaced_with_fallback():
-    from imas_codex.discovery.base.llm import ProviderBudgetExhausted
+    from iter_codex.discovery.base.llm import ProviderBudgetExhausted
 
     call = AsyncMock(side_effect=ProviderBudgetExhausted("budget exhausted"))
     with pytest.raises(ProviderBudgetExhausted):

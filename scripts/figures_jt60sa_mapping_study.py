@@ -26,7 +26,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from imas_codex.plotting.style import save_figure, use_style
+from iter_codex.plotting.style import save_figure, use_style
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs/figures/jt60sa-mapping-study/agreement.svg"

@@ -8,7 +8,7 @@ the group and must not appear in the name or description.
 
 from __future__ import annotations
 
-from imas_codex.discovery.signals.parallel import (
+from iter_codex.discovery.signals.parallel import (
     _fill_member_template,
     extract_member_identifier,
     individualize_members,

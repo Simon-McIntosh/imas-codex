@@ -22,8 +22,8 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import discover
-from imas_codex.cli.discover.map import (
+from iter_codex.cli.discover import discover
+from iter_codex.cli.discover.map import (
     CandidatesStageOptions,
     run_candidates_stage,
 )
@@ -33,8 +33,8 @@ FACILITY = "jet"
 
 @pytest.fixture(autouse=True)
 def bare_discover_stage(monkeypatch, tmp_path):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import sequence
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import sequence
 
     monkeypatch.setattr(
         sequence,
@@ -53,9 +53,9 @@ def bare_discover_stage(monkeypatch, tmp_path):
 @pytest.fixture
 def stage_env(monkeypatch):
     """Plain-text mode and a stub facility config, so the stage needs no graph."""
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda name: {"id": name},
     )
 
@@ -76,7 +76,7 @@ def engine_calls(monkeypatch):
         state.candidates_written = 3
         state.cost.add("candidate", 0.1, 0)
 
-    monkeypatch.setattr("imas_codex.ids.workers.run_candidate_engine", fake_engine)
+    monkeypatch.setattr("iter_codex.ids.workers.run_candidate_engine", fake_engine)
     return calls
 
 
@@ -148,7 +148,7 @@ def test_focus_accepts_known_ids_and_refuses_unknown_ids(
             assert params["facility"] == FACILITY
             return [{"id": item} for item in params["ids"] if item == "source-a"]
 
-    monkeypatch.setattr("imas_codex.graph.GraphClient", Graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", Graph)
 
     run_candidates_stage(FACILITY, CandidatesStageOptions(focus=("source-a",)))
     assert len(engine_calls) == 1
@@ -172,7 +172,7 @@ def test_topic_is_carried_to_the_stage(stage_env, engine_calls, caplog):
     had one), so the topic reaches no worker; the stage still carries and logs
     it so the settled surface is honoured uniformly.
     """
-    caplog.set_level(logging.INFO, logger="imas_codex.discovery.map")
+    caplog.set_level(logging.INFO, logger="iter_codex.discovery.map")
 
     run_candidates_stage(FACILITY, CandidatesStageOptions(topic="equilibrium"))
 
@@ -193,7 +193,7 @@ def test_map_command_builds_options_and_delegates(monkeypatch):
         captured["options"] = options
         return {"sources_judged": 0, "candidates_written": 0, "cost": 0.0}
 
-    monkeypatch.setattr("imas_codex.cli.discover.map.run_candidates_stage", fake_stage)
+    monkeypatch.setattr("iter_codex.cli.discover.map.run_candidates_stage", fake_stage)
 
     result = CliRunner().invoke(
         discover,

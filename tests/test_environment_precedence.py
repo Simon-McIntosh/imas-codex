@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import conftest
 
-from imas_codex.graph import client as graph_client_module
+from iter_codex.graph import client as graph_client_module
 
 
 def _collected_item(*marker_names):
@@ -54,13 +54,13 @@ def test_collection_probes_once_and_skips_only_graph_items(monkeypatch):
 
 def test_explicit_test_graph_probe_bypasses_project_resolution(monkeypatch):
     test_uri = "bolt://127.0.0.1:17687"
-    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", test_uri)
+    monkeypatch.setenv("ITER_CODEX_TEST_NEO4J_URI", test_uri)
     monkeypatch.setenv("NEO4J_USERNAME", "test-user")
     monkeypatch.setenv("NEO4J_PASSWORD", "test-password")
     resolve_profile = Mock(side_effect=AssertionError("project profile resolved"))
-    monkeypatch.setattr("imas_codex.graph.profiles.resolve_neo4j", resolve_profile)
+    monkeypatch.setattr("iter_codex.graph.profiles.resolve_neo4j", resolve_profile)
     resolve_name = Mock(side_effect=AssertionError("project graph name resolved"))
-    monkeypatch.setattr("imas_codex.graph.profiles.get_active_graph_name", resolve_name)
+    monkeypatch.setattr("iter_codex.graph.profiles.get_active_graph_name", resolve_name)
     driver = Mock()
     driver.close = Mock()
     create_driver = Mock(return_value=driver)
@@ -81,7 +81,7 @@ def test_explicit_test_graph_probe_bypasses_project_resolution(monkeypatch):
 
 
 def test_explicit_test_graph_collection_probes_once(monkeypatch):
-    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", "bolt://127.0.0.1:17687")
+    monkeypatch.setenv("ITER_CODEX_TEST_NEO4J_URI", "bolt://127.0.0.1:17687")
     monkeypatch.setattr(conftest, "_neo4j_available", None)
     client = Mock()
     monkeypatch.setattr(conftest, "_neo4j_probe_client", Mock(return_value=client))
@@ -99,7 +99,7 @@ def test_explicit_test_graph_collection_probes_once(monkeypatch):
 
 def test_unavailable_explicit_endpoint_skips_only_graph_items(monkeypatch):
     test_uri = "bolt://127.0.0.1:17687"
-    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", test_uri)
+    monkeypatch.setenv("ITER_CODEX_TEST_NEO4J_URI", test_uri)
     monkeypatch.setattr(conftest, "_neo4j_available", None)
     client = Mock()
     client.get_stats.side_effect = OSError("connection refused")
@@ -119,7 +119,7 @@ def test_unavailable_explicit_endpoint_skips_only_graph_items(monkeypatch):
 
 
 def test_graph_probe_without_test_uri_uses_project_client(monkeypatch):
-    monkeypatch.delenv("IMAS_CODEX_TEST_NEO4J_URI", raising=False)
+    monkeypatch.delenv("ITER_CODEX_TEST_NEO4J_URI", raising=False)
     client_type = Mock()
     monkeypatch.setattr(graph_client_module, "GraphClient", client_type)
 

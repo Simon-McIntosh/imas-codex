@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.tools.version_tool import VersionTool
+from iter_codex.tools.version_tool import VersionTool
 
 pytestmark = pytest.mark.graph_mcp
 

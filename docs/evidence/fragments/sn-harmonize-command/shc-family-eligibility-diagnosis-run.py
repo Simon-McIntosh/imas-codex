@@ -44,37 +44,37 @@ JSON_OUT = Path(__file__).parent / "shc-family-eligibility-diagnosis.json"
 PREDICATE_FRAGMENTS = {
     "reset_eligibility": (
         "reset_standard_name_docs",
-        "imas_codex.standard_names.graph_store.graph_docs_persistence",
+        "iter_codex.standard_names.graph_store.graph_docs_persistence",
         "IN ['accepted', 'exhausted', 'reviewed', 'drafted']",
     ),
     "reset_scope_stamp": (
         "reset_standard_name_docs",
-        "imas_codex.standard_names.graph_store.graph_docs_persistence",
+        "iter_codex.standard_names.graph_store.graph_docs_persistence",
         "coalesce(sn.docs_stage, 'pending') = 'pending'",
     ),
     "docs_claim_core": (
         "claim_generate_docs_batch",
-        "imas_codex.standard_names.graph_store.graph_docs_persistence",
+        "iter_codex.standard_names.graph_store.graph_docs_persistence",
         "sn.name_stage = 'accepted' AND sn.docs_stage = 'pending'",
     ),
     "claim_scope_clause": (
         "_claim_sn_atomic",
-        "imas_codex.standard_names.graph_store.graph_cost_and_claims",
+        "iter_codex.standard_names.graph_store.graph_cost_and_claims",
         "AND sn.run_id = $scope_run_id",
     ),
     "review_claim_core": (
         "claim_review_docs_batch",
-        "imas_codex.standard_names.graph_store.graph_review_persistence",
+        "iter_codex.standard_names.graph_store.graph_review_persistence",
         "(sn.docs_stage = 'drafted' OR",
     ),
     "family_exclusion": (
         "_pattern_family_rows_query",
-        "imas_codex.standard_names.families",
+        "iter_codex.standard_names.families",
         "coalesce(m.name_stage, '') <> $superseded",
     ),
     "scope_name_ids": (
         "_scope_name_ids",
-        "imas_codex.standard_names.loop",
+        "iter_codex.standard_names.loop",
         "sn.run_id = $rid",
     ),
 }
@@ -194,8 +194,8 @@ def _ids(rows) -> list[str]:
 
 
 def measure() -> dict:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.families import fetch_pattern_families
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.families import fetch_pattern_families
 
     transcribed = verify_transcriptions()
     # Stands for the uuid a new apply mints under its scope; fixed rather than
@@ -276,19 +276,19 @@ def measure() -> dict:
         checks = [
             (
                 "docs_claim:name_stage",
-                "imas_codex/standard_names/graph_store/graph_docs_persistence.py:54",
+                "iter_codex/standard_names/graph_store/graph_docs_persistence.py:54",
                 st["name_stage"] == "accepted",
                 f"name_stage={st['name_stage']!r} (claim requires 'accepted')",
             ),
             (
                 "docs_claim:docs_stage",
-                "imas_codex/standard_names/graph_store/graph_docs_persistence.py:54",
+                "iter_codex/standard_names/graph_store/graph_docs_persistence.py:54",
                 st["docs_stage"] == "pending",
                 f"docs_stage={st['docs_stage']!r} (claim requires 'pending')",
             ),
             (
                 "docs_claim:scope_run_id",
-                "imas_codex/standard_names/graph_store/graph_cost_and_claims.py:329",
+                "iter_codex/standard_names/graph_store/graph_cost_and_claims.py:329",
                 mid in claim_scoped_fresh,
                 (
                     "a scoped drain binds $scope_run_id to the uuid this apply "
@@ -323,42 +323,42 @@ def measure() -> dict:
         "transcription_verified": transcribed,
         "predicates": {
             "reset_eligibility": {
-                "file": "imas_codex/standard_names/graph_store/graph_docs_persistence.py",
+                "file": "iter_codex/standard_names/graph_store/graph_docs_persistence.py",
                 "line": 406,
                 "excluded": sorted(set(member_ids) - set(reset_eligible)),
                 "matched": reset_eligible,
             },
             "reset_scope_stamp": {
-                "file": "imas_codex/standard_names/graph_store/graph_docs_persistence.py",
+                "file": "iter_codex/standard_names/graph_store/graph_docs_persistence.py",
                 "line": 420,
                 "matched": scope_stampable,
                 "note": "this query is skipped when reset eligibility is 0",
             },
             "docs_claim_core": {
-                "file": "imas_codex/standard_names/graph_store/graph_docs_persistence.py",
+                "file": "iter_codex/standard_names/graph_store/graph_docs_persistence.py",
                 "line": 54,
                 "matched": claim_eligible,
             },
             "docs_claim_scoped_fresh_scope": {
-                "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+                "file": "iter_codex/standard_names/graph_store/graph_cost_and_claims.py",
                 "line": 329,
                 "scope_run_id": fresh_scope,
                 "matched": claim_scoped_fresh,
             },
             "docs_claim_scoped_own_run_id": {
-                "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+                "file": "iter_codex/standard_names/graph_store/graph_cost_and_claims.py",
                 "line": 329,
                 "note": "positive control: the same claim, scoped to the run id "
                 "the node already carries",
                 "by_member": claim_scoped_by_own,
             },
             "review_claim_core": {
-                "file": "imas_codex/standard_names/graph_store/graph_review_persistence.py",
+                "file": "iter_codex/standard_names/graph_store/graph_review_persistence.py",
                 "line": 689,
                 "matched": review_claim,
             },
             "review_claim_scoped_fresh_scope": {
-                "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+                "file": "iter_codex/standard_names/graph_store/graph_cost_and_claims.py",
                 "line": 329,
                 "scope_run_id": fresh_scope,
                 "matched": review_claim_scoped_fresh,

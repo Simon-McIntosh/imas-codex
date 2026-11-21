@@ -8,9 +8,9 @@ the provider rather than a frozen table.
 
 from __future__ import annotations
 
-from imas_codex.core.physics_domain import PhysicsDomain
-from imas_codex.definitions.physics import load_domain_guidance
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.core.physics_domain import PhysicsDomain
+from iter_codex.definitions.physics import load_domain_guidance
+from iter_codex.llm.prompt_loader import render_prompt
 
 
 def test_prompt_lists_every_physics_domain_value() -> None:
@@ -21,7 +21,7 @@ def test_prompt_lists_every_physics_domain_value() -> None:
 
 def test_vocabulary_follows_the_provider_not_a_frozen_table(monkeypatch) -> None:
     """A domain added upstream must appear without touching the prompt text."""
-    from imas_codex.llm import prompt_loader
+    from iter_codex.llm import prompt_loader
 
     delivered = prompt_loader._provide_physics_domains()["physics_domains"]
     added = {
@@ -87,12 +87,12 @@ def test_category_block_is_rendered_in_precedence_order(monkeypatch) -> None:
     in reverse precedence order: an explicit sort is the only way the rendered
     order can follow precedence, so removing that sort fails this test.
     """
-    from imas_codex.definitions import physics as physics_defs
-    from imas_codex.graph.dd_domain_classifier import (
+    from iter_codex.definitions import physics as physics_defs
+    from iter_codex.graph.dd_domain_classifier import (
         _category_precedence_rank,
         _precedence_rank,
     )
-    from imas_codex.llm import prompt_loader
+    from iter_codex.llm import prompt_loader
 
     rank = _category_precedence_rank(_precedence_rank())
     guidance = load_domain_guidance()

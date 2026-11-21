@@ -12,7 +12,7 @@ from __future__ import annotations
 import sys
 from unittest.mock import patch
 
-from imas_codex.standard_names.export import GATE_B, _run_gate_b
+from iter_codex.standard_names.export import GATE_B, _run_gate_b
 
 
 def _isn_grammar_unimportable():

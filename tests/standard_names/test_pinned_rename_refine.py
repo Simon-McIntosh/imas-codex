@@ -19,14 +19,14 @@ from __future__ import annotations
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_claim_release as _owning_graph_claim_release,
     graph_cost_and_claims as _owning_graph_cost_and_claims,
     graph_foundation as _owning_graph_foundation,
     graph_refinement as _owning_graph_refinement,
 )
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_compose_and_validate as _owning_worker_compose_and_validate,
 )
 
@@ -279,7 +279,7 @@ class TestStageNameForRescore:
         assert node["validated_at"] is None
 
     def test_formerly_valid_name_is_claimable_for_scoped_validation(self) -> None:
-        from imas_codex.standard_names import workers
+        from iter_codex.standard_names import workers
 
         node = {
             "id": "n",
@@ -291,7 +291,7 @@ class TestStageNameForRescore:
         }
         _stage_rescore(node, run_id="r")
         fake = _NodeGraph(node)
-        with patch("imas_codex.graph.client.GraphClient", return_value=fake):
+        with patch("iter_codex.graph.client.GraphClient", return_value=fake):
             token, items = _owning_worker_compose_and_validate.claim_ids_for_validation(
                 ["n"], 1
             )
@@ -305,7 +305,7 @@ class TestRescoreNameOrchestrator:
     scoped review. The scoped pipeline is mocked — no live LLM/embed calls."""
 
     def test_stage_only_skips_review(self) -> None:
-        from imas_codex.standard_names import edit as edit_mod
+        from iter_codex.standard_names import edit as edit_mod
 
         with (
             patch.object(
@@ -338,8 +338,8 @@ class TestRescoreNameOrchestrator:
         mock_pipeline.assert_not_called()
 
     def test_review_path_runs_scoped_pipeline(self) -> None:
-        from imas_codex.standard_names import edit as edit_mod
-        from imas_codex.standard_names.edit import InlineReviewResult
+        from iter_codex.standard_names import edit as edit_mod
+        from iter_codex.standard_names.edit import InlineReviewResult
 
         summary = MagicMock(cost_spent=0.02, stop_reason="no_eligible_work")
         outcome_result = InlineReviewResult(
@@ -389,7 +389,7 @@ class TestRescoreNameOrchestrator:
         assert res["outcome"].all_accepted is True
 
     def test_revalidation_precedes_review(self) -> None:
-        from imas_codex.standard_names import edit as edit_mod
+        from iter_codex.standard_names import edit as edit_mod
 
         order: list[str] = []
         with (
@@ -423,7 +423,7 @@ class TestRescoreNameOrchestrator:
         assert order == ["validation", "review"]
 
     def test_requarantine_aborts_without_review_spend(self) -> None:
-        from imas_codex.standard_names import edit as edit_mod
+        from iter_codex.standard_names import edit as edit_mod
 
         node = {
             "id": "n",
@@ -469,7 +469,7 @@ class TestRescoreNameOrchestrator:
         mock_pipeline.assert_not_called()
 
     def test_refusal_propagates(self) -> None:
-        from imas_codex.standard_names import edit as edit_mod
+        from iter_codex.standard_names import edit as edit_mod
 
         with patch.object(
             _owning_graph_claim_release,
@@ -480,7 +480,7 @@ class TestRescoreNameOrchestrator:
         assert res["ok"] is False and "not found" in res["reason"]
 
     def test_atomic_stage_race_loss_never_validates_or_reviews(self) -> None:
-        from imas_codex.standard_names import edit as edit_mod
+        from iter_codex.standard_names import edit as edit_mod
 
         node = {"id": "n", "name_stage": "reviewed"}
         fake = _NodeGraph(node, lose_rescore_transition=True)

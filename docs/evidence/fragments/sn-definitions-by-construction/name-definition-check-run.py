@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at cd446eacb75baf1bc4efbd39db037d21af253021, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.audits.name_definition_agreement_check.
+# Names the tree no longer defines: iter_codex.standard_names.audits.name_definition_agreement_check.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Measure the name-versus-definition check against held-out labels and the catalog.
@@ -28,7 +28,7 @@ import json
 import re
 from pathlib import Path
 
-from imas_codex.standard_names.audits import name_definition_agreement_check
+from iter_codex.standard_names.audits import name_definition_agreement_check
 
 REPO = Path(__file__).resolve().parents[4]
 LABELS = (
@@ -44,7 +44,7 @@ OUT = Path(__file__).with_name("name-definition-check-results.json")
 # also carries them, so the arms can be recomputed from the repository alone
 # once the seat has been paid for; the cache copy is the seat's own output.
 JUDGMENT_ANSWERS = Path.home() / (
-    ".cache/imas-codex-sdbc-name-definition-check/name-definition-judgment-answers.json"
+    ".cache/iter-codex-sdbc-name-definition-check/name-definition-judgment-answers.json"
 )
 
 # The split seed and the stratified draw. Committed before the check was
@@ -207,7 +207,7 @@ def derived_children(names: set[str]) -> dict[str, list[str]]:
     absent from the mapping, which is observed-and-empty rather than unknown.
     """
 
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     rows = GraphClient().query(
         "MATCH (parent:StandardName)<-[:HAS_PARENT]-(child:StandardName) "
@@ -228,10 +228,10 @@ async def judge(rows: list[dict], *, concurrency: int = 8) -> dict[str, dict]:
     measurement asks exactly what review asks.
     """
 
-    from imas_codex.discovery.base.judgment import decide_batch
-    from imas_codex.settings import get_model
-    from imas_codex.standard_names.review.checks import load_review_checks
-    from imas_codex.standard_names.review.jev_review import (
+    from iter_codex.discovery.base.judgment import decide_batch
+    from iter_codex.settings import get_model
+    from iter_codex.standard_names.review.checks import load_review_checks
+    from iter_codex.standard_names.review.jev_review import (
         SERVICE,
         _question_def,
         build_name_state,
@@ -428,7 +428,7 @@ def main() -> None:
         "schema": "name-definition-check",
         "check": {
             "id": "definition_states_qualifier_name_lacks",
-            "implementation": "imas_codex.standard_names.audits.name_definition_agreement_check",
+            "implementation": "iter_codex.standard_names.audits.name_definition_agreement_check",
             "reads": "description, documentation, name",
             "calls_a_model": False,
         },

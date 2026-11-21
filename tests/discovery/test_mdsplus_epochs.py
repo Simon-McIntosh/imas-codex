@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.mdsplus.epochs import (
+from iter_codex.discovery.mdsplus.epochs import (
     detect_epochs_for_subtrees,
     detect_epochs_for_tree,
     epochs_to_versions,
@@ -16,7 +16,7 @@ from imas_codex.discovery.mdsplus.epochs import (
 class TestDetectEpochsForTree:
     """Tests for detect_epochs_for_tree wrapper."""
 
-    @patch("imas_codex.discovery.mdsplus.epochs.discover_epochs_optimized")
+    @patch("iter_codex.discovery.mdsplus.epochs.discover_epochs_optimized")
     def test_returns_epochs(self, mock_discover):
         mock_discover.return_value = (
             [
@@ -54,7 +54,7 @@ class TestDetectEpochsForTree:
         assert result[1]["version"] == 2
         mock_discover.assert_called_once()
 
-    @patch("imas_codex.discovery.mdsplus.epochs.discover_epochs_optimized")
+    @patch("iter_codex.discovery.mdsplus.epochs.discover_epochs_optimized")
     def test_empty_when_no_epochs(self, mock_discover):
         mock_discover.return_value = ([], {})
 
@@ -63,7 +63,7 @@ class TestDetectEpochsForTree:
 
         assert result == []
 
-    @patch("imas_codex.discovery.mdsplus.epochs.discover_epochs_optimized")
+    @patch("iter_codex.discovery.mdsplus.epochs.discover_epochs_optimized")
     def test_uses_epoch_config_params(self, mock_discover):
         mock_discover.return_value = ([], {})
 
@@ -81,7 +81,7 @@ class TestDetectEpochsForTree:
         assert call_kwargs.kwargs["start_shot"] == 5000
         assert call_kwargs.kwargs["coarse_step"] == 500
 
-    @patch("imas_codex.discovery.mdsplus.epochs.discover_epochs_optimized")
+    @patch("iter_codex.discovery.mdsplus.epochs.discover_epochs_optimized")
     def test_passes_client_for_incremental(self, mock_discover):
         mock_discover.return_value = ([], {})
         mock_client = MagicMock()
@@ -92,7 +92,7 @@ class TestDetectEpochsForTree:
         call_kwargs = mock_discover.call_args
         assert call_kwargs.kwargs["client"] is mock_client
 
-    @patch("imas_codex.discovery.mdsplus.epochs.discover_epochs_optimized")
+    @patch("iter_codex.discovery.mdsplus.epochs.discover_epochs_optimized")
     def test_default_step_size(self, mock_discover):
         mock_discover.return_value = ([], {})
 
@@ -106,7 +106,7 @@ class TestDetectEpochsForTree:
 class TestDetectEpochsForSubtrees:
     """Tests for detect_epochs_for_subtrees."""
 
-    @patch("imas_codex.discovery.mdsplus.epochs.detect_epochs_for_tree")
+    @patch("iter_codex.discovery.mdsplus.epochs.detect_epochs_for_tree")
     def test_processes_only_detect_epochs_trees(self, mock_detect):
         mock_detect.return_value = [{"version": 1, "first_shot": 3000}]
 
@@ -123,7 +123,7 @@ class TestDetectEpochsForSubtrees:
         assert "diagz" not in result
         mock_detect.assert_called_once()
 
-    @patch("imas_codex.discovery.mdsplus.epochs.detect_epochs_for_tree")
+    @patch("iter_codex.discovery.mdsplus.epochs.detect_epochs_for_tree")
     def test_returns_empty_for_no_epoched_subtrees(self, mock_detect):
         subtrees = [
             {"source_name": "results"},

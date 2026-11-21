@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.budget import (
+from iter_codex.standard_names.budget import (
     BudgetLease,
     BudgetManager,
     ChargeResult,
@@ -156,7 +156,7 @@ class TestGrammarRetryChargeEvent:
         # Mock acall_fn that returns an LLMResult-like object
         from pydantic import BaseModel, Field
 
-        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _grammar_retry,
         )
 
@@ -203,7 +203,7 @@ class TestGrammarRetryChargeEvent:
     @pytest.mark.asyncio
     async def test_grammar_retry_returns_zero_on_failure(self):
         """On exception, _grammar_retry returns (None, 0.0, 0, 0)."""
-        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _grammar_retry,
         )
 
@@ -281,7 +281,7 @@ class TestReviewCycleChargeEvents:
 
     def test_review_c0_c1_c2_emit_correct_cycle(self):
         """_charge_review_cycle creates events with c0/c1/c2 cycle tags."""
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _charge_review_cycle,
         )
 
@@ -328,7 +328,7 @@ class TestReviewCycleChargeEvents:
 
     def test_review_docs_phase_is_review_docs(self):
         """When review_target='docs', phase is 'review_docs'."""
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _charge_review_cycle,
         )
 
@@ -378,7 +378,7 @@ class TestReviewRetryChargeEvent:
 
     def test_review_retry_distinguishes_batch_id(self):
         """When _review_single_batch has retry cost, two events are created."""
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _charge_review_cycle,
         )
 
@@ -437,7 +437,7 @@ class TestReviewRetryChargeEvent:
 
     def test_review_no_retry_single_event(self):
         """When no retry occurred, only one event is created."""
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _charge_review_cycle,
         )
 

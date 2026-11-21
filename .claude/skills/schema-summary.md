@@ -1,6 +1,6 @@
 # Graph Schema Summary
 
-Condensed schema for the imas-codex Neo4j knowledge graph.
+Condensed schema for the iter-codex Neo4j knowledge graph.
 
 **Before writing Cypher queries**, verify property names against this reference.
 For the full schema (53 node types), see `agents/schema-reference.md` or call `get_graph_schema()`.

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.export import _run_gate_b
+from iter_codex.standard_names.export import _run_gate_b
 
 
 def _make_candidate(

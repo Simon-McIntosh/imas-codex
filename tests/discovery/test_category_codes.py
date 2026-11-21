@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.discovery.signals.category_codes import (
+from iter_codex.discovery.signals.category_codes import (
     carried_codes,
     delimited_parts,
     select_hand_sample,

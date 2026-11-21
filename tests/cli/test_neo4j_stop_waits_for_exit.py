@@ -16,8 +16,8 @@ from types import SimpleNamespace
 import click
 import pytest
 
-import imas_codex.cli.services as services
-from imas_codex.graph.neo4j_ops import Neo4jOperation
+import iter_codex.cli.services as services
+from iter_codex.graph.neo4j_ops import Neo4jOperation
 
 RUNNING_JOB = {
     "job_name": "codex-neo4j",
@@ -106,7 +106,7 @@ def test_export_stop_cleans_locks_only_after_the_job_has_exited(monkeypatch):
         services, "_clean_neo4j_locks", lambda node: events.append(f"clean {node}")
     )
     monkeypatch.setattr(
-        "imas_codex.graph.neo4j_ops.subprocess.run",
+        "iter_codex.graph.neo4j_ops.subprocess.run",
         lambda *args, **kwargs: SimpleNamespace(returncode=0),
     )
 
@@ -125,7 +125,7 @@ def test_a_failed_stop_stops_the_operation_before_any_cleanup(monkeypatch):
     monkeypatch.setattr(services, "stop_neo4j_job", stop_fails)
     monkeypatch.setattr(services, "_clean_neo4j_locks", cleaned.append)
     monkeypatch.setattr(
-        "imas_codex.graph.neo4j_ops.subprocess.run",
+        "iter_codex.graph.neo4j_ops.subprocess.run",
         lambda *args, **kwargs: pytest.fail("ran a local command after a failed stop"),
     )
 

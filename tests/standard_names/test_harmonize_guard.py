@@ -21,8 +21,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from iter_codex.standard_names.graph_store import (
     graph_docs_persistence as _owning_graph_docs_persistence,
 )
 
@@ -140,7 +140,7 @@ class _Harness:
         self.marked_batches: list[list[str]] = []
 
     def mark_fn(self, batch: list[str], dry_run: bool = False) -> dict[str, Any]:
-        from imas_codex.standard_names.harmonize import mark_members_for_regen
+        from iter_codex.standard_names.harmonize import mark_members_for_regen
 
         self.marked_batches.append(list(batch))
         return mark_members_for_regen(batch, dry_run=dry_run)
@@ -184,7 +184,7 @@ class _Harness:
 
 
 def _install_docs_pipeline(monkeypatch: Any, pipeline: _DocsPipeline) -> None:
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     monkeypatch.setattr(
         _owning_graph_docs_persistence, "reset_standard_name_docs", pipeline.reset
@@ -213,7 +213,7 @@ def _apply(
     force: str | None = None,
     reviews_dir: Any = None,
 ):
-    from imas_codex.standard_names.harmonize import apply_families
+    from iter_codex.standard_names.harmonize import apply_families
 
     return apply_families(
         graph,
@@ -234,7 +234,7 @@ def test_roster_and_approved_members_refused_without_force(
     The refusal names both, each with the evidence that protected it, and no
     member is marked, snapshotted or reset.
     """
-    from imas_codex.standard_names.protection import RecommendedNameError
+    from iter_codex.standard_names.protection import RecommendedNameError
 
     nodes = _family_nodes()
     pipeline = _DocsPipeline(nodes)
@@ -260,7 +260,7 @@ def test_contested_member_refused_without_force(
     monkeypatch: Any, tmp_path: Any
 ) -> None:
     """A name at ``contested`` is refused the same way, with its evidence."""
-    from imas_codex.standard_names.protection import RecommendedNameError
+    from iter_codex.standard_names.protection import RecommendedNameError
 
     nodes = _family_nodes()
     pipeline = _DocsPipeline(nodes)
@@ -315,7 +315,7 @@ def test_harmonize_help_describes_report_and_apply() -> None:
     """`sn harmonize --help` describes both the report and the apply modes."""
     from click.testing import CliRunner
 
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     result = CliRunner().invoke(sn, ["harmonize", "--help"])
 
@@ -334,9 +334,9 @@ def test_cli_refuses_recommended_member_without_force(
     """`sn harmonize --apply` refuses through the CLI, naming the protected name."""
     from click.testing import CliRunner
 
-    from imas_codex.cli.sn import sn
-    from imas_codex.graph import client as graph_client
-    from imas_codex.standard_names import catalog_release
+    from iter_codex.cli.sn import sn
+    from iter_codex.graph import client as graph_client
+    from iter_codex.standard_names import catalog_release
 
     nodes = _family_nodes()
     pipeline = _DocsPipeline(nodes)

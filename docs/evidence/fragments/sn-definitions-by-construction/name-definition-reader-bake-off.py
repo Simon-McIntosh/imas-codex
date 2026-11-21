@@ -239,7 +239,7 @@ def reader_class_groups(items: list[dict]) -> dict[str, str]:
 
 
 def _plan() -> list[dict]:
-    from imas_codex.settings import (
+    from iter_codex.settings import (
         get_sn_review_docs_models,
         get_sn_review_reasoning_effort,
     )
@@ -289,14 +289,14 @@ def _plan() -> list[dict]:
 
 
 def _system_prompt() -> str:
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     rendered = render_prompt("sn/review_name_definition_system", {})
     return rendered if isinstance(rendered, str) else str(rendered)
 
 
 async def _judge(batch: list[dict], model: str, effort: str | None):
-    from imas_codex.standard_names.review.name_definition_seat import _judge_batch
+    from iter_codex.standard_names.review.name_definition_seat import _judge_batch
 
     return await _judge_batch(
         batch, seat=model, system_prompt=_system_prompt(), reasoning_effort=effort
@@ -691,7 +691,7 @@ def build_report(items: list[dict], meta: dict) -> dict:
             "text_sources": meta["text_sources"],
             "text_mismatch": meta["text_mismatch"],
         },
-        "prompt": "imas_codex/llm/prompts/sn/review_name_definition_system.md",
+        "prompt": "iter_codex/llm/prompts/sn/review_name_definition_system.md",
         "spend_usd": round(spent, 4),
         "ceiling_usd": CEILING_USD,
         "class_counts": dict(collections.Counter(grouping.values())),

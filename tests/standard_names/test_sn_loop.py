@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from imas_codex.standard_names.loop import (
+from iter_codex.standard_names.loop import (
     RunSummary,
     summary_table,
 )

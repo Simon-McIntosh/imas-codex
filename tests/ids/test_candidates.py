@@ -10,8 +10,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from imas_codex.models.constants import SearchMode
-from imas_codex.search.search_strategy import SearchHit
+from iter_codex.models.constants import SearchMode
+from iter_codex.search.search_strategy import SearchHit
 
 
 def _hit(path: str, score: float) -> SearchHit:
@@ -59,7 +59,7 @@ class _FakeEncoder:
 @pytest.fixture(autouse=True)
 def fake_encoder(monkeypatch):
     _FakeEncoder.calls = []
-    monkeypatch.setattr("imas_codex.embeddings.encoder.Encoder", _FakeEncoder)
+    monkeypatch.setattr("iter_codex.embeddings.encoder.Encoder", _FakeEncoder)
     return _FakeEncoder
 
 
@@ -78,12 +78,12 @@ def _patch_hybrid(monkeypatch, hits_by_arm: dict, calls: list):
         return list(hits_by_arm.get(ids_filter, []))
 
     monkeypatch.setattr(
-        "imas_codex.ids.candidates.hybrid_dd_search", fake_hybrid, raising=True
+        "iter_codex.ids.candidates.hybrid_dd_search", fake_hybrid, raising=True
     )
 
 
 def test_every_returned_path_is_a_graph_node_id(monkeypatch):
-    from imas_codex.ids.candidates import retrieve_candidates
+    from iter_codex.ids.candidates import retrieve_candidates
 
     node_ids = {
         "equilibrium/time_slice/profiles_1d/psi",
@@ -116,7 +116,7 @@ def test_every_returned_path_is_a_graph_node_id(monkeypatch):
 
 
 def test_hits_from_several_ids_merge_by_score_without_duplicating_a_path(monkeypatch):
-    from imas_codex.ids.candidates import retrieve_candidates
+    from iter_codex.ids.candidates import retrieve_candidates
 
     shared_path = "equilibrium/time_slice/profiles_1d/psi"
     gc = _FakeGraph({shared_path})
@@ -155,7 +155,7 @@ def test_hits_from_several_ids_merge_by_score_without_duplicating_a_path(monkeyp
 
 
 def test_empty_ids_list_runs_unscoped(monkeypatch):
-    from imas_codex.ids.candidates import UNSCOPED_ARM, retrieve_candidates
+    from iter_codex.ids.candidates import UNSCOPED_ARM, retrieve_candidates
 
     path = "magnetics/flux_loop/flux"
     gc = _FakeGraph({path})
@@ -173,7 +173,7 @@ def test_empty_ids_list_runs_unscoped(monkeypatch):
 
 
 def test_one_encoder_call_embeds_a_batch(monkeypatch):
-    from imas_codex.ids.candidates import retrieve_candidates
+    from iter_codex.ids.candidates import retrieve_candidates
 
     gc = _FakeGraph({"pf_active/coil/current"})
     calls: list[dict] = []
@@ -197,8 +197,8 @@ def test_gather_ids_context_reads_candidates_from_edges(monkeypatch):
     Retrieval is no longer called here: the shortlist comes from the stored
     MAPPING_CANDIDATE edges through ``read_candidates``.
     """
-    import imas_codex.ids.candidates as candidates_mod
-    import imas_codex.ids.mapping as mapping
+    import iter_codex.ids.candidates as candidates_mod
+    import iter_codex.ids.mapping as mapping
 
     sentinel = {"src-1": [{"path": "equilibrium/time_slice/time"}]}
     captured: dict = {}
@@ -242,9 +242,9 @@ def test_section_prompt_lists_candidate_edge_dicts(monkeypatch):
     so ``_prepare_section_context`` must read them as mappings rather than the
     retrieved ``Candidate`` objects it used to receive.
     """
-    import imas_codex.ids.mapping as mapping
-    from imas_codex.ids.mapping import _prepare_section_context
-    from imas_codex.ids.models import TargetAssignment, TargetType
+    import iter_codex.ids.mapping as mapping
+    from iter_codex.ids.mapping import _prepare_section_context
+    from iter_codex.ids.models import TargetAssignment, TargetType
 
     monkeypatch.setattr(mapping, "fetch_imas_fields", lambda *a, **k: [])
     monkeypatch.setattr(mapping, "fetch_imas_subtree", lambda *a, **k: [])
@@ -254,7 +254,7 @@ def test_section_prompt_lists_candidate_edge_dicts(monkeypatch):
         def __init__(self, *args, **kwargs):
             pass
 
-    monkeypatch.setattr("imas_codex.tools.version_tool.VersionTool", _NoVersionTool)
+    monkeypatch.setattr("iter_codex.tools.version_tool.VersionTool", _NoVersionTool)
 
     assignment = TargetAssignment(
         source_id="src-1",
@@ -306,6 +306,6 @@ def test_mapping_module_no_longer_imports_cluster_searcher():
     re-export or an ``import ... as`` would surface and a text search of the
     one file would not.
     """
-    import imas_codex.ids.mapping as mapping
+    import iter_codex.ids.mapping as mapping
 
     assert not hasattr(mapping, "ClusterSearcher")

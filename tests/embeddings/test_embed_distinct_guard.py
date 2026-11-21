@@ -12,8 +12,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from imas_codex.embeddings.config import EmbeddingBackend, EncoderConfig
-from imas_codex.embeddings.encoder import DegenerateEmbeddingError, Encoder
+from iter_codex.embeddings.config import EmbeddingBackend, EncoderConfig
+from iter_codex.embeddings.encoder import DegenerateEmbeddingError, Encoder
 
 
 @pytest.fixture

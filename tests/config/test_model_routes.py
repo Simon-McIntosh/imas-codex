@@ -8,8 +8,8 @@ from urllib.parse import urlparse
 import httpx
 import pytest
 
-from imas_codex import settings
-from imas_codex.discovery.base import llm
+from iter_codex import settings
+from iter_codex.discovery.base import llm
 from tests.config.test_model_seats import _declared_models
 
 _DECLARED = [
@@ -29,7 +29,7 @@ def test_seat_scan_covers_all_route_classes():
 
 @pytest.mark.parametrize("seat,model", _DECLARED, ids=[seat for seat, _ in _DECLARED])
 def test_every_declared_seat_resolves_to_its_endpoint(seat, model, monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-provider-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-provider-key")
     section = seat.removesuffix(".model")
     if section in settings.MODEL_SECTIONS:
         config = settings.get_model_config(section)

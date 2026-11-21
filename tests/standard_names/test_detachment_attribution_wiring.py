@@ -3,7 +3,7 @@
 ``reconcile_attachment_consistency`` records ``run_id`` on every
 ``detach_inconsistent_attachment`` change it writes so a detachment can be
 traced back to the run that performed it (see
-:func:`imas_codex.standard_names.attachment_audit.count_unattributed_detachments`).
+:func:`iter_codex.standard_names.attachment_audit.count_unattributed_detachments`).
 The record accepting a run id is useless if no caller supplies one — these
 tests pin the two production call sites, the pool loop's global-maintenance
 pass and the provenance rebuild's post-replay consistency check, to actually
@@ -18,13 +18,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.attachment_audit import AttachmentAuditResult
+from iter_codex.standard_names.graph_store import (
     owner_module_path as _owner_module_path,
 )
 
-_GO = "imas_codex.standard_names.graph_ops"
-_LOOP = "imas_codex.standard_names.loop"
+_GO = "iter_codex.standard_names.graph_ops"
+_LOOP = "iter_codex.standard_names.loop"
 
 
 def _graph_context() -> tuple[MagicMock, MagicMock]:
@@ -69,31 +69,31 @@ def _maintenance_mocks(stack: ExitStack) -> None:
         )
     stack.enter_context(
         patch(
-            "imas_codex.graph.dd_graph_ops.reconcile_dd_unit_corrections",
+            "iter_codex.graph.dd_graph_ops.reconcile_dd_unit_corrections",
             return_value={},
         )
     )
     stack.enter_context(
         patch(
-            "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+            "iter_codex.standard_names.source_refresh.refresh_drifted_sources",
             return_value={},
         )
     )
     stack.enter_context(
         patch(
-            "imas_codex.standard_names.harmonize.restamp_harmonized_families",
+            "iter_codex.standard_names.harmonize.restamp_harmonized_families",
             return_value={},
         )
     )
     stack.enter_context(
         patch(
-            "imas_codex.standard_names.orphan_sweep.run_orphan_sweep_loop",
+            "iter_codex.standard_names.orphan_sweep.run_orphan_sweep_loop",
             new_callable=AsyncMock,
         )
     )
     stack.enter_context(
         patch(
-            "imas_codex.discovery.base.embed_worker.embed_description_worker",
+            "iter_codex.discovery.base.embed_worker.embed_description_worker",
             new_callable=AsyncMock,
         )
     )
@@ -112,87 +112,87 @@ async def test_pool_loop_passes_active_run_id_to_attachment_reconcile() -> None:
         _maintenance_mocks(stack)
         attach_mock = stack.enter_context(
             patch(
-                "imas_codex.standard_names.attachment_audit."
+                "iter_codex.standard_names.attachment_audit."
                 "reconcile_attachment_consistency",
                 return_value=AttachmentAuditResult(),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+                "iter_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
             )
         )
         stack.enter_context(
-            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
+            patch("iter_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
+                "iter_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
                 return_value={"total": 0, "names": [], "sources": []},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.ledger.find_provenance_orphans",
+                "iter_codex.standard_names.ledger.find_provenance_orphans",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.audits."
+                "iter_codex.standard_names.audits."
                 "find_flux_surface_reduction_violations",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.audits.find_removed_dd_sources",
+                "iter_codex.standard_names.audits.find_removed_dd_sources",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+                "iter_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+                "iter_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
             )
         )
         stack.enter_context(patch(f"{_LOOP}._build_pool_specs", return_value=[]))
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.pools.run_pools",
+                "iter_codex.standard_names.pools.run_pools",
                 new_callable=AsyncMock,
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.budget.BudgetManager.start",
+                "iter_codex.standard_names.budget.BudgetManager.start",
                 new_callable=AsyncMock,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.budget.BudgetManager.drain_pending",
+                "iter_codex.standard_names.budget.BudgetManager.drain_pending",
                 new_callable=AsyncMock,
                 return_value=True,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
+                "iter_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
                 return_value=0.0,
             )
         )
         stack.enter_context(
-            patch("imas_codex.graph.client.GraphClient", return_value=graph_context)
+            patch("iter_codex.graph.client.GraphClient", return_value=graph_context)
         )
 
-        from imas_codex.standard_names.loop import run_sn_pools
+        from iter_codex.standard_names.loop import run_sn_pools
 
         stop = asyncio.Event()
         stop.set()
@@ -214,7 +214,7 @@ def test_provenance_rebuild_passes_run_id_to_attachment_reconcile() -> None:
     consistency check carries ``run_id IS NULL`` and cannot be traced back to
     the rebuild invocation that performed it.
     """
-    import imas_codex.standard_names.provenance_rebuild as pr
+    import iter_codex.standard_names.provenance_rebuild as pr
 
     gc = MagicMock()
     with (
@@ -256,7 +256,7 @@ def test_provenance_rebuild_synthesizes_a_run_id_when_none_is_given() -> None:
     An operator invocation that forgets to pass ``run_id`` must not silently
     fall back to an untraceable ``run_id=None`` write.
     """
-    import imas_codex.standard_names.provenance_rebuild as pr
+    import iter_codex.standard_names.provenance_rebuild as pr
 
     gc = MagicMock()
     with (

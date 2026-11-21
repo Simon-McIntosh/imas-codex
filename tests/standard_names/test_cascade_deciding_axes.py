@@ -2,8 +2,8 @@
 
 import pytest
 
-from imas_codex import settings
-from imas_codex.standard_names.review import cascade
+from iter_codex import settings
+from iter_codex.standard_names.review import cascade
 
 
 def _set_deciding(monkeypatch, value):
@@ -51,7 +51,7 @@ def test_the_shipped_configuration_makes_both_axes_deciding():
     decides nothing, so its verdicts stay a drift watch rather than a second
     decider.
     """
-    from imas_codex.standard_names.review import panel_audit
+    from iter_codex.standard_names.review import panel_audit
 
     assert cascade.deciding_enabled("name") is True
     assert cascade.deciding_enabled("docs") is True
@@ -85,7 +85,7 @@ async def test_names_deciding_leaves_documentation_with_the_incumbent(
     the name axis returns Jev's own decision. That reviewer runs a single seat,
     so the fallback receives the head of the configured chain.
     """
-    from imas_codex.standard_names.review.checks import (
+    from iter_codex.standard_names.review.checks import (
         DOCS_DIMENSIONS,
         NAME_DIMENSIONS,
     )
@@ -117,7 +117,7 @@ async def test_names_deciding_leaves_documentation_with_the_incumbent(
 
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(
-        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+        "iter_codex.discovery.base.judgment.decisions_key_present", lambda: True
     )
     monkeypatch.setattr(
         cascade, "_name_judgment" if axis == "name" else "_docs_judgment", judgment

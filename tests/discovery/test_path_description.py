@@ -4,13 +4,13 @@ import json
 
 import pytest
 
-from imas_codex.discovery.paths.models import PathDescriptionBatch
+from iter_codex.discovery.paths.models import PathDescriptionBatch
 
 
 @pytest.mark.asyncio
 async def test_parallel_description_prompt_names_batch_shape(monkeypatch):
-    from imas_codex.discovery.base import judgment, llm
-    from imas_codex.discovery.paths.parallel import _async_score_with_llm
+    from iter_codex.discovery.base import judgment, llm
+    from iter_codex.discovery.paths.parallel import _async_score_with_llm
 
     paths = [{"path": "/analysis/src", "total_files": 3}]
 
@@ -41,8 +41,8 @@ async def test_parallel_description_prompt_names_batch_shape(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_path_keyed_answer_replays_as_one_description_per_path(monkeypatch):
-    from imas_codex.discovery.base import llm
-    from imas_codex.discovery.paths.description import describe_paths
+    from iter_codex.discovery.base import llm
+    from iter_codex.discovery.paths.description import describe_paths
 
     paths = [{"path": "/analysis/src"}, {"path": "/analysis/data"}]
     answer = {
@@ -67,8 +67,8 @@ async def test_path_keyed_answer_replays_as_one_description_per_path(monkeypatch
 
 @pytest.mark.asyncio
 async def test_description_refuses_missing_or_repeated_paths(monkeypatch):
-    from imas_codex.discovery.base import llm
-    from imas_codex.discovery.paths.description import describe_paths
+    from iter_codex.discovery.base import llm
+    from iter_codex.discovery.paths.description import describe_paths
 
     async def wrong(**kwargs):
         batch = kwargs["response_model"].model_validate(
@@ -95,8 +95,8 @@ async def test_description_refuses_missing_or_repeated_paths(monkeypatch):
 async def test_triage_judges_when_description_is_path_keyed_or_fails(
     monkeypatch, description_fails
 ):
-    from imas_codex.discovery.base import facility, judgment, llm
-    from imas_codex.discovery.paths.scorer import DirectoryTriager
+    from iter_codex.discovery.base import facility, judgment, llm
+    from iter_codex.discovery.paths.scorer import DirectoryTriager
 
     path = "/analysis/src/eddb"
 

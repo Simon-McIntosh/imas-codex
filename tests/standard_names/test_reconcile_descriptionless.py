@@ -48,7 +48,7 @@ _SEEDS = {
 @pytest.fixture()
 def _gc():
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -157,7 +157,7 @@ def _source(gc, source_id: str) -> dict:
 @pytest.mark.graph
 def test_reconcile_reopens_descriptionless_drafted_name(_gc, _clean):
     """A drafted name with no prose drops to pending and frees its source."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_descriptionless_composed_names,
     )
 
@@ -185,7 +185,7 @@ def test_reconcile_reopens_descriptionless_drafted_name(_gc, _clean):
 @pytest.mark.graph
 def test_reconcile_leaves_a_described_drafted_name_untouched(_gc, _clean):
     """Prose present is the whole invariant — such a name is ordinary work."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_reviewable_name_stage,
     )
 
@@ -206,7 +206,7 @@ def test_reconcile_leaves_a_described_drafted_name_untouched(_gc, _clean):
 @pytest.mark.graph
 def test_reconcile_is_idempotent_over_a_reopened_name(_gc, _clean):
     """A second pass finds nothing: the freed source no longer points anywhere."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_descriptionless_composed_names,
     )
 
@@ -228,7 +228,7 @@ def test_startup_reconcile_performs_the_repair(_gc, _clean):
     startup, so routing the descriptionless repair through it is what makes the
     fix fire before the pools read their work.
     """
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_reviewable_name_stage,
     )
 
@@ -249,7 +249,7 @@ def test_reconcile_does_not_advance_a_descriptionless_pending_name(_gc, _clean):
     stranded-at-pending to stranded-at-drafted and buys nothing, so a null
     description withholds the advance exactly as a quarantine does.
     """
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_reviewable_name_stage,
     )
 
@@ -302,7 +302,7 @@ def _claimed_compose_product(gc, *, name_id: str, description: str | None) -> di
 @pytest.mark.graph
 def test_finalize_refuses_to_draft_a_name_with_no_description(_gc, _clean):
     """The compose finalize parks a prose-less product at pending, not drafted."""
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         _finalize_generated_name_stage,
     )
 
@@ -317,7 +317,7 @@ def test_finalize_refuses_to_draft_a_name_with_no_description(_gc, _clean):
 @pytest.mark.graph
 def test_finalize_still_drafts_a_name_that_carries_prose(_gc, _clean):
     """The guard is narrow: an ordinary compose product still reaches review."""
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         _finalize_generated_name_stage,
     )
 

@@ -17,18 +17,18 @@ class ServerStartupBenchmarks:
 
     def time_server_cold_start(self):
         """Full server construction from scratch."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         AgentsServer()
 
     def time_mcp_tool_registration(self):
         """Tool registration via _register_tools()."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer.__new__(AgentsServer)
         from fastmcp import FastMCP
 
-        server.mcp = FastMCP("imas-codex-bench")
+        server.mcp = FastMCP("iter-codex-bench")
         server.read_only = False
         server._register_tools()
 
@@ -38,7 +38,7 @@ class ServerStartupBenchmarks:
 
         from fastmcp import Client
 
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         srv = AgentsServer()
         client = Client(srv.mcp)

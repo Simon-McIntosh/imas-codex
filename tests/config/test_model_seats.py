@@ -36,7 +36,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.settings import (
+from iter_codex.settings import (
     _MODEL_DEFAULTS,
     _SN_BENCHMARK_DEFAULTS,
     _SN_REVIEW_DEFAULTS,
@@ -50,13 +50,13 @@ from imas_codex.settings import (
     get_sn_review_names_models,
     get_sn_review_profile_models,
 )
-from imas_codex.standard_names.defaults import DEFAULT_REFINE_ROTATIONS
-from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+from iter_codex.standard_names.defaults import DEFAULT_REFINE_ROTATIONS
+from iter_codex.standard_names.worker_tasks.worker_refine_names import (
     refine_model_for_attempt,
 )
 from tests.standard_names.test_seat_exposure_calibration import _assert_proven_pricing
 
-# Every single-model seat under [tool.imas-codex.*].
+# Every single-model seat under [tool.iter-codex.*].
 SINGLE_SEATS = [
     "sn-docs",
     "sn-refine",
@@ -101,7 +101,7 @@ def _declared_models() -> dict[str, str]:
     ``sn-fanout.proposer-model``), so a seat added to the configuration is
     covered by these checks without an edit here.
     """
-    config = tomllib.loads(_PYPROJECT.read_text())["tool"]["imas-codex"]
+    config = tomllib.loads(_PYPROJECT.read_text())["tool"]["iter-codex"]
     found: dict[str, str] = {}
 
     def walk(node: object, path: str) -> None:
@@ -391,7 +391,7 @@ def test_escalation_seat_drives_the_final_refine_rotation(
     tier, resolves a model the seat does not name and fails here.
     """
     escalated_model = "openrouter/x-ai/grok-4.7"
-    monkeypatch.setenv("IMAS_CODEX_SN_ESCALATION_MODEL", escalated_model)
+    monkeypatch.setenv("ITER_CODEX_SN_ESCALATION_MODEL", escalated_model)
 
     seat = _get_section("sn-escalation")
     cap = DEFAULT_REFINE_ROTATIONS

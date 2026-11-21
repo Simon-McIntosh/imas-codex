@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from imas_codex.graph.build_dd import _batch_create_path_nodes
-from imas_codex.graph.models import (
+from iter_codex.graph.build_dd import _batch_create_path_nodes
+from iter_codex.graph.models import (
     DDResolutionField,
     DDResolutionStatus,
     DDResolutionValueKind,

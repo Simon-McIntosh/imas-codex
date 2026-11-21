@@ -20,9 +20,9 @@ import asyncio
 import json
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.ids.mapping import PipelineCost
-from imas_codex.standard_names.review.judge_stage import judge_entries
+from iter_codex.graph.client import GraphClient
+from iter_codex.ids.mapping import PipelineCost
+from iter_codex.standard_names.review.judge_stage import judge_entries
 
 FIXTURE_IDS = [
     "flux_surface_averaged_carbon_density_at_plasma_boundary",

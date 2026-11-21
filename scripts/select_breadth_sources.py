@@ -32,7 +32,7 @@ import sys
 
 def select_breadth_sources(per_ids: int = 8, status: str = "extracted") -> list[str]:
     """Return up to ``per_ids`` popularity-ranked source ids per IDS."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         rows = gc.query(

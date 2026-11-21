@@ -15,10 +15,10 @@ from time import perf_counter
 import matplotlib.pyplot as plt
 from neo4j import Query
 
-from imas_codex.discovery.base.evaluation import bootstrap_interval
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.domain_audit import _LIVE_NAMES_QUERY, LIVE_NAME_STAGES
-from imas_codex.standard_names.domain_ranking import (
+from iter_codex.discovery.base.evaluation import bootstrap_interval
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.domain_audit import _LIVE_NAMES_QUERY, LIVE_NAME_STAGES
+from iter_codex.standard_names.domain_ranking import (
     FALLBACK_RANK_TABLE,
     select_primary_domain,
 )

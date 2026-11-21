@@ -4,7 +4,7 @@ import re
 
 import pytest
 
-from imas_codex.discovery.wiki.entity_extraction import (
+from iter_codex.discovery.wiki.entity_extraction import (
     COCOS_PATTERN,
     MDSPLUS_PATH_PATTERN,
     SIGN_CONVENTION_PATTERN,
@@ -16,7 +16,7 @@ from imas_codex.discovery.wiki.entity_extraction import (
     extract_units,
     get_all_ids_names,
 )
-from imas_codex.discovery.wiki.scraper import WikiPage
+from iter_codex.discovery.wiki.scraper import WikiPage
 
 IMAS_PATH_PATTERN = _build_imas_pattern()
 

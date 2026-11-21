@@ -1,0 +1,1777 @@
+# Facility Configuration Schema
+#
+# Defines the structure of per-facility YAML config files (tcv.yaml, jet.yaml, etc.).
+# Validates both public and private configuration sections.
+#
+# Public config: <facility>.yaml (git-tracked, visible to LLMs/agents)
+# Private config: <facility>_private.yaml (gitignored, infrastructure secrets)
+#
+# Generated models: iter_codex/config/models.py
+# To regenerate: uv run build-models --force
+#
+# Usage:
+#   from iter_codex.config.models import FacilityConfig
+#   config = FacilityConfig.model_validate(yaml_data)
+
+id: https://imas.iter.org/schemas/facility_config
+name: facility_config
+title: Facility Configuration Schema
+description: >-
+  Schema for per-facility YAML configuration files. Defines required and
+  optional fields for both public and private config sections. Agents should
+  edit these files via MCP tools (update_facility_infrastructure, add_exploration_note)
+  which enforce this schema.
+
+license: MIT
+version: 0.4.0
+
+prefixes:
+  linkml: https://w3id.org/linkml/
+  fc: https://imas.iter.org/schemas/facility_config/
+
+default_prefix: fc
+default_range: string
+
+imports:
+  - linkml:types
+
+# =============================================================================
+# Enums
+# =============================================================================
+
+enums:
+  DataSystemType:
+    description: Types of data systems available at facilities
+    permissible_values:
+      mdsplus:
+        description: MDSplus tree-based data system
+      tdi:
+        description: TDI function-based data access layer
+      uda:
+        description: Universal Data Access (UDA) system
+      codac_uda:
+        description: CODAC plant archive through the UDA client
+      imas:
+        description: IMAS native data format
+      ppf:
+        description: JET Processed Pulse File system
+      edas:
+        description: JT-60SA EDAS data system
+      hdf5:
+        description: HDF5 file-based storage
+      netcdf:
+        description: NetCDF scientific data format
+
+  ArchiveRole:
+    description: Named CODAC archive roles, including an excluded operator endpoint
+    permissible_values:
+      fast:
+        description: Fast archive
+      slow:
+        description: Slow archive
+      operator:
+        description: Operator-reserved endpoint, never readable by this application
+
+  ReadableArchiveRole:
+    description: Archive roles that application readers may select
+    permissible_values:
+      fast:
+        description: Fast archive
+      slow:
+        description: Slow archive
+
+  LocalForwardProtocol:
+    description: Protocol for local port forwards
+    permissible_values:
+      http:
+        description: HTTP (plain)
+      https:
+        description: HTTPS (TLS)
+      ssh:
+        description: SSH tunnel endpoint
+
+  WikiSiteType:
+    description: Types of wiki/documentation sites
+    permissible_values:
+      mediawiki:
+        description: MediaWiki-based sites (Wikipedia, SPCwiki)
+      confluence:
+        description: Atlassian Confluence
+      twiki:
+        description: TWiki/Foswiki installation
+      twiki_static:
+        description: TWiki static HTML export
+      static:
+        description: Static HTML documentation site
+      static_html:
+        description: Static HTML site (alias for static)
+      twiki_raw:
+        description: TWiki raw filesystem access (direct data/pub path, no HTTP)
+
+  WikiAuthType:
+    description: Authentication methods for wiki sites
+    permissible_values:
+      none:
+        description: No authentication required
+      tequila:
+        description: EPFL Tequila SSO
+      keycloak:
+        description: Keycloak OIDC (JET)
+      basic:
+        description: HTTP Basic authentication
+      session:
+        description: Session-based auth (login form, cookies)
+      ssh_proxy:
+        description: Access only via SSH tunnel
+
+  SchedulerType:
+    description: Types of job schedulers available at facilities
+    permissible_values:
+      slurm:
+        description: Slurm Workload Manager
+      sge:
+        description: Sun Grid Engine (SGE/UGE)
+      pbs:
+        description: PBS/Torque batch system
+      lsf:
+        description: IBM Spectrum LSF
+      condor:
+        description: HTCondor workload management
+
+  StaticSourceFormat:
+    description: Data formats for static source files
+    permissible_values:
+      xml:
+        description: XML-structured data (device XMLs, geometry definitions)
+      text:
+        description: Plain text with whitespace-delimited or fixed-width columns
+      csv:
+        description: Comma-separated values
+      netcdf:
+        description: NetCDF scientific data format
+      hdf5:
+        description: HDF5 hierarchical data format
+      json:
+        description: JSON structured data
+      fortran_namelist:
+        description: Fortran namelist format (&name ... /)
+
+  NameFormat:
+    description: Format of user names in GECOS field
+    permissible_values:
+      first_last:
+        description: First Last format
+      last_first:
+        description: Last, First format
+      username:
+        description: Username only (no real name)
+
+# =============================================================================
+# Classes - Config File Structure
+# =============================================================================
+
+classes:
+  # -------------------------------------------------------------------------
+  # Public Config (in <facility>.yaml)
+  # -------------------------------------------------------------------------
+
+  FacilityConfig:
+    description: >-
+      Root configuration for a facility. Combines public and private fields.
+      Public fields go in <facility>.yaml, private in <facility>_private.yaml.
+      Validation merges both files before checking required fields.
+      
+      Note: The loader renames 'facility' to 'id', so either is accepted.
+    class_uri: fc:FacilityConfig
+    tree_root: true
+    attributes:
+      # --- Facility identifier (one of these is required) ---
+      facility:
+        description: Facility identifier in YAML files (e.g., "tcv", "jet")
+      id:
+        description: Facility identifier after loading (alias of facility)
+      name:
+        description: Human-readable facility name
+        required: true
+      machine:
+        description: Tokamak/stellarator machine name
+        required: true
+      description:
+        description: Brief facility description
+
+      # --- Optional public fields ---
+      location:
+        description: Geographic location
+      ssh_host:
+        description: SSH host alias for connection (configured in ~/.ssh/config)
+      ssh_max_sessions:
+        description: >-
+          Maximum concurrent SSH sessions to this host within one process.
+          Persistent worker pools and per-call execution share this bound.
+        range: integer
+        minimum_value: 1
+      ssh_gateway:
+        description: >-
+          SSH gateway/bastion host for ProxyJump connections to facility
+          login nodes. Used by the host CLI for node discovery and querying
+          when the primary ssh_host is unreachable.
+      ssh_user:
+        description: >-
+          SSH username for facility connections. Defaults to the current
+          user if not specified.
+      known_login_nodes:
+        description: >-
+          Known login node short hostnames for this facility. Used as
+          fallback when dynamic discovery via /etc/hosts fails (e.g.,
+          when the current SSH target node is down). The host CLI tries
+          dynamic discovery first, then falls back to probing these nodes
+          via the ssh_gateway. Short hostnames without domain suffix.
+        multivalued: true
+
+      # --- Nested config sections ---
+      discovery_roots:
+        description: >-
+          Root paths for discovery pipeline seeding. Can be simple strings
+          ["/home", "/work"] or structured [{path: "/home", category: "container"}].
+      data_systems:
+        description: Data system configuration for signal discovery
+        range: DataSystemsConfig
+      signal_glossary:
+        description: Facility terms and meanings for signal enrichment context
+        range: SignalGlossaryEntry
+        multivalued: true
+      data_access_patterns:
+        description: >-
+          Data access patterns discovered during initial facility exploration.
+          Populated by exploration agents before signal discovery runs. Describes
+          how data is organized, what tools/APIs exist, what naming conventions
+          are used. This informs downstream tools (wiki scoring, signal extraction,
+          code ingestion) about what to look for at this facility.
+        range: DataAccessPatternsConfig
+      wiki_sites:
+        description: Wiki/documentation sites
+        multivalued: true
+        range: WikiSiteConfig
+      user_info:
+        description: User info discovery configuration
+        range: UserInfoConfig
+      port_forwards:
+        description: >-
+          Port forward configuration for accessing facility services from workstation.
+          Each facility uses a base port range (e.g., 88xx for jt-60sa). Individual
+          services increment the last digit (0=wiki1, 1=wiki2, etc). Workstation
+          SSH config establishes LocalForwards; autossh systemd services maintain them.
+        range: PortForwardsConfig
+      browser:
+        description: >-
+          Browser-accessible URLs for facility services accessible via port forwards.
+          Maps service names to localhost URLs for documentation and quick access.
+        range: BrowserConfig
+      signal_member_patterns:
+        description: >-
+          Per-source-group rules for reading a singleton array's member
+          identifier out of its name, keyed by source group. A source group the
+          member belongs to regardless of the array (e.g. "MMSYS") names the
+          pattern that captures it. A group with no entry keeps the default
+          rule: the numeric runs that vary across the source's members, or the
+          array name's trailing number. An array an entry's pattern does not
+          match keeps a null identifier.
+        range: MemberIdentifierPattern
+        multivalued: true
+        inlined: true
+        inlined_as_list: false
+
+      # --- Private fields (in <facility>_private.yaml) ---
+      hostnames:
+        description: Network hostnames for this facility
+        multivalued: true
+        annotations:
+          is_private: true
+      nfs_mounts:
+        description: NFS mount points (list of {source, target, options})
+        annotations:
+          is_private: true
+      paths:
+        description: Key filesystem paths (nested dict structure)
+        annotations:
+          is_private: true
+      svn:
+        description: SVN repository URLs
+        annotations:
+          is_private: true
+      excludes:
+        description: >-
+          Paths and patterns to exclude during runtime discovery and exploration.
+          Public field because scan behavior must be reproducible from committed
+          facility configuration.
+      tools:
+        description: Tool availability map (tool -> version)
+        annotations:
+          is_private: true
+      os_info:
+        description: Operating system details
+        annotations:
+          is_private: true
+      python_info:
+        description: Python environment details
+        annotations:
+          is_private: true
+      compilers:
+        description: Compiler availability
+        annotations:
+          is_private: true
+      containers:
+        description: Available container images
+        annotations:
+          is_private: true
+      exploration_notes:
+        description: Free-form exploration notes (timestamped)
+        multivalued: true
+        annotations:
+          is_private: true
+      login_nodes:
+        description: >-
+          FQDN patterns for login nodes where this facility's SSH alias is local.
+          Supports wildcards (*, ?). When is_local_host() detects the current
+          machine's FQDN matches any pattern, the facility's local_hosts aliases
+          are treated as local. Example: ["98dci4-srv-*.iter.org"]
+          Public field — not security-sensitive (FQDN patterns only).
+        multivalued: true
+      local_hosts:
+        description: >-
+          SSH host aliases that refer to this machine when on a matching login node.
+          Used by is_local_host() for location-aware graph profile resolution.
+          Typically just the facility name, e.g. ["iter"] for ITER login nodes.
+          Public field — not security-sensitive (SSH aliases only).
+        multivalued: true
+      nice_level:
+        description: >-
+          Unix nice level (0-19) applied to all remote SSH commands targeting
+          this facility. Higher values = lower scheduling priority. Set to 19
+          on shared analysis servers where codex scanning should yield CPU to
+          facility users. When set, all run_command(), run_python_script(), and
+          run_script_via_stdin() calls to this host are wrapped with nice.
+          Applied automatically via the per-host nice registry in executor.py.
+        range: integer
+      remote_environment:
+        description: >-
+          Host-wide interpreter and shell environment for every remote script
+          the facility runs. One home for the recipe each host needs before a
+          remote Python call: ordered setup_commands (module loads, env
+          sourcing, virtualenv activation), the python_command valid after
+          them, the minimum interpreter version the scripts require, and the
+          modules every remote script requires. A data system may override its
+          own python_command and setup_commands for its scripts. Resolved by
+          the facility-aware layer, which passes the result to the executor as
+          parameters; the executor itself stays facility-agnostic.
+        range: RemoteEnvironmentConfig
+      compute:
+        description: >-
+          Compute infrastructure available at this facility. Describes job
+          schedulers, partitions/queues, GPU resources, and constraints.
+          Used by --submit flag to route CLI work to compute nodes.
+        range: ComputeConfig
+        annotations:
+          is_private: true
+      compute_locations:
+        description: >-
+          Named compute locations for location-aware routing.
+          Maps location names to scheduler/partition/service_job_name.
+          Used by remote/locations.py for compute node discovery.
+
+  # -------------------------------------------------------------------------
+  # Nested Config Types
+  # -------------------------------------------------------------------------
+
+  MemberIdentifierPattern:
+    description: >-
+      A rule for reading a member identifier out of a singleton array's name,
+      declared once per source group. The pattern is a regular expression matched
+      against the array name; the text its `member` named group captures is the
+      array's member identifier. Which part of a name is the member is facility
+      knowledge, so it is declared here rather than guessed by the exporter.
+    class_uri: fc:MemberIdentifierPattern
+    attributes:
+      source_group:
+        description: Source group the rule applies to (e.g. "MMSYS").
+        identifier: true
+      pattern:
+        description: >-
+          Regular expression matched against the source array name, carrying a
+          named group `member`.
+        required: true
+
+  RemoteEnvironmentModule:
+    description: >-
+      A Python module every remote script for a facility must be able to
+      import. The facility environment probe checks each one; a module that
+      ships outside the interpreter's default path carries the directory that
+      must be added to sys.path.
+    class_uri: fc:RemoteEnvironmentModule
+    attributes:
+      name:
+        description: Importable module name (e.g., "numpy", "eddb_pwrapper").
+        required: true
+      path:
+        description: >-
+          Directory added to sys.path before importing the module, for a
+          module that is not installed into the interpreter's environment
+          (e.g., "/analysis/src/eddb" for eddb_pwrapper).
+
+  RemoteEnvironmentConfig:
+    description: >-
+      Host-wide interpreter and shell recipe for remote script execution.
+      Holds the environment a facility's remote scripts depend on, so code
+      scans, path scans and signal scans on one host share one recipe instead
+      of each falling back to a bare interpreter.
+    class_uri: fc:RemoteEnvironmentConfig
+    attributes:
+      setup_commands:
+        description: >-
+          Ordered shell commands run before a remote Python call: module
+          unloads and loads, sourcing an environment file, virtualenv
+          activation.
+        multivalued: true
+      python_command:
+        description: >-
+          Python interpreter valid after setup_commands. A bare command name
+          or a full path. Default: "python3".
+      min_python_version:
+        description: >-
+          Minimum interpreter version the remote scripts require, as a dotted
+          string (e.g., "3.12"). The facility environment probe reports a
+          version below this floor.
+      required_modules:
+        description: >-
+          Python modules every remote script for this facility requires. The
+          facility environment probe verifies each one imports.
+        multivalued: true
+        range: RemoteEnvironmentModule
+
+  DiscoveryRootConfig:
+    description: >-
+      Structured configuration for a discovery root path. Used in private
+      configs to provide category and priority hints for discovery seeding.
+      Public configs may use simple string paths instead.
+    class_uri: fc:DiscoveryRootConfig
+    attributes:
+      path:
+        description: Absolute filesystem path to seed
+        required: true
+      category:
+        description: >-
+          Discovery category for balanced seeding. Values: container, modeling_code,
+          analysis_code, data_access, workflow, experimental_data, documentation.
+      description:
+        description: Brief description of what this root contains
+      priority:
+        description: Seeding priority (high, medium, low)
+      expand_depth:
+        description: Maximum depth to expand from this root
+        range: integer
+
+  WikiSiteConfig:
+    description: >-
+      Configuration for a wiki/documentation site. Used by wiki discovery
+      to enumerate pages and artifacts.
+    class_uri: fc:WikiSiteConfig
+    attributes:
+      name:
+        description: >-
+          Unique identifier for cross-referencing with port_forwards and browser config.
+          Should match LocalForwardConfig.name and BrowserServiceConfig.name.
+      url:
+        description: Base URL of the wiki site (original URL, may require VPN)
+        required: true
+      portal_page:
+        description: Main portal/landing page name (e.g., "Main_Page", "Portal:TCV")
+        ifabsent: "Main_Page"
+      description:
+        description: Brief description of the wiki content
+      site_type:
+        description: Type of wiki software
+        range: WikiSiteType
+        ifabsent: "mediawiki"
+      access_method:
+        description: >-
+          How the site is accessed. Values: direct (public), vpn (VPN required),
+          tunnel (use port forward from browser config), ssh_tunnel (SSH only).
+        ifabsent: "direct"
+      auth_type:
+        description: Authentication method
+        range: WikiAuthType
+        ifabsent: "none"
+      credential_service:
+        description: Keyring service name for credentials
+      ssh_available:
+        description: Whether SSH tunnel is available as fallback
+        range: boolean
+      max_wiki_connections:
+        description: >-
+          Maximum concurrent HTTP connections to this wiki.
+          Controls the shared semaphore across all workers.
+          Lower values are safer for older MediaWiki installations
+          (e.g. MediaWiki 1.16 + MariaDB 5.5). Default 10.
+        range: integer
+        ifabsent: int(10)
+      data_path:
+        description: >-
+          Filesystem path to wiki data directory (for twiki_raw sites).
+          Used by TWikiRawAdapter for direct filesystem page enumeration.
+      pub_path:
+        description: >-
+          Filesystem path to wiki pub/attachments directory.
+          Used for artifact discovery on twiki and twiki_raw sites.
+      web_name:
+        description: >-
+          TWiki web name (e.g., "Main"). Defaults to "Main".
+          Used by TWikiRawAdapter to scope page enumeration.
+        ifabsent: "Main"
+      exclude_patterns:
+        description: >-
+          Regex patterns to exclude topic names during enumeration.
+          E.g., ["^OperationStatusReport", "^DailyReport"].
+        multivalued: true
+      exclude_prefixes:
+        description: >-
+          URL path prefixes to exclude during static HTML crawling.
+          E.g., ["/twiki_html", "/matlab", "/idl"].
+        multivalued: true
+      languages:
+        description: >-
+          Content languages for this wiki site.
+          E.g., ["ja", "en"] for bilingual sites.
+        multivalued: true
+
+  DataSystemBase:
+    description: >-
+      Common fields shared by all data system configurations.
+      Provides environment setup for remote script execution.
+    class_uri: fc:DataSystemBase
+    mixin: true
+    attributes:
+      setup_commands:
+        description: >-
+          Shell commands to run before remote operations (e.g., module loads,
+          environment sourcing). Applied to all remote script invocations
+          for this data source. Example: ["source /etc/profile.d/modules.sh",
+          "module load python/3.9"].
+        multivalued: true
+      python_command:
+        description: >-
+          Python interpreter for remote script execution. Can be a bare
+          command name or full path. Default: "python3".
+          Example: "/common/software/micromamba/root/envs/python-3.12/bin/python3"
+      static_signals:
+        description: >-
+          Signals from this data system that contain static machine
+          description data (geometry, calibration, diagnostic positions).
+          Enables scanners to discover which signals are non-time-varying
+          without hardcoding signal lists.
+        multivalued: true
+        range: StaticSignalRef
+
+  DataSystemsConfig:
+    description: >-
+      Data system configuration for signal discovery. Specifies how to
+      enumerate signals from each data system. Each key maps to a scanner
+      plugin that knows how to extract signals from that data system type.
+    class_uri: fc:DataSystemsConfig
+    attributes:
+      tdi:
+        description: TDI function configuration (MDSplus TDI expression files)
+        range: TDIConfig
+      mdsplus:
+        description: MDSplus tree configuration (direct tree traversal)
+        range: MDSplusConfig
+      ppf:
+        description: JET PPF configuration (Processed Pulse Files)
+        range: PPFConfig
+      edas:
+        description: JT-60SA EDAS configuration (Experiment Data Access System)
+        range: EDASConfig
+      hdf5:
+        description: HDF5 file configuration
+        range: HDF5Config
+      imas:
+        description: IMAS native data configuration
+        range: IMASConfig
+      codac_uda:
+        description: CODAC UDA archive configuration
+        range: CodacUDAConfig
+      jpf:
+        description: JET JPF (JET Processing Facility) raw hardware signal configuration
+        range: JPFConfig
+      device_xml:
+        description: Device XML configuration (EFIT-format geometry files in git)
+        range: DeviceXMLConfig
+      static_sources:
+        description: >-
+          File-based static data sources providing machine description,
+          calibration, or geometry data. Each entry describes a collection
+          of files — any format, any facility. Scanners iterate this list
+          and dispatch based on source name and file format.
+        multivalued: true
+        range: StaticSourceConfig
+
+  ArchiveEndpointConfig:
+    description: >-
+      Named archive endpoint. Hosts are resolved only from private facility
+      configuration. The operator role must remain excluded; readers validate
+      the complete policy through iter_codex.config.codac_uda before resolution.
+    class_uri: fc:ArchiveEndpointConfig
+    attributes:
+      role:
+        description: Archive role used as the stable endpoint identity
+        range: ArchiveRole
+        required: true
+      host:
+        description: Private endpoint hostname or IP address, absent in public configuration
+        annotations:
+          is_private: true
+      port:
+        description: UDA service port
+        range: integer
+        minimum_value: 1
+        maximum_value: 65535
+        ifabsent: int(3090)
+      excluded:
+        description: Endpoint is forbidden for catalogue and data reads
+        range: boolean
+        ifabsent: "false"
+      description:
+        description: Purpose of this endpoint, without infrastructure identifiers
+
+  CodacUDAConfig:
+    description: >-
+      CODAC archive setup, named endpoint policy and bounded read budget.
+      Private configuration supplies hosts and variable patterns. Public
+      configuration remains valid with unresolved endpoints; resolving a read
+      requires an explicit operator exclusion and a non-excluded target.
+    class_uri: fc:CodacUDAConfig
+    mixins:
+      - DataSystemBase
+    attributes:
+      archives:
+        description: >-
+          Named archives including the excluded operator endpoint. This list
+          replaces public entries wholesale when private configuration is merged;
+          a private block must redeclare every role and the operator exclusion.
+        multivalued: true
+        range: ArchiveEndpointConfig
+        inlined_as_list: true
+      readable_roles:
+        description: Application-readable roles; operator is deliberately not permitted
+        multivalued: true
+        range: ReadableArchiveRole
+      variable_patterns:
+        description: Private bounded cohort of archive variable selectors
+        multivalued: true
+        annotations:
+          is_private: true
+      catalogue_role:
+        description: Readable archive whose listing supplies the variable catalogue
+        range: ReadableArchiveRole
+      catalogue_limit:
+        description: Maximum variables accepted from one declared pattern without truncation
+        range: integer
+        minimum_value: 1
+        maximum_value: 100000
+        ifabsent: int(10000)
+      metadata_batch_size:
+        description: Maximum metadata requests in one UDA protocol batch
+        range: integer
+        minimum_value: 1
+        maximum_value: 1000
+        ifabsent: int(100)
+      validation_start_ns:
+        description: Private bounded-read validation window start in epoch nanoseconds
+        range: integer
+        annotations:
+          is_private: true
+      validation_end_ns:
+        description: Private bounded-read validation window end in epoch nanoseconds
+        range: integer
+        annotations:
+          is_private: true
+      max_samples:
+        description: Maximum samples returned by one read
+        range: integer
+        minimum_value: 1
+        ifabsent: int(100000)
+      max_bytes:
+        description: Maximum serialized result size in bytes
+        range: integer
+        minimum_value: 1
+        ifabsent: int(8388608)
+      max_window_ns:
+        description: Maximum absolute read interval in nanoseconds
+        range: integer
+        minimum_value: 1
+        ifabsent: int(60000000000)
+      timeout:
+        description: Maximum reader execution time in seconds
+        range: float
+        minimum_value: 0.001
+        ifabsent: float(30.0)
+
+  TDIConfig:
+    description: >-
+      TDI function data source configuration. TDI (.fun) files provide
+      physics-level accessor functions over raw MDSplus tree paths.
+      Facility-specific (e.g., TCV tcv_eq, tcv_get, tcv_ip).
+    class_uri: fc:TDIConfig
+    mixins:
+      - DataSystemBase
+    attributes:
+      primary_path:
+        description: Primary TDI directory path (e.g., /usr/local/CRPP/tdi/tcv)
+      additional_paths:
+        description: Additional TDI directories to scan
+        multivalued: true
+      reference_shot:
+        description: Reference shot for TDI accessor validation
+        range: integer
+      exclude_functions:
+        description: >-
+          TDI function names to exclude from signal discovery (case-insensitive).
+          Hardware control, acquisition triggers, and operational dispatch functions
+          that don't return physics data. These functions may load missing shared
+          libraries, print debug output, or perform side effects when executed.
+        multivalued: true
+
+  MDSplusConfig:
+    description: >-
+      MDSplus data source configuration for signal discovery.
+      Controls which trees are scanned, how nodes are filtered,
+      and what constitutes a physics-relevant signal.
+    class_uri: fc:MDSplusConfig
+    mixins:
+      - DataSystemBase
+    attributes:
+      connection_tree:
+        description: Default MDSplus tree for TDI context and data access
+      all_subtrees:
+        description: >-
+          Complete list of all available subtrees (scanned and unscanned).
+          Documentary only — used for reference and exploration notes.
+        multivalued: true
+      trees:
+        description: >-
+          MDSplus tree configurations. Each entry describes one tree with
+          its extraction parameters: version/epoch strategy, subtrees,
+          accessor function, and systems. Both versioned (machine-description)
+          trees and shot-scoped (dynamic) trees use the same SourceConfig
+          structure — the difference is in what fields are populated.
+          Replaces the previous split between flat 'trees' list and
+          'static_trees' structured list.
+        multivalued: true
+        range: SourceConfig
+      reference_shot:
+        description: Shot number for tree introspection and signal validation
+        range: integer
+      exclude_node_names:
+        description: >-
+          Node names to skip during tree traversal (case-insensitive).
+          Typically metadata nodes like COMMENTS, DATE, ROUTINE,
+          VERSION_NUM that are not physics signals.
+        multivalued: true
+      max_nodes_per_tree:
+        description: >-
+          Safety limit on signals extracted per tree. Prevents
+          runaway scans on unexpectedly large trees. Default 5000.
+        range: integer
+      node_usages:
+        description: >-
+          MDSplus node usage types to include (e.g., SIGNAL, NUMERIC).
+          Default is SIGNAL only. NUMERIC nodes are typically
+          configuration parameters, AXIS nodes are time bases.
+        multivalued: true
+      server:
+        description: >-
+          MDSplus server hostname for thin-client connections.
+          Used when connection_type is "thin_client" to connect
+          remotely rather than opening local tree files.
+      connection_type:
+        description: >-
+          How to connect to MDSplus: "local" (open tree files directly)
+          or "thin_client" (connect to remote mdsip server).
+          Determines which scanner dispatch path is used.
+
+  SourceConfig:
+    description: >-
+      Unified configuration for a data source. Covers both versioned
+      (machine-description) sources and shot-scoped (dynamic) sources.
+      Versioned sources have pre-configured versions; shot-scoped sources
+      use reference_shot for extraction. Sources may have subtrees that
+      are scanned as independent data sources.
+    class_uri: fc:SourceConfig
+    attributes:
+      source_name:
+        description: >-
+          Data source name (e.g., "static", "results", "magnetics").
+          For versioned sources, opened by version number. For shot-scoped
+          sources, opened by experimental shot number.
+        required: true
+      accessor_function:
+        description: >-
+          TDI function that abstracts version selection (e.g., "static").
+          Called as accessor("tag") to get data from the correct version
+          based on the currently open experimental shot. Only applicable
+          to versioned trees.
+      versions:
+        description: >-
+          Known version numbers and their first applicable shot. List of
+          {version: N, first_shot: M, description: "..."} mappings.
+          Used to enumerate all versions for complete extraction.
+          If omitted, the tree is treated as shot-scoped.
+        multivalued: true
+        range: SourceVersion
+      subtrees:
+        description: >-
+          Subtrees that are scanned as independent data sources.
+          Each subtree is a SourceConfig nested under this parent source.
+          Subtrees inherit setup_commands and other settings from the
+          parent MDSplusConfig.
+        multivalued: true
+        range: SourceConfig
+      detect_epochs:
+        description: >-
+          Whether to detect structural epochs via batched SSH
+          fingerprinting. When true, the epoch detection pipeline
+          discovers version boundaries automatically. When false
+          (default), uses pre-configured versions or single-shot
+          extraction.
+        range: boolean
+      epoch_config:
+        description: >-
+          Configuration for structural epoch detection. Only relevant
+          when detect_epochs is true.
+        range: EpochConfig
+      member_parent_types:
+        description: >-
+          MDSplus node types whose direct member children (colon-separated,
+          e.g. :PRE, :VAL, :STORE) should be grouped into patterns for
+          batch enrichment. At TCV, SIGNAL nodes have identical NUMERIC
+          member children across thousands of instances. Other facilities
+          may use different parent types. If omitted, member-suffix pattern
+          detection is skipped for this tree.
+        multivalued: true
+      systems:
+        description: >-
+          Named subsystems within the tree. Each system groups related
+          parameters (e.g., coils, vessel, tiles, flux loops, magnetic probes).
+          System symbols are used in tag construction: <parameter>_<system>.
+          Only applicable to versioned/static trees.
+        multivalued: true
+        range: SourceSystem
+  SourceVersion:
+    description: >-
+      A version of a data source, corresponding to a machine configuration or
+      structural epoch. Used for both pre-configured versions and
+      discovered epoch boundaries.
+    class_uri: fc:SourceVersion
+    attributes:
+      version:
+        description: Version number (1-based)
+        required: true
+        range: integer
+      first_shot:
+        description: First shot where this version applies
+        range: integer
+      last_shot:
+        description: Last shot where this version applies (optional)
+        range: integer
+      description:
+        description: Configuration description (e.g., "Belt limiter removed")
+
+  EpochConfig:
+    description: >-
+      Configuration for structural epoch detection via batched SSH
+      fingerprinting. Controls how aggressively the binary search
+      for epoch boundaries operates.
+    class_uri: fc:EpochConfig
+    attributes:
+      start_shot:
+        description: First shot to scan from
+        range: integer
+      step_size:
+        description: Shot increment for coarse scanning
+        range: integer
+      batch_size:
+        description: Shots per SSH query for fingerprinting
+        range: integer
+      subtree_path:
+        description: >-
+          Subtree path within the tree to fingerprint. If omitted,
+          fingerprints the entire tree structure.
+
+  SourceSystem:
+    description: >-
+      A named subsystem within a data source. Groups related mechanical
+      or electromagnetic parameters.
+    class_uri: fc:SourceSystem
+    attributes:
+      symbol:
+        description: >-
+          Short symbol used in tag construction (e.g., "C" for coils,
+          "V" for vessel, "M" for magnetic probes).
+        required: true
+      name:
+        description: Human-readable name (e.g., "Poloidal field coils")
+        required: true
+      description:
+        description: What this system contains
+      size:
+        description: Number of elements (e.g., 29 coils, 256 vessel filaments)
+        range: integer
+      parameters:
+        description: >-
+          Mechanical/geometric parameters available for this system.
+          Each is a tag prefix: R (radial), Z (vertical), ANG (angle),
+          PERIM (perimeter), W/H (width/height), N (count), etc.
+        multivalued: true
+
+  PPFConfig:
+    description: >-
+      JET PPF (Processed Pulse File) data source configuration.
+      PPF is organized as Owner/DDA/Dtype entries. Access via SAL REST API,
+      MATLAB ppfget, IDL ppfget, or getdat CLI.
+    class_uri: fc:PPFConfig
+    mixins:
+      - DataSystemBase
+    attributes:
+      sal_endpoint:
+        description: SAL REST API endpoint URL
+      reference_pulse:
+        description: Reference pulse for signal validation
+        range: integer
+      default_owner:
+        description: Default PPF data owner (e.g., "jetppf")
+      exclude_ddas:
+        description: DDA identifiers to exclude from discovery
+        multivalued: true
+      check_shots:
+        description: >-
+          Additional shot numbers to try when the primary reference_pulse
+          returns ier=210002 (data not available for shot). Spread across
+          different campaigns for coverage.
+        multivalued: true
+        range: integer
+      dda_descriptions:
+        description: >-
+          Human-readable descriptions of DDA codes for enrichment prompt
+          context. Each entry has a code (e.g., EFIT) and description
+          (e.g., Equilibrium reconstruction).
+        multivalued: true
+        range: DDADescriptionConfig
+
+  EDASEquilibriumExample:
+    description: An equilibrium file used to identify discoverable fields and validate access
+    attributes:
+      code: {description: Equilibrium producer code, range: string}
+      inventory_code: {description: Code used by the equilibrium inventory, range: string}
+      format: {description: Equilibrium file format, range: string}
+      root: {description: Directory containing equilibrium files, range: string}
+      filename_template: {description: Template for files at other shots and times, range: string}
+      path: {description: Path to the observed equilibrium file, range: string}
+      shot: {description: Shot recorded in the example file, range: integer}
+      time: {description: Time in seconds recorded in the example file, range: float}
+      grid: {description: Radial and vertical grid dimensions, range: integer, multivalued: true}
+      cocos: {description: COCOS convention of the example equilibrium, range: integer}
+      sha256: {description: SHA-256 digest of the example file, range: string}
+
+  EDASConfig:
+    description: >-
+      JT-60SA EDAS (Experiment Data Access System) configuration.
+      EDAS wraps proprietary data formats with C/Fortran/Python APIs.
+      Signal definitions are in C header files and Python wrapper code.
+    class_uri: fc:EDASConfig
+    mixins:
+      - DataSystemBase
+    attributes:
+      databases:
+        description: EDAS databases to enumerate during signal discovery
+        range: string
+        multivalued: true
+      database_routes:
+        description: Observed native read, catalogue and metadata routes for each database
+        range: EDASDatabaseRoute
+        multivalued: true
+      category_descriptions:
+        description: Human-readable descriptions of EDAS category codes for enrichment
+        range: EDASCategoryDescription
+        multivalued: true
+      api_path:
+        description: Path to EDAS API source files
+      uddb_api_path: {description: Path to the UDDB Python API source, range: string}
+      uddb_lib_path: {description: Path to the UDDB shared library, range: string}
+      pmdb_api_path: {description: Path to the PMDB Python API source, range: string}
+      pmdb_lib_path: {description: Path to the PMDB shared library, range: string}
+      fsmd_api_path: {description: Path to the fast-sampling Python API, range: string}
+      fsmd_lib_path: {description: Configured fast-sampling shared library, range: string}
+      easy_api_path: {description: Path to the EASY Python API, range: string}
+      easy_lib_path: {description: Configured EASY shared library, range: string}
+      fledd_lib_path: {description: Path to the FLEDD socket client library, range: string}
+      fledd_client_path: {description: Path to the linked equilibrium client, range: string}
+      eqdb_root: {description: Candidate central EQDB mount, range: string}
+      dbsel_path: {description: Path to the local equilibrium reconstruction wrapper, range: string}
+      lcdb_api_path: {description: Path to the LCDB wrapper API source, range: string}
+      lcdb_root: {description: Root directory of LCDB analysis data, range: string}
+      mbdb_api_path: {description: Path to the MBDB Python API source, range: string}
+      mbdb_lib_path: {description: Path to the MBDB shared library, range: string}
+      mbdb_root: {description: Root directory of MBDB data, range: string}
+      equilibrium_examples:
+        description: Observed equilibrium files used to discover and validate fields
+        range: EDASEquilibriumExample
+        multivalued: true
+      header_path:
+        description: Path to EDAS C header files with signal definitions
+      reference_shot:
+        description: Reference shot for signal validation
+        range: integer
+      lib_path:
+        description: >-
+          Path to the EDAS shared library (e.g., /analysis/lib/libeddb.so).
+          Used for ctypes bindings in signal discovery.
+
+  EDASDatabaseRoute:
+    description: Access route and observed catalogue status for an EDAS database
+    class_uri: fc:EDASDatabaseRoute
+    attributes:
+      name:
+        description: Database or access-layer name
+      read_call:
+        description: Native call that reads a value or equilibrium field
+      catalogue_call:
+        description: Native call that lists channel or field identifiers, if available
+      metadata_source:
+        description: Source of units and descriptions, or why they are unavailable
+      status:
+        description: Observed access and enumeration status
+      status_detail:
+        description: Return code or missing prerequisite explaining the status
+      access_path:
+        description: Database root, socket route or native library path
+      observed_on:
+        description: Date on which the access status was measured
+        range: date
+      source_ids:
+        description: Named database identifiers passed to a shared access layer
+        range: string
+        multivalued: true
+
+  JPFSubsystem:
+    description: >-
+      A JPF subsystem definition with its two-character code,
+      human-readable description, and physics domain hint for
+      signal classification.
+    class_uri: fc:JPFSubsystem
+    attributes:
+      code:
+        description: >-
+          Two-character subsystem identifier (e.g., DA, PF, AH).
+          Used in JPF signal paths: dpf("{code}/{signal}", shot).
+        identifier: true
+      description:
+        description: Human-readable subsystem description
+      physics_domain:
+        description: >-
+          Default physics domain for signals in this subsystem.
+          Used as initial classification before LLM enrichment.
+          Must be a valid PhysicsDomain enum value.
+
+  JPFConfig:
+    description: >-
+      JET JPF (JET Processing Facility) raw hardware signal configuration.
+      JPF provides raw diagnostic data organized by 2-char subsystem codes.
+      Accessed via MDSplus thin-client TDI function: dpf("subsystem/signal", shot).
+    class_uri: fc:JPFConfig
+    mixins:
+      - DataSystemBase
+    attributes:
+      server:
+        description: MDSplus server hostname for thin-client JPF access
+      reference_shot:
+        description: Reference shot for JPF signal enumeration
+        range: integer
+      subsystems:
+        description: >-
+          JPF diagnostic subsystem definitions. Each entry provides
+          the two-character code, description, and default physics domain.
+        multivalued: true
+        range: JPFSubsystem
+
+  HDF5Config:
+    description: HDF5 file data source configuration
+    class_uri: fc:HDF5Config
+    mixins:
+      - DataSystemBase
+    attributes:
+      paths:
+        description: HDF5 file/directory paths to scan
+        multivalued: true
+
+  IMASConfig:
+    description: >-
+      IMAS native data source configuration. Used at facilities with
+      native IMAS backend support (ITER, JET post-migration, JT-60SA).
+    class_uri: fc:IMASConfig
+    mixins:
+      - DataSystemBase
+    attributes:
+      backends:
+        description: Available IMAS backends (e.g., mdsplus, hdf5, memory)
+        multivalued: true
+      db_name:
+        description: IMAS database name
+      reference_shot:
+        description: Reference shot for IDS enumeration
+        range: integer
+
+  StaticSignalRef:
+    description: >-
+      A reference to a signal within a data system that contains static
+      (non-time-varying) machine description data. Used to annotate
+      signals in PPF, MDSplus, IMAS, or any other data system as
+      containing geometry, calibration, or other static technical data.
+
+      This enables scanners to cross-reference file-based geometry with
+      data-system-accessible signals — the same limiter contour may exist
+      as both a text file and a PPF signal.
+    class_uri: fc:StaticSignalRef
+    attributes:
+      name:
+        description: >-
+          Signal identifier in the data system's native format.
+          PPF: "DDA/DTYPE" (e.g., "EFIT/RLIM").
+          MDSplus: node path (e.g., "\static::top.v:r").
+          IMAS: IDS path (e.g., "wall.description_2d[0].limiter.unit[0].outline.r").
+        required: true
+      description:
+        description: What this signal contains
+      static:
+        description: >-
+          Whether truly static (identical across all shots) or quasi-static
+          (changes only at major hardware boundaries).
+        range: boolean
+      expected_shape:
+        description: Expected array shape for validation
+        multivalued: true
+        range: integer
+
+  StaticFileConfig:
+    description: >-
+      A single file within a StaticSourceConfig. Describes what the file
+      provides (role), its format, and optional validation hints.
+      Path is relative to the parent source's base_dir or git_repo.
+    class_uri: fc:StaticFileConfig
+    attributes:
+      path:
+        description: >-
+          File path relative to parent source's base_dir, or
+          input_prefix within git_repo.
+        required: true
+      role:
+        description: >-
+          What physical system or data category this file describes.
+          Use consistent role names across facilities:
+          limiter, vessel, magnetics, pf_coils, iron_core, sensors,
+          calibration_index, calibration_data, circuits, diagnostics,
+          response_functions.
+        required: true
+      description:
+        description: What this file contains
+      format:
+        description: >-
+          File format override. If omitted, inherits from parent source.
+        range: StaticSourceFormat
+      expected_count:
+        description: >-
+          Expected element count for validation. Scanner can verify
+          the parsed file produces this many elements (probes, coils,
+          contour points, etc.).
+        range: integer
+
+  SignalGlossaryEntry:
+    description: A facility term and its meaning for signal enrichment
+    class_uri: fc:SignalGlossaryEntry
+    attributes:
+      term:
+        description: Term found in a catalogue path or signal name
+        required: true
+      meaning:
+        description: Facility meaning of the term
+        required: true
+
+  EDASCategoryDescription:
+    description: An EDAS category code and its signal context
+    class_uri: fc:EDASCategoryDescription
+    attributes:
+      code:
+        description: EDAS category code
+        required: true
+      description:
+        description: Human-readable description of the category
+        required: true
+
+  DDADescriptionConfig:
+    description: >-
+      A DDA code with its human-readable description for enrichment
+      prompt context.
+    class_uri: fc:DDADescriptionConfig
+    attributes:
+      code:
+        description: DDA code identifier (e.g., EFIT)
+        required: true
+      description:
+        description: Human-readable description of the DDA
+        required: true
+
+  SensorVersionConfig:
+    description: >-
+      A historical sensor position file version. Tracks geometry
+      refinements over time with file name, filesystem path, and
+      effective date.
+    class_uri: fc:SensorVersionConfig
+    attributes:
+      file:
+        description: Sensor geometry filename
+        required: true
+      path:
+        description: Filesystem directory containing the file
+        required: true
+      date:
+        description: Effective date of this sensor version (ISO 8601)
+        required: true
+
+  StaticSourceConfig:
+    description: >-
+      A named collection of files providing machine description, calibration,
+      or other static technical data about the physical machine. "Static" means
+      the data does not change per-shot, or changes only at major hardware
+      modification boundaries (tracked via versions).
+
+      Generic container for any file-based technical data: geometry XMLs,
+      sensor position files, calibration tables, contour data, CAD exports,
+      equilibrium inputs, response function matrices.
+
+      Example Cypher (after ingestion):
+        MATCH (ds:DataSource {id: $facility + ':' + $source_name})-[:AT_FACILITY]->(f:Facility {id: $facility})
+        RETURN ds
+    class_uri: fc:StaticSourceConfig
+    mixins:
+      - DataSystemBase
+    attributes:
+      name:
+        description: >-
+          Unique identifier within this facility. Use descriptive names that
+          indicate what the source provides, not internal project codes.
+          Examples: "efit_geometry", "sensor_positions", "vessel_cad",
+          "iron_core", "response_functions".
+        required: true
+      description:
+        description: What this data source provides
+      format:
+        description: Primary data format of files in this source
+        range: StaticSourceFormat
+      base_dir:
+        description: >-
+          Root filesystem directory containing the files. File paths
+          are resolved relative to this directory.
+      index_file:
+        description: >-
+          Path to the index file that maps shot ranges to configuration
+          files within this source. Used by sources like magnetics_config
+          and greens_table where a master index maps shot ranges to
+          versioned data files.
+      git_repo:
+        description: >-
+          Path to git repository containing the files (bare or working tree).
+          Mutually exclusive with base_dir for file path resolution.
+      input_prefix:
+        description: >-
+          Path prefix within git_repo for file resolution.
+          Example: "JET/input" means files are at <git_repo>/JET/input/<path>.
+      reference_shot:
+        description: First shot where this source's data applies
+        range: integer
+      files:
+        description: Individual files in this source
+        multivalued: true
+        range: StaticFileConfig
+      versions:
+        description: >-
+          Shot-range versions for epoch-dependent data. Each version
+          maps a shot range to a configuration state. Reuses the same
+          SourceVersion type used for MDSplus tree versions.
+        multivalued: true
+        range: SourceVersion
+      systems:
+        description: >-
+          Physical subsystems described by this source. Reuses the same
+          SourceSystem type used for MDSplus static tree systems.
+          Examples: magnetics, pf_coils, vessel, limiters, iron_core.
+        multivalued: true
+        range: SourceSystem
+      sensor_versions:
+        description: >-
+          Historical sensor position file versions tracking geometry
+          refinements over time. Each entry records a sensor geometry
+          file with its filesystem path and effective date. Used to
+          create SUPERSEDES relationships between versions.
+        multivalued: true
+        range: SensorVersionConfig
+
+  UserInfoConfig:
+    description: >-
+      Configuration for user info discovery. Specifies how to extract
+      user names from system (GECOS field, LDAP, etc.).
+    class_uri: fc:UserInfoConfig
+    attributes:
+      name_format:
+        description: Format of user names in GECOS field
+        range: NameFormat
+        ifabsent: "first_last"
+      lookup_tools:
+        description: Ordered list of tools to try for name lookup
+        multivalued: true
+        ifabsent: "[getent, passwd, id]"
+      gecos_suffix_pattern:
+        description: >-
+          Regex pattern to strip from GECOS field values.
+          E.g., "\\s+EXT$" removes " EXT" suffix from external users.
+      home_path_pattern:
+        description: >-
+          Regex pattern to extract username from home directory paths.
+          Must contain a capture group for the username.
+          E.g., "^/home/ITER/([a-z0-9_-]+)(?:/|$)".
+
+  ExcludesConfig:
+    description: >-
+      Exclusion patterns for discovery. Prevents scanning of large directories
+      that would hang or produce low-value results.
+    class_uri: fc:ExcludesConfig
+    attributes:
+      large_dirs:
+        description: >-
+          Directories that caused timeouts (absolute paths).
+          Discovery skips these entirely.
+        multivalued: true
+      depth_limits:
+        description: >-
+          Per-path depth limits (map of path -> max_depth).
+          Limits recursion in specific subtrees.
+      patterns:
+        description: >-
+          Glob patterns to exclude (e.g., "**/node_modules", "**/.git").
+          Applied during directory enumeration.
+        multivalued: true
+
+  DataAccessPatternsConfig:
+    description: >-
+      Data access patterns discovered during initial facility exploration.
+      Populated by exploration agents to inform downstream discovery tools.
+      Describes how shot data is organized, what APIs/tools exist, and what
+      naming conventions are used at this facility. This bridges exploration
+      knowledge to scanning/scoring tools.
+    class_uri: fc:DataAccessPatternsConfig
+    attributes:
+      primary_method:
+        description: >-
+          The primary data access method at this facility (e.g., "tdi" for TCV,
+          "ppf" for JET, "edas" for JT-60SA, "imas" for ITER). Informs which
+          scanner plugin to run first.
+      signal_naming:
+        description: >-
+          How signals are named at this facility. Free text describing the
+          convention (e.g., "TDI function dispatch: tcv_eq('quantity')",
+          "PPF hierarchy: owner/dda/dtype", "EDAS channels: eddb_get(channel)").
+      shot_identifier:
+        description: >-
+          What the facility calls shots (e.g., "shot" at TCV, "pulse" at JET,
+          "shot" at JT-60SA). Used to template data access patterns.
+      tree_organization:
+        description: >-
+          How experimental data is organized (e.g., "MDSplus trees by subsystem",
+          "PPF by diagnostic data area", "EDAS database tables").
+      key_tools:
+        description: >-
+          Key data access tools/APIs discovered at the facility.
+          E.g., ["sal", "ppfget", "getdat"] for JET,
+          ["tdiExecute", "tcv_get", "gdat"] for TCV,
+          ["eddb_get", "edgis", "eslice"] for JT-60SA.
+        multivalued: true
+      wiki_signal_patterns:
+        description: >-
+          Patterns observed in wiki pages that indicate signal documentation.
+          E.g., ["MDSplus path tables", "diagnostic node listings", "signal catalogs"].
+          Helps wiki discovery score pages with data access content higher.
+        multivalued: true
+      code_import_patterns:
+        description: >-
+          Import patterns that indicate data access code.
+          E.g., ["import MDSplus", "from jet.data import sal", "import eddb"].
+          Helps code ingestion identify data access files.
+        multivalued: true
+      notes:
+        description: Free-form notes about data access at this facility
+        multivalued: true
+      independent_trees:
+        description: >-
+          MDSplus trees that must be opened on independent connections
+          (not shared with the main connection tree). Used by the signal
+          checking pipeline to manage per-tree connection state.
+        multivalued: true
+
+  PortForwardsConfig:
+    description: >-
+      Port forward configuration for accessing facility services from workstation.
+      Each facility uses a base port range (e.g., 88xx for jt-60sa). Individual services
+      use ports within that range: port_base+0 for first wiki, port_base+1 for second, etc.
+      This convention allows internal tracking of which ports belong to which machines.
+    class_uri: fc:PortForwardsConfig
+    attributes:
+      port_base:
+        description: >-
+          Base port number for this facility (e.g., 8800 for jt-60sa, 8810 for jet).
+          All local ports for this facility fall within port_base to port_base+99.
+          Different facilities use different hundreds to avoid conflicts.
+        range: integer
+        required: true
+      ssh_host:
+        description: >-
+          SSH host alias to tunnel through. If different from facility's ssh_host,
+          this specifies the intermediate hop (e.g., "iter" when facility is behind ITER).
+      forwards:
+        description: List of local port forwards to establish
+        multivalued: true
+        range: LocalForwardConfig
+
+  LocalForwardConfig:
+    description: >-
+      Configuration for a single SSH local port forward (LocalForward in ssh_config).
+      Maps a localhost port to a remote host:port accessible from the tunnel endpoint.
+    class_uri: fc:LocalForwardConfig
+    attributes:
+      name:
+        description: >-
+          Service name for identification (e.g., "twiki_main", "twiki_code", "api").
+          Used in browser config and logs.
+        required: true
+      local_port:
+        description: >-
+          Local port number on workstation (e.g., 8880). Should follow facility convention:
+          port_base + service_index where wiki sites use indices 0, 1, 2, etc.
+        range: integer
+        required: true
+      remote_host:
+        description: >-
+          Remote hostname accessible from SSH tunnel endpoint. Can be IP, hostname,
+          or localhost if the service runs on the SSH target host itself.
+        required: true
+      remote_port:
+        description: Remote port number (e.g., 80 for HTTP, 443 for HTTPS)
+        range: integer
+        required: true
+      protocol:
+        description: Protocol for documentation and browser config
+        range: LocalForwardProtocol
+        ifabsent: "http"
+      description:
+        description: Brief description of what service this forward provides
+
+  BrowserConfig:
+    description: >-
+      Browser-accessible URLs for facility services. After port forwards are established,
+      these URLs work in a local browser. Used by agents and documentation to construct
+      working URLs from wiki_sites[].name references.
+    class_uri: fc:BrowserConfig
+    attributes:
+      services:
+        description: >-
+          Map of service names to localhost URLs. Keys match LocalForwardConfig.name
+          and WikiSiteConfig.name. Values are full URLs including protocol and port.
+        multivalued: true
+        range: BrowserServiceConfig
+
+  BrowserServiceConfig:
+    description: Browser-accessible URL for a single service
+    class_uri: fc:BrowserServiceConfig
+    attributes:
+      name:
+        description: Service name (matches WikiSiteConfig.name or LocalForwardConfig.name)
+        required: true
+      url:
+        description: >-
+          Full localhost URL for browser access (e.g., "http://localhost:8880/twiki").
+          Protocol derived from port forward config or explicit if no forward.
+        required: true
+      description:
+        description: Brief description of the service
+
+  # -------------------------------------------------------------------------
+  # Compute Infrastructure
+  # -------------------------------------------------------------------------
+
+  ComputeConfig:
+    description: >-
+      Compute infrastructure available at a facility. Describes job schedulers,
+      partitions/queues, GPU resources, and access constraints. Used by the
+      --submit CLI flag to route CPU-intensive work to compute nodes instead
+      of saturating shared login nodes.
+    class_uri: fc:ComputeConfig
+    attributes:
+      scheduler:
+        description: Job scheduler configuration (Slurm, SGE, etc.)
+        range: SchedulerConfig
+      gpus:
+        description: GPU resources available at the facility
+        multivalued: true
+        range: GPUResource
+      login_node:
+        description: >-
+          Login node hardware summary (cores, memory). Informs load thresholds
+          for deciding when to offload work to compute.
+        range: LoginNodeConfig
+      notes:
+        description: Free-form compute infrastructure notes
+        multivalued: true
+
+  SchedulerConfig:
+    description: >-
+      Job scheduler configuration for a facility. Describes the scheduler type,
+      available partitions/queues, allocation commands, and constraints.
+    class_uri: fc:SchedulerConfig
+    attributes:
+      type:
+        description: Scheduler type
+        range: SchedulerType
+        required: true
+      alloc_command:
+        description: >-
+          Interactive allocation command (e.g., "salloc" for Slurm, "qrsh" for SGE).
+          Used to obtain an interactive session on a compute node.
+      batch_command:
+        description: >-
+          Batch submission command (e.g., "sbatch" for Slurm, "qsub" for SGE).
+      partitions:
+        description: Available partitions or queues
+        multivalued: true
+        range: PartitionConfig
+      alloc_latency_ms:
+        description: >-
+          Measured allocation latency in milliseconds for debug/interactive partitions.
+          Helps decide whether per-task submission is viable vs long-lived allocations.
+        range: integer
+      home_shared:
+        description: >-
+          Whether home directory is shared between login and compute nodes (e.g., via NFS/GPFS).
+          If true, no code deployment needed on compute.
+        range: boolean
+      tunnel_required:
+        description: >-
+          Whether SSH tunnels are needed from compute nodes back to login node services
+          (embed server, Neo4j). True when services bind to 127.0.0.1 on login node.
+        range: boolean
+      service_job_name:
+        description: >-
+          SLURM job name for the iter-codex services allocation (Neo4j + embed
+          server).  Used by ``discover_compute_node()`` to find which compute
+          node the services run on via ``squeue -n <name>``.  Default:
+          ``"codex-neo4j"``.  Override per facility when using a
+          different job name or wrapper script.
+        ifabsent: "codex-neo4j"
+
+  PartitionConfig:
+    description: A scheduler partition (Slurm) or queue (SGE/PBS)
+    class_uri: fc:PartitionConfig
+    attributes:
+      name:
+        description: Partition or queue name
+        required: true
+      max_time:
+        description: >-
+          Maximum wall time (e.g., "1:00:00" for debug, "UNLIMITED" for main).
+        ifabsent: "UNLIMITED"
+      nodes:
+        description: Number of nodes in this partition/queue
+        range: integer
+      cores_per_node:
+        description: CPU cores per node
+        range: integer
+      memory_gb:
+        description: Memory per node in GiB
+        range: integer
+      is_debug:
+        description: Whether this is a debug/preemption partition with fast allocation
+        range: boolean
+      gpu_type:
+        description: GPU type if GPU partition (e.g., "Tesla P100-PCIE-16GB")
+      gpus_per_node:
+        description: Number of GPUs per node
+        range: integer
+      notes:
+        description: Free-form notes about this partition
+
+  GPUResource:
+    description: GPU resource available at the facility
+    class_uri: fc:GPUResource
+    attributes:
+      location:
+        description: Where the GPU is (e.g., "login_node", "titan", "compute")
+        required: true
+      model:
+        description: GPU model name (e.g., "Tesla T4", "Tesla P100-PCIE-16GB")
+        required: true
+      count:
+        description: Number of GPUs at this location
+        range: integer
+      memory_gb:
+        description: Per-GPU memory in GiB
+        range: integer
+      current_use:
+        description: What the GPU is currently used for (e.g., "embed_server")
+
+  LoginNodeConfig:
+    description: >-
+      Login node hardware summary. Used to set load thresholds for offloading
+      decisions. When login node load exceeds a fraction of available cores,
+      work should be routed to compute.
+    class_uri: fc:LoginNodeConfig
+    attributes:
+      hostname:
+        description: Login node hostname
+      cores:
+        description: Total CPU cores
+        range: integer
+      memory_gb:
+        description: Total memory in GiB
+        range: integer
+      shared_users:
+        description: >-
+          Approximate number of active users sharing the login node.
+          Informs load budget calculations.
+        range: integer
+
+  # -------------------------------------------------------------------------
+  # Device XML (EFIT geometry files)
+  # -------------------------------------------------------------------------
+
+  DeviceXMLConfig:
+    description: >-
+      Device XML data source configuration. Used for EFIT-format geometry files
+      stored in a bare git repository. Contains versioned device XMLs describing
+      PF coils, passive structures, magnetic probes, flux loops, circuits,
+      and limiter contours.
+    class_uri: fc:DeviceXMLConfig
+    mixins:
+      - DataSystemBase
+    attributes:
+      git_repo:
+        description: Path to bare git repo containing device XML files
+        required: true
+      input_prefix:
+        description: Tree path prefix within git repo (e.g., JET/input)
+      versions:
+        description: Device geometry versions with pulse ranges
+        multivalued: true
+        range: DeviceXMLVersion
+      systems:
+        description: Named subsystems within device XML
+        multivalued: true
+        range: SourceSystem
+      limiter_versions:
+        description: First-wall contour versions
+        multivalued: true
+        range: LimiterVersion
+      limiter_dir:
+        description: >-
+          Filesystem directory containing limiter contour files.
+          Fallback source when files are not in the git repository.
+      flush_dir:
+        description: >-
+          Directory containing SCAL/FLUSH wall geometry files.
+          Used for pre-EFIT era limiter contours that are not in the git repo.
+          E.g., /usr/local/data/flush on JET.
+
+  DeviceXMLVersion:
+    description: >-
+      A version of the device XML geometry, corresponding to a hardware
+      configuration epoch. Each version maps to a pulse range and references
+      specific device XML, snap, limiter, and Green's function files.
+    class_uri: fc:DeviceXMLVersion
+    attributes:
+      version:
+        description: Version identifier (e.g., p68613, p89440)
+        required: true
+      first_shot:
+        description: First shot where this version applies
+        range: integer
+      last_shot:
+        description: Last shot where this version applies
+        range: integer
+      description:
+        description: What changed in this version
+      device_xml:
+        description: >-
+          Git path to device XML file (relative to input_prefix).
+          Optional for pre-EFIT epochs that have only limiter geometry.
+      device_ppfs:
+        description: >-
+          Git path to PPF routing namelist. Provenance metadata recording
+          which PPF routing configuration was active for this epoch.
+          Not consumed by the scanner — used for cross-referencing
+          magnetic probe PPF/JPF signal sources.
+      limiter:
+        description: Git path to limiter contour file
+      greens:
+        description: >-
+          Git path to Green's function directory. Provenance metadata
+          recording which Green's function set was active for this epoch.
+          Not consumed by the scanner — provided for cross-referencing
+          with the GreensTable ingestion pipeline.
+      snap_file:
+        description: Git path to EFITSNAP probe enable/disable mask
+      pf_configuration:
+        description: >-
+          PF coil geometry configuration identifier for this epoch.
+          E.g., "DMSS=091", "DMSS=105". Tracks poloidal field coil
+          transitions. Pre-divertor epochs have null (no PF coils).
+      uses_limiter:
+        description: >-
+          Name of the LimiterVersion used by this epoch.
+          For pre-EFIT epochs without device_xml, this is the only
+          geometry reference.
+      wall_configuration:
+        description: >-
+          Type of plasma-facing component configuration (limiter or divertor).
+          Matches WallConfiguration enum values.
+
+  LimiterVersion:
+    description: >-
+      A version of the first-wall limiter contour. Each represents a
+      physically installed wall configuration with an R,Z contour file.
+    class_uri: fc:LimiterVersion
+    attributes:
+      name:
+        description: Limiter name (e.g., Mk2ILW, Mk2HD)
+        required: true
+      first_shot:
+        description: First shot with this limiter installed
+        range: integer
+      last_shot:
+        description: Last shot with this limiter
+        range: integer
+      description:
+        description: Description of this limiter configuration
+      file:
+        description: Git path to R,Z contour file (relative to input_prefix)
+      source_dir:
+        description: >-
+          Filesystem directory containing the limiter contour file.
+          Used when the file lives on the facility filesystem rather
+          than in the device_xml git_repo.
+      n_points:
+        description: Expected number of R,Z contour points (for validation)
+        range: integer

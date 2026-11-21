@@ -22,10 +22,10 @@ import asyncio
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import discover
-from imas_codex.ids.candidates import PairJudgment
-from imas_codex.ids.workers import CandidateDiscoveryState, candidate_worker
-from imas_codex.settings import RouteThresholds
+from iter_codex.cli.discover import discover
+from iter_codex.ids.candidates import PairJudgment
+from iter_codex.ids.workers import CandidateDiscoveryState, candidate_worker
+from iter_codex.settings import RouteThresholds
 
 FACILITY = "jet"
 
@@ -99,7 +99,7 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0, expand=
     judge anything while the key is absent, so an unset key would measure the
     skip in place of the pipeline these tests replace the calls for.
     """
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
     remaining = list(SOURCES)
 
     def fake_claim(facility, domains=None, batch_size=10):
@@ -158,17 +158,17 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0, expand=
         return len(records)
 
     monkeypatch.setattr(
-        "imas_codex.ids.workers.claim_sources_for_candidates", fake_claim
+        "iter_codex.ids.workers.claim_sources_for_candidates", fake_claim
     )
-    monkeypatch.setattr("imas_codex.ids.workers.route_ids", fake_route_ids)
-    monkeypatch.setattr("imas_codex.ids.workers.retrieve_candidates", fake_retrieve)
-    monkeypatch.setattr("imas_codex.ids.workers.judge_candidates", fake_judge)
-    monkeypatch.setattr("imas_codex.ids.workers.expand_cluster_siblings", fake_expand)
-    monkeypatch.setattr("imas_codex.ids.workers.write_candidates", fake_write)
+    monkeypatch.setattr("iter_codex.ids.workers.route_ids", fake_route_ids)
+    monkeypatch.setattr("iter_codex.ids.workers.retrieve_candidates", fake_retrieve)
+    monkeypatch.setattr("iter_codex.ids.workers.judge_candidates", fake_judge)
+    monkeypatch.setattr("iter_codex.ids.workers.expand_cluster_siblings", fake_expand)
+    monkeypatch.setattr("iter_codex.ids.workers.write_candidates", fake_write)
     monkeypatch.setattr(
-        "imas_codex.ids.workers.get_mapping_route_thresholds", lambda: _THRESHOLDS
+        "iter_codex.ids.workers.get_mapping_route_thresholds", lambda: _THRESHOLDS
     )
-    monkeypatch.setattr("imas_codex.ids.workers.GraphClient", lambda: _FakeGraph())
+    monkeypatch.setattr("iter_codex.ids.workers.GraphClient", lambda: _FakeGraph())
 
 
 def _new_state(**kwargs) -> CandidateDiscoveryState:
@@ -298,7 +298,7 @@ def test_candidate_worker_releases_when_the_cluster_judgment_fails(monkeypatch):
 
     _patch_worker(monkeypatch, captured, expand=expand)
     monkeypatch.setattr(
-        "imas_codex.ids.workers.release_mapping_claim",
+        "iter_codex.ids.workers.release_mapping_claim",
         lambda source_id: released.append(source_id),
     )
     state = _new_state(batch_size=10)
@@ -342,8 +342,8 @@ def test_source_limit_bounds_the_loop(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def bare_discover_stage(monkeypatch, tmp_path):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import sequence
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import sequence
 
     monkeypatch.setattr(
         sequence,
@@ -361,9 +361,9 @@ def bare_discover_stage(monkeypatch, tmp_path):
 
 @pytest.fixture
 def command_env(monkeypatch):
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda name: {"id": name},
     )
 
@@ -371,7 +371,7 @@ def command_env(monkeypatch):
 def test_map_command_builds_the_engine_state(monkeypatch, command_env, caplog):
     import logging
 
-    caplog.set_level(logging.INFO, logger="imas_codex.discovery.map")
+    caplog.set_level(logging.INFO, logger="iter_codex.discovery.map")
     captured: dict = {}
 
     async def fake_engine(state, *, stop_event=None, on_progress=None):
@@ -380,7 +380,7 @@ def test_map_command_builds_the_engine_state(monkeypatch, command_env, caplog):
         state.candidates_written = 4
         state.cost.add("candidate", 0.25, 0)
 
-    monkeypatch.setattr("imas_codex.ids.workers.run_candidate_engine", fake_engine)
+    monkeypatch.setattr("iter_codex.ids.workers.run_candidate_engine", fake_engine)
 
     result = CliRunner().invoke(
         discover,
@@ -414,9 +414,9 @@ def test_map_command_builds_the_engine_state(monkeypatch, command_env, caplog):
 
 
 def test_status_domain_map_prints_route_counts(monkeypatch):
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.ids.graph_ops.count_candidates_by_route",
+        "iter_codex.ids.graph_ops.count_candidates_by_route",
         lambda facility: {"selected": 2, "escalated": 3, "pending": 5},
     )
 
@@ -430,11 +430,11 @@ def test_status_domain_map_prints_route_counts(monkeypatch):
 
 def test_clear_domain_map_removes_candidates(monkeypatch):
     monkeypatch.setattr(
-        "imas_codex.ids.graph_ops.count_candidates_by_route",
+        "iter_codex.ids.graph_ops.count_candidates_by_route",
         lambda facility: {"selected": 2, "pending": 5},
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.map.clear_facility_candidates",
+        "iter_codex.cli.discover.map.clear_facility_candidates",
         lambda facility: {"edges_removed": 7, "routes_reset": 2},
     )
 

@@ -34,8 +34,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names import loop as loop_mod
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import loop as loop_mod
+from iter_codex.standard_names.graph_store import (
     graph_cost_and_claims as _owning_graph_cost_and_claims,
 )
 
@@ -75,7 +75,7 @@ def _mock_gc_tx():
 
 def _patch_graph_ops_gc(mock_gc):
     return patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -88,7 +88,7 @@ def _patch_graph_ops_gc(mock_gc):
 class TestClaimAtomicEditScope:
     def test_edits_only_adds_where_clause(self):
         """edits_only=True → seed Cypher contains the edit_status='open' filter."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             _claim_sn_atomic,
         )
 
@@ -111,7 +111,7 @@ class TestClaimAtomicEditScope:
 
     def test_edits_only_propagates_to_expand(self):
         """The edit_status filter appears in the expand Cypher too (cluster branch)."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             _claim_sn_atomic,
         )
 
@@ -153,7 +153,7 @@ class TestClaimAtomicEditScope:
 
     def test_edits_only_combines_with_scope_run_id(self):
         """Both predicates AND together when edits_only and scope_run_id are set."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             _claim_sn_atomic,
         )
 
@@ -175,7 +175,7 @@ class TestClaimAtomicEditScope:
 
     def test_default_has_no_edit_filter(self):
         """edits_only defaults to False → no edit_status fragment (backward compat)."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             _claim_sn_atomic,
         )
 
@@ -201,7 +201,7 @@ class TestClaimAtomicEditScope:
 class TestReviewNameEditScope:
     def test_review_name_edits_only_adds_fragment(self):
         """claim_review_name_batch(edits_only=True) composes the fragment."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_review_name_batch,
         )
 
@@ -219,7 +219,7 @@ class TestReviewNameEditScope:
 
     def test_review_name_default_no_fragment(self):
         """A plain claim_review_name_batch() call carries no edit_status filter."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_review_name_batch,
         )
 
@@ -251,7 +251,7 @@ class TestDocsPoolsEditScopeScoreGate:
         ],
     )
     def test_edits_only_drops_score_gate(self, claim_name):
-        from imas_codex.standard_names.graph_store import resolve_owned_name
+        from iter_codex.standard_names.graph_store import resolve_owned_name
 
         claim = resolve_owned_name(claim_name)
         gc, tx = _mock_gc_tx()
@@ -276,7 +276,7 @@ class TestDocsPoolsEditScopeScoreGate:
         ],
     )
     def test_default_keeps_score_gate(self, claim_name):
-        from imas_codex.standard_names.graph_store import resolve_owned_name
+        from iter_codex.standard_names.graph_store import resolve_owned_name
 
         claim = resolve_owned_name(claim_name)
         gc, tx = _mock_gc_tx()
@@ -306,7 +306,7 @@ class TestScopeKwargsThreading:
         adapter closure to the current object, so the mock must be in place
         when the specs are constructed.
         """
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         captured: dict = {}
 
@@ -347,7 +347,7 @@ class TestScopeKwargsThreading:
 def _gc():
     """Function-scoped GraphClient; skip if Neo4j is unreachable."""
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -383,7 +383,7 @@ def test_edits_only_claims_only_open_edit(_gc, _clean_test_nodes):
     nodes, never on a real edit successor (a live migration may leave many
     real ``edit_status='open'`` names in the graph).
     """
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         claim_review_name_batch,
     )
 

@@ -16,14 +16,14 @@ from contextvars import ContextVar
 from pathlib import Path
 from unittest.mock import patch
 
-from imas_codex.discovery.base import llm
-from imas_codex.discovery.signals.enrichment import (
+from iter_codex.discovery.base import llm
+from iter_codex.discovery.signals.enrichment import (
     EnrichmentOptions,
     enrich_signal_batch,
     fit_enrichment_prompt,
 )
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_model
+from iter_codex.graph.client import GraphClient
+from iter_codex.settings import get_model
 from scripts import benchmark_signal_enrichment as bench
 from scripts.refine_signal_enrichment import (
     frozen_signal_order,

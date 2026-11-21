@@ -20,7 +20,7 @@ import logging
 import httpx
 import pytest
 
-from imas_codex.discovery.base import judgment, llm
+from iter_codex.discovery.base import judgment, llm
 
 MODEL = "typesafe/jev-1.13"
 SERVICE = "facility-discovery"
@@ -75,7 +75,7 @@ def _payload() -> dict:
 @pytest.fixture(autouse=True)
 def _decisions_key(monkeypatch):
     """Every test here resolves the service credential on its way to the seam."""
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
 
 
 async def _no_backoff(model, state, questions, *, service, **_kwargs):

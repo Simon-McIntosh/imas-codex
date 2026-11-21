@@ -8,7 +8,7 @@ The function signature is:
 
     _compute_pool_pending(gc, domains, rotation_cap, min_score) -> dict[str, int]
 
-where *gc* is an open :class:`~imas_codex.graph.client.GraphClient` session.
+where *gc* is an open :class:`~iter_codex.graph.client.GraphClient` session.
 All tests use a lightweight mock that intercepts ``gc.query``.
 """
 
@@ -18,9 +18,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.cli.sn import _compute_pool_pending
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.cli.sn import _compute_pool_pending
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_claim_release as _owning_graph_claim_release,
     graph_cost_and_claims as _owning_graph_cost_and_claims,
     graph_docs_persistence as _owning_graph_docs_persistence,

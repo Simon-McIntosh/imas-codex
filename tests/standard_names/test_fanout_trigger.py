@@ -18,13 +18,13 @@ from __future__ import annotations
 import inspect
 from pathlib import Path
 
-from imas_codex.standard_names.fanout import trigger as trigger_module
-from imas_codex.standard_names.fanout.config import FanoutSettings, load_settings
-from imas_codex.standard_names.fanout.trigger import (
+from iter_codex.standard_names.fanout import trigger as trigger_module
+from iter_codex.standard_names.fanout.config import FanoutSettings, load_settings
+from iter_codex.standard_names.fanout.trigger import (
     should_trigger_fanout,
     should_trigger_fanout_from_checks,
 )
-from imas_codex.standard_names.review.checks import JevQuestion, ReviewCheck
+from iter_codex.standard_names.review.checks import JevQuestion, ReviewCheck
 
 # Identifiers that belong only to the retired comment/keyword trigger.
 RETIRED_TRIGGER_IDENTIFIERS = (

@@ -82,7 +82,7 @@ def load(name: str):
 
 
 def _cap() -> int:
-    from imas_codex.standard_names.graph_store import graph_foundation
+    from iter_codex.standard_names.graph_store import graph_foundation
 
     return graph_foundation.services_for_call()._MAX_COMPOSE_CLAIM_ATTEMPTS
 
@@ -164,7 +164,7 @@ def select() -> int:
 
 
 def originals() -> int:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     selection = load("selection")
     items = selection["below_cap"]
@@ -242,7 +242,7 @@ def negative() -> int:
     none here. The apply phase's twenty rows are the positive control that the
     statement does write when its predicate admits the item.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     selection = load("selection")
     cap = int(selection["attempt_cap"])
@@ -264,7 +264,7 @@ def negative() -> int:
 
 
 def apply(*, dry_run: bool) -> int:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     selection = load("selection")
     cap = int(selection["attempt_cap"])
@@ -281,7 +281,7 @@ def apply(*, dry_run: bool) -> int:
 
 
 def readback() -> int:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     selection = load("selection")
     cap = int(selection["attempt_cap"])

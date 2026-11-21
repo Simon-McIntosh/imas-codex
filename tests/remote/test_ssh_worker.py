@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.remote.ssh_worker import _WORKER_SCRIPT, SSHWorker
+from iter_codex.remote.ssh_worker import _WORKER_SCRIPT, SSHWorker
 
 # ============================================================================
 # Helpers
@@ -173,7 +173,7 @@ class TestSSHWorkerStartup:
 
     async def test_nice_level_applied_to_startup(self):
         """When a nice level is configured for the host, 'nice -n N' must appear."""
-        from imas_codex.remote.executor import _host_nice_levels
+        from iter_codex.remote.executor import _host_nice_levels
 
         # Register a nice level for our test host
         _host_nice_levels["nice-host"] = 10
@@ -291,8 +291,8 @@ class TestSSHWorkerExecute:
 async def test_pooled_scripts_bundle_the_same_dependencies_as_executor(monkeypatch):
     from contextlib import asynccontextmanager
 
-    from imas_codex.remote import ssh_worker
-    from imas_codex.remote.script_source import load_script_source
+    from iter_codex.remote import ssh_worker
+    from iter_codex.remote.script_source import load_script_source
 
     captured = []
 
@@ -306,7 +306,7 @@ async def test_pooled_scripts_bundle_the_same_dependencies_as_executor(monkeypat
         async def acquire(self):
             yield Worker()
 
-    monkeypatch.setattr("imas_codex.remote.executor.is_local_host", lambda host: False)
+    monkeypatch.setattr("iter_codex.remote.executor.is_local_host", lambda host: False)
     result = await ssh_worker.pooled_run_python_script(
         "codac_uda.py",
         {"operation": "variables"},

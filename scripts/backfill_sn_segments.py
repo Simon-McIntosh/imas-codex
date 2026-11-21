@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Back-fill HAS_SEGMENT edges for existing named StandardName nodes.
 
-The persist_worker pipeline (``imas_codex.standard_names.graph_ops._write_segment_edges``)
+The persist_worker pipeline (``iter_codex.standard_names.graph_ops._write_segment_edges``)
 emits ``(sn:StandardName)-[:HAS_SEGMENT {position, segment}]->(t:GrammarToken)``
 edges for every newly persisted SN. This script is a one-shot catch-up for
 corpora that predate that wiring.
@@ -20,9 +20,9 @@ the SN node is left intact.
 Depends on:
     - ``imas_standard_names.grammar.parse_standard_name`` for decomposition
     - ``imas_standard_names.graph.spec.segment_edge_specs`` for edge layout
-    - ``imas_codex.standard_names.graph_ops._write_segment_edges`` for writes
+    - ``iter_codex.standard_names.graph_ops._write_segment_edges`` for writes
     - Active ``ISNGrammarVersion`` with populated GrammarToken vocabulary
-      (run ``imas-codex sn sync-grammar`` first).
+      (run ``iter-codex sn sync-grammar`` first).
 
 Plan reference: 29-architectural-pivot.md Phase E (E.7 back-fill).
 """
@@ -33,8 +33,8 @@ import argparse
 import logging
 import sys
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_store.graph_catalog import _write_segment_edges
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_store.graph_catalog import _write_segment_edges
 
 logger = logging.getLogger("backfill_sn_segments")
 
@@ -109,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
         if not active:
             print(
                 "ERROR: no ISNGrammarVersion{active:true} — "
-                "run `imas-codex sn sync-grammar` first.",
+                "run `iter-codex sn sync-grammar` first.",
                 file=sys.stderr,
             )
             return 2

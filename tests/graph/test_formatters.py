@@ -1,6 +1,6 @@
 """Tests for result formatters."""
 
-from imas_codex.graph.formatters import as_summary, as_table, pick
+from iter_codex.graph.formatters import as_summary, as_table, pick
 
 
 class TestPick:

@@ -7,7 +7,7 @@ Organize work using **project-scoped sessions** with multi-tab agent coordinatio
 ```
 WSL Client
  └─ cx                    → SSH → iter → zellij session "codex"      (infrastructure)
- └─ cx iter imas-codex    → SSH → iter → zellij session "imas-codex" (agents + mcp + git)
+ └─ cx iter iter-codex    → SSH → iter → zellij session "iter-codex" (agents + mcp + git)
  └─ cx iter efitpp        → SSH → iter → zellij session "efitpp"     (agent + build + run)
  └─ cx iter tcv           → SSH → iter → zellij session "tcv"        (facility discovery)
 ```
@@ -20,7 +20,7 @@ All sessions run on the **same iter login node**. The `cx` command handles SSH +
 
 | Session        | Layout       | Use Case                    |
 |----------------|--------------|-----------------------------|
-| `imas-codex`   | project.kdl  | Codex development           |
+| `iter-codex`   | project.kdl  | Codex development           |
 | `efitpp`       | project.kdl  | EFIT++ development          |
 | `codex`        | codex.kdl    | Infrastructure services     |
 
@@ -63,16 +63,16 @@ In the `codex` session tabs:
 
 | Tab       | Command                                              |
 |-----------|------------------------------------------------------|
-| `graph`   | `uv run imas-codex graph start`                      |
-| `embed`   | `uv run imas-codex embed start`                      |
-| `tunnel`  | `uv run imas-codex tunnel start iter`                |
+| `graph`   | `uv run iter-codex graph start`                      |
+| `embed`   | `uv run iter-codex embed start`                      |
+| `tunnel`  | `uv run iter-codex tunnel start iter`                |
 | `llm`     | general purpose shell / llm monitoring               |
 
 ### 2. Open a project session
 
 ```bash
 # Each command opens a separate SSH + zellij session
-cx iter imas-codex     # Codex development
+cx iter iter-codex     # Codex development
 cx iter efitpp         # EFIT++ work
 ```
 
@@ -90,21 +90,21 @@ In the `tcv` session (for example):
 
 | Tab        | Command                                         |
 |------------|--------------------------------------------------|
-| `wiki`     | `uv run imas-codex discover tcv --only wiki`      |
-| `paths`    | `uv run imas-codex discover tcv --only paths`     |
-| `code`     | `uv run imas-codex discover tcv --only code`      |
-| `signals`  | `uv run imas-codex discover tcv --only signals`   |
-| `docs`     | `uv run imas-codex discover tcv --only documents` |
-| `map`      | `uv run imas-codex discover tcv --only candidates,mapping` |
+| `wiki`     | `uv run iter-codex discover tcv --only wiki`      |
+| `paths`    | `uv run iter-codex discover tcv --only paths`     |
+| `code`     | `uv run iter-codex discover tcv --only code`      |
+| `signals`  | `uv run iter-codex discover tcv --only signals`   |
+| `docs`     | `uv run iter-codex discover tcv --only documents` |
+| `map`      | `uv run iter-codex discover tcv --only candidates,mapping` |
 
 ### 4. Monitor progress
 
 ```bash
 # Watch live stats in any tab
-watch -n 10 uv run imas-codex discover status tcv
+watch -n 10 uv run iter-codex discover status tcv
 
 # Or check logs
-tail -f ~/.local/share/imas-codex/logs/paths_tcv.log
+tail -f ~/.local/share/iter-codex/logs/paths_tcv.log
 ```
 
 ## Session Navigation
@@ -114,7 +114,7 @@ tail -f ~/.local/share/imas-codex/logs/paths_tcv.log
 | Action                          | Key / Command                                 |
 |---------------------------------|-----------------------------------------------|
 | Detach (keeps session alive)    | `Ctrl+q`                                      |
-| Reattach from WSL               | `cx iter imas-codex`                          |
+| Reattach from WSL               | `cx iter iter-codex`                          |
 | Switch session from inside      | `cx iter tcv` (from within any zellij session)|
 | List sessions (from iter shell) | `zellij list-sessions`                        |
 | Kill a session                  | `zellij kill-session tcv`                     |
@@ -140,7 +140,7 @@ Open multiple WSL terminal tabs, one per session:
 
 ```
 WT Tab 1:  cx                   → codex session (infra)
-WT Tab 2:  cx iter imas-codex   → imas-codex session (agents)
+WT Tab 2:  cx iter iter-codex   → iter-codex session (agents)
 WT Tab 3:  cx iter tcv          → tcv session (discovery)
 WT Tab 4:  cx iter jet          → jet session (discovery)
 ```
@@ -151,7 +151,7 @@ Each WSL tab maps to one remote zellij session. Close and reopen any WSL tab wit
 
 - **Atomic creation:** `cx` uses `zellij attach --create` to atomically attach or create sessions, preventing the race condition where a dropped SSH connection causes a duplicate server that orphans the original.
 - **Session serialization:** Enabled (`session_serialization true`) so sessions survive server crashes.
-- **SSH drops:** Just run `cx iter imas-codex` again — it reattaches to the existing session.
+- **SSH drops:** Just run `cx iter iter-codex` again — it reattaches to the existing session.
 - **Orphan cleanup:** `cx` automatically cleans dead sessions and stale resurrection data on startup.
 - **Version upgrades:** `cx` detects and kills orphan zellij servers from old versions that use incompatible socket paths.
 
@@ -159,6 +159,6 @@ Each WSL tab maps to one remote zellij session. Close and reopen any WSL tab wit
 
 - **Sessions are persistent.** SSH drops, laptop sleep, network changes — just run `cx` again to reattach.
 - **Don't nest zellij.** If inside zellij with 2+ args (e.g., `cx iter tcv`), `cx` switches sessions locally instead of nesting.
-- **Logs over pipes.** Never pipe `imas-codex` CLI output. Check `~/.local/share/imas-codex/logs/` instead.
+- **Logs over pipes.** Never pipe `iter-codex` CLI output. Check `~/.local/share/iter-codex/logs/` instead.
 - **New tabs on the fly.** `Alt+t` → `n` to add a tab, `r` to rename it.
 - **Clean slate.** `zellij kill-session <name>` or `zellij delete-all-sessions` to start fresh.

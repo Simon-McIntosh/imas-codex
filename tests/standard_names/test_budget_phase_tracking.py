@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
 
 # ── Test helper ───────────────────────────────────────────────────────
 

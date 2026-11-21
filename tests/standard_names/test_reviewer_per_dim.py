@@ -15,7 +15,7 @@ import pytest
 def _no_approved_names():
     """Make the approval-backed protection lookup explicit for this suite."""
     with patch(
-        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        "iter_codex.standard_names.protection._fetch_catalog_edit_names",
         return_value=set(),
     ):
         yield
@@ -23,11 +23,11 @@ def _no_approved_names():
 
 def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -36,11 +36,11 @@ def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
 
 def _call_write_reviews(reviews: list[dict], mock_gc: MagicMock) -> int:
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
+        from iter_codex.standard_names.graph_store.graph_catalog import write_reviews
 
         return write_reviews(reviews)
 
@@ -63,7 +63,7 @@ def _find_merge_batch(mock_gc: MagicMock, needle: str) -> list[dict] | None:
 
 class TestQualityCommentModels:
     def test_full_comments_round_trip(self):
-        from imas_codex.standard_names.models import StandardNameQualityComments
+        from iter_codex.standard_names.models import StandardNameQualityComments
 
         c = StandardNameQualityComments(
             grammar="ok",
@@ -80,7 +80,7 @@ class TestQualityCommentModels:
         assert StandardNameQualityComments.model_validate(d) == c
 
     def test_name_only_comments_round_trip(self):
-        from imas_codex.standard_names.models import StandardNameQualityCommentsNameOnly
+        from iter_codex.standard_names.models import StandardNameQualityCommentsNameOnly
 
         c = StandardNameQualityCommentsNameOnly(
             grammar="good", semantic=None, convention="minor issue", completeness=None
@@ -90,7 +90,7 @@ class TestQualityCommentModels:
         assert StandardNameQualityCommentsNameOnly.model_validate(d) == c
 
     def test_docs_comments_independent_dim_names(self):
-        from imas_codex.standard_names.models import StandardNameQualityCommentsDocs
+        from iter_codex.standard_names.models import StandardNameQualityCommentsDocs
 
         c = StandardNameQualityCommentsDocs(
             description_quality="clear",
@@ -105,7 +105,7 @@ class TestQualityCommentModels:
 
 class TestQualityReviewWithComments:
     def test_full_review_with_comments(self):
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.models import (
             StandardNameQualityComments,
             StandardNameQualityReview,
         )
@@ -129,7 +129,7 @@ class TestQualityReviewWithComments:
         assert review.comments.documentation is None
 
     def test_full_review_without_comments(self):
-        from imas_codex.standard_names.models import StandardNameQualityReview
+        from iter_codex.standard_names.models import StandardNameQualityReview
 
         review = StandardNameQualityReview(
             source_id="eq/psi",
@@ -147,7 +147,7 @@ class TestQualityReviewWithComments:
         assert review.comments is None
 
     def test_docs_review_with_comments(self):
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.models import (
             StandardNameQualityCommentsDocs,
             StandardNameQualityReviewDocs,
         )
@@ -226,7 +226,7 @@ class TestWriteReviewsPerDim:
 
 class TestBuildReviewRecordPerDim:
     def test_explicit_comments_per_dim(self):
-        from imas_codex.standard_names.review.pipeline import _build_review_record
+        from iter_codex.standard_names.review.pipeline import _build_review_record
 
         reviewed_at = datetime.now(UTC).isoformat()
         per_dim = {"grammar": "fine", "semantic": "accurate"}
@@ -240,7 +240,7 @@ class TestBuildReviewRecordPerDim:
         assert record["comments_per_dim_json"] == json.dumps(per_dim)
 
     def test_comments_per_dim_from_item(self):
-        from imas_codex.standard_names.review.pipeline import _build_review_record
+        from iter_codex.standard_names.review.pipeline import _build_review_record
 
         reviewed_at = datetime.now(UTC).isoformat()
         per_dim_json = json.dumps({"grammar": "fine", "semantic": "accurate"})
@@ -253,7 +253,7 @@ class TestBuildReviewRecordPerDim:
         assert record["comments_per_dim_json"] == per_dim_json
 
     def test_no_comments_per_dim(self):
-        from imas_codex.standard_names.review.pipeline import _build_review_record
+        from iter_codex.standard_names.review.pipeline import _build_review_record
 
         reviewed_at = datetime.now(UTC).isoformat()
         record = _build_review_record(
@@ -267,11 +267,11 @@ class TestBuildReviewRecordPerDim:
 
 class TestMatchReviewsPerDim:
     def test_reviewer_comments_per_dim_set(self):
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.models import (
             StandardNameQualityComments,
             StandardNameQualityReview,
         )
-        from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+        from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
         entries = [
             {"id": "electron_temperature", "standard_name": "electron_temperature"}
@@ -301,11 +301,11 @@ class TestMatchReviewsPerDim:
         assert entry["review_tier"] == "outstanding"
 
     def test_docs_review_sets_comments(self):
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.models import (
             StandardNameQualityCommentsDocs,
             StandardNameQualityReviewDocs,
         )
-        from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+        from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
         entries = [
             {"id": "electron_temperature", "standard_name": "electron_temperature"}

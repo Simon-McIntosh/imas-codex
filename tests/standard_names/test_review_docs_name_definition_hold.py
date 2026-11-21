@@ -12,12 +12,12 @@ from __future__ import annotations
 import asyncio
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_review_persistence as _owning_graph_review_persistence,
 )
-from imas_codex.standard_names.review import cascade, name_definition_seat
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.review import cascade, name_definition_seat
+from iter_codex.standard_names.worker_tasks import (
     worker_common as _owning_worker_common,
     worker_review_docs as _owning_worker_review_docs,
 )

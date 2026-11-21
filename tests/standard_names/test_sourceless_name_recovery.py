@@ -44,7 +44,7 @@ _HELD_KIND = "change_in_electron_temperature"
 
 @pytest.fixture()
 def _gc(disposable_neo4j_uri: str):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     client = GraphClient(
         uri=disposable_neo4j_uri,
@@ -166,7 +166,7 @@ def test_lapsed_detachment_is_reattached(_gc, _clean):
     the provenance edge, the source's produced state, the ``source_paths``
     entry and (via provenance) the DD-side projection, and the census falls.
     """
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_sourceless_pipeline_names,
     )
 
@@ -208,7 +208,7 @@ def test_reason_that_still_holds_is_surfaced_and_left(_gc, _clean):
     a blocker and leaves the detached source untouched — the census is
     unchanged.
     """
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_sourceless_pipeline_names,
     )
 
@@ -232,7 +232,7 @@ def test_reason_that_still_holds_is_surfaced_and_left(_gc, _clean):
 @pytest.mark.graph
 def test_reattach_is_idempotent(_gc, _clean):
     """A second pass after a re-pair matches nothing and adds no edge."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_sourceless_pipeline_names,
     )
 
@@ -248,7 +248,7 @@ def test_reattach_is_idempotent(_gc, _clean):
 @pytest.mark.graph
 def test_runs_from_startup_reviewable_reconcile(_gc, _clean):
     """The healing fires from the startup wiring, not only the focused call."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_reviewable_name_stage,
     )
 

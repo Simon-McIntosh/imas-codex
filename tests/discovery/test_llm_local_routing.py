@@ -14,7 +14,7 @@ from typing import Any
 import pytest
 from pydantic import BaseModel
 
-from imas_codex.discovery.base import llm
+from iter_codex.discovery.base import llm
 
 LOCAL_MODEL = "local/deepseek-v4.1-flash"
 LOCAL_ENDPOINT = "http://local.example.test/v1"
@@ -36,7 +36,7 @@ def _fake_response(content: str) -> Any:
 
 
 def _register_local_endpoint(monkeypatch, model: str = LOCAL_MODEL) -> None:
-    from imas_codex import settings
+    from iter_codex import settings
 
     monkeypatch.setattr(
         settings,
@@ -50,7 +50,7 @@ def _register_local_endpoint(monkeypatch, model: str = LOCAL_MODEL) -> None:
         },
     )
     monkeypatch.setenv("TEST_LOCAL_API_KEY", "local-key")
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-or-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-or-key")
 
 
 def test_local_client_prefixes_subset_of_local_model_prefixes():
@@ -122,10 +122,10 @@ def test_local_model_reaches_synchronous_local_client(monkeypatch):
 
 def test_openrouter_model_reaches_litellm(monkeypatch):
     """An OpenRouter model keeps litellm routing on the synchronous path."""
-    from imas_codex import settings
+    from iter_codex import settings
 
     monkeypatch.setattr(settings, "_MODEL_ENDPOINTS", {})
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-or-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-or-key")
 
     called: dict[str, Any] = {}
 

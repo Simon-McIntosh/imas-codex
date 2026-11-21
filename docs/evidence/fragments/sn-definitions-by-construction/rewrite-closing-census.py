@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 19daa7a6db6e1a0212c2be6cd4c82b11957e0cd5, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.graph.temp_neo4j.
+# Names the tree no longer defines: iter_codex.graph.temp_neo4j.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Closing census of the live standard-name catalog after the wording rewrite.
@@ -204,7 +204,7 @@ def conventions_for(name: str) -> Any:
 def operator_sentence(operator: str, rows: list[dict[str, Any]]) -> str | None:
     """The stored sentence every name carrying *operator* has to state."""
 
-    from imas_codex.standard_names.docs_gates import shared_part_sentences
+    from iter_codex.standard_names.docs_gates import shared_part_sentences
 
     for row in rows:
         if operator not in row["id"]:
@@ -221,7 +221,7 @@ def operator_sentence(operator: str, rows: list[dict[str, Any]]) -> str | None:
 def operator_census(rows, before):
     """Definition wordings per operator, beside the reading before the rewrite."""
 
-    from imas_codex.standard_names.harmonize import shared_part_form_counts
+    from iter_codex.standard_names.harmonize import shared_part_form_counts
 
     out = {}
     for operator in OPERATORS:
@@ -310,12 +310,12 @@ def family_census(rows, min_members=3, name_re=None, word_re=None):
 def population_census(rows):
     """Every species name against the population the lead ruled."""
 
-    from imas_codex.standard_names.docs_gates import (
+    from iter_codex.standard_names.docs_gates import (
         SPECIES_POPULATION_SENTENCE,
         is_species_density_name,
         population_contradiction,
     )
-    from imas_codex.standard_names.harmonize import written_part_form
+    from iter_codex.standard_names.harmonize import written_part_form
 
     species = [row for row in rows if is_species_density_name(row["id"])]
     departing = []
@@ -375,7 +375,7 @@ def population_census(rows):
 def score_census(rows, rewrite):
     """Documentation scores of the rewritten names against the publish threshold."""
 
-    from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+    from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 
     by_id = {row["id"]: row for row in rows}
     held = []
@@ -487,8 +487,8 @@ def rewritten_subset(rows, rewrite, before):
 
 
 def phase_live():
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.audits import live_unit_spelling_census
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.audits import live_unit_spelling_census
 
     census = load_census()
     rewrite = json.loads(REWRITE.read_text())
@@ -542,8 +542,8 @@ def phase_live():
 
 
 def phase_seat():
-    import imas_codex.standard_names.review.name_definition_seat as seat
-    from imas_codex.graph.client import GraphClient
+    import iter_codex.standard_names.review.name_definition_seat as seat
+    from iter_codex.graph.client import GraphClient
 
     census = load_census()
     with GraphClient() as client:
@@ -624,7 +624,7 @@ def _start_neo4j():
     import os
     import tempfile
 
-    from imas_codex.graph import temp_neo4j
+    from iter_codex.graph import temp_neo4j
 
     scratch = os.environ.get("TMPDIR") or None
     directory = tempfile.TemporaryDirectory(prefix="closing-census-", dir=scratch)
@@ -669,11 +669,11 @@ def phase_planted():
     """Plant a five-member family in a disposable graph and read it back.
 """
 
-    from imas_codex.standard_names.docs_gates import (
+    from iter_codex.standard_names.docs_gates import (
         SPECIES_POPULATION_SENTENCE,
         population_contradiction,
     )
-    from imas_codex.standard_names.harmonize import shared_part_form_counts
+    from iter_codex.standard_names.harmonize import shared_part_form_counts
 
     census = load_census()
     directory, process, log, bolt_port = _start_neo4j()

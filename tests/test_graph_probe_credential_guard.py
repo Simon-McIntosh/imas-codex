@@ -39,7 +39,7 @@ def conftest_module(monkeypatch):
     """The root conftest with its per-session reachability cache cleared."""
     module = _conftest_module()
     monkeypatch.setattr(module, "_neo4j_available", None, raising=False)
-    monkeypatch.delenv("IMAS_CODEX_TEST_NEO4J_URI", raising=False)
+    monkeypatch.delenv("ITER_CODEX_TEST_NEO4J_URI", raising=False)
     return module
 
 
@@ -57,7 +57,7 @@ class TestProbeCredentialGuard:
         self, conftest_module, monkeypatch
     ):
         """The decisive property: nothing is constructed, so nothing authenticates."""
-        from imas_codex.graph import profiles
+        from iter_codex.graph import profiles
 
         monkeypatch.setattr(
             profiles,
@@ -73,7 +73,7 @@ class TestProbeCredentialGuard:
 
         monkeypatch.setattr(conftest_module, "_neo4j_probe_client", _must_not_be_called)
 
-        with patch("imas_codex.graph.client.GraphClient.__post_init__") as post_init:
+        with patch("iter_codex.graph.client.GraphClient.__post_init__") as post_init:
             assert conftest_module._check_neo4j() is False
 
         assert post_init.call_count == 0
@@ -82,13 +82,13 @@ class TestProbeCredentialGuard:
         self, conftest_module, monkeypatch
     ):
         """An unset credential is as unusable as the placeholder."""
-        from imas_codex.graph import profiles
+        from iter_codex.graph import profiles
 
         monkeypatch.setattr(
             profiles, "resolve_neo4j", lambda **_kwargs: _profile_with("")
         )
 
-        with patch("imas_codex.graph.client.GraphClient.__post_init__") as post_init:
+        with patch("iter_codex.graph.client.GraphClient.__post_init__") as post_init:
             assert conftest_module._check_neo4j() is False
 
         assert post_init.call_count == 0
@@ -97,21 +97,21 @@ class TestProbeCredentialGuard:
         self, conftest_module, monkeypatch
     ):
         """A checkout that cannot resolve a profile at all must not guess one."""
-        from imas_codex.graph import profiles
+        from iter_codex.graph import profiles
 
         def _raise(**_kwargs):
             raise RuntimeError("no profile configured")
 
         monkeypatch.setattr(profiles, "resolve_neo4j", _raise)
 
-        with patch("imas_codex.graph.client.GraphClient.__post_init__") as post_init:
+        with patch("iter_codex.graph.client.GraphClient.__post_init__") as post_init:
             assert conftest_module._check_neo4j() is False
 
         assert post_init.call_count == 0
 
     def test_real_credential_still_probes(self, conftest_module, monkeypatch):
         """No behaviour change where a credential exists — the probe still runs."""
-        from imas_codex.graph import profiles
+        from iter_codex.graph import profiles
 
         monkeypatch.setattr(
             profiles,
@@ -144,7 +144,7 @@ class TestProbeCredentialGuard:
         It stays usable with no password so an auth-disabled local server
         still probes normally.
         """
-        monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", "bolt://127.0.0.1:7687")
+        monkeypatch.setenv("ITER_CODEX_TEST_NEO4J_URI", "bolt://127.0.0.1:7687")
         monkeypatch.delenv("NEO4J_PASSWORD", raising=False)
 
         assert conftest_module._graph_credential_is_configured() is True
@@ -155,7 +155,7 @@ class TestSkipReason:
         self, conftest_module, monkeypatch
     ):
         """A skipped graph test says why in one line a reader can act on."""
-        from imas_codex.graph import profiles
+        from iter_codex.graph import profiles
 
         monkeypatch.setattr(
             profiles,
@@ -172,7 +172,7 @@ class TestSkipReason:
         self, conftest_module, monkeypatch
     ):
         """A configured-but-down graph must not be reported as unconfigured."""
-        from imas_codex.graph import profiles
+        from iter_codex.graph import profiles
 
         monkeypatch.setattr(
             profiles,

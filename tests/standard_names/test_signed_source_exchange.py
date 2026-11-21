@@ -9,9 +9,9 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import signed_manifest as operator
-from imas_codex.standard_names.repair_authority import build_repair_authority
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import signed_manifest as operator
+from iter_codex.standard_names.repair_authority import build_repair_authority
 from tests.standard_names.test_signed_recovery_unbind import (
     FakeGraph as _BaseGraph,
     _Transaction as _BaseTransaction,

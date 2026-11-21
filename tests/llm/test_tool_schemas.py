@@ -11,7 +11,7 @@ import json
 
 import pytest
 
-from imas_codex.llm.server import AgentsServer
+from iter_codex.llm.server import AgentsServer
 
 SN_TOOLS = {"search_standard_names", "fetch_standard_names", "list_standard_names"}
 

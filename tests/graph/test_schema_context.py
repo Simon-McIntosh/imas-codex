@@ -22,7 +22,7 @@ class TestTaskGroupsYAML:
     def task_groups(self):
         yaml_path = (
             Path(__file__).parent.parent.parent
-            / "imas_codex"
+            / "iter_codex"
             / "schemas"
             / "task_groups.yaml"
         )
@@ -32,9 +32,9 @@ class TestTaskGroupsYAML:
     @pytest.fixture(scope="class")
     def all_schema_labels(self):
         """Get all node labels from both schemas."""
-        from imas_codex.graph.schema import GraphSchema
+        from iter_codex.graph.schema import GraphSchema
 
-        schemas_dir = Path(__file__).parent.parent.parent / "imas_codex" / "schemas"
+        schemas_dir = Path(__file__).parent.parent.parent / "iter_codex" / "schemas"
         facility = GraphSchema(schemas_dir / "facility.yaml")
         dd = GraphSchema(schemas_dir / "imas_dd.yaml")
         return set(facility.node_labels + dd.node_labels)
@@ -42,7 +42,7 @@ class TestTaskGroupsYAML:
     def test_task_groups_file_exists(self):
         path = (
             Path(__file__).parent.parent.parent
-            / "imas_codex"
+            / "iter_codex"
             / "schemas"
             / "task_groups.yaml"
         )
@@ -199,10 +199,10 @@ class TestVectorIndexFilters:
 
     @pytest.fixture(scope="class")
     def schemas_dir(self):
-        return Path(__file__).parent.parent.parent / "imas_codex" / "schemas"
+        return Path(__file__).parent.parent.parent / "iter_codex" / "schemas"
 
     def test_schema_exposes_code_chunk_facility_filter(self, schemas_dir):
-        from imas_codex.graph.schema import GraphSchema
+        from iter_codex.graph.schema import GraphSchema
 
         schema = GraphSchema(schemas_dir / "facility.yaml")
         filters = schema.vector_index_filters
@@ -210,7 +210,7 @@ class TestVectorIndexFilters:
 
     def test_schema_exposes_sibling_facility_filters(self, schemas_dir):
         """The signal, wiki-chunk and code-example indexes also carry the filter."""
-        from imas_codex.graph.schema import GraphSchema
+        from iter_codex.graph.schema import GraphSchema
 
         schema = GraphSchema(schemas_dir / "facility.yaml")
         filters = schema.vector_index_filters
@@ -220,7 +220,7 @@ class TestVectorIndexFilters:
 
     def test_vector_indexes_shape_unchanged(self, schemas_dir):
         """vector_indexes stays a list of 3-tuples."""
-        from imas_codex.graph.schema import GraphSchema
+        from iter_codex.graph.schema import GraphSchema
 
         schema = GraphSchema(schemas_dir / "facility.yaml")
         for entry in schema.vector_indexes:
@@ -267,7 +267,7 @@ class TestVectorIndexFilters:
             assert len(value) == 2, index_name
 
     def test_ddl_registers_filter_property(self):
-        from imas_codex.graph.client import _vector_index_ddl
+        from iter_codex.graph.client import _vector_index_ddl
 
         ddl = _vector_index_ddl(
             "code_chunk_embedding", "CodeChunk", "embedding", 1024, ["facility_id"]
@@ -281,13 +281,13 @@ class TestVectorIndexFilters:
         assert ddl.index("WITH [n.facility_id]") < ddl.index("OPTIONS")
 
     def test_ddl_without_filters_has_no_with_clause(self):
-        from imas_codex.graph.client import _vector_index_ddl
+        from iter_codex.graph.client import _vector_index_ddl
 
         ddl = _vector_index_ddl("imas_node_embedding", "IMASNode", "embedding", 1024)
         assert "WITH [" not in ddl
 
     def test_ddl_dimensions_and_similarity(self):
-        from imas_codex.graph.client import _vector_index_ddl
+        from iter_codex.graph.client import _vector_index_ddl
 
         ddl = _vector_index_ddl(
             "wiki_chunk_embedding", "WikiChunk", "embedding", 768, ["facility_id"]
@@ -306,7 +306,7 @@ class TestInverseOfAnnotation:
 
     @pytest.fixture(scope="class")
     def schemas_dir(self):
-        return Path(__file__).parent.parent.parent / "imas_codex" / "schemas"
+        return Path(__file__).parent.parent.parent / "iter_codex" / "schemas"
 
     def _mutated_schema(self, schemas_dir, tmp_path, mutate):
         """Copy the schemas dir, apply ``mutate`` to facility.yaml, return its path.
@@ -326,7 +326,7 @@ class TestInverseOfAnnotation:
 
     def test_inverse_of_slot_derives_no_relationship(self, schemas_dir):
         """The three stored-foreign-key page slots derive no Relationship."""
-        from imas_codex.graph.schema import GraphSchema
+        from iter_codex.graph.schema import GraphSchema
 
         schema = GraphSchema(schemas_dir / "facility.yaml")
         derived = {(rel.from_class, rel.slot_name) for rel in schema.relationships}
@@ -339,7 +339,7 @@ class TestInverseOfAnnotation:
 
     def test_owning_has_chunks_slots_still_derive(self, schemas_dir):
         """The multivalued owner slots keep deriving HAS_CHUNK."""
-        from imas_codex.graph.schema import GraphSchema
+        from iter_codex.graph.schema import GraphSchema
 
         schema = GraphSchema(schemas_dir / "facility.yaml")
         owners = {
@@ -357,7 +357,7 @@ class TestInverseOfAnnotation:
                 "inverse_of"
             ] = "no_such_slot"
 
-        from imas_codex.graph.schema import GraphSchema
+        from iter_codex.graph.schema import GraphSchema
 
         path = self._mutated_schema(schemas_dir, tmp_path, mutate)
         with pytest.raises(ValueError, match="no_such_slot"):
@@ -372,7 +372,7 @@ class TestInverseOfAnnotation:
                 "inverse_of"
             ] = "facility_id"
 
-        from imas_codex.graph.schema import GraphSchema
+        from iter_codex.graph.schema import GraphSchema
 
         path = self._mutated_schema(schemas_dir, tmp_path, mutate)
         with pytest.raises(ValueError, match="facility_id"):
@@ -450,7 +450,7 @@ class TestEnsureVectorIndexes:
         return fake
 
     def test_recreates_index_missing_filter_property(self):
-        from imas_codex.graph import client as client_mod
+        from iter_codex.graph import client as client_mod
 
         dim = client_mod.get_embedding_dimension()
         fake = _FakeNeo4jSession(
@@ -468,7 +468,7 @@ class TestEnsureVectorIndexes:
         )
 
     def test_keeps_index_with_matching_shape(self):
-        from imas_codex.graph import client as client_mod
+        from iter_codex.graph import client as client_mod
 
         dim = client_mod.get_embedding_dimension()
         fake = _FakeNeo4jSession(
@@ -490,7 +490,7 @@ class TestEnsureVectorIndexes:
         )
 
     def test_recreates_index_on_dimension_mismatch(self):
-        from imas_codex.graph import client as client_mod
+        from iter_codex.graph import client as client_mod
 
         dim = client_mod.get_embedding_dimension()
         fake = _FakeNeo4jSession(
@@ -512,7 +512,7 @@ class TestEnsureVectorIndexes:
         )
 
     def test_leaves_indexes_the_schema_does_not_own(self):
-        from imas_codex.graph import client as client_mod
+        from iter_codex.graph import client as client_mod
 
         fake = _FakeNeo4jSession(
             vector_rows=[
@@ -530,7 +530,7 @@ class TestEnsureVectorIndexes:
         say which properties an index should carry, so an index that carries
         more than the vector property is not evidence of a mismatch.
         """
-        from imas_codex.graph import client as client_mod
+        from iter_codex.graph import client as client_mod
 
         dim = client_mod.get_embedding_dimension()
         fake = _FakeNeo4jSession(
@@ -552,7 +552,7 @@ class TestEnsureVectorIndexes:
         )
 
     def test_unknown_filter_map_still_drops_on_dimension_mismatch(self):
-        from imas_codex.graph import client as client_mod
+        from iter_codex.graph import client as client_mod
 
         dim = client_mod.get_embedding_dimension()
         fake = _FakeNeo4jSession(
@@ -575,7 +575,7 @@ class TestEnsureVectorIndexes:
         With the symbol present and empty the schema says no index carries a
         filter property, so a live index that carries one is a real mismatch.
         """
-        from imas_codex.graph import client as client_mod
+        from iter_codex.graph import client as client_mod
 
         dim = client_mod.get_embedding_dimension()
         fake = _FakeNeo4jSession(
@@ -602,7 +602,7 @@ class TestSchemaFor:
     """Test the runtime schema_for() function."""
 
     def test_schema_for_overview_returns_string(self):
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         result = schema_for(task="overview")
         assert isinstance(result, str)
@@ -610,7 +610,7 @@ class TestSchemaFor:
 
     def test_code_example_resolves_source_through_has_chunk(self):
         """The shipped code example embeds the one rendered resolution."""
-        from imas_codex.graph.schema_context import _EXAMPLE_PATTERNS
+        from iter_codex.graph.schema_context import _EXAMPLE_PATTERNS
 
         code_example = _EXAMPLE_PATTERNS["code"][0]
         assert "OPTIONAL MATCH (ce:CodeExample)-[:HAS_CHUNK]->(node)" in code_example
@@ -620,7 +620,7 @@ class TestSchemaFor:
         assert "CodeFile" not in code_example
 
     def test_schema_for_signals_task(self):
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         result = schema_for(task="signals")
         assert isinstance(result, str)
@@ -631,21 +631,21 @@ class TestSchemaFor:
         assert "## IMASNode" not in result
 
     def test_schema_for_wiki_task(self):
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         result = schema_for(task="wiki")
         assert "WikiPage" in result
         assert "WikiChunk" in result
 
     def test_schema_for_imas_task(self):
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         result = schema_for(task="imas")
         assert "IMASNode" in result
         assert "DDVersion" in result
 
     def test_schema_for_specific_labels(self):
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         result = schema_for("Facility", "DataSource")
         assert "Facility" in result
@@ -655,47 +655,47 @@ class TestSchemaFor:
 
     def test_schema_for_overview_is_compact(self):
         """Overview should contain all labels but be compact (no full property lists)."""
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         result = schema_for(task="overview")
         assert "Facility" in result
         assert "IMASNode" in result
 
     def test_schema_for_includes_vector_indexes(self):
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         result = schema_for(task="signals")
         # Should include relevant vector indexes
         assert "embedding" in result.lower() or "vector" in result.lower()
 
     def test_schema_for_includes_relationships(self):
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         result = schema_for(task="signals")
         # Should include relationships for the labels
         assert "DATA_ACCESS" in result or "BELONGS_TO_DIAGNOSTIC" in result
 
     def test_schema_for_includes_enums(self):
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         result = schema_for(task="facility")
         assert "discovered" in result or "PathStatus" in result
 
     def test_schema_for_unknown_task_raises(self):
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         with pytest.raises(ValueError, match="Unknown task"):
             schema_for(task="nonexistent")
 
     def test_schema_for_unknown_label_raises(self):
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         with pytest.raises(ValueError, match="Unknown label"):
             schema_for("NonexistentLabel")
 
     def test_schema_for_token_efficiency(self):
         """Task-specific schema should be smaller than full-detail schema."""
-        from imas_codex.graph.schema_context import schema_for
+        from iter_codex.graph.schema_context import schema_for
 
         # Compare signals slice against the full-detail output for ALL labels
         all_labels = schema_for(task="signals")

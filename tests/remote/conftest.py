@@ -5,7 +5,7 @@ import subprocess
 
 import pytest
 
-from imas_codex.remote import executor
+from iter_codex.remote import executor
 
 
 @pytest.fixture(params=["sync", "async"])

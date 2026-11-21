@@ -6,8 +6,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from imas_codex import settings
-from imas_codex.settings import _parse_bool
+from iter_codex import settings
+from iter_codex.settings import _parse_bool
 
 
 class TestSettingsFunctions:
@@ -17,7 +17,7 @@ class TestSettingsFunctions:
         """Environment variable overrides embedding model setting."""
         settings._load_pyproject_settings.cache_clear()
 
-        monkeypatch.setenv("IMAS_CODEX_EMBEDDING_MODEL", "test-model")
+        monkeypatch.setenv("ITER_CODEX_EMBEDDING_MODEL", "test-model")
         result = settings.get_embedding_model()
 
         assert result == "test-model"
@@ -26,7 +26,7 @@ class TestSettingsFunctions:
         """Environment variable overrides labeling batch size."""
         settings._load_pyproject_settings.cache_clear()
 
-        monkeypatch.setenv("IMAS_CODEX_LABELING_BATCH_SIZE", "100")
+        monkeypatch.setenv("ITER_CODEX_LABELING_BATCH_SIZE", "100")
         result = settings.get_labeling_batch_size()
 
         assert result == 100
@@ -35,7 +35,7 @@ class TestSettingsFunctions:
         """Environment variable overrides include_ggd setting."""
         settings._load_pyproject_settings.cache_clear()
 
-        monkeypatch.setenv("IMAS_CODEX_INCLUDE_GGD", "false")
+        monkeypatch.setenv("ITER_CODEX_INCLUDE_GGD", "false")
         result = settings.get_include_ggd()
 
         assert result is False
@@ -44,7 +44,7 @@ class TestSettingsFunctions:
         """Environment variable overrides include_error_fields setting."""
         settings._load_pyproject_settings.cache_clear()
 
-        monkeypatch.setenv("IMAS_CODEX_INCLUDE_ERROR_FIELDS", "true")
+        monkeypatch.setenv("ITER_CODEX_INCLUDE_ERROR_FIELDS", "true")
         result = settings.get_include_error_fields()
 
         assert result is True
@@ -62,7 +62,7 @@ class TestSettingsFunctions:
         """get_embedding_model returns default when env not set."""
         settings._load_pyproject_settings.cache_clear()
 
-        monkeypatch.delenv("IMAS_CODEX_EMBEDDING_MODEL", raising=False)
+        monkeypatch.delenv("ITER_CODEX_EMBEDDING_MODEL", raising=False)
         result = settings.get_embedding_model()
 
         assert isinstance(result, str)
@@ -110,7 +110,7 @@ class TestSettingsFunctions:
         """get_labeling_batch_size returns default when env not set."""
         settings._load_pyproject_settings.cache_clear()
 
-        monkeypatch.delenv("IMAS_CODEX_LABELING_BATCH_SIZE", raising=False)
+        monkeypatch.delenv("ITER_CODEX_LABELING_BATCH_SIZE", raising=False)
         result = settings.get_labeling_batch_size()
 
         assert isinstance(result, int)
@@ -120,7 +120,7 @@ class TestSettingsFunctions:
         """get_include_ggd returns default when env not set."""
         settings._load_pyproject_settings.cache_clear()
 
-        monkeypatch.delenv("IMAS_CODEX_INCLUDE_GGD", raising=False)
+        monkeypatch.delenv("ITER_CODEX_INCLUDE_GGD", raising=False)
         result = settings.get_include_ggd()
 
         assert isinstance(result, bool)
@@ -129,7 +129,7 @@ class TestSettingsFunctions:
         """get_include_error_fields returns default when env not set."""
         settings._load_pyproject_settings.cache_clear()
 
-        monkeypatch.delenv("IMAS_CODEX_INCLUDE_ERROR_FIELDS", raising=False)
+        monkeypatch.delenv("ITER_CODEX_INCLUDE_ERROR_FIELDS", raising=False)
         result = settings.get_include_error_fields()
 
         assert isinstance(result, bool)
@@ -271,7 +271,7 @@ class TestGraphSettings:
         monkeypatch.delenv("NEO4J_PASSWORD", raising=False)
         result = settings.get_graph_password()
         assert isinstance(result, str)
-        assert result == "imas-codex"
+        assert result == "iter-codex"
 
     def test_get_graph_password_env_override(self, monkeypatch):
         """NEO4J_PASSWORD env var overrides pyproject.toml."""
@@ -281,7 +281,7 @@ class TestGraphSettings:
         assert result == "secret-pw"
 
     def test_graph_settings_from_pyproject(self, monkeypatch):
-        """Graph settings are read from pyproject.toml [tool.imas-codex.graph]."""
+        """Graph settings are read from pyproject.toml [tool.iter-codex.graph]."""
         settings._load_pyproject_settings.cache_clear()
         monkeypatch.delenv("NEO4J_URI", raising=False)
         monkeypatch.delenv("NEO4J_USERNAME", raising=False)
@@ -294,12 +294,12 @@ class TestGraphSettings:
 
         assert "bolt://" in uri
         assert username == "neo4j"
-        assert password == "imas-codex"
+        assert password == "iter-codex"
 
     def test_get_graph_name_default(self, monkeypatch):
         """get_graph_name returns active graph name."""
         settings._load_pyproject_settings.cache_clear()
-        monkeypatch.delenv("IMAS_CODEX_GRAPH", raising=False)
+        monkeypatch.delenv("ITER_CODEX_GRAPH", raising=False)
         name = settings.get_graph_name()
         # In CI/local environments without an initialized graph symlink,
         # get_active_graph_name() returns "uninitialized".
@@ -308,7 +308,7 @@ class TestGraphSettings:
     def test_get_graph_profile_returns_profile(self, monkeypatch):
         """get_graph_profile returns a Neo4jProfile object."""
         settings._load_pyproject_settings.cache_clear()
-        monkeypatch.delenv("IMAS_CODEX_GRAPH", raising=False)
+        monkeypatch.delenv("ITER_CODEX_GRAPH", raising=False)
         monkeypatch.delenv("NEO4J_URI", raising=False)
         monkeypatch.delenv("NEO4J_PASSWORD", raising=False)
         profile = settings.get_graph_profile()
@@ -348,7 +348,7 @@ class TestDiscoveryFunctionSeats:
         settings._load_pyproject_settings.cache_clear()
 
         monkeypatch.setenv(
-            "IMAS_CODEX_DISCOVERY_SCORE_MODEL", "openrouter/test/score-model"
+            "ITER_CODEX_DISCOVERY_SCORE_MODEL", "openrouter/test/score-model"
         )
         assert settings.get_model("discovery-score") == "openrouter/test/score-model"
 
@@ -393,8 +393,8 @@ class TestDiscoveryFunctionSeats:
         """
         settings._load_pyproject_settings.cache_clear()
         moved = "openrouter/deepseek/deepseek-v4.1-flash"
-        monkeypatch.setenv("IMAS_CODEX_IDS_MAPPING_MODEL", moved)
-        monkeypatch.delenv("IMAS_CODEX_IDS_MAPPING_API_BASE", raising=False)
+        monkeypatch.setenv("ITER_CODEX_IDS_MAPPING_MODEL", moved)
+        monkeypatch.delenv("ITER_CODEX_IDS_MAPPING_API_BASE", raising=False)
         monkeypatch.setattr(settings, "_MODEL_ENDPOINTS", {})
 
         config = settings.get_model_config("ids-mapping")
@@ -415,8 +415,8 @@ class TestDiscoveryFunctionSeats:
     def test_same_provider_override_keeps_the_local_route(self, monkeypatch):
         """Another model on the same local provider stays on the seat's route."""
         settings._load_pyproject_settings.cache_clear()
-        monkeypatch.setenv("IMAS_CODEX_IDS_MAPPING_MODEL", "local/another-model")
-        monkeypatch.delenv("IMAS_CODEX_IDS_MAPPING_API_BASE", raising=False)
+        monkeypatch.setenv("ITER_CODEX_IDS_MAPPING_MODEL", "local/another-model")
+        monkeypatch.delenv("ITER_CODEX_IDS_MAPPING_API_BASE", raising=False)
 
         route_api_base = settings._get_section("model-routes")["ambix-local"][
             "api-base"
@@ -430,10 +430,10 @@ class TestDiscoveryFunctionSeats:
         """An explicit API-base variable still names the endpoint for a moved seat."""
         settings._load_pyproject_settings.cache_clear()
         monkeypatch.setenv(
-            "IMAS_CODEX_IDS_MAPPING_MODEL", "openrouter/deepseek/deepseek-v4.1-flash"
+            "ITER_CODEX_IDS_MAPPING_MODEL", "openrouter/deepseek/deepseek-v4.1-flash"
         )
         monkeypatch.setenv(
-            "IMAS_CODEX_IDS_MAPPING_API_BASE", "http://router.example.test/v1"
+            "ITER_CODEX_IDS_MAPPING_API_BASE", "http://router.example.test/v1"
         )
 
         config = settings.get_model_config("ids-mapping")
@@ -472,10 +472,10 @@ class TestMapRunModelSeat:
     def test_map_run_model_check_names_ids_mapping(self, monkeypatch):
         from unittest.mock import MagicMock
 
-        import imas_codex.cli.discover.common as common
-        import imas_codex.cli.map as map_mod
-        import imas_codex.discovery.base.facility as facility_mod
-        import imas_codex.ids.progress as progress_mod
+        import iter_codex.cli.discover.common as common
+        import iter_codex.cli.map as map_mod
+        import iter_codex.discovery.base.facility as facility_mod
+        import iter_codex.ids.progress as progress_mod
 
         captured: dict[str, object] = {}
 
@@ -523,8 +523,8 @@ class TestIdsMappingReasoningEffortForwarding:
     def test_acall_llm_forwards_seat_effort(self, monkeypatch):
         import asyncio
 
-        import imas_codex.discovery.base.llm as llm_mod
-        import imas_codex.ids.mapping as mapping
+        import iter_codex.discovery.base.llm as llm_mod
+        import iter_codex.ids.mapping as mapping
 
         captured: dict[str, object] = {}
 
@@ -543,8 +543,8 @@ class TestIdsMappingReasoningEffortForwarding:
         assert captured["reasoning_effort"] == "high"
 
     def test_call_llm_forwards_seat_effort(self, monkeypatch):
-        import imas_codex.discovery.base.llm as llm_mod
-        import imas_codex.ids.mapping as mapping
+        import iter_codex.discovery.base.llm as llm_mod
+        import iter_codex.ids.mapping as mapping
 
         captured: dict[str, object] = {}
 

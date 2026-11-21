@@ -1,6 +1,6 @@
 import json, time
-from imas_codex.graph.client import GraphClient
-from imas_codex.discovery.base.llm import call_decisions
+from iter_codex.graph.client import GraphClient
+from iter_codex.discovery.base.llm import call_decisions
 
 ids = ['flux_surface_averaged_carbon_density_at_plasma_boundary',
        'flux_surface_averaged_argon_density_at_plasma_boundary',

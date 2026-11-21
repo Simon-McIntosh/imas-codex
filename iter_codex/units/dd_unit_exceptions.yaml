@@ -1,0 +1,317 @@
+# SN ↔ DD unit-mismatch axis exceptions.
+#
+# The standard-name pipeline sometimes assigns a physically-correct unit that
+# disagrees with the unit its Data-Dictionary source path declares, because the
+# DD path itself carries a wrong unit. This file records those DD-side unit bugs
+# (where the SN is correct) plus genuine unit equivalences that the canonical
+# formatter does not collapse, so the mismatch axis suppresses them instead of
+# raising a false positive.
+#
+# Both sides are compared on their canonical form (imas_standard_names.
+# canonical_unit): ordering-only and spelling-only differences already collapse
+# there, so only the residual physical disagreements reach this file.
+#
+# Consumed by tests/graph/test_sn_unit_integrity.py via
+# iter_codex.units.dd_unit_exceptions.units_agree().
+
+# ---------------------------------------------------------------------------
+# DD-side unit bugs — the DD source path declares `dd_unit`; the physically
+# correct unit is `correct_unit` (which the SN carries). `path` is an
+# fnmatch-style glob over the DD node id (`*` matches any characters, INCLUDING
+# `/`; `[xyz]` is a character class). A mismatch is suppressed only when the DD
+# unit canonicalises to `dd_unit` AND the SN unit canonicalises to
+# `correct_unit` on a path matching the glob — so a broad glob cannot mask an
+# unrelated unit disagreement.
+# ---------------------------------------------------------------------------
+dd_unit_bugs:
+  # -- Charge / quantum NUMBERS tagged with the elementary-charge unit `e`.
+  #    A charge state (Z), nuclear charge (z_n) or vibrational level is a pure
+  #    number; the DD annotates it `e`. The SN correctly carries dimensionless.
+  - path: "*/z_ion"
+    dd_unit: e
+    correct_unit: "1"
+    reason: Ion charge is a charge number (dimensionless); the DD tags it `e`.
+  - path: "*/z_n"
+    dd_unit: e
+    correct_unit: "1"
+    reason: Nuclear charge number is dimensionless; the DD tags it `e`.
+  - path: "*/z_n/value"
+    dd_unit: e
+    correct_unit: "1"
+    reason: Nuclear charge number is dimensionless; the DD tags it `e`.
+  - path: "*/z_average"
+    dd_unit: e
+    correct_unit: "1"
+    reason: Average charge state is a number (dimensionless); the DD tags it `e`.
+  - path: "*/z_average/values"
+    dd_unit: e
+    correct_unit: "1"
+    reason: >-
+      The ggd copy of the average charge state, one value per grid element; same
+      dimensionless quantity and same DD defect as the scalar copy.
+  - path: "*/z_square_average"
+    dd_unit: e
+    correct_unit: "1"
+    reason: Mean-square charge state is a number (dimensionless); the DD tags it `e`.
+  - path: "*/z_square_average/values"
+    dd_unit: e
+    correct_unit: "1"
+    reason: >-
+      The ggd copy of the mean-square charge state; same dimensionless quantity
+      and same DD defect as the scalar copy.
+  - path: "*/state/z_max"
+    dd_unit: e
+    correct_unit: "1"
+    reason: >-
+      The upper bound of a charge-state bundle is a charge NUMBER — the DD's own
+      text reads "Maximum Z of the charge state bundle" — so it is
+      dimensionless; the DD tags it `e`.
+  - path: "*/state/z_min"
+    dd_unit: e
+    correct_unit: "1"
+    reason: >-
+      The lower bound of a charge-state bundle is a charge NUMBER — the DD's own
+      text reads "Minimum Z of the charge state bundle" — so it is
+      dimensionless; the DD tags it `e`.
+  - path: "*/vibrational_level"
+    dd_unit: e
+    correct_unit: "1"
+    reason: A vibrational level is a quantum number (dimensionless); the DD tags it `e`.
+
+  # -- Direction / unit-vector components tagged with metre `m`.
+  #    A direction cosine (component of a unit vector) is dimensionless; the DD
+  #    annotates the axis component with the position unit `m`.
+  - path: "*/direction/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: A direction unit-vector component is a dimensionless cosine; the DD tags it metre.
+  - path: "*/direction_second/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: A direction unit-vector component is a dimensionless cosine; the DD tags it metre.
+  - path: "*/up/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: An orientation ("up") unit-vector component is dimensionless; the DD tags it metre.
+  - path: "*/injection_direction/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: An injection-direction unit-vector component is dimensionless; the DD tags it metre.
+  - path: "*/unit_vector_major/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: A unit-vector component is dimensionless; the DD tags it metre.
+  - path: "*/unit_vector_minor/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: A unit-vector component is dimensionless; the DD tags it metre.
+  - path: "ec_launchers/beam/direction/kphi"
+    dd_unit: m^-1
+    correct_unit: "1"
+    reason: >-
+      A normalised (toroidal) wave-vector component is dimensionless; the DD
+      tags it with the un-normalised wave-vector unit m^-1.
+
+  # -- Areal power density tagged with total power `W`.
+  #    A peak power density (per unit area) is W.m^-2; two wall global-quantity
+  #    paths named power_density_*_target_max carry the total-power unit `W`.
+  #    The DD contradicts ITSELF here: the four DD sources of one standard name
+  #    for this same divertor-target load split two against two — the sibling
+  #    divertors/summary paths for the identical peak-load quantity declare
+  #    W.m^-2. There is therefore no single DD answer to mirror, so this
+  #    carries `correct_in_graph` (as psi and ionisation potential above), not
+  #    suppression alone.
+  - path: "wall/global_quantities/power_density_*_target_max"
+    dd_unit: W
+    correct_unit: W.m^-2
+    correct_in_graph: true
+    reason: >-
+      A peak areal power density is W.m^-2; the DD tags these
+      power_density_*_target_max paths with total power W while sibling
+      facets of the identical divertor-target-load quantity declare W.m^-2.
+
+  # -- Ionisation potential (an ENERGY) tagged with the charge unit `e`.
+  #    Unlike every other entry here, the DD contradicts ITSELF on this
+  #    quantity: the profiles_1d / profiles_2d copies declare eV while the ggd
+  #    copies declare e. There is therefore no single DD answer to mirror, so
+  #    these carry `correct_in_graph` — the DD-side unit is rewritten to the
+  #    dimensionally-correct eV at build time (see units.resolve_dd_unit), not
+  #    merely suppressed, so a standard name composed from a ggd copy cannot
+  #    inherit a charge unit for an energy.
+  - path: "*/ggd/ion/state/ionisation_potential*"
+    dd_unit: e
+    correct_unit: eV
+    correct_in_graph: true
+    reason: >-
+      A cumulative ionisation potential is an energy in eV (the profiles_1d and
+      profiles_2d copies of this same quantity declare eV); the ggd copies were
+      migrated to the charge unit e in DD 4.1.0.
+  - path: "*/ggd/ion/state/ionization_potential*"
+    dd_unit: e
+    correct_unit: eV
+    correct_in_graph: true
+    reason: >-
+      American-spelling variant of the same quantity and the same defect.
+
+  # -- Neutral incident ENERGY flux tagged as a PARTICLE flux.
+  #    Sibling energy_fluxes paths carry W.m^-2; the neutral incident facets
+  #    carry the particle-flux unit m^-2.s^-1.
+  - path: "*/energy_fluxes/kinetic/neutral/state/incident/values"
+    dd_unit: m^-2.s^-1
+    correct_unit: W.m^-2
+    upstream_kind: type_wiring
+    upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/issues/272
+    reason: >-
+      An incident energy flux is W.m^-2 (sibling energy_fluxes facets agree);
+      the DD tags the neutral facet with the particle-flux unit m^-2.s^-1.
+  - path: "*/energy_fluxes/kinetic/neutral/incident/values"
+    dd_unit: m^-2.s^-1
+    correct_unit: W.m^-2
+    reason: >-
+      The species-level (non-state-resolved) copy of the same incident energy
+      flux carries the same particle-flux mis-tag.
+
+  # -- Perpendicular WAVE VECTOR tagged with an electric-field unit.
+  #    k_perpendicular is a wave vector (m^-1); the DD declares V.m^-1, the unit
+  #    of the electric field the surrounding wave structure also carries.
+  - path: "waves/coherent_wave/*k_perpendicular*"
+    dd_unit: V.m^-1
+    correct_unit: m^-1
+    reason: >-
+      A perpendicular wave vector is m^-1; the DD tags it with the
+      electric-field unit V.m^-1 of the neighbouring wave-field quantities.
+
+  # -- SPI gas flow rate tagged as a particle rate.
+  #    Every other DD */flow_rate (gas_injection, gas_pumping, pulse_schedule)
+  #    declares the throughput unit Pa.m^3.s^-1 for identically-documented
+  #    fields ("Flow rate of the gas at the injector exit"); the two spi copies
+  #    declare s^-1.
+  - path: "spi/injector/*_gas/flow_rate"
+    dd_unit: s^-1
+    correct_unit: Pa.m^3.s^-1
+    correct_in_graph: true
+    reason: >-
+      A gas flow rate is a throughput in Pa.m^3.s^-1 (every other DD flow_rate
+      agrees); the spi injector copies are tagged with the particle rate s^-1.
+
+  # -- Reconstructed equilibrium CONSTRAINTS carrying a dimensionless sentinel.
+  #    Each constraint holds a `measured` and a `reconstructed` copy of ONE
+  #    quantity, so the DD contradicts itself: `measured` declares the physical
+  #    unit while these `reconstructed` twins declare `1`. (j_tor/reconstructed,
+  #    the un-renamed twin of j_phi, declares A.m^-2 — confirming which side is
+  #    right.) These carry `correct_in_graph` so generation cannot inherit a
+  #    dimensionless sentinel for a pressure, density or current density.
+  - path: "equilibrium/time_slice/constraints/pressure/reconstructed"
+    dd_unit: "1"
+    correct_unit: Pa
+    correct_in_graph: true
+    reason: >-
+      The `measured` twin of this same constraint declares Pa; the
+      `reconstructed` copy carries a dimensionless sentinel.
+  - path: "equilibrium/time_slice/constraints/pressure_rotational/reconstructed"
+    dd_unit: "1"
+    correct_unit: Pa
+    correct_in_graph: true
+    reason: >-
+      The `measured` twin declares Pa; the `reconstructed` copy carries a
+      dimensionless sentinel.
+  - path: "equilibrium/time_slice/constraints/n_e/reconstructed"
+    dd_unit: "1"
+    correct_unit: m^-3
+    correct_in_graph: true
+    reason: >-
+      The `measured` twin declares m^-3; the `reconstructed` copy carries a
+      dimensionless sentinel.
+  - path: "equilibrium/time_slice/constraints/j_phi/reconstructed"
+    dd_unit: "1"
+    correct_unit: A.m^-2
+    correct_in_graph: true
+    reason: >-
+      The `measured` twin declares A.m^-2, as does the un-renamed j_tor
+      reconstructed copy of the same quantity.
+  - path: "equilibrium/time_slice/constraints/j_parallel/reconstructed"
+    dd_unit: "1"
+    correct_unit: A.m^-2
+    correct_in_graph: true
+    reason: >-
+      The `measured` twin declares A.m^-2; the `reconstructed` copy carries a
+      dimensionless sentinel.
+
+  # -- Gyrokinetic poloidal ANGLE carrying a dimensionless sentinel.
+  #    The DD contradicts itself: species_all/angle_pol_equilibrium declares rad
+  #    for the same poloidal angle that the eigenmode grid declares `1`.
+  - path: "gyrokinetics_local/*/angle_pol"
+    dd_unit: "1"
+    correct_unit: rad
+    correct_in_graph: true
+    reason: >-
+      A poloidal angle is in radian — the DD's own angle_pol_equilibrium copy
+      declares rad; the eigenmode grid copy declares a dimensionless sentinel.
+
+  # -- Phase-space particle SOURCE term with an inverted dimensionality.
+  #    The DD contradicts itself: the profiles_1d copy of this density-equation
+  #    source term declares m^-3.s^-1 while the ggd copy declares m^-6.s^2 —
+  #    the reciprocal of a phase-space density rather than a source rate.
+  - path: "distribution_sources/source/ggd/particles/values"
+    dd_unit: m^-6.s^2
+    correct_unit: m^-3.s^-1
+    correct_in_graph: true
+    reason: >-
+      A density-equation particle source term is m^-3.s^-1 (the profiles_1d copy
+      of the same quantity agrees); the ggd copy declares m^-6.s^2.
+  - path: "*/energy_fluxes/recombination/neutral/incident/values"
+    dd_unit: m^-2.s^-1
+    correct_unit: W.m^-2
+    reason: >-
+      An incident energy flux is W.m^-2 (sibling energy_fluxes facets agree);
+      the DD tags the neutral facet with the particle-flux unit m^-2.s^-1.
+
+  # -- Poloidal magnetic flux (psi) tagged with total power `W`.
+  #    psi is definitionally a poloidal magnetic flux in weber; some
+  #    measurement-position facets carry the total-power unit `W`.
+  #    The DD contradicts ITSELF here, which is why this carries
+  #    `correct_in_graph` rather than being suppressed only:
+  #    `ece/channel/beam_tracing/beam/position/psi` and
+  #    `ece/channel/position/psi` share the documentation "Poloidal flux" while
+  #    declaring `Wb` and `W` respectively. Under suppression alone there is no
+  #    single DD answer to mirror, so a name composed from the W-tagged facet
+  #    inherits total power for a magnetic flux — and one did.
+  - path: "*/position/psi"
+    dd_unit: W
+    correct_unit: Wb
+    correct_in_graph: true
+    reason: >-
+      Poloidal magnetic flux (psi) is weber; some measurement-position psi
+      facets are tagged with total power W while sibling facets of the same
+      documented quantity are tagged Wb.
+
+  # -- Toroidal current tagged with a torque unit.
+  #    A toroidal (particle) current is in ampere; one distributions facet of
+  #    current_tor carries the torque unit N.m.
+  - path: "distributions/distribution/global_quantities/current_tor"
+    dd_unit: N.m
+    correct_unit: A
+    reason: >-
+      A toroidal current is in ampere (the sibling current_phi facet agrees);
+      the DD tags this current_tor facet with the torque unit N.m.
+
+# ---------------------------------------------------------------------------
+# Unit equivalences — canonical forms the formatter keeps distinct but which
+# are the same physical unit. A mismatch is suppressed when the SN and DD
+# canonical forms are BOTH members of one equivalence set. Keep these to
+# genuine identities (a spelling the canonical formatter does not fold), never
+# a mere shared dimensionality — dimensionality alone would wrongly equate, for
+# example, torque and energy.
+# ---------------------------------------------------------------------------
+unit_equivalences:
+  # Frequency: the DD spells a rate as Hz in some IDSs and s^-1 in others.
+  - [Hz, s^-1]
+  # Torque: the DD spells it with the derived N.m in some IDSs and the base
+  # kg.m^2.s^-2 in others (both == joule dimensionally, distinct from J's
+  # canonical short symbol so energy is not swept in).
+  - [N.m, kg.m^2.s^-2]
+  # Torque DENSITY: the DD spells it with the derived N.m^-2 in the momentum
+  # source facets and the base kg.m^-1.s^-2 in the ggd copies of the same
+  # quantity (both == torque per unit volume; distinct from Pa's canonical short
+  # symbol so a pressure is not swept in).
+  - [N.m^-2, kg.m^-1.s^-2]

@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock
 
-from imas_codex.graph.build_dd import _check_graph_up_to_date, _compute_build_hash
+from iter_codex.graph.build_dd import _check_graph_up_to_date, _compute_build_hash
 
 
 class TestComputeBuildHash:

@@ -26,7 +26,7 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog_reset as _owning_graph_catalog_reset,
     graph_foundation as _owning_graph_foundation,
 )
@@ -73,7 +73,7 @@ def _all_kwargs(gc: MagicMock) -> list[dict]:
 
 class TestResetStandardNamesPathAllowlist:
     def _call(self, gc: MagicMock, **kwargs):
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
             return _owning_graph_catalog_reset.reset_standard_names(**kwargs)
@@ -149,7 +149,7 @@ class TestResetStandardNamesPathAllowlist:
 
 class TestClearStandardNamesPathAllowlist:
     def _call(self, gc: MagicMock, **kwargs):
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
             return _owning_graph_catalog_reset.clear_standard_names(**kwargs)
@@ -232,7 +232,7 @@ class TestAcceptedWipeGuardPredicate:
     """Direct unit tests of the guard predicate."""
 
     def _guard(self, **kwargs):
-        from imas_codex.cli.sn import _reject_unscoped_accepted_reset
+        from iter_codex.cli.sn import _reject_unscoped_accepted_reset
 
         defaults = {
             "reset_to": "extracted",
@@ -279,7 +279,7 @@ class TestAcceptedWipeGuardCli:
     """End-to-end proof through the Click command (no graph reached)."""
 
     def test_reset_to_include_accepted_no_focus_raises(self) -> None:
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         runner = CliRunner()
         # --skip-clear-gate keeps the pipeline-version gate (which touches the

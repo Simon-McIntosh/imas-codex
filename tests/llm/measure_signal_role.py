@@ -14,7 +14,7 @@ import os
 from collections import Counter
 from pathlib import Path
 
-from imas_codex.discovery.signals.role import ROLE_CRITERIA, judge_signal_roles
+from iter_codex.discovery.signals.role import ROLE_CRITERIA, judge_signal_roles
 
 DEFAULT_FIXTURE = Path(__file__).parent / "fixtures" / "signal_role_random_labels.json"
 REPORT = (

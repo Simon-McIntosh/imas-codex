@@ -30,7 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-EXPORT_DIR = Path.home() / ".local/share/imas-codex/graph-rebuild"
+EXPORT_DIR = Path.home() / ".local/share/iter-codex/graph-rebuild"
 
 # === Migrations ===
 SKIP_NODE_PROPERTIES = frozenset({"tree_name"})
@@ -70,7 +70,7 @@ def _restore_props(props: dict) -> dict:
 
 
 def export_phase():
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     EXPORT_DIR.mkdir(parents=True, exist_ok=True)
     print(f"Export directory: {EXPORT_DIR}")
@@ -259,7 +259,7 @@ def export_phase():
 
 
 def import_phase():
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = GraphClient()
 
@@ -490,7 +490,7 @@ def import_phase():
 
 
 def cleanup_phase():
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = GraphClient()
 
@@ -533,7 +533,7 @@ def cleanup_phase():
 
 
 def verify_phase():
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = GraphClient()
 

@@ -6,7 +6,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch
 
-from imas_codex.plotting.style import (
+from iter_codex.plotting.style import (
     BASE_STYLE,
     CANVAS,
     REFERENCE,

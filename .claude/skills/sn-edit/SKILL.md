@@ -15,14 +15,14 @@ allowed-tools: Bash(*)
 
 ## Golden rule
 
-A standard name or its docs are wrong → run `imas-codex sn edit`, not a Cypher
+A standard name or its docs are wrong → run `iter-codex sn edit`, not a Cypher
 `SET`. Hand-editing graph text bypasses style rules, grammar validation,
 RD-quorum review, and scoring — the exact machinery that makes the catalog
 trustworthy. `sn edit` rides the proposal through that machinery as a steered
 candidate instead of a fait accompli.
 
 ```
-imas-codex sn edit <standard_name> (--hint TEXT | --rename NAME | --docs TEXT) --reason TEXT
+iter-codex sn edit <standard_name> (--hint TEXT | --rename NAME | --docs TEXT) --reason TEXT
                    [--axis name|docs|both] [--scope self|family|subtree] [--dry-run]
 ```
 
@@ -84,7 +84,7 @@ half-edited family: either the whole cascade lands or none of it does.
 ## Always dry-run first
 
 ```bash
-imas-codex sn edit <name> --rename <new_name> --reason "..." --dry-run
+iter-codex sn edit <name> --rename <new_name> --reason "..." --dry-run
 ```
 
 Confirm the proposed candidate (and, for `family`/`subtree` scope, the full
@@ -95,10 +95,10 @@ preview looks right.
 
 Attaching an edit does not score it — it just enters the queue.
 
-1. `imas-codex sn status <name>` — shows `edit_status`:
+1. `iter-codex sn status <name>` — shows `edit_status`:
    `open → applied | exhausted | rejected`.
 2. Drive the pipeline forward with a review rotation, e.g.
-   `imas-codex sn run --focus <name>` or `imas-codex sn review --ids <name>`.
+   `iter-codex sn run --focus <name>` or `iter-codex sn review --ids <name>`.
 3. `applied` = the steered candidate was accepted — the edit achieved its
    intended change. `exhausted` = the refine rotation cap was hit without
    acceptance. `rejected` = review terminally scored it below threshold.
@@ -148,7 +148,7 @@ toroidal surface (that's `surface_area_of_flux_surface`). The pipeline's bare
 (superseded, no successor). Fix it:
 
 ```bash
-imas-codex sn edit area_of_plasma_boundary \
+iter-codex sn edit area_of_plasma_boundary \
     --rename poloidal_cross_section_of_plasma_boundary \
     --reason "DD 'area' is the poloidal cross-sectional area enclosed by the boundary, NOT the swept toroidal surface (that is surface_area_of_flux_surface). The bare 'area' is ambiguous; name it explicitly as the poloidal cross-section." \
     --scope self
@@ -158,6 +158,6 @@ imas-codex sn edit area_of_plasma_boundary \
 
 Agents that call tools rather than shells use the mirrored MCP write tool
 `edit_standard_name` — same parameters, same underlying implementation
-(`imas_codex.standard_names.edit.apply_edit`) as the CLI. Prefer it over the
+(`iter_codex.standard_names.edit.apply_edit`) as the CLI. Prefer it over the
 CLI when already operating through MCP; behavior, review gating, and the
 mandatory `--reason` requirement are identical.

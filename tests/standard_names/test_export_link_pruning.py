@@ -12,7 +12,7 @@ they don't (but left in place).
 
 from __future__ import annotations
 
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     ExportReport,
     _internal_link_target,
     _prune_dangling_links,

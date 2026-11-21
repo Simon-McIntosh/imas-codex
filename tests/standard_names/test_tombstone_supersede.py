@@ -12,7 +12,7 @@ from unittest.mock import patch
 import pytest
 from neo4j.time import DateTime
 
-from imas_codex.standard_names import edit
+from iter_codex.standard_names import edit
 
 
 def _node(
@@ -964,7 +964,7 @@ def test_attachment_mismatch_is_a_write_free_refusal() -> None:
 
 def test_facility_batch_backing_folds_like_any_other_path() -> None:
     """Facility batch ownership of a DD path does not withhold the fold."""
-    from imas_codex.standard_names.sources_manifest import load_sources_file
+    from iter_codex.standard_names.sources_manifest import load_sources_file
 
     manifest = (
         pathlib.Path(edit.__file__).parent

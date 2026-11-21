@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.campaign import default_revalidate
+from iter_codex.standard_names.campaign import default_revalidate
 
 
 class _ValidationGraph:

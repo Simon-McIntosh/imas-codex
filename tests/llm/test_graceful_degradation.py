@@ -20,7 +20,7 @@ import pytest
 @pytest.fixture(autouse=True)
 def _reset_module_state():
     """Reset module-level singletons between tests."""
-    import imas_codex.llm.server as srv
+    import iter_codex.llm.server as srv
 
     original = {
         "_warmup_applied": srv._warmup_applied,
@@ -53,7 +53,7 @@ def mock_graph_warmup():
         "get_schema": MagicMock(name="get_schema"),
         "to_cypher_props": MagicMock(name="to_cypher_props"),
     }
-    with patch("imas_codex.llm.server.warmup") as mock_warmup:
+    with patch("iter_codex.llm.server.warmup") as mock_warmup:
         mock_warmup.graph.return_value = graph_ns
         yield mock_warmup, mock_gc_cls, mock_gc_instance
 
@@ -68,7 +68,7 @@ class TestRequireGraphOnly:
 
     def test_populates_graph_globals(self, mock_graph_warmup):
         """_require_graph_only() should populate GraphClient, get_schema, to_cypher_props."""
-        import imas_codex.llm.server as srv
+        import iter_codex.llm.server as srv
 
         srv._graph_warmup_applied = False
         srv.GraphClient = None
@@ -84,7 +84,7 @@ class TestRequireGraphOnly:
 
     def test_does_not_call_embeddings(self, mock_graph_warmup):
         """_require_graph_only() must NOT call warmup.embeddings()."""
-        import imas_codex.llm.server as srv
+        import iter_codex.llm.server as srv
 
         mock_warmup = mock_graph_warmup[0]
         srv._graph_warmup_applied = False
@@ -98,7 +98,7 @@ class TestRequireGraphOnly:
 
     def test_idempotent(self, mock_graph_warmup):
         """Second call should be a no-op (fast path)."""
-        import imas_codex.llm.server as srv
+        import iter_codex.llm.server as srv
 
         mock_warmup = mock_graph_warmup[0]
         srv._graph_warmup_applied = False
@@ -114,7 +114,7 @@ class TestRequireGraphOnly:
         # (we can't easily run _require_warmup without a real server)
         import inspect
 
-        import imas_codex.llm.server as srv
+        import iter_codex.llm.server as srv
 
         source = inspect.getsource(srv._require_warmup)
         assert "_graph_warmup_applied = True" in source
@@ -130,7 +130,7 @@ class TestGetGraphClient:
 
     def test_creates_client_from_profile(self, mock_graph_warmup):
         """Should create GraphClient.from_profile() on first call."""
-        import imas_codex.llm.server as srv
+        import iter_codex.llm.server as srv
 
         _, mock_gc_cls, mock_gc_instance = mock_graph_warmup
         srv._graph_warmup_applied = False
@@ -143,7 +143,7 @@ class TestGetGraphClient:
 
     def test_singleton_behavior(self, mock_graph_warmup):
         """Second call returns same instance without creating a new one."""
-        import imas_codex.llm.server as srv
+        import iter_codex.llm.server as srv
 
         _, mock_gc_cls, mock_gc_instance = mock_graph_warmup
         srv._graph_warmup_applied = False
@@ -157,7 +157,7 @@ class TestGetGraphClient:
 
     def test_thread_safety(self, mock_graph_warmup):
         """Multiple threads should all get the same instance."""
-        import imas_codex.llm.server as srv
+        import iter_codex.llm.server as srv
 
         _, mock_gc_cls, mock_gc_instance = mock_graph_warmup
         srv._graph_warmup_applied = False
@@ -189,15 +189,15 @@ class TestGetImasToolsSemanticSearch:
 
     def test_default_skips_embed_warmup(self, mock_graph_warmup):
         """Default (no semantic_search) should not call _require_warmup()."""
-        import imas_codex.llm.server as srv
+        import iter_codex.llm.server as srv
 
         mock_warmup = mock_graph_warmup[0]
         srv._graph_warmup_applied = False
         srv._graph_client = None
         srv._imas_tools_instance = None
 
-        with patch("imas_codex.llm.server._require_warmup") as mock_full:
-            with patch("imas_codex.tools.Tools") as MockTools:
+        with patch("iter_codex.llm.server._require_warmup") as mock_full:
+            with patch("iter_codex.tools.Tools") as MockTools:
                 MockTools.return_value = MagicMock()
                 srv._get_imas_tools()
 
@@ -206,14 +206,14 @@ class TestGetImasToolsSemanticSearch:
 
     def test_default_uses_standalone_client(self, mock_graph_warmup):
         """Default should use _get_graph_client(), not _get_repl()."""
-        import imas_codex.llm.server as srv
+        import iter_codex.llm.server as srv
 
         srv._graph_warmup_applied = False
         srv._graph_client = None
         srv._imas_tools_instance = None
 
-        with patch("imas_codex.llm.server._get_repl") as mock_repl:
-            with patch("imas_codex.tools.Tools") as MockTools:
+        with patch("iter_codex.llm.server._get_repl") as mock_repl:
+            with patch("iter_codex.tools.Tools") as MockTools:
                 MockTools.return_value = MagicMock()
                 srv._get_imas_tools()
 
@@ -221,14 +221,14 @@ class TestGetImasToolsSemanticSearch:
 
     def test_semantic_search_triggers_full_warmup(self, mock_graph_warmup):
         """semantic_search=True should call _require_warmup()."""
-        import imas_codex.llm.server as srv
+        import iter_codex.llm.server as srv
 
         srv._imas_tools_instance = None
 
-        with patch("imas_codex.llm.server._require_warmup") as mock_full:
-            with patch("imas_codex.llm.server._get_repl") as mock_repl:
+        with patch("iter_codex.llm.server._require_warmup") as mock_full:
+            with patch("iter_codex.llm.server._get_repl") as mock_repl:
                 mock_repl.return_value = {"gc": MagicMock()}
-                with patch("imas_codex.tools.Tools") as MockTools:
+                with patch("iter_codex.tools.Tools") as MockTools:
                     MockTools.return_value = MagicMock()
                     srv._get_imas_tools(semantic_search=True)
 
@@ -268,7 +268,7 @@ class TestToolTierClassification:
         """Cypher-only tools should NOT pass semantic_search=True."""
         import inspect
 
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(dd_only=True)
         components = server.mcp._local_provider._components
@@ -288,7 +288,7 @@ class TestToolTierClassification:
         """Semantic search tools must pass semantic_search=True."""
         import inspect
 
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(dd_only=True)
         components = server.mcp._local_provider._components

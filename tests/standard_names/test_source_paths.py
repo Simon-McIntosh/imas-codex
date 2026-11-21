@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from imas_codex.standard_names.source_paths import (
+from iter_codex.standard_names.source_paths import (
     DD_PREFIX,
     SourceURI,
     encode_dd_source,

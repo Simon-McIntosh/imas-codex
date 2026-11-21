@@ -16,7 +16,7 @@ across edits).
 
 from __future__ import annotations
 
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 
 def _ctx(*, fanout_evidence: str | None = None) -> dict:

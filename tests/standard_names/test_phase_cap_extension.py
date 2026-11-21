@@ -8,7 +8,7 @@ reservations.
 
 from __future__ import annotations
 
-from imas_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.budget import BudgetManager
 
 
 class TestExtensionRespectsPhaseCap:

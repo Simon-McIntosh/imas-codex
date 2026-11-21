@@ -21,7 +21,7 @@ class TestGraphPathTool:
     """Tests for GraphPathTool (check + fetch)."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphPathTool
+        from iter_codex.tools.graph_search import GraphPathTool
 
         return GraphPathTool(graph_client)
 
@@ -121,7 +121,7 @@ class TestGraphListTool:
     """Tests for GraphListTool."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphListTool
+        from iter_codex.tools.graph_search import GraphListTool
 
         return GraphListTool(graph_client)
 
@@ -168,7 +168,7 @@ class TestGraphOverviewTool:
     """Tests for GraphOverviewTool."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphOverviewTool
+        from iter_codex.tools.graph_search import GraphOverviewTool
 
         return GraphOverviewTool(graph_client)
 
@@ -214,7 +214,7 @@ class TestGraphClustersTool:
     """Tests for GraphClustersTool (path-based lookup only, no embeddings)."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphClustersTool
+        from iter_codex.tools.graph_search import GraphClustersTool
 
         return GraphClustersTool(graph_client)
 
@@ -261,7 +261,7 @@ class TestGraphIdentifiersTool:
     """Tests for GraphIdentifiersTool."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphIdentifiersTool
+        from iter_codex.tools.graph_search import GraphIdentifiersTool
 
         return GraphIdentifiersTool(graph_client)
 
@@ -299,7 +299,7 @@ class TestToolsGraphMode:
     """Test Tools class in graph-native mode."""
 
     def _make_tools(self, graph_client):
-        from imas_codex.tools import Tools
+        from iter_codex.tools import Tools
 
         return Tools(graph_client=graph_client)
 
@@ -366,7 +366,7 @@ class TestFetchImasPathsEnrichment:
     """Tests for fetch_dd_paths with identifier schemas and version history."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphPathTool
+        from iter_codex.tools.graph_search import GraphPathTool
 
         return GraphPathTool(graph_client)
 
@@ -435,7 +435,7 @@ class TestSearchImaClustersListingMode:
     """Tests for search_dd_clusters with IDS listing mode."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphClustersTool
+        from iter_codex.tools.graph_search import GraphClustersTool
 
         return GraphClustersTool(graph_client)
 
@@ -492,7 +492,7 @@ class TestGetDDVersionContext:
 
     @pytest.fixture
     def version_tool(self, graph_client):
-        from imas_codex.tools.version_tool import VersionTool
+        from iter_codex.tools.version_tool import VersionTool
 
         return VersionTool(graph_client)
 
@@ -559,7 +559,7 @@ class TestCommonPathPrefix:
     """Tests for the _common_path_prefix helper."""
 
     def test_common_prefix(self):
-        from imas_codex.tools.graph_search import _common_path_prefix
+        from iter_codex.tools.graph_search import _common_path_prefix
 
         result = _common_path_prefix(
             [
@@ -571,7 +571,7 @@ class TestCommonPathPrefix:
         assert result == "equilibrium/time_slice/boundary"
 
     def test_no_common_prefix(self):
-        from imas_codex.tools.graph_search import _common_path_prefix
+        from iter_codex.tools.graph_search import _common_path_prefix
 
         result = _common_path_prefix(
             [
@@ -582,13 +582,13 @@ class TestCommonPathPrefix:
         assert result == ""
 
     def test_single_path(self):
-        from imas_codex.tools.graph_search import _common_path_prefix
+        from iter_codex.tools.graph_search import _common_path_prefix
 
         result = _common_path_prefix(["equilibrium/time_slice/profiles_1d/psi"])
         assert result == "equilibrium/time_slice/profiles_1d/psi"
 
     def test_empty_list(self):
-        from imas_codex.tools.graph_search import _common_path_prefix
+        from iter_codex.tools.graph_search import _common_path_prefix
 
         result = _common_path_prefix([])
         assert result == ""
@@ -601,7 +601,7 @@ class TestClusterPathLookup:
     """Tests for cluster search by specific path."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphClustersTool
+        from iter_codex.tools.graph_search import GraphClustersTool
 
         return GraphClustersTool(graph_client)
 
@@ -635,7 +635,7 @@ class TestResolveDomain:
     """Tests for _resolve_physics_domain helper."""
 
     def test_exact_match(self, graph_client):
-        from imas_codex.tools.graph_search import _resolve_physics_domain
+        from iter_codex.tools.graph_search import _resolve_physics_domain
 
         domains, method = _resolve_physics_domain(graph_client, "transport")
         assert domains == ["transport"]
@@ -643,7 +643,7 @@ class TestResolveDomain:
 
     def test_ids_name_resolution(self, graph_client):
         """IDS name 'equilibrium' resolves to its physics_domain."""
-        from imas_codex.tools.graph_search import _resolve_physics_domain
+        from iter_codex.tools.graph_search import _resolve_physics_domain
 
         domains, method = _resolve_physics_domain(graph_client, "equilibrium")
         # In fixture, equilibrium IDS has physics_domain='magnetics'
@@ -654,7 +654,7 @@ class TestResolveDomain:
 
     def test_ids_name_not_in_enum(self, graph_client):
         """IDS name that isn't a PhysicsDomain resolves via graph."""
-        from imas_codex.tools.graph_search import _resolve_physics_domain
+        from iter_codex.tools.graph_search import _resolve_physics_domain
 
         # core_profiles is not a PhysicsDomain enum value
         domains, method = _resolve_physics_domain(graph_client, "core_profiles")
@@ -662,14 +662,14 @@ class TestResolveDomain:
         assert method == "ids_name:core_profiles"
 
     def test_substring_match(self, graph_client):
-        from imas_codex.tools.graph_search import _resolve_physics_domain
+        from iter_codex.tools.graph_search import _resolve_physics_domain
 
         domains, method = _resolve_physics_domain(graph_client, "auxiliary")
         assert "auxiliary_heating" in domains
         assert method == "substring:auxiliary"
 
     def test_no_match(self, graph_client):
-        from imas_codex.tools.graph_search import _resolve_physics_domain
+        from iter_codex.tools.graph_search import _resolve_physics_domain
 
         domains, method = _resolve_physics_domain(
             graph_client, "nonexistent_domain_xyz"
@@ -678,7 +678,7 @@ class TestResolveDomain:
         assert method == "no_match"
 
     def test_substring_expansion(self, graph_client):
-        from imas_codex.tools.graph_search import _resolve_physics_domain
+        from iter_codex.tools.graph_search import _resolve_physics_domain
 
         domains, method = _resolve_physics_domain(graph_client, "diagnostics")
         assert method == "substring:diagnostics"
@@ -693,7 +693,7 @@ class TestExportDomain:
     """Tests for export_dd_domain with domain resolution."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphStructureTool
+        from iter_codex.tools.graph_search import GraphStructureTool
 
         return GraphStructureTool(graph_client)
 
@@ -731,7 +731,7 @@ class TestFetchMetadataParity:
     """Verify fetch_dd_paths returns introduced_after_version and version_changes."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphPathTool
+        from iter_codex.tools.graph_search import GraphPathTool
 
         return GraphPathTool(graph_client)
 
@@ -786,7 +786,7 @@ class TestIdentifierSearch:
     """Verify identifier search uses enriched descriptions and keywords."""
 
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphIdentifiersTool
+        from iter_codex.tools.graph_search import GraphIdentifiersTool
 
         return GraphIdentifiersTool(graph_client)
 

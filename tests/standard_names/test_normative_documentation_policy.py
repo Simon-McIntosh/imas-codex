@@ -4,8 +4,8 @@ from pathlib import Path
 
 import yaml
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
-from imas_codex.standard_names.prose_policy import banned_prose_findings
+from iter_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
+from iter_codex.standard_names.prose_policy import banned_prose_findings
 
 
 def test_derived_from_linked_quantity_is_provenance_not_a_recipe() -> None:
@@ -179,7 +179,7 @@ def test_review_prompts_penalize_practical_appendices_instead_of_rewarding_them(
         assert "constitutive" in text
 
     criteria = yaml.safe_load(
-        Path("imas_codex/llm/config/sn_review_criteria.yaml").read_text(
+        Path("iter_codex/llm/config/sn_review_criteria.yaml").read_text(
             encoding="utf-8"
         )
     )

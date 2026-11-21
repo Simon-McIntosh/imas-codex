@@ -1,4 +1,4 @@
-"""Tests for ``imas-codex sn generate`` CLI flags.
+"""Tests for ``iter-codex sn generate`` CLI flags.
 
 Validates:
 - ``sn reset`` is removed (no such command)
@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ class TestResetOnly:
     def test_reset_only_with_reset_to_drafted(self, runner: CliRunner) -> None:
         """--reset-only --reset-to drafted should call reset then exit early."""
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             mock_gc = MagicMock()
             mock_gc.query = MagicMock(return_value=[{"n": 3}])
@@ -86,7 +86,7 @@ class TestResetOnly:
     def test_reset_only_with_reset_to_extracted(self, runner: CliRunner) -> None:
         """--reset-only --reset-to extracted should call clear then exit early."""
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             mock_gc = MagicMock()
             mock_gc.query = MagicMock(return_value=[{"n": 2}])
@@ -107,7 +107,7 @@ class TestFilterPlumbing:
     def test_since_plumbs_to_reset(self, runner: CliRunner) -> None:
         """--since should be passed to reset_standard_names."""
         with patch(
-            "imas_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names",
+            "iter_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names",
             return_value=5,
         ) as mock_reset:
             result = runner.invoke(
@@ -129,7 +129,7 @@ class TestFilterPlumbing:
     def test_below_score_and_tier_plumb_to_reset(self, runner: CliRunner) -> None:
         """--below-score and --tier should be passed to reset_standard_names."""
         with patch(
-            "imas_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names",
+            "iter_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names",
             return_value=3,
         ) as mock_reset:
             result = runner.invoke(
@@ -154,7 +154,7 @@ class TestFilterPlumbing:
     def test_retry_quarantined_sets_validation_status(self, runner: CliRunner) -> None:
         """--retry-quarantined should set validation_status='quarantined'."""
         with patch(
-            "imas_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names",
+            "iter_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names",
             return_value=2,
         ) as mock_reset:
             result = runner.invoke(
@@ -174,7 +174,7 @@ class TestFilterPlumbing:
     def test_before_plumbs_to_clear(self, runner: CliRunner) -> None:
         """--before should be passed to clear_standard_names when reset-to=extracted."""
         with patch(
-            "imas_codex.standard_names.graph_store.graph_catalog_reset.clear_standard_names",
+            "iter_codex.standard_names.graph_store.graph_catalog_reset.clear_standard_names",
             return_value=4,
         ) as mock_clear:
             result = runner.invoke(
@@ -209,10 +209,10 @@ class TestResetToRunsOnPoolPath:
     ) -> None:
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.clear_standard_names",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.clear_standard_names",
                 return_value=7,
             ) as mock_clear,
-            patch("imas_codex.cli.sn._run_sn_cmd", return_value=None) as mock_run,
+            patch("iter_codex.cli.sn._run_sn_cmd", return_value=None) as mock_run,
         ):
             result = runner.invoke(
                 sn,
@@ -239,10 +239,10 @@ class TestResetToRunsOnPoolPath:
     ) -> None:
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names",
                 return_value=3,
             ) as mock_reset,
-            patch("imas_codex.cli.sn._run_sn_cmd", return_value=None) as mock_run,
+            patch("iter_codex.cli.sn._run_sn_cmd", return_value=None) as mock_run,
         ):
             result = runner.invoke(
                 sn,
@@ -267,7 +267,7 @@ class TestBackwardCompatibility:
         """--reset-to drafted --dry-run should not call reset (dry_run skips reset)."""
         with (
             patch(
-                "imas_codex.standard_names.loop.preview_sn_pools",
+                "iter_codex.standard_names.loop.preview_sn_pools",
                 return_value={
                     "source": "dd",
                     "domains": [],
@@ -277,7 +277,7 @@ class TestBackwardCompatibility:
                 },
             ) as preview,
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names"
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names"
             ) as reset,
         ):
             result = runner.invoke(

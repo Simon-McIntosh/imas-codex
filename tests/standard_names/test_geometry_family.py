@@ -12,7 +12,7 @@ def _suffixes(family: object) -> list[str]:
 
 
 def test_rectangle_groups_coordinates_width_and_height() -> None:
-    from imas_codex.standard_names.families import (
+    from iter_codex.standard_names.families import (
         GeometryFamily,
         detect_geometry_families,
     )
@@ -30,7 +30,7 @@ def test_rectangle_groups_coordinates_width_and_height() -> None:
 
 
 def test_oblique_groups_all_eight_shape_fields() -> None:
-    from imas_codex.standard_names.families import detect_geometry_families
+    from iter_codex.standard_names.families import detect_geometry_families
 
     parent = "pf_active/coil/element/geometry/oblique"
     families = detect_geometry_families(
@@ -62,7 +62,7 @@ def test_oblique_groups_all_eight_shape_fields() -> None:
 
 
 def test_annulus_groups_inner_and_outer_radii_with_coordinates() -> None:
-    from imas_codex.standard_names.families import detect_geometry_families
+    from iter_codex.standard_names.families import detect_geometry_families
 
     parent = "pf_active/coil/element/geometry/annulus"
     families = detect_geometry_families(
@@ -81,7 +81,7 @@ def test_annulus_groups_inner_and_outer_radii_with_coordinates() -> None:
 
 
 def test_arcs_of_circle_groups_curvature_radii_with_coordinates() -> None:
-    from imas_codex.standard_names.families import detect_geometry_families
+    from iter_codex.standard_names.families import detect_geometry_families
 
     parent = "pf_active/coil/element/geometry/arcs_of_circle"
     families = detect_geometry_families(
@@ -94,7 +94,7 @@ def test_arcs_of_circle_groups_curvature_radii_with_coordinates() -> None:
 
 
 def test_outline_groups_closed_state_with_coordinates() -> None:
-    from imas_codex.standard_names.families import detect_geometry_families
+    from iter_codex.standard_names.families import detect_geometry_families
 
     parent = "cryostat/description_2d/cryostat/unit/element/outline"
     families = detect_geometry_families(
@@ -107,7 +107,7 @@ def test_outline_groups_closed_state_with_coordinates() -> None:
 
 
 def test_error_and_uncertainty_fields_are_excluded() -> None:
-    from imas_codex.standard_names.families import detect_geometry_families
+    from iter_codex.standard_names.families import detect_geometry_families
 
     parent = "pf_active/coil/element/geometry/rectangle"
     families = detect_geometry_families(
@@ -128,7 +128,7 @@ def test_error_and_uncertainty_fields_are_excluded() -> None:
 
 
 def test_axis_only_shape_does_not_duplicate_vector_family() -> None:
-    from imas_codex.standard_names.families import detect_geometry_families
+    from iter_codex.standard_names.families import detect_geometry_families
 
     parent = "wall/description_2d/mobile/unit/outline"
     families = detect_geometry_families(_items(parent, ("r", "m"), ("z", "m")))
@@ -137,7 +137,7 @@ def test_axis_only_shape_does_not_duplicate_vector_family() -> None:
 
 
 def test_shape_name_not_child_suffixes_controls_detection() -> None:
-    from imas_codex.standard_names.families import detect_geometry_families
+    from iter_codex.standard_names.families import detect_geometry_families
 
     parent = "pf_active/coil/element/geometry/not_a_primitive"
     families = detect_geometry_families(
@@ -148,7 +148,7 @@ def test_shape_name_not_child_suffixes_controls_detection() -> None:
 
 
 def test_existing_detector_result_is_exactly_unchanged() -> None:
-    from imas_codex.standard_names.families import (
+    from iter_codex.standard_names.families import (
         FamilyMember,
         VectorFamily,
         detect_families,

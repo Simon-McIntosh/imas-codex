@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_foundation as foundation,
     graph_source_bindings as bindings,
 )
@@ -204,7 +204,7 @@ def test_stale_claim_cannot_follow_successor():
 
 
 def _persist(graph):
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         persist_generated_name_winners,
     )
 
@@ -299,8 +299,8 @@ def test_retired_successor_is_not_traversed_to_a_live_grandchild():
 
 
 def test_retry_helper_renders_exact_source_spelling_and_refusal():
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.context import build_retired_spelling_retry_reason
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.context import build_retired_spelling_retry_reason
 
     graph = BindingGraph([])
     _lock(graph)
@@ -338,7 +338,7 @@ def test_retry_helper_renders_exact_source_spelling_and_refusal():
     ],
 )
 def test_retry_helper_ignores_unrelated_errors(error):
-    from imas_codex.standard_names.context import build_retired_spelling_retry_reason
+    from iter_codex.standard_names.context import build_retired_spelling_retry_reason
 
     graph = MagicMock()
     graph.query.return_value = [{"id": SOURCE, "last_error": error}]
@@ -351,7 +351,7 @@ def test_retry_helper_ignores_unrelated_errors(error):
 
 
 def test_retry_helper_skips_items_without_a_complete_claim():
-    from imas_codex.standard_names.context import build_retired_spelling_retry_reason
+    from iter_codex.standard_names.context import build_retired_spelling_retry_reason
 
     graph = MagicMock()
     assert build_retired_spelling_retry_reason([{"id": SOURCE}], gc=graph) == ""
@@ -361,8 +361,8 @@ def test_retry_helper_skips_items_without_a_complete_claim():
 @pytest.mark.asyncio
 @pytest.mark.timeout(180)
 async def test_compose_prompts_keep_retired_refusal_through_internal_retry(monkeypatch):
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
         compose_batch,
     )
 
@@ -401,26 +401,26 @@ async def test_compose_prompts_keep_retired_refusal_through_internal_retry(monke
         )
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
+        "iter_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
         lambda items, **kwargs: items,
     )
-    monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: graph)
-    monkeypatch.setattr("imas_codex.discovery.base.llm.acall_llm_structured", compose)
+    monkeypatch.setattr("iter_codex.graph.client.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.acall_llm_structured", compose)
     monkeypatch.setattr(
-        "imas_codex.llm.prompt_loader.render_prompt",
+        "iter_codex.llm.prompt_loader.render_prompt",
         lambda name, context: (
             render_prompt(name, context) if name == "sn/generate_name_dd" else "system"
         ),
     )
     for target, value in {
-        "imas_codex.settings.get_model": "test-model",
-        "imas_codex.standard_names.context.build_compose_context": {},
-        "imas_codex.standard_names.example_loader.load_compose_examples": [],
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items": None,
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names": [],
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context": None,
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts": 1,
-        "imas_codex.standard_names.worker_tasks.worker_common._active_editorial_gap_guidance": (
+        "iter_codex.settings.get_model": "test-model",
+        "iter_codex.standard_names.context.build_compose_context": {},
+        "iter_codex.standard_names.example_loader.load_compose_examples": [],
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items": None,
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names": [],
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context": None,
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts": 1,
+        "iter_codex.standard_names.worker_tasks.worker_common._active_editorial_gap_guidance": (
             editorial_reason,
             True,
         ),

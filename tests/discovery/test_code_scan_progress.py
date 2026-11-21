@@ -7,7 +7,7 @@ rather than crash on ``str.format``.
 
 from __future__ import annotations
 
-from imas_codex.discovery.code.workers import _render_score, _scan_progress_message
+from iter_codex.discovery.code.workers import _render_score, _scan_progress_message
 
 
 def test_unscored_path_renders_as_placeholder():

@@ -6,8 +6,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.export import _graph_node_to_entry_dict
-from imas_codex.standard_names.graph_store.graph_audits import (
+from iter_codex.standard_names.export import _graph_node_to_entry_dict
+from iter_codex.standard_names.graph_store.graph_audits import (
     reconcile_standard_name_kinds,
 )
 

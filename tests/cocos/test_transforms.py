@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.cocos import (
+from iter_codex.cocos import (
     get_sign_flip_paths,
     list_ids_with_sign_flips,
     path_needs_cocos_transform,

@@ -10,9 +10,9 @@ This module tests that:
 
 import pytest
 
-from imas_codex.models.constants import SearchMode
-from imas_codex.search.search_strategy import SearchConfig, SearchModeSelector
-from imas_codex.services.search_configuration import SearchConfigurationService
+from iter_codex.models.constants import SearchMode
+from iter_codex.search.search_strategy import SearchConfig, SearchModeSelector
+from iter_codex.services.search_configuration import SearchConfigurationService
 
 
 class TestSearchModePreservation:

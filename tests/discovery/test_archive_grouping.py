@@ -8,12 +8,12 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.discovery.signals.archive_grouping import (
+from iter_codex.discovery.signals.archive_grouping import (
     ArchiveGrouping,
     group_private_catalogue,
 )
-from imas_codex.remote.archive_catalogue import ArchiveCatalogue
-from imas_codex.remote.catalogue_grouping import run_grouping
+from iter_codex.remote.archive_catalogue import ArchiveCatalogue
+from iter_codex.remote.catalogue_grouping import run_grouping
 
 
 @pytest.fixture

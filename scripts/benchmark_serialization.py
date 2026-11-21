@@ -78,7 +78,7 @@ def bench_msgpack_binary(arrays: list[np.ndarray]) -> tuple[float, float, int]:
     """msgpack with raw numpy .tobytes() encoding (our wire format)."""
     import msgpack
 
-    from imas_codex.remote.serialization import pack_array, unpack_array
+    from iter_codex.remote.serialization import pack_array, unpack_array
 
     def run():
         packed_arrays = [pack_array(a) for a in arrays]

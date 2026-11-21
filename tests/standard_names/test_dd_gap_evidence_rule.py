@@ -5,8 +5,8 @@ from __future__ import annotations
 import logging
 from unittest.mock import MagicMock, patch
 
-from imas_codex.graph.models import DDGapEvidenceRule
-from imas_codex.standard_names.dd_gaps import _prepare_reports, write_dd_gaps
+from iter_codex.graph.models import DDGapEvidenceRule
+from iter_codex.standard_names.dd_gaps import _prepare_reports, write_dd_gaps
 
 PATH = "equilibrium/time_slice/profiles_1d/pressure"
 REVIEWER_RULE = "declared unit must match the defined physical quantity"
@@ -43,8 +43,8 @@ def test_reviewer_prose_persists_as_visible_manual_evidence(caplog) -> None:
     graph.return_value.__exit__.return_value = False
 
     with (
-        patch("imas_codex.standard_names.dd_gaps.GraphClient", graph),
-        caplog.at_level(logging.WARNING, logger="imas_codex.standard_names.dd_gaps"),
+        patch("iter_codex.standard_names.dd_gaps.GraphClient", graph),
+        caplog.at_level(logging.WARNING, logger="iter_codex.standard_names.dd_gaps"),
     ):
         result = write_dd_gaps(
             [_reviewer_report(evidence_rule=REVIEWER_RULE)],

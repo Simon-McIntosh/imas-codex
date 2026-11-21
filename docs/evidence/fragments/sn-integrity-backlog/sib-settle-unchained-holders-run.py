@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at e4def604bbabcf2fa6551640c99113360658f61e, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.classify_sourceless_standard_names.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Settle each unchained-holder name against the holder of its own DD source.
@@ -40,10 +40,10 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from imas_codex.graph import GraphClient
-from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
-from imas_codex.standard_names.repair_authority import build_repair_authority
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph import GraphClient
+from iter_codex.standard_names.graph_ops import classify_sourceless_standard_names
+from iter_codex.standard_names.repair_authority import build_repair_authority
+from iter_codex.standard_names.signed_manifest import (
     apply_signed_manifest,
     signed_payload_sha256,
 )
@@ -250,8 +250,8 @@ def _state(detail: dict) -> dict:
 
 
 def judge() -> dict:
-    from imas_codex.discovery.base.judgment import decide_batch
-    from imas_codex.settings import get_model
+    from iter_codex.discovery.base.judgment import decide_batch
+    from iter_codex.settings import get_model
 
     cohort = json.loads(COHORT_PATH.read_text())["cohort"]
     model = get_model("sn-judge")
@@ -487,7 +487,7 @@ def quiet_graph_check() -> dict:
     re-implemented, so the check cannot pass through a local filter that never
     matches.
     """
-    from imas_codex.graph.offsite import live_graph_activity
+    from iter_codex.graph.offsite import live_graph_activity
 
     live_dir = Path.home() / ".config" / "reckon" / "crew" / "live"
     runs = []
@@ -667,8 +667,8 @@ def negcontrol() -> dict:
     answer is not ``same quantity`` and the pair is absent from the authority
     the floor builds.
     """
-    from imas_codex.discovery.base.judgment import decide_batch
-    from imas_codex.settings import get_model
+    from iter_codex.discovery.base.judgment import decide_batch
+    from iter_codex.settings import get_model
 
     planted = {
         "recorded_name": {

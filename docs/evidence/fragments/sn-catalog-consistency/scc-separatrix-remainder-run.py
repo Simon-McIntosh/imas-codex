@@ -55,8 +55,8 @@ ROOT = Path(__file__).resolve().parents[4]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from imas_codex.graph.client import GraphClient  # noqa: E402
-from imas_codex.standard_names import edit  # noqa: E402
+from iter_codex.graph.client import GraphClient  # noqa: E402
+from iter_codex.standard_names import edit  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 NODE = "scc-separatrix-remainder"

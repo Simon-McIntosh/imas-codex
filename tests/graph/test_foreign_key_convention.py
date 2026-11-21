@@ -5,10 +5,10 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from imas_codex.graph.schema import GraphSchema
+from iter_codex.graph.schema import GraphSchema
 
 _SCHEMA_PATH = (
-    Path(__file__).parents[2] / "imas_codex" / "schemas" / "standard_name.yaml"
+    Path(__file__).parents[2] / "iter_codex" / "schemas" / "standard_name.yaml"
 )
 _STANDARD_NAME_FOREIGN_KEY = re.compile(r"^(?:sn|standard_name)_ids?$")
 _RETIRED_REVIEW_RESOLUTION_FIELD = "docs_review_resolution_method"

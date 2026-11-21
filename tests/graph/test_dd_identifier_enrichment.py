@@ -14,8 +14,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.graph.build_dd import _collect_identifier_schemas
-from imas_codex.graph.dd_identifier_enrichment import (
+from iter_codex.graph.build_dd import _collect_identifier_schemas
+from iter_codex.graph.dd_identifier_enrichment import (
     IdentifierEnrichmentBatch,
     IdentifierEnrichmentResult,
     _compute_enrichment_hash,
@@ -220,7 +220,7 @@ class TestEnrichIdentifierSchemas:
         )
 
         with patch(
-            "imas_codex.discovery.base.llm.call_llm_structured",
+            "iter_codex.discovery.base.llm.call_llm_structured",
             return_value=(mock_result, 0.001, 100),
         ):
             stats = enrich_identifier_schemas(client, model="test-model")
@@ -236,7 +236,7 @@ class TestIdentifierNodeEnrichmentModels:
     """Test Pydantic models for identifier node enrichment."""
 
     def test_node_result(self):
-        from imas_codex.graph.dd_identifier_enrichment import (
+        from iter_codex.graph.dd_identifier_enrichment import (
             IdentifierNodeEnrichmentResult,
         )
 
@@ -250,7 +250,7 @@ class TestIdentifierNodeEnrichmentModels:
         assert len(r.keywords) == 3
 
     def test_node_batch(self):
-        from imas_codex.graph.dd_identifier_enrichment import (
+        from iter_codex.graph.dd_identifier_enrichment import (
             IdentifierNodeEnrichmentBatch,
             IdentifierNodeEnrichmentResult,
         )
@@ -272,7 +272,7 @@ class TestEnrichIdentifierNodes:
     """Test enrichment of identifier IMASNodes (mocked LLM)."""
 
     def test_skips_when_no_nodes(self):
-        from imas_codex.graph.dd_identifier_enrichment import enrich_identifier_nodes
+        from iter_codex.graph.dd_identifier_enrichment import enrich_identifier_nodes
 
         client = MagicMock()
         client.query.return_value = []
@@ -281,7 +281,7 @@ class TestEnrichIdentifierNodes:
         assert stats["cached"] == 0
 
     def test_enriches_nodes_with_llm(self):
-        from imas_codex.graph.dd_identifier_enrichment import (
+        from iter_codex.graph.dd_identifier_enrichment import (
             IdentifierNodeEnrichmentBatch,
             IdentifierNodeEnrichmentResult,
             enrich_identifier_nodes,
@@ -330,7 +330,7 @@ class TestEnrichIdentifierNodes:
         )
 
         with patch(
-            "imas_codex.discovery.base.llm.call_llm_structured",
+            "iter_codex.discovery.base.llm.call_llm_structured",
             return_value=(mock_result, 0.001, 100),
         ):
             stats = enrich_identifier_nodes(client, model="test-model")
@@ -346,7 +346,7 @@ class TestEnrichIdentifierNodes:
         assert updates[0]["enrichment_model"] == "test-model"
 
     def test_caches_when_hash_matches(self):
-        from imas_codex.graph.dd_identifier_enrichment import (
+        from iter_codex.graph.dd_identifier_enrichment import (
             _compute_enrichment_hash,
             enrich_identifier_nodes,
         )

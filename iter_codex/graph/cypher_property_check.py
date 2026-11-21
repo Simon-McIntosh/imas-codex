@@ -1,0 +1,648 @@
+"""Check statically resolvable Cypher properties against LinkML schemas."""
+
+from __future__ import annotations
+
+import ast
+import re
+from collections import Counter
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+
+from iter_codex.graph.schema import GraphSchema
+
+NODE_BINDING_RE = re.compile(
+    r"\(\s*(?P<alias>[A-Za-z_]\w*)\s*:\s*`?(?P<label>[A-Za-z_]\w*)`?"
+)
+_PROPERTY_RE = re.compile(
+    r"\b(?P<alias>[A-Za-z_]\w*)\s*\.\s*`?(?P<property>[A-Za-z_]\w*)`?"
+)
+_CYPHER_KEYWORD_RE = re.compile(
+    r"\b(?:CALL|CREATE|DELETE|DROP|FOREACH|MATCH|MERGE|OPTIONAL|REMOVE|RETURN|"
+    r"SET|SHOW|UNWIND|WHERE|WITH)\b"
+)
+_CYPHER_CONTEXT_RE = re.compile(
+    r"(?:cypher|query|clause|filter|match|predicate|where)", re.IGNORECASE
+)
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+_ADJUDICATION_REASONS = {
+    "defect": (
+        "adjudicated real silent-zero defect: the property is absent from the "
+        "declared label and has no static runtime writer; repair is a follow-on"
+    ),
+    "runtime": (
+        "permanent runtime-property allowance: repository Cypher writes this "
+        "coordination or operational property without declaring it in LinkML"
+    ),
+    "transient_lock": (
+        "adjudicated transient set-then-remove lock idiom: Cypher writes and "
+        "removes this marker in one statement to acquire a node write lock "
+        "without persisting graph data"
+    ),
+    "limitation": (
+        "permanent checker limitation: this untyped alias reference precedes a "
+        "later binding to the reported label in the same composite literal"
+    ),
+}
+
+# Each row is path|label|property|source-lines. Source lines locate the frozen
+# inventory, while repeated entries preserve the maximum occurrence count for a
+# path, label, and property. Line movement is harmless, repaired defects may
+# shrink that count, and any excess occurrence still fails the audit.
+_ADJUDICATED_OCCURRENCES = """
+[defect]
+iter_codex/cli/discover/__init__.py|FacilityPath|scanned_at|352,353
+iter_codex/discovery/base/executor.py|FacilityPath|expand_to|286,286
+iter_codex/discovery/code/graph_ops.py|FacilityPath|purpose|163
+iter_codex/discovery/paths/parallel.py|FacilityPath|accessible|1136
+iter_codex/discovery/paths/parallel.py|FacilityPath|patterns_detected|629
+iter_codex/discovery/signals/parallel.py|CodeChunk|chunk_type|3520
+iter_codex/discovery/signals/scanners/device_xml.py|SignalNode|r|1530,1530,2103,2103,2123,2123,2801
+iter_codex/discovery/signals/scanners/device_xml.py|SignalNode|z|1531,1531,2104,2104,2124,2124,2801
+iter_codex/graph/build_dd.py|IMASNode|units|2486,2625
+iter_codex/graph/client.py|IMASNode|path|858,859
+iter_codex/graph/dd_domain_classifier.py|IMASNode|units|841,893,1037
+iter_codex/graph/dd_search.py|IMASNode|units|433
+iter_codex/graph/schema_context.py|IMASNode|units|75
+iter_codex/graph/sn_link_guardrail.py|StandardName|name|78
+iter_codex/ids/graph_ops.py|SignalNode|sort_key|217,233,270
+iter_codex/llm/search_tools.py|Document|file_type|1051
+iter_codex/llm/search_tools.py|Document|title|1033,1033,1033,1051,1051
+iter_codex/llm/search_tools.py|IMASCoordinateSpec|coordinate_type|1211
+iter_codex/llm/server.py|Document|title|745
+iter_codex/standard_names/campaign.py|StandardName|name|297,677
+iter_codex/standard_names/chain_history.py|StandardName|reviewer_score|43
+iter_codex/standard_names/context.py|StandardName|name|684,714
+iter_codex/standard_names/export.py|COCOS|convention|319,371
+iter_codex/standard_names/graph_ops.py|FacilitySignal|units|738
+iter_codex/standard_names/graph_ops.py|IMASNode|units|4658,12530
+iter_codex/standard_names/graph_ops.py|StandardName|name|13132
+iter_codex/standard_names/graph_ops.py|StandardNameSource|unit|4658
+iter_codex/standard_names/prompt_tools.py|IMASNodeChange|detail|165
+iter_codex/standard_names/prompt_tools.py|IMASNodeChange|from_version|163
+iter_codex/standard_names/prompt_tools.py|IMASNodeChange|to_version|164,166
+iter_codex/standard_names/prompt_tools.py|StandardName|name|117,119
+iter_codex/standard_names/provenance_lifecycle.py|StandardName|stage|1073
+iter_codex/standard_names/review/pipeline.py|StandardName|source_id|299
+iter_codex/standard_names/signed_manifest.py|StandardNameChange|row_id|3074,4249
+iter_codex/standard_names/workers.py|IMASNode|alias|8509
+iter_codex/standard_names/workers.py|IMASNode|units|8493
+iter_codex/standard_names/workers.py|StandardName|name|9572
+iter_codex/tools/graph_search.py|IMASNode|units|2182,2245
+iter_codex/tools/version_tool.py|IMASNodeChange|semantic_change_type|344,345
+[runtime]
+iter_codex/discovery/base/grouping.py|SignalSource|claim_token|128,260
+iter_codex/discovery/base/grouping.py|SignalSource|claimed_at|128,210,260
+iter_codex/discovery/code/graph_ops.py|FacilityPath|files_claim_token|149
+iter_codex/discovery/code/graph_ops.py|FacilityPath|files_claimed_at|134,135,149,212,230,231
+iter_codex/discovery/code/graph_ops.py|FacilityPath|last_file_scan_at|143,145,192,555,557
+iter_codex/discovery/code/scanner.py|FacilityPath|evidence_linked|627
+iter_codex/discovery/code/scanner.py|FacilityPath|last_file_scan_at|366,626
+iter_codex/discovery/mdsplus/graph_ops.py|SignalNode|category|807,1041,1132,1535
+iter_codex/discovery/mdsplus/graph_ops.py|SignalNode|claim_token|912,967
+iter_codex/discovery/mdsplus/graph_ops.py|SignalNode|claimed_at|809,903,912,965,967,1027,1043,1055,1065,1079,1134,1154,1543
+iter_codex/discovery/mdsplus/graph_ops.py|SignalNode|keywords|806,1040,1131,1534
+iter_codex/discovery/mdsplus/graph_ops.py|SignalNode|tags|420,425,748,927,931,980
+iter_codex/discovery/mdsplus/graph_ops.py|SignalSource|category|799,1559
+iter_codex/discovery/mdsplus/graph_ops.py|SignalSource|claim_token|730
+iter_codex/discovery/mdsplus/graph_ops.py|SignalSource|claimed_at|728,730,801,847,1560
+iter_codex/discovery/mdsplus/graph_ops.py|SignalSource|data_source_name|535,661,726,862,1466
+iter_codex/discovery/mdsplus/graph_ops.py|SignalSource|enrichment_status|800,1555,1557
+iter_codex/discovery/mdsplus/graph_ops.py|SignalSource|grandparent_path|536,662,743
+iter_codex/discovery/mdsplus/graph_ops.py|SignalSource|index_count|538,664,745
+iter_codex/discovery/mdsplus/graph_ops.py|SignalSource|leaf_name|537,663,744
+iter_codex/discovery/mdsplus/graph_ops.py|SignalSource|node_type|539,665,746
+iter_codex/discovery/mdsplus/graph_ops.py|SignalSource|representative_path|540,666,740,747
+iter_codex/discovery/mdsplus/tdi_linkage.py|FacilitySignal|preferred_accessor|122,123
+iter_codex/discovery/paths/parallel.py|FacilityUser|claim_token|406
+iter_codex/discovery/paths/parallel.py|FacilityUser|claimed_at|371,372,403,404,406,2633
+iter_codex/discovery/signals/parallel.py|SignalSource|claimed_at|1611
+iter_codex/discovery/signals/scanners/device_xml.py|SignalNode|sensor_type|2098,2118
+iter_codex/discovery/signals/scanners/device_xml.py|SignalNode|system|1529,2102,2122
+iter_codex/discovery/wiki/graph_ops.py|WikiPage|ingest_retries|1154,1154,1164,1180
+iter_codex/discovery/wiki/graph_ops.py|WikiPage|referenced_files|346,372,373
+iter_codex/graph/build_dd.py|IMASNode|claim_token|819
+iter_codex/graph/dd_enrichment.py|IMASNode|claim_token|1183
+iter_codex/graph/dd_graph_ops.py|IMASNode|claim_token|78,128,147,228,276,295,358,402,420,514,537
+iter_codex/graph/dd_identifier_enrichment.py|IMASNode|claim_token|629
+iter_codex/ids/metadata.py|DDVersion|version|169,169
+iter_codex/ids/metadata.py|IMASMapping|code_metadata|497
+iter_codex/ids/metadata.py|IMASMapping|ids_properties_metadata|496
+iter_codex/ids/metadata.py|IMASMapping|library_metadata|498
+iter_codex/ids/metadata.py|IMASMapping|metadata_populated|499
+iter_codex/ingestion/pipeline.py|FacilityPath|last_ingested_at|447
+iter_codex/mdsplus/batch_discovery.py|SignalEpoch|boundary_refined|791
+iter_codex/mdsplus/extraction.py|SignalNode|tags|127,944
+iter_codex/standard_names/edit.py|StandardName|edit_refine|667
+iter_codex/standard_names/graph_store/graph_claim_scope.py|StandardName|_drain_scope_lock|992,993
+iter_codex/standard_names/graph_store/graph_lineage.py|StandardName|_lifecycleless_reconcile_lock|5021,5021
+iter_codex/standard_names/graph_store/graph_claim_release.py|StandardName|_refine_claim_release_lock|405,406
+iter_codex/standard_names/graph_store/graph_parent_lifecycle.py|StandardName|_structural_authority_lock|647,648
+iter_codex/standard_names/graph_store/graph_cost_and_claims.py|StandardNameSource|_claim_lock|14557,14558,14630,14631,14672,14673,14709,14710
+iter_codex/standard_names/graph_store/graph_claim_scope.py|StandardNameSource|_drain_scope_lock|923,924
+iter_codex/standard_names/graph_store/graph_source_bindings.py|StandardName|reservation_source_id|888
+iter_codex/standard_names/graph_store/graph_source_bindings.py|StandardName|reservation_claim_token|889
+iter_codex/standard_names/graph_store/graph_source_bindings.py|StandardName|reservation_claim_seq|890
+iter_codex/standard_names/graph_store/graph_source_bindings.py|StandardNameSource|skipped_at|1207,1208,2145
+iter_codex/standard_names/provenance_lifecycle.py|StandardNameSource|standard_name_id|176
+iter_codex/standard_names/signed_manifest.py|StandardNameChange|authority_rows_sha256|3556,4181
+iter_codex/standard_names/signed_manifest.py|StandardNameChange|detached_target_ids|4179
+iter_codex/standard_names/signed_manifest.py|StandardNameChange|source_id|4178
+[transient_lock]
+iter_codex/standard_names/parents.py|StandardName|_structural_authority_replay_lock|421,422
+iter_codex/standard_names/parents.py|StandardName|_structural_authority_grounding_lock|487,488
+[limitation]
+iter_codex/graph/temp_neo4j.py|Facility|facility_id|552
+""".strip()
+
+
+@dataclass(frozen=True, slots=True)
+class CypherPropertyFinding:
+    """One checked property whose disposition needs attention."""
+
+    path: Path
+    line: int
+    alias: str
+    label: str | None
+    property_name: str
+    reason: str
+    category: str = "unresolved"
+
+    def __str__(self) -> str:
+        """Render a compact source-located finding."""
+        qualified = (
+            f"{self.label}.{self.property_name}"
+            if self.label
+            else f"{self.alias}.{self.property_name}"
+        )
+        return f"{self.path}:{self.line}: {qualified}: {self.reason}"
+
+
+@dataclass(frozen=True, slots=True)
+class CypherPropertyReport:
+    """Summary of schema checks over Cypher property occurrences."""
+
+    checked_properties: int
+    violations: tuple[CypherPropertyFinding, ...]
+    allowlisted: tuple[CypherPropertyFinding, ...]
+
+
+def _parse_adjudications() -> dict[str, Counter[tuple[str, int, str, str]]]:
+    """Parse the exact source occurrences already adjudicated in this tree."""
+    result = {category: Counter() for category in _ADJUDICATION_REASONS}
+    category: str | None = None
+    for row in _ADJUDICATED_OCCURRENCES.splitlines():
+        if row.startswith("[") and row.endswith("]"):
+            category = row[1:-1]
+            if category not in result:
+                raise ValueError(f"Unknown Cypher-property adjudication: {category}")
+            continue
+        if category is None:
+            raise ValueError("Cypher-property adjudication row has no category")
+        path, label, property_name, source_lines = row.split("|")
+        for source_line in source_lines.split(","):
+            result[category][(path, int(source_line), label, property_name)] += 1
+    return result
+
+
+_ADJUDICATIONS = _parse_adjudications()
+
+
+def _adjudication_key(
+    path: Path,
+    line: int,
+    label: str,
+    property_name: str,
+) -> tuple[str, int, str, str] | None:
+    """Return a repository-relative key for an exact source occurrence."""
+    try:
+        relative_path = path.resolve().relative_to(_REPO_ROOT)
+    except ValueError:
+        return None
+    return (relative_path.as_posix(), line, label, property_name)
+
+
+def _matching_adjudication(
+    key: tuple[str, int, str, str] | None,
+    remaining: dict[str, Counter[tuple[str, int, str, str]]],
+) -> tuple[str, tuple[str, int, str, str]] | None:
+    """Match one inventory occurrence without making source lines semantic."""
+    if key is None:
+        return None
+    path, _, label, property_name = key
+    for category, occurrences in remaining.items():
+        for inventory_key, count in occurrences.items():
+            inventory_path, _, inventory_label, inventory_property = inventory_key
+            if (
+                count > 0
+                and inventory_path == path
+                and inventory_label == label
+                and inventory_property == property_name
+            ):
+                return category, inventory_key
+    return None
+
+
+def _string_value(node: ast.AST) -> str | None:
+    """Return the static portion of a Python string expression."""
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if not isinstance(node, ast.JoinedStr):
+        return None
+    parts: list[str] = []
+    for value in node.values:
+        if isinstance(value, ast.Constant) and isinstance(value.value, str):
+            parts.append(value.value)
+        elif isinstance(value, ast.FormattedValue):
+            parts.append("{dynamic}")
+    return "".join(parts)
+
+
+def _assignment_names(node: ast.AST) -> Iterable[str]:
+    """Yield names assigned by an assignment containing *node*."""
+    targets: Sequence[ast.expr]
+    if isinstance(node, ast.Assign):
+        targets = node.targets
+    elif isinstance(node, ast.AnnAssign):
+        targets = (node.target,)
+    else:
+        return
+    for target in targets:
+        if isinstance(target, ast.Name):
+            yield target.id
+        elif isinstance(target, ast.Attribute):
+            yield target.attr
+
+
+def _call_name(node: ast.Call) -> str | None:
+    """Return the terminal name of a called function or method."""
+    if isinstance(node.func, ast.Name):
+        return node.func.id
+    if isinstance(node.func, ast.Attribute):
+        return node.func.attr
+    return None
+
+
+def _has_cypher_context(
+    node: ast.AST,
+    text: str,
+    parents: dict[ast.AST, ast.AST],
+) -> bool:
+    """Return whether a string is used as, or visibly contains, Cypher."""
+    if _CYPHER_KEYWORD_RE.search(text) or NODE_BINDING_RE.search(text):
+        return True
+    current = node
+    for _ in range(6):
+        parent = parents.get(current)
+        if parent is None:
+            break
+        if isinstance(parent, ast.Assign | ast.AnnAssign):
+            return any(
+                _CYPHER_CONTEXT_RE.search(name) for name in _assignment_names(parent)
+            )
+        if isinstance(parent, ast.Call):
+            call_name = _call_name(parent)
+            return call_name in {"execute", "query", "run"}
+        current = parent
+    return False
+
+
+def python_cypher_strings(
+    path: Path, *, require_property: bool = True
+) -> Iterable[tuple[ast.AST, str]]:
+    """Yield relevant Python string nodes and their static text.
+
+    ``require_property`` keeps only strings that reference an ``alias.property``
+    path, which is what the declared-property audit needs. A caller that must
+    see every statement — including one whose only mutation is a relationship —
+    passes ``False``.
+    """
+    source = path.read_text(encoding="utf-8")
+    tree = ast.parse(source, filename=str(path))
+    parents = {
+        child: parent
+        for parent in ast.walk(tree)
+        for child in ast.iter_child_nodes(parent)
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(
+            parents.get(node), ast.JoinedStr
+        ):
+            continue
+        text = _string_value(node)
+        if text is None or (require_property and not _PROPERTY_RE.search(text)):
+            continue
+        if _has_cypher_context(node, text, parents):
+            yield node, text
+
+
+def _source_paths(root: Path) -> Iterable[Path]:
+    """Yield Python sources under *root* in deterministic order."""
+    if root.is_file():
+        if root.suffix == ".py":
+            yield root
+        return
+    yield from sorted(
+        path
+        for path in root.rglob("*.py")
+        if not any(part.startswith(".") for part in path.relative_to(root).parts)
+    )
+
+
+def _declared_properties(
+    schemas: Sequence[GraphSchema],
+) -> dict[str, frozenset[str]]:
+    """Build the label-to-property universe through ``get_all_slots``."""
+    properties: dict[str, set[str]] = {}
+    for schema in schemas:
+        for label in schema.node_labels:
+            properties.setdefault(label, set()).update(schema.get_all_slots(label))
+    return {label: frozenset(names) for label, names in properties.items()}
+
+
+def audit_cypher_properties(
+    root: Path | str,
+    *,
+    schemas: Sequence[GraphSchema],
+) -> CypherPropertyReport:
+    """Validate statically labelled Cypher properties against LinkML.
+
+    Property references on aliases whose label is not declared in the same
+    literal cannot be proved by local static analysis. They remain visible as
+    source-located allowlist entries instead of being silently skipped.
+    """
+    source_root = Path(root)
+    declared = _declared_properties(schemas)
+    violations: list[CypherPropertyFinding] = []
+    allowlisted: list[CypherPropertyFinding] = []
+    remaining_adjudications = {
+        category: occurrences.copy() for category, occurrences in _ADJUDICATIONS.items()
+    }
+    checked = 0
+
+    for path in _source_paths(source_root):
+        for node, text in python_cypher_strings(path):
+            bindings: dict[str, set[str]] = {}
+            for match in NODE_BINDING_RE.finditer(text):
+                bindings.setdefault(match["alias"], set()).add(match["label"])
+
+            for match in _PROPERTY_RE.finditer(text):
+                checked += 1
+                alias = match["alias"]
+                property_name = match["property"]
+                line = int(getattr(node, "lineno", 1)) + text.count(
+                    "\n", 0, match.start()
+                )
+                labels = bindings.get(alias, set())
+                known_labels = labels & declared.keys()
+                unknown_labels = labels - declared.keys()
+
+                if not labels:
+                    allowlisted.append(
+                        CypherPropertyFinding(
+                            path=path,
+                            line=line,
+                            alias=alias,
+                            label=None,
+                            property_name=property_name,
+                            reason="alias label is not declared in this literal",
+                        )
+                    )
+                    continue
+                if unknown_labels:
+                    allowlisted.append(
+                        CypherPropertyFinding(
+                            path=path,
+                            line=line,
+                            alias=alias,
+                            label=", ".join(sorted(labels)),
+                            property_name=property_name,
+                            reason="node label is absent from the supplied LinkML schemas",
+                        )
+                    )
+                    continue
+
+                matching_labels = {
+                    label for label in known_labels if property_name in declared[label]
+                }
+                if len(known_labels) > 1 and matching_labels != known_labels:
+                    allowlisted.append(
+                        CypherPropertyFinding(
+                            path=path,
+                            line=line,
+                            alias=alias,
+                            label=", ".join(sorted(known_labels)),
+                            property_name=property_name,
+                            reason=(
+                                "alias is bound to multiple labels with different "
+                                "property declarations"
+                            ),
+                        )
+                    )
+                    continue
+                if matching_labels:
+                    continue
+                label = next(iter(known_labels))
+                key = _adjudication_key(path, line, label, property_name)
+                adjudication = _matching_adjudication(key, remaining_adjudications)
+                if adjudication is not None:
+                    category, inventory_key = adjudication
+                    remaining_adjudications[category][inventory_key] -= 1
+                    allowlisted.append(
+                        CypherPropertyFinding(
+                            path=path,
+                            line=line,
+                            alias=alias,
+                            label=label,
+                            property_name=property_name,
+                            reason=_ADJUDICATION_REASONS[category],
+                            category=category,
+                        )
+                    )
+                    continue
+                violations.append(
+                    CypherPropertyFinding(
+                        path=path,
+                        line=line,
+                        alias=alias,
+                        label=label,
+                        property_name=property_name,
+                        reason="property is not declared by LinkML for this label",
+                        category="violation",
+                    )
+                )
+
+    if source_root.resolve() == (_REPO_ROOT / "iter_codex").resolve():
+        for category, occurrences in remaining_adjudications.items():
+            if category == "defect":
+                continue
+            for (relative_path, line, label, property_name), count in sorted(
+                occurrences.items()
+            ):
+                for _ in range(count):
+                    violations.append(
+                        CypherPropertyFinding(
+                            path=_REPO_ROOT / relative_path,
+                            line=line,
+                            alias="<adjudication>",
+                            label=label,
+                            property_name=property_name,
+                            reason=(
+                                f"stale {category} adjudication does not match a "
+                                "current source occurrence"
+                            ),
+                            category="stale_adjudication",
+                        )
+                    )
+
+    return CypherPropertyReport(
+        checked_properties=checked,
+        violations=tuple(violations),
+        allowlisted=tuple(allowlisted),
+    )
+
+
+# Properties that mark contention (a claim or lock) rather than a
+# modification of the StandardName identity. A Cypher statement that writes
+# only these properties on a StandardName-bound alias must not be required to
+# also stamp ``updated_at``.
+_TRANSIENT_TOUCH_EXEMPT_PROPERTIES = frozenset(
+    {
+        "_drain_scope_lock",
+        "_lifecycleless_reconcile_lock",
+        "_refine_claim_release_lock",
+        "_structural_authority_grounding_lock",
+        "_structural_authority_lock",
+        "_structural_authority_replay_lock",
+        "reservation_source_id",
+        "reservation_claim_token",
+        "reservation_claim_seq",
+    }
+)
+
+
+@dataclass(frozen=True, slots=True)
+class StandardNameTouchFinding:
+    """One Cypher SET clause whose ``updated_at`` stamp disagrees with its writes."""
+
+    path: Path
+    line: int
+    alias: str
+    properties: tuple[str, ...]
+    stamped: bool
+
+    def __str__(self) -> str:
+        """Render a compact source-located finding."""
+        props = ", ".join(self.properties) or "(none)"
+        if self.stamped:
+            return (
+                f"{self.path}:{self.line}: SET {self.alias}.updated_at is set "
+                f"although this statement assigns no other property of "
+                f"{self.alias} ({props})"
+            )
+        return (
+            f"{self.path}:{self.line}: SET {self.alias}.({props}) does not also "
+            f"set {self.alias}.updated_at in the same statement"
+        )
+
+
+_BRACKET_OPEN = "([{"
+_BRACKET_CLOSE = ")]}"
+
+
+def _next_top_level_keyword(text: str, start: int) -> int | None:
+    """Return the position of the next clause keyword outside bracket nesting.
+
+    A Cypher list comprehension embeds its own ``WHERE``
+    (``[x IN xs WHERE ...]``), so a bracket-blind keyword scan ends a SET
+    clause's body at that embedded keyword and hides any property write that
+    follows later in the same SET.
+    """
+    depth = 0
+    pos = start
+    for match in _CYPHER_KEYWORD_RE.finditer(text, start):
+        segment = text[pos : match.start()]
+        depth += sum(1 for char in segment if char in _BRACKET_OPEN)
+        depth -= sum(1 for char in segment if char in _BRACKET_CLOSE)
+        if depth <= 0:
+            return match.start()
+        pos = match.start()
+    return None
+
+
+def cypher_set_blocks(text: str) -> Iterable[tuple[int, int, int]]:
+    """Yield (set_keyword_start, body_start, body_end) for each SET clause."""
+    set_positions = [m.start() for m in re.finditer(r"\bSET\b", text)]
+    for pos in set_positions:
+        body_start = pos + 3
+        next_keyword = _next_top_level_keyword(text, body_start)
+        body_end = next_keyword if next_keyword is not None else len(text)
+        yield pos, body_start, body_end
+
+
+def audit_standard_name_touch(root: Path | str) -> tuple[StandardNameTouchFinding, ...]:
+    """Flag Cypher writes whose ``updated_at`` stamp disagrees with the alias.
+
+    A statement stamps ``StandardName.updated_at`` if, and only if, it also
+    assigns at least one other, non-exempt property of that same alias (see
+    ``_TRANSIENT_TOUCH_EXEMPT_PROPERTIES``). Both directions are checked: a
+    substantive write with no stamp, and a stamp on an alias the statement
+    does not otherwise touch. A property assigned to itself
+    (``alias.prop = alias.prop``, a compare-and-set lock idiom) never counts
+    as an assignment — it acquires a write lock without changing anything.
+    Dynamically assembled SET clauses (an f-string whose body is a variable,
+    or an ``alias += $map`` merge) cannot be proved either way by static
+    analysis and are silently skipped, the same limitation the
+    declared-property audit above accepts for unresolved aliases.
+    """
+    findings: list[StandardNameTouchFinding] = []
+    for path in _source_paths(Path(root)):
+        for node, text in python_cypher_strings(path):
+            if "StandardName" not in text or not re.search(r"\bSET\b", text):
+                continue
+            bindings: dict[str, set[str]] = {}
+            for match in NODE_BINDING_RE.finditer(text):
+                bindings.setdefault(match["alias"], set()).add(match["label"])
+            sn_aliases = {
+                alias for alias, labels in bindings.items() if "StandardName" in labels
+            }
+            if not sn_aliases:
+                continue
+            blocks = list(cypher_set_blocks(text))
+            line_base = int(getattr(node, "lineno", 1))
+            for alias in sorted(sn_aliases):
+                prop_re = re.compile(rf"\b{re.escape(alias)}\.(\w+)\s*=")
+                self_assign_re = re.compile(
+                    rf"\b{re.escape(alias)}\.(\w+)\s*=\s*{re.escape(alias)}\.\1\b"
+                )
+                merge_re = re.compile(rf"\b{re.escape(alias)}\s*\+=")
+                for set_pos, body_start, body_end in blocks:
+                    body_text = text[body_start:body_end]
+                    if "{dynamic}" in body_text or merge_re.search(body_text):
+                        continue
+                    self_assigned = {
+                        m.group(1) for m in self_assign_re.finditer(body_text)
+                    }
+                    props = {
+                        m.group(1) for m in prop_re.finditer(body_text)
+                    } - self_assigned
+                    if not props:
+                        continue
+                    stamped = "updated_at" in props
+                    substantive = (
+                        props - _TRANSIENT_TOUCH_EXEMPT_PROPERTIES - {"updated_at"}
+                    )
+                    if bool(substantive) == stamped:
+                        continue
+                    line = line_base + text.count("\n", 0, set_pos)
+                    findings.append(
+                        StandardNameTouchFinding(
+                            path=path,
+                            line=line,
+                            alias=alias,
+                            properties=tuple(sorted(substantive)),
+                            stamped=stamped,
+                        )
+                    )
+    return tuple(findings)

@@ -13,10 +13,10 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from imas_codex.standard_names.audits import (
+from iter_codex.standard_names.audits import (
     find_flux_surface_reduction_violations,
 )
-from imas_codex.standard_names.harmonize import (
+from iter_codex.standard_names.harmonize import (
     _FAMILY_OPERATOR_KINDS,
     _FAMILY_REDUCTION_OPERATORS,
 )

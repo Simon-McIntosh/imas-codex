@@ -4,13 +4,13 @@ from uuid import uuid4
 
 import pytest
 
-from imas_codex.graph import GraphClient
-from imas_codex.ingestion.graph import (
+from iter_codex.graph import GraphClient
+from iter_codex.ingestion.graph import (
     link_chunks_to_edas_signals,
     link_chunks_to_ids_roots,
     link_chunks_to_imas_paths,
 )
-from imas_codex.llm.search_tools import (
+from iter_codex.llm.search_tools import (
     _enrich_code_chunks,
     _reference_search_code_chunks,
 )

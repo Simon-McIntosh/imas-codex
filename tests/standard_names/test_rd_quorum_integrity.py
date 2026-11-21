@@ -33,11 +33,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.base.llm import acall_llm_structured, get_model_limits
-from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+from iter_codex.discovery.base.llm import acall_llm_structured, get_model_limits
+from iter_codex.standard_names.worker_tasks.worker_review_docs import (
     process_review_docs_batch,
 )
-from imas_codex.standard_names.worker_tasks.worker_review_names import (
+from iter_codex.standard_names.worker_tasks.worker_review_names import (
     _run_rd_quorum_cycles,
     quorum_incomplete_snapshot,
     reset_quorum_incomplete,
@@ -215,7 +215,7 @@ class TestQuorumCompletenessGuard:
         """2-model profile with a failed secondary → None, warned, counted."""
         reset_quorum_incomplete("run-x")
         with caplog.at_level(
-            logging.WARNING, logger="imas_codex.standard_names.workers"
+            logging.WARNING, logger="iter_codex.standard_names.workers"
         ):
             result, calls = _run(
                 models=["m0", "m1"],
@@ -312,11 +312,11 @@ class TestUnfundedSeatIsAttributed:
         acall, calls = _make_acall([{"score": 0.8, "dims": _NAMES_DIMS}])
         with (
             patch(
-                "imas_codex.standard_names.workers.model_provider_exposure",
+                "iter_codex.standard_names.workers.model_provider_exposure",
                 return_value=0.2773,
             ),
             caplog.at_level(
-                logging.WARNING, logger="imas_codex.standard_names.workers"
+                logging.WARNING, logger="iter_codex.standard_names.workers"
             ),
         ):
             reset_quorum_incomplete("run-x")
@@ -397,27 +397,27 @@ class TestDeferredReviewReleasesClaim:
 
         with (
             patch(
-                "imas_codex.settings.get_sn_review_docs_models",
+                "iter_codex.settings.get_sn_review_docs_models",
                 return_value=["m0", "m1"],
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="Review.",
             ),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_review_names._run_rd_quorum_cycles",
+                "iter_codex.standard_names.worker_tasks.worker_review_names._run_rd_quorum_cycles",
                 new=AsyncMock(return_value=None),
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_claim_release.release_review_docs_failed_claims",
+                "iter_codex.standard_names.graph_store.graph_claim_release.release_review_docs_failed_claims",
                 side_effect=_fake_release,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_docs",
+                "iter_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_docs",
                 side_effect=_fake_persist,
             ),
         ):
-            from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+            from iter_codex.standard_names.worker_tasks.worker_review_docs import (
                 process_review_docs_batch,
             )
 
@@ -477,15 +477,15 @@ class TestEscalatorSeatUnfundedDefers:
         )
         with (
             patch(
-                "imas_codex.standard_names.budget.model_provider_exposure",
+                "iter_codex.standard_names.budget.model_provider_exposure",
                 return_value=0.01,  # funded cycles' per-attempt hook prices
             ),
             patch(
-                "imas_codex.standard_names.workers.model_provider_exposure",
+                "iter_codex.standard_names.workers.model_provider_exposure",
                 side_effect=[0.1, 0.2, 0.2773],  # reservation exposures per seat
             ),
             caplog.at_level(
-                logging.WARNING, logger="imas_codex.standard_names.workers"
+                logging.WARNING, logger="iter_codex.standard_names.workers"
             ),
         ):
             result = asyncio.run(

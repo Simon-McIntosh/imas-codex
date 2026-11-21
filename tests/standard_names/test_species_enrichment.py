@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.standard_names.enrichment import extract_species_context
+from iter_codex.standard_names.enrichment import extract_species_context
 
 
 @pytest.mark.parametrize(

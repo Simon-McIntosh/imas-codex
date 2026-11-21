@@ -79,10 +79,10 @@ class TestFormatUptime:
 class TestHealthEndpointRegistration:
     """Test that the health endpoint is registered on the MCP server."""
 
-    @patch("imas_codex.llm.server.load_prompts", return_value={})
+    @patch("iter_codex.llm.server.load_prompts", return_value={})
     def test_health_route_registered(self, _mock_prompts):
         """The /health custom route is registered on the MCP server."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(read_only=True)
         routes = server.mcp._additional_http_routes
@@ -90,10 +90,10 @@ class TestHealthEndpointRegistration:
         assert len(health_routes) == 1
         assert "GET" in health_routes[0].methods
 
-    @patch("imas_codex.llm.server.load_prompts", return_value={})
+    @patch("iter_codex.llm.server.load_prompts", return_value={})
     def test_started_at_recorded(self, _mock_prompts):
         """Server records startup time for uptime calculation."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         before = time.monotonic()
         server = AgentsServer(read_only=True)
@@ -135,16 +135,16 @@ class TestHealthEndpointResponse:
             ]
         return []
 
-    @patch("imas_codex.llm.server.load_prompts", return_value={})
+    @patch("iter_codex.llm.server.load_prompts", return_value={})
     def test_response_has_required_fields(self, _mock_prompts, mock_graph_client):
         """Health response includes version, uptime, graph, facilities."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(read_only=False)
 
         with (
             patch(
-                "imas_codex.graph.client.GraphClient.from_profile",
+                "iter_codex.graph.client.GraphClient.from_profile",
                 return_value=mock_graph_client,
             ),
         ):
@@ -166,15 +166,15 @@ class TestHealthEndpointResponse:
         assert "uptime_seconds" in data
         assert "mode" not in data
 
-    @patch("imas_codex.llm.server.load_prompts", return_value={})
+    @patch("iter_codex.llm.server.load_prompts", return_value={})
     def test_response_with_graph_data(self, _mock_prompts, mock_graph_client):
         """Health response includes graph metadata when available."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(read_only=True)
 
         with patch(
-            "imas_codex.graph.client.GraphClient.from_profile",
+            "iter_codex.graph.client.GraphClient.from_profile",
             return_value=mock_graph_client,
         ):
             from starlette.testclient import TestClient
@@ -196,15 +196,15 @@ class TestHealthEndpointResponse:
         assert data["imas_dd"]["path_count"] == 12345
         assert "mode" not in data
 
-    @patch("imas_codex.llm.server.load_prompts", return_value={})
+    @patch("iter_codex.llm.server.load_prompts", return_value={})
     def test_response_graph_unavailable(self, _mock_prompts):
         """Health response degrades gracefully when graph is unavailable."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(read_only=True)
 
         with patch(
-            "imas_codex.graph.client.GraphClient.from_profile",
+            "iter_codex.graph.client.GraphClient.from_profile",
             side_effect=Exception("Connection refused"),
         ):
             from starlette.testclient import TestClient
@@ -219,7 +219,7 @@ class TestHealthEndpointResponse:
         assert data["graph"]["status"] == "unavailable"
         assert "Connection refused" in data["graph"]["error"]
 
-    @patch("imas_codex.llm.server.load_prompts", return_value={})
+    @patch("iter_codex.llm.server.load_prompts", return_value={})
     def test_dd_only_graph_no_facilities(self, _mock_prompts):
         """DD-only graph reports empty facilities list."""
         gc = MagicMock()
@@ -245,12 +245,12 @@ class TestHealthEndpointResponse:
 
         gc.query.side_effect = dd_only_query
 
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(read_only=True)
 
         with patch(
-            "imas_codex.graph.client.GraphClient.from_profile",
+            "iter_codex.graph.client.GraphClient.from_profile",
             return_value=gc,
         ):
             from starlette.testclient import TestClient

@@ -3,7 +3,7 @@
 This is the blind audit of the live standard names. It extends the owners the
 pipeline already has rather than building a second harness beside them:
 
-* the draw is :func:`imas_codex.standard_names.benchmark_roles._stratified_sample`,
+* the draw is :func:`iter_codex.standard_names.benchmark_roles._stratified_sample`,
   the seeded round-robin sampler the benchmark and golden builders use;
 * the fixed class list and the per-row reasoning live in this file, and they
   were committed before any name was read;
@@ -12,18 +12,18 @@ pipeline already has rather than building a second harness beside them:
   structures come from ``worker_extraction_and_enrichment._ANCESTOR_CONTEXT_QUERY``,
   the one ancestor read the docs and name grounding share;
 * each verdict is stored in the record shape
-  :func:`imas_codex.standard_names.review.pipeline._build_review_record` builds,
+  :func:`iter_codex.standard_names.review.pipeline._build_review_record` builds,
   tagged ``resolution_role='audit'`` so no accepting, refining or exporting path
   can read it;
 * the statistics are the two-seat form of
-  :mod:`imas_codex.standard_names.review.panel_audit`'s agreement report.
+  :mod:`iter_codex.standard_names.review.panel_audit`'s agreement report.
 
 The two readers are seats of the paid panel. No production seat and no
 selectable review profile composes, refines, generates docs or reviews with
 either model, and the two are different families:
 
 * ``openrouter/google/gemini-3.8-flash`` — Google. It is a priced endpoint; no
-  ``[tool.imas-codex.<seat>].model`` and no ``sn-review`` seat or profile names
+  ``[tool.iter-codex.<seat>].model`` and no ``sn-review`` seat or profile names
   it.
 * ``openrouter/moonshotai/kimi-k3.1-pro`` — Moonshot. Same test: no production
   seat and no review profile names either model.
@@ -198,14 +198,14 @@ class Judgment(BaseModel):
 
 
 def graph_client() -> Any:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     return GraphClient()
 
 
 def load_live_names(gc: Any) -> list[dict[str, Any]]:
     """Every live name with the fields the audit reads."""
-    from imas_codex.standard_names.source_reads import source_paths_projection
+    from iter_codex.standard_names.source_reads import source_paths_projection
 
     rows = gc.query(
         f"""
@@ -233,7 +233,7 @@ def domain_groups(rows: list[dict[str, Any]]) -> dict[str, int]:
 
 def draw_sample(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict]:
     """The seeded stratified draw over every physics-domain group of >= 20 names."""
-    from imas_codex.standard_names.benchmark_roles import _stratified_sample
+    from iter_codex.standard_names.benchmark_roles import _stratified_sample
 
     groups = domain_groups(rows)
     eligible = [r for r in rows if str(r.get("physics_domain") or "") in groups]
@@ -266,7 +266,7 @@ def load_plants(
     drawn sample. Sound plants come from rows ruled ``correct``; defective
     plants from rows ruled ``INCORRECT``.
     """
-    from imas_codex.standard_names.judgment_goldens import _west_verdicts
+    from iter_codex.standard_names.judgment_goldens import _west_verdicts
 
     verdicts = _west_verdicts()
     chosen: dict[str, list[dict[str, Any]]] = {}
@@ -333,8 +333,8 @@ def load_plants(
 
 def load_dd_context(gc: Any, names: list[dict[str, Any]]) -> None:
     """Attach the DD leaf and enclosing-structure text to each name row."""
-    from imas_codex.standard_names.source_paths import split_source_paths
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.source_paths import split_source_paths
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _ANCESTOR_CONTEXT_QUERY,
         ancestor_statements,
     )
@@ -400,7 +400,7 @@ def attach_duplicate_candidates(
 
 
 def names_by_dd_source(live_rows: list[dict[str, Any]]) -> dict[str, list[str]]:
-    from imas_codex.standard_names.source_paths import split_source_paths
+    from iter_codex.standard_names.source_paths import split_source_paths
 
     out: dict[str, list[str]] = defaultdict(list)
     for row in live_rows:
@@ -508,7 +508,7 @@ async def judge_one(
     *,
     ceiling: float = SPEND_CEILING,
 ) -> dict[str, Any]:
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     if spend["total"] > ceiling:
         raise RuntimeError(f"spend ceiling reached at {spend['total']:.2f} USD")
@@ -684,10 +684,10 @@ def kappa(both: int, only_a: int, only_b: int, neither: int) -> float | None:
     """Cohen's kappa on the two readers' defective-or-not labels.
 
     Delegates to the repository's one implementation,
-    :func:`imas_codex.discovery.base.evaluation.cohen_kappa`, rebuilding the
+    :func:`iter_codex.discovery.base.evaluation.cohen_kappa`, rebuilding the
     label sequences the counts came from so both callers cannot drift.
     """
-    from imas_codex.discovery.base.evaluation import cohen_kappa
+    from iter_codex.discovery.base.evaluation import cohen_kappa
 
     if both + only_a + only_b + neither == 0:
         return None
@@ -1227,7 +1227,7 @@ def render_page(summary: dict[str, Any]) -> str:
 
     return (
         '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
-        '<meta name="docs-project" content="imas-codex">\n'
+        '<meta name="docs-project" content="iter-codex">\n'
         '<meta name="reckon-type" content="evidence-fragment">\n'
         '<meta name="plan-slug" content="sn-audited-group-release">\n'
         '<meta name="node-id" content="sagr-blind-audit">\n'
@@ -1445,7 +1445,7 @@ def load_third_items(
     audit is still the name the first two readers saw, so its stored text is
     read and its stage is recorded separately, never in the prompt.
     """
-    from imas_codex.standard_names.source_reads import source_paths_projection
+    from iter_codex.standard_names.source_reads import source_paths_projection
 
     gc = graph_client()
     try:
@@ -2131,7 +2131,7 @@ def render_third_page(summary: dict[str, Any]) -> str:
     )
     return (
         '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
-        '<meta name="docs-project" content="imas-codex">\n'
+        '<meta name="docs-project" content="iter-codex">\n'
         '<meta name="reckon-type" content="evidence-fragment">\n'
         '<meta name="plan-slug" content="sn-audited-group-release">\n'
         '<meta name="node-id" content="sagr-frontier-third-reader">\n'
@@ -2318,7 +2318,7 @@ def third_self_test() -> int:
 
 
 def build_items() -> tuple[list[dict[str, Any]], dict[str, Any], list[dict[str, Any]]]:
-    from imas_codex.standard_names.source_paths import split_source_paths
+    from iter_codex.standard_names.source_paths import split_source_paths
 
     gc = graph_client()
     try:
@@ -2358,11 +2358,11 @@ def pipeline_models() -> set[str]:
     """Every model a production seat or a selectable review profile names.
 
     Reads the same configuration surface the pipeline does, through the
-    accessors that own it (:mod:`imas_codex.settings`), rather than walking
+    accessors that own it (:mod:`iter_codex.settings`), rather than walking
     ``pyproject.toml`` for keys: a seat added with a different key name or a
     profile added later is then still in the set.
     """
-    from imas_codex import settings
+    from iter_codex import settings
 
     found = {
         settings.get_model(section)
@@ -2610,8 +2610,8 @@ def persist(
     resolution role stays ``audit`` so no accepting, refining or exporting path
     can read it.
     """
-    from imas_codex.standard_names.graph_store import graph_catalog
-    from imas_codex.standard_names.review.pipeline import _build_review_record
+    from iter_codex.standard_names.graph_store import graph_catalog
+    from iter_codex.standard_names.review.pipeline import _build_review_record
 
     records = []
     reviewed_at = datetime.now(UTC).isoformat()

@@ -17,7 +17,7 @@ import pytest
 @pytest.fixture
 def graph_client():
     """Live graph client for integration tests."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     try:
         gc = GraphClient()
@@ -31,7 +31,7 @@ def graph_client():
 @pytest.fixture
 def clusters_tool(graph_client):
     """GraphClustersTool backed by the live graph."""
-    from imas_codex.tools.graph_search import GraphClustersTool
+    from iter_codex.tools.graph_search import GraphClustersTool
 
     return GraphClustersTool(graph_client)
 
@@ -47,7 +47,7 @@ class TestTextSearchSummaryExclusion:
 
     def test_default_text_search_excludes_summary(self, graph_client):
         """_text_search_dd_paths with exclude_summary=True returns no summary/ paths."""
-        from imas_codex.tools.graph_search import _text_search_dd_paths
+        from iter_codex.tools.graph_search import _text_search_dd_paths
 
         results = _text_search_dd_paths(
             graph_client, "heating power", 50, ids_filter=None, exclude_summary=True
@@ -60,7 +60,7 @@ class TestTextSearchSummaryExclusion:
 
     def test_text_search_include_summary_ids_can_return_summary(self, graph_client):
         """_text_search_dd_paths with exclude_summary=False may return summary/ paths."""
-        from imas_codex.tools.graph_search import _text_search_dd_paths
+        from iter_codex.tools.graph_search import _text_search_dd_paths
 
         results_incl = _text_search_dd_paths(
             graph_client, "heating power", 100, ids_filter=None, exclude_summary=False
@@ -76,7 +76,7 @@ class TestTextSearchSummaryExclusion:
 
     def test_text_search_ids_filter_summary_with_exclude(self, graph_client):
         """When ids_filter='summary', results are only summary paths regardless of exclude_summary."""
-        from imas_codex.tools.graph_search import _text_search_dd_paths
+        from iter_codex.tools.graph_search import _text_search_dd_paths
 
         # With ids_filter='summary', exclude_summary is intentionally NOT applied
         # at this level — the caller (_search_dd_paths) handles this logic.

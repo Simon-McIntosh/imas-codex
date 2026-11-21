@@ -4,13 +4,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.wiki.adapters import (
+from iter_codex.discovery.wiki.adapters import (
     DiscoveredPage,
     TWikiRawAdapter,
     fetch_twiki_raw_content,
     get_adapter,
 )
-from imas_codex.discovery.wiki.pipeline import (
+from iter_codex.discovery.wiki.pipeline import (
     _strip_twiki_formatting,
     twiki_markup_to_html,
 )

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog_reset as _owning_graph_catalog_reset,
     graph_foundation as _owning_graph_foundation,
 )
@@ -16,7 +16,7 @@ from imas_codex.standard_names.graph_store import (
 def _no_approved_names():
     """Make the approval-backed protection lookup explicit for this suite."""
     with patch(
-        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        "iter_codex.standard_names.protection._fetch_catalog_edit_names",
         return_value=set(),
     ):
         yield
@@ -28,7 +28,7 @@ def _queries(gc: MagicMock) -> list[str]:
 
 def test_derived_parent_delete_records_change_atomically() -> None:
     """A structural placeholder deletion writes a complete recovery receipt."""
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         _delete_derived_parent_nodes,
     )
 
@@ -68,7 +68,7 @@ def test_derived_parent_delete_records_change_atomically() -> None:
 
 def test_skeleton_delete_records_change_atomically() -> None:
     """Placeholder cleanup keeps a durable explanation after the node is gone."""
-    from imas_codex.standard_names.graph_store.graph_catalog import write_standard_names
+    from iter_codex.standard_names.graph_store.graph_catalog import write_standard_names
 
     main = MagicMock()
     main.__enter__.return_value = main
@@ -93,7 +93,7 @@ def test_skeleton_delete_records_change_atomically() -> None:
     sweep.query.side_effect = sweep_query
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         side_effect=[main, sweep],
     ):
         write_standard_names(
@@ -123,7 +123,7 @@ def test_skeleton_delete_records_change_atomically() -> None:
 
 def test_scoped_clear_records_each_deletion_in_same_statement() -> None:
     """A selected-name clear remains atomic with its deletion ledger writes."""
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     gc = MagicMock()
     gc.__enter__.return_value = gc
@@ -153,7 +153,7 @@ def test_scoped_clear_records_each_deletion_in_same_statement() -> None:
 
 def test_subsystem_clear_ledgers_names_but_preserves_change_rows() -> None:
     """A full pipeline wipe deletes names without deleting its explanation."""
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     gc = MagicMock()
     gc.__enter__.return_value = gc
@@ -175,7 +175,7 @@ def test_subsystem_clear_ledgers_names_but_preserves_change_rows() -> None:
 
 def test_compaction_ledgers_delete_with_owned_content() -> None:
     """Compaction records the deletion beside its atomic owned-content cleanup."""
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         compact_unapproved_superseded,
     )
 
@@ -209,7 +209,7 @@ def test_compaction_ledgers_delete_with_owned_content() -> None:
 
 def test_missing_change_targets_are_classified_without_deleting_history() -> None:
     """Missing targets are reported as explained deletion or historical residue."""
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         classify_missing_change_targets,
     )
 

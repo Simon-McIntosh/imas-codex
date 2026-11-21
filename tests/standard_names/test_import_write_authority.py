@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.catalog_import import (
+from iter_codex.standard_names.catalog_import import (
     record_catalog_import_provenance,
 )
 

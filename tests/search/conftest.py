@@ -13,9 +13,9 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.core.node_categories import SEARCHABLE_CATEGORIES
-from imas_codex.embeddings.config import EmbeddingBackend, EncoderConfig
-from imas_codex.embeddings.encoder import Encoder
+from iter_codex.core.node_categories import SEARCHABLE_CATEGORIES
+from iter_codex.embeddings.config import EmbeddingBackend, EncoderConfig
+from iter_codex.embeddings.encoder import Encoder
 from tests.search.benchmark_data import ALL_QUERIES
 
 logger = logging.getLogger(__name__)
@@ -205,7 +205,7 @@ def expanded_expected_paths(request):
 
     # Need graph to generate
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         gc = GraphClient()
         gc.get_stats()

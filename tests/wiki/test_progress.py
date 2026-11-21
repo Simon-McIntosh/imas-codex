@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.discovery.wiki.monitor import WikiIngestionStats, WikiProgressMonitor
+from iter_codex.discovery.wiki.monitor import WikiIngestionStats, WikiProgressMonitor
 
 
 class TestWikiIngestionStats:

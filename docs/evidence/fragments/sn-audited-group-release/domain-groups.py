@@ -47,15 +47,15 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from imas_codex.standard_names.benchmark_roles import spearman_rho
-from imas_codex.standard_names.domain_audit import (
+from iter_codex.standard_names.benchmark_roles import spearman_rho
+from iter_codex.standard_names.domain_audit import (
     LIVE_NAME_STAGES,
     DomainAuditResult,
     NameDomainState,
     audit_domains,
 )
-from imas_codex.standard_names.domain_ranking import select_primary_domain
-from imas_codex.standard_names.families import detect_families
+from iter_codex.standard_names.domain_ranking import select_primary_domain
+from iter_codex.standard_names.families import detect_families
 
 FRAGMENTS = Path(__file__).resolve().parent
 OUT_JSON = FRAGMENTS / "domain-groups.json"
@@ -777,7 +777,7 @@ def render_page(payload: dict[str, Any]) -> str:
 
     parts: list[str] = []
     parts.append('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n')
-    parts.append('<meta name="docs-project" content="imas-codex">\n')
+    parts.append('<meta name="docs-project" content="iter-codex">\n')
     parts.append('<meta name="reckon-type" content="evidence-fragment">\n')
     parts.append('<meta name="plan-slug" content="sn-audited-group-release">\n')
     parts.append(f'<meta name="node-id" content="{node}">\n')
@@ -1448,7 +1448,7 @@ def instrument_checks(payload: dict[str, Any]) -> list[tuple[str, bool]]:
 
 def main() -> int:
     """Measure, check, and only then write: a failed arm leaves the files alone."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         payload = build(gc)

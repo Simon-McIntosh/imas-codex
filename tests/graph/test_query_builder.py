@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.graph.query_builder import (
+from iter_codex.graph.query_builder import (
     graph_search,
     render_chunk_source,
     render_path_prefix_clause,

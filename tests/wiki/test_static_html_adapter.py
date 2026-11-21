@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.discovery.wiki.adapters import (
+from iter_codex.discovery.wiki.adapters import (
     DiscoveredDocument,
     DiscoveredPage,
     StaticHtmlAdapter,
@@ -57,7 +57,7 @@ class TestStaticHtmlAdapterDocumentDiscovery:
             **kwargs,
         )
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_discovers_documents_from_pages(self, mock_fetch):
         """Documents linked from discovered pages are collected."""
         adapter = self._make_adapter()
@@ -86,7 +86,7 @@ class TestStaticHtmlAdapterDocumentDiscovery:
         assert "manual.pdf" in filenames
         assert "results.xlsx" in filenames
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_deduplicates_documents(self, mock_fetch):
         """Same document linked from multiple pages is only counted once."""
         adapter = self._make_adapter()
@@ -111,7 +111,7 @@ class TestStaticHtmlAdapterDocumentDiscovery:
         assert len(documents) == 1
         assert documents[0].filename == "shared.pdf"
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_ignores_non_document_links(self, mock_fetch):
         """Links to HTML pages and images are ignored."""
         adapter = self._make_adapter()
@@ -137,7 +137,7 @@ class TestStaticHtmlAdapterDocumentDiscovery:
         assert len(documents) == 1
         assert documents[0].filename == "actual.pdf"
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_resolves_relative_urls(self, mock_fetch):
         """Relative URLs are resolved against the page URL."""
         adapter = self._make_adapter()
@@ -161,7 +161,7 @@ class TestStaticHtmlAdapterDocumentDiscovery:
         assert len(documents) == 1
         assert documents[0].url == "https://example.org/docs/files/report.pdf"
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_resolves_absolute_path_urls(self, mock_fetch):
         """Absolute path URLs (/path/to/file.pdf) are resolved against the origin."""
         adapter = self._make_adapter()
@@ -187,7 +187,7 @@ class TestStaticHtmlAdapterDocumentDiscovery:
         adapter = StaticHtmlAdapter()
         assert adapter.bulk_discover_documents("test", "") == []
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_unreachable_pages_skipped(self, mock_fetch):
         """Pages that fail to fetch are gracefully skipped."""
         adapter = self._make_adapter()
@@ -211,7 +211,7 @@ class TestStaticHtmlAdapterDocumentDiscovery:
         assert len(documents) == 1
         assert documents[0].filename == "file.pdf"
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_progress_callback(self, mock_fetch):
         """Progress callback is invoked during discovery."""
         adapter = self._make_adapter()
@@ -233,7 +233,7 @@ class TestStaticHtmlAdapterDocumentDiscovery:
         assert any("scanning" in m for m in progress_msgs)
         assert any("discovered" in m for m in progress_msgs)
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_document_type_mapping(self, mock_fetch):
         """All supported document types are correctly identified."""
         adapter = self._make_adapter()
@@ -273,7 +273,7 @@ class TestStaticHtmlAdapterDocumentDiscovery:
 
 
 class TestStaticHtmlAdapterBFSLimits:
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_bfs_respects_depth_limit(self, mock_fetch):
         """BFS crawl does not follow links beyond max_depth."""
         adapter = StaticHtmlAdapter(
@@ -302,7 +302,7 @@ class TestStaticHtmlAdapterBFSLimits:
         # but children's links are not followed
         assert len(pages) <= 10  # bounded, not unbounded
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_depth_0_only_fetches_seeds(self, mock_fetch):
         """max_depth=0 fetches only the seed URLs, no link following."""
         adapter = StaticHtmlAdapter(
@@ -326,7 +326,7 @@ class TestStaticHtmlAdapterBFSLimits:
         assert "page1.html" not in page_names
         assert "page2.html" not in page_names
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html")
     def test_max_pages_still_acts_as_safety_net(self, mock_fetch):
         """max_pages stops crawl even within depth limit."""
         adapter = StaticHtmlAdapter(

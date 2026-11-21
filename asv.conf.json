@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "project": "imas-codex",
+    "project": "iter-codex",
     "repo": ".",
     "branches": ["main", "HEAD"],
     "dvcs": "git",

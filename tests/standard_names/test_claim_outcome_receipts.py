@@ -21,7 +21,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_foundation as claims,
     graph_source_bindings as gsb,
 )
@@ -473,7 +473,7 @@ def test_the_stored_outcome_receipt_is_committed_with_its_status_write() -> None
 
 def test_batch_failure_writer_stores_a_receipt_per_claimed_source() -> None:
     """A raised batch leaves one batch_failed receipt per source it carried."""
-    from imas_codex.standard_names.worker_tasks import worker_compose_batches as wcb
+    from iter_codex.standard_names.worker_tasks import worker_compose_batches as wcb
 
     gc = _FakeGraphClient({"dd:a": _claim("tok-a", 3), "dd:b": _claim("tok-b", 3)})
     entries = wcb._batch_failure_claim_entries(
@@ -502,7 +502,7 @@ def test_batch_failure_writer_stores_a_receipt_per_claimed_source() -> None:
 
 def test_capped_writer_stores_a_capped_receipt() -> None:
     """The attempt-cap sweep leaves a capped receipt on each row it parks."""
-    from imas_codex.standard_names import orphan_sweep
+    from iter_codex.standard_names import orphan_sweep
 
     gc = _FakeGraphClient({"dd:a": _claim("tok", 5, attempt=5)})
     entries = orphan_sweep._capped_claim_entries(
@@ -529,8 +529,8 @@ def test_capped_writer_stores_a_capped_receipt() -> None:
 
 def test_the_sweep_tick_issues_the_capped_append(monkeypatch) -> None:
     """The tick itself appends: deleting the call leaves no capped receipt."""
-    from imas_codex.standard_names import orphan_sweep
-    from imas_codex.standard_names.graph_store import graph_source_bindings
+    from iter_codex.standard_names import orphan_sweep
+    from iter_codex.standard_names.graph_store import graph_source_bindings
 
     gc = _FakeGraphClient({"dd:a": _claim("tok", 5, attempt=5)})
     gc.parking_rows = [
@@ -642,7 +642,7 @@ def test_compose_batch_records_the_receipt_before_it_reraises() -> None:
     real source is the compose batch's own failure path invoking it before it
     re-raises.
     """
-    from imas_codex.standard_names.worker_tasks import worker_compose_batches as wcb
+    from iter_codex.standard_names.worker_tasks import worker_compose_batches as wcb
 
     source = inspect.getsource(wcb.compose_batch)
     failure_path = source[source.rindex("except Exception:") :]
@@ -654,14 +654,14 @@ def test_compose_batch_records_the_receipt_before_it_reraises() -> None:
 
 def test_batch_failure_never_masks_the_batch_error(monkeypatch) -> None:
     """A receipt write that fails does not replace the exception that ended it."""
-    from imas_codex.standard_names.worker_tasks import worker_compose_batches as wcb
+    from iter_codex.standard_names.worker_tasks import worker_compose_batches as wcb
 
     def _explode(entries, *, services):
         raise RuntimeError("graph unavailable")
 
     monkeypatch.setattr(claims, "record_claim_attempts", _explode)
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_store.graph_foundation.get_services",
+        "iter_codex.standard_names.graph_store.graph_foundation.get_services",
         lambda: object(),
     )
 
@@ -686,7 +686,7 @@ def test_the_append_statement_creates_and_links_a_receipt_in_the_live_graph() ->
     reads off the source and the relationship are what the double claims. The
     probe source is created and removed here, so it leaves nothing behind.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     source_id = "dd:__claim_receipt_probe__/equilibrium/time_slice/psi"
     with GraphClient() as gc:

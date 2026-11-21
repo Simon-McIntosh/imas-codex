@@ -17,7 +17,7 @@ import pytest
 def _no_approved_names():
     """Make the approval-backed protection lookup explicit for this suite."""
     with patch(
-        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        "iter_codex.standard_names.protection._fetch_catalog_edit_names",
         return_value=set(),
     ):
         yield
@@ -32,7 +32,7 @@ class TestSNVocabGapModel:
     """StandardNameVocabGap model validates and stores fields."""
 
     def test_basic_construction(self):
-        from imas_codex.standard_names.models import StandardNameVocabGap
+        from iter_codex.standard_names.models import StandardNameVocabGap
 
         gap = StandardNameVocabGap(
             source_id="equilibrium/time_slice/profiles_1d/psi",
@@ -48,7 +48,7 @@ class TestSNVocabGapModel:
     def test_all_fields_required(self):
         from pydantic import ValidationError
 
-        from imas_codex.standard_names.models import StandardNameVocabGap
+        from iter_codex.standard_names.models import StandardNameVocabGap
 
         with pytest.raises(ValidationError):
             StandardNameVocabGap(source_id="path/a", segment="transformation")  # type: ignore[call-arg]
@@ -63,7 +63,7 @@ class TestSNComposeBatchVocabGaps:
     """StandardNameComposeBatch correctly parses vocab_gaps from LLM response."""
 
     def test_compose_batch_with_vocab_gaps(self):
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         data = {
             "candidates": [],
@@ -86,13 +86,13 @@ class TestSNComposeBatchVocabGaps:
         )
 
     def test_compose_batch_vocab_gaps_default_empty(self):
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         batch = StandardNameComposeBatch(candidates=[], skipped=[])
         assert batch.vocab_gaps == []
 
     def test_compose_batch_multiple_gaps(self):
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         data = {
             "candidates": [],
@@ -133,18 +133,18 @@ class TestWriteVocabGaps:
     ) -> int:
         """Call write_vocab_gaps with a mocked GraphClient."""
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+            from iter_codex.standard_names.graph_store.graph_catalog_reset import (
                 write_vocab_gaps,
             )
 
             return write_vocab_gaps(gaps, source_type=source_type)
 
     def test_empty_returns_zero(self):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             write_vocab_gaps,
         )
 
@@ -455,20 +455,20 @@ class TestPersistBatchTokenMissGaps:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+                "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
             ) as MockGC,
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
+                "iter_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                 return_value=token_miss_gaps,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.write_vocab_gaps"
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.write_vocab_gaps"
             ) as mock_write_vg,
         ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 write_standard_names,
             )
 
@@ -502,20 +502,20 @@ class TestPersistBatchTokenMissGaps:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+                "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
             ) as MockGC,
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
+                "iter_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                 return_value=[],
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.write_vocab_gaps"
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.write_vocab_gaps"
             ) as mock_write_vg,
         ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 write_standard_names,
             )
 
@@ -547,20 +547,20 @@ class TestPersistBatchTokenMissGaps:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+                "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
             ) as MockGC,
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
+                "iter_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                 return_value=token_miss_gaps,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.write_vocab_gaps"
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.write_vocab_gaps"
             ) as mock_write_vg,
         ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 write_standard_names,
             )
 
@@ -581,7 +581,7 @@ class TestResolveGrammarTokenVersion:
 
     def test_exact_version_match(self):
         """Returns ISN version when GrammarToken nodes exist for it."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _resolve_grammar_token_version,
         )
 
@@ -593,7 +593,7 @@ class TestResolveGrammarTokenVersion:
 
     def test_fallback_to_latest(self):
         """Falls back to latest available version when exact doesn't exist."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _resolve_grammar_token_version,
         )
 
@@ -607,7 +607,7 @@ class TestResolveGrammarTokenVersion:
 
     def test_no_grammar_tokens(self):
         """Returns None when no GrammarToken nodes exist at all."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _resolve_grammar_token_version,
         )
 
@@ -632,10 +632,10 @@ class TestWriteSegmentEdgesVersionFallback:
         mock_gc = MagicMock()
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
+            "iter_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
             return_value=None,
         ):
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 _write_grammar_decomposition,
             )
 
@@ -669,11 +669,11 @@ class TestWriteSegmentEdgesVersionFallback:
         )
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
+                "iter_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
                 return_value="0.7.0rc14",
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog._resolve_synced_segments",
+                "iter_codex.standard_names.graph_store.graph_catalog._resolve_synced_segments",
                 return_value=_all_segs,
             ),
             patch("imas_standard_names.grammar.parse_standard_name") as mock_parse,
@@ -687,7 +687,7 @@ class TestWriteSegmentEdgesVersionFallback:
             mock_spec.token = "electron"
             mock_specs.return_value = [mock_spec]
 
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 _write_grammar_decomposition,
             )
 
@@ -720,12 +720,12 @@ class TestOpenSegmentFilter:
     """
 
     def test_open_segments_includes_physical_base(self):
-        from imas_codex.standard_names.segments import open_segments
+        from iter_codex.standard_names.segments import open_segments
 
         assert "physical_base" not in open_segments()
 
     def test_is_open_segment_predicate(self):
-        from imas_codex.standard_names.segments import is_open_segment
+        from iter_codex.standard_names.segments import is_open_segment
 
         assert is_open_segment("physical_base") is False
         assert is_open_segment("grammar_ambiguity") is True
@@ -738,7 +738,7 @@ class TestOpenSegmentFilter:
         assert is_open_segment("") is False
 
     def test_filter_closed_segment_gaps_splits_by_openness(self):
-        from imas_codex.standard_names.segments import filter_closed_segment_gaps
+        from iter_codex.standard_names.segments import filter_closed_segment_gaps
 
         gaps = [
             {"source_id": "a", "segment": "component", "token": "curl_of"},
@@ -781,11 +781,11 @@ class TestOpenSegmentFilter:
         ]
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+            from iter_codex.standard_names.graph_store.graph_catalog_reset import (
                 write_vocab_gaps,
             )
 
@@ -821,11 +821,11 @@ class TestOpenSegmentFilter:
         ]
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+            from iter_codex.standard_names.graph_store.graph_catalog_reset import (
                 write_vocab_gaps,
             )
 
@@ -846,7 +846,7 @@ class TestLoadKnownPhysicalBases:
     """Verify _load_known_physical_bases returns expected tokens."""
 
     def test_returns_nonempty_frozenset(self):
-        from imas_codex.standard_names.worker_tasks.worker_common import (
+        from iter_codex.standard_names.worker_tasks.worker_common import (
             _load_known_physical_bases,
         )
 
@@ -859,7 +859,7 @@ class TestLoadKnownPhysicalBases:
         ["pressure", "density", "velocity", "temperature", "current", "wavelength"],
     )
     def test_contains_key_tokens(self, token):
-        from imas_codex.standard_names.worker_tasks.worker_common import (
+        from iter_codex.standard_names.worker_tasks.worker_common import (
             _load_known_physical_bases,
         )
 
@@ -879,14 +879,14 @@ class TestKnownSegments:
     """known_segments() returns ISN grammar segment names."""
 
     def test_returns_frozenset(self):
-        from imas_codex.standard_names.segments import known_segments
+        from iter_codex.standard_names.segments import known_segments
 
         segs = known_segments()
         assert segs is not None, "ISN must be installed for tests"
         assert isinstance(segs, frozenset)
 
     def test_contains_core_segments(self):
-        from imas_codex.standard_names.segments import known_segments
+        from iter_codex.standard_names.segments import known_segments
 
         segs = known_segments()
         assert segs is not None
@@ -894,39 +894,39 @@ class TestKnownSegments:
             assert expected in segs, f"Missing segment {expected!r}"
 
     def test_is_valid_segment_real(self):
-        from imas_codex.standard_names.segments import is_valid_segment
+        from iter_codex.standard_names.segments import is_valid_segment
 
         assert is_valid_segment("component") is True
         assert is_valid_segment("position") is True
         assert is_valid_segment("qualifier") is True
 
     def test_is_valid_segment_pseudo(self):
-        from imas_codex.standard_names.segments import is_valid_segment
+        from iter_codex.standard_names.segments import is_valid_segment
 
         assert is_valid_segment("grammar_ambiguity") is True
 
     def test_is_valid_segment_bogus(self):
-        from imas_codex.standard_names.segments import is_valid_segment
+        from iter_codex.standard_names.segments import is_valid_segment
 
         assert is_valid_segment("foobar_nonexistent") is False
         assert is_valid_segment("transformation_xyz") is False
 
     def test_is_valid_segment_none_empty(self):
-        from imas_codex.standard_names.segments import is_valid_segment
+        from iter_codex.standard_names.segments import is_valid_segment
 
         assert is_valid_segment(None) is False
         assert is_valid_segment("") is False
 
     def test_isn_unavailable_returns_true_conservatively(self):
         """When ISN is not importable, is_valid_segment returns True."""
-        from imas_codex.standard_names.segments import is_valid_segment
+        from iter_codex.standard_names.segments import is_valid_segment
 
         with patch(
-            "imas_codex.standard_names.segments._load_segment_token_map",
+            "iter_codex.standard_names.segments._load_segment_token_map",
             return_value=None,
         ):
             # Clear caches
-            from imas_codex.standard_names.segments import known_segments
+            from iter_codex.standard_names.segments import known_segments
 
             known_segments.cache_clear()
             try:
@@ -939,7 +939,7 @@ class TestClassifyGap:
     """classify_gap() returns correct (category, actual_segments) tuples."""
 
     def test_absent_token(self):
-        from imas_codex.standard_names.segments import classify_gap
+        from iter_codex.standard_names.segments import classify_gap
 
         cat, actual = classify_gap("position", "zzz_nonexistent_token_xyzzy")
         assert cat == "absent"
@@ -947,7 +947,7 @@ class TestClassifyGap:
 
     def test_false_positive(self):
         """Token exists in the reported segment → false_positive."""
-        from imas_codex.standard_names.segments import classify_gap, is_known_token
+        from iter_codex.standard_names.segments import classify_gap, is_known_token
 
         # Find a token that exists in 'qualifier' segment.  (maximum/minimum
         # moved to the operator class in the finalized grammar — "effective"
@@ -961,7 +961,7 @@ class TestClassifyGap:
 
     def test_wrong_slot_placement(self):
         """Token exists in a different segment than reported."""
-        from imas_codex.standard_names.segments import classify_gap
+        from iter_codex.standard_names.segments import classify_gap
 
         # 'electron' is a subject token — report it as 'position' → wrong_slot
         cat, actual = classify_gap("position", "electron")
@@ -969,14 +969,14 @@ class TestClassifyGap:
         assert "subject" in actual
 
     def test_invalid_segment(self):
-        from imas_codex.standard_names.segments import classify_gap
+        from iter_codex.standard_names.segments import classify_gap
 
         cat, actual = classify_gap("nonexistent_segment_xyz", "some_token")
         assert cat == "invalid_segment"
         assert actual == []
 
     def test_open_segment(self):
-        from imas_codex.standard_names.segments import classify_gap, open_segments
+        from iter_codex.standard_names.segments import classify_gap, open_segments
 
         open_segs = open_segments()
         if not open_segs:
@@ -987,7 +987,7 @@ class TestClassifyGap:
 
     def test_decomposable_compound(self):
         """Compound token whose parts are all registered → decomposable."""
-        from imas_codex.standard_names.segments import classify_gap, is_known_token
+        from iter_codex.standard_names.segments import classify_gap, is_known_token
 
         # Verify prerequisites: 'thermal' in population, 'density' in
         # physical_base. (thermal_pressure itself became a lexical base in
@@ -1004,7 +1004,7 @@ class TestClassifyGap:
 
     def test_decomposable_cross_segment(self):
         """Compound where parts span different segments."""
-        from imas_codex.standard_names.segments import classify_gap, is_known_token
+        from iter_codex.standard_names.segments import classify_gap, is_known_token
 
         # 'poloidal' should be in component/coordinate
         segs_pol = is_known_token("poloidal")
@@ -1022,7 +1022,7 @@ class TestClassifyGap:
 
     def test_atomic_compound_not_decomposed(self):
         """Atomic compounds in whitelist must NOT be classified as decomposable."""
-        from imas_codex.standard_names.segments import (
+        from iter_codex.standard_names.segments import (
             ATOMIC_COMPOUNDS,
             classify_gap,
         )
@@ -1037,7 +1037,7 @@ class TestClassifyGap:
 
     def test_single_token_not_decomposable(self):
         """Single-word tokens with no underscores cannot be decomposable."""
-        from imas_codex.standard_names.segments import classify_gap
+        from iter_codex.standard_names.segments import classify_gap
 
         cat, actual = classify_gap("qualifier", "zzz_truly_unique_xyzzy")
         assert cat == "absent"
@@ -1062,7 +1062,7 @@ class TestLexicalCompoundPhysicalBase:
         # Precondition: token is genuinely absent from the flat registry.
         from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
 
-        from imas_codex.standard_names.segments import is_known_token
+        from iter_codex.standard_names.segments import is_known_token
 
         assert token not in SEGMENT_TOKEN_MAP.get("physical_base", ()), (
             f"{token} unexpectedly in flat map — test premise invalid"
@@ -1072,7 +1072,7 @@ class TestLexicalCompoundPhysicalBase:
 
     @pytest.mark.parametrize("token", LEXICAL_COMPOUNDS)
     def test_classify_gap_false_positive(self, token):
-        from imas_codex.standard_names.segments import classify_gap
+        from iter_codex.standard_names.segments import classify_gap
 
         cat, actual = classify_gap("physical_base", token)
         assert cat == "false_positive"
@@ -1087,19 +1087,19 @@ class TestLexicalCompoundPhysicalBase:
         """
         from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
 
-        from imas_codex.standard_names.segments import is_known_token
+        from iter_codex.standard_names.segments import is_known_token
 
         assert "internal_inductance" in SEGMENT_TOKEN_MAP.get("physical_base", ())
         assert is_known_token("internal_inductance") == ["physical_base"]
 
     def test_resolved_base_segment_self_resolving(self):
-        from imas_codex.standard_names.segments import resolved_base_segment
+        from iter_codex.standard_names.segments import resolved_base_segment
 
         assert resolved_base_segment("internal_inductance") == "physical_base"
 
     def test_resolved_base_segment_decomposing_token_is_none(self):
         """A token resolving to a *different* base is not self-resolving."""
-        from imas_codex.standard_names.segments import resolved_base_segment
+        from iter_codex.standard_names.segments import resolved_base_segment
 
         # poloidal_magnetic_flux → physical_base 'magnetic_flux' (≠ token).
         assert resolved_base_segment("poloidal_magnetic_flux") is None
@@ -1111,7 +1111,7 @@ class TestLexicalCompoundPhysicalBase:
         when a vocab rotation adds a real candidate (poloidal_current_function
         was the prior exemplar and became valid in ISN rc39).
         """
-        from imas_codex.standard_names.segments import classify_gap, is_known_token
+        from iter_codex.standard_names.segments import classify_gap, is_known_token
 
         assert is_known_token("zzz_nonexistent_quantity_xyz") == []
         cat, actual = classify_gap("physical_base", "zzz_nonexistent_quantity_xyz")
@@ -1120,7 +1120,7 @@ class TestLexicalCompoundPhysicalBase:
 
     def test_closed_enum_segments_unaffected(self):
         """Lexical-compound resolution does not bleed into closed enums."""
-        from imas_codex.standard_names.segments import (
+        from iter_codex.standard_names.segments import (
             classify_gap,
             is_known_token,
         )
@@ -1139,7 +1139,7 @@ class TestAutoDetectLexicalCompoundBases:
     """Compose auto-detection must not emit gaps for self-resolving bases."""
 
     def test_default_path_skips_lexical_compounds(self):
-        from imas_codex.standard_names.worker_tasks.worker_common import (
+        from iter_codex.standard_names.worker_tasks.worker_common import (
             _auto_detect_physical_base_gaps,
         )
 
@@ -1152,7 +1152,7 @@ class TestAutoDetectLexicalCompoundBases:
         assert _auto_detect_physical_base_gaps(candidates) == []
 
     def test_default_path_still_flags_genuine_gap(self):
-        from imas_codex.standard_names.worker_tasks.worker_common import (
+        from iter_codex.standard_names.worker_tasks.worker_common import (
             _auto_detect_physical_base_gaps,
         )
 
@@ -1172,7 +1172,7 @@ class TestAutoDetectLexicalCompoundBases:
 
     def test_explicit_known_bases_stays_strict(self):
         """An explicit known_bases override is authoritative (no parser hatch)."""
-        from imas_codex.standard_names.worker_tasks.worker_common import (
+        from iter_codex.standard_names.worker_tasks.worker_common import (
             _auto_detect_physical_base_gaps,
         )
 
@@ -1188,7 +1188,7 @@ class TestWriteVocabGapsInvalidSegment:
 
     def test_invalid_segment_skipped(self):
         """Gaps with a bogus segment name should not be written."""
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             write_vocab_gaps,
         )
 
@@ -1201,7 +1201,7 @@ class TestWriteVocabGapsInvalidSegment:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -1212,7 +1212,7 @@ class TestWriteVocabGapsInvalidSegment:
 
     def test_false_positive_skipped(self):
         """Gaps where token exists in reported segment should be skipped."""
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             write_vocab_gaps,
         )
 
@@ -1227,7 +1227,7 @@ class TestWriteVocabGapsInvalidSegment:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -1242,7 +1242,7 @@ class TestReconcileVocabGaps:
 
     def test_deletes_false_positive(self):
         """Gap where token now exists in reported segment → deleted."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             reconcile_vocab_gaps,
         )
 
@@ -1257,7 +1257,7 @@ class TestReconcileVocabGaps:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -1275,7 +1275,7 @@ class TestReconcileVocabGaps:
 
     def test_preserves_genuine_absent_gap(self):
         """Genuinely absent token → preserved."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             reconcile_vocab_gaps,
         )
 
@@ -1288,7 +1288,7 @@ class TestReconcileVocabGaps:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -1302,7 +1302,7 @@ class TestReconcileVocabGaps:
 
     def test_reclassifies_wrong_slot(self):
         """Token that appeared in a different segment → reclassified."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             reconcile_vocab_gaps,
         )
 
@@ -1315,7 +1315,7 @@ class TestReconcileVocabGaps:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -1333,15 +1333,15 @@ class TestReconcileVocabGaps:
 
     def test_isn_unavailable_skips(self):
         """When ISN is unavailable, reconcile skips gracefully."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             reconcile_vocab_gaps,
         )
 
         with patch(
-            "imas_codex.standard_names.segments._load_segment_token_map",
+            "iter_codex.standard_names.segments._load_segment_token_map",
             return_value=None,
         ):
-            from imas_codex.standard_names.segments import known_segments
+            from iter_codex.standard_names.segments import known_segments
 
             known_segments.cache_clear()
             try:
@@ -1353,12 +1353,12 @@ class TestReconcileVocabGaps:
 
     def test_empty_graph(self):
         """No VocabGap nodes → quick return."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             reconcile_vocab_gaps,
         )
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -1412,7 +1412,7 @@ class TestBatchRescueValidator:
 
     def test_all_valid_candidates_preserved(self):
         """When all candidates are valid, none are rescued."""
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         batch = StandardNameComposeBatch(
             candidates=[self._valid_candidate("p/a"), self._valid_candidate("p/b")]
@@ -1422,7 +1422,7 @@ class TestBatchRescueValidator:
 
     def test_bad_candidate_rescued_to_vocab_gap(self):
         """A candidate with an unregistered qualifier is rescued to vocab_gaps."""
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         data = {
             "candidates": [
@@ -1439,7 +1439,7 @@ class TestBatchRescueValidator:
 
     def test_multiple_bad_candidates_all_rescued(self):
         """Multiple bad candidates are individually rescued."""
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         bad_1 = {
             "source_id": "p/x",
@@ -1463,7 +1463,7 @@ class TestBatchRescueValidator:
 
     def test_existing_vocab_gaps_preserved(self):
         """Rescued gaps are appended to existing LLM-reported vocab_gaps."""
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         data = {
             "candidates": [self._bad_qualifier_candidate("p/b")],
@@ -1486,7 +1486,7 @@ class TestBatchRescueValidator:
         """Candidates with non-vocab validation errors stay in candidates list."""
         from pydantic import ValidationError
 
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         # Bad base_kind is not a vocab gap — it's an enum error
         bad_enum = {
@@ -1507,7 +1507,7 @@ class TestBatchRescueValidator:
 
     def test_all_bad_produces_empty_candidates(self):
         """When all candidates have vocab gaps, candidates list is empty."""
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         data = {
             "candidates": [
@@ -1524,7 +1524,7 @@ class TestExtractGapFromError:
     """_extract_gap_from_error parses vocab-gap validation error messages."""
 
     def test_qualifier_error(self):
-        from imas_codex.standard_names.models import _extract_gap_from_error
+        from iter_codex.standard_names.models import _extract_gap_from_error
 
         segment, token = _extract_gap_from_error(
             "qualifier 'cumulative' is not a registered grammar token.",
@@ -1534,7 +1534,7 @@ class TestExtractGapFromError:
         assert token == "cumulative"
 
     def test_base_token_error(self):
-        from imas_codex.standard_names.models import _extract_gap_from_error
+        from iter_codex.standard_names.models import _extract_gap_from_error
 
         segment, token = _extract_gap_from_error(
             "base_token 'exotic_flux' is not a registered physical_base.",
@@ -1544,7 +1544,7 @@ class TestExtractGapFromError:
         assert token == "exotic_flux"
 
     def test_projection_axis_error(self):
-        from imas_codex.standard_names.models import _extract_gap_from_error
+        from iter_codex.standard_names.models import _extract_gap_from_error
 
         segment, token = _extract_gap_from_error(
             "projection_axis 'spiral' is not a registered component token.",
@@ -1554,7 +1554,7 @@ class TestExtractGapFromError:
         assert token == "spiral"
 
     def test_fallback_extracts_from_segments(self):
-        from imas_codex.standard_names.models import _extract_gap_from_error
+        from iter_codex.standard_names.models import _extract_gap_from_error
 
         segment, token = _extract_gap_from_error(
             "some unexpected error format",
@@ -1569,7 +1569,7 @@ class TestReconcileVocabGapSourceReset:
 
     def test_sources_reset_when_gaps_resolved(self):
         """Sources whose entity has no remaining gap edge → 'extracted'."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             reconcile_vocab_gaps,
         )
 
@@ -1584,7 +1584,7 @@ class TestReconcileVocabGapSourceReset:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)

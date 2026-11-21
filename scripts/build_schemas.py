@@ -10,7 +10,7 @@ from pathlib import Path
 
 import click
 
-from imas_codex.core.xml_parser import DataDictionaryTransformer
+from iter_codex.core.xml_parser import DataDictionaryTransformer
 
 
 @click.command()
@@ -27,7 +27,7 @@ from imas_codex.core.xml_parser import DataDictionaryTransformer
 @click.option(
     "--output-dir",
     type=click.Path(path_type=Path),
-    help="Custom output directory (defaults to imas_codex/resources/schemas)",
+    help="Custom output directory (defaults to iter_codex/resources/schemas)",
 )
 @click.option(
     "--include-ggd",

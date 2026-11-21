@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.doc_links import find_name_references
+from iter_codex.standard_names.doc_links import find_name_references
 
 
 def test_math_notation_is_not_a_name_reference() -> None:

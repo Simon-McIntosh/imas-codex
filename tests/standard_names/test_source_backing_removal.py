@@ -57,7 +57,7 @@ class _SourceBackingGraph:
         }
 
     def query(self, statement: str, **params: Any) -> list[dict[str, Any]]:
-        from imas_codex.standard_names import edit
+        from iter_codex.standard_names import edit
 
         if statement == edit._SOURCE_BACKING_REMOVAL_PREFLIGHT_QUERY:
             return [self._preflight(**params)]
@@ -119,7 +119,7 @@ class _SourceBackingGraph:
 
 
 def test_removes_spurious_beta_backing_and_records_reason() -> None:
-    from imas_codex.standard_names.edit import remove_source_dd_path_backing
+    from iter_codex.standard_names.edit import remove_source_dd_path_backing
 
     graph = _SourceBackingGraph()
     before_count = graph.relationship_count()
@@ -143,7 +143,7 @@ def test_removes_spurious_beta_backing_and_records_reason() -> None:
 
 
 def test_dry_run_reports_same_directed_intent_and_writes_nothing() -> None:
-    from imas_codex.standard_names.edit import remove_source_dd_path_backing
+    from iter_codex.standard_names.edit import remove_source_dd_path_backing
 
     graph = _SourceBackingGraph()
     before = graph.shape()
@@ -167,7 +167,7 @@ def test_dry_run_reports_same_directed_intent_and_writes_nothing() -> None:
 
 
 def test_refuses_missing_source_without_changing_relationship_count() -> None:
-    from imas_codex.standard_names.edit import remove_source_dd_path_backing
+    from iter_codex.standard_names.edit import remove_source_dd_path_backing
 
     graph = _SourceBackingGraph()
     before_count = graph.relationship_count()
@@ -183,7 +183,7 @@ def test_refuses_missing_source_without_changing_relationship_count() -> None:
 
 
 def test_refuses_missing_dd_path_without_changing_relationship_count() -> None:
-    from imas_codex.standard_names.edit import remove_source_dd_path_backing
+    from iter_codex.standard_names.edit import remove_source_dd_path_backing
 
     graph = _SourceBackingGraph()
     before_count = graph.relationship_count()
@@ -199,7 +199,7 @@ def test_refuses_missing_dd_path_without_changing_relationship_count() -> None:
 
 
 def test_refuses_absent_relationship_without_changing_relationship_count() -> None:
-    from imas_codex.standard_names.edit import remove_source_dd_path_backing
+    from iter_codex.standard_names.edit import remove_source_dd_path_backing
 
     graph = _SourceBackingGraph()
     before_count = graph.relationship_count()
@@ -215,7 +215,7 @@ def test_refuses_absent_relationship_without_changing_relationship_count() -> No
 
 
 def test_refuses_to_leave_source_unbacked_and_keeps_relationship() -> None:
-    from imas_codex.standard_names.edit import remove_source_dd_path_backing
+    from iter_codex.standard_names.edit import remove_source_dd_path_backing
 
     graph = _SourceBackingGraph()
     before_count = graph.relationship_count()
@@ -235,7 +235,7 @@ def test_refuses_to_leave_source_unbacked_and_keeps_relationship() -> None:
 def test_refuses_actively_claimed_source_without_changing_relationship_count(
     claim_field: str,
 ) -> None:
-    from imas_codex.standard_names.edit import remove_source_dd_path_backing
+    from iter_codex.standard_names.edit import remove_source_dd_path_backing
 
     graph = _SourceBackingGraph()
     graph.sources[_BETA_NORMAL_SOURCE][claim_field] = "active-claim"
@@ -252,7 +252,7 @@ def test_refuses_actively_claimed_source_without_changing_relationship_count(
 
 
 def test_success_leaves_exactly_one_backing_required_by_fold_guard() -> None:
-    from imas_codex.standard_names.edit import remove_source_dd_path_backing
+    from iter_codex.standard_names.edit import remove_source_dd_path_backing
 
     graph = _SourceBackingGraph()
 
@@ -266,8 +266,8 @@ def test_success_leaves_exactly_one_backing_required_by_fold_guard() -> None:
 
 
 def test_cli_exposes_required_reason_and_dry_run() -> None:
-    from imas_codex.cli.sn import sn
-    from imas_codex.standard_names.edit import remove_source_dd_path_backing
+    from iter_codex.cli.sn import sn
+    from iter_codex.standard_names.edit import remove_source_dd_path_backing
 
     graph = _SourceBackingGraph()
     before_count = graph.relationship_count()
@@ -276,7 +276,7 @@ def test_cli_exposes_required_reason_and_dry_run() -> None:
         return remove_source_dd_path_backing(source, dd_path, gc=graph, **kwargs)
 
     with patch(
-        "imas_codex.standard_names.edit.remove_source_dd_path_backing",
+        "iter_codex.standard_names.edit.remove_source_dd_path_backing",
         side_effect=_remove,
     ):
         result = CliRunner().invoke(

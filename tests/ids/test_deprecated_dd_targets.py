@@ -5,7 +5,7 @@ does not mean the configured Data Dictionary contains it.
 ``tf/coil/conductor/current/data`` was introduced in 3.22.0 and deprecated in
 3.42.0, so it is not part of a 4.1.1 mapping, while ``tf/coil/current/data`` is.
 One lifecycle predicate
-(:func:`imas_codex.ids.graph_ops.dd_path_live_at`) is applied at three points —
+(:func:`iter_codex.ids.graph_ops.dd_path_live_at`) is applied at three points —
 candidate retrieval, binding validation and the hand-off export — and the
 retired path must be excluded, refused and written unexpanded at each.
 """
@@ -17,17 +17,17 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from imas_codex.ids.graph_ops import dd_path_live_at
-from imas_codex.ids.mapping import validate_mappings
-from imas_codex.ids.models import (
+from iter_codex.ids.graph_ops import dd_path_live_at
+from iter_codex.ids.mapping import validate_mappings
+from iter_codex.ids.models import (
     EscalationSeverity,
     SignalMappingBatch,
     SignalMappingEntry,
     TargetAssignment,
     TargetAssignmentBatch,
 )
-from imas_codex.models.constants import SearchMode
-from imas_codex.search.search_strategy import SearchHit
+from iter_codex.models.constants import SearchMode
+from iter_codex.search.search_strategy import SearchHit
 
 DD_VERSION = "4.1.1"
 CONDUCTOR = "tf/coil/conductor/current/data"
@@ -119,17 +119,17 @@ class _FakeEncoder:
 
 
 def _candidates(monkeypatch):
-    from imas_codex.ids.candidates import retrieve_candidates
+    from iter_codex.ids.candidates import retrieve_candidates
 
     monkeypatch.setattr(
-        "imas_codex.embeddings.encoder.Encoder", _FakeEncoder, raising=True
+        "iter_codex.embeddings.encoder.Encoder", _FakeEncoder, raising=True
     )
 
     def fake_hybrid(gc, query, *, ids_filter=None, dd_version=None, k=20, **kwargs):
         return [_hit(CONDUCTOR, 0.9), _hit(COIL, 0.8)]
 
     monkeypatch.setattr(
-        "imas_codex.ids.candidates.hybrid_dd_search", fake_hybrid, raising=True
+        "iter_codex.ids.candidates.hybrid_dd_search", fake_hybrid, raising=True
     )
     return retrieve_candidates(
         {"src-1": "toroidal field coil current"},
@@ -195,9 +195,9 @@ def _validate(target_id: str):
     passing.all_passed = True
     passing.binding_checks = []
     with (
-        patch("imas_codex.ids.validation.validate_mapping", return_value=passing),
-        patch("imas_codex.ids.validation.check_coverage_threshold", return_value=[]),
-        patch("imas_codex.ids.tools.get_sign_flip_paths", return_value=set()),
+        patch("iter_codex.ids.validation.validate_mapping", return_value=passing),
+        patch("iter_codex.ids.validation.check_coverage_threshold", return_value=[]),
+        patch("iter_codex.ids.tools.get_sign_flip_paths", return_value=set()),
     ):
         return validate_mappings(
             "jt-60sa", "tf", DD_VERSION, _sections(), [_batch(target_id)], gc=_gc()
@@ -228,7 +228,7 @@ def test_live_path_passes_validation():
 
 
 def _build_handoff():
-    from imas_codex.ids.handoff import build_mapping_handoff
+    from iter_codex.ids.handoff import build_mapping_handoff
 
     mapping = {
         "mapping": {
@@ -237,7 +237,7 @@ def _build_handoff():
             "ids_name": "tf",
             "dd_version": DD_VERSION,
             "status": "generated",
-            "provider": "imas-codex",
+            "provider": "iter-codex",
         },
         "bindings": [
             {"source_id": "jt-60sa:tf:conductor", "target_id": CONDUCTOR},
@@ -284,7 +284,7 @@ def _build_handoff():
         return []
 
     gc.query.side_effect = _query
-    with patch("imas_codex.ids.handoff.search_existing_mappings", return_value=mapping):
+    with patch("iter_codex.ids.handoff.search_existing_mappings", return_value=mapping):
         return build_mapping_handoff("jt-60sa", ["tf"], gc=gc)
 
 
@@ -313,8 +313,8 @@ def test_live_path_is_expanded_in_the_export():
 
 @pytest.mark.graph
 def test_lifecycle_predicate_on_the_live_graph():
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.ids.graph_ops import dd_path_lifecycles
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.ids.graph_ops import dd_path_lifecycles
 
     with GraphClient() as gc:
         lifecycles = dd_path_lifecycles(gc, [CONDUCTOR, COIL], DD_VERSION)

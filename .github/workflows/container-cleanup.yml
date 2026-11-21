@@ -17,7 +17,7 @@ on:
 
 env:
   ACR_REGISTRY: crcommonallfrc.azurecr.io
-  IMAGE_NAME: iterorganization/imas-codex
+  IMAGE_NAME: iterorganization/iter-codex
 
 jobs:
   cleanup-rc-images:

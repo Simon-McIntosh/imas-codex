@@ -17,11 +17,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.definitions.physics import (
+from iter_codex.definitions.physics import (
     load_domain_guidance,
     load_isn_physics_domains,
 )
-from imas_codex.graph.dd_domain_classifier import (
+from iter_codex.graph.dd_domain_classifier import (
     CATEGORY_BEAM_MARGIN,
     CATEGORY_QUESTION,
     DOMAIN_QUESTION,
@@ -202,7 +202,7 @@ async def test_the_endpoint_is_shown_the_description_and_the_documentation() -> 
         domains={(category, PATH): (domain, {domain: 1.0})},
     )
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=scripted):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=scripted):
         await decide_domain_tree([gathered()], model="tree-model")
 
     assert scripted.calls, "the tree asked no question at all"
@@ -253,10 +253,10 @@ def test_category_options_follow_the_vocabulary_not_a_frozen_list(monkeypatch) -
         "ids": [],
     }
     monkeypatch.setattr(
-        "imas_codex.definitions.physics.load_isn_physics_domains", lambda: extended
+        "iter_codex.definitions.physics.load_isn_physics_domains", lambda: extended
     )
     monkeypatch.setattr(
-        "imas_codex.definitions.physics.load_domain_guidance",
+        "iter_codex.definitions.physics.load_domain_guidance",
         lambda: {
             "categories": {"sentinel_category_xyz": {"scope": "added upstream"}},
             "domains": {},
@@ -348,7 +348,7 @@ async def test_a_near_tie_asks_the_domain_question_in_both_categories() -> None:
         },
     )
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=scripted):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=scripted):
         decisions, _cost = await decide_domain_tree([gathered()], model="m")
 
     assert set(scripted.categories_asked) == {winner, runner_up}
@@ -380,7 +380,7 @@ async def test_a_clear_lead_asks_only_the_leading_category() -> None:
         },
     )
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=scripted):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=scripted):
         await decide_domain_tree([gathered()], model="m")
 
     assert scripted.categories_asked == [winner]
@@ -400,7 +400,7 @@ async def test_the_probability_is_the_product_of_the_two_levels() -> None:
         domains={(category, PATH): (domain, {domain: 0.4})},
     )
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=scripted):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=scripted):
         decisions, _cost = await decide_domain_tree([gathered()], model="m")
 
     decision = decisions[0]
@@ -436,7 +436,7 @@ async def test_a_near_tie_is_decided_by_the_best_product_not_the_best_category()
         },
     )
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=scripted):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=scripted):
         decisions, _cost = await decide_domain_tree([gathered()], model="m")
 
     decision = decisions[0]
@@ -505,8 +505,8 @@ async def test_a_path_below_the_threshold_goes_to_the_chat_classifier() -> None:
     low = tree_batch(category, domain, 0.5, 0.9)
     chat = chat_stub(reply="transport", cost=0.02)
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=low):
-        with patch("imas_codex.graph.dd_domain_classifier._classify_batch", new=chat):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=low):
+        with patch("iter_codex.graph.dd_domain_classifier._classify_batch", new=chat):
             results, _cost = await _classify_batch_tree(
                 [gathered()],
                 model="tree-model",
@@ -522,8 +522,8 @@ async def test_a_path_below_the_threshold_goes_to_the_chat_classifier() -> None:
 
     high = tree_batch(category, domain, 1.0, 0.95)
     chat = chat_stub(reply="transport")
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=high):
-        with patch("imas_codex.graph.dd_domain_classifier._classify_batch", new=chat):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=high):
+        with patch("iter_codex.graph.dd_domain_classifier._classify_batch", new=chat):
             results, _cost = await _classify_batch_tree(
                 [gathered()],
                 model="tree-model",
@@ -545,8 +545,8 @@ async def test_a_failed_jev_call_falls_back_to_chat() -> None:
     failed = ScriptedDecisions(categories={PATH: None})
     chat = chat_stub(reply="transport")
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=failed):
-        with patch("imas_codex.graph.dd_domain_classifier._classify_batch", new=chat):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=failed):
+        with patch("iter_codex.graph.dd_domain_classifier._classify_batch", new=chat):
             results, _cost = await _classify_batch_tree(
                 [gathered()],
                 model="tree-model",
@@ -576,8 +576,8 @@ async def test_a_failed_chat_call_leaves_the_path_for_tier_two() -> None:
 
     chat = AsyncMock(side_effect=_empty)
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=low):
-        with patch("imas_codex.graph.dd_domain_classifier._classify_batch", new=chat):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=low):
+        with patch("iter_codex.graph.dd_domain_classifier._classify_batch", new=chat):
             results, _cost = await _classify_batch_tree(
                 [gathered()],
                 model="tree-model",
@@ -603,8 +603,8 @@ async def test_costs_from_both_classifiers_reach_the_tracker() -> None:
     chat = chat_stub(cost=0.02)
     tracker = MagicMock()
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=low):
-        with patch("imas_codex.graph.dd_domain_classifier._classify_batch", new=chat):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=low):
+        with patch("iter_codex.graph.dd_domain_classifier._classify_batch", new=chat):
             _results, total = await _classify_batch_tree(
                 [gathered()],
                 model="tree-model",
@@ -626,7 +626,7 @@ async def test_classify_tier1_llm_reports_both_classifiers_costs() -> None:
     A run that spent on the tree and again on chat reports the summed spend, so
     the cost tracker records what the classification actually cost.
     """
-    from imas_codex.graph.dd_domain_classifier import classify_tier1_llm
+    from iter_codex.graph.dd_domain_classifier import classify_tier1_llm
 
     category = sorted(_category_options())[0]
     domain = sorted(_domain_options(category))[0]
@@ -635,8 +635,8 @@ async def test_classify_tier1_llm_reports_both_classifiers_costs() -> None:
     spent: list[float] = []
     gc = make_gc(context_row())
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=low):
-        with patch("imas_codex.graph.dd_domain_classifier._classify_batch", new=chat):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=low):
+        with patch("iter_codex.graph.dd_domain_classifier._classify_batch", new=chat):
             await classify_tier1_llm(
                 gc,
                 [{"id": PATH, "node_category": "quantity"}],
@@ -670,7 +670,7 @@ async def test_a_decision_is_read_from_under_its_question_name() -> None:
             0.005 * len(states),
         )
 
-    with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=flat):
+    with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=flat):
         decisions, _cost = await decide_domain_tree([gathered()], model="tree-model")
 
     assert decisions == [None], (

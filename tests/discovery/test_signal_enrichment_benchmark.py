@@ -177,7 +177,7 @@ async def test_normal_context_is_captured_without_enrichment_calls(tmp_path):
         patch.object(bench.parallel, "fetch_signal_code_refs", return_value={}),
         patch.object(bench.parallel, "_fetch_code_chunks", return_value=[]),
         patch(
-            "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+            "iter_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
     ):

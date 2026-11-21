@@ -27,7 +27,7 @@ def generate_schema_reference(force: bool = False) -> Path:
     """
     project_root = get_project_root()
     output_file = project_root / "agents" / "schema-reference.md"
-    schemas_dir = project_root / "imas_codex" / "schemas"
+    schemas_dir = project_root / "iter_codex" / "schemas"
 
     # Freshness check: skip if output is newer than all schema sources
     schema_files = [
@@ -51,7 +51,7 @@ def generate_schema_reference(force: bool = False) -> Path:
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
 
-    from imas_codex.graph.schema import GraphSchema
+    from iter_codex.graph.schema import GraphSchema
 
     facility_schema = GraphSchema(schemas_dir / "facility.yaml")
     dd_schema = GraphSchema(schemas_dir / "imas_dd.yaml")
@@ -95,7 +95,7 @@ def generate_schema_reference(force: bool = False) -> Path:
     lines.append("")
     lines.append(
         "This file is the auto-generated graph schema reference derived from the "
-        "LinkML schemas (`imas_codex/schemas/`). It is rebuilt during `uv sync` "
+        "LinkML schemas (`iter_codex/schemas/`). It is rebuilt during `uv sync` "
         "and gitignored. Use `get_graph_schema()` MCP tool for runtime introspection."
     )
 

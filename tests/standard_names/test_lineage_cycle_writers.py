@@ -7,9 +7,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import edit
-from imas_codex.standard_names.graph_store import graph_refinement
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import edit
+from iter_codex.standard_names.graph_store import graph_refinement
 
 pytestmark = pytest.mark.graph
 

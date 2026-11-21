@@ -68,11 +68,11 @@ def _call_merge(sources, mock_gc, *, force=False):
 
     mock_gc.query.side_effect = _query
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -91,17 +91,17 @@ def _call_reconcile(
     ]
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC,
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.mark_sources_stale"
+            "iter_codex.standard_names.graph_store.graph_source_bindings.mark_sources_stale"
         ) as mock_mark_stale,
     ):
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
         mock_mark_stale.return_value = len(stale_ids or [])
 
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             reconcile_standard_name_sources,
         )
 
@@ -297,15 +297,15 @@ class TestReconcileMarksStale:
         ]
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+                "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
             ) as MockGC,
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings.mark_sources_stale"
+                "iter_codex.standard_names.graph_store.graph_source_bindings.mark_sources_stale"
             ),
         ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 reconcile_standard_name_sources,
             )
 
@@ -330,7 +330,7 @@ class TestReconcileRunsAtTurnStart:
         """The turn phases list must begin with 'reconcile'."""
         # We don't need to execute the turn — just inspect the phase
         # ordering by checking that TURN_PHASES starts with 'reconcile'.
-        from imas_codex.standard_names.turn import TURN_PHASES
+        from iter_codex.standard_names.turn import TURN_PHASES
 
         assert TURN_PHASES[0] == "reconcile", (
             f"TURN_PHASES must start with 'reconcile', got {TURN_PHASES[0]!r}"
@@ -338,7 +338,7 @@ class TestReconcileRunsAtTurnStart:
 
     def test_reconcile_before_generate_in_turn_phases(self):
         """'reconcile' must appear before 'generate' is active in the phases tuple."""
-        from imas_codex.standard_names.turn import TURN_PHASES
+        from iter_codex.standard_names.turn import TURN_PHASES
 
         # generate is represented as 'extract'/'compose'/'validate'/'persist' in CLI
         # but the internal phase name is 'generate'.  TURN_PHASES lists the CLI names,
@@ -349,7 +349,7 @@ class TestReconcileRunsAtTurnStart:
 
     def test_reconcile_phase_key_in_only_mapping(self):
         """--only reconcile must map to the reconcile internal phase."""
-        from imas_codex.standard_names.turn import _ONLY_TO_ACTIVE
+        from iter_codex.standard_names.turn import _ONLY_TO_ACTIVE
 
         assert "reconcile" in _ONLY_TO_ACTIVE, (
             "'reconcile' must be a valid --only value"

@@ -12,7 +12,7 @@ import sys
 
 import click
 
-from imas_codex.search.document_store import DocumentStore
+from iter_codex.search.document_store import DocumentStore
 
 
 @click.command()

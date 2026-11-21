@@ -15,18 +15,18 @@ import json
 
 import pytest
 
-from imas_codex.discovery.base import llm
-from imas_codex.ids.candidates import (
+from iter_codex.discovery.base import llm
+from iter_codex.ids.candidates import (
     Candidate,
     PairJudgment,
     judge_candidates,
     route,
     route_ids,
 )
-from imas_codex.ids.mapping import PipelineCost
-from imas_codex.models.constants import SearchMode
-from imas_codex.search.search_strategy import SearchHit
-from imas_codex.settings import RouteThresholds, get_mapping_route_thresholds
+from iter_codex.ids.mapping import PipelineCost
+from iter_codex.models.constants import SearchMode
+from iter_codex.search.search_strategy import SearchHit
+from iter_codex.settings import RouteThresholds, get_mapping_route_thresholds
 
 MODEL = "typesafe/jev-1.13"
 COST = 2.0e-4
@@ -123,7 +123,7 @@ def test_state_carries_facility_source_and_candidate_blocks(monkeypatch):
 
 
 def test_malformed_answer_is_rejected(monkeypatch):
-    from imas_codex.discovery.base.llm import DecisionsValidationError
+    from iter_codex.discovery.base.llm import DecisionsValidationError
 
     def fake_post(headers, body, timeout):
         return _FakeResponse(
@@ -324,7 +324,7 @@ class _DocGraph:
 
 def _related_result(path: str, sibling_paths: list[str]):
     """A ``RelatedPathResult`` carrying ``sibling_paths`` as cluster hits."""
-    from imas_codex.graph.dd_search import RelatedPathHit, RelatedPathResult
+    from iter_codex.graph.dd_search import RelatedPathHit, RelatedPathResult
 
     return RelatedPathResult(
         path=path,
@@ -343,7 +343,7 @@ def _related_result(path: str, sibling_paths: list[str]):
 
 
 def _patch_related(monkeypatch, by_seed: dict[str, list[str]]):
-    from imas_codex.ids import candidates as cand
+    from iter_codex.ids import candidates as cand
 
     def fake_related(gc, path, *, relationship_types="all", dd_version=None):
         assert relationship_types == "cluster"
@@ -368,7 +368,7 @@ def _answering_post(captured: dict | None = None):
 def test_expansion_adds_cluster_siblings_with_the_cluster_arm_and_see_also(
     monkeypatch,
 ):
-    from imas_codex.ids import candidates as cand
+    from iter_codex.ids import candidates as cand
 
     siblings = [
         "equilibrium/time_slice/constraints/ip",
@@ -396,7 +396,7 @@ def test_expansion_adds_cluster_siblings_with_the_cluster_arm_and_see_also(
 
 
 def test_expansion_dedupes_shortlist_paths_and_caps_at_ten(monkeypatch):
-    from imas_codex.ids import candidates as cand
+    from iter_codex.ids import candidates as cand
 
     already = "equilibrium/p0"
     returned = [f"equilibrium/p{i}" for i in range(12)]
@@ -418,7 +418,7 @@ def test_expansion_dedupes_shortlist_paths_and_caps_at_ten(monkeypatch):
 
 
 def test_expansion_books_second_call_cost_to_the_cluster_step(monkeypatch):
-    from imas_codex.ids import candidates as cand
+    from iter_codex.ids import candidates as cand
 
     _patch_related(monkeypatch, {"magnetics/ip": ["equilibrium/time_slice/ip"]})
     monkeypatch.setattr(llm, "_post_decisions", _answering_post())
@@ -441,7 +441,7 @@ def test_expansion_fails_closed_when_the_second_call_fails(monkeypatch):
     """A failed second call must not fall back to the first-call candidates:
     the siblings exist but were never scored, so the whole expansion is None and
     the caller leaves the source unjudged."""
-    from imas_codex.ids import candidates as cand
+    from iter_codex.ids import candidates as cand
 
     _patch_related(monkeypatch, {"magnetics/ip": ["equilibrium/time_slice/ip"]})
     monkeypatch.setattr(llm, "_decisions_retryable", lambda error: False)

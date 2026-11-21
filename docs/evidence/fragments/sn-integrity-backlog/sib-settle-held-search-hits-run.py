@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 4482b241a1b3c7b3beffb1557156802d76f114a8, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.classify_sourceless_standard_names.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Settle each referred standard name whose unit-matching DD hit a live name holds.
@@ -26,7 +26,7 @@ self-reported confidence is at least ``CONFIDENCE_FLOOR``.
 Every graph write goes through ``apply_signed_manifest``: the authority is
 built by ``build_repair_authority``, previewed, and written under the preview's
 digest. The apply path itself calls the repository's own graph-activity probe
-inside ``imas_codex.graph.offsite`` immediately before the signed write and
+inside ``iter_codex.graph.offsite`` immediately before the signed write and
 refuses when the graph is not quiet, so a replayed write on a busy graph stops.
 
 Modes: read | judge | authority | preview | apply | readback | negcontrol |
@@ -46,10 +46,10 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from imas_codex.graph import GraphClient
-from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
-from imas_codex.standard_names.repair_authority import build_repair_authority
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph import GraphClient
+from iter_codex.standard_names.graph_ops import classify_sourceless_standard_names
+from iter_codex.standard_names.repair_authority import build_repair_authority
+from iter_codex.standard_names.signed_manifest import (
     apply_signed_manifest,
     signed_payload_sha256,
 )
@@ -520,8 +520,8 @@ def _state(detail: dict) -> dict:
 
 def judge() -> dict:
     """Put each name to the seat as one Choice whose options are its holders."""
-    from imas_codex.discovery.base.judgment import decide_batch
-    from imas_codex.settings import get_model
+    from iter_codex.discovery.base.judgment import decide_batch
+    from iter_codex.settings import get_model
 
     cohort = json.loads(COHORT_PATH.read_text())["cohort"]
     model = get_model("sn-judge")
@@ -695,7 +695,7 @@ def build_authority() -> dict:
 def _quiet_gate(probe=None) -> dict:
     """Refuse the signed write when another graph client is working.
 
-    ``live_graph_activity`` in ``imas_codex.graph.offsite`` owns this
+    ``live_graph_activity`` in ``iter_codex.graph.offsite`` owns this
     measurement: it runs every probe in one session, identifies its own
     transaction by the ``SHOW TRANSACTIONS`` query text, and subtracts the
     probes from the id gap. The apply path calls it here, immediately before
@@ -703,7 +703,7 @@ def _quiet_gate(probe=None) -> dict:
     racing a foreign writer. The probe is injectable so a run can show the
     refusal without planting a live writer.
     """
-    from imas_codex.graph.offsite import live_graph_activity
+    from iter_codex.graph.offsite import live_graph_activity
 
     observed = (probe or live_graph_activity)(window_seconds=6.0, interval_seconds=3.0)
     reading = {
@@ -855,7 +855,7 @@ def quiet_graph_check() -> dict:
     re-implemented, so the check cannot pass through a local filter that never
     matches.
     """
-    from imas_codex.graph.offsite import live_graph_activity
+    from iter_codex.graph.offsite import live_graph_activity
 
     live_dir = Path.home() / ".config" / "reckon" / "crew" / "live"
     runs = []
@@ -1055,8 +1055,8 @@ def negcontrol() -> dict:
     run shows the answer is not a ``same quantity as`` option and the pair is
     absent from the authority the floor builds.
     """
-    from imas_codex.discovery.base.judgment import decide_batch
-    from imas_codex.settings import get_model
+    from iter_codex.discovery.base.judgment import decide_batch
+    from iter_codex.settings import get_model
 
     planted_detail = {
         "id": "PLANTED-neutron_rate",
@@ -1478,7 +1478,7 @@ def compose() -> dict:
         f"<pre id='{node}-preview-pre'>{escape(json.dumps({'preview': preview, 'receipt': apply_receipt, 'quiet_gate': apply_receipt.get('quiet_gate')}, indent=1))}</pre>",
         f"<h3 id='{node}-quiet'>Quiet-graph probe (owner instrument)</h3>",
         f"<p id='{node}-quiet-note'>The apply path calls the repository's own probe in "
-        "<code>imas_codex.graph.offsite</code> immediately before the signed write and refuses "
+        "<code>iter_codex.graph.offsite</code> immediately before the signed write and refuses "
         "when the graph is busy. The refusal is shown below against an injected busy reading, "
         "so the guard is demonstrated to fire rather than merely present.</p>",
         f"<pre id='{node}-quiet-pre'>{escape(json.dumps(quiet, indent=1))}</pre>",
@@ -1500,7 +1500,7 @@ def compose() -> dict:
 
 def _stubbed_busy_probe(**_):
     """A busy reading, so ``quiet-refuse`` can show the gate refusing."""
-    from imas_codex.graph.offsite import GraphActivity
+    from iter_codex.graph.offsite import GraphActivity
 
     return GraphActivity(
         window_seconds=6.0,

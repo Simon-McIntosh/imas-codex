@@ -1,0 +1,700 @@
+"""Paths discovery command: Directory structure scanning and scoring."""
+
+from __future__ import annotations
+
+import logging
+import re
+from dataclasses import dataclass
+from pathlib import Path
+
+import click
+from rich.markup import escape
+from rich.panel import Panel
+from rich.text import Text
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class PathsStageOptions:
+    """Options shared by the paths command and the discovery sequence."""
+
+    focus: tuple[str, ...] = ()
+    topic: str | None = None
+    cost_limit: float = 10.0
+    limit: int | None = None
+    threshold: float | None = None
+    scan_workers: int = 1
+    triage_workers: int = 2
+    scan_only: bool = False
+    flush: bool = False
+    rejudge_stale: bool = False
+    add_roots: bool = False
+    enrich_threshold: float | None = None
+    reset_to: str | None = None
+    time_limit: int | None = None
+    triage_batch_size: int | None = None
+
+
+def _focus_roots(items: tuple[str, ...]) -> list[str] | None:
+    """Expand path items and newline-separated manifest files into roots."""
+    roots: list[str] = []
+    for item in items:
+        path = Path(item)
+        if path.is_file():
+            roots.extend(
+                line.strip()
+                for line in path.read_text().splitlines()
+                if line.strip() and not line.lstrip().startswith("#")
+            )
+        else:
+            roots.append(item)
+    return roots or None
+
+
+def run_paths_stage(facility: str, options: PathsStageOptions) -> None:
+    """Run path discovery with the requested seed and drain halves."""
+    from iter_codex.settings import get_path_scan_threshold
+
+    if options.scan_only and options.flush:
+        raise click.UsageError("--scan-only and --flush are mutually exclusive")
+    if options.flush and options.add_roots:
+        raise click.UsageError("--flush and --add-roots are mutually exclusive")
+
+    root_filter = _focus_roots(options.focus)
+    if options.rejudge_stale:
+        import asyncio
+
+        from iter_codex.discovery.paths.scorer import rejudge_stale_paths
+
+        if (
+            not root_filter
+            or len(root_filter) != 1
+            or options.reset_to
+            or options.add_roots
+            or options.scan_only
+            or options.flush
+        ):
+            raise click.UsageError(
+                "--rejudge-stale requires exactly one --focus path and no reset, add-roots or scan-only"
+            )
+        count, spent = asyncio.run(
+            rejudge_stale_paths(facility, root_filter[0], limit=options.limit or 25)
+        )
+        click.echo(f"Re-judged {count} paths from stored evidence (${spent:.6f})")
+        return
+
+    _run_iterative_discovery(
+        facility=facility,
+        budget=options.cost_limit,
+        path_limit=options.limit,
+        focus=options.topic,
+        threshold=(
+            options.threshold
+            if options.threshold is not None
+            else get_path_scan_threshold()
+        ),
+        num_scan_workers=options.scan_workers,
+        num_triage_workers=options.triage_workers,
+        scan_only=options.scan_only,
+        triage_only=options.flush,
+        root_filter=root_filter,
+        add_roots=options.add_roots,
+        enrich_threshold=options.enrich_threshold,
+        reset_to=options.reset_to,
+        timeout_minutes=options.time_limit,
+        triage_batch_size=options.triage_batch_size,
+    )
+
+
+# =============================================================================
+# Internal Implementation
+# =============================================================================
+
+
+def _run_iterative_discovery(
+    facility: str,
+    budget: float,
+    path_limit: int | None,
+    focus: str | None,
+    threshold: float,
+    num_scan_workers: int = 1,
+    num_triage_workers: int = 3,
+    scan_only: bool = False,
+    triage_only: bool = False,
+    root_filter: list[str] | None = None,
+    add_roots: bool = False,
+    enrich_threshold: float | None = None,
+    reset_to: str | None = None,
+    timeout_minutes: int | None = None,
+    triage_batch_size: int | None = None,
+) -> None:
+    """Run parallel scan/triage/score discovery."""
+    import time as time_module
+
+    from iter_codex.cli.discover.common import (
+        DiscoveryConfig,
+        make_log_print,
+        run_discovery,
+        setup_logging,
+        use_rich_output,
+    )
+    from iter_codex.discovery import (
+        get_discovery_stats,
+        seed_facility_roots,
+    )
+    from iter_codex.discovery.base.facility import get_facility
+    from iter_codex.settings import get_model
+
+    # Compute deadline from timeout
+    start_time = time_module.time()
+    deadline: float | None = None
+    if timeout_minutes is not None:
+        deadline = start_time + (timeout_minutes * 60)
+
+    use_rich = use_rich_output()
+    console = setup_logging("paths", facility, use_rich)
+    log_print = make_log_print("paths", console)
+
+    disc_logger = logging.getLogger("iter_codex.discovery")
+    if not use_rich:
+        disc_logger.setLevel(logging.INFO)
+
+    # Read graph counts to decide whether seeding is needed.
+    stats = get_discovery_stats(facility)
+
+    # Handle --add-roots flag
+    if add_roots:
+        log_print("[cyan]Checking for missing discovery_roots...[/cyan]")
+        seeded = seed_facility_roots(facility)
+        if seeded > 0:
+            log_print(f"[green]Added {seeded} new root path(s) from config[/green]")
+        else:
+            log_print("[dim]All discovery_roots already in graph[/dim]")
+        stats = get_discovery_stats(facility)
+
+    # Handle --reset-to flag
+    if reset_to:
+        from iter_codex.discovery.base.reset import PATH_RESET_SPECS, reset_to_status
+
+        spec = PATH_RESET_SPECS[reset_to]
+        reset_count = reset_to_status(spec, facility, path_prefixes=root_filter)
+        scope = f" (root: {', '.join(root_filter)})" if root_filter else ""
+        if reset_count > 0:
+            log_print(
+                f"[green]Reset {reset_count} path(s) to '{reset_to}'{scope} for reprocessing[/green]"
+            )
+        else:
+            log_print(f"[dim]No paths to reset to '{reset_to}'{scope}[/dim]")
+        stats = get_discovery_stats(facility)
+
+    # Handle targeted discovery under named paths.
+    if root_filter:
+        log_print(f"[cyan]Targeted discovery: {len(root_filter)} root(s)[/cyan]")
+        for r in root_filter:
+            log_print(f"  • {r}")
+        if not triage_only:
+            seeded = seed_facility_roots(facility, root_paths=root_filter)
+            if seeded > 0:
+                log_print(f"[green]Added {seeded} new root path(s)[/green]")
+            stats = get_discovery_stats(facility)
+    elif stats["total"] == 0:
+        if triage_only:
+            log_print("[red]Error: --flush requires existing paths in the graph.[/red]")
+            log_print(
+                f"[yellow]Run 'iter-codex discover {facility} --only paths' or "
+                "'--scan-only' first to populate the graph.[/yellow]"
+            )
+            raise SystemExit(1)
+        log_print(f"[cyan]Seeding root paths for {facility}...[/cyan]")
+        seed_facility_roots(facility)
+        stats = get_discovery_stats(facility)
+
+    if triage_only and stats.get("scanned", 0) == 0:
+        log_print(
+            "[yellow]Warning: No 'scanned' paths available for triaging.[/yellow]"
+        )
+        log_print("Checking for already-triaged paths to expand...")
+
+    # Adjust worker counts based on mode flags
+    effective_scan_workers = 0 if triage_only else num_scan_workers
+    effective_triage_workers = 0 if scan_only else num_triage_workers
+
+    # Get model name for display
+    model_name = get_model("discovery-triage")
+    if model_name.startswith("anthropic/"):
+        model_name = model_name[len("anthropic/") :]
+
+    # Display mode
+    mode_str = ""
+    if scan_only:
+        mode_str = " [bold cyan](SCAN ONLY)[/bold cyan]"
+    elif triage_only:
+        mode_str = " [bold green](DRAIN ONLY)[/bold green]"
+
+    log_print(
+        f"[bold]Starting parallel discovery for {facility.upper()}[/bold]{mode_str}"
+    )
+    if not scan_only:
+        log_print(f"Cost limit: ${budget:.2f}")
+    if path_limit:
+        log_print(f"Path limit: {path_limit}")
+    if timeout_minutes is not None:
+        log_print(f"Time limit: {timeout_minutes} min")
+    if not scan_only:
+        log_print(f"Model: {model_name}")
+
+    # Build worker count display showing actual worker types.
+    # Defaults from run_parallel_discovery for workers not exposed via CLI:
+    num_expand = 0 if triage_only else 1
+    num_enrich = 0 if scan_only else 2
+    num_score = 0 if scan_only else 1
+
+    worker_parts = []
+    if not triage_only and effective_scan_workers > 0:
+        worker_parts.append(f"{effective_scan_workers} scan")
+        worker_parts.append(f"{num_expand} expand")
+    if not scan_only and effective_triage_workers > 0:
+        worker_parts.append(f"{effective_triage_workers} triage")
+    if not scan_only:
+        worker_parts.append(f"{num_enrich} enrich")
+        worker_parts.append(f"{num_score} score")
+        worker_parts.append("1 dedup")
+        worker_parts.append("1 embed")
+    log_print(f"Workers: {', '.join(worker_parts)}")
+    if focus and not scan_only:
+        log_print(f"Focus: {focus}")
+
+    # Run the async discovery loop via the unified harness.
+    from iter_codex.discovery.paths.parallel import run_parallel_discovery
+
+    try:
+        scored_this_run: set[str] = set()
+        enrichment_aggregates: dict = {}
+
+        # Build display for rich mode
+        display = None
+        if use_rich:
+            from iter_codex.discovery.paths.progress import ParallelProgressDisplay
+
+            display = ParallelProgressDisplay(
+                facility=facility,
+                cost_limit=budget,
+                path_limit=path_limit,
+                model=model_name,
+                console=console,
+                focus=focus or "",
+                scan_only=scan_only,
+                triage_only=triage_only,
+            )
+
+        facility_config = get_facility(facility)
+
+        disc_config = DiscoveryConfig(
+            domain="paths",
+            facility=facility,
+            facility_config=facility_config,
+            model_section="discovery-triage",
+            display=display,
+            check_graph=True,
+            check_embed=not scan_only,
+            check_model=not scan_only,
+            check_ssh=bool(effective_scan_workers or num_expand or num_enrich),
+            check_auth=False,
+        )
+
+        # Callbacks — wire to display or logging
+        if display:
+
+            def on_scan(msg, stats, paths=None, scan_results=None):
+                display.update_scan(msg, stats, paths=paths, scan_results=scan_results)
+
+            def on_expand(msg, stats, paths=None, scan_results=None):
+                display.update_expand(
+                    msg, stats, paths=paths, scan_results=scan_results
+                )
+
+            def on_triage(msg, stats, results=None):
+                display.update_triage(msg, stats, results=results)
+
+            def on_enrich(msg, stats, results=None):
+                display.update_enrich(msg, stats, results=results)
+
+            def on_score(msg, stats, results=None):
+                display.update_score(msg, stats, results=results)
+
+            def on_dedup(msg, stats, results=None):
+                display.update_dedup(msg, stats, results=results)
+
+            def on_worker_status(worker_group):
+                display.update_worker_status(worker_group)
+        else:
+
+            def on_scan(msg, stats, paths=None, scan_results=None):
+                if scan_results and len(scan_results) > 0:
+                    disc_logger.info(
+                        f"SCAN batch: {len(scan_results)} paths, "
+                        f"total: {stats.processed}, rate: {stats.rate:.1f}/s"
+                    )
+
+            on_expand = None
+
+            def on_triage(msg, stats, results=None):
+                if results and len(results) > 0:
+                    for r in results:
+                        if r.get("path"):
+                            scored_this_run.add(r["path"])
+                    disc_logger.info(
+                        f"TRIAGE batch: {len(results)} paths, "
+                        f"total: {stats.processed}, cost: ${stats.cost:.3f}"
+                    )
+
+            on_enrich = None
+            on_score = None
+            on_dedup = None
+            on_worker_status = None
+
+        async def async_main(stop_event, service_monitor):
+            return await run_parallel_discovery(
+                facility=facility,
+                cost_limit=budget,
+                path_limit=path_limit,
+                focus=focus,
+                threshold=threshold,
+                root_filter=root_filter,
+                auto_enrich_threshold=enrich_threshold,
+                num_scan_workers=effective_scan_workers,
+                num_expand_workers=num_expand,
+                num_triage_workers=effective_triage_workers,
+                num_enrich_workers=num_enrich,
+                num_score_workers=num_score,
+                **(
+                    {
+                        "triage_batch_size": triage_batch_size,
+                    }
+                    if triage_batch_size is not None
+                    else {}
+                ),
+                on_scan_progress=on_scan,
+                on_expand_progress=on_expand,
+                on_triage_progress=on_triage,
+                on_enrich_progress=on_enrich,
+                on_score_progress=on_score,
+                on_dedup_progress=on_dedup,
+                on_worker_status=on_worker_status,
+                deadline=deadline,
+                stop_event=stop_event,
+            )
+
+        def on_complete(result):
+            nonlocal scored_this_run, enrichment_aggregates
+            if display:
+                try:
+                    display.refresh_from_graph(facility)
+                except Exception:
+                    pass
+                scored_this_run = display.get_paths_scored_this_run()
+                enrichment_aggregates = display.get_enrichment_aggregates()
+
+        result = run_discovery(disc_config, async_main, on_complete=on_complete)
+
+        # Build full result dict
+        full_result = {
+            "cycles": 1,
+            "scanned": result["scanned"],
+            "scored": result["scored"],
+            "expanded": result.get("expanded", 0),
+            "enriched": result.get("enriched", 0),
+            "triaged": result.get("triaged", 0),
+            "cost": result["cost"],
+            "elapsed_seconds": result["elapsed_seconds"],
+            "scan_rate": result.get("scan_rate"),
+            "triage_rate": result.get("triage_rate"),
+            "score_rate": result.get("score_rate"),
+            "enrichment_aggregates": enrichment_aggregates,
+        }
+
+        _print_discovery_summary(
+            console, facility, full_result, scored_this_run, scan_only=scan_only
+        )
+
+    except KeyboardInterrupt:
+        log_print("\n[yellow]Discovery interrupted by user[/yellow]")
+        from iter_codex.remote.executor import cleanup_ssh_on_exit
+
+        cleanup_ssh_on_exit()
+        raise SystemExit(130) from None
+    except Exception as e:
+        log_print(f"\n[red]Error: {e}[/red]")
+        raise SystemExit(1) from e
+
+
+def _print_discovery_summary(
+    console,
+    facility: str,
+    result: dict,
+    scored_this_run: set[str] | None = None,
+    scan_only: bool = False,
+) -> None:
+    """Print detailed discovery summary with statistics."""
+    from iter_codex.discovery import get_discovery_stats
+    from iter_codex.discovery.paths.frontier import (
+        get_accumulated_cost,
+        get_high_value_paths,
+    )
+
+    _ansi_pattern = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
+
+    def clean_text(text: str) -> str:
+        return escape(_ansi_pattern.sub("", text))
+
+    disc_logger = logging.getLogger("iter_codex.discovery")
+
+    # Get final graph stats
+    stats = get_discovery_stats(facility)
+    coverage = stats["scored"] / stats["total"] * 100 if stats["total"] > 0 else 0
+    elapsed = result.get("elapsed_seconds", 0)
+
+    if elapsed >= 3600:
+        hours, rem = divmod(int(elapsed), 3600)
+        mins = rem // 60
+        elapsed_str = f"{hours}h {mins:02d}m" if mins else f"{hours}h"
+    elif elapsed >= 60:
+        mins, secs = divmod(int(elapsed), 60)
+        elapsed_str = f"{mins}m {secs:02d}s" if secs else f"{mins}m"
+    else:
+        elapsed_str = f"{int(elapsed)}s"
+
+    scan_rate = result.get("scan_rate")
+    triage_rate = result.get("triage_rate")
+
+    # Non-rich mode: log simple summary
+    if console is None:
+        disc_logger.info(
+            f"Discovery complete: scanned={result['scanned']}, "
+            f"scored={result['scored']}, cost=${result['cost']:.3f}, "
+            f"elapsed={elapsed_str}"
+        )
+        disc_logger.info(
+            f"Graph state: total={stats['total']}, scored={stats['scored']} "
+            f"({coverage:.1f}%), pending={stats.get('pending', 0)}"
+        )
+        return
+
+    # Rich mode: use panels
+    console.print()
+
+    facility_upper = facility.upper()
+    summary = Text()
+    panel_width = console.width or 100
+
+    # Row 1: SCAN stats
+    scanned = result["scanned"]
+    expanded = result.get("expanded", 0)
+    enriched = result.get("enriched", 0)
+    summary.append("  SCAN  ", style="bold blue")
+    summary.append(f"scanned={scanned:,}", style="white")
+    summary.append(f"  expanded={expanded:,}", style="white")
+    summary.append(f"  enriched={enriched:,}", style="white")
+    if scan_rate:
+        summary.append(f"  {scan_rate:.1f}/s", style="dim")
+    summary.append("\n")
+
+    # Row 2: SCORE stats
+    if not scan_only:
+        scored = result["scored"]
+        cost = result.get("cost", 0.0)
+        triaged = result.get("triaged", 0)
+        summary.append("  TRIAGE ", style="bold green")
+        summary.append(f"triaged={triaged:,}", style="white")
+        summary.append(f"  scored={scored:,}", style="white")
+        summary.append(f"  cost=${cost:.3f}", style="yellow")
+        if triage_rate:
+            summary.append(f"  {triage_rate:.1f}/s", style="dim")
+        summary.append("\n")
+
+    # Row 3: ENRICH stats
+    enrichment_aggs = result.get("enrichment_aggregates", {})
+    if enrichment_aggs and (
+        enrichment_aggs.get("total_bytes", 0) > 0
+        or enrichment_aggs.get("total_lines", 0) > 0
+    ):
+        total_bytes = enrichment_aggs.get("total_bytes", 0)
+        total_lines = enrichment_aggs.get("total_lines", 0)
+        multiformat = enrichment_aggs.get("multiformat_count", 0)
+        pattern_cats = enrichment_aggs.get("pattern_categories", {})
+
+        def fmt_bytes(b: int) -> str:
+            if b >= 1_000_000_000:
+                return f"{b / 1_000_000_000:.1f}GB"
+            if b >= 1_000_000:
+                return f"{b / 1_000_000:.1f}MB"
+            if b >= 1_000:
+                return f"{b / 1_000:.1f}KB"
+            return f"{b}B"
+
+        def fmt_lines(ln: int) -> str:
+            if ln >= 1_000_000:
+                return f"{ln / 1_000_000:.1f}M"
+            if ln >= 1_000:
+                return f"{ln / 1_000:.1f}K"
+            return str(ln)
+
+        summary.append("  ENRICH", style="bold magenta")
+        summary.append(f"  size={fmt_bytes(total_bytes)}", style="white")
+        summary.append(f"  LOC={fmt_lines(total_lines)}", style="white")
+        if multiformat:
+            summary.append(f"  multiformat={multiformat}", style="cyan")
+
+        if pattern_cats:
+            top_cats = sorted(pattern_cats.items(), key=lambda x: x[1], reverse=True)[
+                :4
+            ]
+            cat_strs = [f"{cat}={count}" for cat, count in top_cats]
+            summary.append(f"  patterns: {', '.join(cat_strs)}", style="dim")
+        summary.append("\n")
+
+    # Row 4: USAGE
+    summary.append("  USAGE ", style="bold cyan")
+    summary.append(f"time={elapsed_str}", style="white")
+    if not scan_only:
+        cost_data = get_accumulated_cost(facility)
+        total_cost = cost_data.get("total_cost", 0.0)
+        summary.append(f"  total_cost=${total_cost:.2f}", style="yellow")
+
+    # Title based on mode
+    if scan_only:
+        title = f"[bold blue]{facility_upper} Scan Complete[/bold blue]"
+        border = "blue"
+    else:
+        title = f"[bold green]{facility_upper} Discovery Complete[/bold green]"
+        border = "green"
+
+    console.print(
+        Panel(
+            summary,
+            title=title,
+            border_style=border,
+            width=panel_width,
+        )
+    )
+
+    # Show high-value paths found IN THIS RUN only
+    if scan_only:
+        console.print()
+        console.print(
+            f"[dim]Next step: Run 'iter-codex discover {facility} --only paths --flush' "
+            "to score listed paths.[/dim]"
+        )
+        return
+
+    from iter_codex.settings import get_path_scan_threshold
+
+    all_high_value = get_high_value_paths(
+        facility, min_score=get_path_scan_threshold(), limit=200
+    )
+
+    if scored_this_run:
+        high_value = [p for p in all_high_value if p["path"] in scored_this_run]
+    else:
+        high_value = all_high_value
+
+    if not high_value:
+        return
+
+    score_categories = {
+        "score_modeling_code": "Modeling Code",
+        "score_analysis_code": "Analysis Code",
+        "score_operations_code": "Operations Code",
+        "score_modeling_data": "Modeling Data",
+        "score_experimental_data": "Experimental Data",
+        "score_data_access": "Data Access",
+        "score_workflow": "Workflow",
+        "score_visualization": "Visualization",
+        "score_documentation": "Documentation",
+        "score_imas": "IMAS",
+    }
+    category_order = list(score_categories.keys())
+
+    by_category: dict[str, list] = {cat: [] for cat in category_order}
+
+    for p in high_value:
+        max_cat = None
+        max_score = 0.0
+        for cat in category_order:
+            cat_score = p.get(cat) or 0.0
+            if cat_score > max_score:
+                max_score = cat_score
+                max_cat = cat
+        if max_cat is None:
+            # All dimension scores are 0 — fall back to path_purpose
+            purpose = p.get("path_purpose", "")
+            purpose_key = f"score_{purpose}"
+            if purpose_key in score_categories:
+                max_cat = purpose_key
+            else:
+                max_cat = category_order[0]
+        by_category[max_cat].append(p)
+
+    console.print()
+    console.print(f"[bold]High-value paths this run ({len(high_value)}):[/bold]")
+
+    def clip_path_inner(path: str, max_len: int) -> str:
+        if len(path) <= max_len:
+            return path
+        keep_start = max_len // 3
+        keep_end = max_len - keep_start - 5
+        return f"{path[:keep_start]}/.../{path[-keep_end:]}"
+
+    for cat_key in category_order:
+        cat_paths = by_category.get(cat_key, [])
+        if not cat_paths:
+            continue
+
+        sorted_paths = sorted(
+            cat_paths,
+            key=lambda p: p.get(cat_key) or p.get("score") or 0.0,
+            reverse=True,
+        )
+
+        cat_name = score_categories[cat_key]
+        console.print(f"  [bold cyan]{cat_name}[/bold cyan] ({len(sorted_paths)})")
+
+        for p in sorted_paths[:3]:
+            cat_score = p.get(cat_key) or p.get("score") or 0.0
+            path = p.get("path", "")
+            description = p.get("description", "")
+            should_expand = p.get("should_expand", True)
+            terminal_reason = p.get("terminal_reason", "")
+
+            max_path_len = 70 if terminal_reason else 88
+            clipped_path = clip_path_inner(path, max_path_len)
+
+            if cat_score >= 1.0:
+                score_style = "bold green"
+            elif cat_score >= 0.8:
+                score_style = "green"
+            else:
+                score_style = "yellow"
+
+            path_line = (
+                f"    [{score_style}]{cat_score:.2f}[/{score_style}] "
+                f"{clean_text(clipped_path)}"
+            )
+            if terminal_reason:
+                reason_display = terminal_reason.replace("_", " ")
+                path_line += f" [magenta]{reason_display}[/magenta]"
+            elif not should_expand:
+                path_line += " [magenta]terminal[/magenta]"
+
+            reason = description[:80] + "..." if len(description) > 80 else description
+
+            console.print(path_line, highlight=False)
+            if reason:
+                console.print(
+                    f"         [dim]{clean_text(reason)}[/dim]", highlight=False
+                )
+
+        remaining = len(sorted_paths) - 3
+        if remaining > 0:
+            console.print(f"    [dim]... +{remaining} more[/dim]")

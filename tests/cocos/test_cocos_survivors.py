@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.cocos import (
+from iter_codex.cocos import (
     SignObservation,
     ValidationResult,
     dd_cocos_class,
@@ -108,7 +108,7 @@ def mock_dd_graph(
     monkeypatch: pytest.MonkeyPatch, labels: dict[str, str]
 ) -> list[list[str]]:
     """Supply graph labels while retaining the query's requested path prefixes."""
-    from imas_codex.graph import client
+    from iter_codex.graph import client
 
     calls: list[list[str]] = []
 

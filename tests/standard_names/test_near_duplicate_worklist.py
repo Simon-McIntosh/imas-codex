@@ -5,8 +5,8 @@ from __future__ import annotations
 import asyncio
 import math
 
-from imas_codex.standard_names.audits import synonym_check
-from imas_codex.standard_names.near_duplicates import build_worklist, judge_worklist
+from iter_codex.standard_names.audits import synonym_check
+from iter_codex.standard_names.near_duplicates import build_worklist, judge_worklist
 
 
 def _name(name: str, unit: str, vector: list[float]) -> dict:
@@ -74,7 +74,7 @@ def test_worklist_filters_units_threshold_and_groups_overlaps(monkeypatch):
             for _ in states
         ], 0.006
 
-    monkeypatch.setattr("imas_codex.standard_names.near_duplicates.decide_batch", stub)
+    monkeypatch.setattr("iter_codex.standard_names.near_duplicates.decide_batch", stub)
     judged, cost = asyncio.run(
         judge_worklist(worklist["west"] + worklist["other"], model="seat-model")
     )

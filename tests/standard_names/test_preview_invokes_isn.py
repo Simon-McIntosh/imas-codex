@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.preview import PreviewHandle, run_preview
+from iter_codex.standard_names.preview import PreviewHandle, run_preview
 
 
 @pytest.fixture()
@@ -30,7 +30,7 @@ def staging_dir(tmp_path: Path) -> Path:
 class TestRunPreview:
     """``run_preview`` delegates to ISN's ``standard-names serve`` subcommand."""
 
-    @patch("imas_codex.standard_names.preview.subprocess.Popen")
+    @patch("iter_codex.standard_names.preview.subprocess.Popen")
     def test_invokes_isn_serve_command(
         self, mock_popen: MagicMock, staging_dir: Path
     ) -> None:
@@ -50,7 +50,7 @@ class TestRunPreview:
         assert "--host" in cmd
         assert "127.0.0.1" in cmd
 
-    @patch("imas_codex.standard_names.preview.subprocess.Popen")
+    @patch("iter_codex.standard_names.preview.subprocess.Popen")
     def test_custom_port(self, mock_popen: MagicMock, staging_dir: Path) -> None:
         mock_popen.return_value = MagicMock()
 
@@ -61,7 +61,7 @@ class TestRunPreview:
         assert "9090" in cmd
         assert handle.url == "http://127.0.0.1:9090"
 
-    @patch("imas_codex.standard_names.preview.subprocess.Popen")
+    @patch("iter_codex.standard_names.preview.subprocess.Popen")
     def test_custom_host(self, mock_popen: MagicMock, staging_dir: Path) -> None:
         mock_popen.return_value = MagicMock()
 
@@ -72,14 +72,14 @@ class TestRunPreview:
         assert "0.0.0.0" in cmd
         assert handle.url == "http://0.0.0.0:8000"
 
-    @patch("imas_codex.standard_names.preview.subprocess.Popen")
+    @patch("iter_codex.standard_names.preview.subprocess.Popen")
     def test_default_port_url(self, mock_popen: MagicMock, staging_dir: Path) -> None:
         mock_popen.return_value = MagicMock()
 
         handle = run_preview(staging_dir)
         assert handle.url == "http://127.0.0.1:8000"
 
-    @patch("imas_codex.standard_names.preview.subprocess.Popen")
+    @patch("iter_codex.standard_names.preview.subprocess.Popen")
     def test_returns_handle(self, mock_popen: MagicMock, staging_dir: Path) -> None:
         mock_popen.return_value = MagicMock()
 
@@ -107,7 +107,7 @@ class TestRunPreview:
         with pytest.raises(FileNotFoundError, match="standard_names"):
             run_preview(staging)
 
-    @patch("imas_codex.standard_names.preview.subprocess.Popen")
+    @patch("iter_codex.standard_names.preview.subprocess.Popen")
     def test_stop_terminates_process(
         self, mock_popen: MagicMock, staging_dir: Path
     ) -> None:
@@ -120,7 +120,7 @@ class TestRunPreview:
         mock_process.terminate.assert_called_once()
 
     @patch(
-        "imas_codex.standard_names.preview.subprocess.Popen",
+        "iter_codex.standard_names.preview.subprocess.Popen",
         side_effect=FileNotFoundError("standard-names not found"),
     )
     def test_missing_cli_raises_importerror(

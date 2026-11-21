@@ -40,7 +40,7 @@ def test_missing_credential_explicit_graph_selection_exits_not_run(
 ) -> None:
     _install_project_conftest(pytester, credential_configured=False)
     _write_mixed_test_file(pytester)
-    monkeypatch.delenv("IMAS_CODEX_TEST_NEO4J_URI", raising=False)
+    monkeypatch.delenv("ITER_CODEX_TEST_NEO4J_URI", raising=False)
 
     result = pytester.runpytest_subprocess("-m", "graph", "-q")
 
@@ -55,7 +55,7 @@ def test_default_credentialless_selection_stays_green(
 ) -> None:
     _install_project_conftest(pytester, credential_configured=False)
     _write_mixed_test_file(pytester)
-    monkeypatch.delenv("IMAS_CODEX_TEST_NEO4J_URI", raising=False)
+    monkeypatch.delenv("ITER_CODEX_TEST_NEO4J_URI", raising=False)
 
     result = pytester.runpytest_subprocess("-m", "not slow and not graph", "-q")
 

@@ -13,8 +13,8 @@ from __future__ import annotations
 from typing import Any
 from unittest.mock import MagicMock
 
-import imas_codex.standard_names.graph_ops as graph_ops
-from imas_codex.standard_names.graph_store import (
+import iter_codex.standard_names.graph_ops as graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_parent_lifecycle as _owning_graph_parent_lifecycle,
 )
 

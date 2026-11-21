@@ -8,7 +8,7 @@ import yaml
 from imas_standard_names.models import create_standard_name_entry
 from imas_standard_names.yaml_store import YamlStore
 
-from imas_codex.standard_names.export import _write_domain_yaml
+from iter_codex.standard_names.export import _write_domain_yaml
 
 
 def test_domain_export_uses_review_friendly_yaml_and_round_trips(

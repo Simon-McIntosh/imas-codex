@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from imas_codex.ingestion.search import ChunkSearchResult, search_code_chunks
+from iter_codex.ingestion.search import ChunkSearchResult, search_code_chunks
 
 
 class TestChunkSearchResult:
@@ -39,8 +39,8 @@ class TestChunkSearchResult:
 
 
 class TestSearchCodeChunks:
-    @patch("imas_codex.ingestion.search.GraphClient")
-    @patch("imas_codex.ingestion.search.Encoder")
+    @patch("iter_codex.ingestion.search.GraphClient")
+    @patch("iter_codex.ingestion.search.Encoder")
     def test_basic_search(self, mock_encoder_cls, mock_gc_cls):
         encoder = MagicMock()
         encoder.embed_texts.return_value = np.array([[0.1, 0.2, 0.3]])
@@ -70,8 +70,8 @@ class TestSearchCodeChunks:
         assert results[0].score == 0.9
         encoder.embed_texts.assert_called_once_with(["equilibrium solver"])
 
-    @patch("imas_codex.ingestion.search.GraphClient")
-    @patch("imas_codex.ingestion.search.Encoder")
+    @patch("iter_codex.ingestion.search.GraphClient")
+    @patch("iter_codex.ingestion.search.Encoder")
     def test_min_score_filtering(self, mock_encoder_cls, mock_gc_cls):
         encoder = MagicMock()
         encoder.embed_texts.return_value = np.array([[0.1, 0.2, 0.3]])
@@ -109,8 +109,8 @@ class TestSearchCodeChunks:
         assert len(results) == 1
         assert results[0].chunk_id == "b"
 
-    @patch("imas_codex.ingestion.search.GraphClient")
-    @patch("imas_codex.ingestion.search.Encoder")
+    @patch("iter_codex.ingestion.search.GraphClient")
+    @patch("iter_codex.ingestion.search.Encoder")
     def test_facility_filter(self, mock_encoder_cls, mock_gc_cls):
         encoder = MagicMock()
         encoder.embed_texts.return_value = np.array([[0.1, 0.2]])
@@ -129,8 +129,8 @@ class TestSearchCodeChunks:
         assert "node.facility_id = $facility" in cypher
         assert call_args[1]["facility"] == "tcv"
 
-    @patch("imas_codex.ingestion.search.GraphClient")
-    @patch("imas_codex.ingestion.search.Encoder")
+    @patch("iter_codex.ingestion.search.GraphClient")
+    @patch("iter_codex.ingestion.search.Encoder")
     def test_ids_filter(self, mock_encoder_cls, mock_gc_cls):
         encoder = MagicMock()
         encoder.embed_texts.return_value = np.array([[0.1, 0.2]])
@@ -148,8 +148,8 @@ class TestSearchCodeChunks:
         assert "related_ids" in cypher
         assert call_args[1]["ids_filter"] == ["equilibrium", "core_profiles"]
 
-    @patch("imas_codex.ingestion.search.GraphClient")
-    @patch("imas_codex.ingestion.search.Encoder")
+    @patch("iter_codex.ingestion.search.GraphClient")
+    @patch("iter_codex.ingestion.search.Encoder")
     def test_empty_results(self, mock_encoder_cls, mock_gc_cls):
         encoder = MagicMock()
         encoder.embed_texts.return_value = np.array([[0.1, 0.2]])
@@ -163,8 +163,8 @@ class TestSearchCodeChunks:
         results = search_code_chunks("no match")
         assert results == []
 
-    @patch("imas_codex.ingestion.search.GraphClient")
-    @patch("imas_codex.ingestion.search.Encoder")
+    @patch("iter_codex.ingestion.search.GraphClient")
+    @patch("iter_codex.ingestion.search.Encoder")
     def test_combined_filters(self, mock_encoder_cls, mock_gc_cls):
         encoder = MagicMock()
         encoder.embed_texts.return_value = np.array([[0.1, 0.2]])

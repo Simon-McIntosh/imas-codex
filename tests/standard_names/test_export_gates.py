@@ -14,7 +14,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     _prune_dangling_links,
     _run_gate_a,
     _run_gate_b,
@@ -134,7 +134,7 @@ class TestReleaseGateFindings:
             stderr="",
         )
         with patch(
-            "imas_codex.standard_names.export.subprocess.run",
+            "iter_codex.standard_names.export.subprocess.run",
             return_value=completed,
         ) as run:
             result = _run_gate_a()

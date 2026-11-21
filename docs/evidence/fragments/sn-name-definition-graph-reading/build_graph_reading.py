@@ -35,7 +35,7 @@ DRAW = HERE / "sheet-draw.json"
 RECORDS = Path(
     os.environ.get(
         "GRAPH_READING_RECORDS",
-        Path.home() / ".cache/imas-codex-graph-reading/records.json",
+        Path.home() / ".cache/iter-codex-graph-reading/records.json",
     )
 )
 FIELDS = ("name", "unit", "description", "documentation")
@@ -140,7 +140,7 @@ def classes_block():
 
 def read_graph():
     """Call the release export's own candidate selection, then read graph text."""
-    from imas_codex.standard_names.export import (
+    from iter_codex.standard_names.export import (
         _classify_export_population,
         _fetch_export_population,
         _graph_node_to_entry_dict,
@@ -178,7 +178,7 @@ def read_graph():
             {
                 "schema": "sn-candidate-set",
                 "rule": {
-                    "module": "imas_codex/standard_names/export.py",
+                    "module": "iter_codex/standard_names/export.py",
                     "called": (
                         "_classify_export_population("
                         "_fetch_export_population(batch=None, "
@@ -227,7 +227,7 @@ def read_retired_states(names):
     """What the graph says of read names, keyed by name; absent names are omitted."""
     if not names:
         return {}
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     cypher = """
     UNWIND $names AS id
@@ -574,7 +574,7 @@ def check():
     items, _sources = earlier_items()
     rows = {row["name"]: row for row in read_json(AGREEMENT)["rows"]}
 
-    assert candidate_set["rule"]["module"] == "imas_codex/standard_names/export.py"
+    assert candidate_set["rule"]["module"] == "iter_codex/standard_names/export.py"
     assert candidate_set["read_at"].endswith("Z"), "graph read time not recorded"
     assert candidate_set["names"] == sorted(set(candidate_set["names"])), (
         "candidate names are not distinct and sorted"

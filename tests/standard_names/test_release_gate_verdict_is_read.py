@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.standard_names.catalog_release import run_review_release
+from iter_codex.standard_names.catalog_release import run_review_release
 
 
 def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -66,7 +66,7 @@ def _release_with_report(
         raise AssertionError("catalog assembly must not consume an unreadable verdict")
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.export.assemble_review_catalog",
+        "iter_codex.standard_names.export.assemble_review_catalog",
         unexpected_assembly,
     )
     report = run_review_release(

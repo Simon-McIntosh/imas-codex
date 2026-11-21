@@ -2,11 +2,11 @@
 
 import pytest
 
-from imas_codex.discovery.signals.parallel import ingest_discovered_signals
-from imas_codex.discovery.signals.scanners import codac_uda as catalogue
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import ArchiveEndpoint
-from imas_codex.remote import codac_uda as service
+from iter_codex.discovery.signals.parallel import ingest_discovered_signals
+from iter_codex.discovery.signals.scanners import codac_uda as catalogue
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.models import ArchiveEndpoint
+from iter_codex.remote import codac_uda as service
 
 pytestmark = pytest.mark.graph
 
@@ -58,7 +58,7 @@ def test_archive_catalogue_statements_are_idempotent_and_keep_provenance(
         }
         for _ in range(2):
             assert ingest_discovered_signals(parameters["signals"]) == 1
-        from imas_codex.discovery.signals.parallel import build_signal_scope_case
+        from iter_codex.discovery.signals.parallel import build_signal_scope_case
 
         scoped = graph.query(
             "MATCH (s:FacilitySignal {id: $id}) RETURN "

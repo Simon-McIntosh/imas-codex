@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from imas_codex.standard_names.promote import (
+from iter_codex.standard_names.promote import (
     mark_catalog_name_approved,
     resolve_contested_override,
 )

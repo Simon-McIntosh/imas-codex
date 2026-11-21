@@ -42,7 +42,7 @@ across models is <2× (all ≥128).  **Case A** applies:
 | `sn-compose.max-concurrency` updated | 24 → **96** |
 | Per-model semaphore (`phase7-per-model-sem`) | **Skipped** — variance <2× |
 
-**Pilot coordination:** No `~/.local/share/imas-codex/logs/sn.log` found at probe
+**Pilot coordination:** No `~/.local/share/iter-codex/logs/sn.log` found at probe
 start — pilot agent was not active; probe results reflect uncontested rate limits.
 
 ### Per-model level detail

@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from imas_codex.ids.workers import (
+from iter_codex.ids.workers import (
     MappingDiscoveryState,
     claim_sources_for_escalated,
     has_pending_assignment_work,
@@ -32,9 +32,9 @@ def test_pending_matches_claim_for_target_candidate(candidate_ids, expected):
         return [source] if matches(**kwargs) else []
 
     with (
-        patch("imas_codex.ids.workers.claim_batch", side_effect=claim) as claim_mock,
+        patch("iter_codex.ids.workers.claim_batch", side_effect=claim) as claim_mock,
         patch(
-            "imas_codex.ids.workers.has_pending",
+            "iter_codex.ids.workers.has_pending",
             side_effect=lambda *_a, **kw: matches(**kw),
         ) as pending_mock,
     ):
@@ -53,9 +53,9 @@ def test_mapping_engine_passes_target_ids_to_pending_check():
         target_info=[{"ids_name": "magnetics", "domains": ["magnetic_field"]}],
     )
     with (
-        patch("imas_codex.ids.workers.run_discovery_engine", new_callable=AsyncMock),
+        patch("iter_codex.ids.workers.run_discovery_engine", new_callable=AsyncMock),
         patch(
-            "imas_codex.ids.workers.has_pending_assignment_work", return_value=False
+            "iter_codex.ids.workers.has_pending_assignment_work", return_value=False
         ) as pending,
     ):
         asyncio.run(run_mapping_engine(state))
@@ -68,11 +68,11 @@ def test_claim_and_pending_pass_shared_predicate_unchanged():
     predicate = "n.assignment_marker = $marker"
     with (
         patch(
-            "imas_codex.ids.workers._escalated_source_predicate",
+            "iter_codex.ids.workers._escalated_source_predicate",
             return_value=(predicate, params),
         ) as builder,
-        patch("imas_codex.ids.workers.claim_batch", return_value=[]) as claim,
-        patch("imas_codex.ids.workers.has_pending", return_value=False) as pending,
+        patch("iter_codex.ids.workers.claim_batch", return_value=[]) as claim,
+        patch("iter_codex.ids.workers.has_pending", return_value=False) as pending,
     ):
         claim_sources_for_escalated("jet", ["magnetics"], domains=["equilibrium"])
         has_pending_assignment_work("jet", ["magnetics"])

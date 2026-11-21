@@ -34,8 +34,8 @@ from typing import Any
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from iter_codex.standard_names.graph_store import (
     graph_docs_persistence as _owning_graph_docs_persistence,
 )
 
@@ -173,7 +173,7 @@ class _ApplyHarness:
 
     def mark_fn(self, batch: list[str], dry_run: bool = False) -> dict[str, Any]:
         """Record the batch, then run the real snapshot+reset+stamp."""
-        from imas_codex.standard_names.harmonize import mark_members_for_regen
+        from iter_codex.standard_names.harmonize import mark_members_for_regen
 
         self.marked_batches.append(list(batch))
         return mark_members_for_regen(batch, dry_run=dry_run)
@@ -218,7 +218,7 @@ class _ApplyHarness:
 
 
 def _apply(gc: _FamilyGraph, harness: _ApplyHarness, *, thresholds: Any = None):
-    from imas_codex.standard_names.harmonize import apply_families
+    from iter_codex.standard_names.harmonize import apply_families
 
     return apply_families(
         gc,
@@ -238,7 +238,7 @@ def _apply(gc: _FamilyGraph, harness: _ApplyHarness, *, thresholds: Any = None):
 
 
 def _install_docs_pipeline(monkeypatch: Any, pipeline: _DocsPipeline) -> None:
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     monkeypatch.setattr(
         _owning_graph_docs_persistence, "reset_standard_name_docs", pipeline.reset
@@ -258,7 +258,7 @@ def _thresholds_or_gate_removed() -> Any:
     member batch runs even though the anchor did not converge and the
     untouched-members test fails.
     """
-    from imas_codex.standard_names.campaign import ConvergenceThresholds
+    from iter_codex.standard_names.campaign import ConvergenceThresholds
 
     if os.environ.get("SHC_NO_ANCHOR_GATE"):
         return ConvergenceThresholds(min_docs_accept_rate=0.0)
@@ -329,7 +329,7 @@ def test_second_apply_over_unchanged_scope_plans_zero_calls(
     monkeypatch: Any,
 ) -> None:
     """The stamped family is harmonized; a repeat apply plans nothing."""
-    from imas_codex.standard_names.harmonize import (
+    from iter_codex.standard_names.harmonize import (
         group_signature,
         plan_family_applies,
     )
@@ -351,8 +351,8 @@ def test_second_apply_over_unchanged_scope_plans_zero_calls(
 
 def test_dry_run_prints_the_plan_and_writes_nothing(monkeypatch: Any) -> None:
     """`--apply --dry-run` reports the planned calls and cost, and writes nothing."""
-    from imas_codex.cli.sn import sn
-    from imas_codex.graph import client as graph_client
+    from iter_codex.cli.sn import sn
+    from iter_codex.graph import client as graph_client
 
     nodes = _family_nodes()
     pipeline = _DocsPipeline(nodes)
@@ -375,8 +375,8 @@ def _invoke_dry_run(
     monkeypatch: Any, graph: _FamilyGraph, pipeline: _DocsPipeline, *extra: str
 ):
     """Run ``harmonize --family <anchor> --apply --dry-run`` against the fixture."""
-    from imas_codex.cli.sn import sn
-    from imas_codex.graph import client as graph_client
+    from iter_codex.cli.sn import sn
+    from iter_codex.graph import client as graph_client
 
     _install_docs_pipeline(monkeypatch, pipeline)
     monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
@@ -451,8 +451,8 @@ def _invoke_dry_run_all(
     monkeypatch: Any, graph: _FamilyGraph, pipeline: _DocsPipeline, *extra: str
 ):
     """Run ``harmonize --all --apply --dry-run`` over the whole fixture."""
-    from imas_codex.cli.sn import sn
-    from imas_codex.graph import client as graph_client
+    from iter_codex.cli.sn import sn
+    from iter_codex.graph import client as graph_client
 
     _install_docs_pipeline(monkeypatch, pipeline)
     monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
@@ -520,7 +520,7 @@ def _regressions_or_removed(monkeypatch: Any) -> None:
     :func:`test_apply_names_a_member_below_threshold` fail.
     """
     if os.environ.get("SHC_NO_SCORE_COMPARISON"):
-        from imas_codex.standard_names import harmonize
+        from iter_codex.standard_names import harmonize
 
         monkeypatch.setattr(
             harmonize,
@@ -590,7 +590,7 @@ def test_apply_reports_no_fall_when_no_member_scores_worse(
 
 def test_score_comparison_reports_below_threshold_and_fall() -> None:
     """The comparison classifies a fell-below member and ignores unscored ones."""
-    from imas_codex.standard_names.harmonize import docs_score_regressions
+    from iter_codex.standard_names.harmonize import docs_score_regressions
 
     regressions = docs_score_regressions(
         {"below_and_fell": 0.90, "rose": 0.60, "fell_only": 0.95, "same": 0.90},
@@ -606,9 +606,9 @@ def test_score_comparison_reports_below_threshold_and_fall() -> None:
 
 def test_apply_report_names_member_in_cli_output(monkeypatch: Any) -> None:
     """`--apply` prints the below-threshold member with both scores."""
-    from imas_codex.cli.sn import sn
-    from imas_codex.graph import client as graph_client
-    from imas_codex.standard_names import harmonize
+    from iter_codex.cli.sn import sn
+    from iter_codex.graph import client as graph_client
+    from iter_codex.standard_names import harmonize
 
     class _Result:
         halted = False

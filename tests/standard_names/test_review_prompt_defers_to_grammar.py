@@ -17,7 +17,7 @@ from pathlib import Path
 import pytest
 
 PROMPT_DIR = (
-    Path(__file__).resolve().parents[2] / "imas_codex" / "llm" / "prompts" / "sn"
+    Path(__file__).resolve().parents[2] / "iter_codex" / "llm" / "prompts" / "sn"
 )
 REVIEW_NAMES_SYSTEM = PROMPT_DIR / "review_names_system.md"
 

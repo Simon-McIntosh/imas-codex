@@ -13,7 +13,7 @@ from __future__ import annotations
 import asyncio
 from unittest.mock import patch
 
-from imas_codex.standard_names.review import jev_review
+from iter_codex.standard_names.review import jev_review
 
 CARBON = "accumulated_carbon_equivalent_electron_count_due_to_gas_injection"
 LEAF = "summary/gas_injection_accumulated/carbon/value"

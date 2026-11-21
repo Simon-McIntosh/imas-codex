@@ -16,9 +16,9 @@ from pathlib import Path
 
 import numpy as np
 
-from imas_codex.discovery.base.evaluation import bootstrap_interval, roc_auc
-from imas_codex.standard_names.review.checks import load_review_checks
-from imas_codex.standard_names.review.jev_review import DOCS_AXIS
+from iter_codex.discovery.base.evaluation import bootstrap_interval, roc_auc
+from iter_codex.standard_names.review.checks import load_review_checks
+from iter_codex.standard_names.review.jev_review import DOCS_AXIS
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]

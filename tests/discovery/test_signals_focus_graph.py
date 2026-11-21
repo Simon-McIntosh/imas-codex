@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.discovery.signals.parallel import build_focus_predicate
+from iter_codex.discovery.signals.parallel import build_focus_predicate
 
 pytestmark = pytest.mark.graph
 
@@ -48,7 +48,7 @@ def _members(graph, source_id: str) -> set[str]:
 
 
 def test_rendered_predicate_selects_the_named_source_members() -> None:
-    from imas_codex.graph import GraphClient
+    from iter_codex.graph import GraphClient
 
     with GraphClient() as graph:
         source_id = _mdac_source_id(graph)

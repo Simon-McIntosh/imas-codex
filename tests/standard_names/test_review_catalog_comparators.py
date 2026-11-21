@@ -6,7 +6,7 @@ import logging
 
 import pytest
 
-from imas_codex.standard_names.review.enrichment import build_neighborhood_context
+from iter_codex.standard_names.review.enrichment import build_neighborhood_context
 
 
 def _catalog_name(
@@ -41,7 +41,7 @@ def test_every_batch_item_contributes_a_vector_query(monkeypatch) -> None:
         ]
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.search.search_standard_names_vector", search
+        "iter_codex.standard_names.search.search_standard_names_vector", search
     )
     names = [
         _catalog_name(
@@ -95,7 +95,7 @@ def test_same_unit_different_base_accepted_name_is_a_comparator(
         physical_base="photon_radiance",
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.search.search_standard_names_vector",
+        "iter_codex.standard_names.search.search_standard_names_vector",
         lambda _query, *, k: [],
     )
 
@@ -120,9 +120,9 @@ def test_same_unit_different_base_accepted_name_is_a_comparator(
 
 @pytest.mark.asyncio
 async def test_standalone_review_prompt_receives_catalog_names(monkeypatch) -> None:
-    from imas_codex.discovery.base import llm as llm_module
-    from imas_codex.llm import prompt_loader
-    from imas_codex.standard_names.review.pipeline import _review_single_batch
+    from iter_codex.discovery.base import llm as llm_module
+    from iter_codex.llm import prompt_loader
+    from iter_codex.standard_names.review.pipeline import _review_single_batch
 
     rendered_contexts: list[dict] = []
 

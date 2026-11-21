@@ -10,8 +10,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.signed_manifest import (
     _DOCS_RESTORE_ADAPTER,
     _DOCS_RESTORE_GUARDS,
     _DOCS_RESTORE_MUTATION,
@@ -30,7 +30,7 @@ def _write_authority(
     path: Path, rows: list[dict[str, Any]], operation: str
 ) -> tuple[str, str]:
     authority: dict[str, Any] = {
-        "schema": "imas-codex.docs-revision-restore.v1",
+        "schema": "iter-codex.docs-revision-restore.v1",
         "operation_id": operation,
         "rows": rows,
         "selection": _SELECTION,

@@ -18,7 +18,7 @@ from collections import Counter, defaultdict
 from html import escape
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 HERE = Path(__file__).resolve().parent
 CENSUS = HERE / "sib-catalog-import-source-census.json"
@@ -27,10 +27,10 @@ REPORT = HERE / "sib-source-loss-generators.html"
 ROOT = Path(__file__).resolve().parents[4]
 
 IMPORT_CUTOFF = "2026-07-04"
-GRAPH_CATALOG = "imas_codex/standard_names/graph_store/graph_catalog.py"
-SOURCE_BINDINGS = "imas_codex/standard_names/graph_store/graph_source_bindings.py"
-SOURCE_INVARIANT = "imas_codex/standard_names/source_invariant.py"
-EXPORT_PY = "imas_codex/standard_names/export.py"
+GRAPH_CATALOG = "iter_codex/standard_names/graph_store/graph_catalog.py"
+SOURCE_BINDINGS = "iter_codex/standard_names/graph_store/graph_source_bindings.py"
+SOURCE_INVARIANT = "iter_codex/standard_names/source_invariant.py"
+EXPORT_PY = "iter_codex/standard_names/export.py"
 
 
 def line_of(relpath: str, needle: str) -> str:
@@ -106,11 +106,11 @@ def generators() -> list[dict]:
                 "composed from a removed path, so the binding is gone by design."
             ),
             "code": [
-                line_of("imas_codex/graph/sn_link_guardrail.py", "_DANGLING_QUERY")
+                line_of("iter_codex/graph/sn_link_guardrail.py", "_DANGLING_QUERY")
             ],
             "performs_today": True,
             "guard": line_of(
-                "imas_codex/graph/sn_link_guardrail.py", "def check_sn_links_safe"
+                "iter_codex/graph/sn_link_guardrail.py", "def check_sn_links_safe"
             ),
             "guard_note": "check_sn_links_safe asserts edge counts never decrease; a removal that unbinds a catalog name is not measured by it.",
         },

@@ -49,7 +49,7 @@ class TestNodeCategoryFiltering:
     @pytest.fixture()
     def classify(self):
         """Node classification via ExclusionChecker (same logic as _classify_node)."""
-        from imas_codex.core.exclusions import ExclusionChecker
+        from iter_codex.core.exclusions import ExclusionChecker
 
         checker = ExclusionChecker()
 
@@ -135,7 +135,7 @@ class TestTextSearchImasPathsDDServer:
 
     def test_fulltext_index_path_returns_normalized_scores(self, mock_gc):
         """When fulltext index returns results, scores are normalized 0-1."""
-        from imas_codex.tools.graph_search import _text_search_dd_paths
+        from iter_codex.tools.graph_search import _text_search_dd_paths
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -159,7 +159,7 @@ class TestTextSearchImasPathsDDServer:
 
     def test_fulltext_includes_node_category_filter(self, mock_gc):
         """Fulltext query includes node_category='data' in WHERE clause."""
-        from imas_codex.tools.graph_search import _text_search_dd_paths
+        from iter_codex.tools.graph_search import _text_search_dd_paths
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -178,7 +178,7 @@ class TestTextSearchImasPathsDDServer:
 
     def test_contains_fallback_when_fulltext_fails(self, mock_gc):
         """When fulltext index raises, falls back to CONTAINS matching."""
-        from imas_codex.tools.graph_search import _text_search_dd_paths
+        from iter_codex.tools.graph_search import _text_search_dd_paths
 
         call_count = 0
 
@@ -200,7 +200,7 @@ class TestTextSearchImasPathsDDServer:
 
     def test_ids_filter_applied(self, mock_gc):
         """ids_filter is passed to fulltext search WHERE clause."""
-        from imas_codex.tools.graph_search import _text_search_dd_paths
+        from iter_codex.tools.graph_search import _text_search_dd_paths
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -242,7 +242,7 @@ class TestTextSearchImasPathsCodexServer:
 
     def test_fulltext_returns_normalized_scores(self, mock_gc):
         """BM25 scores are normalized 0-1 with 0.7 floor."""
-        from imas_codex.llm.search_tools import _text_search_dd_paths_by_query
+        from iter_codex.llm.search_tools import _text_search_dd_paths_by_query
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -272,7 +272,7 @@ class TestTextSearchImasPathsCodexServer:
 
     def test_fulltext_filters_generic_paths(self, mock_gc):
         """Generic metadata paths are filtered from fulltext results."""
-        from imas_codex.llm.search_tools import _text_search_dd_paths_by_query
+        from iter_codex.llm.search_tools import _text_search_dd_paths_by_query
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -294,7 +294,7 @@ class TestTextSearchImasPathsCodexServer:
 
     def test_contains_fallback(self, mock_gc):
         """Falls back to CONTAINS when fulltext raises."""
-        from imas_codex.llm.search_tools import _text_search_dd_paths_by_query
+        from iter_codex.llm.search_tools import _text_search_dd_paths_by_query
 
         def side_effect(cypher: str, **kwargs):
             if "db.index.fulltext.queryNodes" in cypher:
@@ -329,7 +329,7 @@ class TestGraphSearchToolHybrid:
         return gc
 
     def _make_tool(self, mock_gc):
-        from imas_codex.tools.graph_search import GraphSearchTool
+        from iter_codex.tools.graph_search import GraphSearchTool
 
         tool = GraphSearchTool(mock_gc)
         tool._embed_query = MagicMock(return_value=[0.1] * 256)
@@ -667,7 +667,7 @@ class TestSearchImasHybridCodex:
 
     def test_text_only_match_uses_text_score(self, mock_gc, mock_encoder):
         """A path found only by text (not vector) uses text score directly."""
-        from imas_codex.llm.search_tools import _search_imas
+        from iter_codex.llm.search_tools import _search_imas
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -705,7 +705,7 @@ class TestSearchImasHybridCodex:
 
     def test_dual_match_boosted(self, mock_gc, mock_encoder):
         """Path found in both vector AND text gets +0.05 boost."""
-        from imas_codex.llm.search_tools import _search_imas
+        from iter_codex.llm.search_tools import _search_imas
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -745,7 +745,7 @@ class TestSearchImasHybridCodex:
 
     def test_enrichment_includes_lifecycle(self, mock_gc, mock_encoder):
         """Enriched results include lifecycle_status, structure_reference."""
-        from imas_codex.llm.search_tools import _search_imas
+        from iter_codex.llm.search_tools import _search_imas
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -797,7 +797,7 @@ class TestCodeExampleVectorSearch:
 
     def test_returns_chunk_ids_from_examples(self, mock_gc):
         """Vector search on CodeExamples traverses to CodeChunks."""
-        from imas_codex.llm.search_tools import _vector_search_code_examples
+        from iter_codex.llm.search_tools import _vector_search_code_examples
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -816,7 +816,7 @@ class TestCodeExampleVectorSearch:
 
     def test_facility_filter_applied(self, mock_gc):
         """Facility filter is included in Cypher WHERE clause."""
-        from imas_codex.llm.search_tools import _vector_search_code_examples
+        from iter_codex.llm.search_tools import _vector_search_code_examples
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -837,7 +837,7 @@ class TestCodeExampleVectorSearch:
 
     def test_no_facility_no_filter(self, mock_gc):
         """Without facility, no facility filter in query."""
-        from imas_codex.llm.search_tools import _vector_search_code_examples
+        from iter_codex.llm.search_tools import _vector_search_code_examples
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -855,7 +855,7 @@ class TestCodeExampleVectorSearch:
 
     def test_graceful_on_missing_index(self, mock_gc):
         """Gracefully returns empty when index doesn't exist."""
-        from imas_codex.llm.search_tools import _vector_search_code_examples
+        from iter_codex.llm.search_tools import _vector_search_code_examples
 
         mock_gc.query.side_effect = Exception("Index not found")
 
@@ -881,7 +881,7 @@ class TestSearchCodeWithExamples:
 
     def test_code_example_chunks_merged(self, mock_gc, mock_encoder):
         """CodeExample chunks are merged into results with boost."""
-        from imas_codex.llm.search_tools import _search_code
+        from iter_codex.llm.search_tools import _search_code
 
         enrichment = [
             {
@@ -919,7 +919,7 @@ class TestSearchCodeWithExamples:
 
     def test_code_example_boost_on_overlap(self, mock_gc, mock_encoder):
         """Chunks found by both code_chunk and code_example get boosted."""
-        from imas_codex.llm.search_tools import _search_code
+        from iter_codex.llm.search_tools import _search_code
 
         enrichment = [
             {

@@ -2,14 +2,14 @@
 
 These tests exercise the scoring adjustments in isolation — no Neo4j or
 embedding server required.  We replicate the same logic that lives in
-`imas_codex/tools/graph_search.py` after the segment-tiebreaker block.
+`iter_codex/tools/graph_search.py` after the segment-tiebreaker block.
 """
 
 from __future__ import annotations
 
 import pytest
 
-from imas_codex.tools.graph_search import _ACCESSOR_TERMINALS, _CONCEPT_IDS_PREFERENCE
+from iter_codex.tools.graph_search import _ACCESSOR_TERMINALS, _CONCEPT_IDS_PREFERENCE
 
 # ---------------------------------------------------------------------------
 # Helpers that mirror the production scoring adjustments

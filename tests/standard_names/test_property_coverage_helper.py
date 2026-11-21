@@ -7,12 +7,12 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.schema import GraphSchema
-from imas_codex.standard_names.graph_store.graph_catalog import property_coverage
+from iter_codex.graph.schema import GraphSchema
+from iter_codex.standard_names.graph_store.graph_catalog import property_coverage
 
 SCHEMA_PATH = (
     Path(__file__).resolve().parents[2]
-    / "imas_codex"
+    / "iter_codex"
     / "schemas"
     / "standard_name.yaml"
 )

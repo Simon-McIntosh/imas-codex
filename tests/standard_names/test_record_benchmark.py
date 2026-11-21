@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.advisory_benchmark import summarize_costs
-from imas_codex.standard_names.benchmark import (
+from iter_codex.standard_names.advisory_benchmark import summarize_costs
+from iter_codex.standard_names.benchmark import (
     BenchmarkControlDidNotSeparate,
     RecordBenchmarkArm,
     RecordBenchmarkRow,
@@ -154,7 +154,7 @@ def test_paired_comparison_uses_the_shared_bootstrap(
         return {"lower": -0.2, "upper": 0.1, "n_resamples": n_resamples}
 
     monkeypatch.setattr(
-        "imas_codex.discovery.base.evaluation.bootstrap_interval", fake_bootstrap
+        "iter_codex.discovery.base.evaluation.bootstrap_interval", fake_bootstrap
     )
     one_pass = rows_for("one-pass/local", ["right", "wrong", "right"])
     staged = rows_for("staged/local", ["right", "right", "wrong"])

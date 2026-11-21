@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.standard_names.grammar_adapter import (
+from iter_codex.standard_names.grammar_adapter import (
     adopt_canonical_segment_order,
     is_canonical_name,
     parse_canonical_name,

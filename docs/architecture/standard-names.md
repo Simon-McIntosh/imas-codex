@@ -34,7 +34,7 @@ codex owns the pipeline, evaluation, and graph persistence.
 `sn run` drives a **single concurrent loop of seven pools**. Each pool claims
 eligible work by a stage gate, does one unit of work, and persists a durable
 state transition. Pools run concurrently, weighted by `POOL_WEIGHTS`
-(`imas_codex/standard_names/pools.py`); the loop orchestrator is
+(`iter_codex/standard_names/pools.py`); the loop orchestrator is
 `run_sn_pools()` in `loop.py`.
 
 | Pool | Label | Stage gate | Key operation |
@@ -51,7 +51,7 @@ state transition. Pools run concurrently, weighted by `POOL_WEIGHTS`
 `--flush` (it drains the *existing* placeholder backlog, not new work), is
 excluded under `--docs-only`, and shares the single `--cost-limit` budget pool.
 Its weight and replica count live alongside the other pools in `POOL_WEIGHTS`
-and `[tool.imas-codex.sn-pools].enrich-parents-replicas`.
+and `[tool.iter-codex.sn-pools].enrich-parents-replicas`.
 
 `--flush` has fixed membership: it excludes only `generate_name` and drains
 `review_name`, `refine_name`, `generate_docs`, `review_docs`, `refine_docs`,
@@ -115,13 +115,13 @@ sub-pipeline:
 
 SN-eligibility is **owned by the DD `node_category`** classification, not a
 bespoke rule engine. EXTRACT pre-filters DD paths through
-`SN_SOURCE_CATEGORIES` in `imas_codex/core/node_categories.py` — only physics
+`SN_SOURCE_CATEGORIES` in `iter_codex/core/node_categories.py` — only physics
 quantities and the categories declared there proceed to COMPOSE. Error fields,
 pure metadata, structural nodes, and identifiers are filtered out by category.
 
 ### Enrichment (cluster selection + grouping)
 
-`imas_codex/standard_names/enrichment.py`:
+`iter_codex/standard_names/enrichment.py`:
 
 - **Primary cluster selection** — each path may belong to multiple semantic
   clusters; one primary is chosen by scope rank (IDS > domain > global), then
@@ -202,7 +202,7 @@ completeness, physics_accuracy.
 **Benchmark (6 dims):** grammar, semantic, documentation, convention,
 completeness, compliance (aggregate `sum / 120.0`).
 
-Criteria are defined in `imas_codex/llm/config/sn_review_criteria.yaml`.
+Criteria are defined in `iter_codex/llm/config/sn_review_criteria.yaml`.
 
 **Tier thresholds** (`review_tier`, derived from `reviewer_score_name`):
 
@@ -258,15 +258,15 @@ cycle. Names are sent in batches; the response is matched back by ID; unmatched
 names are auto-retried individually so none is silently dropped on LLM
 truncation.
 
-**Configuration:** `[tool.imas-codex.sn-review]` (`disagreement-threshold`,
-`max-cycles`, `active-profile`) + `[tool.imas-codex.sn-review.{names,docs}]`
+**Configuration:** `[tool.iter-codex.sn-review]` (`disagreement-threshold`,
+`max-cycles`, `active-profile`) + `[tool.iter-codex.sn-review.{names,docs}]`
 (`models = [cycle0, cycle1, cycle2]`). Named profiles live under
-`[tool.imas-codex.sn-review.names.profiles.*]`. Accessors:
+`[tool.iter-codex.sn-review.names.profiles.*]`. Accessors:
 `get_sn_review_{names,docs}_models()`, `get_sn_review_max_cycles()`,
 `get_sn_review_disagreement_threshold()`, `get_sn_review_active_profile()`.
 
 ```toml
-[tool.imas-codex.sn-review.names]
+[tool.iter-codex.sn-review.names]
 models = [
   "openrouter/deepseek/deepseek-v4-flash",     # cycle 0 primary (blind, cheapest)
   "openrouter/openai/gpt-5.4",                 # cycle 1 secondary (blind, fast)
@@ -294,14 +294,14 @@ stays `valid` and routes to a refine pool.
 
 ## Structured Fan-Out
 
-`imas_codex/standard_names/fanout/` runs a bounded
+`iter_codex/standard_names/fanout/` runs a bounded
 Proposer → Executor → Synthesizer fan-out for `refine_name`. The Proposer emits
 a closed-catalog `FanoutPlan` (Pydantic discriminated union on `fn_id`, all
 bounds enforced at parse time); a pure-Python executor runs it in parallel via
 `asyncio.to_thread`; the call-site's LLM call ingests the rendered evidence
 block. No agentic loop, no runtime function generation.
 
-- **Runtime gating lives in config** (`[tool.imas-codex.sn-fanout]`). Current
+- **Runtime gating lives in config** (`[tool.iter-codex.sn-fanout]`). Current
   rollout is enabled for `refine_name`; if disabled, `run_fanout()` is a true
   no-op.
 - **One `GraphClient` per refine cycle** — the worker passes its `gc` in;
@@ -318,7 +318,7 @@ block. No agentic loop, no runtime function generation.
 Structural parent SNs are inferred from the ISN grammar peel and enter with
 `origin='derived'`, `name_stage='pending'`. The placeholder node is created at
 write time by `_write_standard_name_edges` **only if it passes the two-clause
-admission gate** in `imas_codex/standard_names/parents.py`
+admission gate** in `iter_codex/standard_names/parents.py`
 (`is_admissible_parent_name`):
 
 - **Clause A — IR specificity.** `parse_standard_name(name).ir` has at least one
@@ -442,7 +442,7 @@ Each DD path item is enriched with four channels during EXTRACT:
 **Compose retry with expanded context:** on grammar/validation failure the
 compose worker retries up to `retry_attempts` times (default 1), re-enriching
 with expanded hybrid search (`search_k=retry_k_expansion`, default 12).
-Configurable via `[tool.imas-codex.sn]` or `IMAS_CODEX_SN_RETRY_*` env vars.
+Configurable via `[tool.iter-codex.sn]` or `ITER_CODEX_SN_RETRY_*` env vars.
 
 **Scored-example injection:** compose and review prompts include dynamically
 selected exemplar StandardName nodes at target thresholds `(1.0, 0.8, 0.65,
@@ -513,7 +513,7 @@ no longer exists as `stale`.
 one existing DD source before it enters pooled composition:
 
 ```
-imas-codex sn source-hint <exact-dd-path> --hint TEXT --reason TEXT \
+iter-codex sn source-hint <exact-dd-path> --hint TEXT --reason TEXT \
     [--replace] [--dry-run]
 ```
 
@@ -574,17 +574,17 @@ The safe operator sequence is to preview and set the hint, then run the normal
 pool loop with that same exact path, for example:
 
 ```
-imas-codex sn source-hint equilibrium/time_slice/.../quantity \
+iter-codex sn source-hint equilibrium/time_slice/.../quantity \
     --hint "Preserve the source-defined denominator." \
     --reason "The DD description defines a ratio against the complementary set." \
     --dry-run
-imas-codex sn source-hint equilibrium/time_slice/.../quantity \
+iter-codex sn source-hint equilibrium/time_slice/.../quantity \
     --hint "Preserve the source-defined denominator." \
     --reason "The DD description defines a ratio against the complementary set."
-imas-codex sn run --focus equilibrium/time_slice/.../quantity
+iter-codex sn run --focus equilibrium/time_slice/.../quantity
 ```
 
-`sn run` uses the configured `[tool.imas-codex.sn-compose]` model by default;
+`sn run` uses the configured `[tool.iter-codex.sn-compose]` model by default;
 an explicit `--compose-model` remains a run-scoped override. Focus routing
 fences the worklist, while the ordinary compose, validation, review, and
 persistence gates remain authoritative.
@@ -607,7 +607,7 @@ reviewer, but never quarantine.
 
 ## Graph Persistence
 
-**Module:** `imas_codex/standard_names/graph_ops.py`.
+**Module:** `iter_codex/standard_names/graph_ops.py`.
 
 ### Write semantics
 
@@ -650,7 +650,7 @@ nodes.
 | `DOCS_REVISION_OF` | SN → `DocsRevision` | `persist_refined_docs`; snapshots prior docs+reviewer state before in-place rewrite |
 
 `HAS_ARGUMENT` / `HAS_ERROR` derivation lives in
-`imas_codex/standard_names/derivation.py` (`derive_edges(name)`, pure logic).
+`iter_codex/standard_names/derivation.py` (`derive_edges(name)`, pure logic).
 Each name is peeled one layer only; the inner name runs its own derivation when
 written. Unparseable names silently produce no derived edges.
 
@@ -699,7 +699,7 @@ sn release --export-only → sn preview → sn release -m "msg" → GitHub Pages
 1. **`sn release --export-only`** — runs only the export leg: reads validated
    SN nodes, applies quality gates (`reviewer_score_name ≥ 0.65` + description
    sub-score), writes YAML to `<staging>/standard_names/<domain>/<name>.yml`
-   (default staging `~/.cache/imas-codex/staging`) and stops (no tag/push).
+   (default staging `~/.cache/iter-codex/staging`) and stops (no tag/push).
 2. **`sn preview`** — auto-exports and launches a local MkDocs dev server via
    ISN's CatalogRenderer. `--no-export` serves an existing staging dir. Tunnel:
    `ssh -L 8000:localhost:8000 <host>`.
@@ -723,7 +723,7 @@ missing node is reported, never recreated), updates only diverging scalar
 editorial fields, and replays each entry's `sources:` block through the
 provenance-rebuild binder to restore `StandardNameSource` + `PRODUCED_NAME`.
 The read-only `check_catalog` divergence report
-(`imas_codex/standard_names/catalog_import.py`) compares catalog-vs-graph
+(`iter_codex/standard_names/catalog_import.py`) compares catalog-vs-graph
 without writing.
 
 **Protection model:** `PROTECTED_FIELDS` = {description, documentation, kind,
@@ -842,16 +842,16 @@ beside the family queries in `families.py`.
 
 ## Edit Side-Car
 
-`imas-codex sn edit <standard_name>` lets a human or agent attach a proposed
+`iter-codex sn edit <standard_name>` lets a human or agent attach a proposed
 correction to an existing StandardName's name or docs as a **steered
 candidate** that rides the normal generate→review→score pipeline, instead of
 mutating graph text directly (which bypasses grammar validation, RD-quorum
 review, and scoring). A mirrored MCP write tool (`edit_standard_name`)
 exposes the same operation to agents; both share one implementation,
-`imas_codex.standard_names.edit.apply_edit`.
+`iter_codex.standard_names.edit.apply_edit`.
 
 ```
-imas-codex sn edit <standard_name> (--hint TEXT | --rename NAME | --docs TEXT) --reason TEXT
+iter-codex sn edit <standard_name> (--hint TEXT | --rename NAME | --docs TEXT) --reason TEXT
                    [--axis name|docs|both] [--scope self|family|subtree] [--dry-run]
 ```
 
@@ -958,7 +958,7 @@ through review.
 
 `sn bench` uses the same prompt pipeline as `sn run` (system/user split via
 `build_compose_context()`). Model lists default from
-`[tool.imas-codex.sn-benchmark]`. The output table includes a **Cache %**
+`[tool.iter-codex.sn-benchmark]`. The output table includes a **Cache %**
 column (provider-side via OpenRouter). Scoring is 6-dimensional (see
 [Scoring](#scoring)).
 
@@ -1026,11 +1026,11 @@ into Cypher in all three search branches, so it does not lose results below
 | `review/pipeline.py` | RD-quorum review; `_axis_overwrite_blocked` guard |
 | `fanout/` | Bounded Proposer → Executor → Synthesizer fan-out for refine_name |
 | `benchmark.py` | LLM model quality benchmarking |
-| `imas_codex/core/node_categories.py` | `SN_SOURCE_CATEGORIES` pre-filter |
-| `imas_codex/graph/dd_search.py` | `hybrid_dd_search`, `find_related_dd_paths` |
-| `imas_codex/llm/prompts/sn/*` | Compose + review prompts |
-| `imas_codex/llm/config/sn_review_criteria.yaml` | Review scoring config |
-| `imas_codex/schemas/standard_name.yaml` | LinkML schema |
+| `iter_codex/core/node_categories.py` | `SN_SOURCE_CATEGORIES` pre-filter |
+| `iter_codex/graph/dd_search.py` | `hybrid_dd_search`, `find_related_dd_paths` |
+| `iter_codex/llm/prompts/sn/*` | Compose + review prompts |
+| `iter_codex/llm/config/sn_review_criteria.yaml` | Review scoring config |
+| `iter_codex/schemas/standard_name.yaml` | LinkML schema |
 
 ## Architecture Boundary
 
@@ -1065,7 +1065,7 @@ tokens in Python — pull from ISN.
 **VocabGap nodes** record missing grammar tokens from composition (linked via
 `HAS_SN_VOCAB_GAP` from `IMASNode`/`FacilitySignal`; carry segment, token,
 reason). Pseudo segments like `grammar_ambiguity` are filtered at write time
-(`imas_codex.standard_names.segments.filter_closed_segment_gaps`); reviewers
+(`iter_codex.standard_names.segments.filter_closed_segment_gaps`); reviewers
 audit the `physical_base` slot via the decomposition rule
 (`sn_review_criteria.yaml` I4.6). `VocabGap` nodes accumulate automatically
 during composition; query them directly from the graph when assembling an ISN
@@ -1081,7 +1081,7 @@ agent reuses it or confirms it distinct — the confirmation is stamped on the
 When rotations surface `VocabGap` nodes blocked by the current ISN vocabulary,
 add tokens on the fork (`~/Code/imas-standard-names` →
 `Simon-McIntosh/IMAS-Standard-Names`) and cut an RC release. Upstream is
-`iterorganization/IMAS-Standard-Names`; the dep in imas-codex pins to a git tag
+`iterorganization/IMAS-Standard-Names`; the dep in iter-codex pins to a git tag
 on the fork, so RC tags on origin suffice.
 
 **Vocab-addition rules** (apply *before* editing YAML):

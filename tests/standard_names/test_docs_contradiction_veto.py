@@ -7,13 +7,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names import workers
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import workers
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_review_persistence as _owning_graph_review_persistence,
 )
-from imas_codex.standard_names.review import cascade, holds, jev_review
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.review import cascade, holds, jev_review
+from iter_codex.standard_names.worker_tasks import (
     worker_common as _owning_worker_common,
     worker_review_docs as _owning_worker_review_docs,
     worker_review_names as _owning_worker_review_names,
@@ -149,7 +149,7 @@ def test_claim_verdict_controls_acceptance(
         persisted_stages.append(stage)
         return stage
 
-    import imas_codex.standard_names.graph_ops as graph_ops
+    import iter_codex.standard_names.graph_ops as graph_ops
 
     manager = MagicMock()
     manager.run_id = "run"
@@ -221,7 +221,7 @@ def test_a_claim_is_held_only_when_no_bound_source_supports_it(
     readings, expected_stage, passing_name_definition_seat
 ):
     """Every bound source is read, and support from any of them releases the hold."""
-    import imas_codex.standard_names.graph_ops as graph_ops
+    import iter_codex.standard_names.graph_ops as graph_ops
 
     first = "equilibrium/time_slice/profiles_1d/psi"
     second = "equilibrium/time_slice/profiles_1d/phi"
@@ -317,16 +317,16 @@ def test_a_claim_is_held_only_when_no_bound_source_supports_it(
     manager = MagicMock()
     manager.run_id = "run"
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=graph_context),
+        patch("iter_codex.graph.client.GraphClient", return_value=graph_context),
         patch(
-            "imas_codex.standard_names.context.fetch_review_neighbours", return_value={}
+            "iter_codex.standard_names.context.fetch_review_neighbours", return_value={}
         ),
         patch(
-            "imas_codex.standard_names.context.conventions_context_for", return_value={}
+            "iter_codex.standard_names.context.conventions_context_for", return_value={}
         ),
-        patch("imas_codex.llm.prompt_loader.render_prompt", return_value="review"),
+        patch("iter_codex.llm.prompt_loader.render_prompt", return_value="review"),
         patch(
-            "imas_codex.settings.get_sn_review_docs_models", return_value=["test/model"]
+            "iter_codex.settings.get_sn_review_docs_models", return_value=["test/model"]
         ),
         patch.object(workers, "model_provider_exposure", return_value=0.001),
         patch.object(
@@ -343,14 +343,14 @@ def test_a_claim_is_held_only_when_no_bound_source_supports_it(
         ),
         patch.object(_owning_worker_common, "_persist_dd_gap_evidence"),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items"
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items"
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours_batch",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
             return_value=[],
         ),
         patch.object(jev_review, "decide_batch", decide),
@@ -389,7 +389,7 @@ def test_stale_docs_claim_cannot_change_winning_holds(
     passing_name_definition_seat,
 ) -> None:
     """A no-op persistence must leave the graph owner's hold state untouched."""
-    import imas_codex.standard_names.graph_ops as graph_ops
+    import iter_codex.standard_names.graph_ops as graph_ops
 
     item = {
         "id": "magnetic_field",

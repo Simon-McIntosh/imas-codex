@@ -20,13 +20,13 @@ import os
 
 import pytest
 
-from imas_codex.cocos.calculator import cocos_from_dd_version
-from imas_codex.llm.search_formatters import (
+from iter_codex.cocos.calculator import cocos_from_dd_version
+from iter_codex.llm.search_formatters import (
     format_path_context_report,
     format_search_dd_report,
 )
-from imas_codex.llm.server import _get_imas_tools
-from imas_codex.settings import get_dd_version
+from iter_codex.llm.server import _get_imas_tools
+from iter_codex.settings import get_dd_version
 from tests.search.conftest import load_benchmark_encoder
 
 pytestmark = [pytest.mark.graph, pytest.mark.timeout(30)]
@@ -41,23 +41,23 @@ def _use_production_embedder():
     use the same embedder; otherwise Neo4j raises a dimensionality error.
     """
     prior = {
-        "IMAS_CODEX_EMBEDDING_MODEL": os.environ.get("IMAS_CODEX_EMBEDDING_MODEL"),
-        "IMAS_CODEX_EMBEDDING_LOCATION": os.environ.get(
-            "IMAS_CODEX_EMBEDDING_LOCATION"
+        "ITER_CODEX_EMBEDDING_MODEL": os.environ.get("ITER_CODEX_EMBEDDING_MODEL"),
+        "ITER_CODEX_EMBEDDING_LOCATION": os.environ.get(
+            "ITER_CODEX_EMBEDDING_LOCATION"
         ),
-        "IMAS_CODEX_EMBEDDING_DIMENSION": os.environ.get(
-            "IMAS_CODEX_EMBEDDING_DIMENSION"
+        "ITER_CODEX_EMBEDDING_DIMENSION": os.environ.get(
+            "ITER_CODEX_EMBEDDING_DIMENSION"
         ),
     }
-    os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = os.environ.get(
-        "IMAS_CODEX_BENCHMARK_EMBEDDING_MODEL",
+    os.environ["ITER_CODEX_EMBEDDING_MODEL"] = os.environ.get(
+        "ITER_CODEX_BENCHMARK_EMBEDDING_MODEL",
         "Qwen/Qwen3-Embedding-0.6B",
     )
-    os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = os.environ.get(
-        "IMAS_CODEX_BENCHMARK_EMBEDDING_LOCATION",
+    os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = os.environ.get(
+        "ITER_CODEX_BENCHMARK_EMBEDDING_LOCATION",
         "titan",
     )
-    os.environ["IMAS_CODEX_EMBEDDING_DIMENSION"] = "256"
+    os.environ["ITER_CODEX_EMBEDDING_DIMENSION"] = "256"
     yield
     for key, value in prior.items():
         if value is None:
@@ -68,7 +68,7 @@ def _use_production_embedder():
 
 @pytest.fixture(scope="module")
 def live_tools(_use_production_embedder):
-    from imas_codex.tools import graph_search
+    from iter_codex.tools import graph_search
 
     prior_encoder = graph_search._encoder
     graph_search._encoder = load_benchmark_encoder()
@@ -187,8 +187,8 @@ async def test_list_dd_paths_cocos_filter(live_tools):
 def test_format_search_dd_report_includes_cocos_line():
     """The search report must render a COCOS line when the hit carries a
     cocos_transformation_type."""
-    from imas_codex.models.result_models import SearchPathsResult
-    from imas_codex.search.search_strategy import SearchHit
+    from iter_codex.models.result_models import SearchPathsResult
+    from iter_codex.search.search_strategy import SearchHit
 
     hit = SearchHit(
         path="magnetics/ip",

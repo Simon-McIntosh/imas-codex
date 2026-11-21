@@ -11,7 +11,7 @@ import os
 
 import pytest
 
-from imas_codex.graph.dd_search import (
+from iter_codex.graph.dd_search import (
     RelatedPathHit,
     RelatedPathResult,
     hybrid_dd_search,
@@ -25,17 +25,17 @@ pytestmark = pytest.mark.graph
 def _use_production_embedder():
     """Override embedding config to match graph vector indexes."""
     prior = {
-        "IMAS_CODEX_EMBEDDING_MODEL": os.environ.get("IMAS_CODEX_EMBEDDING_MODEL"),
-        "IMAS_CODEX_EMBEDDING_LOCATION": os.environ.get(
-            "IMAS_CODEX_EMBEDDING_LOCATION"
+        "ITER_CODEX_EMBEDDING_MODEL": os.environ.get("ITER_CODEX_EMBEDDING_MODEL"),
+        "ITER_CODEX_EMBEDDING_LOCATION": os.environ.get(
+            "ITER_CODEX_EMBEDDING_LOCATION"
         ),
-        "IMAS_CODEX_EMBEDDING_DIMENSION": os.environ.get(
-            "IMAS_CODEX_EMBEDDING_DIMENSION"
+        "ITER_CODEX_EMBEDDING_DIMENSION": os.environ.get(
+            "ITER_CODEX_EMBEDDING_DIMENSION"
         ),
     }
-    os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = "Qwen/Qwen3-Embedding-0.6B"
-    os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = "titan"
-    os.environ["IMAS_CODEX_EMBEDDING_DIMENSION"] = "256"
+    os.environ["ITER_CODEX_EMBEDDING_MODEL"] = "Qwen/Qwen3-Embedding-0.6B"
+    os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = "titan"
+    os.environ["ITER_CODEX_EMBEDDING_DIMENSION"] = "256"
     yield
     for key, value in prior.items():
         if value is None:
@@ -47,7 +47,7 @@ def _use_production_embedder():
 @pytest.fixture(scope="module")
 def gc(_use_production_embedder):
     """Session-scoped GraphClient."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     try:
         client = GraphClient()
@@ -92,7 +92,7 @@ def test_hit_has_expected_keys(gc):
 
 def test_hits_are_searchhit_instances(gc):
     """Returned objects are SearchHit model instances."""
-    from imas_codex.search.search_strategy import SearchHit
+    from iter_codex.search.search_strategy import SearchHit
 
     hits = hybrid_dd_search(gc, "safety factor", k=5)
     assert hits

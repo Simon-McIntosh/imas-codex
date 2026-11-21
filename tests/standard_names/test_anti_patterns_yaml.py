@@ -1,4 +1,4 @@
-"""Schema validation for ``imas_codex/standard_names/anti_patterns.yaml``.
+"""Schema validation for ``iter_codex/standard_names/anti_patterns.yaml``.
 
 The anti-patterns YAML is the static source of decomposition-failure
 exemplars rendered into the SN compose system prompt.  These tests guard
@@ -18,7 +18,7 @@ from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP  # noqa: E40
 
 ANTI_PATTERNS_PATH = (
     Path(__file__).resolve().parents[2]
-    / "imas_codex"
+    / "iter_codex"
     / "standard_names"
     / "anti_patterns.yaml"
 )
@@ -114,7 +114,7 @@ class TestSchema:
 
 class TestLoaderIntegration:
     def test_loader_returns_entries(self):
-        from imas_codex.standard_names.context import _load_decomposition_anti_patterns
+        from iter_codex.standard_names.context import _load_decomposition_anti_patterns
 
         # lru_cache may have been primed by an earlier test — clear so we
         # exercise the fresh-load path.
@@ -125,7 +125,7 @@ class TestLoaderIntegration:
             assert "bad_name" in e
 
     def test_context_builder_exposes_anti_patterns(self):
-        from imas_codex.standard_names.context import (
+        from iter_codex.standard_names.context import (
             build_compose_context,
             clear_context_cache,
         )

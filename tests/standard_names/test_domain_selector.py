@@ -12,9 +12,9 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.core.physics_domain import PhysicsDomain
-from imas_codex.standard_names import domain_priority, domain_ranking
-from imas_codex.standard_names.consolidation import _resolve_physics_domains
+from iter_codex.core.physics_domain import PhysicsDomain
+from iter_codex.standard_names import domain_priority, domain_ranking
+from iter_codex.standard_names.consolidation import _resolve_physics_domains
 
 
 def test_declared_order_covers_vocabulary():
@@ -44,7 +44,7 @@ def test_select_primary_domain_refuses_unknown():
 
 def test_selection_never_opens_graph():
     with patch(
-        "imas_codex.graph.client.GraphClient",
+        "iter_codex.graph.client.GraphClient",
         side_effect=AssertionError("graph opened"),
     ):
         assert (

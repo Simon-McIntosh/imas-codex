@@ -11,7 +11,7 @@ import asyncio
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -168,7 +168,7 @@ class TestWatchdogUsesHardExhausted:
     @pytest.mark.asyncio
     async def test_watchdog_skips_reservation_spike(self) -> None:
         """Large reservation drains pool → watchdog does NOT fire."""
-        from imas_codex.standard_names.pools import PoolSpec, run_pools
+        from iter_codex.standard_names.pools import PoolSpec, run_pools
 
         mgr = BudgetManager(total_budget=5.0)
         stop_event = asyncio.Event()

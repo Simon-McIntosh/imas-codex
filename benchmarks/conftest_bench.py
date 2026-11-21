@@ -15,7 +15,7 @@ class MCPFixture:
 
     @cached_property
     def server(self):
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         return AgentsServer()
 
@@ -27,7 +27,7 @@ class MCPFixture:
 
     @cached_property
     def graph_client(self):
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         return GraphClient.from_profile()
 

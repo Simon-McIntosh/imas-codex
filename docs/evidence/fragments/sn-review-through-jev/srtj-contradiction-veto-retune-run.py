@@ -60,8 +60,8 @@ REPO = HERE.parents[3]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from imas_codex.settings import get_model  # noqa: E402
-from imas_codex.standard_names.review import jev_review  # noqa: E402
+from iter_codex.settings import get_model  # noqa: E402
+from iter_codex.standard_names.review import jev_review  # noqa: E402
 
 HOLD = HERE / "srtj-contradiction-veto-hold.json"
 PLANTED = HERE / "golden-documentation-planted.json"
@@ -396,7 +396,7 @@ def main() -> int:
     result["questions_from"] = "jev_review.docs_question_table"
     result["shipped_criterion"] = dict(jev_review._CLAIM_COMPARISON_CRITERIA)
     result["old_question_captured_from"] = (
-        f"imas_codex/standard_names/review/jev_review.py at {BASE_REVISION}"
+        f"iter_codex/standard_names/review/jev_review.py at {BASE_REVISION}"
     )
 
     args.out.write_text(json.dumps(result, indent=1) + "\n")

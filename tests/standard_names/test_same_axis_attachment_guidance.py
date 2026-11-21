@@ -1,6 +1,6 @@
 """Rendering guard for property-specific attachment guidance."""
 
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 
 def test_equal_axis_leaf_contrasts_render() -> None:

@@ -10,8 +10,8 @@ pytest.importorskip(
     reason="sentence-transformers not installed (optional GPU dependency)",
 )
 
-from imas_codex.embeddings.config import EmbeddingBackend, EncoderConfig
-from imas_codex.embeddings.encoder import Encoder
+from iter_codex.embeddings.config import EmbeddingBackend, EncoderConfig
+from iter_codex.embeddings.encoder import Encoder
 
 
 @pytest.mark.slow
@@ -64,7 +64,7 @@ def test_embedding_encoder_ad_hoc_embed():
 @pytest.mark.slow
 def test_model_failure_raises_error():
     """Test that Encoder raises EmbeddingBackendError if model fails to load."""
-    from imas_codex.embeddings.encoder import EmbeddingBackendError
+    from iter_codex.embeddings.encoder import EmbeddingBackendError
 
     config = EncoderConfig(
         model_name="nonexistent/model-name",

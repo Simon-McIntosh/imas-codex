@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.derivation import DerivedEdge
-from imas_codex.standard_names.graph_store.graph_catalog import write_standard_names
+from iter_codex.standard_names.derivation import DerivedEdge
+from iter_codex.standard_names.graph_store.graph_catalog import write_standard_names
 
 pytestmark = pytest.mark.graph
 
@@ -19,7 +19,7 @@ _PREFIX = "__write_local_placeholder__"
 @pytest.fixture()
 def _graph():
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -187,7 +187,7 @@ def test_write_sweeps_only_its_unowned_placeholder_endpoints(_graph) -> None:
 
         with (
             patch(
-                "imas_codex.standard_names.protection.filter_protected",
+                "iter_codex.standard_names.protection.filter_protected",
                 side_effect=lambda records, **_kwargs: (records, []),
             ),
             patch(
@@ -196,19 +196,19 @@ def test_write_sweeps_only_its_unowned_placeholder_endpoints(_graph) -> None:
             ),
             patch("imas_standard_names.grammar.compose", side_effect=lambda ir: ir),
             patch(
-                "imas_codex.standard_names.graph_store.graph_foundation._parse_grammar",
+                "iter_codex.standard_names.graph_store.graph_foundation._parse_grammar",
                 return_value={},
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
+                "iter_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                 return_value=[],
             ),
             patch(
-                "imas_codex.standard_names.derivation.derive_edges",
+                "iter_codex.standard_names.derivation.derive_edges",
                 side_effect=lambda name: edges.get(name, []),
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
+                "iter_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
                 side_effect=lambda batch, _client, **_kwargs: batch,
             ),
         ):

@@ -14,11 +14,11 @@ from __future__ import annotations
 
 from rich.console import Console
 
-from imas_codex.discovery.base.progress import (
+from iter_codex.discovery.base.progress import (
     DataDrivenProgressDisplay,
     WorkerStats,
 )
-from imas_codex.standard_names.progress import (
+from iter_codex.standard_names.progress import (
     SNLoopState,
     build_sn_loop_stages,
 )
@@ -260,13 +260,13 @@ class TestSNLoopProgressDisplayDeleted:
     def test_import_raises(self):
         import importlib
 
-        mod = importlib.import_module("imas_codex.standard_names.progress")
+        mod = importlib.import_module("iter_codex.standard_names.progress")
         assert not hasattr(mod, "SNLoopProgressDisplay")
 
     def test_old_helpers_removed(self):
         import importlib
 
-        mod = importlib.import_module("imas_codex.standard_names.progress")
+        mod = importlib.import_module("iter_codex.standard_names.progress")
         assert not hasattr(mod, "LoopEvent")
         assert not hasattr(mod, "PhaseState")
         assert not hasattr(mod, "_EVENT_RING_SIZE")

@@ -25,9 +25,9 @@ try:
 except ImportError:
     pass  # dotenv optional in CI/benchmark environments
 
-from imas_codex.clusters.label_cache import LabelCache
-from imas_codex.core.clusters import Clusters
-from imas_codex.embeddings.config import EncoderConfig
+from iter_codex.clusters.label_cache import LabelCache
+from iter_codex.core.clusters import Clusters
+from iter_codex.embeddings.config import EncoderConfig
 
 
 @click.command()

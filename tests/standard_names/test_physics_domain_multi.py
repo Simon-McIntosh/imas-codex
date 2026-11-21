@@ -34,7 +34,7 @@ class TestPhysicsDomainMultiValued:
 
     def test_write_single_domain_stores_scalar(self, graph_client, clean_sn):
         """Writing a single domain stores it as a scalar string (not a list)."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -64,7 +64,7 @@ class TestPhysicsDomainMultiValued:
         physics_domain retains the highest-priority (lowest-rank) domain after promotion.
         source_domains accumulates all contributing domains.
         """
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -104,7 +104,7 @@ class TestPhysicsDomainMultiValued:
 
     def test_no_duplicate_on_rewrite(self, graph_client, clean_sn):
         """Re-writing an existing domain does not duplicate it in source_domains."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -151,7 +151,7 @@ class TestPhysicsDomainMultiValued:
 
     def test_has_physics_domain_edge_count(self, graph_client, clean_sn):
         """HAS_PHYSICS_DOMAIN relationship count matches distinct domains."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -187,7 +187,7 @@ class TestPhysicsDomainMultiValued:
 
     def test_scalar_input_stored_as_scalar(self, graph_client, clean_sn):
         """Scalar physics_domain input is stored as a scalar string."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 

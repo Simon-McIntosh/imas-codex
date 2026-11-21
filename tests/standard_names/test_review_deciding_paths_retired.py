@@ -16,8 +16,8 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.review import cascade, panel_audit
-from imas_codex.standard_names.worker_tasks import worker_review_names
+from iter_codex.standard_names.review import cascade, panel_audit
+from iter_codex.standard_names.worker_tasks import worker_review_names
 
 _WORKER_SOURCE = pathlib.Path(worker_review_names.__file__).read_text()
 _CASCADE_SOURCE = pathlib.Path(cascade.__file__).read_text()
@@ -44,7 +44,7 @@ def _seats_declared_in_pyproject() -> dict[str, set[str]]:
 
     root = pathlib.Path(__file__).resolve().parents[2]
     config = tomllib.loads((root / "pyproject.toml").read_text())
-    sn_review = config["tool"]["imas-codex"]["sn-review"]
+    sn_review = config["tool"]["iter-codex"]["sn-review"]
     declared: dict[str, set[str]] = {}
     for axis in ("names", "docs"):
         section = sn_review[axis]
@@ -57,7 +57,7 @@ def _seats_declared_in_pyproject() -> dict[str, set[str]]:
 
 def test_the_persisting_quorum_cycle_runner_is_not_defined():
     """The write-the-whole-chain wrapper is gone, from the module and the API."""
-    from imas_codex.standard_names import worker_tasks
+    from iter_codex.standard_names import worker_tasks
 
     assert not hasattr(worker_review_names, "_persisting_quorum_cycles")
     exported = {
@@ -101,7 +101,7 @@ def test_the_retained_runner_persists_nothing(monkeypatch):
         written.append(list(records))
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
+        "iter_codex.standard_names.graph_store.graph_catalog.write_reviews",
         record_writes,
     )
 
@@ -153,11 +153,11 @@ async def test_an_unjudged_item_reaches_the_single_chat_reviewer(monkeypatch):
 
     monkeypatch.setattr(cascade, "_store_unjudged", store_unjudged)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.judgment.decisions_key_absent_reason",
+        "iter_codex.discovery.base.judgment.decisions_key_absent_reason",
         lambda: "no decision key on this host",
     )
     with patch(
-        "imas_codex.discovery.base.judgment.decisions_key_present",
+        "iter_codex.discovery.base.judgment.decisions_key_present",
         return_value=False,
     ):
         result = await cascade.adjudicate_review(
@@ -198,7 +198,7 @@ def test_no_review_seat_resolves_outside_the_chat_reviewer_and_audit_panel():
     seat registered as a model section would be resolvable anywhere, which is
     the shape a restored deciding path needs and this test refuses.
     """
-    from imas_codex.settings import MODEL_SECTIONS, get_model_source_models
+    from iter_codex.settings import MODEL_SECTIONS, get_model_source_models
 
     review_sections = sorted(
         section

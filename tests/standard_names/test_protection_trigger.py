@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.protection import filter_protected
+from iter_codex.standard_names.protection import filter_protected
 
 
 def _graph_client(*, rows: list[dict[str, str]] | None = None) -> MagicMock:
@@ -18,7 +18,7 @@ def _graph_client(*, rows: list[dict[str, str]] | None = None) -> MagicMock:
 def test_approved_name_is_protected() -> None:
     """Approval is sufficient and is the only predicate in the graph query."""
     client = _graph_client(rows=[{"id": "approved_name"}])
-    with patch("imas_codex.graph.client.GraphClient") as graph_client:
+    with patch("iter_codex.graph.client.GraphClient") as graph_client:
         graph_client.return_value.__enter__.return_value = client
         filtered, skipped = filter_protected(
             [{"id": "approved_name", "description": "replacement"}]
@@ -37,7 +37,7 @@ def test_unapproved_legacy_marker_is_not_protected() -> None:
     client.query.side_effect = lambda query, **_params: (
         [{"id": "legacy_name"}] if "sn.origin" in query else []
     )
-    with patch("imas_codex.graph.client.GraphClient") as graph_client:
+    with patch("iter_codex.graph.client.GraphClient") as graph_client:
         graph_client.return_value.__enter__.return_value = client
         item = {"id": "legacy_name", "description": "pipeline text"}
         filtered, skipped = filter_protected([item])
@@ -51,7 +51,7 @@ def test_query_failure_refuses_write() -> None:
     client = _graph_client()
     client.query.side_effect = RuntimeError("graph unavailable")
     with (
-        patch("imas_codex.graph.client.GraphClient") as graph_client,
+        patch("iter_codex.graph.client.GraphClient") as graph_client,
         pytest.raises(RuntimeError, match="graph unavailable"),
     ):
         graph_client.return_value.__enter__.return_value = client

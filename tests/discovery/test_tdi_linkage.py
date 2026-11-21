@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.mdsplus.tdi_linkage import (
+from iter_codex.discovery.mdsplus.tdi_linkage import (
     _extract_build_paths,
     link_tdi_to_data_nodes,
     update_signal_accessors,
@@ -62,7 +62,7 @@ class TestExtractBuildPaths:
 class TestLinkTdiToDataNodes:
     """Test link_tdi_to_data_nodes graph operation."""
 
-    @patch("imas_codex.discovery.mdsplus.tdi_linkage.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.tdi_linkage.GraphClient")
     def test_creates_resolves_to_edges(self, mock_gc_cls):
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -87,7 +87,7 @@ class TestLinkTdiToDataNodes:
         assert result == 3
         assert mock_gc.query.call_count == 2
 
-    @patch("imas_codex.discovery.mdsplus.tdi_linkage.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.tdi_linkage.GraphClient")
     def test_no_tdi_functions(self, mock_gc_cls):
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -99,7 +99,7 @@ class TestLinkTdiToDataNodes:
 
         assert result == 0
 
-    @patch("imas_codex.discovery.mdsplus.tdi_linkage.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.tdi_linkage.GraphClient")
     def test_no_matching_paths(self, mock_gc_cls):
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -123,7 +123,7 @@ class TestLinkTdiToDataNodes:
 class TestUpdateSignalAccessors:
     """Test update_signal_accessors graph operation."""
 
-    @patch("imas_codex.discovery.mdsplus.tdi_linkage.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.tdi_linkage.GraphClient")
     def test_updates_signals(self, mock_gc_cls):
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)

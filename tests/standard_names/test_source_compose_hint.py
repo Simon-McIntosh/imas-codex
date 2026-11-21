@@ -37,7 +37,7 @@ def _decision(
 def test_schema_declares_source_hint_lifecycle() -> None:
     schema = yaml.safe_load(
         (
-            Path(__file__).parents[2] / "imas_codex" / "schemas" / "standard_name.yaml"
+            Path(__file__).parents[2] / "iter_codex" / "schemas" / "standard_name.yaml"
         ).read_text()
     )
     values = schema["enums"]["ComposeHintStatus"]["permissible_values"]
@@ -54,7 +54,7 @@ def test_schema_declares_source_hint_lifecycle() -> None:
     ["", "equilibrium/*/psi", "equilibrium/[ab]/psi", "signals:tcv:x"],
 )
 def test_source_hint_requires_one_exact_dd_path(path: str) -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         set_source_compose_hint,
     )
 
@@ -78,7 +78,7 @@ def test_source_hint_text_is_nonblank_and_bounded(
     reason: str,
     message: str,
 ) -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         set_source_compose_hint,
     )
 
@@ -87,7 +87,7 @@ def test_source_hint_text_is_nonblank_and_bounded(
 
 
 def test_source_hint_dry_run_is_nonmutating_and_exact() -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         set_source_compose_hint,
     )
 
@@ -114,7 +114,7 @@ def test_source_hint_dry_run_is_nonmutating_and_exact() -> None:
 
 
 def test_source_hint_cas_sets_only_steering_fields() -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         set_source_compose_hint,
     )
 
@@ -147,7 +147,7 @@ def test_source_hint_cas_sets_only_steering_fields() -> None:
 
 
 def test_source_hint_replace_reopens_and_clears_consumption_time() -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         set_source_compose_hint,
     )
 
@@ -182,7 +182,7 @@ def test_source_hint_replace_reopens_and_clears_consumption_time() -> None:
     ],
 )
 def test_source_hint_refusals_never_write(decision: str) -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         set_source_compose_hint,
     )
 
@@ -197,7 +197,7 @@ def test_source_hint_refusals_never_write(decision: str) -> None:
 
 
 def test_source_hint_claim_turnover_loses_cas() -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         set_source_compose_hint,
     )
 
@@ -215,7 +215,7 @@ def test_source_hint_claim_turnover_loses_cas() -> None:
 
 
 def test_source_hint_unclassified_cas_loss_is_explicit() -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         set_source_compose_hint,
     )
 
@@ -228,7 +228,7 @@ def test_source_hint_unclassified_cas_loss_is_explicit() -> None:
 
 
 def test_source_hint_decision_query_has_every_cas_refusal() -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         _source_compose_hint_decision,
     )
 
@@ -249,12 +249,12 @@ def test_source_hint_decision_query_has_every_cas_refusal() -> None:
 
 
 def test_source_hint_cli_success_dry_run_replace_and_refusal() -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     runner = CliRunner()
     base = ["source-hint", _PATH, "--hint", _HINT, "--reason", _REASON]
     with patch(
-        "imas_codex.standard_names.graph_store.graph_source_bindings.set_source_compose_hint",
+        "iter_codex.standard_names.graph_store.graph_source_bindings.set_source_compose_hint",
         return_value={
             "source_id": _SOURCE_ID,
             "eligible": True,
@@ -267,7 +267,7 @@ def test_source_hint_cli_success_dry_run_replace_and_refusal() -> None:
     assert f"set: {_SOURCE_ID}" in applied.output
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_source_bindings.set_source_compose_hint",
+        "iter_codex.standard_names.graph_store.graph_source_bindings.set_source_compose_hint",
         return_value={
             "source_id": _SOURCE_ID,
             "eligible": True,
@@ -287,7 +287,7 @@ def test_source_hint_cli_success_dry_run_replace_and_refusal() -> None:
     )
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_source_bindings.set_source_compose_hint",
+        "iter_codex.standard_names.graph_store.graph_source_bindings.set_source_compose_hint",
         return_value={
             "source_id": _SOURCE_ID,
             "eligible": False,
@@ -301,7 +301,7 @@ def test_source_hint_cli_success_dry_run_replace_and_refusal() -> None:
 
 
 def test_claim_readback_returns_both_source_and_name_steering() -> None:
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         claim_generate_name_batch,
     )
 
@@ -342,11 +342,11 @@ def test_claim_readback_returns_both_source_and_name_steering() -> None:
     gc.session.return_value.__exit__.return_value = False
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=gc,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
+            "iter_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
             side_effect=lambda items: items,
         ),
     ):
@@ -383,7 +383,7 @@ def _prompt_context(item: dict[str, object]) -> dict[str, object]:
 
 
 def test_source_hint_prompt_is_conditional_and_non_authoritative() -> None:
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     base = {
         "path": _PATH,
@@ -430,8 +430,8 @@ def test_source_hint_prompt_is_conditional_and_non_authoritative() -> None:
 
 @pytest.mark.asyncio
 async def test_pooled_compose_delivers_source_and_name_steering_to_prompt() -> None:
-    from imas_codex.llm.prompt_loader import render_prompt as real_render
-    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+    from iter_codex.llm.prompt_loader import render_prompt as real_render
+    from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
         compose_batch,
     )
 
@@ -474,40 +474,40 @@ async def test_pooled_compose_delivers_source_and_name_steering_to_prompt() -> N
     manager.reserve.return_value = lease
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
+            "iter_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
             side_effect=lambda items, **_kwargs: items,
         ),
         patch(
-            "imas_codex.standard_names.context.build_compose_context", return_value={}
+            "iter_codex.standard_names.context.build_compose_context", return_value={}
         ),
-        patch("imas_codex.settings.get_model", return_value="test-model"),
+        patch("iter_codex.settings.get_model", return_value="test-model"),
         patch(
-            "imas_codex.standard_names.context.build_domain_vocabulary_preseed",
+            "iter_codex.standard_names.context.build_domain_vocabulary_preseed",
             return_value="",
         ),
         patch(
-            "imas_codex.standard_names.review.themes.extract_reviewer_themes",
+            "iter_codex.standard_names.review.themes.extract_reviewer_themes",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.example_loader.load_compose_examples",
+            "iter_codex.standard_names.example_loader.load_compose_examples",
             return_value=[],
         ),
-        patch("imas_codex.graph.client.GraphClient", return_value=graph),
+        patch("iter_codex.graph.client.GraphClient", return_value=graph),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items"
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items"
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
             return_value=None,
         ),
-        patch("imas_codex.llm.prompt_loader.render_prompt", side_effect=_render),
+        patch("iter_codex.llm.prompt_loader.render_prompt", side_effect=_render),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             new=AsyncMock(side_effect=RuntimeError("stop after prompt capture")),
         ),
         pytest.raises(RuntimeError, match="stop after prompt capture"),
@@ -525,10 +525,10 @@ async def test_pooled_compose_delivers_source_and_name_steering_to_prompt() -> N
 
 
 def test_only_successful_binding_queries_consume_open_hints() -> None:
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         persist_generated_name_winners,
     )
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         _lock_claimed_name_bindings,
         persist_claimed_attachments,
         persist_claimed_source_outcomes,

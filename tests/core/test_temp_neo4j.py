@@ -1,4 +1,4 @@
-"""Unit tests for imas_codex.graph.temp_neo4j module.
+"""Unit tests for iter_codex.graph.temp_neo4j module.
 
 Tests for temporary Neo4j instance management extracted from graph_cli.py.
 """
@@ -13,7 +13,7 @@ from unittest.mock import Mock, call
 import click
 import pytest
 
-from imas_codex.graph import temp_neo4j as sut
+from iter_codex.graph import temp_neo4j as sut
 
 # ============================================================================
 # IMAS_DD_LABELS

@@ -1,7 +1,7 @@
 """The remote directory enumerator must quote the path it scans.
 
 ``_enumerate_files_find`` in
-``imas_codex/remote/scripts/discover_files.py`` builds a ``find`` command as a
+``iter_codex/remote/scripts/discover_files.py`` builds a ``find`` command as a
 ``str`` and hands it to ``sh -c``. A scanned path carrying a space, a ``#`` or
 another shell metacharacter is silently mangled unless the path is quoted.
 """
@@ -9,7 +9,7 @@ another shell metacharacter is silently mangled unless the path is quoted.
 import shlex
 from unittest.mock import MagicMock, patch
 
-from imas_codex.remote.scripts import discover_files
+from iter_codex.remote.scripts import discover_files
 
 # A path with both a space and a "#": the space splits the command into two
 # shell words and the "#" opens a comment.

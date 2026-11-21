@@ -11,9 +11,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.remote.archive_catalogue import ArchiveCatalogue
-from imas_codex.remote.catalogue_scan import MetadataReaders, main, run_scan
-from imas_codex.remote.scripts import codac_uda as reader
+from iter_codex.remote.archive_catalogue import ArchiveCatalogue
+from iter_codex.remote.catalogue_scan import MetadataReaders, main, run_scan
+from iter_codex.remote.scripts import codac_uda as reader
 
 
 def available(name):
@@ -204,17 +204,17 @@ from pathlib import Path
 from types import SimpleNamespace
 class NoGraph(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path=None, target=None):
-        if fullname.startswith(('imas_codex.graph', 'imas_codex.discovery', 'neo4j')):
+        if fullname.startswith(('iter_codex.graph', 'iter_codex.discovery', 'neo4j')):
             raise AssertionError('graph import refused by control')
 sys.meta_path.insert(0, NoGraph())
 try:
-    import imas_codex.graph.client
+    import iter_codex.graph.client
 except AssertionError as error:
     assert 'refused by control' in str(error)
 else:
     raise AssertionError('import guard did not fire')
-from imas_codex.remote.archive_catalogue import ArchiveCatalogue
-from imas_codex.remote.catalogue_scan import MetadataReaders, run_scan
+from iter_codex.remote.archive_catalogue import ArchiveCatalogue
+from iter_codex.remote.catalogue_scan import MetadataReaders, run_scan
 probe=MetadataReaders({'data_systems':{'codac_uda':{'archives':[{'role':'fast','host':'fast.invalid'},{'role':'slow','host':'slow.invalid'},{'role':'operator','host':'operators.invalid','excluded':True}],'readable_roles':['slow']}}})
 probe.close()
 root=Path(sys.argv[1])
@@ -230,7 +230,7 @@ class Readers:
 result=run_scan(store_path=root/'store.sqlite',config={},receipt_path=root/'receipt.json',reader_factory=Readers)
 assert result['status']=='complete' and result['repeat']['metadata_requests']==0
 assert result['graph_operations']==result['data_reads']==0
-assert not any(name.startswith(('imas_codex.graph', 'imas_codex.discovery', 'neo4j')) for name in sys.modules)
+assert not any(name.startswith(('iter_codex.graph', 'iter_codex.discovery', 'neo4j')) for name in sys.modules)
 print('graph import control fired; store-only scan and repeat completed')
 """
     result = subprocess.run(
@@ -244,7 +244,7 @@ print('graph import control fired; store-only scan and repeat completed')
 
 
 def test_reader_policy_refuses_operator_alias_before_start(monkeypatch):
-    import imas_codex.remote.catalogue_scan as scan
+    import iter_codex.remote.catalogue_scan as scan
 
     started = []
     monkeypatch.setattr(
@@ -398,8 +398,8 @@ def test_reader_framing_retains_second_receipt_and_skips_native_diagnostic():
 def test_separate_population_audit_reads_only_and_requires_positive_control(
     monkeypatch, tmp_path
 ):
-    from imas_codex.graph import client
-    from imas_codex.remote.catalogue_audit import measure_population
+    from iter_codex.graph import client
+    from iter_codex.remote.catalogue_audit import measure_population
 
     graph = MagicMock()
     monkeypatch.setattr(client, "GraphClient", lambda: graph)
@@ -452,7 +452,7 @@ def test_cleanup_failure_cannot_publish_a_complete_job_receipt(tmp_path):
 
 def timeout_reader(monkeypatch, permanent=False):
     """Exercise the real fetch boundary with deterministic native batch receipts."""
-    import imas_codex.remote.catalogue_scan as scan
+    import iter_codex.remote.catalogue_scan as scan
 
     readers = MetadataReaders.__new__(MetadataReaders)
     readers.local = threading.local()

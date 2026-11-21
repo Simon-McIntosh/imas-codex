@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 0a9221bfde65e386943e5a392cc6396cd2693843, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.review.jev_review.choice_acceptable_form, imas_codex.standard_names.workers._search_nearby_names.
+# Names the tree no longer defines: iter_codex.standard_names.review.jev_review.choice_acceptable_form, iter_codex.standard_names.workers._search_nearby_names.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Measure how well a Jev risk composite founds known defects first.
@@ -87,13 +87,13 @@ def _unwrap(value):
 
 
 def _load_checks():
-    from imas_codex.standard_names.review.checks import load_review_checks
+    from iter_codex.standard_names.review.checks import load_review_checks
 
     return load_review_checks()[0]
 
 
 def _defect_probability(check, answer) -> float | None:
-    from imas_codex.standard_names.review.jev_review import choice_acceptable_form
+    from iter_codex.standard_names.review.jev_review import choice_acceptable_form
 
     if answer is None:
         return None
@@ -179,7 +179,7 @@ def _name_frozen() -> dict[str, dict]:
 
 
 def _name_items(checks):
-    from imas_codex.standard_names.review.jev_review import audit_finding_for
+    from iter_codex.standard_names.review.jev_review import audit_finding_for
 
     name_checks = [c for c in checks if c.axis == "name"]
     question_checks = {c.id for c in name_checks if c.question is not None}
@@ -262,7 +262,7 @@ def _name_items(checks):
 
 def _graph_name_props(names: list[str]) -> dict[str, dict]:
     """Whatever the graph holds for a name, so a judgement reads what is there."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     if not names:
         return {}
@@ -294,7 +294,7 @@ def _name_siblings(name: str, query: str) -> list[dict]:
     context, not a gate: an unavailable search returns none and the candidate
     is still judged.
     """
-    from imas_codex.standard_names.workers import _search_nearby_names
+    from iter_codex.standard_names.workers import _search_nearby_names
 
     try:
         found = _search_nearby_names(query or name, k=5)
@@ -316,7 +316,7 @@ def _judge_name_gap(names: list[str], name_checks) -> dict:
     a dropped name is indistinguishable from a judged one in the counts, and the
     coverage arithmetic then closes over the hole.
     """
-    from imas_codex.standard_names.review.jev_review import review_names
+    from iter_codex.standard_names.review.jev_review import review_names
 
     props = _graph_name_props(names)
     items = []
@@ -368,7 +368,7 @@ def _docs_frozen() -> dict[str, dict]:
 
 
 def _graph_names(ids: list[str]) -> dict[str, dict]:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     graph = GraphClient()
     query = """
@@ -420,7 +420,7 @@ def _docs_item_from_state(name: str, state: dict) -> dict:
 
 
 def _docs_items(checks):
-    from imas_codex.standard_names.review.jev_review import (
+    from iter_codex.standard_names.review.jev_review import (
         SERVICE,
         build_docs_audit_report,
         build_docs_state,
@@ -476,8 +476,8 @@ def _docs_items(checks):
     errors: dict[str, str] = {}
     pending = [e for e in entries if e["answers"] is None]
     if pending:
-        from imas_codex.discovery.base.judgment import decide_batch
-        from imas_codex.settings import get_model
+        from iter_codex.discovery.base.judgment import decide_batch
+        from iter_codex.settings import get_model
 
         judge_model = get_model("sn-judge")
 
@@ -558,7 +558,7 @@ def _docs_items(checks):
                 if probability is not None:
                     failures[check.id] = probability
             else:
-                from imas_codex.standard_names.review.jev_review import (
+                from iter_codex.standard_names.review.jev_review import (
                     audit_finding_for,
                 )
 
@@ -700,7 +700,7 @@ def _composite_interval(labels, values, groups, fraction) -> dict:
     """
     import numpy as np
 
-    from imas_codex.discovery.base.evaluation import _group_indices
+    from iter_codex.discovery.base.evaluation import _group_indices
 
     point = _recall_at(_order_by(values, reverse=True), labels, fraction)
     index_groups = _group_indices(groups, len(labels))
@@ -771,7 +771,7 @@ def _golden_orders(items, incumbent: dict[str, float | None]) -> dict:
 
 
 def _graph_scores(names: list[str], *, docs: bool) -> dict[str, float | None]:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     prop = "reviewer_score_docs" if docs else "reviewer_score"
     graph = GraphClient()

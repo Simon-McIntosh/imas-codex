@@ -60,11 +60,11 @@ class TestSearchFiltersInCypher:
     passed to GraphClient.query() to confirm the filters are present.
     """
 
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.embeddings.encoder.Encoder")
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.embeddings.encoder.Encoder")
     def test_query_excludes_quarantined(self, MockEncoder, MockGC) -> None:
         """Cypher must filter out validation_status='quarantined'."""
-        from imas_codex.standard_names.search import search_standard_names_vector
+        from iter_codex.standard_names.search import search_standard_names_vector
 
         # Mock encoder
         mock_enc = MagicMock()
@@ -81,11 +81,11 @@ class TestSearchFiltersInCypher:
         assert "superseded" in cypher
         assert "exhausted" in cypher
 
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.embeddings.encoder.Encoder")
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.embeddings.encoder.Encoder")
     def test_results_respect_k_limit(self, MockEncoder, MockGC) -> None:
         """Results are capped at k even when more pass filters."""
-        from imas_codex.standard_names.search import search_standard_names_vector
+        from iter_codex.standard_names.search import search_standard_names_vector
 
         mock_enc = MagicMock()
         mock_enc.embed_texts.return_value = [[0.1] * 768]
@@ -99,11 +99,11 @@ class TestSearchFiltersInCypher:
         results = search_standard_names_vector("electron temperature", k=3)
         assert len(results) == 3
 
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.embeddings.encoder.Encoder")
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.embeddings.encoder.Encoder")
     def test_empty_query_returns_empty(self, MockEncoder, MockGC) -> None:
         """Empty or whitespace query returns [] without calling graph."""
-        from imas_codex.standard_names.search import search_standard_names_vector
+        from iter_codex.standard_names.search import search_standard_names_vector
 
         assert search_standard_names_vector("") == []
         assert search_standard_names_vector("   ") == []

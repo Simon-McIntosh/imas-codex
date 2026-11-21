@@ -23,7 +23,7 @@ class TestR1HardwareRejection:
         ["vsm_probe", "kstar", "mast_u", "diii_d", "asdex_upgrade"],
     )
     def test_hardware_tokens_rejected(self, token):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         v = classify_vocab_token(token, "subject")
         assert v.action == "reject"
@@ -31,7 +31,7 @@ class TestR1HardwareRejection:
 
     def test_vsm_with_digit_rejected(self):
         """vsm_1 hits R4 (digit) before R1 — both reject it."""
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         v = classify_vocab_token("vsm_1", "component")
         assert v.action == "reject"
@@ -44,7 +44,7 @@ class TestR2SignalCodenames:
 
     @pytest.mark.parametrize("token", ["ip", "btf", "nel", "nbi", "ech", "sxr"])
     def test_signal_codenames_rejected(self, token):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         v = classify_vocab_token(token, "subject")
         assert v.action == "reject"
@@ -55,7 +55,7 @@ class TestR3PluralDedup:
     """R3: English plurals of existing tokens should be rejected."""
 
     def test_channels_rejected_when_channel_exists(self):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         existing = frozenset({"channel", "electron", "temperature"})
         v = classify_vocab_token("channels", "component", existing_tokens=existing)
@@ -64,7 +64,7 @@ class TestR3PluralDedup:
         assert "channel" in v.reason
 
     def test_electrons_rejected_when_electron_exists(self):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         existing = frozenset({"electron", "ion"})
         v = classify_vocab_token("electrons", "subject", existing_tokens=existing)
@@ -72,7 +72,7 @@ class TestR3PluralDedup:
         assert "R3" in v.reason
 
     def test_processes_es_plural_rejected(self):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         existing = frozenset({"process", "drift"})
         v = classify_vocab_token("processes", "process", existing_tokens=existing)
@@ -80,7 +80,7 @@ class TestR3PluralDedup:
         assert "R3" in v.reason
 
     def test_non_plural_accepted(self):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         existing = frozenset({"electron"})
         v = classify_vocab_token(
@@ -96,7 +96,7 @@ class TestR4ShortNumeric:
 
     @pytest.mark.parametrize("token", ["ab", "x", "q"])
     def test_short_tokens_rejected(self, token):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         v = classify_vocab_token(token, "subject")
         assert v.action == "reject"
@@ -104,7 +104,7 @@ class TestR4ShortNumeric:
 
     @pytest.mark.parametrize("token", ["b0_like", "v2", "temp3", "k1"])
     def test_digit_tokens_rejected(self, token):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         v = classify_vocab_token(token, "subject")
         assert v.action == "reject"
@@ -116,7 +116,7 @@ class TestR5LocusReclassification:
 
     @pytest.mark.parametrize("token", ["midplane", "lfs", "hfs", "divertor", "x_point"])
     def test_locus_tokens_reclassified(self, token):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         v = classify_vocab_token(token, "subject")  # proposed on wrong segment
         # lfs/hfs are 3 chars, so they pass R4 (exactly 3)
@@ -125,14 +125,14 @@ class TestR5LocusReclassification:
             assert "R5" in v.reason
 
     def test_midplane_reclassified_from_component(self):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         v = classify_vocab_token("midplane", "component")
         assert v.action == "reclassify"
         assert v.reclassify_segment == "position"
 
     def test_position_segment_stays_accepted(self):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         # If already proposed on position segment, it's a legitimate gap
         v = classify_vocab_token("midplane", "position")
@@ -153,7 +153,7 @@ class TestHappyPath:
         ],
     )
     def test_legitimate_tokens_accepted(self, token, segment):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         v = classify_vocab_token(token, segment, existing_tokens=frozenset())
         assert v.action == "accept"
@@ -163,7 +163,7 @@ class TestBatchFilter:
     """Test filter_vocab_gaps batch API."""
 
     def test_splits_into_three_buckets(self):
-        from imas_codex.standard_names.vocab_token_filter import filter_vocab_gaps
+        from iter_codex.standard_names.vocab_token_filter import filter_vocab_gaps
 
         gaps = [
             {"token": "runaway_electron", "segment": "subject"},
@@ -190,7 +190,7 @@ class TestBatchFilter:
         assert any(g["token"] == "ab" for g in rejected)
 
     def test_reclassified_segment_updated(self):
-        from imas_codex.standard_names.vocab_token_filter import filter_vocab_gaps
+        from iter_codex.standard_names.vocab_token_filter import filter_vocab_gaps
 
         gaps = [{"token": "divertor", "segment": "component"}]
         _, _, reclassified = filter_vocab_gaps(gaps, existing_tokens=frozenset())

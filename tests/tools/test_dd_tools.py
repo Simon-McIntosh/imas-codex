@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.tools.graph_search import GraphPathTool, _dd_version_clause
+from iter_codex.tools.graph_search import GraphPathTool, _dd_version_clause
 
 # ============================================================================
 # _dd_version_clause — semver string mode

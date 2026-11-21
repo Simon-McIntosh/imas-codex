@@ -16,9 +16,9 @@ from __future__ import annotations
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_store.graph_claim_scope import (
+from iter_codex.cli.sn import sn
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_store.graph_claim_scope import (
     partition_focus_by_accepted,
 )
 
@@ -89,7 +89,7 @@ def _stub_seed(monkeypatch):
     ``name_stage``) runs via a direct query and stays real.
     """
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+        "iter_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
         lambda sources, force=False, default_dd_version=None: len(sources),
     )
 
@@ -134,7 +134,7 @@ def test_partition_preserves_input_order(focus_nodes):
 @pytest.mark.graph
 def test_focus_gap_only_leaves_accepted_untouched(focus_nodes, tmp_path, monkeypatch):
     manifest = _write_manifest(tmp_path)
-    monkeypatch.setattr("imas_codex.cli.sn._run_sn_cmd", lambda **kw: None)
+    monkeypatch.setattr("iter_codex.cli.sn._run_sn_cmd", lambda **kw: None)
     _stub_seed(monkeypatch)
 
     result = CliRunner().invoke(sn, ["run", "--focus", str(manifest), "--dry-run"])
@@ -160,10 +160,10 @@ def test_focus_seeds_new_sources_with_default_dd_version(
     before. Per-source dicts stay version-free (the re-seed contract), so a
     re-seed of an older-pinned source is not falsely re-pinned to current.
     """
-    from imas_codex.settings import get_dd_version
+    from iter_codex.settings import get_dd_version
 
     manifest = _write_manifest(tmp_path)
-    monkeypatch.setattr("imas_codex.cli.sn._run_sn_cmd", lambda **kw: None)
+    monkeypatch.setattr("iter_codex.cli.sn._run_sn_cmd", lambda **kw: None)
 
     calls: list[dict] = []
 
@@ -172,7 +172,7 @@ def test_focus_seeds_new_sources_with_default_dd_version(
         return len(sources)
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+        "iter_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
         _capture,
     )
 
@@ -192,7 +192,7 @@ def test_focus_seeds_new_sources_with_default_dd_version(
 @pytest.mark.graph
 def test_focus_reseed_restages_accepted(focus_nodes, tmp_path, monkeypatch):
     manifest = _write_manifest(tmp_path)
-    monkeypatch.setattr("imas_codex.cli.sn._run_sn_cmd", lambda **kw: None)
+    monkeypatch.setattr("iter_codex.cli.sn._run_sn_cmd", lambda **kw: None)
     _stub_seed(monkeypatch)
 
     result = CliRunner().invoke(

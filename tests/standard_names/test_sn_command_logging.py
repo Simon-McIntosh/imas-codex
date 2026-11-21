@@ -1,7 +1,7 @@
 """Every ``sn`` command that can spend model calls writes a run log.
 
 A command that spends places model calls whose record is the run log under
-``~/.local/share/imas-codex/logs/``. When it calls no logging helper the run
+``~/.local/share/iter-codex/logs/``. When it calls no logging helper the run
 leaves nothing behind, so its evidence can cite only the command line and its
 exit status. These tests hold the whole class, not a list: a command qualifies
 structurally, from what the command *is* rather than from a hard-coded roster,
@@ -32,8 +32,8 @@ import pytest
 from click import Command, Group
 from click.testing import CliRunner
 
-from imas_codex.cli import sn as sn_module
-from imas_codex.cli.sn import sn
+from iter_codex.cli import sn as sn_module
+from iter_codex.cli.sn import sn
 
 # Option parameter means "this command spends": the user states a spend ceiling.
 COST_LIMIT_PARAMS = frozenset({"cost_limit"})
@@ -187,12 +187,12 @@ def _spy(monkeypatch: Any) -> Any:
     def _record(*args: Any, **kwargs: Any) -> None:
         calls.append((args, kwargs))
 
-    monkeypatch.setattr("imas_codex.cli.logging.configure_cli_logging", _record)
+    monkeypatch.setattr("iter_codex.cli.logging.configure_cli_logging", _record)
     return calls
 
 
 def _install_stub_graph(monkeypatch: Any) -> None:
-    from imas_codex.graph import client as graph_client
+    from iter_codex.graph import client as graph_client
 
     class _StubGraph:
         def __enter__(self) -> _StubGraph:
@@ -211,7 +211,7 @@ def test_harmonize_report_writes_a_run_log(monkeypatch: Any) -> None:
     calls = _spy(monkeypatch)
     _install_stub_graph(monkeypatch)
     monkeypatch.setattr(
-        "imas_codex.standard_names.harmonize.report_family_rows",
+        "iter_codex.standard_names.harmonize.report_family_rows",
         lambda *a, **k: [],
     )
 
@@ -238,9 +238,9 @@ def test_edit_inline_review_writes_a_run_log(monkeypatch: Any) -> None:
         mode="hint",
     )
     outcome = SimpleNamespace(ran=True, all_accepted=True)
-    monkeypatch.setattr("imas_codex.standard_names.edit.apply_edit", lambda *a, **k: plan)
+    monkeypatch.setattr("iter_codex.standard_names.edit.apply_edit", lambda *a, **k: plan)
     monkeypatch.setattr(
-        "imas_codex.standard_names.edit.run_inline_review", lambda *a, **k: outcome
+        "iter_codex.standard_names.edit.run_inline_review", lambda *a, **k: outcome
     )
     monkeypatch.setattr(sn_module, "_render_edit_plan", lambda *a, **k: None)
     monkeypatch.setattr(sn_module, "_render_inline_review_outcome", lambda *a, **k: None)
@@ -266,7 +266,7 @@ def test_rescore_inline_review_writes_a_run_log(monkeypatch: Any) -> None:
         "run_id": "run-2",
         "reviewed": False,
     }
-    monkeypatch.setattr("imas_codex.standard_names.edit.rescore_name", lambda *a, **k: receipt)
+    monkeypatch.setattr("iter_codex.standard_names.edit.rescore_name", lambda *a, **k: receipt)
 
     result = CliRunner().invoke(sn, ["rescore", "electron_temperature"])
 

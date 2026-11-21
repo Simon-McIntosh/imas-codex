@@ -11,19 +11,19 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.graph_store.graph_claim_release import (
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.graph_store.graph_claim_release import (
     release_review_names_claims,
 )
-from imas_codex.standard_names.graph_store.graph_claim_scope import (
+from iter_codex.standard_names.graph_store.graph_claim_scope import (
     ExactNameScopeConflict,
     scope_exact_standard_names,
 )
-from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
     claim_generate_name_batch,
     claim_review_name_batch,
 )
-from imas_codex.standard_names.turn import skip_flags_from_only
+from iter_codex.standard_names.turn import skip_flags_from_only
 
 
 def _candidate(name_id: str, **overrides: object) -> dict[str, object]:
@@ -271,7 +271,7 @@ def test_exact_name_dry_run_splits_values_and_uses_zero_write_helper() -> None:
         "stamped": 0,
     }
     with patch(
-        "imas_codex.standard_names.graph_store.graph_claim_scope.scope_exact_standard_names",
+        "iter_codex.standard_names.graph_store.graph_claim_scope.scope_exact_standard_names",
         return_value=scoped,
     ) as helper:
         result = CliRunner().invoke(
@@ -346,14 +346,14 @@ def test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection(
     if skip_global:
         args.append("--skip-global-maintenance")
     with (
-        patch("imas_codex.cli.sn._require_embed_ready"),
-        patch("imas_codex.cli.sn._auto_sync_grammar"),
-        patch("imas_codex.cli.sn._note_pipeline_version_drift"),
+        patch("iter_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.cli.sn._auto_sync_grammar"),
+        patch("iter_codex.cli.sn._note_pipeline_version_drift"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_scope.scope_exact_standard_names",
+            "iter_codex.standard_names.graph_store.graph_claim_scope.scope_exact_standard_names",
             return_value=helper_result,
         ) as helper,
-        patch("imas_codex.cli.sn._run_sn_cmd") as run,
+        patch("iter_codex.cli.sn._run_sn_cmd") as run,
     ):
         result = CliRunner().invoke(sn, args)
 
@@ -374,14 +374,14 @@ def test_exact_name_review_action_routes_to_one_pool() -> None:
         "stamped": 1,
     }
     with (
-        patch("imas_codex.cli.sn._require_embed_ready"),
-        patch("imas_codex.cli.sn._auto_sync_grammar"),
-        patch("imas_codex.cli.sn._note_pipeline_version_drift"),
+        patch("iter_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.cli.sn._auto_sync_grammar"),
+        patch("iter_codex.cli.sn._note_pipeline_version_drift"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_scope.scope_exact_standard_names",
+            "iter_codex.standard_names.graph_store.graph_claim_scope.scope_exact_standard_names",
             return_value=helper_result,
         ),
-        patch("imas_codex.cli.sn._run_sn_cmd") as run,
+        patch("iter_codex.cli.sn._run_sn_cmd") as run,
     ):
         result = CliRunner().invoke(
             sn,
@@ -415,12 +415,12 @@ def test_exact_parent_enrich_routes_only_enrichment_pool_flags() -> None:
         "stamped": 1,
     }
     with (
-        patch("imas_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.cli.sn._require_embed_ready"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_scope.scope_exact_standard_names",
+            "iter_codex.standard_names.graph_store.graph_claim_scope.scope_exact_standard_names",
             return_value=helper_result,
         ),
-        patch("imas_codex.cli.sn._run_sn_cmd") as run,
+        patch("iter_codex.cli.sn._run_sn_cmd") as run,
     ):
         result = CliRunner().invoke(
             sn,
@@ -456,7 +456,7 @@ def test_generate_phases_keep_enrichment_while_enrich_is_independent() -> None:
 
 
 def test_shared_claim_query_ands_exact_scope_with_edits() -> None:
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         _claim_sn_atomic,
     )
 
@@ -476,7 +476,7 @@ def test_shared_claim_query_ands_exact_scope_with_edits() -> None:
     graph.session = _session_context
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         claimed = _claim_sn_atomic(
@@ -496,14 +496,14 @@ def test_shared_claim_query_ands_exact_scope_with_edits() -> None:
 @pytest.mark.graph
 def test_disposable_graph_keeps_unrelated_names_and_sources_unclaimable() -> None:
     """A live graph proves exact stamping and both claim boundaries."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    uri = os.environ.get("ITER_CODEX_TEST_NEO4J_URI")
     if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.skip("ITER_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("ITER_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
         pytest.fail("exact-name scope graph test requires an ephemeral graph")
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+    password = os.environ.get("ITER_CODEX_TEST_NEO4J_PASSWORD", "")
     suffix = uuid.uuid4().hex
     selected = f"exact_scope_selected_{suffix}"
     unrelated = f"exact_scope_unrelated_{suffix}"
@@ -571,7 +571,7 @@ def test_disposable_graph_keeps_unrelated_names_and_sources_unclaimable() -> Non
                 )
 
             with patch(
-                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+                "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 side_effect=_ephemeral_client,
             ):
                 reviewed = claim_review_name_batch(
@@ -617,20 +617,20 @@ def _plan_operator_types(plan: object) -> list[str]:
 @pytest.mark.graph
 def test_disposable_graph_exact_scope_query_plans_are_index_bounded() -> None:
     """Cohorts of one and forty retain indexed starts and bounded expansion."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_store.graph_claim_scope import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.graph_store.graph_claim_scope import (
         _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
         _EXACT_NAME_SCOPE_STAMP_QUERY,
         _EXACT_SCOPE_TERMINAL_NAME_STAGES,
         _EXACT_SCOPE_TERMINAL_STATUSES,
     )
 
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    uri = os.environ.get("ITER_CODEX_TEST_NEO4J_URI")
     if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.skip("ITER_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("ITER_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
         pytest.fail("exact-name scope graph test requires an ephemeral graph")
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+    password = os.environ.get("ITER_CODEX_TEST_NEO4J_PASSWORD", "")
     suffix = uuid.uuid4().hex
     ids = [f"exact_scope_plan_{suffix}_{index}" for index in range(40)]
     plans: dict[str, dict[str, list[str]]] = {}

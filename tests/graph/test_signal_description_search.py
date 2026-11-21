@@ -2,8 +2,8 @@
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.llm.search_tools import _text_search_signals, _vector_search_signals
+from iter_codex.graph.client import GraphClient
+from iter_codex.llm.search_tools import _text_search_signals, _vector_search_signals
 
 pytestmark = pytest.mark.graph
 

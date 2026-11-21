@@ -18,11 +18,11 @@ try:
 except ImportError:
     pass  # dotenv optional in CI/benchmark environments
 
-from imas_codex import dd_version
-from imas_codex.embeddings.config import EncoderConfig
-from imas_codex.embeddings.encoder import Encoder
-from imas_codex.resource_path_accessor import ResourcePathAccessor
-from imas_codex.search.document_store import DocumentStore
+from iter_codex import dd_version
+from iter_codex.embeddings.config import EncoderConfig
+from iter_codex.embeddings.encoder import Encoder
+from iter_codex.resource_path_accessor import ResourcePathAccessor
+from iter_codex.search.document_store import DocumentStore
 
 
 @click.command()
@@ -43,7 +43,7 @@ from imas_codex.search.document_store import DocumentStore
     "--model-name",
     type=str,
     default=None,
-    help="Sentence transformer model name (default: from imas_codex_EMBEDDING_MODEL env var or all-MiniLM-L6-v2)",
+    help="Sentence transformer model name (default: from iter_codex_EMBEDDING_MODEL env var or all-MiniLM-L6-v2)",
 )
 @click.option(
     "--batch-size",

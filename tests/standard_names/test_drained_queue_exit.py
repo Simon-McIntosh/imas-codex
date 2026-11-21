@@ -24,8 +24,8 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.cli.sn import _compute_pool_progress, _require_terminal_drain
-from imas_codex.standard_names.pools import (
+from iter_codex.cli.sn import _compute_pool_progress, _require_terminal_drain
+from iter_codex.standard_names.pools import (
     PoolSpec,
     _idle_exhaustion_watchdog,
 )
@@ -180,14 +180,14 @@ def test_a_stuck_claim_still_reports_stalled_and_exits_one() -> None:
 
 def test_every_pending_count_names_the_claim_restrictions() -> None:
     """Both pending-count queries must name the claim's own restrictions."""
-    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+    from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
         pool_pending_counts,
     )
 
     cli_query = _generate_name_clause(_count_cypher([]))
 
     lifecycle_graph = _FixtureGraph([])
-    with patch("imas_codex.graph.client.GraphClient", return_value=lifecycle_graph):
+    with patch("iter_codex.graph.client.GraphClient", return_value=lifecycle_graph):
         pool_pending_counts(
             services=SimpleNamespace(
                 _MAX_COMPOSE_CLAIM_ATTEMPTS=5,
@@ -217,7 +217,7 @@ def test_the_count_and_the_claim_select_the_same_sources() -> None:
 
 def test_both_count_sites_and_the_claim_read_one_predicate() -> None:
     """The claimability predicate is defined once and read by every site."""
-    from imas_codex.standard_names.graph_store.graph_foundation import (
+    from iter_codex.standard_names.graph_store.graph_foundation import (
         source_claim_predicate,
     )
 
@@ -236,7 +236,7 @@ def test_the_claim_predicate_has_one_input() -> None:
     """
     import inspect
 
-    from imas_codex.standard_names.graph_store.graph_foundation import (
+    from iter_codex.standard_names.graph_store.graph_foundation import (
         source_claim_predicate,
     )
 
@@ -253,7 +253,7 @@ def test_every_site_calls_the_shared_claim_predicate(
     itself makes only a site that reads it carry the marker, so a site that
     stops applying the shared predicate fails here.
     """
-    from imas_codex.standard_names.graph_store import (
+    from iter_codex.standard_names.graph_store import (
         graph_cost_and_claims,
         graph_parent_lifecycle,
     )
@@ -303,7 +303,7 @@ def _claim_seed_cypher() -> str:
     The graph double answers with no rows, so the claim reports an empty batch
     after its first statement and nothing is written.
     """
-    from imas_codex.standard_names.graph_store import graph_cost_and_claims
+    from iter_codex.standard_names.graph_store import graph_cost_and_claims
 
     graph = _RecordingGraph()
     graph_cost_and_claims.claim_generate_name_batch(

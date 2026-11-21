@@ -1,5 +1,5 @@
 {
-  "format": "imas-codex-mapping-handoff",
+  "format": "iter-codex-mapping-handoff",
   "format_version": 1,
   "facility": "jt-60sa",
   "dd_version": "4.1.1",

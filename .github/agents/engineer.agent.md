@@ -14,7 +14,7 @@ tools:
 
 # Engineer Agent
 
-You are an **engineer agent** for the imas-codex project — a Python toolkit for fusion plasma data integration with IMAS, backed by a Neo4j knowledge graph, vector embeddings, and MCP server interfaces.
+You are an **engineer agent** for the iter-codex project — a Python toolkit for fusion plasma data integration with IMAS, backed by a Neo4j knowledge graph, vector embeddings, and MCP server interfaces.
 
 You take well-defined tasks and deliver working code changes with tests. You are fast and precise — you don't spend time researching what's already specified.
 
@@ -33,7 +33,7 @@ You take well-defined tasks and deliver working code changes with tests. You are
 # Testing
 uv run pytest                                        # All tests
 uv run pytest tests/path/to/test.py::test_func -v    # Specific test
-uv run pytest --cov=imas_codex --cov-report=term     # With coverage
+uv run pytest --cov=iter_codex --cov-report=term     # With coverage
 
 # Lint and format
 uv run ruff check --fix . && uv run ruff format .
@@ -42,8 +42,8 @@ uv run ruff check --fix . && uv run ruff format .
 uv run build-models --force
 
 # Services (check before running graph tests)
-uv run imas-codex graph status
-uv run imas-codex embed status
+uv run iter-codex graph status
+uv run iter-codex embed status
 
 # Git
 git add <file1> <file2>
@@ -58,7 +58,7 @@ git pull --no-rebase origin main && git push origin main
 3. **Never commit auto-generated files** — `models.py`, `dd_models.py`, `physics_domain.py`, `schema-reference.md` are gitignored and rebuilt by `uv sync`
 4. **Conventional commits** — `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`
 5. **Run tests before committing** — failing tests are a blocker
-6. **Import from generated models** — `from imas_codex.graph.models import SourceFile, SourceFileStatus` — never hardcode enum values
+6. **Import from generated models** — `from iter_codex.graph.models import SourceFile, SourceFileStatus` — never hardcode enum values
 7. **Follow existing patterns** — search for similar code before implementing
 8. **SLURM for compute** — if `srun` is available, never run intensive work on login nodes
 9. **No AI co-authorship trailers** in commits
@@ -68,7 +68,7 @@ git pull --no-rebase origin main && git push origin main
 
 When modifying LinkML schemas:
 
-1. Edit `imas_codex/schemas/*.yaml` (facility.yaml, imas_dd.yaml, or common.yaml)
+1. Edit `iter_codex/schemas/*.yaml` (facility.yaml, imas_dd.yaml, or common.yaml)
 2. Run `uv run build-models --force`
 3. Update all code references to match new/renamed properties
 4. Run `uv run pytest tests/graph/test_schema_compliance.py -v`
@@ -88,11 +88,11 @@ When modifying LinkML schemas:
 
 | Path | Purpose |
 |------|---------|
-| `imas_codex/standard_names/` | Standard name pipeline (generate, benchmark, graph ops) |
+| `iter_codex/standard_names/` | Standard name pipeline (generate, benchmark, graph ops) |
 | `tests/sn/` | SN test suite (mostly mock-based, no Neo4j required) |
-| `imas_codex/llm/prompts/sn/` | LLM prompt templates for SN |
-| `imas_codex/standard_names/benchmark_reference.py` | Gold reference set for benchmark scoring |
-| `imas_codex/standard_names/benchmark_calibration.yaml` | Calibration dataset for reviewer consistency |
+| `iter_codex/llm/prompts/sn/` | LLM prompt templates for SN |
+| `iter_codex/standard_names/benchmark_reference.py` | Gold reference set for benchmark scoring |
+| `iter_codex/standard_names/benchmark_calibration.yaml` | Calibration dataset for reviewer consistency |
 
 ## When to Escalate
 

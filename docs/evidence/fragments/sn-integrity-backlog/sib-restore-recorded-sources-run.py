@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at f22eebcac726f52cac4970bf6b1bbddf7733ac4d, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops._TransactionQuery, imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops._TransactionQuery, iter_codex.standard_names.graph_ops.classify_sourceless_standard_names.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Restore the DD source each dropped-edge name recorded for itself.
@@ -22,12 +22,12 @@ from collections import Counter, defaultdict, deque
 from html import escape
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_ops import (
     _TransactionQuery,
     classify_sourceless_standard_names,
 )
-from imas_codex.standard_names.provenance_rebuild import bind_recovery_sources
+from iter_codex.standard_names.provenance_rebuild import bind_recovery_sources
 
 ROOT = Path(__file__).resolve().parents[4]
 OUTPUT = Path(__file__).with_name("sib-restore-recorded-sources.json")

@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.audits import (
+from iter_codex.standard_names.audits import (
     _strip_final_sign_convention_paragraph,
     repair_invariant_sign_convention_documents,
 )

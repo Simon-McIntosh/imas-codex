@@ -7,8 +7,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
-from imas_codex.standard_names.dd_resolutions import (
+from iter_codex.graph.models import DDResolutionField, DDResolutionValueKind
+from iter_codex.standard_names.dd_resolutions import (
     DDResolutionCollision,
     DDResolutionEvidenceMismatch,
     DDResolutionManifest,

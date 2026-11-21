@@ -38,7 +38,7 @@ Options:
                         ``get_sn_benchmark_reviewer_model()``).
 
 The runner is deliberately script-level (no CLI subcommand) to match
-``scripts/prompt_ab_run.py``.  Promote to ``imas-codex sn benchmark
+``scripts/prompt_ab_run.py``.  Promote to ``iter-codex sn benchmark
 --set v1`` once the eval set is full and gating is wired into CI.
 """
 
@@ -54,9 +54,9 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from imas_codex.discovery.base.llm import call_llm_structured
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_sn_benchmark_reviewer_model
+from iter_codex.discovery.base.llm import call_llm_structured
+from iter_codex.graph.client import GraphClient
+from iter_codex.settings import get_sn_benchmark_reviewer_model
 
 logger = logging.getLogger(__name__)
 

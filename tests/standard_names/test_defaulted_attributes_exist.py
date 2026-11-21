@@ -14,13 +14,13 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 # Package the empty-container aperture is derived from: every module it holds
 # that reads an attribute through a literal-name getattr with an empty-container
 # default is scanned, whether or not one of the roots below names it.
-SOURCE_PACKAGE = Path("imas_codex")
+SOURCE_PACKAGE = Path("iter_codex")
 
 # Extend this tuple when another standard-name surface needs the same guard.
 MODULE_ROOTS = (
-    Path("imas_codex/standard_names/review"),
-    Path("imas_codex/standard_names/export.py"),
-    Path("imas_codex/standard_names/loop.py"),
+    Path("iter_codex/standard_names/review"),
+    Path("iter_codex/standard_names/export.py"),
+    Path("iter_codex/standard_names/loop.py"),
 )
 
 # Bare constructor spellings of an empty container default.
@@ -322,7 +322,7 @@ def test_defaulted_literal_attributes_are_declared() -> None:
 
 def test_defaulted_literal_attribute_fixture_is_reported(tmp_path: Path) -> None:
     """The guard has a permanent counterexample independent of production code."""
-    source_file = tmp_path / "imas_codex/standard_names/review/fixture.py"
+    source_file = tmp_path / "iter_codex/standard_names/review/fixture.py"
     source_file.parent.mkdir(parents=True)
     source_file.write_text('getattr(subject, "fixture_missing", [])\n')
 
@@ -340,9 +340,9 @@ def test_misspelled_module_root_raises(tmp_path: Path, case: str) -> None:
     both halves of that condition are driven, not just the absent half.
     """
     if case == "absent":
-        configured_root = Path("imas_codex/standard_names/reviwe")
+        configured_root = Path("iter_codex/standard_names/reviwe")
     else:
-        configured_root = Path("imas_codex/standard_names/review/guard-probe")
+        configured_root = Path("iter_codex/standard_names/review/guard-probe")
         (tmp_path / configured_root).parent.mkdir(parents=True, exist_ok=True)
         os.mkfifo(tmp_path / configured_root)
 

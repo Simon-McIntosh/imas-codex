@@ -26,8 +26,8 @@ from tests.standard_names.test_pattern_families import (
 # Helpers
 # =============================================================================
 
-_WORKERS_MOD = "imas_codex.standard_names.workers"
-_GC_CLASS = "imas_codex.graph.client.GraphClient"
+_WORKERS_MOD = "iter_codex.standard_names.workers"
+_GC_CLASS = "iter_codex.graph.client.GraphClient"
 
 
 def _mock_gc(query_side_effect: list[list[dict]] | None = None) -> Any:
@@ -56,7 +56,7 @@ def _patch_gc(gc: Any):
 
 def test_enrich_populates_source_paths():
     """source_paths are stripped of dd: prefix and stored on item."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -91,11 +91,11 @@ def test_enrich_populates_source_paths():
     # Patch _search_nearby_names and _related_path_neighbours to avoid graph I/O
     with (
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
             return_value=[],
         ),
     ):
@@ -109,7 +109,7 @@ def test_enrich_populates_source_paths():
 
 def test_enrich_populates_dd_source_docs_and_aliases():
     """dd_source_docs and dd_aliases are populated from linked IMASNodes."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -141,11 +141,11 @@ def test_enrich_populates_dd_source_docs_and_aliases():
 
     with (
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
             return_value=[],
         ),
     ):
@@ -161,7 +161,7 @@ def test_enrich_populates_dd_source_docs_and_aliases():
 
 def test_enrich_populates_nearest_peers():
     """nearest_peers are populated when _search_nearby_names returns results."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -187,7 +187,7 @@ def test_enrich_populates_nearest_peers():
     }
 
     with patch(
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
         return_value=peers_mock,
     ):
         _enrich_for_docs_gen(gc, [item])
@@ -198,7 +198,7 @@ def test_enrich_populates_nearest_peers():
 
 def test_enrich_skips_item_with_no_id():
     """Items without an id key are silently skipped."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -213,7 +213,7 @@ def test_enrich_skips_item_with_no_id():
 
 def test_enrich_handles_empty_graph_result():
     """Empty graph result leaves item without enrichment keys (no crash)."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -222,7 +222,7 @@ def test_enrich_handles_empty_graph_result():
     item: dict[str, Any] = {"id": "missing_sn", "description": "some description"}
 
     with patch(
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
         return_value=[],
     ):
         _enrich_for_docs_gen(gc, [item])
@@ -233,7 +233,7 @@ def test_enrich_handles_empty_graph_result():
 
 def test_enrich_excludes_self_from_nearest_peers():
     """The SN being enriched must not appear in nearest_peers."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -247,7 +247,7 @@ def test_enrich_excludes_self_from_nearest_peers():
     item: dict[str, Any] = {"id": "electron_temperature", "description": "Te"}
 
     with patch(
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
         return_value=peers_mock,
     ):
         _enrich_for_docs_gen(gc, [item])
@@ -264,7 +264,7 @@ def test_enrich_excludes_self_from_nearest_peers():
 
 def test_nearby_names_returns_accepted_sns():
     """_nearby_names_for_docs_gen returns list of dicts from the graph."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _nearby_names_for_docs_gen,
     )
 
@@ -293,7 +293,7 @@ def test_nearby_names_returns_accepted_sns():
 
 def test_nearby_names_excludes_batch_items():
     """Items in the batch are not included in nearby_existing_names."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _nearby_names_for_docs_gen,
     )
 
@@ -332,7 +332,7 @@ def test_nearby_names_excludes_batch_items():
 
 def test_generate_docs_user_template_renders_source_paths():
     """generate_docs_user template renders source_paths and dd_source_docs."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     context = {
         "item": {
@@ -403,7 +403,7 @@ def test_generate_docs_user_template_renders_source_paths():
 
 def test_generate_docs_user_template_renders_without_dd_context():
     """generate_docs_user template renders cleanly when DD context is absent."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     context = {
         "item": {
@@ -448,7 +448,7 @@ class _PatternFamilyGC:
 
 def test_locus_qualified_variants_resolve_to_one_pattern_family():
     """A locus axis is a variation axis, so per-locus variants are family-mates."""
-    from imas_codex.standard_names.context import fetch_sibling_family
+    from iter_codex.standard_names.context import fetch_sibling_family
 
     gc = _PatternFamilyGC(
         _PatternGraph(
@@ -487,7 +487,7 @@ def test_locus_qualified_variants_resolve_to_one_pattern_family():
 
 def test_projection_family_remains_available_to_docs():
     """Component projections remain useful parallel-structure comparators."""
-    from imas_codex.standard_names.context import fetch_sibling_family
+    from iter_codex.standard_names.context import fetch_sibling_family
 
     gc = _PatternFamilyGC(
         _PatternGraph(
@@ -522,7 +522,7 @@ def test_projection_family_remains_available_to_docs():
 
 def test_source_owners_are_not_automatic_prose_family_members():
     """Attached owners never become sibling members or identity evidence."""
-    from imas_codex.standard_names.context import fetch_sibling_family
+    from iter_codex.standard_names.context import fetch_sibling_family
 
     gc = _PatternFamilyGC(
         _PatternGraph([_name("vertical_outline", physical_base="vertical_outline")])
@@ -547,7 +547,7 @@ def test_entity_owners_are_not_an_automatic_docs_cohort():
     The entity locus is invariant, so 34 registered entity tokens sharing a
     base quantity form 34 families of one, not one cohort of 34.
     """
-    from imas_codex.standard_names.context import fetch_sibling_family
+    from iter_codex.standard_names.context import fetch_sibling_family
 
     gc = _PatternFamilyGC(_entity_owner_fixture())
 
@@ -558,7 +558,7 @@ def test_entity_owners_are_not_an_automatic_docs_cohort():
 
 def test_sibling_family_omits_a_parent_the_graph_does_not_hold():
     """A base token with no backing node yields no parent, not a phantom."""
-    from imas_codex.standard_names.context import fetch_sibling_family
+    from iter_codex.standard_names.context import fetch_sibling_family
 
     gc = _PatternFamilyGC(
         _PatternGraph(

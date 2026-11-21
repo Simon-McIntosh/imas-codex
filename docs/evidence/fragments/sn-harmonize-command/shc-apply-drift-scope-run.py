@@ -48,7 +48,7 @@ BASELINE_HI = "2026-10-22T18:35:10"
 
 # The detector compares, per name: the resolved (live) DD context against the
 # stored snapshot. Content fields steer; provenance fields only re-stamp. See
-# imas_codex/standard_names/source_refresh.py:280 (requires_steering).
+# iter_codex/standard_names/source_refresh.py:280 (requires_steering).
 
 LOG: list[str] = []
 
@@ -96,8 +96,8 @@ def read_log_lines() -> dict:
 
 
 def main() -> int:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.source_refresh import detect_source_drift
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.source_refresh import detect_source_drift
 
     t0 = time.time()
     record: dict = {
@@ -105,15 +105,15 @@ def main() -> int:
         "runner": str(Path(__file__).resolve()),
         "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
-    import imas_codex
-    from imas_codex.standard_names import source_refresh
+    import iter_codex
+    from iter_codex.standard_names import source_refresh
 
     record["imports"] = {
-        "imas_codex.__file__": imas_codex.__file__,
-        "imas_codex.standard_names.source_refresh.__file__": source_refresh.__file__,
+        "iter_codex.__file__": iter_codex.__file__,
+        "iter_codex.standard_names.source_refresh.__file__": source_refresh.__file__,
         "cwd": os.getcwd(),
     }
-    note(f"module imas_codex -> {imas_codex.__file__}")
+    note(f"module iter_codex -> {iter_codex.__file__}")
     note(f"module source_refresh -> {source_refresh.__file__}")
     note(f"cwd -> {os.getcwd()}")
 
@@ -122,32 +122,32 @@ def main() -> int:
         # ── Q1: the call path that lets the refresh leave the family ──────
         record["q1_call_path"] = {
             "harmonize_apply_entry": cite(
-                "imas_codex/cli/sn.py",
+                "iter_codex/cli/sn.py",
                 r"outcome = apply_families\(",
                 "sn harmonize --apply calls apply_families",
             ),
             "drain_factory": cite(
-                "imas_codex/cli/sn.py",
+                "iter_codex/cli/sn.py",
                 r"def _docs_drain_factory|skip_generate=True|scope_run_id=run_id",
                 "the drain builds a docs-only flush scoped by run_id",
             ),
             "drain_call_in_pools": cite(
-                "imas_codex/standard_names/loop.py",
+                "iter_codex/standard_names/loop.py",
                 r"refresh_drifted_sources\(|_global_maintenance_call\(|scope_run_id=run_id",
                 "run_sn_pools runs the refresh, passing only scope_run_id",
             ),
             "refresh_signature": cite(
-                "imas_codex/standard_names/source_refresh.py",
+                "iter_codex/standard_names/source_refresh.py",
                 r"def refresh_drifted_sources|scope_run_id: str|def detect_source_drift|def stamp_source_snapshots|sn_ids: list\[str\] \| None|sn\.run_id = \$scope_run_id",
                 "the refresh has no id filter; scope_run_id only tags names INTO the run",
             ),
             "budget_charge": cite(
-                "imas_codex/standard_names/harmonize.py",
+                "iter_codex/standard_names/harmonize.py",
                 r"def _family_budget_drain|def drain\(run_id|spent \+= float\(cost\)|campaign_cost_ceiling=cost_limit|per_batch_cost_cap=cost_limit",
                 "the batch drain's measured spend is charged to the family cap",
             ),
             "focus_scope": cite(
-                "imas_codex/standard_names/graph_ops.py",
+                "iter_codex/standard_names/graph_ops.py",
                 r"AND sn\.run_id = \$scope_run_id",
                 "the docs pools claim only names whose run_id matches the drain scope",
             ),

@@ -4,8 +4,8 @@ import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from imas_codex.ids.models import SignalMappingBatch, SignalMappingEntry, TargetChoice
-from imas_codex.ids.workers import MappingDiscoveryState, assign_worker, map_worker
+from iter_codex.ids.models import SignalMappingBatch, SignalMappingEntry, TargetChoice
+from iter_codex.ids.workers import MappingDiscoveryState, assign_worker, map_worker
 
 
 def test_assignment_releases_selected_source_for_mapping():
@@ -22,26 +22,26 @@ def test_assignment_releases_selected_source_for_mapping():
         reasoning="selected probe home",
     )
     with (
-        patch("imas_codex.ids.workers.GraphClient", return_value=graph),
+        patch("iter_codex.ids.workers.GraphClient", return_value=graph),
         patch(
-            "imas_codex.ids.workers.get_mapping_route_thresholds",
+            "iter_codex.ids.workers.get_mapping_route_thresholds",
             return_value=SimpleNamespace(shortlist_size=5),
         ),
         patch(
-            "imas_codex.ids.workers.claim_sources_for_escalated",
+            "iter_codex.ids.workers.claim_sources_for_escalated",
             side_effect=[[{"id": source_id}], []],
         ),
         patch(
-            "imas_codex.ids.graph_ops.read_candidates",
+            "iter_codex.ids.graph_ops.read_candidates",
             return_value={source_id: [{"path": target}]},
         ),
         patch(
-            "imas_codex.ids.mapping.achoose_targets",
+            "iter_codex.ids.mapping.achoose_targets",
             new_callable=AsyncMock,
             return_value=choice,
         ),
-        patch("imas_codex.ids.graph_ops.select_candidates", return_value=1),
-        patch("imas_codex.ids.workers.release_mapping_claim") as release,
+        patch("iter_codex.ids.graph_ops.select_candidates", return_value=1),
+        patch("iter_codex.ids.workers.release_mapping_claim") as release,
     ):
         asyncio.run(assign_worker(state))
 
@@ -93,25 +93,25 @@ def test_map_worker_waits_for_selected_source_with_assign_claim():
     graph = MagicMock()
     graph.__enter__.return_value = graph
     with (
-        patch("imas_codex.ids.workers.claim_sources_for_mapping", side_effect=claim),
+        patch("iter_codex.ids.workers.claim_sources_for_mapping", side_effect=claim),
         patch(
-            "imas_codex.ids.workers.has_pending_mapping_work",
+            "iter_codex.ids.workers.has_pending_mapping_work",
             side_effect=lambda *_a: not mapped,
         ),
-        patch("imas_codex.ids.workers.GraphClient", return_value=graph),
-        patch("imas_codex.ids.graph_ops.read_candidates", return_value=edges),
+        patch("iter_codex.ids.workers.GraphClient", return_value=graph),
+        patch("iter_codex.ids.graph_ops.read_candidates", return_value=edges),
         patch(
-            "imas_codex.ids.mapping._prepare_section_context",
+            "iter_codex.ids.mapping._prepare_section_context",
             return_value={"prompt": "probe"},
         ),
-        patch("imas_codex.ids.mapping._build_messages", return_value=[]),
+        patch("iter_codex.ids.mapping._build_messages", return_value=[]),
         patch(
-            "imas_codex.ids.mapping._acall_llm",
+            "iter_codex.ids.mapping._acall_llm",
             new_callable=AsyncMock,
             return_value=batch,
         ),
-        patch("imas_codex.ids.workers.refresh_mapping_status", side_effect=refresh),
-        patch("imas_codex.ids.workers.asyncio.sleep", new_callable=AsyncMock),
+        patch("iter_codex.ids.workers.refresh_mapping_status", side_effect=refresh),
+        patch("iter_codex.ids.workers.asyncio.sleep", new_callable=AsyncMock),
     ):
         asyncio.run(map_worker(state))
 

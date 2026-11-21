@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-_GO = "imas_codex.standard_names.graph_ops"
+_GO = "iter_codex.standard_names.graph_ops"
 
 _DRIFT_SCOPE = "drift-run-2"
 _FOCUS_SCOPE = "focus-run-1"
@@ -26,9 +26,9 @@ _FOCUS_SCOPE = "focus-run-1"
 
 def _docs_specs() -> dict[str, Any]:
     """Build the docs pools carrying both a focus and a priority scope."""
-    from imas_codex.standard_names.loop import _build_pool_specs
+    from iter_codex.standard_names.loop import _build_pool_specs
 
-    with patch("imas_codex.settings.get_pool_replicas", return_value=1):
+    with patch("iter_codex.settings.get_pool_replicas", return_value=1):
         specs = _build_pool_specs(
             MagicMock(),
             asyncio.Event(),
@@ -52,7 +52,7 @@ async def test_priority_scope_replaces_caller_scope_in_priority_pass() -> None:
         ]
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
+        "iter_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
         side_effect=_claim,
     ):
         specs = _docs_specs()
@@ -79,7 +79,7 @@ async def test_empty_priority_pass_falls_back_to_caller_scope() -> None:
         ]
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
+        "iter_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
         side_effect=_claim,
     ):
         specs = _docs_specs()
@@ -102,7 +102,7 @@ async def test_review_docs_priority_scope_replaces_caller_scope() -> None:
         ]
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_review_persistence.claim_review_docs_batch",
+        "iter_codex.standard_names.graph_store.graph_review_persistence.claim_review_docs_batch",
         side_effect=_claim,
     ):
         specs = _docs_specs()

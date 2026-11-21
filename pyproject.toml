@@ -20,7 +20,7 @@ requires = [
 build-backend = "hatchling.build"
 
 [project]
-name = "imas-codex"
+name = "iter-codex"
 dynamic = ["version"]
 description = "An IMAS Data Dictionary MCP server"
 readme = "README.md"
@@ -120,13 +120,13 @@ serve = [
 cpu = [
     "torch",
     "sentence-transformers>=5.0.0",
-    "imas-codex[serve]",
+    "iter-codex[serve]",
 ]
 gpu = [
     "torch==2.5.1",
     "accelerate>=1.0.0",
     "sentence-transformers>=5.0.0",
-    "imas-codex[serve]",
+    "iter-codex[serve]",
 ]
 
 [dependency-groups]
@@ -186,13 +186,13 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/iterorganization/imas-codex"
-Repository = "https://github.com/iterorganization/imas-codex"
-Documentation = "https://github.com/iterorganization/imas-codex#readme"
-"Bug Tracker" = "https://github.com/iterorganization/imas-codex/issues"
+Homepage = "https://github.com/iterorganization/iter-codex"
+Repository = "https://github.com/iterorganization/iter-codex"
+Documentation = "https://github.com/iterorganization/iter-codex#readme"
+"Bug Tracker" = "https://github.com/iterorganization/iter-codex/issues"
 
 [project.scripts]
-imas-codex = "imas_codex.cli:main"
+iter-codex = "iter_codex.cli:main"
 dd-version = "scripts.dd_version:main"
 build-schemas = "scripts.build_schemas:build_schemas"
 map-ids-domains = "scripts.map_ids_domains:map_ids_domains"
@@ -209,13 +209,13 @@ ingest-mdsplus = "scripts.ingest_mdsplus:ingest_mdsplus"
 source = "vcs"
 
 [tool.hatch.build.targets.wheel]
-packages = ["imas_codex", "scripts"]
-exclude = ["imas_codex/resources/.gitkeep"]
+packages = ["iter_codex", "scripts"]
+exclude = ["iter_codex/resources/.gitkeep"]
 artifacts = [
-    "imas_codex/resources/**",
-    "imas_codex/core/physics_domain.py",
-    "imas_codex/graph/models.py",
-    "imas_codex/graph/schema_context_data.py",
+    "iter_codex/resources/**",
+    "iter_codex/core/physics_domain.py",
+    "iter_codex/graph/models.py",
+    "iter_codex/graph/schema_context_data.py",
 ]
 
 [tool.hatch.build.hooks.custom]
@@ -224,7 +224,7 @@ verbose = true
 ids-filter = ""
 imas-dd-version = ""
 
-[tool.imas-codex]
+[tool.iter-codex]
 
 # Facility locations — list position determines port offsets for all services.
 # Neo4j: bolt = 7687 + index, http = 7474 + index.
@@ -235,50 +235,50 @@ locations = ["iter", "tcv", "jt-60sa", "jet", "west", "mast-u", "asdex-u", "east
 # SSH host aliases for remote services (graph, embedding, etc.).
 # When omitted, the location name is used as the SSH alias.
 # Only add entries where the SSH alias differs from the location name.
-[tool.imas-codex.hosts]
+[tool.iter-codex.hosts]
 # iter, tcv, jt-60sa use location name as SSH alias (implicit)
 
-[tool.imas-codex.graph]
+[tool.iter-codex.graph]
 # Location = where Neo4j runs. Use a facility name ("iter") for the login node,
 # or a compute location ("titan") for SLURM-managed services.
 # Compute locations are defined in {facility}.yaml under compute_locations.
-# Override: IMAS_CODEX_GRAPH_LOCATION=local
+# Override: ITER_CODEX_GRAPH_LOCATION=local
 location = "titan"
 neo4j-version = "2026.01.4-community"  # Docker tag for Apptainer image
 username = "neo4j"
-password = "imas-codex"
+password = "iter-codex"
 
 # Explicit profile overrides (convention handles standard cases):
-# [tool.imas-codex.graph.profiles.staging]
+# [tool.iter-codex.graph.profiles.staging]
 # location = "staging-server"      # Where Neo4j runs (SSH alias)
 # bolt-port = 7700
 # http-port = 7701
 # data-dir = "/custom/path/neo4j-staging"
 
-[tool.imas-codex.data-dictionary]
+[tool.iter-codex.data-dictionary]
 version = "4.1.1"
 include-ggd = true
 include-error-fields = false
 
-[tool.imas-codex.embedding]
+[tool.iter-codex.embedding]
 model = "Qwen/Qwen3-Embedding-0.6B"
 dimension = 256
 location = "titan"       # login node T4 (or "titan" for compute P100 via SLURM)
 
-[tool.imas-codex.discovery]
+[tool.iter-codex.discovery]
 # Minimum combined score for high-value path processing.
 # Used by: enrichment auto-threshold, refinement gate, code CLI default.
-# Override: IMAS_CODEX_DISCOVERY_THRESHOLD
+# Override: ITER_CODEX_DISCOVERY_THRESHOLD
 threshold = 0.90
 # Offset subtracted from threshold to get the triage gate.
 # triage_threshold = threshold - triage-offset (default: 0.90 - 0.15 = 0.75).
-# Override: IMAS_CODEX_TRIAGE_THRESHOLD
+# Override: ITER_CODEX_TRIAGE_THRESHOLD
 triage-offset = 0.15
 # Code-relevance gates through the decisions (Jev) model, as a maximum over
 # the four scope probabilities (loads, processes, describes, maps_to_imas).
 # code-triage-threshold is the names-arm pass gate; code-ingest-threshold is
-# the content-arm ingest gate. Overrides: IMAS_CODEX_CODE_TRIAGE_THRESHOLD,
-# IMAS_CODEX_CODE_INGEST_THRESHOLD.
+# the content-arm ingest gate. Overrides: ITER_CODEX_CODE_TRIAGE_THRESHOLD,
+# ITER_CODEX_CODE_INGEST_THRESHOLD.
 code-triage-threshold = 0.4
 code-ingest-threshold = 0.5
 # code-facet-admission-threshold is the content-arm facet gate: a content-stage
@@ -288,7 +288,7 @@ code-ingest-threshold = 0.5
 # Measured on the 128-file labelled sample: the highest out-of-scope facet is
 # 0.837 (lmdif.f), so the lowest threshold admitting no out-of-scope file the
 # composite rule rejects is 0.85, which admits mgset0.f (machine_description
-# 0.88). Override: IMAS_CODEX_CODE_FACET_ADMISSION_THRESHOLD.
+# 0.88). Override: ITER_CODEX_CODE_FACET_ADMISSION_THRESHOLD.
 code-facet-admission-threshold = 0.85
 # Candidate-stage routing thresholds (get_mapping_route_thresholds). A source
 # is selected when map-select-threshold is set and any candidate's same_quantity
@@ -299,15 +299,15 @@ code-facet-admission-threshold = 0.85
 # size that held every recoverable hit.
 map-shortlist-size = 5
 
-[tool.imas-codex.logs]
+[tool.iter-codex.logs]
 # Where CLI commands run and write logs.
 # MCP log tools (get_logs, list_logs, tail_logs) read from this location.
 # "local" = read from local filesystem (default)
 # "<facility>" = SSH to that host to read logs (e.g. "iter")
-# Override: IMAS_CODEX_LOG_LOCATION
+# Override: ITER_CODEX_LOG_LOCATION
 location = "iter"
 
-[tool.imas-codex.sn-docs]
+[tool.iter-codex.sn-docs]
 # Documentation generation needs physics-faithful prose and strict banned-prose
 # compliance. Selection evidence belongs in the benchmark result artifacts.
 # Switch-back: model="openrouter/anthropic/claude-sonnet-5.5".
@@ -315,14 +315,14 @@ model = "openrouter/openai/gpt-6.1-sol"
 # Reasoning effort for docs prose (OpenRouter unified field).
 reasoning-effort = "high"
 
-[tool.imas-codex.model-routes.ambix-local]
+[tool.iter-codex.model-routes.ambix-local]
 # This is the router. Serve ports are internal and rotate with topology: the
 # current four-card serve declares 18800, and which internal serve is up is an
 # operational decision. Pinning a serve port turns a routine rotation into an
 # outage for every pool the seat gates, so consumers stay on the bounded router.
 api-base = "http://98dci4-gpu-0003:18802/v1"
 
-[tool.imas-codex.sn-refine]
+[tool.iter-codex.sn-refine]
 # Refine rewrites rejected names and documentation, so it uses a strong model.
 # Switch-back to local: model="local/deepseek-v4.1-flash"
 # with model-route="ambix-local", api-key-env="AMBIX_API_KEY".
@@ -330,10 +330,10 @@ model = "openrouter/openai/gpt-6-luna"
 # Reasoning effort for refine_name / refine_docs rewrites. "high" — NOT "max":
 # these route through OpenRouter, which accepts only low|medium|high. "max" is a
 # vLLM/DeepSeek-only level (see [sn-compose]). The final chain-cap attempt uses
-# [tool.imas-codex.sn-escalation] at escalation-reasoning-effort.
+# [tool.iter-codex.sn-escalation] at escalation-reasoning-effort.
 reasoning-effort = "high"
 
-[tool.imas-codex.sn-escalation]
+[tool.iter-codex.sn-escalation]
 # Final refine attempt at chain cap, for both name-refine and docs-refine.
 # Vendor-diverse from the refine base (OpenAI) and compose model (local
 # DeepSeek) so escalation breaks a failure loop with an independent perspective
@@ -343,7 +343,7 @@ reasoning-effort = "high"
 # affordable on the many family parents that reach it.
 model = "openrouter/anthropic/claude-sonnet-5.5"
 
-[tool.imas-codex.sn-parent-enrich]
+[tool.iter-codex.sn-parent-enrich]
 # Derived-parent description synthesis. A derived parent (e.g.
 # ``magnetic_field``, ``area_at_plasma_boundary``) abstracts over its accepted
 # HAS_PARENT children; this step writes a real description GENERALISED over
@@ -360,7 +360,7 @@ api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
 reasoning-effort = "medium"
 
-[tool.imas-codex.sn-classifier]
+[tool.iter-codex.sn-classifier]
 # Physics-domain classifier (dd_domain_classifier.classify_domains): assigns a
 # physics_domain to DD paths, which SN names inherit — so it is an
 # SN-attributable seat, its model choice owned by the SN pipeline that
@@ -369,7 +369,7 @@ reasoning-effort = "medium"
 # name sees at compose/review), so it uses a strong model.
 model = "openrouter/openai/gpt-6-luna"
 
-[tool.imas-codex.sn-domain-tree]
+[tool.iter-codex.sn-domain-tree]
 # Two-level category-then-domain Choice over the physics-domain guidance
 # (dd_domain_classifier.decide_domain_tree): asks the ISN category first, then
 # the domain within it, and returns a probability for the path. Runs through
@@ -382,7 +382,7 @@ model = "openrouter/openai/gpt-6-luna"
 model = "typesafe/jev-1.14"
 threshold = 0.8
 
-[tool.imas-codex.sn-prose-adjudicator]
+[tool.iter-codex.sn-prose-adjudicator]
 # Adjudicates banned-prose grep flags on refined docs at the campaign
 # convergence gate: decides whether a flagged doc genuinely reintroduced banned
 # prose or is legitimate definitional writing. A light seat, kept independent of
@@ -390,14 +390,14 @@ threshold = 0.8
 model = "openrouter/openai/gpt-6-luna"
 reasoning-effort = "low"
 
-[tool.imas-codex.sn-release-notes]
+[tool.iter-codex.sn-release-notes]
 # PR-description synthesis for catalog review PRs: grounds on the release
 # message, the frozen batch artifact, and the per-domain catalog diff to write
 # a concise, factual PR body for human reviewers. Pure summarisation over
 # supplied evidence (never invents physics) — language tier is sufficient.
 model = "openrouter/anthropic/claude-sonnet-5.5"
 
-[tool.imas-codex.dd-enrichment]
+[tool.iter-codex.dd-enrichment]
 # The provider prefix selects direct OpenRouter calls with prompt caching
 # and response-cost telemetry.
 model = "openrouter/anthropic/claude-sonnet-5.5"
@@ -408,34 +408,34 @@ model = "openrouter/anthropic/claude-sonnet-5.5"
 # IDS mapping run on the local lane through the ambix router; cluster labelling
 # and the two Jev seats (discovery-relevance, mapping-candidates) stay on
 # OpenRouter. The same model is priced on OpenRouter below, so a seat can be
-# moved off the shared lane with its IMAS_CODEX_*_MODEL environment variable,
+# moved off the shared lane with its ITER_CODEX_*_MODEL environment variable,
 # set to openrouter/deepseek/deepseek-v4.1-flash, when the lane is congested.
 # reasoning-effort is left unset on the text/vision seats, which keeps the
 # local model's non-thinking behaviour; IDS mapping sets it high for the
 # escalated choice.
 
-[tool.imas-codex.discovery-triage]
+[tool.iter-codex.discovery-triage]
 # Path triage and code-file triage.
 model = "local/deepseek-v4.1-flash"
 model-route = "ambix-local"
 api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
 
-[tool.imas-codex.discovery-score]
+[tool.iter-codex.discovery-score]
 # Path scoring, code-file scoring, wiki page and wiki document scoring.
 model = "local/deepseek-v4.1-flash"
 model-route = "ambix-local"
 api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
 
-[tool.imas-codex.discovery-describe]
+[tool.iter-codex.discovery-describe]
 # Signal enrichment and static tree enrichment.
 model = "local/deepseek-v4.1-flash"
 model-route = "ambix-local"
 api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
 
-[tool.imas-codex.discovery-describe.signal-enrichment]
+[tool.iter-codex.discovery-describe.signal-enrichment]
 # Single-signal calls keep validation failures local to one description.
 batch-size = 1
 max-workers = 3
@@ -451,28 +451,28 @@ review-thinking = true
 recovery-attempts = 1
 source-fallback = true
 
-[tool.imas-codex.discovery-vision]
+[tool.iter-codex.discovery-vision]
 # Wiki and document image scoring.
 model = "local/deepseek-v4.1-flash"
 model-route = "ambix-local"
 api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
 
-[tool.imas-codex.discovery-relevance]
+[tool.iter-codex.discovery-relevance]
 # Code-relevance judgements through the OpenRouter alpha decisions endpoint.
 # The endpoint takes its own request/response shape and is called directly by
 # the decisions call layer, so this seat carries no chat route and its cost is
 # read from the response usage rather than priced in configuration.
 model = "typesafe/jev-1.14"
 
-[tool.imas-codex.mapping-candidates]
+[tool.iter-codex.mapping-candidates]
 # Pair judgment and IDS routing over a retrieved DD shortlist, through the same
 # OpenRouter alpha decisions endpoint. A seat separate from discovery-relevance
 # so the candidate stage's model changes alone. Called directly by the
 # decisions call layer; cost is read from the response usage.
 model = "typesafe/jev-1.14"
 
-[tool.imas-codex.sn-judge]
+[tool.iter-codex.sn-judge]
 # Standard-name judgements — name and documentation review, family and
 # docs-context decisions — through the same OpenRouter alpha decisions
 # endpoint. Its own seat so the standard-names stage's model changes
@@ -481,14 +481,14 @@ model = "typesafe/jev-1.14"
 # is the runtime ``service`` argument of the call, not a key here.
 model = "typesafe/jev-1.14"
 
-[tool.imas-codex.cluster-labels]
+[tool.iter-codex.cluster-labels]
 # Cluster labelling. Keeps the OpenRouter model so nothing outside discovery
 # changes model. batch-size is the clusters-per-LLM-call setting that
 # get_labeling_batch_size reads.
 model = "openrouter/openai/gpt-6.1-sol"
 batch-size = 50
 
-[tool.imas-codex.ids-mapping]
+[tool.iter-codex.ids-mapping]
 # IDS mapping and metadata enrichment, used by the mapping engine for both the
 # escalated set choice and the field mappings. Runs on the local lane through
 # the ambix router. The escalated choice is reasoning work and the local model
@@ -499,14 +499,14 @@ api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
 reasoning-effort = "high"
 
-[tool.imas-codex.reasoning]
+[tool.iter-codex.reasoning]
 # openrouter/ prefix — see [dd-enrichment] note above.
 model = "openrouter/anthropic/claude-sonnet-5.5"
 
-[tool.imas-codex.sn-compose]
+[tool.iter-codex.sn-compose]
 # Maximum concurrent LLM requests issued by the compose worker.
 # This is the shared default for the generate pool; per-pool overrides under
-# ``[tool.imas-codex.sn-pools]`` take precedence when set.
+# ``[tool.iter-codex.sn-pools]`` take precedence when set.
 max-concurrency = 256
 # Compose uses a high-throughput model behind deterministic grammar validation
 # and a vendor-diverse review quorum. Selection evidence belongs in benchmark
@@ -551,9 +551,9 @@ self-refine = false
 # gap (recorded as distinct-confirmed). Set >1.0 (e.g. 1.01) to disable.
 dedup-similarity-threshold = 0.85
 
-[tool.imas-codex.sn-pools]
+[tool.iter-codex.sn-pools]
 # Concurrent replica counts for each of the six SN pools (see
-# imas_codex/standard_names/loop.py::_build_pool_specs). Each replica
+# iter_codex/standard_names/loop.py::_build_pool_specs). Each replica
 # is one cooperative ``pool_loop`` async task claiming and processing
 # batches against the graph.
 #
@@ -569,8 +569,8 @@ dedup-similarity-threshold = 0.85
 #   * Refine pools at 1/3 of generate (small backlog)
 #
 # Operators override individual pool replicas without recompile via
-# IMAS_CODEX_SN_POOLS_<NAME>_REPLICAS env vars (e.g.
-# IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS=96). Use this to scale UP to
+# ITER_CODEX_SN_POOLS_<NAME>_REPLICAS env vars (e.g.
+# ITER_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS=96). Use this to scale UP to
 # the 4-GPU profile counts below without a code change.
 #
 # GPU-PROFILE SIZING (IMPORTANT). The generate pools hit the LOCAL vLLM
@@ -629,7 +629,7 @@ dedup-similarity-threshold = 0.85
 # residue of hard sources (grammar-rejected candidates reset to 'extracted' with no
 # attempt cap → re-claimed forever → total_processed flat → stall-guard). Fixed at
 # the claim/pending layer (compose_attempts cap), not here. 24 stays. Scale UP via
-# IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS on a >2-GPU server.
+# ITER_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS on a >2-GPU server.
 generate-name-replicas = 24
 review-name-replicas = 64
 refine-name-replicas = 32
@@ -641,7 +641,7 @@ refine-docs-replicas = 32
 # modest replica count is plenty (the catch-all fallback would over-provision).
 enrich-parents-replicas = 16
 
-[tool.imas-codex.sn]
+[tool.iter-codex.sn]
 # Scored-example injection targets: score thresholds for selecting
 # exemplar StandardName nodes into compose/review prompts.
 example-target-scores = [1.0, 0.8, 0.65, 0.4]
@@ -667,13 +667,13 @@ refine-rotations = 3
 desc-name-similarity-threshold = 0.55
 
 # Default staging directory for export/preview/publish (ephemeral).
-staging-dir = "~/.cache/imas-codex/staging"
+staging-dir = "~/.cache/iter-codex/staging"
 # Path to ISNC git checkout. Empty auto-discovers from sibling dirs, which
 # cannot distinguish the catalog repository from the grammar repository
 # beside it, so the catalog target is named explicitly.
 isnc-dir = "~/Code/imas-standard-names-catalog"
 
-[tool.imas-codex.sn-review]
+[tool.iter-codex.sn-review]
 # Shared review settings (apply to both axes).
 # Disagreement detection: true iff N>=2 AND max(score) - min(score) >= threshold.
 disagreement-threshold = 0.20
@@ -696,7 +696,7 @@ panel-audit-rate = 0.05
 # panel runs only the 5% audit above, which decides nothing.
 cascade-deciding = true
 
-[tool.imas-codex.sn-review.names]
+[tool.iter-codex.sn-review.names]
 # Mixed-vendor RD-quorum chain.
 # Cycle 0 (primary, blind): local DS4-flash — catches grammar/format/ISN
 # violations for free; OK at low-stakes pass/fail signal.
@@ -716,11 +716,11 @@ api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
 
 # ---------------------------------------------------------------------------
-# Reviewer profiles — select with IMAS_CODEX_SN_REVIEW_PROFILE env var or
+# Reviewer profiles — select with ITER_CODEX_SN_REVIEW_PROFILE env var or
 # the --reviewer-profile CLI flag on `sn run` / `sn review`.
 # ---------------------------------------------------------------------------
 
-[tool.imas-codex.sn-review.names.profiles.default]
+[tool.iter-codex.sn-review.names.profiles.default]
 # Production reviewer quorum: vendor-diverse Grok 4.7 and GPT-6 Luna form
 # the dual-blind base pair. Claude Sonnet 5.5 is the context-aware disagreement
 # breaker, retaining a three-seat chain without a single-review fallback.
@@ -731,7 +731,7 @@ models = [
 ]
 disagreement-threshold = 0.20
 
-[tool.imas-codex.sn-review.names.profiles.local-only]
+[tool.iter-codex.sn-review.names.profiles.local-only]
 # Zero-cost local-only fallback.
 # Single DS4-flash reviewer; no quorum.
 models = [
@@ -739,7 +739,7 @@ models = [
 ]
 disagreement-threshold = 1.0
 
-[tool.imas-codex.sn-review.names.profiles.quality-cost-balanced]
+[tool.iter-codex.sn-review.names.profiles.quality-cost-balanced]
 # Alternative quality-cost-balanced profile (requires OpenRouter credits).
 models = [
   "openrouter/anthropic/claude-sonnet-5.5",
@@ -748,12 +748,12 @@ models = [
 ]
 disagreement-threshold = 0.20
 
-[tool.imas-codex.sn-review.names.profiles.opus-only]
+[tool.iter-codex.sn-review.names.profiles.opus-only]
 # Single-model mode: maximum quality, maximum cost (requires OpenRouter credits).
 models = ["openrouter/anthropic/claude-opus-5.5"]
 disagreement-threshold = 1.0
 
-[tool.imas-codex.sn-review.docs]
+[tool.iter-codex.sn-review.docs]
 # Dual-blind claude-sonnet-5.5 + grok-4.7 with a gpt-6.1-sol breaker. The pair is
 # vendor-diverse and uses providers that sustain pool concurrency; the breaker
 # supplies an independent override perspective. All endpoints auto-resolve.
@@ -764,7 +764,7 @@ models = [
 ]
 disagreement-threshold = 0.20
 
-[tool.imas-codex.sn-benchmark]
+[tool.iter-codex.sn-benchmark]
 # Models to evaluate for standard name composition.
 # Each is benchmarked independently; results are compared side-by-side.
 # Format: OpenRouter model IDs (provider/model-slug).
@@ -821,7 +821,7 @@ reviewer-models = [
     "openrouter/anthropic/claude-opus-5.5",     # quality ceiling ref $4/$20
 ]
 
-[tool.imas-codex.sn-fanout]
+[tool.iter-codex.sn-fanout]
 # Structured fan-out for the SN compose pipeline.
 # Master switch for proposer, runner, and synthesis.
 enabled = true
@@ -865,11 +865,11 @@ fanout-cost-estimate-escalation = 0.05
 fanout-max-charge-per-cycle-baseline = 0.02
 fanout-max-charge-per-cycle-escalation = 0.10
 
-[tool.imas-codex.sn-fanout.sites]
+[tool.iter-codex.sn-fanout.sites]
 # Per-site enable flags; the master `enabled` switch above gates everything.
 refine_name = true
 
-[tool.imas-codex.llm]
+[tool.iter-codex.llm]
 
 # Rates are USD per million tokens, transcribed from each route's published
 # OpenRouter pricing. `cache-read` and `cache-write` are what the provider
@@ -892,7 +892,7 @@ refine_name = true
 # each route's prompt, completion, cache and long-input override rates and its
 # context length.
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4.1-flash"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4.1-flash"]
 prompt = 0.0507
 completion = 0.2028
 cache-read = 0.001014
@@ -900,7 +900,7 @@ source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4.1-flash"
 verified-at = "2026-11-14"
 max-input-tokens = 1048576
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4-pro-0813"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4-pro-0813"]
 prompt = 0.111
 completion = 4.44
 cache-read = 0.097
@@ -908,7 +908,7 @@ source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4-pro-0813"
 verified-at = "2026-11-14"
 max-input-tokens = 1048576
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/x-ai/grok-4.7"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/x-ai/grok-4.7"]
 prompt = 2
 completion = 6
 cache-read = 0.5
@@ -919,7 +919,7 @@ overrides = [
   { min-input-tokens = 200000, prompt = 4, completion = 12, cache-read = 1 },
 ]
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-6.1-sol"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/openai/gpt-6.1-sol"]
 prompt = 2
 completion = 10
 cache-read = 0.1
@@ -931,7 +931,7 @@ overrides = [
   { min-input-tokens = 272000, prompt = 4, completion = 15, cache-read = 0.2, cache-write = 5 },
 ]
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-6.1-terra"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/openai/gpt-6.1-terra"]
 prompt = 1
 completion = 5
 cache-read = 0.05
@@ -943,7 +943,7 @@ overrides = [
   { min-input-tokens = 272000, prompt = 2, completion = 7.5, cache-read = 0.1, cache-write = 2.5 },
 ]
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-6-luna"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/openai/gpt-6-luna"]
 prompt = 0.1
 completion = 0.5
 cache-read = 0.01
@@ -955,7 +955,7 @@ overrides = [
   { min-input-tokens = 272000, prompt = 0.2, completion = 0.75, cache-read = 0.02, cache-write = 0.25 },
 ]
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-sonnet-5.5"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/anthropic/claude-sonnet-5.5"]
 prompt = 2
 completion = 10
 cache-read = 0.1
@@ -964,7 +964,7 @@ source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-5.5"
 verified-at = "2026-11-14"
 max-input-tokens = 1000000
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-haiku-5.5"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/anthropic/claude-haiku-5.5"]
 prompt = 0.1
 completion = 0.5
 cache-read = 0.01
@@ -976,7 +976,7 @@ overrides = [
   { min-input-tokens = 100000, prompt = 0.5, completion = 2.5, cache-read = 0.05, cache-write = 0.625 },
 ]
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-opus-5.5"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/anthropic/claude-opus-5.5"]
 prompt = 4
 completion = 20
 cache-read = 0.2
@@ -985,7 +985,7 @@ source = "https://openrouter.ai/api/v1/model/anthropic/claude-opus-5.5"
 verified-at = "2026-11-14"
 max-input-tokens = 1000000
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-3.1-pro-preview"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/google/gemini-3.1-pro-preview"]
 prompt = 2
 completion = 12
 cache-read = 0.2
@@ -997,7 +997,7 @@ overrides = [
   { min-input-tokens = 200000, prompt = 4, completion = 18, cache-read = 0.4 },
 ]
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-3.8-flash"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/google/gemini-3.8-flash"]
 prompt = 0.825
 completion = 4.125
 cache-read = 0.0825
@@ -1006,7 +1006,7 @@ source = "https://openrouter.ai/api/v1/model/google/gemini-3.8-flash"
 verified-at = "2026-11-14"
 max-input-tokens = 1048576
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-3.5-flash-lite"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/google/gemini-3.5-flash-lite"]
 prompt = 0.3
 completion = 2.5
 cache-read = 0.03
@@ -1015,7 +1015,7 @@ source = "https://openrouter.ai/api/v1/model/google/gemini-3.5-flash-lite"
 verified-at = "2026-11-14"
 max-input-tokens = 1048576
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/qwen/qwen3.7-plus"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/qwen/qwen3.7-plus"]
 prompt = 0.32
 completion = 1.28
 cache-read = 0.064
@@ -1027,7 +1027,7 @@ overrides = [
   { min-input-tokens = 256000, prompt = 0.96, completion = 3.84, cache-read = 0.192, cache-write = 1.2 },
 ]
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/xiaomi/mimo-v2.6-pro"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/xiaomi/mimo-v2.6-pro"]
 prompt = 0.435
 completion = 0.87
 cache-read = 0.0036
@@ -1035,7 +1035,7 @@ source = "https://openrouter.ai/api/v1/model/xiaomi/mimo-v2.6-pro"
 verified-at = "2026-11-14"
 max-input-tokens = 1050000
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/moonshotai/kimi-k3.1-pro"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/moonshotai/kimi-k3.1-pro"]
 prompt = 0.2403
 completion = 8.4023
 cache-read = 0.2
@@ -1043,7 +1043,7 @@ source = "https://openrouter.ai/api/v1/model/moonshotai/kimi-k3.1-pro"
 verified-at = "2026-11-15"
 max-input-tokens = 1048576
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/meta-llama/llama-4-maverick"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/meta-llama/llama-4-maverick"]
 prompt = 0.35
 completion = 1
 cache-read = 0.17
@@ -1051,7 +1051,7 @@ source = "https://openrouter.ai/api/v1/model/meta-llama/llama-4-maverick"
 verified-at = "2026-11-14"
 max-input-tokens = 524288
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-4-hydrogen"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/google/gemini-4-hydrogen"]
 prompt = 1.5
 completion = 7.5
 cache-read = 0.075
@@ -1060,7 +1060,7 @@ source = "https://openrouter.ai/api/v1/model/google/gemini-4-hydrogen"
 verified-at = "2026-11-15"
 max-input-tokens = 1048576
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-4-carbon"]
+[tool.iter-codex.llm.openrouter-pricing."openrouter/google/gemini-4-carbon"]
 prompt = 2
 completion = 10
 cache-read = 0.1
@@ -1069,12 +1069,12 @@ source = "https://openrouter.ai/api/v1/model/google/gemini-4-carbon"
 verified-at = "2026-11-15"
 max-input-tokens = 1048576
 
-[tool.imas-codex.docs-server]
+[tool.iter-codex.docs-server]
 # Host-wide HTML docs server (~/Code/dotfiles/docs-server/serve.py): fronts every
 # project's docs/plans-html/ under a single URL prefix and exposes a
 # /state/<project>/<doc> JSON store shared by browser and agents.
 # Runs on the login node as a persistent user service.
-# Forwarded by `imas-codex tunnel start <host> --docs` (port 8765).
+# Forwarded by `iter-codex tunnel start <host> --docs` (port 8765).
 location = "iter"
 port = 8765
 
@@ -1158,7 +1158,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 
 [tool.coverage.run]
-source = ["imas_codex"]
+source = ["iter_codex"]
 omit = ["tests/*", "*/tests/*", "**/test_*.py", "**/conftest.py"]
 
 [tool.coverage.report]
@@ -1210,10 +1210,10 @@ ignore = [
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py
 "tests/**/*" = ["B011", "F401", "F811"]  # Allow assert False and unused imports in tests
 # Remote scripts run on Python 3.6+ systems - disable type hint and subprocess modernization
-"imas_codex/remote/scripts/*" = ["UP006", "UP007", "UP021", "UP022", "UP031", "UP035", "UP038", "UP045"]
+"iter_codex/remote/scripts/*" = ["UP006", "UP007", "UP021", "UP022", "UP031", "UP035", "UP038", "UP045"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["imas_codex"]
+known-first-party = ["iter_codex"]
 force-single-line = false
 combine-as-imports = true
 

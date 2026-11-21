@@ -18,13 +18,13 @@ import pytest
 
 
 class TestRunOnNode:
-    """Tests for _run_on_node in imas_codex.cli.services."""
+    """Tests for _run_on_node in iter_codex.cli.services."""
 
     def test_generates_ssh_command(self):
         """_run_on_node must call _run_remote with an SSH command targeting the node."""
-        with patch("imas_codex.cli.services._run_remote") as mock_run:
+        with patch("iter_codex.cli.services._run_remote") as mock_run:
             mock_run.return_value = "output"
-            from imas_codex.cli.services import _run_on_node
+            from iter_codex.cli.services import _run_on_node
 
             result = _run_on_node("gpu-0001", "pgrep -u $USER -f embed", timeout=30)
 
@@ -36,9 +36,9 @@ class TestRunOnNode:
 
     def test_no_base64_in_command(self):
         """The SSH command must not contain the word 'base64'."""
-        with patch("imas_codex.cli.services._run_remote") as mock_run:
+        with patch("iter_codex.cli.services._run_remote") as mock_run:
             mock_run.return_value = ""
-            from imas_codex.cli.services import _run_on_node
+            from iter_codex.cli.services import _run_on_node
 
             _run_on_node("gpu-0001", "pgrep -u $USER -f embed", timeout=30)
 
@@ -47,9 +47,9 @@ class TestRunOnNode:
 
     def test_no_echo_base64_pipe(self):
         """The 'echo ... | base64 -d' pattern must not appear in the SSH command."""
-        with patch("imas_codex.cli.services._run_remote") as mock_run:
+        with patch("iter_codex.cli.services._run_remote") as mock_run:
             mock_run.return_value = ""
-            from imas_codex.cli.services import _run_on_node
+            from iter_codex.cli.services import _run_on_node
 
             _run_on_node("gpu-0001", "pgrep -u $USER -f embed", timeout=30)
 
@@ -63,7 +63,7 @@ class TestRunOnNode:
 
 
 class TestSubmitServiceJob:
-    """Tests for _submit_service_job in imas_codex.cli.services."""
+    """Tests for _submit_service_job in iter_codex.cli.services."""
 
     @staticmethod
     def _patched_submit(mock_run_side_effect=None):
@@ -71,28 +71,28 @@ class TestSubmitServiceJob:
         if mock_run_side_effect is None:
             mock_run_side_effect = ["/home/user", "Submitted batch job 12345"]
         return (
-            patch("imas_codex.cli.services._stop_login_services"),
+            patch("iter_codex.cli.services._stop_login_services"),
             patch(
-                "imas_codex.cli.services._run_remote",
+                "iter_codex.cli.services._run_remote",
                 side_effect=mock_run_side_effect,
             ),
             patch(
-                "imas_codex.cli.services._general_partition_name",
+                "iter_codex.cli.services._general_partition_name",
                 return_value="batch",
             ),
             patch(
-                "imas_codex.cli.services._embedding_target",
+                "iter_codex.cli.services._embedding_target",
                 return_value=(
                     {"name": "gpu"},
                     {"location": "gpu-0001"},
                 ),
             ),
             patch(
-                "imas_codex.cli.services._gpu_entry",
+                "iter_codex.cli.services._gpu_entry",
                 return_value={"location": "gpu-0001"},
             ),
             patch(
-                "imas_codex.cli.services._get_node_state",
+                "iter_codex.cli.services._get_node_state",
                 return_value=("idle", "none"),
             ),
         )
@@ -108,7 +108,7 @@ class TestSubmitServiceJob:
             patches[4],
             patches[5],
         ):
-            from imas_codex.cli.services import _submit_service_job
+            from iter_codex.cli.services import _submit_service_job
 
             _submit_service_job(
                 "test-job",
@@ -134,7 +134,7 @@ class TestSubmitServiceJob:
             patches[4],
             patches[5],
         ):
-            from imas_codex.cli.services import _submit_service_job
+            from iter_codex.cli.services import _submit_service_job
 
             _submit_service_job(
                 "test-job",
@@ -160,13 +160,13 @@ class TestSubmitServiceJob:
         patches = self._patched_submit()
         with (
             patches[0],
-            patch("imas_codex.cli.services._run_remote", side_effect=capturing_run),
+            patch("iter_codex.cli.services._run_remote", side_effect=capturing_run),
             patches[2],
             patches[3],
             patches[4],
             patches[5],
         ):
-            from imas_codex.cli.services import _submit_service_job
+            from iter_codex.cli.services import _submit_service_job
 
             _submit_service_job(
                 "test-job",
@@ -229,26 +229,26 @@ class TestEmbeddingTarget:
             facility="iter",
         )
         with (
-            patch("imas_codex.settings.get_embedding_location", return_value="titan"),
+            patch("iter_codex.settings.get_embedding_location", return_value="titan"),
             patch(
-                "imas_codex.remote.locations.resolve_location",
+                "iter_codex.remote.locations.resolve_location",
                 return_value=location,
             ),
             patch(
-                "imas_codex.cli.services._compute_config",
+                "iter_codex.cli.services._compute_config",
                 return_value=self._compute_config(),
             ),
-            patch("imas_codex.cli.services._stop_login_services"),
+            patch("iter_codex.cli.services._stop_login_services"),
             patch(
-                "imas_codex.cli.services._get_node_state",
+                "iter_codex.cli.services._get_node_state",
                 return_value=("idle", "none"),
             ),
             patch(
-                "imas_codex.cli.services._run_remote",
+                "iter_codex.cli.services._run_remote",
                 side_effect=["/home/user", "Submitted batch job 12345"],
             ) as mock_run,
         ):
-            from imas_codex.cli.services import _submit_service_job
+            from iter_codex.cli.services import _submit_service_job
 
             _submit_service_job(
                 "codex-embed",
@@ -273,19 +273,19 @@ class TestEmbeddingTarget:
         )
         with (
             patch(
-                "imas_codex.settings.get_embedding_location",
+                "iter_codex.settings.get_embedding_location",
                 return_value="betelgeuse",
             ),
             patch(
-                "imas_codex.remote.locations.resolve_location",
+                "iter_codex.remote.locations.resolve_location",
                 return_value=location,
             ),
             patch(
-                "imas_codex.cli.services._compute_config",
+                "iter_codex.cli.services._compute_config",
                 return_value=self._compute_config(),
             ),
         ):
-            from imas_codex.cli.services import _embedding_target
+            from iter_codex.cli.services import _embedding_target
 
             partition, gpu = _embedding_target()
 
@@ -311,20 +311,20 @@ class TestEmbedStop:
             "node": "98dci4-gpu-0003",
         }
         with (
-            patch("imas_codex.cli.embed._get_embed_job", return_value=live_job),
-            patch("imas_codex.cli.embed._cancel_service_job", return_value=True),
-            patch("imas_codex.cli.embed._run_remote", side_effect=run_remote),
-            patch("imas_codex.cli.embed.time.sleep"),
+            patch("iter_codex.cli.embed._get_embed_job", return_value=live_job),
+            patch("iter_codex.cli.embed._cancel_service_job", return_value=True),
+            patch("iter_codex.cli.embed._run_remote", side_effect=run_remote),
+            patch("iter_codex.cli.embed.time.sleep"),
             patch(
-                "imas_codex.cli.services._gpu_entry",
+                "iter_codex.cli.services._gpu_entry",
                 return_value={"location": "98dci4-gpu-0002"},
             ) as configured_target,
             patch(
-                "imas_codex.cli.services._run_on_node", return_value="9876\n"
+                "iter_codex.cli.services._run_on_node", return_value="9876\n"
             ) as run_on_node,
-            patch("imas_codex.cli.services._kill_embed_orphans") as kill_orphans,
+            patch("iter_codex.cli.services._kill_embed_orphans") as kill_orphans,
         ):
-            from imas_codex.cli.embed import embed_stop
+            from iter_codex.cli.embed import embed_stop
 
             embed_stop.callback()
 

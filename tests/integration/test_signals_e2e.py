@@ -18,7 +18,7 @@ import subprocess
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 # ── Markers ──────────────────────────────────────────────────────────────
 pytestmark = [pytest.mark.graph, pytest.mark.slow, pytest.mark.integration]
@@ -97,7 +97,7 @@ def run_cli_signals(
     cmd = [
         "uv",
         "run",
-        "imas-codex",
+        "iter-codex",
         "discover",
         "signals",
         FACILITY,
@@ -113,7 +113,7 @@ def run_cli_signals(
 
 def clear_signals() -> dict[str, int]:
     """Clear all signal discovery data via Python API."""
-    from imas_codex.discovery.signals.parallel import clear_facility_signals
+    from iter_codex.discovery.signals.parallel import clear_facility_signals
 
     return clear_facility_signals(FACILITY)
 

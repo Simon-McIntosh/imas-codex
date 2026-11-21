@@ -10,7 +10,7 @@ import re
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 
 class TestSnHelpNoLegacyVerbs:

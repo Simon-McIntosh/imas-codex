@@ -11,18 +11,18 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.batching import (
+from iter_codex.standard_names.batching import (
     DEFAULT_MAX_TOKENS,
     estimate_batch_tokens,
     estimate_tokens,
     get_generate_batch_config,
     pre_flight_token_check,
 )
-from imas_codex.standard_names.enrichment import (
+from iter_codex.standard_names.enrichment import (
     group_by_concept_and_unit,
     group_for_name_only,
 )
-from imas_codex.standard_names.sources.base import ExtractionBatch
+from iter_codex.standard_names.sources.base import ExtractionBatch
 
 # ============================================================================
 # Helpers
@@ -410,7 +410,7 @@ class TestBatchConfig:
         assert isinstance(cfg["max_tokens"], int)
 
     def test_generate_config_defaults(self):
-        """Defaults match pyproject.toml [tool.imas-codex.sn-generate]."""
+        """Defaults match pyproject.toml [tool.iter-codex.sn-generate]."""
         cfg = get_generate_batch_config()
         assert cfg["batch_size"] == 25
         assert cfg["name_only_batch_size"] == 50

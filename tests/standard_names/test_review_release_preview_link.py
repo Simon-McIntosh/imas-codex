@@ -7,8 +7,8 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.catalog_release import run_review_release
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.catalog_release import run_review_release
 
 
 def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -160,7 +160,7 @@ def test_release_command_exits_nonzero_for_missing_preview_link(tmp_path):
     )
 
     with patch(
-        "imas_codex.standard_names.catalog_release.run_review_release",
+        "iter_codex.standard_names.catalog_release.run_review_release",
         return_value=failure,
     ):
         result = CliRunner().invoke(

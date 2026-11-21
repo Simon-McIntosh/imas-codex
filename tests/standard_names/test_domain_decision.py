@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import domain_decision as dd
+from iter_codex.standard_names import domain_decision as dd
 from tests.standard_names.test_source_target_reconciliation import disposable_neo4j
 
 
@@ -186,7 +186,7 @@ def test_derived_parent_unions_its_children() -> None:
 
 @pytest.fixture
 def graph(disposable_neo4j: tuple[str, str]) -> Any:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     uri, password = disposable_neo4j
     client = GraphClient(

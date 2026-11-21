@@ -53,8 +53,8 @@ Available phases:
 Key files to check when updating:
 - `tests/conftest.py` - Test infrastructure
 - `tests/test_*.py` - Test implementations
-- `imas_codex/server.py` - MCP tool implementations
-- `imas_codex/search/` - Search functionality
+- `iter_codex/server.py` - MCP tool implementations
+- `iter_codex/search/` - Search functionality
 - `benchmarks/` - Performance monitoring
 - `scripts/` - Build and utility scripts
 

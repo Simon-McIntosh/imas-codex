@@ -17,13 +17,13 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.discovery.base.reset import (
+from iter_codex.discovery.base.reset import (
     _CODE_ENRICH_FIELDS,
     _CODE_SCORE_FIELDS,
     CODE_RESET_SPECS,
     reset_to_status,
 )
-from imas_codex.discovery.code.scorer import (
+from iter_codex.discovery.code.scorer import (
     ADMISSION_FACET_FIELDS,
     RELEVANCE_STAGE_CONTENT,
     RELEVANCE_STAGE_NAME,
@@ -153,7 +153,7 @@ def test_name_stage_predicate_carries_no_facet_clause():
 
 def test_ingest_claim_admits_a_facet_only_file(monkeypatch):
     """A file below the composite gate is claimed when its facet clears."""
-    from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
+    from iter_codex.discovery.code.workers import _claim_code_files_for_ingestion
 
     facet_only = _file(
         "/analysis/src/mgset.f",
@@ -170,7 +170,7 @@ def test_ingest_claim_admits_a_facet_only_file(monkeypatch):
         score_machine_description=0.4,
     )
     monkeypatch.setattr(
-        "imas_codex.graph.GraphClient", lambda: _IngestStub([facet_only, weak])
+        "iter_codex.graph.GraphClient", lambda: _IngestStub([facet_only, weak])
     )
 
     claimed = _claim_code_files_for_ingestion(
@@ -231,7 +231,7 @@ class _CapturingGraph:
 @pytest.fixture
 def captured(monkeypatch):
     graph = _CapturingGraph()
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: graph)
     return graph
 
 

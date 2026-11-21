@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.services.base import BaseService
+from iter_codex.services.base import BaseService
 
 
 class TestBaseService:

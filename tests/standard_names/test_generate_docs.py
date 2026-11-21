@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_common as _owning_worker_common,
 )
 from tests.standard_names.graph_transaction_doubles import transaction_double
@@ -32,8 +32,8 @@ from tests.standard_names.graph_transaction_doubles import transaction_double
 # Path constants
 # =============================================================================
 
-_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
-_CHAIN_HISTORY_PATH = "imas_codex.standard_names.chain_history.name_chain_history"
+_GC_PATH = "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_CHAIN_HISTORY_PATH = "iter_codex.standard_names.chain_history.name_chain_history"
 _TOKEN_A = "aaaaaaaa-0000-0000-0000-000000000001"
 _TOKEN_B = "bbbbbbbb-0000-0000-0000-000000000002"
 
@@ -173,7 +173,7 @@ def _make_docs_item(
 
 def test_claim_only_when_name_accepted():
     """SN with name_stage='reviewed' is NOT claimed; accepted+pending IS claimed."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_generate_docs_batch,
     )
 
@@ -197,7 +197,7 @@ def test_claim_only_when_name_accepted():
 
 def test_claim_eligible_accepted_pending():
     """SN with name_stage='accepted', docs_stage='pending' IS claimed."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_generate_docs_batch,
     )
 
@@ -217,7 +217,7 @@ def test_claim_eligible_accepted_pending():
 
 def test_claim_skips_already_drafted_docs():
     """SN with docs_stage='drafted' is NOT returned even if name_stage='accepted'."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_generate_docs_batch,
     )
 
@@ -242,7 +242,7 @@ def test_claim_skips_already_drafted_docs():
 
 def test_claim_includes_reviewer_feedback():
     """Claimed items include reviewer_score_name and reviewer_comments_name."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_generate_docs_batch,
     )
 
@@ -271,7 +271,7 @@ def test_claim_includes_reviewer_feedback():
 
 def test_persist_writes_docs_fields():
     """persist_generated_docs writes description, documentation, docs_stage='drafted', etc."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         persist_generated_docs,
     )
 
@@ -310,7 +310,7 @@ def test_persist_writes_docs_fields():
 
 def test_persist_does_not_change_name_fields():
     """persist_generated_docs Cypher must NOT SET name, kind, unit, or name_stage."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         persist_generated_docs,
     )
 
@@ -342,7 +342,7 @@ def test_persist_does_not_change_name_fields():
 
 def test_persist_token_mismatch_no_op():
     """Wrong token → ValueError raised (no node matched)."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         persist_generated_docs,
     )
 
@@ -366,7 +366,7 @@ def test_persist_token_mismatch_no_op():
 
 def test_failed_release_clears_token():
     """release_generate_docs_failed_claims clears claim_token; docs_stage stays 'pending'."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         release_generate_docs_failed_claims,
     )
 
@@ -394,7 +394,7 @@ def test_failed_release_clears_token():
 
 def test_failed_release_token_verification():
     """release_generate_docs_failed_claims only releases matching token."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         release_generate_docs_failed_claims,
     )
 
@@ -417,7 +417,7 @@ def test_failed_release_token_verification():
 
 def test_worker_renders_chain_history():
     """prompt context includes chain_history when chain is non-empty."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     chain_history = [
         {
@@ -442,7 +442,7 @@ def test_worker_renders_chain_history():
 
 def test_worker_renders_reviewer_feedback():
     """prompt context includes reviewer feedback fields."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     item = _make_docs_item(
         reviewer_score=0.91,
@@ -462,8 +462,8 @@ def test_worker_renders_reviewer_feedback():
 @pytest.mark.asyncio
 async def test_worker_uses_docs_model():
     """process_generate_docs_batch uses get_model('sn-docs'), not a reasoning model."""
-    from imas_codex.standard_names.models import GeneratedDocs
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.models import GeneratedDocs
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         process_generate_docs_batch,
     )
 
@@ -490,15 +490,15 @@ async def test_worker_uses_docs_model():
 
     with (
         patch(
-            "imas_codex.settings.get_model",
+            "iter_codex.settings.get_model",
             return_value="test-language-model",
         ) as mock_get_model,
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_fake_acall,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         ),
         patch(
             "asyncio.to_thread",
@@ -509,7 +509,7 @@ async def test_worker_uses_docs_model():
 
     mock_get_model.assert_called_with("sn-docs")
     assert processed == 1
-    # reasoning_effort must be threaded from [tool.imas-codex.sn-docs] ("high").
+    # reasoning_effort must be threaded from [tool.iter-codex.sn-docs] ("high").
     assert reasoning_effort_used == ["high"]
 
 
@@ -521,8 +521,8 @@ async def test_worker_uses_docs_model():
 @pytest.mark.asyncio
 async def test_worker_streams_per_item():
     """process_generate_docs_batch logs per-item progress (name + desc preview)."""
-    from imas_codex.standard_names.models import GeneratedDocs
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.models import GeneratedDocs
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         process_generate_docs_batch,
     )
 
@@ -553,7 +553,7 @@ async def test_worker_streams_per_item():
             log_messages.append(record.getMessage())
 
     handler = _Capture()
-    import imas_codex.standard_names.workers as _workers_mod
+    import iter_codex.standard_names.workers as _workers_mod
 
     _owning_worker_common.logger.addHandler(handler)
     _owning_worker_common.logger.setLevel(logging.DEBUG)
@@ -561,11 +561,11 @@ async def test_worker_streams_per_item():
     try:
         with (
             patch(
-                "imas_codex.settings.get_model",
+                "iter_codex.settings.get_model",
                 return_value="test-language-model",
             ),
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 side_effect=_fake_acall,
             ),
             patch(
@@ -591,7 +591,7 @@ async def test_worker_streams_per_item():
 
 def test_release_generate_docs_claims_correct_token():
     """release_generate_docs_claims with correct token returns count."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         release_generate_docs_claims,
     )
 
@@ -610,7 +610,7 @@ def test_release_generate_docs_claims_correct_token():
 
 def test_release_generate_docs_claims_empty_ids():
     """release_generate_docs_claims with empty list returns 0 without querying."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         release_generate_docs_claims,
     )
 
@@ -629,7 +629,7 @@ def test_release_generate_docs_claims_empty_ids():
 
 def test_generate_docs_prompt_includes_metadata_requirements():
     """generate_docs prompts contain all three structural metadata requirements."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     system = render_prompt("sn/generate_docs_system", {})
 
@@ -639,7 +639,7 @@ def test_generate_docs_prompt_includes_metadata_requirements():
     )
 
     # 2. DD alias mention requirement (user prompt template — aliases are per-item)
-    from imas_codex.llm.prompt_loader import PROMPTS_DIR
+    from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
     user_template_text = (PROMPTS_DIR / "sn" / "generate_docs_user.md").read_text()
     assert "alias" in user_template_text.lower(), (
@@ -660,8 +660,8 @@ def test_generate_docs_prompt_includes_metadata_requirements():
 def _rendered_documentation(name: str) -> str:
     """Render one name's definition through the writer's own renderer."""
 
-    from imas_codex.standard_names.context import conventions_context_for
-    from imas_codex.standard_names.worker_tasks import (
+    from iter_codex.standard_names.context import conventions_context_for
+    from iter_codex.standard_names.worker_tasks import (
         worker_generate_docs as owning_worker,
     )
 
@@ -709,7 +709,7 @@ def test_two_quantities_carry_one_operator_sentence(operator, left, right):
 
     from imas_standard_names.grammar.terms import select_conventions
 
-    from imas_codex.standard_names.docs_gates import shared_part_sentences
+    from iter_codex.standard_names.docs_gates import shared_part_sentences
 
     left_sentences = shared_part_sentences(left, select_conventions(left))
     right_sentences = shared_part_sentences(right, select_conventions(right))
@@ -728,7 +728,7 @@ def test_two_quantities_carry_one_operator_sentence(operator, left, right):
 def test_species_family_carries_one_population_statement():
     """Every member of a species family states the population identically."""
 
-    from imas_codex.standard_names.docs_gates import SPECIES_POPULATION_SENTENCE
+    from iter_codex.standard_names.docs_gates import SPECIES_POPULATION_SENTENCE
 
     members = ["argon_density", "iron_density", "boron_density", "neon_density"]
     for member in members:
@@ -738,12 +738,12 @@ def test_species_family_carries_one_population_statement():
 def test_altered_shared_part_is_refused_before_it_is_stored():
     """A definition that restates the population is refused, not persisted."""
 
-    from imas_codex.standard_names.context import conventions_context_for
-    from imas_codex.standard_names.docs_gates import (
+    from iter_codex.standard_names.context import conventions_context_for
+    from iter_codex.standard_names.docs_gates import (
         HouseStyleFindingClass,
         conformance_findings,
     )
-    from imas_codex.standard_names.worker_tasks import (
+    from iter_codex.standard_names.worker_tasks import (
         worker_generate_docs as owning_worker,
     )
 
@@ -774,12 +774,12 @@ def test_free_text_including_neutrals_is_refused_before_it_is_stored():
     """The observed contradiction is refused: text that counts neutrals under
     a stored population that excludes them."""
 
-    from imas_codex.standard_names.context import conventions_context_for
-    from imas_codex.standard_names.docs_gates import (
+    from iter_codex.standard_names.context import conventions_context_for
+    from iter_codex.standard_names.docs_gates import (
         HouseStyleFindingClass,
         conformance_findings,
     )
-    from imas_codex.standard_names.worker_tasks import (
+    from iter_codex.standard_names.worker_tasks import (
         worker_generate_docs as owning_worker,
     )
 
@@ -797,7 +797,7 @@ def test_free_text_including_neutrals_is_refused_before_it_is_stored():
     assert "neutral" in contradictory[0].detail.lower()
 
     # Text the writer itself negates agrees with the stored population.
-    from imas_codex.standard_names.docs_gates import population_contradiction
+    from iter_codex.standard_names.docs_gates import population_contradiction
 
     assert (
         population_contradiction(
@@ -820,7 +820,7 @@ def test_free_text_including_neutrals_is_refused_before_it_is_stored():
 def test_description_states_the_settled_population():
     """The one-line description carries the population the definition counts."""
 
-    from imas_codex.standard_names.docs_gates import description_with_population
+    from iter_codex.standard_names.docs_gates import description_with_population
 
     written = description_with_population(
         "argon_density", "Number density of argon in the plasma."
@@ -845,7 +845,7 @@ def test_description_states_the_settled_population():
 def test_rendered_text_does_not_open_with_a_bare_fragment():
     """A fragment opening is completed by the first note, not left alone."""
 
-    from imas_codex.standard_names.worker_tasks import (
+    from iter_codex.standard_names.worker_tasks import (
         worker_generate_docs as owning_worker,
     )
 
@@ -859,7 +859,7 @@ def test_rendered_text_does_not_open_with_a_bare_fragment():
     assert rest.strip() == ""
 
     # A fragment the model itself wrote is completed the same way.
-    from imas_codex.standard_names.docs_gates import open_without_fragment
+    from iter_codex.standard_names.docs_gates import open_without_fragment
 
     completed = open_without_fragment(
         "Number density of argon\n\nIts continuum definition is:\n\n$$n = N/V$$"
@@ -882,7 +882,7 @@ def test_paraphrase_below_the_exact_match_band_is_removed():
 
     from imas_standard_names.grammar.terms import select_conventions
 
-    from imas_codex.standard_names.docs_gates import (
+    from iter_codex.standard_names.docs_gates import (
         SPECIES_POPULATION_SENTENCE,
         replace_altered_shared_parts,
         shared_part_sentences,
@@ -901,7 +901,7 @@ def test_paraphrase_below_the_exact_match_band_is_removed():
 def test_paraphrase_left_beside_the_stored_wording_is_reported():
     """Text the renderer could not remove is a finding, not silently kept."""
 
-    from imas_codex.standard_names.docs_gates import (
+    from iter_codex.standard_names.docs_gates import (
         SPECIES_POPULATION_SENTENCE,
         HouseStyleFindingClass,
         conformance_findings,
@@ -923,8 +923,8 @@ def test_paraphrase_left_beside_the_stored_wording_is_reported():
 async def test_pipeline_refuses_a_contradicting_definition_before_persist():
     """The refusal is reached on the pipeline path, and nothing is stored."""
 
-    from imas_codex.standard_names.models import GeneratedDocs
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.models import GeneratedDocs
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         process_generate_docs_batch,
     )
 
@@ -947,20 +947,20 @@ async def test_pipeline_refuses_a_contradicting_definition_before_persist():
 
     with (
         patch(
-            "imas_codex.settings.get_model",
+            "iter_codex.settings.get_model",
             return_value="test-language-model",
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_fake_acall,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "iter_codex.standard_names.graph_store.graph_docs_persistence."
             "persist_generated_docs",
             persist,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         ),
         patch("asyncio.to_thread", new=AsyncMock(return_value="drafted")),
     ):
@@ -976,8 +976,8 @@ async def test_pipeline_refuses_a_contradicting_definition_before_persist():
 async def test_refine_refuses_a_contradicting_definition_before_persist():
     """A refinement is held to the settled population exactly as a first draft."""
 
-    from imas_codex.standard_names.models import RefinedDocs
-    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+    from iter_codex.standard_names.models import RefinedDocs
+    from iter_codex.standard_names.worker_tasks.worker_refine_docs import (
         process_refine_docs_batch,
     )
     from tests.standard_names.test_refine_docs_chain import _make_refine_docs_item
@@ -995,21 +995,21 @@ async def test_refine_refuses_a_contradicting_definition_before_persist():
 
     with (
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             return_value=(refined, 0.05, {"input_tokens": 10, "output_tokens": 5}),
         ),
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             return_value="test prompt",
         ),
-        patch("imas_codex.settings.get_model", return_value="model-x"),
+        patch("iter_codex.settings.get_model", return_value="model-x"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "iter_codex.standard_names.graph_store.graph_docs_persistence."
             "persist_refined_docs",
             persist,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "iter_codex.standard_names.graph_store.graph_docs_persistence."
             "release_refine_docs_failed_claims",
             return_value=1,
         ),

@@ -22,7 +22,7 @@ from __future__ import annotations
 import pytest
 from rich.console import Console
 
-from imas_codex.standard_names.display import POOL_LABELS, SN6PoolDisplay
+from iter_codex.standard_names.display import POOL_LABELS, SN6PoolDisplay
 
 
 def _feed_event(display: SN6PoolDisplay, pool: str, *, name: str, cost: float) -> None:

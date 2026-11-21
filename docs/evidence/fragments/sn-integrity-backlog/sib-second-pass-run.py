@@ -58,7 +58,7 @@ def cohort() -> list[dict]:
 
 
 def source_state(source_ids: list[str]) -> dict[str, dict]:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     out: dict[str, dict] = {}
     with GraphClient() as gc:
@@ -93,7 +93,7 @@ def source_state(source_ids: list[str]) -> dict[str, dict]:
 
 
 def failed_census(exclude: list[str]) -> dict:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         rows = list(
@@ -112,7 +112,7 @@ def failed_census(exclude: list[str]) -> dict:
 
 def retry_receipts(source_ids: list[str]) -> dict[str, dict]:
     """Every retry event hanging off a cohort source, oldest first."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     out: dict[str, dict] = {}
     with GraphClient() as gc:
@@ -179,8 +179,8 @@ def phase_census(args: argparse.Namespace) -> dict:
 
 
 def _retry(rows: list[dict], *, dry_run: bool) -> dict:
-    from imas_codex.standard_names.graph_store import graph_foundation
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store import graph_foundation
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         retry_failed_sources,
     )
 
@@ -310,7 +310,7 @@ def phase_manifest(args: argparse.Namespace) -> dict:
 
 def phase_readback(args: argparse.Namespace) -> dict:
     """Per-source outcome after the rerun, names by stage, spend by run id."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     rows = cohort()
     ids = [r["id"] for r in rows]

@@ -4,12 +4,12 @@ import json
 
 import pytest
 
-from imas_codex.discovery.signals.controls_metadata import (
+from iter_codex.discovery.signals.controls_metadata import (
     catalogue_members,
     read_controls_feed,
 )
-from imas_codex.graph.signal_descriptions import description_is_name
-from imas_codex.remote.archive_catalogue import ArchiveCatalogue
+from iter_codex.graph.signal_descriptions import description_is_name
+from iter_codex.remote.archive_catalogue import ArchiveCatalogue
 
 
 def entry(**changes):
@@ -85,7 +85,7 @@ def test_name_only_description_eligibility(description, expected):
 def test_description_writer_refuses_a_missing_precomputed_receipt():
     from unittest.mock import Mock
 
-    from imas_codex.discovery.signals.parallel import write_signal_descriptions
+    from iter_codex.discovery.signals.parallel import write_signal_descriptions
 
     graph = Mock()
     with pytest.raises(ValueError, match="cover every description"):

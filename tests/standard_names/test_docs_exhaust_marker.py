@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_store.graph_claim_release import (
+from iter_codex.standard_names.graph_store.graph_claim_release import (
     _mark_docs_exhausted,
 )
 from tests.recording_graph_client import RecordingGraphClient
@@ -143,8 +143,8 @@ async def test_writer_paths_reach_the_marker_with_the_graph_client_replaced(
     """
 
     if writer == "generate":
-        from imas_codex.standard_names.models import GeneratedDocs
-        from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        from iter_codex.standard_names.models import GeneratedDocs
+        from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
             process_generate_docs_batch,
         )
         from tests.standard_names.test_generate_docs import _make_docs_item
@@ -159,14 +159,14 @@ async def test_writer_paths_reach_the_marker_with_the_graph_client_replaced(
             ),
             documentation=ARGON_CONTRADICTION,
         )
-        module = "imas_codex.standard_names.graph_store.graph_docs_persistence"
+        module = "iter_codex.standard_names.graph_store.graph_docs_persistence"
         persist_name = "persist_generated_docs"
         release_name = "release_generate_docs_failed_claims"
         processor = process_generate_docs_batch
         item = _make_docs_item(sn_id="argon_density")
     else:
-        from imas_codex.standard_names.models import RefinedDocs
-        from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+        from iter_codex.standard_names.models import RefinedDocs
+        from iter_codex.standard_names.worker_tasks.worker_refine_docs import (
             process_refine_docs_batch,
         )
         from tests.standard_names.test_refine_docs_chain import _make_refine_docs_item
@@ -181,7 +181,7 @@ async def test_writer_paths_reach_the_marker_with_the_graph_client_replaced(
             ),
             links=[],
         )
-        module = "imas_codex.standard_names.graph_store.graph_docs_persistence"
+        module = "iter_codex.standard_names.graph_store.graph_docs_persistence"
         persist_name = "persist_refined_docs"
         release_name = "release_refine_docs_failed_claims"
         processor = process_refine_docs_batch
@@ -197,7 +197,7 @@ async def test_writer_paths_reach_the_marker_with_the_graph_client_replaced(
 
         refine_conventions.append(
             patch(
-                "imas_codex.standard_names.context.conventions_context_for",
+                "iter_codex.standard_names.context.conventions_context_for",
                 return_value=AppliedConventions(),
             )
         )
@@ -211,13 +211,13 @@ async def test_writer_paths_reach_the_marker_with_the_graph_client_replaced(
 
     patches = [
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_answer,
         ),
-        patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
-        patch("imas_codex.settings.get_model", return_value="model-x"),
+        patch("iter_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
+        patch("iter_codex.settings.get_model", return_value="model-x"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.get_services",
+            "iter_codex.standard_names.graph_store.graph_foundation.get_services",
             return_value=services,
         ),
         patch(f"{module}.{persist_name}", MagicMock(return_value="drafted")),

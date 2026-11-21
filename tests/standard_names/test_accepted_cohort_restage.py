@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.edit import restage_accepted_names_for_review
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.edit import restage_accepted_names_for_review
 
 
 def _relationship(
@@ -335,7 +335,7 @@ def test_cli_refuses_without_include_accepted_and_explains_export_consequence() 
 def test_cli_reaches_atomic_operator() -> None:
     runner = CliRunner()
     receipt = {
-        "schema": "imas-codex.accepted-review-restage-receipt",
+        "schema": "iter-codex.accepted-review-restage-receipt",
         "schema_version": 1,
         "outcome": "would_apply",
         "dry_run": True,
@@ -347,7 +347,7 @@ def test_cli_reaches_atomic_operator() -> None:
     }
 
     with patch(
-        "imas_codex.standard_names.edit.restage_accepted_names_for_review",
+        "iter_codex.standard_names.edit.restage_accepted_names_for_review",
         return_value=receipt,
     ) as operator:
         result = runner.invoke(

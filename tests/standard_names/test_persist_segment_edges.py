@@ -21,7 +21,7 @@ import pytest
 def _no_approved_names():
     """Make the approval-backed protection lookup explicit for this suite."""
     with patch(
-        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        "iter_codex.standard_names.protection._fetch_catalog_edit_names",
         return_value=set(),
     ):
         yield
@@ -39,7 +39,7 @@ def _mock_version_resolver():
     consuming mock_gc.query side_effect entries.
     """
     with patch(
-        "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
+        "iter_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
         return_value="0.7.0rc16",
     ):
         yield
@@ -66,7 +66,7 @@ def _mock_synced_segments():
         }
     )
     with patch(
-        "imas_codex.standard_names.graph_store.graph_catalog._resolve_synced_segments",
+        "iter_codex.standard_names.graph_store.graph_catalog._resolve_synced_segments",
         return_value=_all_segments,
     ):
         yield
@@ -95,16 +95,16 @@ def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
     """Call write_standard_names with a mocked GraphClient."""
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC,
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
+            "iter_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
             return_value="0.7.0rc16",
         ),
     ):
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -334,7 +334,7 @@ class TestSegmentEdgeParseFailure:
 
         # write_standard_names calls _write_grammar_decomposition directly
         with patch(
-            "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition"
+            "iter_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition"
         ) as mock_write:
             mock_write.side_effect = None  # No-op
             _call_write(names, mock_gc)
@@ -346,7 +346,7 @@ class TestSegmentEdgeParseFailure:
         """Parse failure should log a warning."""
         mock_gc.query.return_value = []
 
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _write_segment_edges,
         )
 
@@ -357,7 +357,7 @@ class TestSegmentEdgeParseFailure:
             import logging
 
             with caplog.at_level(
-                logging.WARNING, logger="imas_codex.standard_names.graph_ops"
+                logging.WARNING, logger="iter_codex.standard_names.graph_ops"
             ):
                 _write_segment_edges(mock_gc, ["bad_name_xyz"])
 
@@ -396,12 +396,12 @@ class TestSegmentEdgeTokenMiss:
 
         import logging
 
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _write_segment_edges,
         )
 
         with caplog.at_level(
-            logging.WARNING, logger="imas_codex.standard_names.graph_ops"
+            logging.WARNING, logger="iter_codex.standard_names.graph_ops"
         ):
             _write_segment_edges(mock_gc, ["electron_temperature"])
 
@@ -426,12 +426,12 @@ class TestSegmentEdgeTokenMiss:
 
         import logging
 
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _write_segment_edges,
         )
 
         with caplog.at_level(
-            logging.WARNING, logger="imas_codex.standard_names.graph_ops"
+            logging.WARNING, logger="iter_codex.standard_names.graph_ops"
         ):
             _write_segment_edges(mock_gc, ["electron_temperature"])
 
@@ -464,7 +464,7 @@ class TestSegmentEdgeRoundTrip:
             ],
         ]
 
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _write_segment_edges,
         )
 
@@ -510,7 +510,7 @@ class TestSegmentEdgeRoundTrip:
             ],
         ]
 
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _write_segment_edges,
         )
 
@@ -558,7 +558,7 @@ class TestSegmentEdgeRoundTrip:
             ],
         ]
 
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _write_segment_edges,
         )
 

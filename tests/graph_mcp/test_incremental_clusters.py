@@ -20,7 +20,7 @@ class TestImportClustersIncremental:
 
     @pytest.fixture(autouse=True)
     def _load_source(self):
-        from imas_codex.graph.build_dd import _import_clusters
+        from iter_codex.graph.build_dd import _import_clusters
 
         self.source = inspect.getsource(_import_clusters)
 
@@ -80,7 +80,7 @@ class TestContentHashDeterminism:
     """Validate content hash produces stable, deterministic IDs."""
 
     def test_same_paths_same_hash(self):
-        from imas_codex.graph.build_dd import _compute_cluster_content_hash
+        from iter_codex.graph.build_dd import _compute_cluster_content_hash
 
         paths = [
             "equilibrium/time_slice/profiles_1d/psi",
@@ -91,7 +91,7 @@ class TestContentHashDeterminism:
         assert h1 == h2
 
     def test_different_paths_different_hash(self):
-        from imas_codex.graph.build_dd import _compute_cluster_content_hash
+        from iter_codex.graph.build_dd import _compute_cluster_content_hash
 
         paths_a = ["equilibrium/time_slice/profiles_1d/psi"]
         paths_b = ["equilibrium/time_slice/profiles_1d/q"]
@@ -100,7 +100,7 @@ class TestContentHashDeterminism:
         )
 
     def test_order_independent(self):
-        from imas_codex.graph.build_dd import _compute_cluster_content_hash
+        from iter_codex.graph.build_dd import _compute_cluster_content_hash
 
         paths1 = ["a/b", "c/d"]
         paths2 = ["c/d", "a/b"]
@@ -110,7 +110,7 @@ class TestContentHashDeterminism:
         assert h1 == h2
 
     def test_hash_length(self):
-        from imas_codex.graph.build_dd import _compute_cluster_content_hash
+        from iter_codex.graph.build_dd import _compute_cluster_content_hash
 
         h = _compute_cluster_content_hash(["a/b"])
         assert len(h) == 16
@@ -122,14 +122,14 @@ class TestSyncLabelsFromCacheRemoved:
 
     def test_function_still_exists_but_not_called(self):
         """The function may still exist but should not be called from _import_clusters."""
-        from imas_codex.graph.build_dd import _import_clusters
+        from iter_codex.graph.build_dd import _import_clusters
 
         source = inspect.getsource(_import_clusters)
         assert "_sync_labels_from_cache" not in source
 
     def test_labels_persist_via_merge(self):
         """Documentation confirms labels persist via MERGE."""
-        from imas_codex.graph.build_dd import _import_clusters
+        from iter_codex.graph.build_dd import _import_clusters
 
         source = inspect.getsource(_import_clusters)
         # Should have a comment about labels persisting

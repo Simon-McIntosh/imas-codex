@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.edit import _apply_rename, reclassify_kind
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.edit import _apply_rename, reclassify_kind
 
 
 class _KindGraph:
@@ -47,7 +47,7 @@ def test_kind_reclassification_defaults_to_an_exact_zero_write_preview() -> None
     graph = _KindGraph()
 
     with patch(
-        "imas_codex.standard_names.edit._validate_kind_candidate",
+        "iter_codex.standard_names.edit._validate_kind_candidate",
         return_value=[],
     ):
         result = reclassify_kind(
@@ -108,7 +108,7 @@ def test_kind_reclassification_applies_one_cas_event_without_stage_changes() -> 
     graph = _KindGraph()
 
     with patch(
-        "imas_codex.standard_names.edit._validate_kind_candidate",
+        "iter_codex.standard_names.edit._validate_kind_candidate",
         return_value=[],
     ):
         result = reclassify_kind(
@@ -162,14 +162,14 @@ def test_rename_derives_successor_kind_instead_of_copying_predecessor() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.edit._isn_round_trip_ok",
+            "iter_codex.standard_names.edit._isn_round_trip_ok",
             return_value=(True, ""),
         ),
-        patch("imas_codex.standard_names.edit._base_token", return_value="time"),
-        patch("imas_codex.standard_names.edit._derive_rename_unit", return_value="s"),
-        patch("imas_codex.standard_names.edit.persist_refined_name", _persist),
-        patch("imas_codex.standard_names.edit._grammar_segment_props", return_value={}),
-        patch("imas_codex.standard_names.edit._stamp_successor_validation"),
+        patch("iter_codex.standard_names.edit._base_token", return_value="time"),
+        patch("iter_codex.standard_names.edit._derive_rename_unit", return_value="s"),
+        patch("iter_codex.standard_names.edit.persist_refined_name", _persist),
+        patch("iter_codex.standard_names.edit._grammar_segment_props", return_value={}),
+        patch("iter_codex.standard_names.edit._stamp_successor_validation"),
     ):
         plan = _apply_rename(
             _RenameGraph(),
@@ -206,7 +206,7 @@ def test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate() -> None:
     runner = CliRunner()
 
     with patch(
-        "imas_codex.standard_names.edit.reclassify_kind", return_value=preview
+        "iter_codex.standard_names.edit.reclassify_kind", return_value=preview
     ) as operation:
         result = runner.invoke(
             sn,
@@ -228,7 +228,7 @@ def test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate() -> None:
 
     applied = {**preview, "dry_run": False, "change_id": "sn-change:one"}
     with patch(
-        "imas_codex.standard_names.edit.reclassify_kind", return_value=applied
+        "iter_codex.standard_names.edit.reclassify_kind", return_value=applied
     ) as operation:
         result = runner.invoke(
             sn,

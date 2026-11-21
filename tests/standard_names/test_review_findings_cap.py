@@ -15,8 +15,8 @@ import logging
 
 import pytest
 
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.models import (
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.models import (
     StandardNameQualityReviewDocs,
     StandardNameQualityScoreDocs,
 )
@@ -41,7 +41,7 @@ AUDIT_SECTION_HEADING = "Layer 1 Audit Findings"
 @pytest.mark.parametrize("prompt_name", ["sn/review_docs", "sn/review_names"])
 def test_audit_finding_text_reaches_rendered_prompt(prompt_name: str) -> None:
     """A rendered review prompt carries the batch's audit finding text."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     rendered = render_prompt(
         prompt_name,
@@ -62,7 +62,7 @@ def test_audit_findings_block_is_absent_when_no_findings() -> None:
     heading even with no findings, so the test reddens on exactly the change it
     guards. A marker only the test could supply would pass either way.
     """
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     rendered = render_prompt(
         "sn/review_docs",
@@ -128,7 +128,7 @@ async def _run_docs_review(
     defaulting to a full-marks review for both candidates. Returns the scored
     items and the review holds the pass raised.
     """
-    from imas_codex.standard_names.review import holds, pipeline as pl
+    from iter_codex.standard_names.review import holds, pipeline as pl
 
     totals = score_totals or {}
     raised: list[dict] = []
@@ -162,7 +162,7 @@ async def _run_docs_review(
         "clear_holds_not_raised",
         lambda name_id, axis, kinds, raised_keys, *, graph=None: 0,
     )
-    import imas_codex.graph.client as graph_client
+    import iter_codex.graph.client as graph_client
 
     monkeypatch.setattr(graph_client, "GraphClient", _NullGraph)
 
@@ -179,8 +179,8 @@ async def _run_docs_review(
         ]
         return response_model(reviews=reviews), 0.0, 0
 
-    import imas_codex.discovery.base.llm as dbllm
-    from imas_codex.llm import prompt_loader
+    import iter_codex.discovery.base.llm as dbllm
+    from iter_codex.llm import prompt_loader
 
     monkeypatch.setattr(prompt_loader, "render_prompt", fake_render_prompt)
     monkeypatch.setattr(dbllm, "acall_llm_structured", fake_call_llm_structured)

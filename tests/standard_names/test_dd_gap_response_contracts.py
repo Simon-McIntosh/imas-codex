@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from imas_codex.standard_names.models import (
+from iter_codex.standard_names.models import (
     DDGapEvidence,
     StandardNameComposeBatch,
     StandardNameQualityReviewDocs,
@@ -130,7 +130,7 @@ def test_half_reference_pair_is_repaired_and_recorded() -> None:
 
 
 def test_schema_exposes_only_schema_owned_dd_gap_kinds() -> None:
-    from imas_codex.graph.models import DDGapKind
+    from iter_codex.graph.models import DDGapKind
 
     schema = DDGapEvidence.model_json_schema()
     kinds = schema["properties"]["kind"]["enum"]

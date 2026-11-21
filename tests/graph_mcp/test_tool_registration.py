@@ -10,7 +10,7 @@ class TestToolRegistration:
 
     def test_graph_tools_registered(self, graph_client):
         """Graph tools appear in registered tool names when client provided."""
-        from imas_codex.tools import Tools
+        from iter_codex.tools import Tools
 
         tools = Tools(graph_client=graph_client)
         names = tools.get_registered_tool_names()
@@ -20,14 +20,14 @@ class TestToolRegistration:
 
     def test_graph_client_required(self):
         """Tools raises ValueError when no graph_client provided."""
-        from imas_codex.tools import Tools
+        from iter_codex.tools import Tools
 
         with pytest.raises(ValueError, match="GraphClient is required"):
             Tools()
 
     def test_existing_tools_still_registered(self, graph_client):
         """Original tools still present alongside graph tools."""
-        from imas_codex.tools import Tools
+        from iter_codex.tools import Tools
 
         tools = Tools(graph_client=graph_client)
         names = tools.get_registered_tool_names()
@@ -38,7 +38,7 @@ class TestToolRegistration:
 
     def test_total_tool_count(self, graph_client):
         """Total tool count matches expected number of graph-backed tools."""
-        from imas_codex.tools import Tools
+        from iter_codex.tools import Tools
 
         tools = Tools(graph_client=graph_client)
         names = tools.get_registered_tool_names()

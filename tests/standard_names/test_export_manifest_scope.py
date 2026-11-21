@@ -14,7 +14,7 @@ import typing
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import _write_manifest, resolve_export_scope
+from iter_codex.standard_names.export import _write_manifest, resolve_export_scope
 
 
 def _allowed_scopes() -> set[str]:

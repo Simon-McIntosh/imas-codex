@@ -12,9 +12,9 @@ import sys
 import traceback
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import signed_manifest as signed
-from imas_codex.standard_names.repair_authority import build_repair_authority
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import signed_manifest as signed
+from iter_codex.standard_names.repair_authority import build_repair_authority
 
 ROOT = Path(__file__).resolve().parents[4]
 HERE = Path(__file__).resolve().parent

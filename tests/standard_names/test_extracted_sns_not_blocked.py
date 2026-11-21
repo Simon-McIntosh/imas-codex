@@ -15,7 +15,7 @@ import inspect
 
 import pytest
 
-from imas_codex.standard_names.sources.dd import extract_dd_candidates
+from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
 
 class TestExtractedSNSNotBlocked:

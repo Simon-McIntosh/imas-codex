@@ -1,0 +1,355 @@
+---
+name: sn/generate_docs_user
+description: Per-item user prompt for generate_docs — writes description and documentation for a single accepted standard name
+used_by: iter_codex.standard_names.workers.process_generate_docs_batch
+task: generate_docs
+dynamic: true
+schema_needs: []
+---
+
+# Generate documentation for: {{ item.name }}
+
+This standard name has passed name review and is now accepted. Your task is to write
+clear, complete `description` and `documentation` fields. You must NOT change the name,
+kind, unit, or any other identity field.
+
+**Standard name:** `{{ item.name }}`
+**Unit:** {{ item.unit or "—" }}
+**Kind:** {{ item.kind or "scalar" }}
+**Physics domain:** {{ item.physics_domain or "—" }}
+
+{% include ("sn/_conventions.md") %}
+{% include ("sn/_shared_parts.md") %}{% if locus_context %}
+
+## Locus of this quantity
+
+This entry's locus is **`{{ locus_context.token }}`**. Name the locus where the
+quantity is evaluated, but never define it: the locus's defining sentence is
+appended from the registry and reads identically for every name at this locus,
+so any definition you write duplicates it. Do not restate the locus's meaning,
+its equation, or a gloss of it in your prose.{% if locus_context.defining_quantity %}
+Its position is itself defined by the standard quantity **`{{ locus_context.defining_quantity }}`**.
+Cross-link it inline as `[label](name:{{ locus_context.defining_quantity }})`
+at the first natural mention of the locus.{% endif %}
+{% endif %}
+{% if item.derived_children %}
+## This is a DERIVED PARENT — generalize over its children
+
+`{{ item.name }}` is a structural **parent**: an abstraction over the more
+specific standard names below (its children). These children are the concrete
+instances that carry the real physics and are your **primary grounding** (this
+quantity has no Data Dictionary source of its own).
+
+{% for c in item.derived_children %}- `{{ c.name }}`{% if c.unit %} [{{ c.unit }}]{% endif %}{% if c.physics_domain %} ({{ c.physics_domain }}){% endif %}{% if c.description %} — {{ c.description }}{% endif %}
+{% endfor %}
+
+Write the description and documentation for the **general quantity these
+children share** — the common physical meaning. Do **NOT** over-specialize to
+any single child's component, axis, projection, qualifier, normalization, or
+region (e.g. for a parent `perturbed_velocity` do not write the docs of its
+`normalized_parallel_perturbed_velocity` child — describe the perturbed velocity
+in general). Where natural, cross-reference a representative child or two with
+`[label](name:bare_id)`. Ground strictly on what the children attest; do not
+invent physics beyond them.
+{% endif %}
+
+{% if item.sibling_family %}
+## Sibling Family — parallel structure REQUIRED
+
+`{{ item.name }}` belongs to a family of sibling standard names{% if item.sibling_family.parent %} sharing the
+parent `{{ item.sibling_family.parent.name }}`{% else %} that share a common
+pattern{% endif %}. Family members must read as a
+**matched set**: the same documentation section structure, differing where the physics genuinely
+differs (axis, species, zone, locus — and the symbols that go with them).
+
+{% if item.sibling_family.anchor %}
+### Accepted sibling anchor: `{{ item.sibling_family.anchor.name }}`{% if item.sibling_family.anchor.is_parent %} (the family parent){% endif %}
+
+Compare this member's section ordering and physical scope.
+
+- **Anchor description:** {{ item.sibling_family.anchor.description }}
+{% if item.sibling_family.anchor.documentation %}- **Anchor documentation:**
+
+{{ item.sibling_family.anchor.documentation }}
+{% endif %}
+{% else %}
+### No accepted anchor yet
+
+No family member has review-accepted documentation. Use the selected registry
+opening when one applies, and make the section structure reusable by siblings.
+{% endif %}
+
+### Family members
+{% for s in item.sibling_family.siblings %}
+- `{{ s.name }}`{% if s.axis %} (axis: {{ s.axis }}){% endif %}{% if s.operator_kind %} [{{ s.operator_kind }}]{% endif %}{% if s.docs_stage %} — docs {{ s.docs_stage }}{% endif %}{% if s.description %}
+  - description: {{ s.description }}{% endif %}{% if s.documentation_opening %}
+  - documentation opens: "{{ s.documentation_opening }}"{% endif %}
+{% endfor %}
+
+**Family rules (enforced at review):**
+
+1. **Vary only the physics that varies** — the axis/species/zone-specific
+   token and genuinely member-specific physical claims.
+2. **Never flatten real physics differences.** If this member's quantity is
+   genuinely different in kind (e.g. a radial branch index vs an angular
+   Fourier harmonic), state the distinction explicitly in the body.
+3. **Cross-link the family.**{% if item.sibling_family.parent %} Link the parent
+   `[{{ item.sibling_family.parent.name }}](name:{{ item.sibling_family.parent.name }})`
+   and at least{% else %} Link at least{% endif %} one adjacent sibling inline where the prose supports it.
+{% endif %}
+
+## Why this name was accepted (reviewer feedback)
+
+{% if item.reviewer_score_name is defined and item.reviewer_score_name is not none %}
+- **Reviewer score:** {{ "%.2f"|format(item.reviewer_score_name) }}
+{% endif %}
+{% if item.reviewer_comments_name %}
+- **Reviewer comments:** {{ item.reviewer_comments_name }}
+{% endif %}
+{% if (item.reviewer_score_name is not defined or item.reviewer_score_name is none) and not item.reviewer_comments_name %}
+_(no reviewer feedback available)_
+{% endif %}
+{% if item.docs_hint and item.edit_reason %}
+## Expert steering ({{ item.edit_origin or "human" }})
+
+A domain expert has proposed this documentation direction: "{{ item.docs_hint }}"
+— for this reason: {{ item.edit_reason }}
+
+This proposal is subordinate to the grammar and composition rules above —
+realize the intent within the rules; if the rules forbid the literal
+proposal, compose the nearest rule-compliant documentation. Do not treat it
+as pre-approved.
+{% endif %}
+{% if item.chain_history and item.chain_history | length > 0 %}
+## Name evolution history (chain)
+
+This name was refined through {{ item.chain_history | length }} predecessor(s). Write
+documentation that reflects the FINAL accepted name — the chain is provided as context
+to understand what the name represents and how reviewers refined it.
+
+{% for h in item.chain_history %}
+### Predecessor {{ loop.index }}: `{{ h.name }}`
+{% if h.description %}- Description: {{ h.description }}{% endif %}
+{% if h.reviewer_score_name is defined and h.reviewer_score_name is not none %}- Reviewer score: {{ "%.2f"|format(h.reviewer_score_name) }}{% endif %}
+{% if h.reviewer_comments_per_dim_name %}- Reviewer comments: {{ h.reviewer_comments_per_dim_name }}{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if item.description %}
+## Draft description (untrusted scaffolding — do not inherit)
+
+Rewrite the description from the Physics Reference Material and the name itself; do not carry over any claim you cannot verify from the reference material.
+A deterministic-parent placeholder is a lifecycle marker, not physics content;
+never paraphrase it into the result.
+
+{{ item.description }}
+{% endif %}
+
+{% set cocos_transformation_type = item.cocos_transformation_type | default(none, true) %}
+{% if cocos_transformation_type is none %}
+{% set cocos_transformation_type = item.cocos_label | default(none, true) %}
+{% endif %}
+{% set cocos_sensitive = cocos_transformation_type is not none and cocos_transformation_type != "one_like" %}
+{% if cocos_sensitive %}
+## COCOS Sign Convention
+
+This quantity has COCOS transformation type **{{ cocos_transformation_type }}**.
+{% if item.cocos_guidance %}
+
+{{ item.cocos_guidance }}
+{% endif %}
+
+You **MUST** include a sign convention paragraph in the documentation using exactly
+this format: `Sign convention: Positive when …` as a standalone paragraph (blank line
+before and after, plain text — no markdown headings, no bold).
+{% endif %}
+
+{% if item.parent_sn %}
+## Parent Standard Name
+
+This is a component of `{{ item.parent_sn.name }}`.
+{% if item.parent_sn.description %}- Parent description: {{ item.parent_sn.description }}{% endif %}
+{% if item.parent_sn.documentation %}- Parent documentation excerpt: {{ item.parent_sn.documentation[:300] }}{% endif %}
+
+Focus on what distinguishes this {{ item.component_axis or "component" }} specifically.
+Cross-reference the parent: `[{{ item.parent_sn.name }}](name:{{ item.parent_sn.name }})`.
+{% endif %}
+
+{% if item.child_components %}
+## Component Standard Names — document at PARENT scope
+
+`{{ item.name }}` is the parent of the more specific standard names below.
+Your entry is the family's shared reference: components link here for the
+common physics context.
+
+{% for c in item.child_components %}- `{{ c.name }}`{% if c.axis %} ({{ c.axis }}){% endif %}{% if c.description %}: {{ c.description }}{% endif %}
+{% endfor %}
+
+Write the description and documentation for the **general quantity the name
+denotes**, wide enough that EVERY child above is an instance of it. Do NOT
+narrow the definition to any single child's species, axis, locus, or
+application — and do NOT narrow it to your own source material when the
+children attest a broader span (a parent's source is often just one concrete
+instance). If the children are too heterogeneous to share one physical
+definition, define the name at the level they DO share (e.g. a dimensionless
+part-to-whole ratio) and characterize the distinct sub-uses briefly, cross-
+referencing representative children with `[label](name:bare_id)`.
+{% endif %}
+
+{% if item.base_quantity %}
+## Base Quantity
+
+This quantity is derived from `{{ item.base_quantity.name }}`.
+{% if item.base_quantity.documentation %}
+{{ item.base_quantity.documentation[:300] }}
+{% endif %}
+Describe how this derivative/transformation relates to the base quantity.
+{% endif %}
+
+{% if item.derivative_context %}
+## Derivative Context
+
+Numerator: {{ item.derivative_context.numerator }}
+Denominator: {{ item.derivative_context.denominator }}
+{% if item.derivative_context.siblings %}
+Related derivatives (same denominator):
+{% for sib in item.derivative_context.siblings %}
+- `{{ sib }}`
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% if item.source_paths %}
+## Source Context (PRIVATE — do NOT cite in output)
+
+These source paths are provided for physics context ONLY. They help you understand
+what this quantity represents. NEVER mention these paths, IDS names, or DD references
+in the description or documentation — source provenance is tracked externally.
+A generic leaf or parent label does not make the accepted identity generic; use
+the enriched source meaning and the accepted name's explicit segments.
+
+{% for p in item.source_paths %}- `{{ p }}`
+{% endfor %}{% endif %}
+
+{% if item.dd_source_docs %}
+## Enriched Source Descriptions (PRIMARY GROUNDING — PRIVATE, do NOT cite)
+
+These entries are rich-first: each `documentation` value is the enriched source
+description, with terse DD documentation used only when no enriched description
+exists. Use this material to ground your documentation in correct physics; never
+replace it with a generic interpretation of the path.
+Extract the PHYSICS MEANING, not the source identity. NEVER copy path identifiers,
+IDS names, or DD-specific language into the output text.
+
+{% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.description or p.documentation }}
+{% endfor %}{% endif %}
+
+{% if item.ancestor_context %}
+## DD Path Lineage (PRIVATE — do NOT cite in output)
+
+The concrete source leaf is often terse; the quantity's meaning and its
+evaluation locus live on parent nodes. Use this lineage to ground the physics
+and the correct evaluation location. NEVER cite these paths in the output.
+
+{% for anc in item.ancestor_context %}- `{{ anc.path }}`: {{ anc.text }}
+{% endfor %}{% endif %}
+
+{% if item.dd_aliases %}
+## Aliases (PRIVATE — do NOT cite in output)
+
+{{ item.dd_aliases | join(', ') }}
+{% endif %}
+
+{% if item.nearest_peers %}
+## Nearest Peer Standard Names
+
+Concept-similar names already in the catalog.
+Use these for inline cross-references `[label](name:bare_id)` where naturally relevant.
+
+{% for n in item.nearest_peers %}- `{{ n.tag }}` [{{ n.unit }}, {{ n.physics_domain }}]: {{ n.doc_short }}{% if n.cocos_label %} (COCOS {{ n.cocos_label }}){% endif %}
+{% endfor %}{% endif %}
+
+{% if item.related_neighbours %}
+## Related Physics Quantities
+
+Cross-domain related quantities sharing cluster membership, coordinates, or units.
+
+{% for r in item.related_neighbours %}- `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}{% if r.physics_domain %} [{{ r.physics_domain }}]{% endif %}{% if r.doc %}: {{ r.doc }}{% endif %}
+{% endfor %}{% endif %}
+
+{% if item.dd_clusters %}
+## Semantic Clusters
+
+{% for cl in item.dd_clusters %}- **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
+{% endfor %}{% endif %}
+
+{% if item.dd_version_history %}
+## DD Version History
+
+Notable changes to this path across Data Dictionary versions:
+
+{% for vh in item.dd_version_history %}- {{ vh.change_type }} (v{{ vh.version }})
+{% endfor %}{% endif %}
+
+{% if item.dd_keywords %}
+## Keywords
+
+{{ item.dd_keywords | join(', ') }}
+{% endif %}
+
+{% if item.dd_parent_description %}
+## Parent Structure
+
+{{ item.dd_parent_description }}
+{% endif %}
+
+{% if nearby_existing_names %}
+## Nearby Existing Names (same physics domain)
+
+For consistency, compare your documentation style and cross-references against these
+accepted names in the same physics domain.
+
+{% for n in nearby_existing_names %}- **{{ n.id }}**: {{ n.description | default('', true) }} ({{ n.kind | default('scalar', true) }}, {{ n.unit | default('dimensionless', true) }})
+{% endfor %}
+
+**Authoritative cross-reference list:** The names listed above (plus those in "Nearest Peer
+Standard Names" if present) are the **only** standard names you may link to using
+`[label](name:bare_id)` inline links or `name:bare_id` entries in the `links` array.
+Do NOT invent or guess other name IDs — links to non-existent names are rejected by
+the validation pipeline and cause the entire batch item to fail.
+{% endif %}
+
+## Output schema
+
+Return a JSON object with exactly these two fields:
+
+```json
+{
+  "description": "1 sentence preferred, 2 maximum, ≤250 chars, no LaTeX, American spelling",
+  "documentation": "Strict normative markdown with defining $LaTeX$, scope, exclusions, and essential cross-references"
+}
+```
+
+### description requirements
+- 1 sentence strongly preferred, 2 max — ≤ 250 characters (NOT 500)
+- First sentence = self-contained definition
+- Add ONLY information beyond what the name tokens encode
+- NO trailing clauses starting with "Representing", "Characterizing", "Quantifying"
+- American spelling (ionization, behavior, center, etc.)
+- No LaTeX; no inline units (unit is shown separately)
+- No trailing "See also:" blocks
+- **No storage-shape tags**: NEVER write "1D", "2D", "3D", "scalar", "array",
+  "profile", or "time-dependent" — describe the *physics*, not the data layout
+
+### documentation requirements
+- Use only as many sentences as the rigorous definition requires
+- Cover: physical meaning, the defining equation and symbols when applicable,
+  scope/exclusions, essential semantic relationships, and necessary sign conventions
+- Do not include generic diagnostics, estimator recipes, simulation workflows,
+  typical machine values, experiment ranges, or padding
+- Mention measurement/computation only when constitutive of the quantity or
+  necessary to distinguish it from another quantity
+- Cross-references to related standard names use `[label](name:bare_id)` inline links only
+- {% if cocos_sensitive %}Sign convention is REQUIRED for this quantity (see COCOS section above): use exactly `Sign convention: Positive when …` as a standalone paragraph (blank line before and after, plain text — no markdown headings, no bold){% else %}Sign convention (if COCOS-dependent): use exactly `Sign convention: Positive when …` as a standalone paragraph (blank line before and after, plain text — no markdown headings, no bold); omit if sign-invariant{% endif %}
+- American spelling throughout
+- Minimum 20 characters

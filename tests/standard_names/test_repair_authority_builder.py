@@ -9,14 +9,14 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.models import RepairAuthorityArtifact
-from imas_codex.standard_names import signed_manifest as operator
-from imas_codex.standard_names.repair_authority import (
+from iter_codex.graph.models import RepairAuthorityArtifact
+from iter_codex.standard_names import signed_manifest as operator
+from iter_codex.standard_names.repair_authority import (
     ARTIFACT_ROWS_SELECTION,
     RepairAuthorityBuildError,
     build_repair_authority,
 )
-from imas_codex.standard_names.signed_manifest import signed_payload_sha256
+from iter_codex.standard_names.signed_manifest import signed_payload_sha256
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _EVIDENCE_ROOT = _REPOSITORY_ROOT / "docs/evidence/sn-graph-wide-integrity"

@@ -3,7 +3,7 @@
 ``sn restore compose`` signs one archive extraction into the authority the
 adapter accepts, and ``sn restore apply`` is the committed caller that reaches
 ``apply_signed_manifest`` with the adapter's closed mutation and guard set. Both
-live in ``imas_codex.cli.sn`` rather than in the out-of-tree driver that
+live in ``iter_codex.cli.sn`` rather than in the out-of-tree driver that
 composed and applied the input before, so these tests hold the reachability
 that was previously uncommitted.
 
@@ -22,8 +22,8 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import compose_archive_reconstruction_authority, sn
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.cli.sn import compose_archive_reconstruction_authority, sn
+from iter_codex.standard_names.signed_manifest import (
     _load_archive_reconstruction_authority,
     signed_payload_sha256,
 )
@@ -322,7 +322,7 @@ def test_cli_apply_reaches_the_adapter_through_the_committed_command(
     """Removing the command fails this test: nothing else raises AdapterReached."""
     path, _ = authority_file(_extraction())
     monkeypatch.setattr(
-        "imas_codex.cli.sn._archive_reconstruction_graph_client",
+        "iter_codex.cli.sn._archive_reconstruction_graph_client",
         lambda: _SentinelGraph(),
     )
 

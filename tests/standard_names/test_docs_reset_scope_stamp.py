@@ -13,8 +13,8 @@ from collections.abc import Iterator
 
 import pytest
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_docs_persistence as _docs_persistence,
 )
 
@@ -30,7 +30,7 @@ def _uid(tag: str) -> str:
 @pytest.fixture()
 def _names(disposable_neo4j_uri: str) -> Iterator[list[str]]:
     """Seed two accepted, already-pending names and remove them afterwards."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     ids = [_uid("anchor"), _uid("sibling")]
     unit_id = _uid("unit")
@@ -92,7 +92,7 @@ def test_scoped_reset_stamps_names_that_need_no_reset(
 
     assert result == {"eligible": 0, "reset": 0}
 
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         stamped = [_read_run_id(gc, sn_id) for sn_id in _names]
@@ -108,7 +108,7 @@ def test_unscoped_reset_leaves_an_already_pending_name_alone(
     disposable_neo4j_uri: str, _names: list[str]
 ) -> None:
     """Without a run id there is no batch to bind, and nothing is written."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     stale_run = "earlier-run"
     with GraphClient() as gc:
@@ -132,7 +132,7 @@ def test_scoped_reset_of_an_eligible_name_still_resets_it(
     disposable_neo4j_uri: str, _run_id: str
 ) -> None:
     """An eligible name is snapshotted, reset to pending and bound, as before."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     sn_id = _uid("eligible")
     with GraphClient() as gc:

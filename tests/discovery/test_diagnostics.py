@@ -13,7 +13,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.discovery.base.progress import (
+from iter_codex.discovery.base.progress import (
     ResourceConfig,
     ScannerProgress,
     WorkerStats,
@@ -21,7 +21,7 @@ from imas_codex.discovery.base.progress import (
     build_servers_section,
     build_worker_status_section,
 )
-from imas_codex.discovery.base.supervision import (
+from iter_codex.discovery.base.supervision import (
     SupervisedWorkerGroup,
     WorkerState,
     WorkerStatus,
@@ -326,7 +326,7 @@ class TestServiceHealthSummary:
     """Tests for ServiceStatus health tracking."""
 
     def test_record_check_healthy(self):
-        from imas_codex.discovery.base.services import ServiceStatus
+        from iter_codex.discovery.base.services import ServiceStatus
 
         s = ServiceStatus(name="ssh")
         s.record_check(True, 2300.0)
@@ -335,7 +335,7 @@ class TestServiceHealthSummary:
         assert s.avg_latency_ms == 2300.0
 
     def test_record_check_failure(self):
-        from imas_codex.discovery.base.services import ServiceStatus
+        from iter_codex.discovery.base.services import ServiceStatus
 
         s = ServiceStatus(name="ssh")
         s.record_check(False, 0.0)
@@ -343,7 +343,7 @@ class TestServiceHealthSummary:
         assert s.failure_ratio == "1/1"
 
     def test_avg_latency(self):
-        from imas_codex.discovery.base.services import ServiceStatus
+        from iter_codex.discovery.base.services import ServiceStatus
 
         s = ServiceStatus(name="ssh")
         s.record_check(True, 1000.0)
@@ -351,7 +351,7 @@ class TestServiceHealthSummary:
         assert abs(s.avg_latency_ms - 2000.0) < 0.01
 
     def test_format_health_summary_with_stats(self):
-        from imas_codex.discovery.base.services import ServiceStatus
+        from iter_codex.discovery.base.services import ServiceStatus
 
         s = ServiceStatus(name="ssh", detail="jet")
         s.record_check(True, 2300.0)
@@ -363,7 +363,7 @@ class TestServiceHealthSummary:
         assert "1/3" in summary
 
     def test_format_health_summary_no_failures(self):
-        from imas_codex.discovery.base.services import ServiceStatus
+        from iter_codex.discovery.base.services import ServiceStatus
 
         s = ServiceStatus(name="ssh", detail="jet")
         s.record_check(True, 1000.0)
@@ -372,7 +372,7 @@ class TestServiceHealthSummary:
         assert "fail" not in summary
 
     def test_format_health_summary_no_checks(self):
-        from imas_codex.discovery.base.services import ServiceStatus
+        from iter_codex.discovery.base.services import ServiceStatus
 
         s = ServiceStatus(name="ssh")
         summary = s.format_health_summary()

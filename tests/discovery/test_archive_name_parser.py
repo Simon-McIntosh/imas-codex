@@ -4,13 +4,13 @@ from unittest.mock import Mock
 
 import pytest
 
-from imas_codex.discovery.signals.scanners.codac_uda import CodacUDAScanner
-from imas_codex.discovery.signals.variable_name_graph import (
+from iter_codex.discovery.signals.scanners.codac_uda import CodacUDAScanner
+from iter_codex.discovery.signals.variable_name_graph import (
     parse_archive_catalogue,
     persist_name_parses,
     snapshot_archive_signals,
 )
-from imas_codex.discovery.signals.variable_names import (
+from iter_codex.discovery.signals.variable_names import (
     PARSE_PROVENANCE,
     parse_variable_name,
 )

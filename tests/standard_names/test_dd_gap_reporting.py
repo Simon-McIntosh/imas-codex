@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from neo4j.exceptions import ConstraintError
 
-from imas_codex.standard_names.dd_gaps import (
+from iter_codex.standard_names.dd_gaps import (
     _REGISTRY_IDENTITY_CHANGE_ACTOR,
     _REGISTRY_IDENTITY_CHANGE_REASON,
     DDGapRegistrySyncConflict,
@@ -34,7 +34,7 @@ def _graph_context(mock_gc: MagicMock):
     graph = MagicMock()
     graph.return_value.__enter__.return_value = mock_gc
     graph.return_value.__exit__.return_value = False
-    return patch("imas_codex.standard_names.dd_gaps.GraphClient", graph)
+    return patch("iter_codex.standard_names.dd_gaps.GraphClient", graph)
 
 
 def _evidence(path: str = "equilibrium/path") -> dict[str, str]:
@@ -407,7 +407,7 @@ def test_write_boundary_still_raises_when_response_model_repairs() -> None:
     dict and rejects the pair rather than storing one without its other half.
     This pins that the write boundary was not loosened alongside the model.
     """
-    from imas_codex.standard_names.models import DDGapEvidence
+    from iter_codex.standard_names.models import DDGapEvidence
 
     repaired = DDGapEvidence.model_validate(
         {
@@ -549,7 +549,7 @@ def test_registry_inventory_backfills_structured_unit_facts() -> None:
     }
     paths = ["equilibrium/pressure/reconstructed", "launcher/direction/x"]
     with patch(
-        "imas_codex.standard_names.dd_gaps.load_exceptions",
+        "iter_codex.standard_names.dd_gaps.load_exceptions",
         return_value=entries,
     ):
         nodes, relationships = _registry_inventory(paths, "4.1.0")
@@ -613,7 +613,7 @@ def test_registry_sync_returns_persisted_counts() -> None:
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
     ):
@@ -659,7 +659,7 @@ def test_registry_dry_run_reads_version_and_paths_only() -> None:
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
     ):
@@ -959,7 +959,7 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
     ):
@@ -1039,7 +1039,7 @@ def test_registry_sync_dry_run_reports_reclassification_without_mutation() -> No
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
     ):
@@ -1213,7 +1213,7 @@ def test_registry_sync_rejects_concurrent_lifecycle_drift_and_rolls_back() -> No
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
         pytest.raises(DDGapRegistrySyncConflict, match="changed after preflight"),
@@ -1256,7 +1256,7 @@ def test_registry_sync_rejects_concurrent_evidence_graph_drift(mutation) -> None
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
         pytest.raises(DDGapRegistrySyncConflict, match="changed after preflight"),
@@ -1298,7 +1298,7 @@ def test_registry_sync_rolls_back_when_atomic_rewrite_matches_nothing() -> None:
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
         pytest.raises(DDGapRegistrySyncConflict, match="no longer matches"),
@@ -1326,7 +1326,7 @@ def test_registry_sync_rolls_back_on_concurrent_target_constraint_violation() ->
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
         pytest.raises(ConstraintError, match="concurrent target id"),
@@ -1365,7 +1365,7 @@ def test_registry_sync_rejects_duplicate_target_rows_during_postverify() -> None
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
         pytest.raises(DDGapRegistrySyncConflict, match="invalid=.*self_contradiction"),
@@ -1406,7 +1406,7 @@ def test_registry_sync_rolls_back_on_observation_rekey_postverify_failure(
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
         pytest.raises(DDGapRegistrySyncConflict, match="observations=.*"),
@@ -1451,7 +1451,7 @@ def test_registry_sync_rolls_back_on_observation_ownership_postverify_failure(
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
         pytest.raises(DDGapRegistrySyncConflict, match="observations=.*"),
@@ -1492,7 +1492,7 @@ def test_registry_sync_rolls_back_on_identity_event_postverify_failure(
     with (
         _graph_context(mock_gc),
         patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            "iter_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
         pytest.raises(DDGapRegistrySyncConflict, match="identity_changes=.*"),

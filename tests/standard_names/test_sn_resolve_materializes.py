@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import patch
 
-from imas_codex.standard_names.promote import (
+from iter_codex.standard_names.promote import (
     ApprovalChange,
     resolve_contested_override,
     run_approval,
@@ -82,14 +82,14 @@ def test_override_materializes_reviewer_wording_and_pr_provenance() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.promote.read_pr_changes",
+            "iter_codex.standard_names.promote.read_pr_changes",
             return_value=[change],
         ),
         patch(
-            "imas_codex.standard_names.promote.apply_edit",
+            "iter_codex.standard_names.promote.apply_edit",
             side_effect=attach_proposal,
         ),
-        patch("imas_codex.standard_names.promote._score_proposal", return_value=0.5),
+        patch("iter_codex.standard_names.promote._score_proposal", return_value=0.5),
     ):
         report = run_approval(
             isnc_dir="/unused/catalog",

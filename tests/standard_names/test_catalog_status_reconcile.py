@@ -5,15 +5,15 @@ from __future__ import annotations
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names.export import _classify_export_population
-from imas_codex.standard_names.graph_store.graph_audits import reconcile_catalog_status
-from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+from iter_codex.standard_names.export import _classify_export_population
+from iter_codex.standard_names.graph_store.graph_audits import reconcile_catalog_status
+from iter_codex.standard_names.graph_store.graph_catalog_reset import (
     mark_names_validated,
 )
-from imas_codex.standard_names.graph_store.graph_claim_release import (
+from iter_codex.standard_names.graph_store.graph_claim_release import (
     stop_refine_name_attempt,
 )
-from imas_codex.standard_names.graph_store.graph_review_persistence import (
+from iter_codex.standard_names.graph_store.graph_review_persistence import (
     persist_reviewed_name,
 )
 
@@ -222,7 +222,7 @@ def test_validation_failure_writer_keeps_quarantine_and_issues() -> None:
     graph = _context_graph([{"marked": 1}])
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         assert (
@@ -315,7 +315,7 @@ def test_review_exhaustion_does_not_quarantine_at_the_stage_write() -> None:
     )
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         stage = persist_reviewed_name(
@@ -339,7 +339,7 @@ def test_stopped_refinement_does_not_quarantine_when_it_exhausts() -> None:
     graph = _context_graph([{"stage": "exhausted"}])
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         stage = stop_refine_name_attempt(

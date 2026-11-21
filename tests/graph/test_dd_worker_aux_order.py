@@ -1,7 +1,7 @@
 import pytest
 
-from imas_codex.discovery.base.supervision import PipelinePhase
-from imas_codex.graph.dd_workers import DDBuildState, embed_worker, enrich_worker
+from iter_codex.discovery.base.supervision import PipelinePhase
+from iter_codex.graph.dd_workers import DDBuildState, embed_worker, enrich_worker
 
 
 @pytest.mark.asyncio
@@ -27,15 +27,15 @@ async def test_enrich_worker_runs_aux_before_idle_completion(monkeypatch):
         test_state.stop_requested = True
 
     monkeypatch.setattr(
-        "imas_codex.graph.dd_graph_ops.claim_paths_for_enrichment",
+        "iter_codex.graph.dd_graph_ops.claim_paths_for_enrichment",
         lambda limit, ids_filter=None: [],
     )
     monkeypatch.setattr(
-        "imas_codex.graph.dd_graph_ops.count_imas_nodes_by_status",
+        "iter_codex.graph.dd_graph_ops.count_imas_nodes_by_status",
         lambda node_category=None: {"total": 0},
     )
-    monkeypatch.setattr("imas_codex.settings.get_model", lambda _section: "test-model")
-    monkeypatch.setattr("imas_codex.graph.dd_workers._run_aux_enrichment", run_aux)
+    monkeypatch.setattr("iter_codex.settings.get_model", lambda _section: "test-model")
+    monkeypatch.setattr("iter_codex.graph.dd_workers._run_aux_enrichment", run_aux)
 
     await enrich_worker(state)
 
@@ -68,14 +68,14 @@ async def test_embed_worker_runs_aux_before_idle_completion(monkeypatch):
         test_state.stop_requested = True
 
     monkeypatch.setattr(
-        "imas_codex.graph.dd_graph_ops.claim_paths_for_embedding",
+        "iter_codex.graph.dd_graph_ops.claim_paths_for_embedding",
         lambda limit: [],
     )
     monkeypatch.setattr(
-        "imas_codex.graph.dd_graph_ops.count_imas_nodes_by_status",
+        "iter_codex.graph.dd_graph_ops.count_imas_nodes_by_status",
         lambda node_category=None: {"total": 0},
     )
-    monkeypatch.setattr("imas_codex.graph.dd_workers._run_aux_embedding", run_aux)
+    monkeypatch.setattr("iter_codex.graph.dd_workers._run_aux_embedding", run_aux)
 
     await embed_worker(state)
 

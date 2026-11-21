@@ -17,7 +17,7 @@ _PERSIST_STATEMENT = "RETURN sn.docs_stage AS docs_stage"
 
 def test_compute_embed_hash_deterministic():
     """Hash is deterministic for the same input."""
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         _compute_embed_hash,
     )
 
@@ -29,7 +29,7 @@ def test_compute_embed_hash_deterministic():
 
 def test_compute_embed_hash_differs_on_change():
     """Hash changes when description changes."""
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         _compute_embed_hash,
     )
 
@@ -40,7 +40,7 @@ def test_compute_embed_hash_differs_on_change():
 
 def test_compute_embed_hash_name_only():
     """Hash works when description is None."""
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         _compute_embed_hash,
     )
 
@@ -56,7 +56,7 @@ def test_compute_embed_hash_name_only():
 
 def test_claim_embed_batch_mock():
     """claim_embed_batch issues correct Cypher and returns items."""
-    from imas_codex.standard_names.graph_store.graph_refinement import claim_embed_batch
+    from iter_codex.standard_names.graph_store.graph_refinement import claim_embed_batch
 
     mock_gc = MagicMock()
     # First call: SET claim fields (no return needed)
@@ -71,7 +71,7 @@ def test_claim_embed_batch_mock():
     mock_gc.__exit__ = MagicMock(return_value=False)
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     ):
         items = claim_embed_batch(limit=10)
@@ -87,7 +87,7 @@ def test_claim_embed_batch_mock():
 @pytest.mark.asyncio
 async def test_process_embed_batch_mock():
     """process_embed_batch embeds items and persists results."""
-    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_refine_docs import (
         process_embed_batch,
     )
 
@@ -104,11 +104,11 @@ async def test_process_embed_batch_mock():
 
     with (
         patch(
-            "imas_codex.embeddings.description.embed_descriptions_batch",
+            "iter_codex.embeddings.description.embed_descriptions_batch",
             side_effect=fake_embed,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_refinement.persist_embed_batch",
+            "iter_codex.standard_names.graph_store.graph_refinement.persist_embed_batch",
             return_value=2,
         ) as mock_persist,
     ):
@@ -133,7 +133,7 @@ async def test_process_embed_batch_mock():
 @pytest.mark.asyncio
 async def test_process_embed_batch_stops_on_event():
     """process_embed_batch returns 0 when stop_event is set."""
-    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_refine_docs import (
         process_embed_batch,
     )
 
@@ -151,7 +151,7 @@ async def test_process_embed_batch_stops_on_event():
 
 def test_persist_generated_docs_clears_hash():
     """persist_generated_docs clears embed_text_hash so embed worker picks it up."""
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         persist_generated_docs,
     )
 
@@ -161,11 +161,11 @@ def test_persist_generated_docs_clears_hash():
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=mock_gc,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter",
+            "iter_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter",
         ),
     ):
         result = persist_generated_docs(
@@ -189,7 +189,7 @@ def test_persist_generated_docs_clears_hash():
 
 def test_display_rows_cover_all_pools():
     """Every internal pool is covered by exactly one display row."""
-    from imas_codex.standard_names.display import (
+    from iter_codex.standard_names.display import (
         DISPLAY_POOL_MAP,
         DISPLAY_ROWS,
         POOL_ORDER,
@@ -209,7 +209,7 @@ def test_display_rows_cover_all_pools():
 
 def test_display_rows_count():
     """4 display rows, 7 internal pools (enrich_parents folds into GENERATE NAME)."""
-    from imas_codex.standard_names.display import DISPLAY_ROWS, POOL_ORDER
+    from iter_codex.standard_names.display import DISPLAY_ROWS, POOL_ORDER
 
     assert len(DISPLAY_ROWS) == 4
     assert len(POOL_ORDER) == 7
@@ -217,7 +217,7 @@ def test_display_rows_count():
 
 def test_pool_weights_sum_to_one():
     """Pool weights must sum to approximately 1.0."""
-    from imas_codex.standard_names.pools import POOL_WEIGHTS
+    from iter_codex.standard_names.pools import POOL_WEIGHTS
 
     total = sum(POOL_WEIGHTS.values())
     assert abs(total - 1.0) < 0.01, f"Weights sum to {total}, expected ~1.0"

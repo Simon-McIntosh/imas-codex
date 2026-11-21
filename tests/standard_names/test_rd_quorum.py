@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
 
 
 def _ce(lease, amount, phase=None):
@@ -88,7 +88,7 @@ class TestCheckPerDimDisagreement:
     """Tests for _check_per_dim_disagreement."""
 
     def test_agreement_within_tolerance(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _check_per_dim_disagreement,
         )
 
@@ -103,7 +103,7 @@ class TestCheckPerDimDisagreement:
         assert not _check_per_dim_disagreement(item_0, item_1, 0.15, "names")
 
     def test_disagreement_beyond_tolerance(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _check_per_dim_disagreement,
         )
 
@@ -117,7 +117,7 @@ class TestCheckPerDimDisagreement:
         assert _check_per_dim_disagreement(item_0, item_1, 0.15, "names")
 
     def test_docs_dimensions(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _check_per_dim_disagreement,
         )
 
@@ -142,7 +142,7 @@ class TestCheckPerDimDisagreement:
         assert _check_per_dim_disagreement(item_0, item_1, 0.15, "docs")
 
     def test_missing_scores_treated_as_disagreement(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _check_per_dim_disagreement,
         )
 
@@ -151,7 +151,7 @@ class TestCheckPerDimDisagreement:
         assert _check_per_dim_disagreement(item_0, item_1, 0.15, "names")
 
     def test_both_missing_no_disagreement(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _check_per_dim_disagreement,
         )
 
@@ -165,7 +165,7 @@ class TestMergeReviewItems:
     """Tests for _merge_review_items."""
 
     def test_mean_scores(self):
-        from imas_codex.standard_names.review.pipeline import _merge_review_items
+        from iter_codex.standard_names.review.pipeline import _merge_review_items
 
         item_0 = _make_item(
             "a", {"grammar": 20, "semantic": 16, "convention": 16, "completeness": 16}
@@ -182,7 +182,7 @@ class TestMergeReviewItems:
         assert scores["completeness"] == pytest.approx(14.0)
 
     def test_merged_score_normalized(self):
-        from imas_codex.standard_names.review.pipeline import _merge_review_items
+        from iter_codex.standard_names.review.pipeline import _merge_review_items
 
         item_0 = _make_item(
             "a", {"grammar": 20, "semantic": 20, "convention": 20, "completeness": 20}
@@ -196,7 +196,7 @@ class TestMergeReviewItems:
         assert merged["reviewer_score"] == pytest.approx(0.75)
 
     def test_comments_merged(self):
-        from imas_codex.standard_names.review.pipeline import _merge_review_items
+        from iter_codex.standard_names.review.pipeline import _merge_review_items
 
         item_0 = _make_item("a", comments="primary comment")
         item_1 = _make_item("a", comments="secondary comment")
@@ -209,7 +209,7 @@ class TestBuildPriorReviewsContext:
     """Tests for _build_prior_reviews_context."""
 
     def test_only_disputed_items_included(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _build_prior_reviews_context,
         )
 
@@ -225,7 +225,7 @@ class TestBuildPriorReviewsContext:
             assert entry["items"][0]["standard_name"] == "b"
 
     def test_roles_and_models(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _build_prior_reviews_context,
         )
 
@@ -244,7 +244,7 @@ class TestBuildReviewRecord:
     """Tests for _build_review_record."""
 
     def test_builds_record(self):
-        from imas_codex.standard_names.review.pipeline import _build_review_record
+        from iter_codex.standard_names.review.pipeline import _build_review_record
 
         item = _make_item("electron_temperature")
         rec = _build_review_record(
@@ -296,11 +296,11 @@ class TestSingleModelSingleReview:
 
         with (
             patch(
-                "imas_codex.standard_names.review.pipeline._review_single_batch",
+                "iter_codex.standard_names.review.pipeline._review_single_batch",
                 side_effect=mock_review,
             ),
             patch(
-                "imas_codex.standard_names.review.pipeline._persist_review_records_sync",
+                "iter_codex.standard_names.review.pipeline._persist_review_records_sync",
                 return_value=2,
             ),
         ):
@@ -309,7 +309,7 @@ class TestSingleModelSingleReview:
             import uuid as _uuid
             from datetime import UTC, datetime
 
-            from imas_codex.standard_names.review.pipeline import (
+            from iter_codex.standard_names.review.pipeline import (
                 _build_review_record,
                 _update_batch_stats,
             )
@@ -336,7 +336,7 @@ class TestTwoModelsAgreement:
 
     @pytest.mark.asyncio
     async def test_len_2_agreement_mean(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _check_per_dim_disagreement,
             _merge_review_items,
         )
@@ -364,7 +364,7 @@ class TestTwoModelsDisagreementNoEscalator:
 
     @pytest.mark.asyncio
     async def test_len_2_disagreement_no_escalator(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _check_per_dim_disagreement,
             _merge_review_items,
         )
@@ -391,7 +391,7 @@ class TestThreeModelsAgreementNoEscalation:
 
     @pytest.mark.asyncio
     async def test_len_3_agreement_no_escalation(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _check_per_dim_disagreement,
         )
 
@@ -416,7 +416,7 @@ class TestThreeModelsDisagreementEscalates:
 
     @pytest.mark.asyncio
     async def test_len_3_disagreement_escalates(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _build_prior_reviews_context,
             _check_per_dim_disagreement,
         )
@@ -490,7 +490,7 @@ class TestHybridBatchingCycle2PerItem:
     @pytest.mark.asyncio
     async def test_hybrid_batching_cycle_2_per_item(self):
         """The escalator batch only contains disputed items."""
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _check_per_dim_disagreement,
         )
 
@@ -631,11 +631,11 @@ class TestBlindCycle1NoPrimaryContext:
 
         with (
             patch(
-                "imas_codex.standard_names.review.pipeline._review_single_batch",
+                "iter_codex.standard_names.review.pipeline._review_single_batch",
                 side_effect=mock_review,
             ),
             patch(
-                "imas_codex.standard_names.review.pipeline._persist_review_records_sync",
+                "iter_codex.standard_names.review.pipeline._persist_review_records_sync",
                 return_value=1,
             ),
         ):
@@ -669,7 +669,7 @@ class TestCycle2SeesBothPrior:
 
     @pytest.mark.asyncio
     async def test_cycle_2_sees_both_prior(self):
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _build_prior_reviews_context,
         )
 
@@ -701,7 +701,7 @@ class TestReviewNodeMetadata:
     """Assert Review nodes have axis, cycle_index, review_group_id, resolution_role."""
 
     def test_review_node_metadata(self):
-        from imas_codex.standard_names.review.pipeline import _build_review_record
+        from iter_codex.standard_names.review.pipeline import _build_review_record
 
         item = _make_item("electron_temperature")
         rec = _build_review_record(
@@ -828,14 +828,14 @@ class TestSchemaEnums:
     """Verify new enums appear in generated models."""
 
     def test_review_resolution_role_enum(self):
-        from imas_codex.graph.models import ReviewResolutionRole
+        from iter_codex.graph.models import ReviewResolutionRole
 
         assert hasattr(ReviewResolutionRole, "primary")
         assert hasattr(ReviewResolutionRole, "secondary")
         assert hasattr(ReviewResolutionRole, "escalator")
 
     def test_review_resolution_method_enum(self):
-        from imas_codex.graph.models import ReviewResolutionMethod
+        from iter_codex.graph.models import ReviewResolutionMethod
 
         assert hasattr(ReviewResolutionMethod, "quorum_consensus")
         assert hasattr(ReviewResolutionMethod, "authoritative_escalation")
@@ -844,7 +844,7 @@ class TestSchemaEnums:
         assert hasattr(ReviewResolutionMethod, "single_review")
 
     def test_review_model_has_new_fields(self):
-        from imas_codex.graph.models import StandardNameReview
+        from iter_codex.graph.models import StandardNameReview
 
         fields = StandardNameReview.model_fields
         assert "review_axis" in fields
@@ -867,7 +867,7 @@ class TestPromptBlindnessGuard:
         from pathlib import Path
 
         prompt_path = (
-            Path(__file__).parents[2] / "imas_codex/llm/prompts/sn/review_names.md"
+            Path(__file__).parents[2] / "iter_codex/llm/prompts/sn/review_names.md"
         )
         content = prompt_path.read_text()
         assert "{% if prior_reviews %}" in content
@@ -880,7 +880,7 @@ class TestPromptBlindnessGuard:
         from pathlib import Path
 
         prompt_path = (
-            Path(__file__).parents[2] / "imas_codex/llm/prompts/sn/review_docs.md"
+            Path(__file__).parents[2] / "iter_codex/llm/prompts/sn/review_docs.md"
         )
         content = prompt_path.read_text()
         assert "{% if prior_reviews %}" in content
@@ -892,7 +892,7 @@ class TestParseDimScores:
     """Tests for _parse_dim_scores helper."""
 
     def test_parse_names_dims(self):
-        from imas_codex.standard_names.review.pipeline import _parse_dim_scores
+        from iter_codex.standard_names.review.pipeline import _parse_dim_scores
 
         item = _make_item(
             "a", {"grammar": 18, "semantic": 16, "convention": 17, "completeness": 15}
@@ -906,7 +906,7 @@ class TestParseDimScores:
         }
 
     def test_parse_docs_dims(self):
-        from imas_codex.standard_names.review.pipeline import _parse_dim_scores
+        from iter_codex.standard_names.review.pipeline import _parse_dim_scores
 
         item = _make_docs_item(
             "a",
@@ -926,7 +926,7 @@ class TestParseDimScores:
         }
 
     def test_parse_string_scores(self):
-        from imas_codex.standard_names.review.pipeline import _parse_dim_scores
+        from iter_codex.standard_names.review.pipeline import _parse_dim_scores
 
         item = {
             "reviewer_scores": '{"grammar": 15, "semantic": 16, "convention": 17, "completeness": 18}'
@@ -935,7 +935,7 @@ class TestParseDimScores:
         assert scores["grammar"] == 15.0
 
     def test_parse_none_returns_empty(self):
-        from imas_codex.standard_names.review.pipeline import _parse_dim_scores
+        from iter_codex.standard_names.review.pipeline import _parse_dim_scores
 
         item = {"reviewer_scores": None}
         assert _parse_dim_scores(item, "names") == {}
@@ -957,7 +957,7 @@ class TestUpdateReviewAggregates:
 
     def test_empty_ids_returns_zero(self):
         """Empty id list short-circuits without hitting the graph."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             update_review_aggregates,
         )
 
@@ -967,7 +967,7 @@ class TestUpdateReviewAggregates:
         """Returns the number of rows the GC query returns."""
         from unittest.mock import MagicMock, patch
 
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             update_review_aggregates,
         )
 
@@ -980,7 +980,7 @@ class TestUpdateReviewAggregates:
         cm.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             count = update_review_aggregates(["electron_temperature", "plasma_current"])
@@ -996,7 +996,7 @@ class TestUpdateReviewAggregates:
         """Custom threshold is forwarded to the Cypher query."""
         from unittest.mock import MagicMock, patch
 
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             update_review_aggregates,
         )
 
@@ -1007,7 +1007,7 @@ class TestUpdateReviewAggregates:
         cm.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             update_review_aggregates(["electron_temperature"], threshold=0.3)

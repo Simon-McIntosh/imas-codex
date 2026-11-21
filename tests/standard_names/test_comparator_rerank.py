@@ -13,19 +13,19 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.discovery.base import judgment
-from imas_codex.standard_names import budget as budget_module
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+from iter_codex.discovery.base import judgment
+from iter_codex.standard_names import budget as budget_module
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
     compose_worker,
 )
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _rerank_comparators_for_compose,
     _rerank_comparators_for_worker,
     _reranked_nearby_comparators,
 )
 
-_SWITCH = "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS"
+_SWITCH = "ITER_CODEX_SN_COMPOSE_RERANK_COMPARATORS"
 
 _ITEMS = [
     {
@@ -202,7 +202,7 @@ async def test_rerank_spend_is_booked_under_the_seat_that_billed_it(
     already billed the spend, and the charge draws the shortfall from the pool
     and beyond it.
     """
-    from imas_codex.settings import get_model
+    from iter_codex.settings import get_model
 
     monkeypatch.setenv(_SWITCH, "1")
     _stub_rerank(monkeypatch, ["third_name", "second_name", "first_name"], cost=0.25)
@@ -324,7 +324,7 @@ async def test_a_rerank_whose_seat_cannot_be_resolved_keeps_the_order(
     def failing_get_model(*_args, **_kwargs):
         raise KeyError("sn-judge")
 
-    monkeypatch.setattr("imas_codex.settings.get_model", failing_get_model)
+    monkeypatch.setattr("iter_codex.settings.get_model", failing_get_model)
 
     pool = list(_POOL)
     ordered, cost, seat = await _rerank_comparators_for_compose(_ITEMS, pool)
@@ -343,7 +343,7 @@ async def test_the_worker_path_charges_the_rerank_to_a_lease(monkeypatch) -> Non
     recorded even where the pool cannot fund it. The reported compose cost is
     telemetry on top of that, never a substitute for it.
     """
-    from imas_codex.settings import get_model
+    from iter_codex.settings import get_model
 
     monkeypatch.setenv(_SWITCH, "1")
     _stub_rerank(monkeypatch, ["third_name", "second_name", "first_name"], cost=0.25)

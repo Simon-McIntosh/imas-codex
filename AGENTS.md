@@ -6,38 +6,38 @@
 
 Use terminal for direct ops (`rg`, `fd`, `git`), MCP `repl()` for chained processing + graph queries, `uv run` for tests/CLI. Conventional commits. **Always commit and push after every file modification — no confirmation, no asking.** Never use `vscode_askQuestions` or other interactive VS Code dialogs — put questions inline in the chat response.
 
-**Git sync (fork-based):** All work on the fork's `main` branch. Merge on pull — never rebase, never use feature branches (the release CLI requires `main`). Pull before work and before push: `git pull origin main && git push origin main`. Push to `origin`, **never directly to `upstream`** — final releases go via the release CLI. Commit your own files before pulling a dirty worktree. See `~/.agents/AGENTS.md` for clone setup, banned commands, and stash ban. Release workflow detail in [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md) (Release Workflow) for the package itself, and in [`imas_codex/standard_names/AGENTS.md`](imas_codex/standard_names/AGENTS.md) (Release recipe) for every standard-name catalog release.
+**Git sync (fork-based):** All work on the fork's `main` branch. Merge on pull — never rebase, never use feature branches (the release CLI requires `main`). Pull before work and before push: `git pull origin main && git push origin main`. Push to `origin`, **never directly to `upstream`** — final releases go via the release CLI. Commit your own files before pulling a dirty worktree. See `~/.agents/AGENTS.md` for clone setup, banned commands, and stash ban. Release workflow detail in [`iter_codex/cli/AGENTS.md`](iter_codex/cli/AGENTS.md) (Release Workflow) for the package itself, and in [`iter_codex/standard_names/AGENTS.md`](iter_codex/standard_names/AGENTS.md) (Release recipe) for every standard-name catalog release.
 
 ## Scoped References
 
 Reference material now lives in the subtree that owns the code; this root file
 keeps only what a worker editing any file needs, plus these pointers.
 
-- **Model & Tool Configuration** — [`imas_codex/config/AGENTS.md`](imas_codex/config/AGENTS.md) (pyproject model seats, `get_model` accessors)
-- **Schema System** + design guidelines + schema-driven testing — [`imas_codex/graph/AGENTS.md`](imas_codex/graph/AGENTS.md)
-- **Facility Configuration** — [`imas_codex/config/AGENTS.md`](imas_codex/config/AGENTS.md) (facility YAML, `get_facility`)
-- **Graph State Machine** (claim patterns, FacilityPath lifecycle) — [`imas_codex/discovery/AGENTS.md`](imas_codex/discovery/AGENTS.md)
-- **SourceFile Lifecycle** — [`imas_codex/ingestion/AGENTS.md`](imas_codex/ingestion/AGENTS.md)
-- **LLM Access** — [`imas_codex/llm/AGENTS.md`](imas_codex/llm/AGENTS.md) (call layer, prompts, routing, service tagging)
-- **Exploration** (persistence, data classification) — [`imas_codex/discovery/AGENTS.md`](imas_codex/discovery/AGENTS.md)
-- **Graph Operations** (zero-row rule, Cypher, Neo4j mgmt, lock files, vector/semantic search) **+ how to dispatch graph work, and checkpointing** — [`imas_codex/graph/AGENTS.md`](imas_codex/graph/AGENTS.md)
-- **Services** — Neo4j connection in [`imas_codex/graph/AGENTS.md`](imas_codex/graph/AGENTS.md); **Embedding server** in [`imas_codex/embeddings/AGENTS.md`](imas_codex/embeddings/AGENTS.md)
-- **Standard Name releases — every catalog cut, tag, and review PR** — [`imas_codex/standard_names/AGENTS.md`](imas_codex/standard_names/AGENTS.md) (Release recipe). This is the authoritative runbook for releasing names to the catalog; read it before any release activity that touches standard names.
-- **Software Release Workflow** (the `imas-codex` package itself, not the catalog) — [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md)
-- **Standard Names** (pipeline, family harmonization, lifecycle, naming) — [`imas_codex/core/AGENTS.md`](imas_codex/core/AGENTS.md)
-- **Remote Tools** — [`imas_codex/config/AGENTS.md`](imas_codex/config/AGENTS.md) (rg/fd/eza/tokei/uv, remote Python)
-- **CLI Logs** — [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md)
-- **Python REPL** — [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md)
-- **Quick Reference** (MCP tool table) — [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md)
+- **Model & Tool Configuration** — [`iter_codex/config/AGENTS.md`](iter_codex/config/AGENTS.md) (pyproject model seats, `get_model` accessors)
+- **Schema System** + design guidelines + schema-driven testing — [`iter_codex/graph/AGENTS.md`](iter_codex/graph/AGENTS.md)
+- **Facility Configuration** — [`iter_codex/config/AGENTS.md`](iter_codex/config/AGENTS.md) (facility YAML, `get_facility`)
+- **Graph State Machine** (claim patterns, FacilityPath lifecycle) — [`iter_codex/discovery/AGENTS.md`](iter_codex/discovery/AGENTS.md)
+- **SourceFile Lifecycle** — [`iter_codex/ingestion/AGENTS.md`](iter_codex/ingestion/AGENTS.md)
+- **LLM Access** — [`iter_codex/llm/AGENTS.md`](iter_codex/llm/AGENTS.md) (call layer, prompts, routing, service tagging)
+- **Exploration** (persistence, data classification) — [`iter_codex/discovery/AGENTS.md`](iter_codex/discovery/AGENTS.md)
+- **Graph Operations** (zero-row rule, Cypher, Neo4j mgmt, lock files, vector/semantic search) **+ how to dispatch graph work, and checkpointing** — [`iter_codex/graph/AGENTS.md`](iter_codex/graph/AGENTS.md)
+- **Services** — Neo4j connection in [`iter_codex/graph/AGENTS.md`](iter_codex/graph/AGENTS.md); **Embedding server** in [`iter_codex/embeddings/AGENTS.md`](iter_codex/embeddings/AGENTS.md)
+- **Standard Name releases — every catalog cut, tag, and review PR** — [`iter_codex/standard_names/AGENTS.md`](iter_codex/standard_names/AGENTS.md) (Release recipe). This is the authoritative runbook for releasing names to the catalog; read it before any release activity that touches standard names.
+- **Software Release Workflow** (the `iter-codex` package itself, not the catalog) — [`iter_codex/cli/AGENTS.md`](iter_codex/cli/AGENTS.md)
+- **Standard Names** (pipeline, family harmonization, lifecycle, naming) — [`iter_codex/core/AGENTS.md`](iter_codex/core/AGENTS.md)
+- **Remote Tools** — [`iter_codex/config/AGENTS.md`](iter_codex/config/AGENTS.md) (rg/fd/eza/tokei/uv, remote Python)
+- **CLI Logs** — [`iter_codex/cli/AGENTS.md`](iter_codex/cli/AGENTS.md)
+- **Python REPL** — [`iter_codex/cli/AGENTS.md`](iter_codex/cli/AGENTS.md)
+- **Quick Reference** (MCP tool table) — [`iter_codex/cli/AGENTS.md`](iter_codex/cli/AGENTS.md)
 - **Feature Plan Documentation** — [`docs/AGENTS.md`](docs/AGENTS.md)
-- **MCP Server Deployment** — [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md)
-- **Fallback: MCP Server Not Running** — [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md)
+- **MCP Server Deployment** — [`iter_codex/cli/AGENTS.md`](iter_codex/cli/AGENTS.md)
+- **Fallback: MCP Server Not Running** — [`iter_codex/cli/AGENTS.md`](iter_codex/cli/AGENTS.md)
 
 ## Graph Work Is The Repository's Critical Path
 
 Almost every capability here resolves through the knowledge graph, so a node that
 reaches Neo4j wrongly fails in ways that look like something else. **Read
-[Dispatching graph work](imas_codex/graph/AGENTS.md) before dispatching or
+[Dispatching graph work](iter_codex/graph/AGENTS.md) before dispatching or
 writing any node that touches the graph.** The five that cost the most when
 missed:
 
@@ -48,7 +48,7 @@ missed:
 2. **A worktree without the `.env` symlink fails auth before doing any work.**
    That is a provisioning fault, never evidence the credential is wrong.
 3. **Derive a gate from what the change can reach, not from where its code
-   lives.** `imas_codex/standard_names/graph_ops.py` is Cypher in the
+   lives.** `iter_codex/standard_names/graph_ops.py` is Cypher in the
    standard-names package: gate it with `tests/standard_names`. Gating two such
    commits on `tests/graph` alone hid 22 added failures for hours (2026-09-05).
 4. **The default markers exclude `graph`, so Cypher you edit is never
@@ -69,8 +69,8 @@ costume.
 right after every dispatch.** Measured 2026-09-08 across four worktrees: `.venv`
 and `.env` resolved correctly and all five generated files were absent, which
 fails as an import error inside the worker rather than as a provisioning
-message. They are `imas_codex/graph/models.py`, `imas_codex/graph/dd_models.py`,
-`imas_codex/config/models.py`, `imas_codex/graph/schema_context_data.py` and
+message. They are `iter_codex/graph/models.py`, `iter_codex/graph/dd_models.py`,
+`iter_codex/config/models.py`, `iter_codex/graph/schema_context_data.py` and
 `agents/schema-reference.md` — the same set the never-stage rule below names.
 Copy each one (`cp -n`), never symlink, for the write-through reason above.
 
@@ -80,7 +80,7 @@ bwrap user namespace reckon's fence creates, the root-owned system include
 `/etc/ssh/ssh_config.d/50-redhat.conf` appears owned by `nobody` and OpenSSH
 refuses to parse its configuration at all: `Bad owner or permissions on
 /etc/ssh/ssh_config.d/50-redhat.conf`. Every subprocess that resolves `ssh` from
-`PATH` then fails — `imas_codex/remote/executor.py`, the wiki scraper's document
+`PATH` then fails — `iter_codex/remote/executor.py`, the wiki scraper's document
 fetch (which surfaces as `curl failed: Bad owner …`) and a plain `ssh <host>` —
 and the symptom reads like a remote outage. Measured 2026-10-05 by three
 independent nodes on `98dci4-clu-2018`. The wrapper loads only the user's own
@@ -102,14 +102,14 @@ from inside the worker (both happened on 2026-10-05).
 
 **When the graph goes away, read `squeue -u $USER -n codex-neo4j` before the
 error.** A job a few minutes old is a restart, usually the daily offsite-push
-check (`imas-codex-graph-push.timer` on `98dci4-srv-1006`, 00:00 Europe/Paris),
+check (`iter-codex-graph-push.timer` on `98dci4-srv-1006`, 00:00 Europe/Paris),
 which stops the graph for about three minutes when a weekly push is due and the
 graph is idle. No job means it is down; start it from a login node. After any
-restart, an `ERROR` in `~/.local/share/imas-codex/services/codex-neo4j.log` means
+restart, an `ERROR` in `~/.local/share/iter-codex/services/codex-neo4j.log` means
 stop every writer and run the offline consistency check before anyone writes
 again. Never stop the graph with a bare `scancel` or touch its store files while
 the job is listed. The steps for each case are in "When the graph goes away" in
-[`imas_codex/graph/AGENTS.md`](imas_codex/graph/AGENTS.md).
+[`iter_codex/graph/AGENTS.md`](iter_codex/graph/AGENTS.md).
 
 **Checkpointing:** one verified checkpoint protects a body of work, taken from the
 main checkout; there is no recurring backup discipline. It stops the database, so
@@ -122,7 +122,7 @@ in the graph file.
 Greenfield project, no backwards compatibility. Remove deprecated code decisively, update all usages when patterns change, prefer explicit over clever, prefer good names over "enhanced/new/refactored". Exploration notes belong in facility YAML; `docs/` is for mature infrastructure only.
 
 - **Stale context kills.** If your session is more than a few hours old, your memory of file contents may be wrong. Re-read every file from disk before modifying — never write code from memory.
-- **Build on common infrastructure.** Search for existing utilities (remote SSH execution, graph queries, file parsing, LLM calls all have canonical patterns) before implementing. Extract shared patterns to `imas_codex/remote/` or `imas_codex/graph/`. Never inline SSH subprocess calls — use `run_python_script()` / `async_run_python_script()` from `imas_codex.remote.executor` with scripts in `imas_codex/remote/scripts/`.
+- **Build on common infrastructure.** Search for existing utilities (remote SSH execution, graph queries, file parsing, LLM calls all have canonical patterns) before implementing. Extract shared patterns to `iter_codex/remote/` or `iter_codex/graph/`. Never inline SSH subprocess calls — use `run_python_script()` / `async_run_python_script()` from `iter_codex.remote.executor` with scripts in `iter_codex/remote/scripts/`.
 - **One source of truth.** When a feature applies across domains (e.g. `files` and `wiki` discovery share `discovery/base/`), implement it once. If data is already in the graph (public repos via `SoftwareRepo` nodes, etc.), query the graph — don't re-derive locally.
 
 ## Compute Infrastructure
@@ -178,9 +178,9 @@ runs and live-graph CLI commands are ordinary heavy jobs and belong on a partiti
 
 ## Command Execution
 
-**CRITICAL: Always use `uv run` for project Python code.** This project manages dependencies (including `imas`) via `uv`. Running `python` or `python -m pytest` directly will miss project dependencies and fail with `ModuleNotFoundError`. Always use `uv run python`, `uv run pytest`, `uv run imas-codex`, etc.
+**CRITICAL: Always use `uv run` for project Python code.** This project manages dependencies (including `imas`) via `uv`. Running `python` or `python -m pytest` directly will miss project dependencies and fail with `ModuleNotFoundError`. Always use `uv run python`, `uv run pytest`, `uv run iter-codex`, etc.
 
-**CRITICAL: Never pipe, tee, or redirect CLI output.** All `imas-codex` CLI commands auto-log full DEBUG output to `~/.local/share/imas-codex/logs/<command>_<facility>.log`. Piping (`|`), teeing (`tee`), or redirecting (`>`, `2>&1`) to files prevents auto-approval of terminal commands, stalling agentic workflows. Run commands directly and read the log file afterwards.
+**CRITICAL: Never pipe, tee, or redirect CLI output.** All `iter-codex` CLI commands auto-log full DEBUG output to `~/.local/share/iter-codex/logs/<command>_<facility>.log`. Piping (`|`), teeing (`tee`), or redirecting (`>`, `2>&1`) to files prevents auto-approval of terminal commands, stalling agentic workflows. Run commands directly and read the log file afterwards.
 
 **Decision tree:**
 1. Single command, local → Terminal directly (`rg`, `fd`, `tokei`, `uv run`)
@@ -193,7 +193,7 @@ runs and live-graph CLI commands are ordinary heavy jobs and belong on a partiti
 - `repl()` REPL for chained processing, Cypher queries, IMAS/COCOS operations
 - Terminal for `rg`, `fd`, `git`, `uv run`; SSH for remote single commands
 
-**Serve modes:** `imas-codex serve` exposes all tools; `--read-only` suppresses write tools (`repl()`, `add_to_graph()`, `update_facility_config()`), leaving search/read only; `--dd-only` hides facility tools and **implies `--read-only`** (auto-detected from a DD-only graph). Full topology + transports in [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md) (MCP Server Deployment).
+**Serve modes:** `iter-codex serve` exposes all tools; `--read-only` suppresses write tools (`repl()`, `add_to_graph()`, `update_facility_config()`), leaving search/read only; `--dd-only` hides facility tools and **implies `--read-only`** (auto-detected from a DD-only graph). Full topology + transports in [`iter_codex/cli/AGENTS.md`](iter_codex/cli/AGENTS.md) (MCP Server Deployment).
 
 ## Commit Workflow
 
@@ -285,7 +285,7 @@ If a commit fails with paths already staged, `git restore --staged <your paths>`
 uv run pytest                 # Default markers: excludes slow, graph
 uv run pytest tests/standard_names/  # SN tests (~3300 tests, ~90s)
 uv run pytest tests/path/to/test.py::test_function  # Specific test
-uv run pytest --cov=imas_codex  # With coverage
+uv run pytest --cov=iter_codex  # With coverage
 ```
 
 Project `addopts` intentionally leaves quiet mode unset so every test run emits
@@ -359,7 +359,7 @@ in `~/.agents/AGENTS.md`. The repo-specific facts:
   bring it up to date — that is the fix, not a blocker to hand back. Report only
   if the sync itself fails, with what it printed.
 
-Two retention chores this also surfaced: `~/.local/share/imas-codex/logs` has no
+Two retention chores this also surfaced: `~/.local/share/iter-codex/logs` has no
 directory-wide age cleanup (per-stem rotation only), and reckon run envelopes need
 a scheduled `crew gc --retention-days 30 --apply`.
 
@@ -388,7 +388,7 @@ Test execution follows `~/.agents/AGENTS.md` Test Execution Protocol (no piping 
 - Default `addopts`: `--tb=short --no-header --durations=10` — tracebacks and
   headers stay compact while every run retains its final totals line.
 - Per-test timeout: 30s default (`@pytest.mark.timeout(60)` to override). `faulthandler_timeout = 60` dumps thread stacks on hangs.
-- `_start_exit_watchdog()` in `imas_codex/cli/shutdown.py` is only used in the signal-handler path (second Ctrl-C), not during normal `safe_asyncio_run()` completion — so `CliRunner.invoke()` test environments are safe.
+- `_start_exit_watchdog()` in `iter_codex/cli/shutdown.py` is only used in the signal-handler path (second Ctrl-C), not during normal `safe_asyncio_run()` completion — so `CliRunner.invoke()` test environments are safe.
 
 ## Domain Workflows
 

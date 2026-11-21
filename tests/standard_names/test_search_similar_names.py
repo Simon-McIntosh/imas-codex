@@ -25,10 +25,10 @@ def _row(
 class TestGCReuse:
     """When ``gc`` is supplied, no new ``GraphClient`` is instantiated."""
 
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.embeddings.encoder.Encoder")
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.embeddings.encoder.Encoder")
     def test_gc_kwarg_reuses_session(self, MockEncoder, MockGC) -> None:
-        from imas_codex.standard_names.search import search_standard_names_vector
+        from iter_codex.standard_names.search import search_standard_names_vector
 
         mock_enc = MagicMock()
         mock_enc.embed_texts.return_value = [[0.1] * 768]
@@ -46,11 +46,11 @@ class TestGCReuse:
         external_gc.query.assert_called_once()
         MockGC.assert_not_called()
 
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.embeddings.encoder.Encoder")
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.embeddings.encoder.Encoder")
     def test_no_gc_opens_own_session(self, MockEncoder, MockGC) -> None:
         """Back-compat: when gc=None, the function opens its own session."""
-        from imas_codex.standard_names.search import search_standard_names_vector
+        from iter_codex.standard_names.search import search_standard_names_vector
 
         mock_enc = MagicMock()
         mock_enc.embed_texts.return_value = [[0.1] * 768]
@@ -72,10 +72,10 @@ class TestGCReuse:
 class TestIncludeSuperseded:
     """``include_superseded=True`` drops the superseded WHERE clause."""
 
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.embeddings.encoder.Encoder")
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.embeddings.encoder.Encoder")
     def test_default_excludes_superseded(self, MockEncoder, MockGC) -> None:
-        from imas_codex.standard_names.search import search_standard_names_vector
+        from iter_codex.standard_names.search import search_standard_names_vector
 
         mock_enc = MagicMock()
         mock_enc.embed_texts.return_value = [[0.1] * 768]
@@ -91,10 +91,10 @@ class TestIncludeSuperseded:
         assert "quarantined" in cypher
         assert "exhausted" in cypher
 
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.embeddings.encoder.Encoder")
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.embeddings.encoder.Encoder")
     def test_include_superseded_drops_filter(self, MockEncoder, MockGC) -> None:
-        from imas_codex.standard_names.search import search_standard_names_vector
+        from iter_codex.standard_names.search import search_standard_names_vector
 
         mock_enc = MagicMock()
         mock_enc.embed_texts.return_value = [[0.1] * 768]
@@ -113,14 +113,14 @@ class TestIncludeSuperseded:
         assert "quarantined" in cypher
         assert "exhausted" in cypher
 
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.embeddings.encoder.Encoder")
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.embeddings.encoder.Encoder")
     def test_include_superseded_returns_superseded_rows(
         self, MockEncoder, MockGC
     ) -> None:
         """When the flag is set and the graph returns superseded rows, they
         flow through to the caller (the WHERE no longer filters them)."""
-        from imas_codex.standard_names.search import search_standard_names_vector
+        from iter_codex.standard_names.search import search_standard_names_vector
 
         mock_enc = MagicMock()
         mock_enc.embed_texts.return_value = [[0.1] * 768]

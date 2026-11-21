@@ -11,14 +11,14 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import discover
-from imas_codex.cli.discover.paths import PathsStageOptions, run_paths_stage
+from iter_codex.cli.discover import discover
+from iter_codex.cli.discover.paths import PathsStageOptions, run_paths_stage
 
 
 @pytest.fixture(autouse=True)
 def bare_discover_stage(monkeypatch, tmp_path):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import sequence
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import sequence
 
     monkeypatch.setattr(
         sequence,
@@ -29,7 +29,7 @@ def bare_discover_stage(monkeypatch, tmp_path):
     )
     monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: {}
     )
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
     monkeypatch.setattr(
@@ -57,30 +57,30 @@ def engine(monkeypatch: pytest.MonkeyPatch) -> dict:
         return result
 
     monkeypatch.setattr(
-        "imas_codex.discovery.paths.parallel.run_parallel_discovery", fake_engine
+        "iter_codex.discovery.paths.parallel.run_parallel_discovery", fake_engine
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.run_discovery", fake_run_discovery
+        "iter_codex.cli.discover.common.run_discovery", fake_run_discovery
     )
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.setup_logging", lambda *a, **kw: None
+        "iter_codex.cli.discover.common.setup_logging", lambda *a, **kw: None
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.make_log_print",
+        "iter_codex.cli.discover.common.make_log_print",
         lambda *a, **kw: lambda *a: None,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.get_discovery_stats",
+        "iter_codex.discovery.get_discovery_stats",
         lambda facility: {"total": 4, "scanned": 2, "scored": 1},
     )
-    monkeypatch.setattr("imas_codex.discovery.seed_facility_roots", lambda *a, **kw: 0)
+    monkeypatch.setattr("iter_codex.discovery.seed_facility_roots", lambda *a, **kw: 0)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: {}
     )
-    monkeypatch.setattr("imas_codex.settings.get_model", lambda section: "test-model")
+    monkeypatch.setattr("iter_codex.settings.get_model", lambda section: "test-model")
     monkeypatch.setattr(
-        importlib.import_module("imas_codex.cli.discover.paths"),
+        importlib.import_module("iter_codex.cli.discover.paths"),
         "_print_discovery_summary",
         lambda *a, **kw: None,
     )
@@ -125,7 +125,7 @@ def test_flush_with_focus_does_not_seed_roots(engine: dict, monkeypatch) -> None
     def reject_seed(*args, **kwargs):
         pytest.fail("flush seeded a root")
 
-    monkeypatch.setattr("imas_codex.discovery.seed_facility_roots", reject_seed)
+    monkeypatch.setattr("iter_codex.discovery.seed_facility_roots", reject_seed)
     run_paths_stage("jet", PathsStageOptions(flush=True, focus=("/work/equilibrium",)))
     assert engine["root_filter"] == ["/work/equilibrium"]
 
@@ -145,13 +145,13 @@ def test_focus_manifest_restricts_root_filter(engine: dict, tmp_path) -> None:
 def test_default_threshold_is_the_calibrated_scan_gate(
     engine: dict, monkeypatch
 ) -> None:
-    monkeypatch.setattr("imas_codex.settings.get_path_scan_threshold", lambda: 0.42)
+    monkeypatch.setattr("iter_codex.settings.get_path_scan_threshold", lambda: 0.42)
     run_paths_stage("jet", PathsStageOptions())
     assert engine["threshold"] == 0.42
 
 
 def test_command_builds_options_and_calls_stage() -> None:
-    with patch("imas_codex.cli.discover.paths.run_paths_stage") as stage:
+    with patch("iter_codex.cli.discover.paths.run_paths_stage") as stage:
         result = CliRunner().invoke(
             discover,
             [

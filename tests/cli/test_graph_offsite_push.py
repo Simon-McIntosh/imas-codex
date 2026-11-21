@@ -9,15 +9,15 @@ from subprocess import CompletedProcess
 import click
 from click.testing import CliRunner
 
-from imas_codex.cli.graph.registry import graph_push
-from imas_codex.graph.neo4j_ops import OffsiteCurrency
-from imas_codex.graph.offsite import OffsitePushResult
+from iter_codex.cli.graph.registry import graph_push
+from iter_codex.graph.neo4j_ops import OffsiteCurrency
+from iter_codex.graph.offsite import OffsitePushResult
 
 
 def _stale_currency() -> OffsiteCurrency:
     return OffsiteCurrency(
         status="stale",
-        offsite_ref="ghcr.io/example/imas-codex-graph:old",
+        offsite_ref="ghcr.io/example/iter-codex-graph:old",
         offsite_modified_at=datetime(2026, 7, 7, tzinfo=UTC),
         live_path=Path("/graph/data/store"),
         live_modified_at=datetime(2026, 9, 1, tzinfo=UTC),
@@ -27,15 +27,15 @@ def _stale_currency() -> OffsiteCurrency:
 
 def _common(monkeypatch) -> None:
     monkeypatch.setattr(
-        "imas_codex.cli.graph.registry.get_git_info",
+        "iter_codex.cli.graph.registry.get_git_info",
         lambda: {"is_fork": True, "remote_owner": "example"},
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.registry.get_offsite_currency",
+        "iter_codex.cli.graph.registry.get_offsite_currency",
         lambda registry, token: _stale_currency(),
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.registry.graph_archive_stamp", lambda: "dev-abc-stamp"
+        "iter_codex.cli.graph.registry.graph_archive_stamp", lambda: "dev-abc-stamp"
     )
 
 
@@ -49,7 +49,7 @@ def test_cycle_dry_run_prints_decision_without_export(monkeypatch):
         raise AssertionError(kwargs)
 
     monkeypatch.setattr(
-        "imas_codex.cli.graph.registry.run_offsite_push_cycle", run_cycle
+        "iter_codex.cli.graph.registry.run_offsite_push_cycle", run_cycle
     )
 
     result = CliRunner().invoke(graph_push, ["--cycle", "--dry-run"])
@@ -63,13 +63,13 @@ def test_cycle_dry_run_prints_decision_without_export(monkeypatch):
 def test_schedule_dry_run_prints_login_node_units(monkeypatch, tmp_path):
     project_dir = tmp_path / "project"
     project_dir.mkdir()
-    (project_dir / "pyproject.toml").write_text("[project]\nname='imas-codex'\n")
+    (project_dir / "pyproject.toml").write_text("[project]\nname='iter-codex'\n")
     monkeypatch.setattr(
-        "imas_codex.cli.graph.registry._push_schedule_project_dir",
+        "iter_codex.cli.graph.registry._push_schedule_project_dir",
         lambda: project_dir,
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.registry.shutil.which",
+        "iter_codex.cli.graph.registry.shutil.which",
         lambda command: f"/usr/bin/{command}",
     )
     monkeypatch.setattr("platform.system", lambda: "Linux")
@@ -80,7 +80,7 @@ def test_schedule_dry_run_prints_login_node_units(monkeypatch, tmp_path):
     assert result.exit_code == 0
     assert "[DRY RUN] systemd user service:" in result.output
     assert "ConditionHost=login.example.org" in result.output
-    assert "imas-codex graph push --cycle" in result.output
+    assert "iter-codex graph push --cycle" in result.output
     assert "[DRY RUN] systemd user timer:" in result.output
     assert "OnCalendar=daily" in result.output
     assert "No files were written and systemctl was not called" in result.output
@@ -97,7 +97,7 @@ def test_rejected_environment_token_falls_back_to_gh_credential(monkeypatch):
         return _stale_currency()
 
     monkeypatch.setattr(
-        "imas_codex.cli.graph.registry.get_offsite_currency",
+        "iter_codex.cli.graph.registry.get_offsite_currency",
         lambda registry, token: (
             (_ for _ in ()).throw(click.ClickException("HTTP 401"))
             if token == "stale-token"
@@ -105,7 +105,7 @@ def test_rejected_environment_token_falls_back_to_gh_credential(monkeypatch):
         ),
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.registry.subprocess.run",
+        "iter_codex.cli.graph.registry.subprocess.run",
         lambda *args, **kwargs: CompletedProcess(args[0], 0, "gh-token\n", ""),
     )
 
@@ -121,11 +121,11 @@ def test_cycle_reports_success_receipt(monkeypatch, tmp_path):
     _common(monkeypatch)
     receipt = tmp_path / "receipt.json"
     monkeypatch.setattr(
-        "imas_codex.cli.graph.registry.run_offsite_push_cycle",
+        "iter_codex.cli.graph.registry.run_offsite_push_cycle",
         lambda **kwargs: OffsitePushResult(
             outcome="pushed",
             receipt_path=receipt,
-            archive_ref="ghcr.io/example/imas-codex-graph:stamp",
+            archive_ref="ghcr.io/example/iter-codex-graph:stamp",
             archive_bytes=2_434_869_050,
             wall_time_seconds=91.25,
         ),

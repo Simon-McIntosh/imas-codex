@@ -1,4 +1,4 @@
-"""Tests for the ``sn edit`` engine (``imas_codex.standard_names.edit``).
+"""Tests for the ``sn edit`` engine (``iter_codex.standard_names.edit``).
 
 Exercised against an in-memory ``FakeGraph`` that emulates both the plain
 ``query()`` surface used by ``edit.py``/``cascade.py`` and the transactional
@@ -6,7 +6,7 @@ Exercised against an in-memory ``FakeGraph`` that emulates both the plain
 and ``persist_refined_docs`` in ``graph_ops.py``. No live Neo4j — the
 autouse ``_block_live_graph`` fixture (conftest.py) would refuse one anyway.
 
-``imas_codex.standard_names.graph_ops.GraphClient`` is patched to return
+``iter_codex.standard_names.graph_ops.GraphClient`` is patched to return
 the SAME ``FakeGraph`` instance passed to ``apply_edit(gc=...)`` so that
 internal ``with GraphClient() as gc:`` blocks inside the persist_* helpers
 observe the same state as edit.py's own direct queries.
@@ -22,11 +22,11 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.edit import EditPlan, apply_edit
+from iter_codex.standard_names.edit import EditPlan, apply_edit
 
-_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_GC_PATH = "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
 _WRITE_REVIEWS_PATH = (
-    "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
+    "iter_codex.standard_names.graph_store.graph_catalog.write_reviews"
 )
 
 _DEFAULT_NODE_FIELDS: dict[str, Any] = {
@@ -1250,7 +1250,7 @@ def _admitting_pairing_guard():
     the attachment-audit tests. Stubbing it keeps these tests on the one thing
     they pin — which names the rename admits.
     """
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         AttachmentPairingGuardResult,
     )
 
@@ -1258,7 +1258,7 @@ def _admitting_pairing_guard():
         return AttachmentPairingGuardResult(tuple(sorted(set(source_ids))), ())
 
     with patch(
-        "imas_codex.standard_names.attachment_audit.guard_source_pairings", _admit
+        "iter_codex.standard_names.attachment_audit.guard_source_pairings", _admit
     ):
         yield
 
@@ -1275,7 +1275,7 @@ class TestStrandedRename:
     """
 
     def test_quarantined_pending_with_live_source_is_renameable(self) -> None:
-        from imas_codex.standard_names.provenance_lifecycle import (
+        from iter_codex.standard_names.provenance_lifecycle import (
             retarget_standard_name_sources,
         )
 
@@ -1284,7 +1284,7 @@ class TestStrandedRename:
             _patched_graph(fake),
             _admitting_pairing_guard(),
             patch(
-                "imas_codex.standard_names.provenance_lifecycle."
+                "iter_codex.standard_names.provenance_lifecycle."
                 "retarget_standard_name_sources",
                 wraps=retarget_standard_name_sources,
             ) as migrate_sources,
@@ -1454,7 +1454,7 @@ class TestStrandedRename:
 
 class TestEditLifecycle:
     def test_open_to_applied_on_accept(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -1481,7 +1481,7 @@ class TestEditLifecycle:
         assert fake.nodes["toroidal_plasma_current"]["edit_status"] == "applied"
 
     def test_open_to_exhausted_on_cap(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -1509,7 +1509,7 @@ class TestEditLifecycle:
         assert fake.nodes["toroidal_plasma_current"]["edit_status"] == "exhausted"
 
     def test_open_stays_open_on_reviewed(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -1538,7 +1538,7 @@ class TestEditLifecycle:
 
     def test_non_edit_node_untouched(self) -> None:
         """A regular (non-edit) drafted name's edit_status stays None."""
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -1571,7 +1571,7 @@ class TestRefineRotationPropagation:
     def test_open_edit_fields_propagate_across_refine(self) -> None:
         """A normal pipeline refine call (no edit kwargs) copies the open
         edit fields from predecessor to successor."""
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             persist_refined_name,
         )
 
@@ -1603,7 +1603,7 @@ class TestRefineRotationPropagation:
         assert new_node["edit_requested_at"] == "2026-01-01T00:00:00+00:00"
 
     def test_closed_edit_does_not_propagate(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             persist_refined_name,
         )
 
@@ -1628,7 +1628,7 @@ class TestRefineRotationPropagation:
         assert new_node["edit_status"] is None
 
     def test_explicit_edit_kwargs_are_not_overridden_by_propagation(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             persist_refined_name,
         )
 
@@ -2037,7 +2037,7 @@ class TestRenameCascadeProtections:
     def test_acceptance_cascade_honours_recorded_include_accepted(self) -> None:
         """Accepting the root rename cascades the accepted descendant only
         because include_accepted was recorded True at edit time."""
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -2077,7 +2077,7 @@ class TestRenameCascadeProtections:
         makes the cascade preflight conflict — so the acceptance is refused
         atomically (nothing accepted, nothing renamed) rather than landing a
         grammar-inconsistent half-cascade with the accepted child stranded."""
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -2118,7 +2118,7 @@ class TestRenameCascadeProtections:
         assert issues and any("edit_cascade" in v for v in issues)
 
     def test_old_root_fallback_collision_refuses_acceptance(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -2148,7 +2148,7 @@ class TestRenameCascadeProtections:
         assert fake.edges_by_child["ion_temperature"][0]["parent_id"] == "temperature"
 
     def test_old_root_fallback_grammar_failure_refuses_acceptance(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 

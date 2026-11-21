@@ -33,7 +33,7 @@ pytest.importorskip("imas_standard_names")
 
 from imas_standard_names import compose, parse  # noqa: E402
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt  # noqa: E402
+from iter_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt  # noqa: E402
 
 # Compose system prompt + the shared includes it renders (see the
 # ``{% include %}`` directives in generate_name_system.md).
@@ -73,7 +73,7 @@ def _round_trips(name: str) -> bool:
     except Exception:
         pass
 
-    from imas_codex.standard_names.audits import resolve_retired_operator_spellings
+    from iter_codex.standard_names.audits import resolve_retired_operator_spellings
 
     resolved = resolve_retired_operator_spellings(name)
     if resolved == name:
@@ -128,7 +128,7 @@ def test_allowlist_has_no_stale_entries(name: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# NC composition-rule examples (imas_codex/llm/config/sn_composition_rules.yaml)
+# NC composition-rule examples (iter_codex/llm/config/sn_composition_rules.yaml)
 # ---------------------------------------------------------------------------
 # The compose system prompt renders every rule's ``examples_good`` verbatim
 # inside a ✓-marked code span (see shared/sn/_nc_rules.md).  The endorsed-name
@@ -143,7 +143,7 @@ def test_allowlist_has_no_stale_entries(name: str) -> None:
 
 def _nc_good_examples() -> list[tuple[str, str]]:
     """(rule_id, name) for every ``examples_good`` entry, loaded like the pipeline."""
-    from imas_codex.llm.prompt_loader import load_prompt_config
+    from iter_codex.llm.prompt_loader import load_prompt_config
 
     cfg = load_prompt_config("sn_composition_rules")
     out: list[tuple[str, str]] = []
@@ -159,7 +159,7 @@ _NC_GOOD_EXAMPLES = _nc_good_examples()
 
 def _nc_bad_examples() -> list[tuple[str, str]]:
     """Return every rejected teaching example with its owning rule ID."""
-    from imas_codex.llm.prompt_loader import load_prompt_config
+    from iter_codex.llm.prompt_loader import load_prompt_config
 
     cfg = load_prompt_config("sn_composition_rules")
     out: list[tuple[str, str]] = []
@@ -268,7 +268,7 @@ def test_outline_owners_are_distinct_public_ir_identities() -> None:
 
 def test_outline_rule_matches_public_grammar_and_owner_semantics() -> None:
     """The registry endorses owned outlines and rejects only owner erasure."""
-    from imas_codex.llm.prompt_loader import load_prompt_config
+    from iter_codex.llm.prompt_loader import load_prompt_config
 
     rules = load_prompt_config("sn_composition_rules")["composition_rules"]
     outline_rule = next(rule for rule in rules if rule["id"] == "NC-13")
@@ -283,7 +283,7 @@ def test_outline_rule_matches_public_grammar_and_owner_semantics() -> None:
 
 def test_consistency_rule_forbids_generic_flux_surface_area_umbrella() -> None:
     """Consistency cannot erase the DD distinction between two surface kinds."""
-    from imas_codex.llm.prompt_loader import load_prompt_config
+    from iter_codex.llm.prompt_loader import load_prompt_config
 
     rules = load_prompt_config("sn_composition_rules")["composition_rules"]
     synonym_rule = next(rule for rule in rules if rule["id"] == "NC-1")
@@ -408,7 +408,7 @@ def test_grammar_reference_exempts_only_atomic_compounds() -> None:
 
 
 def _decomposition_criterion() -> dict:
-    from imas_codex.llm.prompt_loader import load_prompt_config
+    from iter_codex.llm.prompt_loader import load_prompt_config
 
     criteria = load_prompt_config("sn_review_criteria")
     for value in _walk_mappings(criteria):
@@ -614,7 +614,7 @@ def test_compose_modes_preserve_outline_and_unit_vector_owners(
 def _render_policy_surface(prompt_name: str) -> str:
     """Render one production prompt surface without calling external services."""
     if prompt_name == "sn/generate_name_system":
-        from imas_codex.standard_names.context import build_compose_context
+        from iter_codex.standard_names.context import build_compose_context
 
         return render_prompt(prompt_name, context=build_compose_context())
     return render_prompt(

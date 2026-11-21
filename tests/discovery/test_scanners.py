@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.signals.scanners.base import (
+from iter_codex.discovery.signals.scanners.base import (
     DataSourceScanner,
     ScanResult,
     _registry,
@@ -63,10 +63,10 @@ class TestGetScannersForFacility:
 
     def test_wiki_context_is_not_auto_added_as_scanner(self, monkeypatch):
         """Facilities with wiki sites only get configured data_system scanners."""
-        from imas_codex.discovery.signals.scanners import base
+        from iter_codex.discovery.signals.scanners import base
 
         monkeypatch.setattr(
-            "imas_codex.discovery.base.facility.get_facility",
+            "iter_codex.discovery.base.facility.get_facility",
             lambda facility: {
                 "data_systems": {"mdsplus": {}},
                 "wiki_sites": ["https://example.test/wiki"],
@@ -79,7 +79,7 @@ class TestGetScannersForFacility:
 
     def test_tcv_returns_tdi(self, monkeypatch):
         """TCV facility should dispatch TDI scanner."""
-        from imas_codex.discovery.signals.scanners import base
+        from iter_codex.discovery.signals.scanners import base
 
         monkeypatch.setattr(
             base,
@@ -90,14 +90,14 @@ class TestGetScannersForFacility:
         _registry.clear()
 
         # Just test that the registry works with manual registration
-        from imas_codex.discovery.signals.scanners.tdi import TDIScanner
+        from iter_codex.discovery.signals.scanners.tdi import TDIScanner
 
         register_scanner(TDIScanner())
         assert get_scanner("tdi").scanner_type == "tdi"
 
     def test_disabled_data_source_is_skipped(self, monkeypatch):
         """Data systems marked available=false are not scheduled."""
-        from imas_codex.discovery.signals.scanners import base
+        from iter_codex.discovery.signals.scanners import base
 
         monkeypatch.setattr(
             base,
@@ -106,11 +106,11 @@ class TestGetScannersForFacility:
         )
         _registry.clear()
 
-        from imas_codex.discovery.signals.scanners.mdsplus import MDSplusScanner
+        from iter_codex.discovery.signals.scanners.mdsplus import MDSplusScanner
 
         register_scanner(MDSplusScanner())
         monkeypatch.setattr(
-            "imas_codex.discovery.base.facility.get_facility",
+            "iter_codex.discovery.base.facility.get_facility",
             lambda facility: {
                 "data_systems": {
                     "mdsplus": {},
@@ -169,17 +169,17 @@ class TestSemanticWikiContextFacilityPredicate:
         return gc
 
     def test_facility_predicate_inside_search(self):
-        from imas_codex.discovery.signals.scanners import wiki as wiki_mod
+        from iter_codex.discovery.signals.scanners import wiki as wiki_mod
 
         mock_gc = self._mock_gc()
         with (
             patch.object(wiki_mod, "GraphClient", return_value=mock_gc),
             patch(
-                "imas_codex.embeddings.encoder.Encoder",
+                "iter_codex.embeddings.encoder.Encoder",
                 return_value=self._fake_encoder(),
             ),
             patch(
-                "imas_codex.embeddings.config.EncoderConfig", return_value=MagicMock()
+                "iter_codex.embeddings.config.EncoderConfig", return_value=MagicMock()
             ),
         ):
             result = wiki_mod.fetch_semantic_wiki_context("jt-60sa", "plasma current")

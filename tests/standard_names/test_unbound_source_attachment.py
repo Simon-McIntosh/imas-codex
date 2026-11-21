@@ -12,8 +12,8 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.signed_manifest import (
     SignedManifestConflict,
     apply_signed_manifest,
     signed_payload_sha256,
@@ -123,7 +123,7 @@ def _write_authority(path: Path) -> tuple[str, str]:
 
 @pytest.fixture
 def client(disposable_neo4j: tuple[str, str], monkeypatch) -> Iterator[GraphClient]:
-    from imas_codex.standard_names import dd_resolutions
+    from iter_codex.standard_names import dd_resolutions
     from tests.standard_names.conftest import SyntheticDDResolutionReader
     from tests.standard_names.dd_resolution_test_data import (
         SYNTHETIC_GRAPH_RESOLUTION_ROWS,
@@ -525,7 +525,7 @@ class _AttachGraph:
 
     # -- query dispatch ---------------------------------------------------
     def query(self, statement: str, **params: Any) -> list[dict[str, Any]]:
-        from imas_codex.standard_names import attachment_audit as mod
+        from iter_codex.standard_names import attachment_audit as mod
 
         if statement == mod._ATTACH_PREFLIGHT_QUERY:
             return self._attach_preflight(**params)
@@ -699,7 +699,7 @@ class _AttachGraph:
 
 def test_attach_binds_an_unbound_source_to_the_name_it_realizes() -> None:
     """The motivating case: an extracted, unbound beta path onto an accepted name."""
-    from imas_codex.standard_names.attachment_audit import attach_one_source
+    from iter_codex.standard_names.attachment_audit import attach_one_source
 
     graph = _AttachGraph()
     assert graph.sources[_BETA_SOURCE]["status"] == "extracted"
@@ -730,7 +730,7 @@ def test_attach_binds_an_unbound_source_to_the_name_it_realizes() -> None:
 
 def test_attach_then_detach_returns_the_graph_to_its_starting_shape() -> None:
     """The verbs are inverse: neither leaves a residue the other cannot remove."""
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         attach_one_source,
         detach_one_attachment,
     )
@@ -758,7 +758,7 @@ def test_attach_then_detach_returns_the_graph_to_its_starting_shape() -> None:
 
 def test_attach_and_detach_name_the_same_edges_and_scalars() -> None:
     """Guards the stand-in above against drifting away from the real Cypher."""
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     for token in ("PRODUCED_NAME", "HAS_STANDARD_NAME", "source_paths"):
         assert token in mod._ATTACH_QUERY, token
@@ -772,7 +772,7 @@ def test_attach_and_detach_name_the_same_edges_and_scalars() -> None:
 
 def test_attach_refuses_a_source_already_bound_to_a_live_name() -> None:
     """Re-pointing is a detach then an attach; one verb would hide the middle."""
-    from imas_codex.standard_names.attachment_audit import attach_one_source
+    from iter_codex.standard_names.attachment_audit import attach_one_source
 
     graph = _AttachGraph(bound_to="normalized_toroidal_beta")
     before = graph.shape()
@@ -788,7 +788,7 @@ def test_attach_refuses_a_source_already_bound_to_a_live_name() -> None:
 
 def test_attach_refuses_a_pairing_the_mechanical_guard_rejects() -> None:
     """An attach that bypassed the guard would manufacture the audit's own work."""
-    from imas_codex.standard_names.attachment_audit import attach_one_source
+    from iter_codex.standard_names.attachment_audit import attach_one_source
 
     graph = _AttachGraph()
     before = graph.shape()
@@ -808,7 +808,7 @@ def test_attach_refuses_a_pairing_the_mechanical_guard_rejects() -> None:
 
 
 def test_attach_refuses_a_target_name_that_does_not_exist() -> None:
-    from imas_codex.standard_names.attachment_audit import attach_one_source
+    from iter_codex.standard_names.attachment_audit import attach_one_source
 
     graph = _AttachGraph(target_exists=False)
     before = graph.shape()
@@ -824,7 +824,7 @@ def test_attach_refuses_a_target_name_that_does_not_exist() -> None:
 @pytest.mark.parametrize("name_stage", ["superseded", "exhausted", "contested"])
 def test_attach_refuses_a_terminal_target(name_stage: str) -> None:
     """Binding onto a terminal identity is the corruption the recovery repairs."""
-    from imas_codex.standard_names.attachment_audit import attach_one_source
+    from iter_codex.standard_names.attachment_audit import attach_one_source
 
     graph = _AttachGraph(name_stage=name_stage)
     before = graph.shape()
@@ -838,7 +838,7 @@ def test_attach_refuses_a_terminal_target(name_stage: str) -> None:
 
 
 def test_attach_refuses_a_dd_path_the_graph_does_not_carry() -> None:
-    from imas_codex.standard_names.attachment_audit import attach_one_source
+    from iter_codex.standard_names.attachment_audit import attach_one_source
 
     graph = _AttachGraph(dd_exists=False)
     before = graph.shape()
@@ -853,7 +853,7 @@ def test_attach_refuses_a_dd_path_the_graph_does_not_carry() -> None:
 
 def test_attach_refuses_a_dd_path_with_no_source_node() -> None:
     """A path nobody extracted has nothing to bind — extraction comes first."""
-    from imas_codex.standard_names.attachment_audit import attach_one_source
+    from iter_codex.standard_names.attachment_audit import attach_one_source
 
     graph = _AttachGraph(source_exists=False)
     before = graph.shape()
@@ -867,7 +867,7 @@ def test_attach_refuses_a_dd_path_with_no_source_node() -> None:
 
 
 def test_attach_dry_run_does_not_write() -> None:
-    from imas_codex.standard_names.attachment_audit import attach_one_source
+    from iter_codex.standard_names.attachment_audit import attach_one_source
 
     graph = _AttachGraph()
     before = graph.shape()
@@ -884,8 +884,8 @@ def test_attach_dry_run_does_not_write() -> None:
 def test_attach_command_reports_the_binding_it_made() -> None:
     from click.testing import CliRunner
 
-    from imas_codex.cli.sn import sn
-    from imas_codex.standard_names.attachment_audit import attach_one_source
+    from iter_codex.cli.sn import sn
+    from iter_codex.standard_names.attachment_audit import attach_one_source
 
     graph = _AttachGraph()
 
@@ -893,7 +893,7 @@ def test_attach_command_reports_the_binding_it_made() -> None:
         return attach_one_source(dd_path, sn_id, gc=graph, **kwargs)
 
     with patch(
-        "imas_codex.standard_names.attachment_audit.attach_one_source",
+        "iter_codex.standard_names.attachment_audit.attach_one_source",
         side_effect=_attach,
     ):
         result = CliRunner().invoke(
@@ -909,8 +909,8 @@ def test_attach_command_exits_non_zero_and_writes_nothing_on_a_refusal() -> None
     """The refusal reason reaches the operator; the graph is untouched."""
     from click.testing import CliRunner
 
-    from imas_codex.cli.sn import sn
-    from imas_codex.standard_names.attachment_audit import attach_one_source
+    from iter_codex.cli.sn import sn
+    from iter_codex.standard_names.attachment_audit import attach_one_source
 
     graph = _AttachGraph(bound_to="normalized_toroidal_beta")
     before = graph.shape()
@@ -919,7 +919,7 @@ def test_attach_command_exits_non_zero_and_writes_nothing_on_a_refusal() -> None
         return attach_one_source(dd_path, sn_id, gc=graph, **kwargs)
 
     with patch(
-        "imas_codex.standard_names.attachment_audit.attach_one_source",
+        "iter_codex.standard_names.attachment_audit.attach_one_source",
         side_effect=_attach,
     ):
         result = CliRunner().invoke(
@@ -936,7 +936,7 @@ def test_attach_requires_a_reason() -> None:
     """An attach is a physics judgement and must carry its argument."""
     from click.testing import CliRunner
 
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     result = CliRunner().invoke(sn, ["attach", _BETA_PATH, _BETA_NAME])
 

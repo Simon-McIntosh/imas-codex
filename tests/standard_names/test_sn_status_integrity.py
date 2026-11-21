@@ -1,6 +1,6 @@
 """Regression test for orphan-integrity false-positives on superseded SNs.
 
-Bug: ``uv run imas-codex sn status`` reported 197 orphan StandardNames after
+Bug: ``uv run iter-codex sn status`` reported 197 orphan StandardNames after
 a $10 smoke.  Investigation showed ALL 197 had ``name_stage='superseded'`` —
 they were predecessors in REFINED_FROM chains.  By design,
 ``persist_refined_name_batch`` migrates the PRODUCED_NAME edge from the
@@ -17,7 +17,7 @@ import uuid
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 pytestmark = pytest.mark.graph
 

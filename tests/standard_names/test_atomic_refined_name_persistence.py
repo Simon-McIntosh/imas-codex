@@ -8,11 +8,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from neo4j.exceptions import TransientError
 
-from imas_codex.standard_names.attachment_audit import (
+from iter_codex.standard_names.attachment_audit import (
     AttachmentPairingGuardResult,
     AttachmentVerdict,
 )
-from imas_codex.standard_names.graph_store.graph_refinement import (
+from iter_codex.standard_names.graph_store.graph_refinement import (
     RefinedNamePersistenceRefusal,
     RefinedNamePersistenceRefusalReason,
     persist_refined_name,
@@ -156,24 +156,24 @@ def _persistence_boundary(
     graph = _graph(transaction)
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ),
         patch(
-            "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+            "iter_codex.standard_names.attachment_audit.guard_source_pairings",
             return_value=guard_result,
         ) as guard,
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "retarget_standard_name_sources",
             return_value=len(source_ids),
         ) as retarget,
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "record_standard_name_change",
             return_value="sn-change:test",
         ) as record,
-        patch("imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
     ):
         yield transaction, guard, retarget, record
 
@@ -280,11 +280,11 @@ def test_predecessor_compare_and_set_loss_has_no_mutation() -> None:
     graph = _graph(transaction)
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ),
         patch(
-            "imas_codex.standard_names.provenance_lifecycle.record_standard_name_change"
+            "iter_codex.standard_names.provenance_lifecycle.record_standard_name_change"
         ) as record,
     ):
         with pytest.raises(RefinedNamePersistenceRefusal) as refusal:
@@ -335,24 +335,24 @@ def test_open_edit_propagation_uses_only_the_atomic_transaction() -> None:
     admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ) as graph_client,
         patch(
-            "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+            "iter_codex.standard_names.attachment_audit.guard_source_pairings",
             return_value=admitted,
         ),
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "retarget_standard_name_sources",
             return_value=1,
         ),
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "record_standard_name_change",
             return_value="sn-change:edit",
         ) as record,
-        patch("imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
     ):
         _persist(
             edit_mode=None,
@@ -379,19 +379,19 @@ def test_edit_state_race_fails_the_finalization_fence_and_rolls_back() -> None:
     admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ),
         patch(
-            "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+            "iter_codex.standard_names.attachment_audit.guard_source_pairings",
             return_value=admitted,
         ),
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "retarget_standard_name_sources"
         ) as retarget,
         patch(
-            "imas_codex.standard_names.provenance_lifecycle.record_standard_name_change"
+            "iter_codex.standard_names.provenance_lifecycle.record_standard_name_change"
         ) as record,
     ):
         with pytest.raises(RefinedNamePersistenceRefusal) as refusal:
@@ -478,25 +478,25 @@ def test_transient_retry_rolls_back_first_event_and_commits_one() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=graphs,
         ),
         patch(
-            "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+            "iter_codex.standard_names.attachment_audit.guard_source_pairings",
             return_value=admitted,
         ),
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "retarget_standard_name_sources",
             return_value=1,
         ),
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "record_standard_name_change",
             side_effect=record,
         ),
-        patch("imas_codex.discovery.base.claims.time.sleep"),
-        patch("imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
+        patch("iter_codex.discovery.base.claims.time.sleep"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
     ):
         _persist()
 

@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
 
 
 def _ce(lease, amount, phase=None):
@@ -43,10 +43,10 @@ class TestClaimComposeSources:
         mock_gc.query = MagicMock(side_effect=[None, []])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=mock_gc,
         ):
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 claim_compose_sources,
             )
 
@@ -81,10 +81,10 @@ class TestClaimComposeSources:
         mock_gc.query = MagicMock(side_effect=[None, fake_rows])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=mock_gc,
         ):
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 claim_compose_sources,
             )
 
@@ -106,7 +106,7 @@ class TestClaimReviewNames:
 
     def test_empty_input_returns_empty(self):
         """Passing empty name_ids returns empty without touching graph."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             claim_review_names,
         )
 
@@ -123,10 +123,10 @@ class TestClaimReviewNames:
         mock_gc.query = MagicMock(side_effect=[None, [{"id": "electron_temperature"}]])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=mock_gc,
         ):
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 claim_review_names,
             )
 
@@ -152,10 +152,10 @@ class TestReleaseFunctions:
         mock_gc.query = MagicMock(return_value=[{"affected": 3}])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=mock_gc,
         ):
-            from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            from iter_codex.standard_names.graph_store.graph_source_bindings import (
                 release_standard_name_source_claims,
             )
 
@@ -165,7 +165,7 @@ class TestReleaseFunctions:
 
     def test_release_review_claims_empty_token(self):
         """release_review_claims with empty token returns 0 immediately."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             release_review_claims,
         )
 
@@ -179,10 +179,10 @@ class TestReleaseFunctions:
         mock_gc.query = MagicMock(return_value=[{"affected": 5}])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=mock_gc,
         ):
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 release_review_claims,
             )
 
@@ -206,10 +206,10 @@ class TestCountEligibleComposeSources:
         mock_gc.query = MagicMock(return_value=[{"cnt": 42}])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=mock_gc,
         ):
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 count_eligible_compose_sources,
             )
 
@@ -222,10 +222,10 @@ class TestCountEligibleComposeSources:
         mock_gc.query = MagicMock(return_value=[{"cnt": 0}])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=mock_gc,
         ):
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 count_eligible_compose_sources,
             )
 

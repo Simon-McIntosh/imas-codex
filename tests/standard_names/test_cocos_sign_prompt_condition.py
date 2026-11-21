@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
+from iter_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
 
 _MANDATORY_SIGN_INSTRUCTIONS = (
     "You **MUST** include a sign convention paragraph",

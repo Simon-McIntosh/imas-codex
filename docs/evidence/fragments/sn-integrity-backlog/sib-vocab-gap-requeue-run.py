@@ -96,7 +96,7 @@ def worklist_rows():
 
 def grammar_tokens():
     """GrammarToken values of the active 0.11.0 snapshot, with their segments."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         rows = gc.query(
@@ -182,7 +182,7 @@ def classify(source_id, row, tokens, operators):
 
 
 def census():
-    from imas_codex.standard_names.graph_store import graph_foundation
+    from iter_codex.standard_names.graph_store import graph_foundation
 
     ids = cohort()
     state = previous().source_state(ids)
@@ -216,7 +216,7 @@ def census():
 
     eligible = sorted(sid for sid in ids if detail[sid]["composable"])
     parked = sorted(sid for sid in ids if not detail[sid]["composable"])
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         live_gap_sources = gc.query(
@@ -272,7 +272,7 @@ def transition():
             "composable": payload["detail"][sid]["composable"],
             "transition_path": (
                 "startup maintenance retry_vocab_gap_sources_on_grammar_change "
-                "(imas_codex/standard_names/graph_store/graph_audits.py)"
+                "(iter_codex/standard_names/graph_store/graph_audits.py)"
             ),
             "transition_observed": before["status"] != after["status"],
             "receipt_note": (
@@ -325,14 +325,14 @@ def manifest():
 
 
 def pipeline(*, dry_run):
-    import imas_codex.standard_names.loop as loop
+    import iter_codex.standard_names.loop as loop
 
     print(f"# module: {loop.__file__}", flush=True)
     command = [
         "uv",
         "run",
         "--no-sync",
-        "imas-codex",
+        "iter-codex",
         "sn",
         "run",
         "--focus",
@@ -362,14 +362,14 @@ def pipeline(*, dry_run):
 
 
 def export_state(gc):
-    from imas_codex.standard_names.export import (
+    from iter_codex.standard_names.export import (
         _RELEASE_IDENTITY_HOLDS,
         _SHIPPING_NAME_STAGES,
     )
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
-    from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+    from iter_codex.standard_names.source_invariant import find_sourceless_live_names
 
     audit = classify_sourceless_standard_names(gc)
     sourceless = [
@@ -399,7 +399,7 @@ def export_state(gc):
 
 
 def readback():
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     payload = load("census")
     ids = payload["cohort"]
@@ -552,7 +552,7 @@ def negative_control():
 
 
 def grammar_tokens_at(version):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         rows = gc.query(
@@ -860,7 +860,7 @@ counted toward this run's production.</p>
 
 <p>The repository's own status-transition path is the startup maintenance call
 <code>retry_vocab_gap_sources_on_grammar_change</code>
-(<code>imas_codex/standard_names/graph_store/graph_audits.py</code>): a source
+(<code>iter_codex/standard_names/graph_store/graph_audits.py</code>): a source
 whose recorded vocabulary signature differs from the live one is returned to
 <code>extracted</code> for one compose attempt under the new vocabulary. It ran at
 2026-11-10 21:18:38 UTC in a peer pipeline's startup, and its own log line is the
@@ -986,7 +986,7 @@ def provenance():
     names it. Time alone is not enough: a concurrent run composes into the same
     cohort, and a bound name can predate this run entirely.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     readback_payload = load("readback")
     run = readback_payload["summary"]

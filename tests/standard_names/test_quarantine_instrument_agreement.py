@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.review.audits import (
+from iter_codex.standard_names.review.audits import (
     AUDIT_WALK_QUESTION,
     QUARANTINE_AUTHORITY,
     QUARANTINE_QUESTION,
@@ -23,7 +23,7 @@ from imas_codex.standard_names.review.audits import (
     answer_quarantine_question,
     run_all_audits,
 )
-from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
     _is_quarantined,
 )
 

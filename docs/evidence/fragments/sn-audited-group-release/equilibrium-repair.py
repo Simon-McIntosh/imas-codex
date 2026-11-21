@@ -87,13 +87,13 @@ def save(record, path=DATA):
 
 
 def client():
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     return GraphClient()
 
 
 def sourceless(gc):
-    from imas_codex.standard_names.source_invariant import (
+    from iter_codex.standard_names.source_invariant import (
         find_sourceless_live_name_rows,
     )
 
@@ -222,7 +222,7 @@ def command(member, arguments):
         "--no-sync",
         "--directory",
         str(MAIN),
-        "imas-codex",
+        "iter-codex",
         "sn",
         *arguments,
     ]
@@ -466,7 +466,7 @@ def check(path=DATA, *, checkpoint=False):
             }
         )
     )
-    from imas_codex.standard_names import source_invariant
+    from iter_codex.standard_names import source_invariant
 
     print(json.dumps({"source_reader_module": source_invariant.__file__}))
     record = load(path)

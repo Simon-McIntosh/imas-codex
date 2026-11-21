@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import shutil
 
-from imas_codex.standard_names.fanout import config as fanout_config
-from imas_codex.standard_names.fanout.config import (
+from iter_codex.standard_names.fanout import config as fanout_config
+from iter_codex.standard_names.fanout.config import (
     FanoutSettings,
     load_settings,
     render_proposer_system_prompt,
@@ -61,7 +61,7 @@ class TestCatalogVersion:
         restore the *other's* mutated text as "original", and a run killed
         mid-test leaves the live prompt corrupted with no cleanup at all.
         """
-        from imas_codex.llm import prompt_loader
+        from iter_codex.llm import prompt_loader
 
         original_hash = fanout_config._compute_catalog_version()
 

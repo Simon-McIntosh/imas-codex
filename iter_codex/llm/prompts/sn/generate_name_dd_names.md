@@ -1,0 +1,355 @@
+---
+name: sn/generate_name_dd_names
+description: Lean user prompt for SN composition in names batching mode
+used_by: iter_codex.standard_names.workers.compose_worker
+task: composition
+dynamic: true
+schema_needs: []
+---
+
+Name the **physical or geometric quantities** represented by the following
+IMAS Data Dictionary paths. Each standard name describes the underlying
+physics — NOT the DD path, IDS section, or measurement instrument.
+
+> **Standard Names are standalone, self-describing metadata labels.** Each name must convey its physical or geometrical meaning without reference to any external data dictionary. A domain expert reading only the name should immediately understand what quantity it represents, what coordinate system it uses, and what physical process it describes.
+
+**Subject–base separation rule:** Species and entity qualifiers (electron,
+ion, neutral, fast_ion) go in the `subject` segment, NOT fused into
+`physical_base`. Example: subject=electron + physical_base=temperature →
+`electron_temperature` — but `temperature` is the base, not
+`electron_temperature` as a monolithic token.
+
+This batch was assembled in **name-only mode**: paths share the same
+`physics_domain` and authoritative unit but may span many different
+semantic clusters and IDSs. **Your first task is to identify the
+natural sub-groups within this batch**, then emit one name per path.
+
+{% if domain_vocabulary %}
+## PREFERRED VOCABULARY FOR THIS DOMAIN — reuse unless concept is genuinely different
+
+The following standard names already exist in this physics domain and have been
+validated. **Reuse** these terms and naming patterns unless the concept you are
+naming is genuinely different. Synonymous proliferation within a domain is the
+single most common quality failure.
+
+{{ domain_vocabulary }}
+{% endif %}
+
+{% if reviewer_themes %}
+## RECENT REVIEWER FEEDBACK FOR THIS DOMAIN — address these
+
+Expert reviewers have flagged these recurring issues in this domain's standard names.
+Pay special attention to avoiding these patterns:
+
+{% for theme in reviewer_themes %}
+- {{ theme }}
+{% endfor %}
+{% endif %}
+
+{% include "sn/_compose_scored_examples.md" %}
+
+## Unit Policy
+
+The `unit` field for each path is pre-populated from the IMAS Data
+Dictionary and is **authoritative and final**:
+
+- Do NOT include unit in your output — it is injected at persistence time
+- Use the unit to disambiguate physics (e.g., `eV` vs `K` for temperature)
+- `dimensionless` means the quantity is genuinely unitless
+
+## Authoritative source-axis fidelity — HARD
+
+For every candidate and attachment, compare the exact authoritative DD source
+binding with the complete name identity. Preserve every source-stated semantic
+axis that distinguishes the observable: **subject/object, mechanism/cause,
+locus/carrier, projection/axis, surface kind, geometry representation,
+coordinate kind, aggregation, process, state, unit, and DD-authoritative
+transformation/label semantics**. Domain-implied boilerplate may be omitted,
+but an explicit differentiator may not. A candidate or attachment that drops,
+changes, or invents any distinguishing axis is wrong even when it parses or
+resembles an existing name. If the public grammar cannot express the exact
+identity, emit a `vocab_gap`; never silently generalize, merge, or substitute a
+nearby registered concept.
+
+The supplied unit is authoritative, and COCOS is fixed DDv4 catalog metadata.
+Do not choose, infer, or change a COCOS transformation label. `psi_like` and
+`ip_like` remain downstream catalog labels, not composer output.
+
+Flux-surface area is not one generic family: DD `area` is
+`poloidal_plane_cross_sectional_area_of_flux_surface`, while DD `surface` is
+`surface_area_of_flux_surface`. Never emit or attach either source family to
+the ambiguous umbrella `area_of_flux_surface`.
+
+### Ordinal geometry preserves its carrier and owner
+
+Never emit, propose, approve, or refine a Standard Name that encodes an ordered
+sample or endpoint. Positional words such as **first, second, third, start, end**
+and equivalent sample-position labels remain in the DD path and source
+description as provenance, never in the identity. Apply this rule only when the
+source structure proves that the word indexes a point or sample; do not strip a
+registered semantic token such as `first_wall`, or `start`/`end` when it names a
+state or process rather than sample position.
+
+Dropping the positional label must preserve the exact quantity, owner, carrier,
+geometry representation, axis, mechanism, and locus. If the same non-ordinal
+identity needs an unavailable carrier or locus token, emit a `vocab_gap` for
+that exact token. Never borrow `line_of_sight` or another object's identity.
+Thus `radial_coordinate_of_arc_of_circle_start_point` is forbidden; the
+intended semantic class is the radial coordinate of the same arc-of-circle
+carrier without its endpoint index. If that carrier has no registered token,
+emit the `vocab_gap` rather than inventing a Standard Name.
+
+Omit `first_point` / `second_point` / `third_point` only when the ordinal is
+array bookkeeping within the same physical geometry carrier and owner. Retain
+the carrier, representation, owner, and axis. Only genuine
+`line_of_sight/*_point` paths may map to
+`radial_coordinate_of_line_of_sight`,
+`vertical_coordinate_of_line_of_sight`, or
+`toroidal_coordinate_of_line_of_sight`. A `thick_line` conductor, pellet path,
+gas pipe, shunt, beam path, interpolation point, or other-object outline is not
+a line of sight; preserve its identity or emit a `vocab_gap`.
+
+Outline vertices retain the source-stated owner. Use an owner-qualified form
+such as `radial_outline_of_wall` or
+`radial_outline_of_plasma_boundary` when that is the exact owner; never teach
+bare `radial_outline` / `vertical_outline` as identities shared by different
+objects. Ordinal siblings of one wall outline may consolidate, but a wall
+outline and a plasma-boundary outline may not.
+
+## Name-Only Mode — Focused Output
+
+This mode keeps the requested output focused on names, but the per-item context
+below remains authoritative: in particular, the rich enriched description,
+unit, semantic neighbours, identifiers, and reviewer history are not optional
+scaffolding. Your job here is to produce **clean, grammar-compliant names** that
+correctly identify the physical quantity; later review may improve prose, but it
+cannot recover a semantic axis omitted from the identity.
+
+### What this means for your output
+
+- **Names** must still be fully grammar-compliant — the grammar
+  check runs on every candidate, and failures trigger a retry.
+- **Descriptions** should be concise (1–2 sentences) and grounded in the rich
+  enriched source description. Treat the terse DD clause as secondary evidence;
+  do not invent detail you do not have.
+
+## Identify Natural Sub-Groups First
+
+Before naming, scan the full path list and group items by the
+**physical quantity** they represent (not by IDS). Typical
+sub-groupings within a single `(physics_domain, unit)` batch:
+
+- species-based: electron vs ion vs neutral
+- orientation: parallel vs perpendicular vs radial vs toroidal
+- process: flux vs source vs sink vs diffusivity
+- state: volumetric vs surface vs line-integrated
+
+Then emit **one** name per path, reusing the same base structure when the
+sub-group identity is the same (e.g., `parallel_electron_particle_flux`
+and `parallel_ion_particle_flux` share a structure). Reuse existing
+standard names from the "Existing Standard Names" list whenever the DD
+path measures the same quantity — do not invent a synonym.
+
+## Common Anti-Patterns (AVOID)
+
+| ❌ Wrong | ✅ Correct | Why |
+|----------|-----------|-----|
+| `electron_temp` | `electron_temperature` | No abbreviations |
+| `electron_temperature_core` | `core_electron_temperature` | Zone prefix before the subject/base |
+| `Te` | `electron_temperature` | No symbol abbreviations |
+| `electron_temperature_in_eV` | `electron_temperature` | Unit is never part of the name |
+| `current_from_passive_loop` | `current_of_passive_loop` | No `_from_` causation; device association is a postfix locus |
+| `reconstructed_faraday_rotation_angle` | `faraday_polarization_angle` | Processing method is metadata |
+| `geometric_minor_radius` | `minor_radius` | DD section prefix leaking in |
+| `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop instrument prefix for generic physics observables (keep only when the quantity is intrinsic to the hardware, e.g. `poloidal_plane_cross_sectional_area_of_rogowski_coil`) |
+| `power_of_bolometer` | `radiated_power` | **Observable vs hardware** — a diagnostic MEASURES a physical observable; name the observable, not the device. A bolometer measures the radiated power reaching it (not "power of the bolometer"), an interferometer the line-integrated density (not "phase of the interferometer"). BUT a *geometric/hardware* property genuinely OF the instrument keeps the instrument locus: `vertical_coordinate_of_bolometer` (where the detector is), `lower_bound_wavelength_of_visible_camera` (the camera's spectral range), `radial_coordinate_of_detector_pixel`. Test: is it the physics being probed (drop the device) or a fact about the device itself (keep it)? |
+| `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **Suffix-form for component** — component/transformation tokens come BEFORE the base as a leading qualifier prefix — never as suffixes |
+| `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector_of_camera` | **Compound hardware identifiers** — drop stacked intermediate hardware tokens but retain the source-stated owning device as the `_of_<device>` locus; a unit-vector field's Z is a projection, not a coordinate |
+
+## Locus Preposition Rules (`_at_` vs `_of_`)
+
+Follow the installed locus relation matrix. Use `_of_` for an intrinsic
+geometric property or object association and `_at_` for a field evaluated at a
+position. A registered locus may support both relations because the quantity
+semantics determine which one is correct.
+
+**Loci come from the injected registry — a locus is not a zone.** The registered locus tokens and the relations each allows (`_at_`/`_of_`/`_over_`/along) are defined by the injected grammar vocabulary — do not invent them. When the registry offers finer VARIANTS of one feature — a locus for a field's *value* there vs one for its steepest-gradient point or the coordinate/flux that *locates* the feature, or a sampled point vs a distribution/peak over a surface vs a distinct contact/tangency point — pick the variant matching what the source measures, and use the relation that variant allows. Never fold a locus into a zone prefix or force a bare feature token where the registry defines a more specific locus.
+
+## Description Quality Rules
+
+- **No storage-shape tags** — NEVER write "1D", "2D", "3D", "scalar", "array",
+  "profile", "time-dependent" in descriptions. The description defines the
+  *physics*, not the data layout.
+- **American English only** — use "center" not "centre", "meter" not "metre",
+  "ionized" not "ionised". ISN catalog follows American spelling exclusively.
+
+## Batch Consistency Check
+
+Before finalizing, verify across your entire output:
+
+1. **No synonymous names** — same concept = same name
+2. **Consistent orientation suffixes** — all `_parallel`, not a mix of `_par`/`_parallel`
+3. **No DD leakage** — no name starts with an IDS or DD section prefix
+4. **No storage-shape tags** — no description mentions "1D", "2D", "3D", "profile", "array"
+5. **American spelling** — check for "centre", "metre", "behaviour" and correct to American
+
+## Batch Context
+
+{{ cluster_context }}
+
+{% if existing_names %}
+## Existing Standard Names (reuse when applicable)
+
+These names already exist. **Reuse** them when the DD path measures the
+same quantity — do not create a duplicate with different wording.
+
+{% for name in existing_names %}
+- {{ name }}
+{% endfor %}
+{% endif %}
+
+{% if nearby_existing_names %}
+## Nearby Existing Standard Names
+
+These names are semantically close to items in this batch. Reuse if
+they match; otherwise use them to calibrate style and specificity.
+
+{% for name in nearby_existing_names %}
+- **{{ name.id }}**: {{ name.description | default('', true) }} ({{ name.kind | default('scalar', true) }}, {{ name.unit | default('dimensionless', true) }})
+{% endfor %}
+{% endif %}
+
+{% if reference_exemplars %}
+## REFERENCE EXEMPLARS — match this level of specificity
+
+These validated standard names are semantically similar to items in this batch.
+Use them as quality benchmarks for naming style and field usage:
+
+{% for ex in reference_exemplars %}
+### `{{ ex.name }}`
+- **Description:** {{ ex.description }}
+- **Unit:** {{ ex.unit }}
+
+{% endfor %}
+{% endif %}
+
+## DD Paths to Name
+
+A generic DD leaf is provenance, not permission to emit a generic Standard
+Name. The enriched source description is the primary grounding and usually
+contains the carrier, surface, subject, or process that makes the identity
+self-describing. Preserve that meaning or emit a `vocab_gap` when the closed
+grammar cannot express it.
+
+{% for item in items %}
+### {{ item.path }}
+{% if item.rate_hint %}
+> ⚠️ **RATE QUANTITY:** DD documentation indicates a rate / time-derivative.
+> Use the registered `tendency`, `time_derivative`, or `change_in` operator
+> that matches the source. Never emit the unregistered `rate_of_change_of_` form.
+> Description must be consistent with the rate-marker prefix.
+> Orientation tokens wrap the rate phrase:
+>   ✅ `parallel_change_in_fast_electron_pressure`
+>   ❌ `change_in_parallel_fast_electron_pressure`
+{% endif %}
+{% if item.value_provenance %}
+> ⚠️ **{{ item.value_provenance | upper }} ESTIMATOR:** this path is the
+> `{{ item.value_provenance }}` estimate of the quantity at `{{ item.provenance_base_path }}`
+> (the grounding above describes that base quantity). Name the **underlying
+> physical quantity ONLY** — do NOT encode `{{ item.value_provenance }}`,
+> `measured`, `reconstructed`, `reference`, `target`, `constraint`, or `fit` in
+> the name. The measured / reconstructed / reference estimates of one quantity
+> share ONE standard name; the estimator is recorded as link metadata, never in
+> the name.
+> **Also drop the FIT-CONSTRAINT framing entirely:** this is a reconstruction
+> constraint, so the grounding mentions a "position", "constraint position", or
+> "at various positions" — that is the fit's sampling locus, NOT a physical
+> locus of the quantity. Do NOT add `_at_constraint_position`,
+> `_at_measurement_position`, `_at_sensor_attachment_point`, or any
+> position/sensor locus drawn from the constraint substructure. Name the bare
+> physical quantity (the surface/flux-average IS part of the quantity when the
+> raw doc gives the formula, e.g. flux-surface-averaged current density — keep
+> that; the *sampling position* is not).
+>   ✅ `plasma_current`   ❌ `measured_plasma_current`   ❌ `plasma_current_constraint`
+>   ✅ `poloidal_magnetic_field`   ❌ `poloidal_magnetic_field_at_constraint_position`
+{% endif %}
+- **Enriched source description (PRIMARY GROUNDING):** {{ item.description }}{% if item.ancestor_context %}
+- **DD path lineage** (ancestor nodes — the quantity's meaning and its evaluation locus live here; use them to resolve the correct locus, e.g. `pedestal_top` vs the bare path segment `pedestal`):
+{% for anc in item.ancestor_context %}  - `{{ anc.path }}`: {{ anc.text }}
+{% endfor %}{% endif %}
+- **Unit:** {{ item.unit or 'dimensionless' }} *(authoritative — do NOT output)*
+{% if item.data_type %}- **Data type:** {{ item.data_type }}{% endif %}
+{% if item.node_type %}- **Node type:** {{ item.node_type }} *(dynamic=time-varying quantity; static=machine-fixed parameter, e.g. wall geometry; constant=single scalar value; none=unclassified — use other context)*{% endif %}
+{% if item.physics_domain %}- **Physics domain:** {{ item.physics_domain }}{% endif %}
+{% if item.ndim is not none %}- **Dimensions:** {{ item.ndim }}D{% endif %}
+{% if item.lifecycle_status %}- **Lifecycle:** {{ item.lifecycle_status }} ⚠️{% endif %}
+{% if item.keywords %}- **Keywords:** {{ item.keywords | join(', ') if item.keywords is iterable and item.keywords is not string else item.keywords }}{% endif %}
+{% if item.cocos_label %}- **COCOS transformation type:** `{{ item.cocos_label }}` — include a brief sign-convention sentence in documentation.{% endif %}
+{% if item.parent_path %}- **Parent:** {{ item.parent_path }}{% endif %}
+{% if item.previous_name %}- **⟳ Previous generation:** `{{ item.previous_name.name }}`{% if item.previous_name.name_stage %} ({{ item.previous_name.name_stage }}){% endif %}{% endif %}
+{% if item.identifier_schema %}- **Identifier schema:** {{ item.identifier_schema }}{% if item.identifier_schema_doc %} — {{ item.identifier_schema_doc }}{% endif %}{% endif %}
+{% if item.identifier_values %}
+- **Identifier enum values:**
+{% for iv in item.identifier_values %}  - `{{ iv.name }}` ({{ iv.index }}): {{ iv.description | default('', true) }}
+{% endfor %}{% endif %}
+{% if item.clusters %}
+- **Semantic clusters:**
+{% for cl in item.clusters %}  - **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
+{% endfor %}{% endif %}
+{% if item.cross_ids_paths %}
+- **Cross-IDS equivalents:** Same quantity in other IDSs — generate ONE name covering all:
+{% for xp in item.cross_ids_paths %}  - `{{ xp }}`
+{% endfor %}{% endif %}
+{% if item.dd_paths_docs %}
+- **Member DD documentation** (sibling leaves this name must cover — ground every qualifier so the name fits all, not just the primary path above):
+{% for mpath, mdoc in item.dd_paths_docs.items() %}  - `{{ mpath }}`: {{ mdoc }}
+{% endfor %}{% endif %}
+{% if item.hybrid_neighbours %}
+- **Hybrid-search neighbours** (physics-concept + structural cousins):
+{% for n in item.hybrid_neighbours %}  - `{{ n.tag }}` [{{ n.unit }}, {{ n.physics_domain }}]: {{ n.doc_short }}{% if n.cocos_label %} (COCOS {{ n.cocos_label }}){% endif %}
+{% endfor %}  → Reuse a name above when your source measures the same quantity.
+{% endif %}
+{% if item.related_neighbours %}
+- **Graph-relationship neighbours** (cluster / coordinate / unit / identifier / COCOS edges):
+{% for r in item.related_neighbours %}  - `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}
+{% endfor %}{% endif %}
+{% if item.error_fields %}
+- **DD error companions:**
+{% for ef in item.error_fields %}  - `{{ ef }}`
+{% endfor %}  → Error companions are minted deterministically by applying the registered `upper_uncertainty`, `lower_uncertainty`, or `uncertainty_index` operator to the parent base identity. Do NOT invent per-error base names. SKIP if this path IS an error field (`_error_upper`/`_error_lower`/`_error_index`).
+{% endif %}
+{% if item.sibling_fields %}
+- **Sibling fields** (same parent — for cross-reference):
+{% for sib in item.sibling_fields %}  - `{{ sib.path }}`: {{ sib.description or 'no description' }} ({{ sib.data_type or '?' }})
+{% endfor %}{% endif %}
+{% if item.review_feedback %}
+- **📝 Prior reviewer feedback — your new name MUST address every issue raised:**
+  - **Previous name:** `{{ item.review_feedback.previous_name }}`{% if item.review_feedback.reviewer_score is not none %} (score={{ item.review_feedback.reviewer_score | round(2) }}{% if item.review_feedback.review_tier %}, tier={{ item.review_feedback.review_tier }}{% endif %}){% endif %}
+{% if item.review_feedback.previous_documentation %}  - **Prior documentation:** {{ item.review_feedback.previous_documentation | replace('\n', ' ') }}
+{% endif %}{% if item.review_feedback.reviewer_scores %}  - **Rubric scores (out of 20 each):** {% for dim, dim_score in item.review_feedback.reviewer_scores.items() %}{% if dim not in ('score', 'tier') and dim_score is number %}`{{ dim }}`={{ dim_score }}{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}
+{% endif %}{% if item.review_feedback.reviewer_comments %}  - **Reviewer critique:** {{ item.review_feedback.reviewer_comments | replace('\n', ' ') }}
+{% endif %}{% if item.review_feedback.reviewer_suggested_name %}  - **Reviewer's suggested replacement:** `{{ item.review_feedback.reviewer_suggested_name }}`{% if item.review_feedback.reviewer_suggestion_justification %} — {{ item.review_feedback.reviewer_suggestion_justification | replace('\n', ' ') }}{% endif %}
+  - Start from the suggestion; refine only if it has grammar or convention defects.
+{% endif %}  - Do NOT re-emit the previous name unchanged.
+{% endif %}{% if item.review_feedback and item.review_feedback.name_hint and item.review_feedback.edit_reason %}
+- **🧭 Expert steering ({{ item.review_feedback.edit_origin or "human" }}):** A domain expert has proposed this naming direction: "{{ item.review_feedback.name_hint }}" — for this reason: {{ item.review_feedback.edit_reason }}
+  - This proposal is subordinate to the grammar and composition rules above — realize the intent within the rules; if the rules forbid the literal proposal, compose the nearest rule-compliant name. Do not treat it as pre-approved.
+{% endif %}
+
+{% endfor %}
+
+## Vocabulary Gaps
+
+If a path requires a token that does **not** exist in a closed grammar
+segment (e.g., a new `subject` species or `position`), do NOT invent
+an invalid name. Instead, add the path to the `vocab_gaps` list with:
+
+- `source_id`: the DD path
+- `segment`: which grammar segment is missing a token
+- `token`: the token value you would need
+- `reason`: why this token is needed
+
+**⚠️ CRITICAL: Most vocab gaps are false positives.** Before emitting:
+1. Search the token in ALL segment registries — it may exist in another segment
+2. For compound tokens, check if each part exists as a registered token — decompose instead
+3. Verify no existing token already covers the concept

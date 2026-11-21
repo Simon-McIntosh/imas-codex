@@ -11,11 +11,11 @@ Verifies that the graph structure matches the LinkML schema definitions:
 
 import pytest
 
-from imas_codex.graph.client import EXPECTED_RELATIONSHIP_TYPES
-from imas_codex.graph.schema import GraphSchema
+from iter_codex.graph.client import EXPECTED_RELATIONSHIP_TYPES
+from iter_codex.graph.schema import GraphSchema
 
 try:
-    from imas_codex.graph.schema_context_data import RELATIONSHIPS
+    from iter_codex.graph.schema_context_data import RELATIONSHIPS
 except ImportError:  # generated models absent: the endpoint check reports it
     RELATIONSHIPS = []
 
@@ -38,12 +38,12 @@ class TestLabelsAndRelationships:
     # GraphMeta is an infrastructure singleton for graph identity/metadata.
     # Fanout is a runtime-telemetry node (like LLMCost in spirit) written
     # directly via Cypher with no Pydantic model — deliberately exempt from
-    # schema management (see imas_codex/standard_names/fanout/telemetry.py).
+    # schema management (see iter_codex/standard_names/fanout/telemetry.py).
     INTERNAL_LABELS: set[str] = {"GraphMeta", "Fanout"}
 
     def test_all_labels_in_schema(self, graph_labels, schema):
         """Every label in the graph must be defined in the schema."""
-        dd_schema = GraphSchema(schema_path="imas_codex/schemas/imas_dd.yaml")
+        dd_schema = GraphSchema(schema_path="iter_codex/schemas/imas_dd.yaml")
         expected = (
             set(schema.node_labels) | set(dd_schema.node_labels) | self.INTERNAL_LABELS
         )
@@ -109,7 +109,7 @@ class TestLabelsAndRelationships:
         Properties that exist on nodes but are not in the LinkML schema
         indicate drift between code and schema definitions.
         """
-        dd_schema = GraphSchema(schema_path="imas_codex/schemas/imas_dd.yaml")
+        dd_schema = GraphSchema(schema_path="iter_codex/schemas/imas_dd.yaml")
 
         # Internal properties added by Neo4j or our infrastructure
         INTERNAL_PROPERTIES = {"embedding"}
@@ -161,7 +161,7 @@ class TestConstraints:
         Uses ``graph_with_schema`` fixture to ensure constraints are
         initialized before checking (idempotent DDL).
         """
-        dd_schema = GraphSchema(schema_path="imas_codex/schemas/imas_dd.yaml")
+        dd_schema = GraphSchema(schema_path="iter_codex/schemas/imas_dd.yaml")
 
         expected_names = set()
         for s in [schema, dd_schema]:

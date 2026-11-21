@@ -5,7 +5,7 @@ All tests use tmp_path fixtures to avoid touching the real filesystem.
 
 import pytest
 
-from imas_codex.graph.dirs import (
+from iter_codex.graph.dirs import (
     GraphDirInfo,
     create_graph_dir,
     delete_graph_dir,
@@ -19,9 +19,9 @@ from imas_codex.graph.dirs import (
 @pytest.fixture(autouse=True)
 def _isolated_store(tmp_path, monkeypatch):
     """Point GRAPH_STORE, ACTIVE_LINK and EXPORTS_DIR to tmp_path."""
-    monkeypatch.setattr("imas_codex.graph.dirs.GRAPH_STORE", tmp_path / ".neo4j")
-    monkeypatch.setattr("imas_codex.graph.dirs.ACTIVE_LINK", tmp_path / "neo4j")
-    monkeypatch.setattr("imas_codex.graph.dirs.EXPORTS_DIR", tmp_path / "exports")
+    monkeypatch.setattr("iter_codex.graph.dirs.GRAPH_STORE", tmp_path / ".neo4j")
+    monkeypatch.setattr("iter_codex.graph.dirs.ACTIVE_LINK", tmp_path / "neo4j")
+    monkeypatch.setattr("iter_codex.graph.dirs.EXPORTS_DIR", tmp_path / "exports")
 
 
 # ── Create ──────────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ class TestCreateGraphDir:
 
 class TestEnsureExportsDir:
     def test_creates_exports_dir(self, tmp_path):
-        from imas_codex.graph.dirs import ensure_exports_dir
+        from iter_codex.graph.dirs import ensure_exports_dir
 
         exports = ensure_exports_dir()
         assert exports == tmp_path / "exports"
@@ -88,7 +88,7 @@ class TestEnsureExportsDir:
         assert oct(exports.stat().st_mode & 0o777) == "0o700"
 
     def test_idempotent(self, tmp_path):
-        from imas_codex.graph.dirs import ensure_exports_dir
+        from iter_codex.graph.dirs import ensure_exports_dir
 
         ensure_exports_dir()
         ensure_exports_dir()

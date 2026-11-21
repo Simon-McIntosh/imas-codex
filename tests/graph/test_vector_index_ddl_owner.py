@@ -8,7 +8,7 @@ has exactly one definition.
 
 Two properties are pinned here:
 
-1. No Python source outside ``imas_codex/graph/client.py`` carries a
+1. No Python source outside ``iter_codex/graph/client.py`` carries a
    ``CREATE VECTOR INDEX`` string literal.  The scan walks every string
    constant in the package -- not just the DDL form that carries
    ``IF NOT EXISTS`` -- so a statement of any shape is caught.  Prose that
@@ -30,10 +30,10 @@ OWNER = Path("graph") / "client.py"
 # Modules that previously composed the statement themselves and must now
 # route through GraphClient.ensure_vector_indexes.
 DELEGATING_MODULES = [
-    "imas_codex.graph.build_dd",
-    "imas_codex.graph.dd_identifier_enrichment",
-    "imas_codex.graph.dd_ids_enrichment",
-    "imas_codex.discovery.wiki.pipeline",
+    "iter_codex.graph.build_dd",
+    "iter_codex.graph.dd_identifier_enrichment",
+    "iter_codex.graph.dd_ids_enrichment",
+    "iter_codex.discovery.wiki.pipeline",
 ]
 
 # A docstring is the first statement of a module, class or function; those
@@ -47,9 +47,9 @@ _DOCSTRING_OWNERS = (
 
 
 def _package_root() -> Path:
-    import imas_codex
+    import iter_codex
 
-    return Path(imas_codex.__file__).resolve().parent
+    return Path(iter_codex.__file__).resolve().parent
 
 
 def _docstring_constants(tree: ast.AST) -> set[int]:

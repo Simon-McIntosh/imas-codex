@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.promote import ApprovalChange, undo_approval
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.promote import ApprovalChange, undo_approval
 
 
 class _IneligibleGraph:
@@ -44,25 +44,25 @@ def test_ineligible_edit_exits_before_graph_or_catalog_mutation(tmp_path) -> Non
 
     with (
         patch(
-            "imas_codex.standard_names.promote.read_pr_changes",
+            "iter_codex.standard_names.promote.read_pr_changes",
             return_value=[change],
         ),
         patch(
-            "imas_codex.standard_names.promote._prepare_additive_catalog_delta",
+            "iter_codex.standard_names.promote._prepare_additive_catalog_delta",
             return_value=SimpleNamespace(added_names=frozenset({change.sn_id})),
         ),
         patch(
-            "imas_codex.standard_names.promote.GraphClient",
+            "iter_codex.standard_names.promote.GraphClient",
             return_value=graph,
         ),
-        patch("imas_codex.standard_names.promote.apply_edit") as apply_edit,
+        patch("iter_codex.standard_names.promote.apply_edit") as apply_edit,
         patch(
-            "imas_codex.standard_names.promote.mark_catalog_name_approved"
+            "iter_codex.standard_names.promote.mark_catalog_name_approved"
         ) as auto_promote,
         patch(
-            "imas_codex.standard_names.promote._commit_catalog_correction"
+            "iter_codex.standard_names.promote._commit_catalog_correction"
         ) as materialize_catalog,
-        patch("imas_codex.standard_names.promote.tag_fold_back") as write_tag,
+        patch("iter_codex.standard_names.promote.tag_fold_back") as write_tag,
     ):
         result = CliRunner().invoke(
             sn,

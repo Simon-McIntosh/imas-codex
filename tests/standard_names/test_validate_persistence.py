@@ -35,7 +35,7 @@ def test_validation_issues_in_write_batch():
 
 def test_review_prompt_includes_validation_context():
     """Review prompt template can render validation issues."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     context = {
         "items": [

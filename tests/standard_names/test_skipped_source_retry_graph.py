@@ -19,11 +19,11 @@ def test_skipped_source_retry_is_exact_audited_and_context_preserving(
     graph_client,
 ) -> None:
     """Only the exact unfenced source is reset, with its context intact."""
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         retry_skipped_sources,
     )
 
-    test_token = os.environ.get("IMAS_CODEX_SKIPPED_RETRY_TEST_TOKEN", uuid.uuid4().hex)
+    test_token = os.environ.get("ITER_CODEX_SKIPPED_RETRY_TEST_TOKEN", uuid.uuid4().hex)
     prefix = f"test_skipped_source_retry__{test_token}__"
     paths = {
         role: f"{prefix}{role}"
@@ -184,7 +184,7 @@ def test_skipped_source_retry_is_exact_audited_and_context_preserving(
         assert before_apply == {"status": "skipped", "attempts": 4, "events": 0}
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.uuid.uuid4",
+            "iter_codex.standard_names.graph_store.graph_foundation.uuid.uuid4",
             side_effect=[
                 uuid.UUID(value.partition(":")[2]) for value in expected_event_ids
             ],

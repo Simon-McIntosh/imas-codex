@@ -17,11 +17,11 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
 )
-from imas_codex.standard_names.graph_store.graph_audits import promote_stranded_reviewed
+from iter_codex.standard_names.graph_store.graph_audits import promote_stranded_reviewed
 
 
 class _FakeGraph:
@@ -236,7 +236,7 @@ class TestQuorumShortfallIsHonoured:
         starts and its maintenance pass sees a 'reviewed' name whose score
         clears the bar. It must leave it alone.
         """
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -299,7 +299,7 @@ class TestFakeMirrorsProduction:
     def test_every_production_name_clause_is_consulted_by_the_fake(self) -> None:
         import re
 
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             PROMOTE_STRANDED_NAME_WHERE,
         )
 
@@ -341,7 +341,7 @@ class TestFakeMirrorsProduction:
     def test_every_production_docs_clause_is_consulted_by_the_fake(self) -> None:
         import re
 
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             PROMOTE_STRANDED_DOCS_WHERE,
         )
 

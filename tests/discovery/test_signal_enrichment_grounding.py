@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from imas_codex.discovery.signals.enrichment import (
+from iter_codex.discovery.signals.enrichment import (
     CitedEnrichmentBatch,
     CitedStatement,
     DescriptionReview,
@@ -14,7 +14,7 @@ from imas_codex.discovery.signals.enrichment import (
     enrich_signal_batch,
     filter_statements,
 )
-from imas_codex.discovery.signals.models import SignalEnrichmentBatch
+from iter_codex.discovery.signals.models import SignalEnrichmentBatch
 from tests.discovery.test_signal_enrichment_benchmark import answer
 
 
@@ -341,7 +341,7 @@ def test_review_call_is_not_a_provider_retry_or_draft_reask():
 async def test_production_private_sink_never_receives_missing_citation_statement(
     tmp_path,
 ):
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
     from scripts import benchmark_signal_enrichment as bench
     from tests.discovery.test_signal_enrichment_options import response
 
@@ -459,7 +459,7 @@ source_description: Field-line angle
     ],
 )
 def test_description_boundaries_preserve_abbreviations(text, expected):
-    from imas_codex.discovery.signals.enrichment import description_statements
+    from iter_codex.discovery.signals.enrichment import description_statements
 
     assert description_statements(text) == expected
 

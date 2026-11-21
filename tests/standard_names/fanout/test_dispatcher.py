@@ -6,10 +6,10 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.fanout import dispatcher
-from imas_codex.standard_names.fanout.config import FanoutSettings
-from imas_codex.standard_names.fanout.schemas import (
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.fanout import dispatcher
+from iter_codex.standard_names.fanout.config import FanoutSettings
+from iter_codex.standard_names.fanout.schemas import (
     CandidateContext,
     FanoutHit,
     FanoutPlan,
@@ -114,7 +114,7 @@ def _patch_llm(monkeypatch: pytest.MonkeyPatch, ret: Any) -> list[dict[str, Any]
             raise ret
         return ret
 
-    monkeypatch.setattr("imas_codex.discovery.base.llm.acall_llm_structured", _fake)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.acall_llm_structured", _fake)
     return recorded
 
 
@@ -246,7 +246,7 @@ class TestPropose:
         literal — the effort level is tuned in pyproject and must not break
         this test when it changes).
         """
-        from imas_codex.settings import get_reasoning_effort
+        from iter_codex.settings import get_reasoning_effort
 
         expected_effort = get_reasoning_effort("sn-fanout")
         plan = FanoutPlan(
@@ -286,7 +286,7 @@ class TestPropose:
         # physics_domain / dd_version fields the LLM can drive.
         assert recorded[0]["response_model"] is FanoutPlan
         # FanoutPlan.queries' variants must not declare scope fields.
-        from imas_codex.standard_names.fanout.schemas import (
+        from iter_codex.standard_names.fanout.schemas import (
             _FindRelatedDDPaths as _FRDD,
             _SearchDDClusters as _SDDC,
             _SearchDDPaths as _SDDP,
@@ -368,7 +368,7 @@ class TestRunFanout:
         _patch_llm(monkeypatch, _FakeLLMResult(plan))
         # Stub the runner to return ok=True with empty hits.
         monkeypatch.setattr(
-            "imas_codex.standard_names.search.search_standard_names_vector",
+            "iter_codex.standard_names.search.search_standard_names_vector",
             lambda *a, **kw: [],
         )
         evidence = await dispatcher.run_fanout(
@@ -395,7 +395,7 @@ class TestRunFanout:
         )
         _patch_llm(monkeypatch, _FakeLLMResult(plan))
         monkeypatch.setattr(
-            "imas_codex.standard_names.search.search_standard_names_vector",
+            "iter_codex.standard_names.search.search_standard_names_vector",
             lambda *a, **kw: [
                 {
                     "id": "electron_temperature",
@@ -507,7 +507,7 @@ class TestSyncTimeouts:
             return []
 
         monkeypatch.setattr(
-            "imas_codex.standard_names.search.search_standard_names_vector",
+            "iter_codex.standard_names.search.search_standard_names_vector",
             _slow,
         )
         s = _settings(function_timeout_s=0.3, total_timeout_s=2.0)
@@ -552,7 +552,7 @@ class TestSyncTimeouts:
             return []
 
         monkeypatch.setattr(
-            "imas_codex.standard_names.search.search_standard_names_vector",
+            "iter_codex.standard_names.search.search_standard_names_vector",
             _slow,
         )
         # function_timeout_s > total_timeout_s so the per-call gate
@@ -584,7 +584,7 @@ class TestSyncTimeouts:
 
 class TestArmAssignment:
     def test_arm_routing_is_balanced(self) -> None:
-        from imas_codex.standard_names.fanout.trigger import assign_arm
+        from iter_codex.standard_names.fanout.trigger import assign_arm
 
         on = sum(1 for i in range(400) if assign_arm(f"sn_id_{i}", i) == "on")
         # Loose 50/50 sanity (true Bernoulli p=0.5, n=400 → ±5σ ≈ ±50)
@@ -599,7 +599,7 @@ class TestArmAssignment:
             raise AssertionError("LLM must not be called on off arm")
 
         monkeypatch.setattr(
-            "imas_codex.discovery.base.llm.acall_llm_structured", _explode
+            "iter_codex.discovery.base.llm.acall_llm_structured", _explode
         )
 
         evidence = await dispatcher.run_fanout(

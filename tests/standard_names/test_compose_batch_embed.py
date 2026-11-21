@@ -26,10 +26,10 @@ class TestEmbedQueryTexts:
         mock_encoder.embed_texts.return_value = np.random.randn(5, 256)
 
         with patch(
-            "imas_codex.embeddings.description._get_encoder",
+            "iter_codex.embeddings.description._get_encoder",
             return_value=mock_encoder,
         ):
-            from imas_codex.embeddings.description import embed_query_texts
+            from iter_codex.embeddings.description import embed_query_texts
 
             texts = [f"text_{i}" for i in range(5)]
             result = embed_query_texts(texts)
@@ -47,10 +47,10 @@ class TestEmbedQueryTexts:
         mock_encoder.embed_texts.return_value = np.random.randn(2, 256)
 
         with patch(
-            "imas_codex.embeddings.description._get_encoder",
+            "iter_codex.embeddings.description._get_encoder",
             return_value=mock_encoder,
         ):
-            from imas_codex.embeddings.description import embed_query_texts
+            from iter_codex.embeddings.description import embed_query_texts
 
             embed_query_texts(["alpha", "beta"])
 
@@ -63,10 +63,10 @@ class TestEmbedQueryTexts:
         """Empty list input returns [] without calling the encoder."""
         mock_encoder = MagicMock()
         with patch(
-            "imas_codex.embeddings.description._get_encoder",
+            "iter_codex.embeddings.description._get_encoder",
             return_value=mock_encoder,
         ):
-            from imas_codex.embeddings.description import embed_query_texts
+            from iter_codex.embeddings.description import embed_query_texts
 
             result = embed_query_texts([])
         assert result == []
@@ -120,15 +120,15 @@ class TestHybridSearchNeighboursBatch:
 
         with (
             patch(
-                "imas_codex.embeddings.description.embed_query_texts",
+                "iter_codex.embeddings.description.embed_query_texts",
                 return_value=mock_embeddings,
             ) as mock_embed,
             patch(
-                "imas_codex.graph.dd_search.hybrid_dd_search",
+                "iter_codex.graph.dd_search.hybrid_dd_search",
                 return_value=[mock_hit],
             ) as mock_search,  # noqa: F841
         ):
-            from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
                 _hybrid_search_neighbours_batch,
             )
 
@@ -157,15 +157,15 @@ class TestHybridSearchNeighboursBatch:
 
         with (
             patch(
-                "imas_codex.embeddings.description.embed_query_texts",
+                "iter_codex.embeddings.description.embed_query_texts",
                 return_value=[[0.1] * 256, [0.2] * 256],
             ) as mock_embed,
             patch(
-                "imas_codex.graph.dd_search.hybrid_dd_search",
+                "iter_codex.graph.dd_search.hybrid_dd_search",
                 return_value=[],
             ),
         ):
-            from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
                 _hybrid_search_neighbours_batch,
             )
 
@@ -179,7 +179,7 @@ class TestHybridSearchNeighboursBatch:
 
     def test_empty_items_returns_empty(self) -> None:
         """Empty items list returns empty results."""
-        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _hybrid_search_neighbours_batch,
         )
 
@@ -205,17 +205,17 @@ class TestHybridDdSearchEmbeddingParam:
         mock_gc.query.return_value = []
 
         with (
-            patch("imas_codex.graph.dd_search._embed") as mock_embed,
+            patch("iter_codex.graph.dd_search._embed") as mock_embed,
             patch(
-                "imas_codex.tools.graph_search._text_search_dd_paths",
+                "iter_codex.tools.graph_search._text_search_dd_paths",
                 return_value=[],
             ),
             patch(
-                "imas_codex.tools.graph_search._dd_version_clause",
+                "iter_codex.tools.graph_search._dd_version_clause",
                 return_value="",
             ),
         ):
-            from imas_codex.graph.dd_search import hybrid_dd_search
+            from iter_codex.graph.dd_search import hybrid_dd_search
 
             hybrid_dd_search(mock_gc, "electron temperature", embedding=pre_emb, k=5)
 
@@ -228,19 +228,19 @@ class TestHybridDdSearchEmbeddingParam:
 
         with (
             patch(
-                "imas_codex.graph.dd_search._embed",
+                "iter_codex.graph.dd_search._embed",
                 return_value=[0.1] * 256,
             ) as mock_embed,
             patch(
-                "imas_codex.tools.graph_search._text_search_dd_paths",
+                "iter_codex.tools.graph_search._text_search_dd_paths",
                 return_value=[],
             ),
             patch(
-                "imas_codex.tools.graph_search._dd_version_clause",
+                "iter_codex.tools.graph_search._dd_version_clause",
                 return_value="",
             ),
         ):
-            from imas_codex.graph.dd_search import hybrid_dd_search
+            from iter_codex.graph.dd_search import hybrid_dd_search
 
             hybrid_dd_search(mock_gc, "electron temperature", k=5)
 

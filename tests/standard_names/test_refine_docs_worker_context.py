@@ -74,10 +74,10 @@ def test_refine_worker_puts_settled_shared_wording_in_the_prompt(monkeypatch):
     the rendered context without the key, so the prompt can only re-guess
     wording the persistence gate refuses.
     """
-    import imas_codex.standard_names.context as sn_context
-    from imas_codex.graph import client as graph_client
-    from imas_codex.llm import prompt_loader
-    from imas_codex.standard_names.worker_tasks import worker_refine_docs
+    import iter_codex.standard_names.context as sn_context
+    from iter_codex.graph import client as graph_client
+    from iter_codex.llm import prompt_loader
+    from iter_codex.standard_names.worker_tasks import worker_refine_docs
 
     monkeypatch.setattr(
         sn_context, "conventions_context_for", lambda _sn_id: _Conventions()

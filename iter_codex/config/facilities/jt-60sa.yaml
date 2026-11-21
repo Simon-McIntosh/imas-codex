@@ -1,0 +1,539 @@
+# JT-60SA - Japan Torus 60 Super Advanced
+#
+# Public facility configuration for graph and mappings.
+# Infrastructure data is in jt-60sa_private.yaml (gitignored).
+
+facility: jt-60sa
+name: JT-60SA
+machine: JT-60SA
+description: Japan Torus 60 Super Advanced - Satellite tokamak facility
+location: Naka, Japan
+
+# SSH connection (user configures ~/.ssh/config with this alias)
+ssh_host: jt-60sa
+ssh_max_sessions: 1
+
+# Lower the priority of codex SSH workloads on shared JT-60SA hosts.
+nice_level: 19
+
+# Host-wide remote environment: the interpreter and shell setup every remote
+# script on this host needs before it runs. The login shell pre-loads
+# python/3.5.6, which cannot run the remote scripts; the recipe unloads it,
+# loads python/3.12, and calls that module's own `python` binary (the system
+# /usr/bin/python3 stays 3.9, and `module purge` drops the module path).
+# eddb_pwrapper is not installed into the interpreter's environment, so its
+# entry carries the source directory added to sys.path before the import.
+remote_environment:
+  python_command: python
+  setup_commands:
+    - module unload python/3.5.6
+    - module load python/3.12
+  min_python_version: "3.12"
+  required_modules:
+    - name: numpy
+    - name: eddb_pwrapper
+      path: /analysis/src/eddb
+
+# Data system configuration for signal discovery
+# Used by: iter-codex discover jt-60sa --only signals
+data_systems:
+  # EDAS is JT-60SA's primary experiment data access system.
+  # Wraps proprietary data formats with C/Fortran/Python APIs.
+  # The interpreter and module recipe comes from the facility
+  # remote_environment block above.
+  edas:
+    databases: [EDDB, UDDB, PMDB, FSMD, EASY, LCDB, MBDB, EQDB, FLEDD]
+    category_descriptions:
+      - code: MMSYS
+        description: Magnet system coil currents, including plasma control and field coils
+    api_path: /analysis/src/eddb
+    lib_path: /analysis/lib/libeddb.so
+    uddb_api_path: /analysis/src/uddb
+    uddb_lib_path: /analysis/lib/libuddb.so
+    pmdb_api_path: /analysis/src/pmdb
+    pmdb_lib_path: /analysis/lib/libpmdb.so
+    fsmd_api_path: /analysis/src/edas2/v2.1.15/edas_share/database_api
+    fsmd_lib_path: /analysis/lib/libfsmdnedb.so
+    easy_api_path: /analysis/src/edas2/v2.1.15/edas_share/database_api
+    easy_lib_path: /analysis/lib/libEASYplus.so
+    fledd_lib_path: /analysis/lib/libFLEDDPIC.so
+    fledd_client_path: /analysis/lib/JT60SAEQDB
+    eqdb_root: /analysis_DB/EQDB
+    dbsel_path: /analysis/bin/dbsel
+    lcdb_api_path: /analysis/src/lcdbWrapper
+    lcdb_root: /analysis_DB/EDASDB
+    mbdb_api_path: /analysis/src/mbdb
+    mbdb_lib_path: /analysis/lib/libmbdb.so
+    mbdb_root: /analysis_DB/MBDB
+    header_path: /analysis/src/edas/include
+    database_routes:
+      - name: EDDB
+        read_call: eddbreadTime(shot, category, data_name, t1, t2); eddbreadOne(shot, category, data_name, pid, step, channel)
+        catalogue_call: eddbreadCatTable(); eddbreadTable(shot, category)
+        metadata_source: eddbreadTable units, English/Japanese descriptions, aliases and shot ranges
+        status: enumerated
+        status_detail: 6,298 signals in 73 categories; 4,588 with units at E101173
+        access_path: /analysis_DB/EDASDB
+        observed_on: "2026-10-08"
+      - name: UDDB
+        read_call: uddbreadConvert(shot, pid, t1, t2, datavol, ch)
+        catalogue_call: uddbreadTable()
+        metadata_source: uddbreadTable aliases and shot ranges; uddbreadHeader(shot, pid) when readable
+        status: enumerated
+        status_detail: 188 global registered PIDs; reference-shot headers returned 1301 or 1013
+        access_path: /analysis/lib/libuddb.so
+        observed_on: "2026-10-08"
+      - name: PMDB
+        read_call: plantdread(cat, dname, t1, t2, datavol); planthread(cat, dname, t1, descriptor, count)
+        catalogue_call: No channel-list method in PMDB wrapper; wildcard reads are keyed probes
+        metadata_source: No channel inventory; edas_pmdb.ini holds timezone/endian defaults only
+        status: catalogue_unavailable
+        status_detail: Five keyed candidates and wildcard probes returned irc 301; no validated PMDB channel names
+        access_path: /analysis/lib/libpmdb.so
+        observed_on: "2026-10-08"
+      - name: FSMD
+        read_call: get_fsmd_from_db(pid, shot_no, start_t, end_t, track, channel)
+        catalogue_call: No separate channel catalogue found; requires validated PID, track and channel
+        metadata_source: No accessible fast-sampling channel descriptions or units
+        status: missing_library
+        status_detail: libfsmdnedb.so absent; legacy libfsmdnedb_nakasvr17.so returned ret_cc 10, ret_ac 1 for a candidate
+        access_path: /analysis/lib/libfsmdnedb.so
+        observed_on: "2026-10-08"
+      - name: EASY
+        read_call: esyserd2(shotnum, pid_name, ch_id, kind, tmin, tmax)
+        catalogue_call: No channel-list method found in EASY wrapper
+        metadata_source: No accessible EASY channel descriptions or units
+        status: missing_library
+        status_detail: libEASYplus.so absent; legacy library process exited 255 after a core dump on one candidate
+        access_path: /analysis/lib/libEASYplus.so
+        observed_on: "2026-10-08"
+      - name: LCDB
+        read_call: lcdb_value(shot, category, [data_name], root=owner)
+        catalogue_call: lcdb_shot(root=owner); lcdbCategoryList(owner, shot); lcdb_dname(shot, category, root=owner)
+        metadata_source: Per-dataset description file contains field description, dimensions and units
+        status: enumerated
+        status_detail: 8,469 owner/category/field signals across 23 shots and seven owners
+        access_path: /analysis_DB/EDASDB
+        observed_on: "2026-10-08"
+      - name: MBDB
+        read_call: mbdbSetDirectory('mbdb'); mbdbROpen(owner, case, category); mbdbRPoint(data_name) or mbdbRTimes(data_name, t1, t2)
+        catalogue_call: mbdbDatanmCount(); mbdbDatanmList() after a successful open
+        metadata_source: Case field list, available only after mbdbROpen succeeds
+        status: no_readable_case
+        status_detail: Two visible case files are zero bytes; both mbdbROpen calls returned 1012
+        access_path: /analysis_DB/MBDB
+        observed_on: "2026-10-08"
+      - name: EQDB
+        read_call: read_equilibrium_file.py EQ31/EQ11 record fields or G-EQDSK file fields
+        catalogue_call: Five hash-verified equilibrium exemplars define the code and format fields below
+        metadata_source: EQ31/EQ11 record field tags and G-EQDSK grid headers
+        status: enumerated
+        status_detail: 22 field signals in the graph, including 10 EQDB record and 12 G-EQDSK fields
+        access_path: LOCALDB/EQDSK/{shot}/{time}; central dbsvr17p:/JT60SA_EQ/EQDB not mounted on nakasvr26
+        observed_on: "2026-10-08"
+      - name: FLEDD
+        read_call: eqlist_get_rev_(database_id, shot); eqdata_get_(database_id, shot, time_ms); eqint_get_(field); eqdbl_get_(field)
+        catalogue_call: eqlist_get_rev_ lists time revisions for eSurf database identifiers, not signal fields
+        metadata_source: Native equilibrium field tags NSR, NSZ, RG, ZG and PSI; no units or descriptions exposed by the list call
+        status: access_route_only
+        status_detail: FAME 0 and EQDB 1 returned finite 129x129 PSI grids; field signals are represented by EQDB file routes
+        access_path: /analysis/lib/libFLEDDPIC.so -> /analysis/lib/JT60SAEQDB -> 192.168.29.13:65011
+        observed_on: "2026-10-08"
+        source_ids: ['-3:LOCALDB/2M', '-2:LOCALDB/EQDSK', '-1:reverse/EQDSK', '0:FAME', '1:EQDB', '2:EQDB_RV', '3:EQDB_PRE', '4:EQDB_EFIT', '5:EQDB_JFT2M', '6:EQDB_CCS', '7:EQDB_TSC']
+    # Newest E-shot the catalogue listed on 2026-10-05; valid data starts at
+    # E080000 and the scanner formats an integer as E%06d.
+    reference_shot: 101173
+    equilibrium_examples:
+      - code: SELENE
+        format: selene_eq31
+        root: /home/a114004/LOCALDB/EQDSK
+        path: /home/a114004/LOCALDB/EQDSK/10/1011/101163/005000
+        shot: 101163
+        time: 5.0
+        grid: [129, 129]
+        sha256: c1b975f893e91c49283115655edf7254dbfcadab8e8347b1cdc144edb4f32089
+      - code: TOPICS
+        format: eq11
+        root: /home/a048717/LOCALDB/EQDSK
+        path: /home/a048717/LOCALDB/EQDSK/08/0802/080296/05000
+        shot: 80296
+        time: 5.0
+        grid: [129, 129]
+        sha256: d3b04dbe821272bab294b27580f297b214cfb35f630bd0d725702bdc13ffd168
+      - code: SA
+        format: g_eqdsk
+        root: /home/d200024/LOCALDB
+        filename_template: "EQDSK_E{shot:06d}t{time:g}_COCOS02"
+        path: /home/d200024/LOCALDB/EQDSK_E101011t6.8_COCOS02
+        shot: 101011
+        time: 6.8
+        grid: [129, 129]
+        cocos: 2
+        sha256: f71d3cb1009e657e841b6d7be22f694921dc9b937278f7a2d4f65ead9c52e1e7
+      - code: LIUQE
+        inventory_code: LIUQE/MEQ
+        format: g_eqdsk
+        root: /home/d260047/olivier/equil_runs
+        filename_template: "EQDSK_E{shot:06d}t{time:g}_COCOS07"
+        path: /home/d260047/olivier/equil_runs/EQDSK_E101011t6.8_COCOS07
+        shot: 101011
+        time: 6.8
+        grid: [60, 129]
+        cocos: 7
+        sha256: f385641ad9740ed00698cbc03c8329a99577b36c948227bb6543e5888c86cd10
+      - code: CHEASE
+        format: g_eqdsk
+        root: /home/d240036/equil_runs
+        filename_template: "EQDSK_COCOS_17.OUT_E{shot:06d}t{time:.2f}"
+        path: /home/d240036/equil_runs/EQDSK_COCOS_17.OUT_E101025t5.90
+        shot: 101025
+        time: 5.9
+        grid: [129, 128]
+        cocos: 17
+        sha256: 962ec0d7b3c5ac22323f16aec8087ac6c01d13bc08bcb463787afb34573c1272
+
+  # IMAS data available via modules
+  imas:
+    backends:
+      - mdsplus
+    db_name: jt-60sa
+
+excludes:
+  path_prefixes:
+    - /tmp
+    - /var/tmp
+    - /work/edas
+  patterns:
+    - '*.avi'
+    - '*.dat.old'
+    - '*.backup'
+
+# Per-source-group rules for reading a singleton array's member identifier out
+# of its name. The MMSYS coil currents carry the member in the middle of the
+# name, followed by the acquisition chain (HiTe, LKAT, TFLKAT), so the member is
+# the text before that chain: curEF5LKAT -> EF5, curCS1HiTe -> CS1,
+# curUFPLKAT -> UFP, cur1TFLKAT -> 1.
+signal_member_patterns:
+  MMSYS: '^cur(?P<member>.+?)(?:TFLKAT|LKAT|HiTe)$'
+
+signal_glossary:
+  - term: UFP
+    meaning: upper fast plasma position control coil (FPPCC)
+  - term: LFP
+    meaning: lower fast plasma position control coil (FPPCC)
+  - term: HiTe
+    meaning: >-
+      HiTe/HiTec acquisition chain measuring the same coil current as LKAT/LKAT2;
+      the chain JT-60SA's equilibrium reconstruction reads, and the chain mapped
+      to pf_active coil currents
+  - term: LKAT
+    meaning: >-
+      LKAT/LKAT2 acquisition chain measuring the same coil current as HiTe/HiTec;
+      a second reading of that current, not the chain mapped to pf_active
+  - term: magFlxLp
+    meaning: >-
+      MDAC flux loop channel; every loop except loop 7 is measured as loop N minus
+      reference loop 7, a differential flux, and magFlxLp7 is the absolute reference
+      loop
+  - term: magPbTC
+    meaning: MDAC SELENE tangential (poloidal-field) magnetic probe
+  - term: EFCC
+    meaning: >-
+      error field correction coil, one of the in-vessel coils on the stabilizing
+      plate; not an equilibrium field coil and not a converter
+  - term: EFC
+    meaning: >-
+      error field correction coil, one of the in-vessel coils on the stabilizing
+      plate (the catalogue spells the abbreviation EFCC); not an equilibrium
+      field coil and not a converter
+  - term: SNU
+    meaning: >-
+      switching network unit: a bank of resistors in the coil power supply,
+      switched in to apply a high loop voltage across the coil at plasma
+      breakdown (V = I·R). Not a snubber and not a superconducting unit
+  - term: BPS
+    meaning: >-
+      booster power supply: the high-voltage coil power supply that augments the
+      base power supply for fast coil current ramp
+  - term: QPC
+    meaning: >-
+      quench protection circuit: the circuit that extracts and absorbs the
+      stored energy of a superconducting coil when it quenches
+  - term: DR
+    meaning: >-
+      dump resistor (discharge resistor): the resistor in the quench protection
+      circuit that absorbs the coil's stored energy during a fast discharge
+  - term: HTS
+    meaning: high-temperature superconductor
+  - term: FPPCC
+    meaning: >-
+      fast plasma position control coil: the in-vessel coil driven for fast
+      vertical position control of the plasma
+  - term: RWMC
+    meaning: >-
+      resistive wall mode control coil, one of the in-vessel coils on the
+      stabilizing plate
+  - term: Com.
+    meaning: >-
+      command: a reference value set by the plasma control system (as in a PSRC
+      "Plasma Vertical Pos. (Zp0) Com."), not a measured or reconstructed value
+
+# Data access patterns discovered during facility exploration.
+data_access_patterns:
+  primary_method: edas
+  shot_identifier: shot
+  signal_naming: >-
+    EDAS EDDB API: EDDB_locallib_API with methods opendb(dbtype), closedb(),
+    get_time_nearest(shot, t, dname, cat), get_time_slice_data(shot, t, dname, cat),
+    get_time_seriese_data(shot, t1, t2, dname, cat).
+    Low-level: _eddbreadTime(shot, cat, dname, t1, t2), _eddbreadHeader(shot, cat, dname),
+    _eddbreadOne(shot, cat, dname, step), _eddbreadPara(shot, cat, dname).
+    Also: _eddbreadPrePro, _eddbreadImage, _eddbreadComment, _eddbreadScore,
+    _eddbreadChInfo, _eddbreadTable, _eddbreadShot, _eddbreadNearTime.
+    EDDB_remote_API mirrors local API for remote access.
+    UDDB identifies globally registered raw channels by PID; LCDB identifies
+    an owner, category revision and field within a shot. PMDB needs a plant
+    category and name plus wall-clock interval; FSMD needs PID, track and channel;
+    MBDB needs owner, case and category. FLEDD selects equilibria by database id,
+    shot and time revision; local EQDB records use shot/time paths under EQDSK.
+    Higher-level tools: eGIS (graphical viewer), eSLICE (time slicer),
+    eSURF (surface viewer) wrap EDAS channels.
+  tree_organization: >-
+    EDAS database at /analysis_DB/EDASDB/ with per-shot directories (a003846, etc.).
+    8 database API modules: edas_eddb_api (main), edas_easy_api (simplified),
+    edas_fledd_api (FLEDD), edas_fsmd_api (FSMD), edas_lcdb_api (LCDB),
+    edas_mbdb_api (MBDB), edas_pmdb_api (PMDB), edas_uddb_api (UDDB).
+    AnalysisDB for processed results, ExperimentDB for raw measurements.
+    Multiple database backends: EDDB, FLEDD, FSMD, LCDB, MBDB, PMDB, UDDB.
+  key_tools:
+    - edas_eddb_api
+    - edas_easy_api
+    - EDDB_locallib_API
+    - EDDB_remote_API
+    - libFLEDDPIC
+    - eqdbms
+    - dbsel
+    - eddbreadOne
+    - eddbreadPara
+    - get_time_seriese_data
+    - uddbreadTable
+    - uddbreadConvert
+    - plantdread
+    - planthread
+    - get_fsmd_from_db
+    - esyserd2
+    - lcdb_dname
+    - lcdb_value
+    - mbdbDatanmList
+    - mbdbRPoint
+    - mbdbRTimes
+    - eslice
+    - esurf
+    - egis
+    - getseldata
+    - FBEQU
+    - SAEQU
+    - TOPICS2
+  wiki_signal_patterns:
+    - EDAS channel ID tables
+    - diagnostic parameter listings
+    - Eddb API reference
+    - EDAS database category (cat) listings
+    - getseldata parameter documentation
+    - eslice/esurf viewer documentation
+  code_import_patterns:
+    - import edas_eddb_api
+    - import edas_easy_api
+    - EDDB_locallib_API
+    - EDDB_remote_API
+    - eddb_get
+    - eddbreadTime
+    - eddbreadHeader
+    - eddbreadOne
+    - eddbreadPara
+    - get_time_slice_data
+    - get_time_seriese_data
+    - get_time_nearest
+    - opendb(
+    - closedb(
+    - import eddb
+    - eslice
+    - esurf
+    - getseldata
+    - libFLEDDPIC
+    - eqlist_get_rev_
+    - eqdata_get_
+    - eqint_get_
+    - eqdbl_get_
+    - eqdbms
+    - dbsel
+    - uddbreadTable
+    - uddbreadConvert
+    - plantdread
+    - planthread
+    - get_fsmd_from_db
+    - esyserd2
+    - lcdb_dname
+    - lcdb_value
+    - mbdbDatanmList
+    - mbdbRPoint
+    - mbdbRTimes
+  notes:
+    - "EDAS2 v2.1.15 at /analysis/src/edas2/v2.1.15/ with edas_egis, edas_eslice2, edas_esurf2, edas_share"
+    - "8 database API modules at edas_share/database_api/: eddb, easy, fledd, fsmd, lcdb, mbdb, pmdb, uddb"
+    - "EDDB_locallib_API class: 25+ methods including opendb, closedb, get_time_nearest, get_time_slice_data"
+    - "Low-level read methods: _eddbreadTime(shot,cat,dname,t1,t2), _eddbreadHeader(shot,cat,dname), _eddbreadOne, _eddbreadPara"
+    - "EDASDB at /analysis_DB/EDASDB/ with shot directories (a003846, a003915, etc.)"
+    - "Tools at /analysis/bin/: eslice, esurf, egis, getseldata, FBEQU, SAEQU, TOPICS2"
+    - "C headers at /analysis/src/getseldata_v4.2/eddbaccess.h"
+    - "IMAS/3.42.0, MDSplus/7.132.0, UDA/2.7.5-2.7.6 modules available"
+    - "import imas works after module load (DD 3.42.0)"
+
+# Discovery root paths for path discovery pipeline
+# These are seeded as starting points for directory scanning
+discovery_roots:
+  # /analysis/src is named only through its seeded subdirectories: a seed of
+  # the parent itself creates a depth-0 row that walks every unseeded child.
+  - /analysis/src/SAselene_v2.0_forPSRC
+  - /analysis/src/SAeqread
+  - /analysis/src/edas2
+  - /analysis/src/ECCD
+  - /analysis/src/OFMC/ofmcauto
+  - /analysis/src/topics_release
+  - /analysis/src/easy-v5.01
+  - /analysis/src/eagle-v4.05
+  - /analysis/src/client_eqdbms.EQ32.Rev1
+  - /analysis/src/SAeqfame
+  - /analysis/src/getseldata_v4.2
+  - /analysis/bin                  # Analysis binaries and scripts
+  - /analysis/data                 # Analysis data outputs
+  - /analysis/manual               # Documentation
+  - /work/edas                     # EDAS work area
+  - /analysis_DB/EDASDB            # EDAS database
+  - /analysis_DB/MBDB              # MB database
+  # Data-access layer: the experiment-database download libraries and wrappers
+  # every diagnostic loader goes through, the reconstruction and machine
+  # description trees, and the analysis/data tools. Each is its own entry; the
+  # parent /analysis/src is never named.
+  - /analysis/src/eddb
+  - /analysis/src/uddb
+  - /analysis/src/pmdb
+  - /analysis/src/mbdb
+  - /analysis/src/lcdbWrapper
+  - /analysis/src/safledd
+  - /analysis/src/edas_inf
+  - /analysis/lib/JT60SAEQDB
+  - /analysis/src/MagLine2022
+  - /analysis/src/offlineTCCS
+  - /analysis/src/offlineTCCS.MAIN
+  - /analysis/src/SAsetequ
+  - /analysis/src/setequ
+  - /analysis/src/SAselene
+  - /analysis/CCStable
+  - /analysis/SAdata
+  - /analysis/src/slice
+  - /analysis/src/adam3
+  - /analysis/src/adamwin-v4
+  - /analysis/src/OFMC
+  - /analysis/src/accome
+  - /analysis/src/toolc
+  - /analysis/src/gdlib
+  - /analysis/src/getseldata_v4.1
+
+# Wiki/documentation sites
+# JT-60SA documentation is served on nakasvr26 through the workstation VPN.
+# Site 0: Static Code wiki - analysis code documentation
+# Site 1: Server landing page - hardware, software, login, batch jobs, compilers
+# Direct viewing requires the IFERC VPN; port_forwards supplies local browser ports.
+# nakasvr23 is retired: it still resolves (157.111.10.188) but answers nothing. Fetch through
+# the hop from the facility side: ssh -n jt-60sa "curl -sk '<url>'" (login host intr26-2).
+# Graph URLs https://nakasvr23.iferc.org/twiki_html/rsrc/Code/<Topic>/<file> map to
+# https://nakasvr26.iferc.org/wiki/rsrc/Code/<Topic>/<file> (39 of 40 sampled resolved,
+# 2026-10-13). The former Main web (daily operation reports, DataAnalysis manuals, the
+# ssh://jt-60sa/var/www/html/twiki/... sources) is not on nakasvr26: every probe returns 404.
+wiki_sites:
+  - name: twiki_code
+    url: https://nakasvr26.iferc.org/wiki
+    portal_page: WebHome.html
+    site_type: twiki_static
+    access_method: tunnel
+    auth_type: none
+    ssh_available: true
+    description: >-
+      JT-60SA static Code wiki with analysis code documentation, EDAS, SLICE,
+      equilibrium codes and linked attachments. Pages are listed by
+      WebTopicList.html and attachments are linked from their topic pages.
+    languages:
+      - ja
+      - en
+
+  - name: server_docs
+    url: https://nakasvr26.iferc.org
+    portal_page: index-en.html
+    site_type: static_html
+    access_method: tunnel
+    auth_type: none
+    ssh_available: true
+    description: >-
+      JT-60SA data analysis server system documentation. Hardware specs,
+      software list, login procedures, batch job usage, compiler configuration
+      and file system layout. Bilingual (JP/EN).
+    languages:
+      - ja
+      - en
+    exclude_prefixes:
+      - /wiki            # Separate Code wiki site
+      - /matlab          # MATLAB vendor documentation
+      - /idl             # IDL vendor documentation
+      - /pv-wave         # PV-WAVE vendor documentation
+      - /analysis        # Analysis tools help (external)
+
+# User info discovery configuration
+user_info:
+  name_format: last_first  # Japanese order: family name first (e.g., マッキントッシュ サイモン)
+  lookup_tools:
+    - getent
+    - passwd
+    - id
+
+# =============================================================================
+# Port Forwards - Local SSH tunnels for service access
+# =============================================================================
+# Facility web traffic follows the jt-60sa SSH hop through the workstation VPN.
+# The port suffix matches the wiki_sites index for browser access.
+
+port_forwards:
+  port_base: 8800
+  ssh_host: jt-60sa
+  forwards:
+    - name: twiki_code
+      local_port: 8800
+      remote_host: nakasvr26.iferc.org
+      remote_port: 443
+      protocol: https
+      description: JT-60SA static Code wiki
+
+    - name: server_docs
+      local_port: 8801
+      remote_host: nakasvr26.iferc.org
+      remote_port: 443
+      protocol: https
+      description: nakasvr26 server documentation (hardware, software, login)
+
+# =============================================================================
+# Browser URLs - Localhost access with active port forwards
+# =============================================================================
+# Direct over the IFERC VPN: https://nakasvr26.iferc.org/wiki/WebHome.html
+# Local Code wiki tunnel: ssh -N -L 8800:nakasvr26.iferc.org:443 jt-60sa
+# Forward port 8801 to the same host for server_docs. These localhost URLs
+# are for workstation browsers with their corresponding SSH forwards running.
+
+browser:
+  services:
+    - name: twiki_code
+      url: https://localhost:8800/wiki/WebHome.html
+      description: Code wiki - analysis code documentation and linked attachments
+
+    - name: server_docs
+      url: https://localhost:8801/
+      description: Server documentation - login, batch jobs, compilers

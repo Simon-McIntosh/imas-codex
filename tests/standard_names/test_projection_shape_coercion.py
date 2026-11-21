@@ -1,6 +1,6 @@
 """Projection shape is derived from base_kind, not trusted from the LLM."""
 
-from imas_codex.standard_names.models import GrammarSegments
+from iter_codex.standard_names.models import GrammarSegments
 
 
 def test_geometry_base_coerces_component_to_coordinate():

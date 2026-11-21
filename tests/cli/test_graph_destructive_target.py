@@ -10,8 +10,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.graph.data import graph_clear, graph_load
-from imas_codex.graph.profiles import resolve_neo4j
+from iter_codex.cli.graph.data import graph_clear, graph_load
+from iter_codex.graph.profiles import resolve_neo4j
 
 
 @pytest.mark.parametrize(
@@ -45,12 +45,12 @@ def test_destructive_command_refuses_target_mismatch(
 
     with (
         patch(
-            "imas_codex.graph.profiles.resolve_neo4j",
+            "iter_codex.graph.profiles.resolve_neo4j",
             return_value=profile,
         ),
-        patch("imas_codex.cli.graph.data.backup_graph_dump") as backup,
-        patch("imas_codex.cli.graph.data.is_neo4j_running", return_value=True),
-        patch("imas_codex.graph.client.GraphClient.from_profile") as client,
+        patch("iter_codex.cli.graph.data.backup_graph_dump") as backup,
+        patch("iter_codex.cli.graph.data.is_neo4j_running", return_value=True),
+        patch("iter_codex.graph.client.GraphClient.from_profile") as client,
     ):
         result = CliRunner().invoke(command, args)
 
@@ -73,12 +73,12 @@ def test_clear_succeeds_when_target_matches_active_graph() -> None:
 
     with (
         patch(
-            "imas_codex.graph.profiles.resolve_neo4j",
+            "iter_codex.graph.profiles.resolve_neo4j",
             return_value=profile,
         ),
-        patch("imas_codex.cli.graph.data.is_neo4j_running", return_value=True),
+        patch("iter_codex.cli.graph.data.is_neo4j_running", return_value=True),
         patch(
-            "imas_codex.graph.client.GraphClient.from_profile",
+            "iter_codex.graph.client.GraphClient.from_profile",
             return_value=graph_client,
         ),
     ):

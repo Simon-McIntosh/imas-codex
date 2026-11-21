@@ -1,0 +1,1780 @@
+"""Concurrent worker-pool orchestrator for ``sn run``.
+
+Uses N persistent async tasks that pull work from the graph independently
+and share a single :class:`BudgetManager` for cost coordination.
+
+Six pools run under a single ``asyncio.gather``:
+
+* ``generate_name``  — composes new ``StandardName`` rows from
+                       ``StandardNameSource(status='extracted')``.
+* ``review_name``    — scores name+grammar (name_stage='drafted').
+* ``refine_name``    — recomposes names below the review threshold.
+* ``generate_docs``  — adds description+documentation to accepted names.
+* ``review_docs``    — scores description+documentation.
+* ``refine_docs``    — refines docs below the review threshold.
+
+Embedding is handled by the shared discovery ``embed_description_worker``
+(async background task launched alongside the pools, not a pool itself).
+
+Each pool follows a cooperative shutdown contract:
+
+    while not stop_event.is_set():
+        wait for admission via mgr.pool_admit(...)
+        claim a coherent batch (seed-and-expand)
+        if no work: sleep with exponential backoff
+        process_batch(...)  # checks stop_event between LLM and persist
+        release_claim     (always, in finally)
+
+After ``stop_event``, the outer harness gives pools a 60s grace window
+to complete in-flight batches before issuing ``task.cancel()``.  The
+budget writer queue is drained before the SNRun is finalized so cost
+accounting remains exact.
+
+This module deliberately contains only the orchestration scaffolding.
+The six claim queries live in ``graph_ops.py`` and the per-pool
+batch-processor functions live in their respective worker modules
+(``workers.py`` for generate_name+refine_name, ``review/pipeline.py``
+for legacy review, ``workers.py`` for every pool worker).  This
+separation keeps the orchestrator agnostic of prompt/persist details —
+its only job is to schedule.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+import random
+import time
+from collections.abc import Awaitable, Callable, Mapping, Sequence
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
+
+from iter_codex.discovery.base.llm import ProviderBudgetExhausted
+from iter_codex.standard_names.pool_registry import POOL_NAMES, POOL_WEIGHTS
+
+if TYPE_CHECKING:
+    from iter_codex.standard_names.budget import BudgetManager
+
+logger = logging.getLogger(__name__)
+
+# Flush drains every downstream pool and excludes only the source composer.
+# Keep this tuple explicit so CLI help, orchestration, and tests share one
+# auditable contract.
+FLUSH_POOL_NAMES = (
+    "review_name",
+    "refine_name",
+    "generate_docs",
+    "review_docs",
+    "refine_docs",
+    "enrich_parents",
+)
+
+
+# Maps each pool to the ``pyproject.toml`` model section that determines
+# which LLM endpoint it calls.  Used by :func:`free_pools` to decide which
+# pools route to a local / zero-cost endpoint and therefore bypass the
+# dollar-budget spend-fairness gate (see ``BudgetManager.pool_admit``).
+# Review pools resolve to a *list* of models (the RD-quorum chain); they are
+# free only when every model in the chain is local.
+_POOL_MODEL_SECTIONS: dict[str, str] = {
+    "generate_name": "sn-compose",
+    "generate_docs": "sn-docs",
+    "refine_name": "sn-refine",
+    "refine_docs": "sn-refine",
+    "review_name": "sn-review.names",
+    "review_docs": "sn-review.docs",
+    "enrich_parents": "sn-parent-enrich",
+}
+
+
+def _pool_models(pool: str) -> list[str]:
+    """Return the model identifier(s) a pool will call.
+
+    Single-model pools (generate/refine) return a one-element list; review
+    pools return their full RD-quorum chain.  Resolution goes through the
+    canonical settings accessors so env / pyproject overrides are honoured.
+    """
+    from iter_codex.settings import (
+        get_model,
+        get_sn_review_docs_models,
+        get_sn_review_names_models,
+    )
+
+    if pool == "review_name":
+        return list(get_sn_review_names_models())
+    if pool == "review_docs":
+        return list(get_sn_review_docs_models())
+    section = _POOL_MODEL_SECTIONS.get(pool)
+    if section is None:
+        return []
+    return [get_model(section)]
+
+
+def _pool_is_free(pool: str) -> bool:
+    """Return True iff every model *pool* will call is a local/zero-cost endpoint.
+
+    A pool is "free" when its configured model(s) route to a local endpoint
+    (``local/``, ``hosted_vllm/``, ``ollama/``, ``openai/localhost``) rather
+    than a paid OpenRouter model. Free pools (e.g. ``generate_name`` on a local GPU)
+    incur no dollar cost, so they must bypass the spend-fairness admission gate
+    — their only real limit is GPU concurrency (replica count).
+
+    Review pools are free only when *all* models in their quorum chain are
+    local (a mixed chain calls paid models, so it is paid).
+    """
+    from iter_codex.discovery.base.llm import _is_local_model
+
+    models = _pool_models(pool)
+    if not models:
+        return False
+    return all(_is_local_model(m) for m in models)
+
+
+def free_pools(pool_names: tuple[str, ...] = POOL_NAMES) -> set[str]:
+    """Return the subset of *pool_names* whose model(s) are local/zero-cost.
+
+    Config is static for the life of a run, so callers should compute this
+    once and reuse it.  ``pool_admit`` consumes the result to exempt free
+    pools from the dollar-budget spend-fairness gate.
+    """
+    return {p for p in pool_names if _pool_is_free(p)}
+
+
+# Number of consecutive admitted-but-empty claim attempts before a pool
+# is temporarily excluded from the active-pools admission denominator.
+# This prevents fairness deadlocks when a pool has non-zero pending_count
+# (as reported by the display query) but its claim function consistently
+# returns nothing (different eligibility criteria between display and claim).
+# Resets to zero on any successful claim.
+_EMPTY_CLAIM_EXCLUDE_THRESHOLD: int = 3
+
+
+@dataclass
+class _PoolBackoff:
+    """Exponential backoff for empty-claim spins.
+
+    Each pool maintains its own backoff state.  On an empty claim
+    result, ``next_sleep`` returns the next interval; on a successful
+    claim, ``reset()`` returns the pool to the base interval.
+
+    Schedule: 3s → 6s → 12s → 24s → 30s (capped).
+    """
+
+    base: float = 3.0
+    cap: float = 30.0
+    _current: float = 3.0
+
+    def reset(self) -> None:
+        self._current = self.base
+
+    def next_sleep(self) -> float:
+        # Add ±10% jitter to avoid lock-step polling across pools.
+        jitter = random.uniform(0.9, 1.1)
+        sleep_for = self._current * jitter
+        self._current = min(self._current * 2.0, self.cap)
+        return sleep_for
+
+
+@dataclass
+class PoolHealth:
+    """Liveness telemetry for a single pool.
+
+    A subpool is wedged when it has pending work but has not persisted
+    a batch within the wedge threshold.  ``last_progress_at`` is updated
+    on each successful
+    batch persist.  ``pending_count`` is refreshed by the orchestrator
+    via the pending-fn callback.  ``in_flight`` tracks claimed but
+    not-yet-persisted batches for restart-safety reasoning.
+
+    ``consecutive_empty_claims`` counts successive admitted-but-empty
+    claim attempts.  The admission gate uses this to temporarily exclude
+    a pool from the active-pools denominator when it has pending work
+    recorded in the graph but consistently returns nothing from claim —
+    which happens when the display's pending query and the claim query
+    have different eligibility criteria.
+    The counter resets on any successful claim.
+
+    Self-healing re-admission: when a pool has been excluded due to
+    consecutive_empty_claims, ``active_pools_fn`` checks whether the
+    pool's ``pending_count`` has grown since the last check.  A pending
+    count increase means new eligible nodes have appeared (e.g. the
+    generate pool produced names that are now enrich-eligible).  When
+    that happens ``consecutive_empty_claims`` is reset to 0 so the pool
+    re-enters contention.  ``_last_pending_count`` tracks the value from
+    the most recent active_pools_fn evaluation.
+
+    ``total_processed`` accumulates the sum of all successful
+    ``spec.process(batch)`` return values.  Used by ``run_sn_pools`` to
+    populate ``SNRun.names_composed/enriched/reviewed/regenerated``.
+    """
+
+    pool: str
+    last_progress_at: float = field(default_factory=time.time)
+    pending_count: int = 0
+    in_flight: int = 0
+    error_count: int = 0
+    last_error: str | None = None
+    consecutive_empty_claims: int = 0
+    total_processed: int = 0
+    _last_pending_count: int = 0
+    _completion_epoch: int = 0
+    _pending_observation_epoch: int | None = None
+    _active_batch_started_at: dict[int, float] = field(default_factory=dict)
+    _next_batch_id: int = 0
+
+    @property
+    def oldest_in_flight_at(self) -> float | None:
+        """Return the oldest start time among batches that are still active."""
+        return min(self._active_batch_started_at.values(), default=None)
+
+    def mark_progress(self) -> None:
+        self.last_progress_at = time.time()
+
+    def mark_batch_started(self, *, started_at: float | None = None) -> int:
+        """Record one claimed batch and return its completion identity."""
+        batch_id = self._next_batch_id
+        self._next_batch_id += 1
+        self._active_batch_started_at[batch_id] = (
+            time.time() if started_at is None else started_at
+        )
+        self.in_flight = len(self._active_batch_started_at)
+        return batch_id
+
+    def mark_batch_finished(self, batch_id: int) -> None:
+        """Release the active batch identified when its claim started."""
+        del self._active_batch_started_at[batch_id]
+        self.in_flight = len(self._active_batch_started_at)
+
+    def overdue_in_flight_age(
+        self,
+        *,
+        age_limit: float,
+        now: float | None = None,
+    ) -> float | None:
+        """Return the oldest active batch age once it reaches ``age_limit``."""
+        started_at = self.oldest_in_flight_at
+        if started_at is None and self.in_flight > 0:
+            started_at = self.last_progress_at
+        if started_at is None:
+            return None
+        age = (time.time() if now is None else now) - started_at
+        return age if age >= age_limit else None
+
+    def is_wedged(self, *, poll_interval: float, now: float | None = None) -> bool:
+        """A pool is wedged when it has pending work but hasn't progressed
+        for at least 2× the poll interval.
+        """
+        if self.pending_count <= 0:
+            return False
+        ts = now if now is not None else time.time()
+        return (ts - self.last_progress_at) > 2.0 * poll_interval
+
+
+# Public type aliases for pool callables.  ``ClaimFn`` returns either a
+# claimed batch (opaque dict; pool-specific shape) or ``None`` when no
+# eligible work is available.  ``ProcessFn`` consumes the batch and
+# performs LLM + persist work; it is responsible for releasing the
+# claim (typically in a try/finally) and returning the count of items
+# successfully processed.  ``ReleaseFn`` is an optional error-recovery
+# hook called when ``ProcessFn`` raises — it should unlock the claimed
+# items so other workers can pick them up.
+ClaimFn = Callable[[], Awaitable[dict[str, Any] | None]]
+ProcessFn = Callable[[dict[str, Any]], Awaitable[int]]
+ReleaseFn = Callable[[dict[str, Any]], Awaitable[None]]
+
+
+@dataclass(frozen=True)
+class StandardNamePoolPredicate:
+    """One worker pool's admission rule in memory and in graph queries."""
+
+    pool: str
+    admits: Callable[[Mapping[str, Any]], bool]
+
+    def cypher(
+        self, expressions: Mapping[str, str | _CategoricalProjection] | None = None
+    ) -> str:
+        """Render the same condition used by the in-memory census."""
+        if not isinstance(self.admits, _PoolCondition):
+            raise TypeError(f"Pool {self.pool!r} has no graph admission condition")
+        return self.admits.cypher(expressions or identity_state_expressions())
+
+
+@dataclass(frozen=True)
+class _CategoricalProjection:
+    """Named states and their graph conditions share one projection table."""
+
+    conditions: Mapping[str, str]
+
+    def __str__(self) -> str:
+        branches = " ".join(
+            f"WHEN {condition} THEN '{value}'"
+            for value, condition in self.conditions.items()
+        )
+        return f"CASE {branches} ELSE null END"
+
+
+@dataclass(frozen=True)
+class _PoolCondition:
+    """A boolean expression evaluated against state or rendered as Cypher."""
+
+    operation: str
+    operands: tuple[Any, ...]
+
+    def __call__(self, state: Mapping[str, Any]) -> bool:
+        if self.operation == "and":
+            return all(term(state) for term in self.operands)
+        if self.operation == "or":
+            return any(term(state) for term in self.operands)
+        if self.operation == "not":
+            return not self.operands[0](state)
+        field, value = self.operands
+        return state.get(field) == value
+
+    def __and__(self, other: _PoolCondition) -> _PoolCondition:
+        return _PoolCondition("and", (self, other))
+
+    def __or__(self, other: _PoolCondition) -> _PoolCondition:
+        return _PoolCondition("or", (self, other))
+
+    def __invert__(self) -> _PoolCondition:
+        return _PoolCondition("not", (self,))
+
+    def cypher(self, expressions: Mapping[str, str | _CategoricalProjection]) -> str:
+        if self.operation in {"and", "or"}:
+            joiner = f" {self.operation.upper()} "
+            return (
+                "("
+                + joiner.join(term.cypher(expressions) for term in self.operands)
+                + ")"
+            )
+        if self.operation == "not":
+            child = self.operands[0]
+            if child.operation in {"and", "or"}:
+                opposite = "or" if child.operation == "and" else "and"
+                return _PoolCondition(
+                    opposite, tuple(~term for term in child.operands)
+                ).cypher(expressions)
+            if child.operation == "not":
+                return child.operands[0].cypher(expressions)
+            field, value = child.operands
+            expression = str(expressions[field])
+            if value is True and expression.endswith(" IS NOT NULL"):
+                return expression.removesuffix(" IS NOT NULL") + " IS NULL"
+            if isinstance(value, str) and value and expression == f"sn.{field}":
+                literal = value.replace("'", "''")
+                return f"coalesce({expression}, '') <> '{literal}'"
+            return f"NOT ({child.cypher(expressions)})"
+        field, value = self.operands
+        projection = expressions[field]
+        if (
+            isinstance(projection, _CategoricalProjection)
+            and value in projection.conditions
+        ):
+            return f"coalesce(({projection.conditions[value]}), false)"
+        expression = str(projection)
+        if value is True:
+            return f"coalesce(({expression}), false)"
+        if value is None:
+            return f"({expression}) IS NULL"
+        literal = "false" if value is False else "'" + value.replace("'", "''") + "'"
+        return f"coalesce(({expression} = {literal}), false)"
+
+
+def _state_is(field: str, value: Any) -> _PoolCondition:
+    return _PoolCondition("equals", (field, value))
+
+
+def identity_state_expressions() -> dict[str, str | _CategoricalProjection]:
+    """Project the state read by pool admission from one StandardName node."""
+    from iter_codex.standard_names.graph_store.graph_foundation import (
+        docs_review_winner_query_body,
+    )
+    from iter_codex.standard_names.review.holds import has_open_docs_hold_where
+    from iter_codex.standard_names.source_invariant import live_child_cypher
+
+    return {
+        **{
+            field: f"sn.{field}"
+            for field in (
+                "name_stage",
+                "docs_stage",
+                "status",
+                "origin",
+                "edit_mode",
+            )
+        },
+        "validation_status": _CategoricalProjection(
+            {
+                "valid": "sn.validation_status = 'valid'",
+                "quarantined": "sn.validation_status = 'quarantined'",
+                "pending": "sn.validation_status IS NULL OR sn.validation_status = 'pending'",
+            }
+        ),
+        "description_state": _CategoricalProjection(
+            {
+                "missing": "sn.description IS NULL",
+                "placeholder": "sn.description = $parent_desc_placeholder",
+                "substantive": "sn.description IS NOT NULL AND sn.description <> $parent_desc_placeholder",
+            }
+        ),
+        "name_score_state": "CASE WHEN sn.reviewer_score_name IS NULL THEN 'missing' WHEN sn.reviewer_score_name < $min_score THEN 'below' ELSE 'passing' END",
+        "docs_score_state": "CASE WHEN sn.reviewer_score_docs IS NULL THEN 'missing' WHEN sn.reviewer_score_docs < $min_score THEN 'below' ELSE 'passing' END",
+        "name_attempts_under_cap": "coalesce(sn.refine_attempts, coalesce(sn.chain_length, 0)) < $rotation_cap",
+        "docs_attempts_under_cap": "coalesce(sn.docs_chain_length, 0) < $rotation_cap",
+        "rename_resubmit_capped": "coalesce(sn.edit_mode, '') = 'rename' AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap",
+        "review_quorum_shortfall": "sn.review_quorum_shortfall IS NOT NULL",
+        "docs_review_quorum_shortfall": "sn.docs_review_quorum_shortfall IS NOT NULL",
+        "has_live_child": live_child_cypher(),
+        "has_winning_docs_review": f"EXISTS {{{docs_review_winner_query_body()}}}",
+        "has_open_docs_hold": has_open_docs_hold_where(),
+        "claim_active": "sn.claim_token IS NOT NULL OR sn.claimed_at IS NOT NULL",
+    }
+
+
+def _terminal_for_run_rules() -> tuple[tuple[str, _PoolCondition], ...]:
+    """Reasons an identity needs external action rather than a pool retry."""
+    return (
+        (
+            "name_review_quorum_shortfall",
+            _state_is("name_stage", "reviewed")
+            & _state_is("review_quorum_shortfall", True),
+        ),
+        (
+            "docs_review_quorum_shortfall",
+            _state_is("docs_stage", "reviewed")
+            & _state_is("docs_review_quorum_shortfall", True),
+        ),
+        ("validation_quarantined", _state_is("validation_status", "quarantined")),
+        (
+            "name_attempt_cap",
+            _state_is("name_stage", "reviewed")
+            & (
+                _state_is("name_score_state", "below")
+                & ~_state_is("name_attempts_under_cap", True)
+                | _state_is("rename_resubmit_capped", True)
+            ),
+        ),
+        (
+            "docs_attempt_cap",
+            _state_is("docs_stage", "reviewed")
+            & ~_state_is("docs_attempts_under_cap", True),
+        ),
+        ("docs_exhausted", _state_is("docs_stage", "exhausted")),
+        (
+            "structural_grounding_missing",
+            _state_is("origin", "derived")
+            & ~_state_is("has_live_child", True)
+            & _state_is("name_score_state", "missing"),
+        ),
+        (
+            "composition_grounding_missing",
+            ~_state_is("origin", "derived")
+            & _state_is("description_state", "missing")
+            & (_state_is("name_stage", "pending") | _state_is("name_stage", None)),
+        ),
+    )
+
+
+def standard_name_pool_predicates(
+    *,
+    scoped_docs: bool = False,
+) -> tuple[StandardNamePoolPredicate, ...]:
+    """Return the shared, mutually exclusive pool ownership conditions.
+
+    Unvalidated name candidates belong to review_name for deterministic
+    validation before a reviewer is called. Reviewed documents without a
+    winning review belong to review_docs, never to paid refinement. Explicit
+    docs scopes retain their existing exemption from the name-score gate.
+    """
+    live = ~(
+        _state_is("name_stage", "superseded")
+        | _state_is("name_stage", "exhausted")
+        | _state_is("name_stage", "contested")
+        | _state_is("status", "deprecated")
+        | _state_is("status", "superseded")
+    )
+    unheld = ~(
+        _terminal_for_run_rules()[0][1]
+        | _terminal_for_run_rules()[1][1]
+        | _state_is("validation_status", "quarantined")
+    )
+    active = live & unheld
+    derived = _state_is("origin", "derived")
+    vetted = ~_state_is("name_score_state", "missing") | (
+        derived & _state_is("has_live_child", True)
+    )
+    substantive = _state_is("description_state", "substantive")
+    validation_pending = _state_is("validation_status", "pending") | _state_is(
+        "validation_status", None
+    )
+    name_entry = _state_is("name_stage", "drafted") | _state_is("name_stage", "pending")
+    name_recovery = (
+        _state_is("name_stage", "reviewed")
+        & (~_state_is("name_score_state", "below") | validation_pending)
+        & ~_state_is("edit_mode", "rename")
+    )
+    if not scoped_docs:
+        name_recovery = name_recovery | (
+            _state_is("name_stage", "accepted")
+            & _state_is("name_score_state", "missing")
+        )
+    review_name = (
+        active
+        & ~derived
+        & substantive
+        & (_state_is("validation_status", "valid") | validation_pending)
+        & (name_entry | name_recovery)
+    )
+    refine_name = (
+        active
+        & ~review_name
+        & (
+            ~_state_is("validation_status", "pending")
+            & _state_is("name_stage", "reviewed")
+            & _state_is("name_score_state", "below")
+            & _state_is("name_attempts_under_cap", True)
+            & ~_state_is("rename_resubmit_capped", True)
+            & ~derived
+        )
+    )
+    enrich_parents = (
+        active
+        & derived
+        & (
+            _state_is("description_state", "placeholder")
+            | _state_is("description_state", "missing")
+        )
+        & _state_is("has_live_child", True)
+    )
+    docs_ready = active & _state_is("name_stage", "accepted") & ~enrich_parents
+    if not scoped_docs:
+        docs_ready = docs_ready & vetted
+    generate_docs = (
+        docs_ready
+        & _state_is("name_stage", "accepted")
+        & _state_is("docs_stage", "pending")
+    )
+    review_docs = docs_ready & (
+        _state_is("docs_stage", "drafted")
+        | (
+            _state_is("docs_stage", "reviewed")
+            & (
+                ~_state_is("has_winning_docs_review", True)
+                | (
+                    ~_state_is("docs_score_state", "below")
+                    & ~_state_is("has_open_docs_hold", True)
+                )
+            )
+        )
+    )
+    refine_docs = (
+        docs_ready
+        & ~review_docs
+        & (
+            _state_is("docs_stage", "reviewed")
+            & (
+                _state_is("docs_score_state", "below")
+                | _state_is("has_open_docs_hold", True)
+            )
+            & ~_state_is("docs_score_state", "missing")
+            & _state_is("docs_attempts_under_cap", True)
+            & _state_is("has_winning_docs_review", True)
+        )
+    )
+    return tuple(
+        StandardNamePoolPredicate(pool, condition)
+        for pool, condition in (
+            ("review_name", review_name),
+            ("refine_name", refine_name),
+            ("generate_docs", generate_docs),
+            ("review_docs", review_docs),
+            ("refine_docs", refine_docs),
+            ("enrich_parents", enrich_parents),
+        )
+    )
+
+
+def pool_admission_where(
+    pool: str,
+    *,
+    scoped_docs: bool = False,
+    expressions: Mapping[str, str] | None = None,
+) -> str:
+    """Render a pool's rule for claims and pending queries alike."""
+    projections = identity_state_expressions()
+    projections.update(expressions or {})
+    return next(
+        p
+        for p in standard_name_pool_predicates(scoped_docs=scoped_docs)
+        if p.pool == pool
+    ).cypher(projections)
+
+
+def pool_admission_params(
+    *, min_score: float = 0.75, rotation_cap: int = 3
+) -> dict[str, Any]:
+    """Bind all graph projections used by the shared admission rules."""
+    from iter_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+    from iter_codex.standard_names.graph_store.graph_catalog import (
+        docs_review_eligibility_params,
+    )
+
+    return dict(
+        min_score=min_score,
+        rotation_cap=rotation_cap,
+        parent_desc_placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        **docs_review_eligibility_params(),
+    )
+
+
+def _validate_claimed_review_candidates(
+    items: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Validate unvalidated review claims without spending on a reviewer.
+
+    The validation writer releases its token atomically. Valid candidates are
+    claimed for review on the next poll; quarantined ones retain their issues
+    and require a validated successor. Already validated claims stay owned.
+    """
+    from iter_codex.standard_names.graph_store.graph_catalog_reset import (
+        mark_names_validated,
+    )
+    from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        validate_name_candidate,
+    )
+
+    ready = []
+    for item in items:
+        if item.get("validation_status", "valid") == "valid":
+            ready.append(item)
+            continue
+        if item.get("validation_status") not in {None, "pending"}:
+            continue
+        issues, summary, status = validate_name_candidate(item)
+        mark_names_validated(
+            item["claim_token"],
+            [
+                {
+                    "id": item["id"],
+                    "validation_issues": issues,
+                    "validation_layer_summary": summary,
+                    "validation_status": status,
+                }
+            ],
+        )
+    return ready
+
+
+def identity_state_groups(
+    *,
+    min_score: float = 0.75,
+    rotation_cap: int = 3,
+    gc: Any | None = None,
+) -> list[dict[str, Any]]:
+    """Aggregate live identities by every state component a pool reads."""
+    from iter_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+    from iter_codex.standard_names.graph_store.graph_catalog import (
+        docs_review_eligibility_params,
+    )
+
+    expressions = identity_state_expressions()
+    derived_fields = (
+        "validation_status",
+        "description_state",
+        "name_score_state",
+        "docs_score_state",
+        "name_attempts_under_cap",
+        "docs_attempts_under_cap",
+        "rename_resubmit_capped",
+        "has_live_child",
+        "has_winning_docs_review",
+        "has_open_docs_hold",
+        "claim_active",
+    )
+    projection = ",\n         ".join(
+        f"{expressions[field]} AS {field}" for field in derived_fields
+    )
+    query = f"""
+    MATCH (sn:StandardName)
+    WITH sn, {projection}
+    WITH sn.name_stage AS name_stage,
+         sn.docs_stage AS docs_stage,
+         validation_status,
+         sn.status AS status,
+         sn.origin AS origin,
+         description_state,
+         name_score_state,
+         docs_score_state,
+         name_attempts_under_cap,
+         docs_attempts_under_cap,
+         sn.edit_mode AS edit_mode,
+         rename_resubmit_capped,
+         sn.review_quorum_shortfall IS NOT NULL AS review_quorum_shortfall,
+         sn.docs_review_quorum_shortfall IS NOT NULL
+             AS docs_review_quorum_shortfall,
+         has_live_child,
+         has_winning_docs_review,
+         has_open_docs_hold,
+         sn.review_quorum_shortfall AS name_hold_reason,
+         sn.docs_review_quorum_shortfall AS docs_hold_reason,
+         claim_active,
+         collect(sn.id) AS identities
+    RETURN name_stage, docs_stage, validation_status, status, origin,
+           description_state, name_score_state, docs_score_state,
+           name_attempts_under_cap, docs_attempts_under_cap, edit_mode,
+           rename_resubmit_capped, review_quorum_shortfall,
+           docs_review_quorum_shortfall, has_live_child,
+           has_winning_docs_review, has_open_docs_hold,
+           name_hold_reason, docs_hold_reason, claim_active, identities,
+           size(identities) AS count
+    ORDER BY name_stage, docs_stage, validation_status, status, origin
+    """
+    params: dict[str, Any] = {
+        "min_score": min_score,
+        "rotation_cap": rotation_cap,
+        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        **docs_review_eligibility_params(),
+    }
+    if gc is not None:
+        return [dict(row) for row in gc.query(query, **params)]
+
+    from iter_codex.graph.client import GraphClient
+
+    with GraphClient() as graph:
+        return [dict(row) for row in graph.query(query, **params)]
+
+
+def _state_breakdown_key(state: Mapping[str, Any]) -> str:
+    fields = (
+        "name_stage",
+        "docs_stage",
+        "validation_status",
+        "status",
+        "origin",
+        "description_state",
+        "name_score_state",
+        "docs_score_state",
+        "name_attempts_under_cap",
+        "docs_attempts_under_cap",
+        "edit_mode",
+        "rename_resubmit_capped",
+        "review_quorum_shortfall",
+        "docs_review_quorum_shortfall",
+        "has_live_child",
+        "has_winning_docs_review",
+        "claim_active",
+    )
+
+    def display(value: Any) -> str:
+        if isinstance(value, bool):
+            return str(value).lower()
+        return str(value)
+
+    return ", ".join(f"{field}={display(state.get(field))}" for field in fields)
+
+
+def classify_identity_state_groups(
+    groups: Sequence[Mapping[str, Any]],
+    pool_predicates: Sequence[StandardNamePoolPredicate],
+) -> dict[str, Any]:
+    """Classify grouped identity states as terminal, claimable, or stranded."""
+    retired_name_stages = {
+        "superseded",
+        "exhausted",
+        "contested",
+    }
+    settled_name_stages = {"accepted", "approved"}
+    settled_docs_stages = {"accepted"}
+    terminal_statuses = {"deprecated", "superseded"}
+    population_count = 0
+    terminal_count = 0
+    terminal_for_run_count = 0
+    terminal_for_run_ids: list[str] = []
+    terminal_for_run_by_reason: dict[str, int] = {}
+    terminal_for_run_reasons: dict[str, str] = {}
+    claimable_count = 0
+    overlap_count = 0
+    stranded_count = 0
+    stranded_ids: list[str] = []
+    overlap_ids: list[str] = []
+    by_state: dict[str, int] = {}
+    seen_ids: set[str] = set()
+
+    for state in groups:
+        identities = [str(identity) for identity in state.get("identities") or []]
+        count = int(state.get("count") or 0)
+        if count != len(identities):
+            raise ValueError(
+                "identity state aggregate count does not match its named identities: "
+                f"count={count}, identities={len(identities)}"
+            )
+        duplicate_ids = seen_ids.intersection(identities)
+        if duplicate_ids:
+            raise ValueError(
+                "identity appears in more than one state group: "
+                + ", ".join(sorted(duplicate_ids))
+            )
+        seen_ids.update(identities)
+        population_count += count
+
+        name_stage = state.get("name_stage")
+        docs_stage = state.get("docs_stage")
+        if (
+            name_stage in retired_name_stages
+            or state.get("status") in terminal_statuses
+            or (name_stage in settled_name_stages and docs_stage in settled_docs_stages)
+        ):
+            terminal_count += count
+            continue
+
+        matching_pools = [
+            predicate.pool for predicate in pool_predicates if predicate.admits(state)
+        ]
+        if not matching_pools and state.get("claim_active"):
+            matching_pools.append("active_claim")
+        if matching_pools:
+            claimable_count += count
+            if len(matching_pools) > 1:
+                overlap_count += count
+                overlap_ids.extend(identities)
+            continue
+
+        parked_reason = next(
+            (reason for reason, rule in _terminal_for_run_rules() if rule(state)), None
+        )
+        if parked_reason:
+            terminal_for_run_count += count
+            terminal_for_run_ids.extend(identities)
+            terminal_for_run_by_reason[parked_reason] = (
+                terminal_for_run_by_reason.get(parked_reason, 0) + count
+            )
+            detail = (
+                state.get("name_hold_reason")
+                if parked_reason == "name_review_quorum_shortfall"
+                else state.get("docs_hold_reason")
+                if parked_reason == "docs_review_quorum_shortfall"
+                else None
+            )
+            terminal_for_run_reasons.update(
+                {identity: str(detail or parked_reason) for identity in identities}
+            )
+            continue
+
+        stranded_ids.extend(identities)
+        stranded_count += count
+        state_key = _state_breakdown_key(state)
+        by_state[state_key] = by_state.get(state_key, 0) + count
+
+    if terminal_for_run_count:
+        logger.info(
+            "identity census: terminal_for_run=%d by_reason=%s",
+            terminal_for_run_count,
+            dict(sorted(terminal_for_run_by_reason.items())),
+        )
+
+    return {
+        "population_count": population_count,
+        "terminal_count": terminal_count,
+        "terminal_for_run_count": terminal_for_run_count,
+        "terminal_for_run_ids": sorted(terminal_for_run_ids),
+        "terminal_for_run_by_reason": dict(sorted(terminal_for_run_by_reason.items())),
+        "terminal_for_run_reasons": terminal_for_run_reasons,
+        "claimable_count": claimable_count,
+        "stranded_count": stranded_count,
+        "stranded_ids": sorted(stranded_ids),
+        "by_state": dict(sorted(by_state.items())),
+        "overlap_count": overlap_count,
+        "overlap_ids": sorted(overlap_ids),
+    }
+
+
+@dataclass
+class PoolSpec:
+    """Configuration for a single pool's worker loop.
+
+    Each pool wraps a graph-side claim query and a batch processor.
+    The orchestrator only needs these two callables plus the pool name
+    to drive the loop — all pipeline-specific logic stays inside the
+    callables themselves.
+
+    ``replicas`` controls the number of concurrent ``pool_loop`` tasks
+    spawned for this pool.  Claim queries are atomic (UUID claim_token
+    + ORDER BY rand()), so multiple replicas safely claim disjoint
+    batches.  Health counters are shared across replicas — safe in
+    asyncio's cooperative model since no two coroutines execute between
+    await points.  Each replica gets its own ``_PoolBackoff`` instance
+    so the exponential ramp is per-replica rather than shared (see
+    ``_replica_backoffs``).
+
+    Set ``replicas > 1`` for pools whose batch processors are
+    sequential per-item (e.g. review_name, review_docs) to increase
+    throughput.  Pools with internal concurrency (e.g. generate_name
+    uses a 96-worker asyncio.Queue) should stay at 1.
+    """
+
+    name: str
+    claim: ClaimFn
+    process: ProcessFn
+    weight: float = 0.0
+    release: ReleaseFn | None = None
+    state_predicate: StandardNamePoolPredicate | None = None
+    replicas: int = 1
+    health: PoolHealth = field(init=False)
+    backoff: _PoolBackoff = field(default_factory=_PoolBackoff)
+    _replica_backoffs: list[_PoolBackoff] = field(init=False)
+
+    def __post_init__(self) -> None:
+        if self.weight == 0.0:
+            self.weight = POOL_WEIGHTS.get(self.name, 0.0)
+        self.health = PoolHealth(pool=self.name)
+        self._replica_backoffs = [_PoolBackoff() for _ in range(self.replicas)]
+
+
+async def pool_loop(
+    spec: PoolSpec,
+    mgr: BudgetManager,
+    stop_event: asyncio.Event,
+    *,
+    active_pools_fn: Callable[[], set[str]],
+    weights: dict[str, float] = POOL_WEIGHTS,
+    admission_poll: float = 0.5,
+    replica_idx: int = 0,
+    provider_exhausted_event: asyncio.Event | None = None,
+    free_pool_set: set[str] | None = None,
+    process_timeout: float | None = None,
+) -> None:
+    """Cooperative pool worker.
+
+    Loop semantics:
+
+    * On each iteration, check ``stop_event``.  If set, exit cleanly
+      without claiming new work.
+    * Wait for admission via ``mgr.pool_admit(spec.name, weights,
+      active_pools_fn())`` — this enforces weighted fairness across
+      live pools.  Sleep ``admission_poll`` seconds and retry while
+      not admitted.
+    * Claim a batch.  If ``None``, increment backoff and sleep.
+    * Process the batch; mark progress on success; reset backoff.
+    * Errors are logged and counted but do not crash the pool — the
+      next iteration will retry (the claim infrastructure handles
+      orphan recovery via ``claimed_at`` timeout).
+
+    When ``spec.replicas > 1``, multiple ``pool_loop`` tasks share
+    the same ``PoolSpec`` (and therefore the same ``PoolHealth``
+    counters).  This is safe in asyncio's cooperative model — no two
+    coroutines execute between await points.  Each replica uses its
+    own ``_PoolBackoff`` (via ``spec._replica_backoffs[replica_idx]``)
+    so the exponential ramp is per-replica.
+    """
+    tag = (
+        f"pool[{spec.name}#{replica_idx}]"
+        if spec.replicas > 1
+        else f"pool[{spec.name}]"
+    )
+    backoff = spec._replica_backoffs[replica_idx]
+    logger.info("%s starting", tag)
+
+    # Stagger replica startup to avoid thundering-herd on the LLM endpoint.
+    # Each replica waits (replica_idx * 0.1s) before entering the main loop,
+    # spreading 64 replicas over ~6.4 seconds.
+    if replica_idx > 0:
+        import random
+
+        jitter = replica_idx * 0.1 + random.uniform(0, 0.05)
+        await asyncio.sleep(jitter)
+
+    while not stop_event.is_set():
+        # ── Admission gate ────────────────────────────────────────
+        if not mgr.pool_admit(spec.name, weights, active_pools_fn(), free_pool_set):
+            try:
+                await asyncio.wait_for(stop_event.wait(), timeout=admission_poll)
+                break  # stop_event triggered during wait
+            except TimeoutError:
+                continue
+
+        # ── Claim ────────────────────────────────────────────────
+        try:
+            batch = await spec.claim()
+        except Exception as exc:  # noqa: BLE001 — log and continue
+            spec.health.error_count += 1
+            spec.health.last_error = f"claim: {exc!r}"
+            logger.exception("%s claim failed: %s", tag, exc)
+            try:
+                await asyncio.wait_for(stop_event.wait(), timeout=backoff.next_sleep())
+                break
+            except TimeoutError:
+                continue
+
+        if batch is None:
+            spec.health.consecutive_empty_claims += 1
+            sleep_for = backoff.next_sleep()
+            try:
+                await asyncio.wait_for(stop_event.wait(), timeout=sleep_for)
+                break
+            except TimeoutError:
+                continue
+
+        # Reset backoff and empty-claim counter after a successful claim.
+        backoff.reset()
+        spec.health.consecutive_empty_claims = 0
+        batch_id = spec.health.mark_batch_started()
+
+        # ── Process ───────────────────────────────────────────────
+        try:
+            if process_timeout is None:
+                count = await spec.process(batch)
+            else:
+                # Bound a single in-flight call so one wedged processor cannot
+                # freeze its pool (and, through the stall watchdog, the whole
+                # run) forever.  Once the call exceeds the pool's in-flight age
+                # bound it is abandoned HERE in its own pool — cancelled, its
+                # claim released below so the identity is reclaimable — and the
+                # pool resumes claiming instead of the run stopping.
+                count = await asyncio.wait_for(
+                    spec.process(batch), timeout=process_timeout
+                )
+            # A processor returning anything but a count violates ProcessFn,
+            # and adding it straight into the counter surfaces that violation
+            # as an arithmetic error several frames from its cause. Name the
+            # pool and the offending type instead; the handler below then
+            # releases the claim on the ordinary error path.
+            if isinstance(count, bool) or not isinstance(count, int):
+                raise TypeError(
+                    f"{spec.name} batch processor returned "
+                    f"{type(count).__name__}, expected an int count of "
+                    "processed items"
+                )
+            spec.health.total_processed += count
+            spec.health.mark_progress()
+            logger.debug("%s processed %d items", tag, count)
+        except TimeoutError:
+            # A single wedged call is abandoned in its own pool, never a
+            # run-wide stop: the process coroutine was cancelled by the
+            # timeout, the row claim is released so the identity is
+            # reclaimable rather than stranded, the pool's liveness clock is
+            # reset, and the loop resumes claiming.  Deliberately NOT counted
+            # as an error so a run that recovers is not promoted to failed.
+            spec.health.last_error = (
+                "process exceeded in-flight age bound — wedged call abandoned"
+            )
+            logger.warning(
+                "%s abandoned a wedged batch after %.0fs (claim released; resuming)",
+                tag,
+                process_timeout or 0.0,
+            )
+            if spec.release is not None:
+                try:
+                    await spec.release(batch)
+                except Exception as rel_exc:  # noqa: BLE001
+                    logger.exception(
+                        "%s release failed after wedge abandon (continuing): %s",
+                        tag,
+                        rel_exc,
+                    )
+            spec.health.mark_progress()
+        except asyncio.CancelledError:
+            logger.info("%s cancelled mid-batch", tag)
+            raise
+        except ProviderBudgetExhausted as exc:
+            # Peer to cost-limit / time-limit: an exhausted provider account
+            # cannot be retried against. Signal global shutdown so all pools
+            # drain rather than spinning on claim → exhausted → release.
+            spec.health.last_error = f"provider_budget_exhausted: {exc}"
+            logger.warning(
+                "%s provider budget exhausted — signalling shutdown: %s",
+                tag,
+                exc,
+            )
+            if provider_exhausted_event is not None:
+                provider_exhausted_event.set()
+            stop_event.set()
+            if spec.release is not None:
+                try:
+                    await spec.release(batch)
+                except Exception as rel_exc:  # noqa: BLE001
+                    logger.exception(
+                        "%s release failed (continuing): %s",
+                        tag,
+                        rel_exc,
+                    )
+            break
+        except Exception as exc:  # noqa: BLE001
+            spec.health.error_count += 1
+            spec.health.last_error = f"process: {exc!r}"
+            logger.exception("%s process failed: %s", tag, exc)
+            if spec.release is not None:
+                try:
+                    await spec.release(batch)
+                except Exception as rel_exc:  # noqa: BLE001
+                    logger.exception(
+                        "%s release failed (continuing): %s",
+                        tag,
+                        rel_exc,
+                    )
+        finally:
+            spec.health.mark_batch_finished(batch_id)
+            # A pending-count snapshot taken before this batch completed or
+            # released cannot prove quiescence: the batch may have created
+            # downstream work or made its own claim eligible again.
+            spec.health._completion_epoch += 1
+    logger.info("%s exiting cleanly", tag)
+
+
+# Consecutive reserve-failure threshold across all pools before declaring
+# budget saturation.  When every pool has failed to reserve budget this many
+# times in a row, the remaining budget is too small to fund any batch —
+# equivalent to "remaining < smallest batch" but signal-driven.
+#
+# Sizing a budget against this gate
+# ---------------------------------
+# Reservations estimate expected provider cost, so the budget a run needs is
+# set by the requests it may hold concurrently as well as the spend it expects
+# to bill. ``model_provider_exposure`` prices one request as
+#
+#     (request_tokens + chat-framing allowance) x prompt_rate / 1e6
+#   + expected_completion_allowance x completion_rate / 1e6
+#   + per_request_rate
+#
+# where request_tokens converts the serialized request's byte length at the
+# measured bytes-per-token floor, and the completion term is the allowance
+# such a response actually reaches rather than the published maximum,
+# using the route's centrally cataloged expected rates. Missing price authority
+# refuses admission instead of substituting the policy ceiling. The immutable
+# provider ``max_price`` cap remains a separate dispatch boundary, and actual
+# charges still count against the campaign hard stop.
+#
+# Two consequences that a nominal-looking budget hides:
+#
+# * A budget below the concurrent request set cannot start all eligible work.
+#   Size the run from rendered-request estimates and leave room for retries.
+# * The failure counter this threshold reads is keyed by PHASE, shared by every
+#   replica of that pool.  A pool running N replicas issues N reservations
+#   against one pot, so a budget funding fewer than N concurrent requests leaves
+#   the surplus replicas failing in a tight claim loop; ten such failures land
+#   within milliseconds, long before an in-flight request can return and reset
+#   the counter.  Keeping the gate honest therefore requires
+#   ``budget >= replicas x per-request exposure``, or a replica count lowered
+#   to match the budget (``ITER_CODEX_SN_POOLS_<POOL>_REPLICAS``).
+SATURATION_THRESHOLD: int = 10
+
+
+async def _budget_watchdog(
+    mgr: BudgetManager,
+    stop_event: asyncio.Event,
+    poll: float = 5.0,
+    *,
+    budget_saturated_event: asyncio.Event | None = None,
+) -> None:
+    """Poll ``mgr`` and set ``stop_event`` when budget runs out.
+
+    Stop condition: ``mgr.hard_exhausted()`` — committed spend ≥ cost limit.
+
+    Uses ``hard_exhausted()`` (committed spend ≥ cost limit) instead of
+    ``exhausted()`` (pool ≤ 0) so that a large in-flight reservation does
+    not trigger a premature global shutdown.  Reservations that are later
+    partially refunded would otherwise cause a false positive.
+
+    The function terminates as soon as ``stop_event`` is set — whether by
+    this watchdog itself or by an external signal — so it never outlives the
+    pool tasks.
+    """
+    while not stop_event.is_set():
+        if mgr.hard_exhausted():
+            logger.info(
+                "run_pools: budget exhausted (spend >= limit) — signalling graceful shutdown"
+            )
+            if budget_saturated_event is not None:
+                budget_saturated_event.set()
+            stop_event.set()
+            return
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=poll)
+        except TimeoutError:
+            continue
+
+
+async def _budget_saturation_watchdog(
+    mgr: BudgetManager,
+    pools: list[PoolSpec],
+    stop_event: asyncio.Event,
+    budget_saturated_event: asyncio.Event,
+    *,
+    poll: float = 2.0,
+) -> None:
+    """Set ``stop_event`` when the budget can no longer fund any
+    progressable pool.
+
+    The gate evaluates saturation only over **live** pools — those that
+    still have pending work (``pending_count > 0``) — and fires when
+    every live pool is budget-saturated.  This replaces the old
+    ``near_exhausted()`` $0.75 floor *and* fixes the all-pools-conjunction
+    defect that produced the 0-token indefinite spin:
+
+    ``BudgetManager`` advances a pool's reserve-failure counter only on an
+    *attempted* reserve that fails.  A pool that runs out of *work* (not
+    *budget*) stops calling ``reserve`` and so its counter freezes below
+    threshold — it is reported "not saturated" forever.  The previous gate
+    required **all** pools (including such idle pools) to be saturated, so
+    a single drained pool — typically the free local-GPU ``generate_name``
+    pool once its sources are exhausted — vetoed shutdown while the paid
+    review/refine pools sat budget-blocked.  With no exit path (spend below
+    the hard limit, pending work outstanding so the idle watchdog also
+    stays quiet) the run spun for hours making zero LLM calls.
+
+    By scoping the conjunction to pools with outstanding work we exit
+    promptly with ``budget_exhausted`` the moment paid work becomes
+    unaffordable, and we never kill a free pool that is still productively
+    composing (such a pool keeps reserving successfully → counter resets →
+    not saturated → it remains a live, unsaturated pool that holds the gate
+    open).  The stall watchdog in ``_idle_exhaustion_watchdog`` remains the
+    general liveness backstop for *non-budget* wedges (deadlock, claim
+    divergence, throttle interactions) that this gate cannot detect.
+    """
+    while not stop_event.is_set():
+        live = [p for p in pools if p.health.pending_count > 0]
+        if live and all(mgr.pool_budget_saturated(p.name) for p in live):
+            logger.info(
+                "run_pools: budget saturated — every pool with pending "
+                "work %s exhausted its reserve-failure threshold; remaining "
+                "budget cannot fund any eligible batch — signalling "
+                "graceful shutdown",
+                [p.name for p in live],
+            )
+            budget_saturated_event.set()
+            stop_event.set()
+            return
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=poll)
+        except TimeoutError:
+            continue
+
+
+async def _idle_exhaustion_watchdog(
+    pools: list[PoolSpec],
+    stop_event: asyncio.Event,
+    idle_exhausted_event: asyncio.Event,
+    stalled_event: asyncio.Event,
+    *,
+    poll: float = 1.0,
+    idle_polls: int = 30,
+    stall_seconds: float = 600.0,
+    in_flight_stall_seconds: float | None = None,
+    require_pending_observation: bool = False,
+) -> None:
+    """Set ``stop_event`` after sustained genuine idleness across all pools.
+
+    Watches every pool every *poll* seconds.  A poll is considered
+    "globally idle" iff **all** pools simultaneously satisfy:
+
+    * ``pending_count == 0`` (no eligible work in scope),
+    * ``in_flight == 0`` (no claimed batch can still produce work), AND
+    * when a pending callback is installed, pending counts were refreshed after
+      the latest batch completion or release, AND
+    * ``total_processed`` did not increase since the last poll (no
+      pool is currently making progress).
+
+    After *idle_polls* consecutive globally-idle observations
+    (default 30 polls × 1s ≈ 30s), the watchdog logs the stop reason,
+    sets ``idle_exhausted_event`` so the caller can map the run to
+    ``stop_reason='no_eligible_work'``, then sets ``stop_event`` to
+    drive cooperative shutdown.
+
+    Why this exists
+    ---------------
+    Without this watchdog ``pool_loop`` never exits autonomously — it
+    only stops when ``stop_event`` is set externally.  When a
+    domain-restricted run (or any run that genuinely runs out of
+    eligible work) sees its pending counts drop to zero, the pools
+    enter an indefinite empty-claim spin.  This wastes resources and
+    leaves SNRun nodes un-finalised when the user finally has to kill
+    the process.
+
+    Counter resets on any forward progress so the watchdog does not
+    misfire during a transient lull (e.g. a slow generate batch
+    feeding the review pool).
+
+    An in-flight call that exceeds *in_flight_stall_seconds* (default:
+    *stall_seconds*) is the signal of a wedged call, not a dead run: its own
+    pool abandons it (the process call is bounded by the same bound in
+    ``pool_loop``, then cancelled with its claim released), so the watchdog
+    resets its forward-progress clock on such an observation and lets the
+    pools continue rather than tearing the run down over one call. The typed
+    stall — ``stalled_event`` then ``stop_event`` — fires only for a genuine
+    deadlock: pending work, **nothing in flight anywhere**, and no progress
+    for *stall_seconds*.
+    """
+    snapshots: dict[str, int] = {p.name: p.health.total_processed for p in pools}
+    consecutive_idle = 0
+    # Stall guard: total work done across all pools and the wall-clock time of the
+    # last forward progress. Catches the case where pending_count stays > 0 (so the
+    # idle condition never trips) but NO pool advances — e.g. a residue of items
+    # wedged in a claim-revert / refine-churn cycle that can never be processed.
+    # Without this a run idles indefinitely (observed: 4h, 0 LLM calls, ~6 stuck
+    # items) until killed, leaving the SNRun un-finalised.
+    last_total = sum(snapshots.values())
+    last_progress_ts = time.time()
+    in_flight_age_limit = (
+        stall_seconds if in_flight_stall_seconds is None else in_flight_stall_seconds
+    )
+    while not stop_event.is_set():
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=poll)
+            return
+        except TimeoutError:
+            pass
+
+        completion_epoch = sum(p.health._completion_epoch for p in pools)
+        pending_is_fresh = not require_pending_observation or all(
+            p.health._pending_observation_epoch == completion_epoch for p in pools
+        )
+        all_idle = pending_is_fresh
+        for p in pools:
+            if p.health.pending_count > 0 or p.health.in_flight > 0:
+                all_idle = False
+            current = p.health.total_processed
+            if current > snapshots.get(p.name, 0):
+                all_idle = False
+            snapshots[p.name] = current
+
+        if all_idle:
+            consecutive_idle += 1
+            if consecutive_idle >= idle_polls:
+                logger.info(
+                    "run_pools: no eligible work for %d consecutive polls "
+                    "(~%.0fs) — signalling graceful shutdown",
+                    consecutive_idle,
+                    consecutive_idle * poll,
+                )
+                idle_exhausted_event.set()
+                stop_event.set()
+                return
+        else:
+            consecutive_idle = 0
+
+        # Stall detection: forward progress across ALL pools (independent of the
+        # all-idle check, which never trips while pending_count > 0).
+        current_total = sum(p.health.total_processed for p in pools)
+        if current_total > last_total:
+            last_total = current_total
+            last_progress_ts = time.time()
+        else:
+            now = time.time()
+            overdue_in_flight: dict[str, float] = {}
+            for p in pools:
+                if p.health.in_flight <= 0:
+                    continue
+                age = p.health.overdue_in_flight_age(
+                    age_limit=in_flight_age_limit,
+                    now=now,
+                )
+                if age is not None:
+                    overdue_in_flight[p.name] = age
+            no_in_flight = all(p.health.in_flight == 0 for p in pools)
+            if overdue_in_flight:
+                # An in-flight call has exceeded the pool's age bound; its own
+                # pool abandons it (timeout -> cancel -> release the claim ->
+                # re-claim) rather than the watchdog stopping the run over it.
+                # Reset the forward-progress clock and let the pools continue,
+                # so other pools' claimable work completes instead of the whole
+                # run being torn down for one wedged call.  The hard stop below
+                # requires NOTHING in flight anywhere.
+                last_progress_ts = now
+                continue
+            should_stall = (
+                any(p.health.pending_count > 0 for p in pools)
+                and no_in_flight
+                and (now - last_progress_ts) >= stall_seconds
+            )
+            if not should_stall:
+                continue
+            logger.warning(
+                "run_pools: no forward progress for ~%.0fs despite pending work "
+                "(pending=%s) and nothing in flight anywhere — genuinely "
+                "deadlocked; signalling graceful shutdown",
+                stall_seconds,
+                {p.name: p.health.pending_count for p in pools},
+            )
+            stalled_event.set()
+            stop_event.set()
+            return
+
+
+async def _pending_count_watchdog(
+    pools: list[PoolSpec],
+    stop_event: asyncio.Event,
+    pending_fn: Callable[[], dict[str, int]],
+    pending_count_failed_event: asyncio.Event | None = None,
+    poll: float = 5.0,
+) -> None:
+    """Poll ``pending_fn`` and push per-pool pending counts to ``PoolHealth``.
+
+    Runs alongside the pool tasks and the budget watchdog.  Calling
+    ``pending_fn()`` every *poll* seconds makes ``active_pools_fn`` accurate
+    in headless / ``--quiet`` mode where the Rich display ticker is absent.
+    Without this watchdog the fairness mechanism degrades to unconditional
+    admission for all pools, allowing cheap pools (generate, regen) to starve
+    expensive-but-important pools (enrich, review_docs).
+
+    The watchdog performs an initial poll immediately so that pending counts are
+    populated before the first admission decision.  It then sleeps *poll*
+    seconds between subsequent refreshes.
+
+    Pool names in the ``pending_fn`` result that do not match a live pool are
+    ignored. Missing live pools, invalid counts, and callback failures stop the
+    run because they leave terminal emptiness unproven.
+    """
+    pool_by_name = {p.name: p for p in pools}
+    failure_event = pending_count_failed_event or asyncio.Event()
+
+    def _refresh() -> bool:
+        # Capture the completion frontier before querying.  If a claimed batch
+        # completes or releases while the query runs, its epoch advances and
+        # this observation remains deliberately stale until the next refresh.
+        observed_epoch = sum(p.health._completion_epoch for p in pools)
+        try:
+            counts = pending_fn()
+        except Exception as exc:  # noqa: BLE001
+            logger.error("pending_count_watchdog: pending_fn raised: %s", exc)
+            failure_event.set()
+            stop_event.set()
+            return False
+        missing = set(pool_by_name).difference(counts)
+        invalid = {
+            name: counts.get(name)
+            for name in pool_by_name
+            if not isinstance(counts.get(name), int) or counts.get(name, -1) < 0
+        }
+        if missing or invalid:
+            logger.error(
+                "pending_count_watchdog: incomplete or invalid counts "
+                "(missing=%s invalid=%s)",
+                sorted(missing),
+                invalid,
+            )
+            failure_event.set()
+            stop_event.set()
+            return False
+        for name, pool in pool_by_name.items():
+            pool.health.pending_count = counts[name]
+            pool.health._pending_observation_epoch = observed_epoch
+        logger.debug(
+            "pending_count_watchdog: updated pending counts — %s",
+            {n: pool_by_name[n].health.pending_count for n in pool_by_name},
+        )
+        return True
+
+    # First poll before any admission decisions.
+    if not _refresh():
+        return
+
+    while not stop_event.is_set():
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=poll)
+            break  # stop_event triggered
+        except TimeoutError:
+            if not _refresh():
+                return
+
+
+async def run_pools(
+    pools: list[PoolSpec],
+    mgr: BudgetManager,
+    stop_event: asyncio.Event,
+    *,
+    pending_fn: Callable[[], dict[str, int]] | None = None,
+    pending_poll_interval: float = 5.0,
+    grace_period: float = 60.0,
+    weights: dict[str, float] = POOL_WEIGHTS,
+    idle_exhausted_event: asyncio.Event | None = None,
+    budget_saturated_event: asyncio.Event | None = None,
+    provider_exhausted_event: asyncio.Event | None = None,
+    stalled_event: asyncio.Event | None = None,
+    pending_count_failed_event: asyncio.Event | None = None,
+    idle_exhaustion_poll: float = 1.0,
+    idle_exhaustion_polls: int = 30,
+    stall_seconds: float = 600.0,
+    in_flight_stall_seconds: float | None = None,
+    free_pool_set: set[str] | None = None,
+) -> dict[str, PoolHealth]:
+    """Run all pool loops concurrently and orchestrate cooperative shutdown.
+
+    Returns a mapping of pool name → final ``PoolHealth`` snapshot.
+
+    Shutdown sequence:
+
+    1. ``stop_event.set()`` (set by caller, e.g. via ``run_discovery``
+       3-press shutdown, or by the budget watchdog when exhausted).
+    2. Each pool exits its claim loop and returns; pools currently
+       processing a batch finish that batch normally.
+    3. The harness waits up to ``grace_period`` seconds for all pool
+       tasks to complete naturally.
+    4. Any pool still running after grace is hard-cancelled.
+    5. ``mgr.drain_pending()`` flushes the LLMCost write queue.
+
+    A ``_budget_watchdog`` task runs alongside the pool tasks and sets
+    ``stop_event`` as soon as ``mgr.exhausted()`` flips True, propagating
+    clean shutdown through the existing grace path.
+
+    When *pending_fn* is provided, a ``_pending_count_watchdog`` task polls
+    it every *pending_poll_interval* seconds and updates each pool's
+    ``PoolHealth.pending_count``.  This keeps ``active_pools_fn`` accurate in
+    headless / ``--quiet`` mode where the Rich display ticker is absent.
+    Without it, the ``not active_pools`` bypass in ``BudgetManager.pool_admit``
+    admits all pools unconditionally, allowing cheap pools to exhaust the
+    budget before slower-but-higher-priority pools (e.g. enrich) can claim
+    any work.
+
+    The caller is responsible for finalizing the SNRun row after this
+    function returns.
+    """
+
+    def active_pools_fn() -> set[str]:
+        # A pool is "active" if its claim queue has pending work AND it has
+        # not been repeatedly admitted but returned nothing from claim.
+        # ``consecutive_empty_claims`` tracks how many times in a row a pool
+        # was admitted but claim returned None — this happens when the display
+        # pending query and the claim eligibility query have different criteria.
+        # Excluding such pools from the denominator prevents a fairness deadlock
+        # where productive pools can never be admitted because pools with phantom
+        # pending counts occupy weight share.
+        # The counter resets on any successful claim, so pools re-enter when
+        # conditions change (e.g. after a stale-claim timeout expires).
+        #
+        # Self-healing: if pending_count has grown since the last evaluation,
+        # new eligible nodes appeared in the graph (e.g. the generate pool just
+        # produced names that are now enrich-eligible).  Reset
+        # consecutive_empty_claims so the pool can re-enter contention
+        # immediately rather than waiting for a stale-claim timeout.
+        result: set[str] = set()
+        for p in pools:
+            current = p.health.pending_count
+            if (
+                current > p.health._last_pending_count
+                and p.health.consecutive_empty_claims > 0
+            ):
+                logger.debug(
+                    "pool[%s] pending grew %d→%d — resetting consecutive_empty_claims",
+                    p.name,
+                    p.health._last_pending_count,
+                    current,
+                )
+                p.health.consecutive_empty_claims = 0
+            p.health._last_pending_count = current
+            # Scale threshold by replicas: with N replicas, empty claims
+            # accumulate N× faster so the threshold must scale accordingly.
+            threshold = _EMPTY_CLAIM_EXCLUDE_THRESHOLD * p.replicas
+            if current > 0 and p.health.consecutive_empty_claims < threshold:
+                result.add(p.name)
+        return result
+
+    # Resolve the free-pool set once (config is static per run): pools whose
+    # model routes to a local/zero-cost endpoint bypass the spend-fairness gate.
+    if free_pool_set is None:
+        free_pool_set = free_pools(tuple(p.name for p in pools))
+    if free_pool_set:
+        logger.info(
+            "run_pools: free (zero-cost) pools bypass spend-fairness gate: %s",
+            sorted(free_pool_set),
+        )
+
+    # Complete the initial graph-backed observation before creating any pool
+    # task, so a failed or incomplete count stops admission before a claim can
+    # launch.
+    pending_watchdog_task: asyncio.Task[None] | None = None
+    if pending_fn is not None:
+        count_failure_event = pending_count_failed_event or asyncio.Event()
+        pending_watchdog_task = asyncio.create_task(
+            _pending_count_watchdog(
+                pools,
+                stop_event,
+                pending_fn,
+                count_failure_event,
+                pending_poll_interval,
+            ),
+            name="pending_count_watchdog",
+        )
+        await asyncio.sleep(0)
+
+    # Each pool bounds its in-flight process calls at the same age the
+    # watchdog treats a call as overdue, so a wedged call is abandoned by its
+    # own pool instead of stopping the whole run.
+    process_timeout = (
+        in_flight_stall_seconds
+        if in_flight_stall_seconds is not None
+        else stall_seconds
+    )
+    tasks = []
+    for p in pools:
+        for replica_idx in range(p.replicas):
+            tasks.append(
+                asyncio.create_task(
+                    pool_loop(
+                        p,
+                        mgr,
+                        stop_event,
+                        active_pools_fn=active_pools_fn,
+                        weights=weights,
+                        replica_idx=replica_idx,
+                        provider_exhausted_event=provider_exhausted_event,
+                        free_pool_set=free_pool_set,
+                        process_timeout=process_timeout,
+                    ),
+                    name=f"pool[{p.name}#{replica_idx}]",
+                )
+            )
+
+    watchdog_task = asyncio.create_task(
+        _budget_watchdog(
+            mgr, stop_event, budget_saturated_event=budget_saturated_event
+        ),
+        name="budget_watchdog",
+    )
+
+    # Budget-saturation watchdog: signal-driven replacement for the old
+    # ``near_exhausted()`` shutdown gate.  Instead of a magic dollar floor,
+    # watches for all pools consecutively failing to reserve budget.
+    sat_event = budget_saturated_event or asyncio.Event()
+    saturation_watchdog_task = asyncio.create_task(
+        _budget_saturation_watchdog(mgr, pools, stop_event, sat_event),
+        name="budget_saturation_watchdog",
+    )
+
+    # Idle-exhaustion watchdog: exits the run when all pools have been
+    # genuinely idle (pending_count == 0 and no progress) for a sustained
+    # window.  Without this, ``pool_loop`` never exits autonomously and a
+    # run that exhausts its scope (e.g. ``--physics-domain X`` with no
+    # remaining sources) spins forever until SIGINT.
+    idle_event = idle_exhausted_event or asyncio.Event()
+    stall_event = stalled_event or asyncio.Event()
+    idle_watchdog_task = asyncio.create_task(
+        _idle_exhaustion_watchdog(
+            pools,
+            stop_event,
+            idle_event,
+            stall_event,
+            poll=idle_exhaustion_poll,
+            idle_polls=idle_exhaustion_polls,
+            require_pending_observation=pending_fn is not None,
+            stall_seconds=stall_seconds,
+            in_flight_stall_seconds=in_flight_stall_seconds,
+        ),
+        name="idle_exhaustion_watchdog",
+    )
+
+    # Wait until stop_event is set OR all pools complete naturally.
+    stop_waiter = asyncio.create_task(stop_event.wait(), name="stop_waiter")
+    done, pending = await asyncio.wait(
+        tasks + [stop_waiter],
+        return_when=asyncio.FIRST_COMPLETED,
+    )
+
+    # If only stop_waiter completed, give pools a grace period.
+    if stop_waiter in done:
+        logger.info(
+            "stop signal received — granting %.0fs grace for in-flight batches",
+            grace_period,
+        )
+        try:
+            await asyncio.wait_for(asyncio.gather(*tasks), timeout=grace_period)
+        except TimeoutError:
+            logger.warning("grace period expired — cancelling stragglers")
+            for t in tasks:
+                if not t.done():
+                    t.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+    else:
+        stop_waiter.cancel()
+        await asyncio.gather(stop_waiter, return_exceptions=True)
+        # A pool task finished before stop_event was set (e.g., crash or
+        # CancelledError).  Set stop_event so remaining pools exit their
+        # while-loop instead of blocking the gather indefinitely.
+        stop_event.set()
+        # If a pool exited with an exception, surface it after others finish.
+        try:
+            await asyncio.wait_for(
+                asyncio.gather(*tasks, return_exceptions=True),
+                timeout=grace_period,
+            )
+        except TimeoutError:
+            logger.warning(
+                "run_pools: else-branch gather timed out after %.0fs — "
+                "cancelling remaining pool tasks",
+                grace_period,
+            )
+            for t in tasks:
+                if not t.done():
+                    t.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Cancel watchdog (it may already be done if it triggered the shutdown).
+    if not watchdog_task.done():
+        watchdog_task.cancel()
+    await asyncio.gather(watchdog_task, return_exceptions=True)
+
+    if not idle_watchdog_task.done():
+        idle_watchdog_task.cancel()
+    await asyncio.gather(idle_watchdog_task, return_exceptions=True)
+
+    if not saturation_watchdog_task.done():
+        saturation_watchdog_task.cancel()
+    await asyncio.gather(saturation_watchdog_task, return_exceptions=True)
+
+    if pending_watchdog_task is not None:
+        if not pending_watchdog_task.done():
+            pending_watchdog_task.cancel()
+        await asyncio.gather(pending_watchdog_task, return_exceptions=True)
+
+    # Drain LLMCost queue before final accounting (bounded to avoid hang).
+    try:
+        await asyncio.wait_for(mgr.drain_pending(), timeout=30.0)
+    except TimeoutError:
+        logger.warning("run_pools: drain_pending timed out after 30s — continuing")
+
+    # ── Quorum-completeness tripwire ───────────────────────────────────
+    # Reviews whose ≥2-model quorum did not complete (a secondary reviewer
+    # throttled or returned empty) are DEFERRED, not accepted on the single
+    # surviving review. Surface the per-axis deferral count so a throttled run
+    # is visible here rather than silently degrading name acceptance to a
+    # single model. Reset the tally afterwards so it does not leak across runs.
+    try:
+        from iter_codex.standard_names.worker_tasks.worker_review_names import (
+            quorum_incomplete_snapshot,
+            reset_quorum_incomplete,
+        )
+
+        run_id = getattr(mgr, "run_id", None)
+        deferrals = quorum_incomplete_snapshot(run_id)
+        for axis, n in sorted(deferrals.items()):
+            if n > 0:
+                logger.warning(
+                    "run_pools: rd_quorum %s deferred %d review(s) — quorum "
+                    "incomplete (secondary reviewer throttled/empty); names NOT "
+                    "accepted on a single review. Check provider rate limits.",
+                    axis,
+                    n,
+                )
+        reset_quorum_incomplete(run_id)
+    except Exception:  # noqa: BLE001 — telemetry only, never fail the run
+        logger.debug(
+            "run_pools: quorum-incomplete tripwire check failed", exc_info=True
+        )
+
+    return {p.name: p.health for p in pools}
+
+
+__all__ = [
+    "POOL_NAMES",
+    "POOL_WEIGHTS",
+    "FLUSH_POOL_NAMES",
+    "PoolHealth",
+    "PoolSpec",
+    "_pending_count_watchdog",
+    "_pool_is_free",
+    "free_pools",
+    "pool_loop",
+    "run_pools",
+]

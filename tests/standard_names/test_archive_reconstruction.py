@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.standard_names.signed_manifest import (
     SignedManifestAuthorityError,
     SignedManifestConflict,
     apply_signed_manifest,

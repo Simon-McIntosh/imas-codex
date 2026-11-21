@@ -27,7 +27,7 @@
 #
 # LiteLLM integration:
 #   Uncomment the ollama model entries in litellm_config.yaml and
-#   restart the proxy: imas-codex llm restart
+#   restart the proxy: iter-codex llm restart
 
 set -euo pipefail
 
@@ -41,7 +41,7 @@ export OLLAMA_NUM_PARALLEL=${OLLAMA_NUM_PARALLEL:-2}
 export OLLAMA_MAX_LOADED_MODELS=${OLLAMA_MAX_LOADED_MODELS:-1}
 
 # Ensure log directory exists
-mkdir -p ~/.local/share/imas-codex/logs
+mkdir -p ~/.local/share/iter-codex/logs
 
 echo "Starting Ollama LLM server on $(hostname) at $(date)"
 echo "GPU: $(nvidia-smi --id=$CUDA_VISIBLE_DEVICES --query-gpu=name --format=csv,noheader 2>/dev/null || echo 'unknown')"
@@ -63,4 +63,4 @@ if [ ! -d "$OLLAMA_MODELS" ]; then
 fi
 
 # Start Ollama server — exec replaces shell for clean signal handling
-exec ollama serve 2>&1 | tee -a ~/.local/share/imas-codex/logs/llm-local.log
+exec ollama serve 2>&1 | tee -a ~/.local/share/iter-codex/logs/llm-local.log

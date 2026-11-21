@@ -13,9 +13,9 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.review import jev_review
-from imas_codex.standard_names.review.audits import AuditReport
-from imas_codex.standard_names.review.checks import load_review_checks
+from iter_codex.standard_names.review import jev_review
+from iter_codex.standard_names.review.audits import AuditReport
+from iter_codex.standard_names.review.checks import load_review_checks
 
 ELECTROSTATIC_SCOPE = (
     "This quantity is the electrostatic potential in the plasma or at a "
@@ -171,7 +171,7 @@ class _Budget:
 async def test_the_review_docs_note_reads_every_binding_and_holds_on_none(
     monkeypatch,
 ):
-    from imas_codex.standard_names.worker_tasks import worker_review_docs as module
+    from iter_codex.standard_names.worker_tasks import worker_review_docs as module
 
     item = _item(ELECTROSTATIC_SCOPE, PHI_BINDINGS, "electrostatic_potential")
 
@@ -192,7 +192,7 @@ async def test_the_review_docs_note_reads_every_binding_and_holds_on_none(
         return results, 0.0
 
     monkeypatch.setattr(jev_review, "decide_batch", decide)
-    from imas_codex import settings as settings_module
+    from iter_codex import settings as settings_module
 
     monkeypatch.setattr(settings_module, "get_model", lambda _seat: "judge-model")
     dependency = lambda name: {  # noqa: E731
@@ -210,7 +210,7 @@ async def test_the_review_docs_note_reads_every_binding_and_holds_on_none(
 async def test_the_review_docs_note_still_holds_a_claim_no_binding_supports(
     monkeypatch,
 ):
-    from imas_codex.standard_names.worker_tasks import worker_review_docs as module
+    from iter_codex.standard_names.worker_tasks import worker_review_docs as module
 
     item = _item(ELECTROSTATIC_SCOPE, PHI_BINDINGS, "electrostatic_potential")
 
@@ -226,7 +226,7 @@ async def test_the_review_docs_note_still_holds_a_claim_no_binding_supports(
         return results, 0.0
 
     monkeypatch.setattr(jev_review, "decide_batch", decide)
-    from imas_codex import settings as settings_module
+    from iter_codex import settings as settings_module
 
     monkeypatch.setattr(settings_module, "get_model", lambda _seat: "judge-model")
     dependency = lambda name: {  # noqa: E731

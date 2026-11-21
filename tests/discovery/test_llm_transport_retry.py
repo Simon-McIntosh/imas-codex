@@ -16,7 +16,7 @@ import httpx
 import pytest
 from pydantic import BaseModel
 
-from imas_codex.discovery.base.llm import acall_llm_structured
+from iter_codex.discovery.base.llm import acall_llm_structured
 
 _MODEL = "openrouter/qwen/qwen-max"
 _MAX_RETRIES = 3
@@ -28,7 +28,7 @@ class _Answer(BaseModel):
 
 @pytest.fixture(autouse=True)
 def _api_key(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-test")
 
 
 async def _call(max_retries: int = _MAX_RETRIES):
@@ -98,7 +98,7 @@ async def test_the_retry_set_is_read_from_the_transient_helper() -> None:
         patch("litellm.acompletion", fake),
         patch("asyncio.sleep", sleep),
         patch(
-            "imas_codex.discovery.base.llm._transient_transport_errors",
+            "iter_codex.discovery.base.llm._transient_transport_errors",
             return_value=(_SeamTransportError,),
         ),
         pytest.raises(ValueError, match=f"failed after {_MAX_RETRIES} attempts"),

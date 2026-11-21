@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names.graph_store.graph_lineage import (
+from iter_codex.standard_names.graph_store.graph_lineage import (
     fetch_review_feedback_for_sources,
 )
 
@@ -18,7 +18,7 @@ class TestFetchReviewFeedbackForSources:
     def test_empty_input_short_circuits(self) -> None:
         """Empty / None input returns {} without calling the graph."""
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             assert fetch_review_feedback_for_sources(None) == {}
             assert fetch_review_feedback_for_sources([]) == {}
@@ -52,7 +52,7 @@ class TestFetchReviewFeedbackForSources:
             ]
         )
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
@@ -103,7 +103,7 @@ class TestFetchReviewFeedbackForSources:
             ]
         )
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
@@ -128,7 +128,7 @@ class TestFetchReviewFeedbackForSources:
             ]
         )
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
@@ -165,7 +165,7 @@ class TestFetchReviewFeedbackForSources:
             ]
         )
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
@@ -189,7 +189,7 @@ class TestSourceToNameEdge:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
@@ -238,7 +238,7 @@ class TestSourceToNameEdge:
             ]
         )
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)

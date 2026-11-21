@@ -4,9 +4,9 @@ For every live StandardName the mismatch axis compares the SN's declared unit
 against the unit each of its DD source paths declares, normalising both sides
 through the single canonical authority
 (:func:`imas_standard_names.canonical_unit`, via
-:mod:`imas_codex.units.dd_unit_exceptions`) so ordering-only and spelling-only
+:mod:`iter_codex.units.dd_unit_exceptions`) so ordering-only and spelling-only
 differences collapse. Two curated exception classes are suppressed rather than
-flagged (see ``imas_codex/units/dd_unit_exceptions.yaml``): DD-side unit bugs
+flagged (see ``iter_codex/units/dd_unit_exceptions.yaml``): DD-side unit bugs
 (the DD path carries a wrong unit and the SN correctly overrides it) and unit
 equivalences (two canonical forms that are the same physical unit).
 
@@ -19,7 +19,7 @@ and not subject to the live-unit invariant.
 
 import pytest
 
-from imas_codex.units.dd_unit_exceptions import (
+from iter_codex.units.dd_unit_exceptions import (
     canonical_or_none,
     dd_unit_bug_globs,
     units_agree,

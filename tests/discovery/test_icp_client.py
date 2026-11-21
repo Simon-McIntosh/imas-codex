@@ -10,15 +10,15 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from imas_codex.discovery.icp import (
+from iter_codex.discovery.icp import (
     ICPAuthenticationError,
     ICPClient,
     ICPConfigurationError,
     ICPRequestRefused,
     client as module,
 )
-from imas_codex.discovery.wiki.auth import CredentialManager, CredentialStoreUnavailable
-from imas_codex.discovery.wiki.confluence import ConfluenceClient
+from iter_codex.discovery.wiki.auth import CredentialManager, CredentialStoreUnavailable
+from iter_codex.discovery.wiki.confluence import ConfluenceClient
 
 ORIGIN = "https://integration.example.test"
 APPLICATION_ORIGINS = (ORIGIN, "https://production.example.test")
@@ -39,7 +39,7 @@ def private_config(monkeypatch, request):
         "sign_in_origins": [IDENTITY, GATEWAY, *APPLICATION_ORIGINS],
         "gateway_sign_in_paths": ["/gateway/sign-in"],
     }
-    monkeypatch.setenv("IMAS_CODEX_ICP_FACILITY", "test-facility")
+    monkeypatch.setenv("ITER_CODEX_ICP_FACILITY", "test-facility")
     monkeypatch.setattr(
         module, "get_facility_infrastructure", lambda facility: {"icp": config}
     )
@@ -71,8 +71,8 @@ def transport(monkeypatch):
 
 @pytest.fixture
 def client(monkeypatch, transport):
-    monkeypatch.setenv("IMAS_CODEX_ICP_ORIGIN", ORIGIN)
-    monkeypatch.setenv("IMAS_CODEX_ICP_DESCRIPTION_PATH", "/openapi.json")
+    monkeypatch.setenv("ITER_CODEX_ICP_ORIGIN", ORIGIN)
+    monkeypatch.setenv("ITER_CODEX_ICP_DESCRIPTION_PATH", "/openapi.json")
     manager = Mock(spec=CredentialManager)
     manager.get_stored_credentials.return_value = ("reader@example.test", "test-secret")
     monkeypatch.setattr(module, "CredentialManager", lambda: manager)
@@ -287,7 +287,7 @@ def test_api_verification_uses_description_instead_of_confluence_endpoint(
 def test_shared_sign_in_exchange_stays_on_guarded_transport(
     client, transport, monkeypatch, caplog
 ):
-    caplog.set_level(logging.DEBUG, logger="imas_codex.discovery.wiki.confluence")
+    caplog.set_level(logging.DEBUG, logger="iter_codex.discovery.wiki.confluence")
 
     def send(adapter, request, **kwargs):
         transport.append(request)
@@ -342,8 +342,8 @@ def test_description_read_and_origin_rooted_paths(client, transport):
 
 
 def test_missing_stored_credentials_refuses_before_any_request(monkeypatch, transport):
-    monkeypatch.setenv("IMAS_CODEX_ICP_ORIGIN", ORIGIN)
-    monkeypatch.setenv("IMAS_CODEX_ICP_DESCRIPTION_PATH", "/openapi.json")
+    monkeypatch.setenv("ITER_CODEX_ICP_ORIGIN", ORIGIN)
+    monkeypatch.setenv("ITER_CODEX_ICP_DESCRIPTION_PATH", "/openapi.json")
     monkeypatch.setenv("ITER_USERNAME", "environment@example.test")
     monkeypatch.setenv("ITER_PASSWORD", "environment-secret")
     manager = Mock(spec=CredentialManager)
@@ -405,13 +405,13 @@ def test_request_rate_is_applied_at_transport_boundary(client, transport, monkey
 
 
 @pytest.mark.parametrize(
-    "setting", ("IMAS_CODEX_ICP_ORIGIN", "IMAS_CODEX_ICP_DESCRIPTION_PATH")
+    "setting", ("ITER_CODEX_ICP_ORIGIN", "ITER_CODEX_ICP_DESCRIPTION_PATH")
 )
 def test_no_implicit_application_configuration(
     client, monkeypatch, setting, transport, private_config
 ):
     monkeypatch.delenv(setting)
-    if setting == "IMAS_CODEX_ICP_ORIGIN":
+    if setting == "ITER_CODEX_ICP_ORIGIN":
         private_config.pop("origin")
     with pytest.raises(ICPConfigurationError):
         ICPClient()
@@ -432,7 +432,7 @@ def test_selector_cannot_authorise_an_unlisted_host(
 ):
     kwargs = {}
     if selector == "environment":
-        monkeypatch.setenv("IMAS_CODEX_ICP_ORIGIN", "https://unlisted.example.test")
+        monkeypatch.setenv("ITER_CODEX_ICP_ORIGIN", "https://unlisted.example.test")
     else:
         kwargs["origin"] = "https://unlisted.example.test"
     with pytest.raises(ICPConfigurationError, match="private readable"):
@@ -483,8 +483,8 @@ def test_keyring_lookup_does_not_use_environment_or_prompt(monkeypatch):
 def test_unreadable_credential_store_reports_unavailable_before_http(
     monkeypatch, transport
 ):
-    monkeypatch.setenv("IMAS_CODEX_ICP_ORIGIN", ORIGIN)
-    monkeypatch.setenv("IMAS_CODEX_ICP_DESCRIPTION_PATH", "/openapi.json")
+    monkeypatch.setenv("ITER_CODEX_ICP_ORIGIN", ORIGIN)
+    monkeypatch.setenv("ITER_CODEX_ICP_DESCRIPTION_PATH", "/openapi.json")
     manager = Mock(spec=CredentialManager)
     manager.get_stored_credentials.side_effect = CredentialStoreUnavailable(
         "System keyring is unavailable; credential storage could not be read"

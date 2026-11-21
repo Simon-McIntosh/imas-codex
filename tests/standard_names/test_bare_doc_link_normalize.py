@@ -23,8 +23,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_store import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_store import (
     graph_audits as _owning_graph_audits,
     graph_catalog as _owning_graph_catalog,
     graph_doc_links as _owning_graph_doc_links,
@@ -32,7 +32,7 @@ from imas_codex.standard_names.graph_store import (
     graph_review_persistence as _owning_graph_review_persistence,
 )
 
-_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_GC_PATH = "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 
 class _RecordingGC:
@@ -61,7 +61,7 @@ class _RecordingGC:
 
 def test_scoped_normalize_links_live_and_strips_dead():
     """A bare [live] becomes a link; a bare [dead]/[unknown] is stripped."""
-    from imas_codex.standard_names.graph_store.graph_doc_links import (
+    from iter_codex.standard_names.graph_store.graph_doc_links import (
         _normalize_bare_doc_links,
     )
 
@@ -94,7 +94,7 @@ def test_scoped_normalize_links_live_and_strips_dead():
 
 def test_scoped_normalize_noop_when_no_brackets():
     """A doc with no bare brackets produces no write."""
-    from imas_codex.standard_names.graph_store.graph_doc_links import (
+    from iter_codex.standard_names.graph_store.graph_doc_links import (
         _normalize_bare_doc_links,
     )
 
@@ -166,12 +166,12 @@ def test_the_shared_fixture_asks_for_two_distinct_ports(monkeypatch):
 @pytest.mark.timeout(180)
 def test_normalize_prose_against_disposable_graph(disposable_neo4j_empty):
     """The real Cypher reads exact live ids and writes only changed documentation."""
-    from imas_codex.standard_names.graph_store.graph_doc_links import (
+    from iter_codex.standard_names.graph_store.graph_doc_links import (
         _normalize_bare_doc_links,
     )
 
-    assert os.environ["IMAS_CODEX_TEST_NEO4J_EPHEMERAL"] == "1"
-    assert os.environ["IMAS_CODEX_TEST_NEO4J_URI"] == disposable_neo4j_empty
+    assert os.environ["ITER_CODEX_TEST_NEO4J_EPHEMERAL"] == "1"
+    assert os.environ["ITER_CODEX_TEST_NEO4J_URI"] == disposable_neo4j_empty
     doc = (
         "Related [poloidal flux], [unknown phrase], and [dead name]. "
         "The [documented name](name:documented_name) is this quantity. "
@@ -246,8 +246,8 @@ def _patch_persist_gc(gc):
 
 def test_persist_reviewed_docs_normalizes_on_accept():
     """On accept, persist_reviewed_docs invokes the scoped bare-link normalize."""
-    import imas_codex.standard_names.graph_ops as g
-    from imas_codex.standard_names.review import holds
+    import iter_codex.standard_names.graph_ops as g
+    from iter_codex.standard_names.review import holds
 
     gc = MagicMock()
     gc.__enter__ = MagicMock(return_value=gc)
@@ -292,7 +292,7 @@ def test_persist_reviewed_docs_normalizes_on_accept():
 
 def test_persist_reviewed_docs_skips_normalize_when_not_accepted():
     """A below-threshold review (→ reviewed) does NOT run the accept normalize."""
-    import imas_codex.standard_names.graph_ops as g
+    import iter_codex.standard_names.graph_ops as g
 
     gc = MagicMock()
     gc.__enter__ = MagicMock(return_value=gc)

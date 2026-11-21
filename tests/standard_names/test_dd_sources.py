@@ -12,12 +12,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.sources.dd import _apply_unit_overrides
+from iter_codex.standard_names.sources.dd import _apply_unit_overrides
 
 
 @pytest.fixture
 def _signal_container_graph(seed_dd_resolutions):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     seed_dd_resolutions([{"path": "synthetic_ids/signal/value", "effective": "A"}])
     paths = ("magnetics/ip", "magnetics/rogowski_coil/current")
@@ -57,7 +57,7 @@ class TestSignalSignatureAdmission:
     no quantity child) are admitted as SN sources despite the leaf invariant."""
 
     def test_signal_structs_admitted(self, _signal_container_graph) -> None:
-        from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
         batches = extract_dd_candidates(
             ids_filter="magnetics", force=True, write_skipped=False, limit=400
@@ -104,7 +104,7 @@ class TestApplyUnitOverrides:
             },
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
+            "iter_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
         ) as mock_write:
             mock_write.return_value = 1
             kept = _apply_unit_overrides(rows, write_skipped=True)
@@ -133,7 +133,7 @@ class TestApplyUnitOverrides:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
+            "iter_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
         ) as mock_write:
             kept = _apply_unit_overrides(rows, write_skipped=True)
             mock_write.assert_not_called()
@@ -148,7 +148,7 @@ class TestApplyUnitOverrides:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
+            "iter_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
         ) as mock_write:
             kept = _apply_unit_overrides(rows, write_skipped=False)
             mock_write.assert_not_called()
@@ -196,7 +196,7 @@ class TestApplyUnitOverrides:
             },
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
+            "iter_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
         ) as mock_write:
             mock_write.return_value = 1
             kept = _apply_unit_overrides(rows, write_skipped=True)
@@ -230,7 +230,7 @@ class TestApplyUnitOverridesErrorHandling:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources",
             side_effect=RuntimeError("neo4j unreachable"),
         ):
             import logging as _logging
@@ -311,7 +311,7 @@ class TestUnparseableUnitCatchAll:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
+            "iter_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
         ) as mock_write:
             mock_write.return_value = 1
             _apply_unit_overrides(rows, write_skipped=True)

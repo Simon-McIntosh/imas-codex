@@ -11,11 +11,11 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import advisory_benchmark
-from imas_codex.standard_names.advisory_benchmark import (
+from iter_codex.standard_names import advisory_benchmark
+from iter_codex.standard_names.advisory_benchmark import (
     run_frozen_advisory_benchmark,
 )
-from imas_codex.standard_names.benchmark import BenchmarkProvenance
+from iter_codex.standard_names.benchmark import BenchmarkProvenance
 
 REVIEWERS = ("hosted/alpha", "hosted/bravo", "hosted/charlie")
 POPULATION = (
@@ -332,10 +332,10 @@ def test_runner_has_no_graph_write_or_persistence_dependency() -> None:
     assert not any(
         module.startswith(
             (
-                "imas_codex.graph",
-                "imas_codex.standard_names.graph_ops",
-                "imas_codex.standard_names.budget",
-                "imas_codex.standard_names.review.pipeline",
+                "iter_codex.graph",
+                "iter_codex.standard_names.graph_ops",
+                "iter_codex.standard_names.budget",
+                "iter_codex.standard_names.review.pipeline",
             )
         )
         for module in imported_modules

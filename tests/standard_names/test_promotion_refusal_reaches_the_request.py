@@ -16,8 +16,8 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from imas_codex.standard_names import promote as approval_mod
-from imas_codex.standard_names.promote import ApprovalChange, run_approval
+from iter_codex.standard_names import promote as approval_mod
+from iter_codex.standard_names.promote import ApprovalChange, run_approval
 
 PR_NUMBER = 7
 PR_URL = "https://github.com/x/y/pull/7"
@@ -59,7 +59,7 @@ def _drive(mark_approved: bool, transport: _Transport) -> object:
         patch.object(approval_mod, "_score_proposal", lambda *a, **k: 0.95),
         patch.object(approval_mod, "_apply_passing_review", lambda *a, **k: "accepted"),
         patch.object(approval_mod, "mark_catalog_name_approved", lambda *a, **k: mark_approved),
-        patch("imas_codex.graph.ghcr.github_api_call", transport),
+        patch("iter_codex.graph.ghcr.github_api_call", transport),
     ):
         return run_approval(
             isnc_dir="/unused",

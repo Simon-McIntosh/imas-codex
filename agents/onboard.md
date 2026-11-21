@@ -1,19 +1,19 @@
 # Facility Onboarding
 
-Step-by-step guide for adding a new fusion facility to IMAS Codex.
+Step-by-step guide for adding a new fusion facility to ITER Codex.
 
 ## Prerequisites
 
 Before starting:
 1. SSH access configured (`~/.ssh/config` with host alias)
-2. Neo4j running locally (`uv run imas-codex neo4j start`)
+2. Neo4j running locally (`uv run iter-codex neo4j start`)
 3. API keys set (`OPENROUTER_API_KEY` in `.env`)
 
 ## Quick Start (5-minute bootstrap)
 
 ```bash
 # 1. Create facility config file
-cat > imas_codex/config/facilities/myfacility.yaml << 'EOF'
+cat > iter_codex/config/facilities/myfacility.yaml << 'EOF'
 facility: myfacility
 name: My Facility Full Name
 machine: TOKAMAK
@@ -29,21 +29,21 @@ EOF
 ssh myfacility "hostname && whoami && pwd"
 
 # 3. Check and install remote tools
-uv run imas-codex tools check myfacility
-uv run imas-codex tools install myfacility
+uv run iter-codex tools check myfacility
+uv run iter-codex tools install myfacility
 
 # 4. Populate infrastructure via MCP (from repl() REPL)
 # See Phase 2 below
 
 # 5. Run initial discovery
-uv run imas-codex discover myfacility --cost-limit 1.0 --limit 50
+uv run iter-codex discover myfacility --cost-limit 1.0 --limit 50
 ```
 
 ## Phase 1: Configuration Setup
 
 ### Step 1.1: Create Public Config
 
-Create `imas_codex/config/facilities/<facility>.yaml`:
+Create `iter_codex/config/facilities/<facility>.yaml`:
 
 ```yaml
 # <FACILITY> - <Full Name>
@@ -112,7 +112,7 @@ chmod 700 ~/.ssh/sockets
 ssh myfacility "hostname && pwd"
 
 # Check remote tools status
-uv run imas-codex tools check myfacility
+uv run iter-codex tools check myfacility
 ```
 
 ## Phase 2: Remote Tools Installation
@@ -123,13 +123,13 @@ The CLI handles all installation automatically:
 
 ```bash
 # Check current status
-uv run imas-codex tools check myfacility
+uv run iter-codex tools check myfacility
 
 # Install required tools only (rg, fd)
-uv run imas-codex tools install myfacility --required-only
+uv run iter-codex tools install myfacility --required-only
 
 # Install all tools (recommended)
-uv run imas-codex tools install myfacility
+uv run iter-codex tools install myfacility
 ```
 
 Tools are installed to `~/bin` on the remote system. The installer:
@@ -241,10 +241,10 @@ add_to_graph('FacilityPath', [
 
 ```bash
 # Discovery with cost limit
-uv run imas-codex discover myfacility --cost-limit 10.0
+uv run iter-codex discover myfacility --cost-limit 10.0
 
 # Monitor progress
-uv run imas-codex discovery status myfacility
+uv run iter-codex discovery status myfacility
 ```
 
 ### Step 4.3: Handle Timeouts
@@ -273,10 +273,10 @@ update_infrastructure('jet', {
 
 ```bash
 # Discover MDSplus trees
-uv run imas-codex mdsplus discover jet
+uv run iter-codex mdsplus discover jet
 
 # Ingest tree structure
-uv run imas-codex mdsplus ingest jet magnetics --shot 12345
+uv run iter-codex mdsplus ingest jet magnetics --shot 12345
 ```
 
 ### Step 4.2: PPF/JPF (JET-specific)
@@ -303,10 +303,10 @@ After discovery finds high-value files:
 
 ```bash
 # Queue discovered files
-uv run imas-codex ingest queue jet
+uv run iter-codex ingest queue jet
 
 # Run ingestion
-uv run imas-codex ingest run jet --limit 100
+uv run iter-codex ingest run jet --limit 100
 ```
 
 ## Phase 5: Enrichment & Mapping
@@ -315,7 +315,7 @@ uv run imas-codex ingest run jet --limit 100
 
 ```bash
 # Run enrichment agent on DataNodes
-uv run imas-codex enrich jet --filter "score > 0.7"
+uv run iter-codex enrich jet --filter "score > 0.7"
 ```
 
 ### Step 5.2: Generate IMAS Mappings
@@ -374,10 +374,10 @@ grep -A5 "Host jet" ~/.ssh/config
 
 ```bash
 # Check facility is configured
-uv run python -c "from imas_codex.discovery.facility import get_facility; print(get_facility('jet'))"
+uv run python -c "from iter_codex.discovery.facility import get_facility; print(get_facility('jet'))"
 
 # Verify SSH works through the tool
-uv run python -c "from imas_codex.remote.tools import run; print(run('ls -la', facility='jet'))"
+uv run python -c "from iter_codex.remote.tools import run; print(run('ls -la', facility='jet'))"
 ```
 
 ### Remote Tools Not Working

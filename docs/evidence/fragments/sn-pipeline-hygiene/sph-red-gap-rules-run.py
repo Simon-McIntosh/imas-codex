@@ -25,10 +25,10 @@ WORKTREE = Path(
     "4f5c460d-ed3a-4460-943c-233208992958/sph-red-gap-rules"
 )
 GENERATED = (
-    "imas_codex/graph/models.py",
-    "imas_codex/graph/dd_models.py",
-    "imas_codex/config/models.py",
-    "imas_codex/graph/schema_context_data.py",
+    "iter_codex/graph/models.py",
+    "iter_codex/graph/dd_models.py",
+    "iter_codex/config/models.py",
+    "iter_codex/graph/schema_context_data.py",
     "agents/schema-reference.md",
 )
 SELECTION = "tests/standard_names"
@@ -83,7 +83,7 @@ def main() -> int:
         [
             str(MAIN_CHECKOUT / ".venv/bin/python"),
             "-c",
-            "import os, imas_standard_names, imas_codex.standard_names.segments as m;"
+            "import os, imas_standard_names, iter_codex.standard_names.segments as m;"
             "print('isn', getattr(imas_standard_names, '__version__', '?'));"
             "print('module.__file__', m.__file__);print('cwd', os.getcwd())",
         ],

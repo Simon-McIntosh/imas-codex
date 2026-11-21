@@ -9,8 +9,8 @@ from collections.abc import Iterator
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_store.graph_supersession import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_store.graph_supersession import (
     supersede_exhausted_standard_name_orphans,
 )
 

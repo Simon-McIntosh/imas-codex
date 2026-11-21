@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.graph.build_dd import _backfill_cocos_labels
+from iter_codex.graph.build_dd import _backfill_cocos_labels
 
 
 @pytest.fixture()

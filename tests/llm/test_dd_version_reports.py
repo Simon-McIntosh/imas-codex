@@ -1,6 +1,6 @@
 """Direct formatter tests for DD version and error-field reports."""
 
-from imas_codex.llm.server import (
+from iter_codex.llm.server import (
     _format_dd_versions_report,
     _format_error_fields_report,
     _format_version_context_report,

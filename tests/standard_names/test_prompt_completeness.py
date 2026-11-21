@@ -19,8 +19,8 @@ import re
 
 import pytest
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
-from imas_codex.standard_names.context import build_compose_context
+from iter_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
+from iter_codex.standard_names.context import build_compose_context
 
 # Aliased segments are duplicated in SEGMENT_TOKEN_MAP under multiple keys
 # (component=coordinate, device=object, geometry=position).  We emit only the
@@ -63,14 +63,14 @@ class TestClosedVocabFull:
     """Exercise the ``_load_closed_vocab_full`` context builder directly."""
 
     def test_returns_nonempty_list(self):
-        from imas_codex.standard_names.context import _load_closed_vocab_full
+        from iter_codex.standard_names.context import _load_closed_vocab_full
 
         data = _load_closed_vocab_full()
         assert isinstance(data, list)
         assert len(data) >= 6, "expected ≥6 canonical closed segments"
 
     def test_alias_segments_omitted_at_top_level(self):
-        from imas_codex.standard_names.context import _load_closed_vocab_full
+        from iter_codex.standard_names.context import _load_closed_vocab_full
 
         seg_names = {entry["segment"] for entry in _load_closed_vocab_full()}
         assert _ALIASES.isdisjoint(seg_names), (
@@ -78,7 +78,7 @@ class TestClosedVocabFull:
         )
 
     def test_aliases_attached_to_canonicals(self):
-        from imas_codex.standard_names.context import _load_closed_vocab_full
+        from iter_codex.standard_names.context import _load_closed_vocab_full
 
         by_seg = {e["segment"]: e for e in _load_closed_vocab_full()}
         # component is canonical for coordinate; device for object; geometry for position
@@ -87,13 +87,13 @@ class TestClosedVocabFull:
         assert "position" in by_seg.get("geometry", {}).get("aliases", [])
 
     def test_physical_base_excluded(self):
-        from imas_codex.standard_names.context import _load_closed_vocab_full
+        from iter_codex.standard_names.context import _load_closed_vocab_full
 
         seg_names = {entry["segment"] for entry in _load_closed_vocab_full()}
         assert "physical_base" in seg_names
 
     def test_tokens_sorted_alphabetically(self):
-        from imas_codex.standard_names.context import _load_closed_vocab_full
+        from iter_codex.standard_names.context import _load_closed_vocab_full
 
         for entry in _load_closed_vocab_full():
             toks = entry["tokens"]
@@ -171,7 +171,7 @@ class TestStaleGuidanceStripped:
 
     def test_review_names_no_stale_open_section(self):
         """``review_names.md`` must not contain stale 'OPEN vocabulary' claims."""
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         text = (PROMPTS_DIR / "sn" / "review_names.md").read_text(encoding="utf-8")
         assert "## `physical_base` is OPEN vocabulary" not in text
@@ -183,7 +183,7 @@ class TestStaleGuidanceStripped:
         """The grammar-retry helper does not claim physical_base is open."""
         import inspect
 
-        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _grammar_retry,
         )
 
@@ -269,7 +269,7 @@ class TestClosedVocabFullSegments:
     """Verify closed_vocab_full includes ALL expected segments with tokens."""
 
     def test_all_expected_segments_present(self):
-        from imas_codex.standard_names.context import _load_closed_vocab_full
+        from iter_codex.standard_names.context import _load_closed_vocab_full
 
         data = _load_closed_vocab_full()
         seg_names = {entry["segment"] for entry in data}
@@ -289,7 +289,7 @@ class TestClosedVocabFullSegments:
             )
 
     def test_all_segments_have_nonzero_tokens(self):
-        from imas_codex.standard_names.context import _load_closed_vocab_full
+        from iter_codex.standard_names.context import _load_closed_vocab_full
 
         for entry in _load_closed_vocab_full():
             assert len(entry["tokens"]) > 0, (
@@ -368,7 +368,7 @@ class TestEndorsedExamplesParse:
         assert not failures
 
     def test_operator_precedence_is_visible_and_ordered(self):
-        from imas_codex.standard_names.context import _load_operators_full
+        from iter_codex.standard_names.context import _load_operators_full
 
         operators = _load_operators_full()
         assert operators is not None
@@ -452,7 +452,7 @@ class TestStructuredOperatorContract:
             assert removed not in rendered_system_prompt
 
     def test_response_schema_has_ordered_operator_items(self):
-        from imas_codex.standard_names.models import GrammarSegments
+        from iter_codex.standard_names.models import GrammarSegments
 
         schema = GrammarSegments.model_json_schema()
         properties = schema["properties"]

@@ -20,7 +20,7 @@ from typing import Any
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from iter_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
 
 _MEMBERS = [
     {
@@ -102,7 +102,7 @@ class _FamilyGraph:
 def _install(
     monkeypatch: Any, nodes: list[dict[str, Any]] | None = None
 ) -> _FamilyGraph:
-    from imas_codex.graph import client as graph_client
+    from iter_codex.graph import client as graph_client
 
     graph = _FamilyGraph(nodes if nodes is not None else _MEMBERS)
     monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
@@ -117,7 +117,7 @@ def _rows(output: str) -> list[dict[str, Any]]:
 def test_family_scope_reports_members_drift_anchor_and_total(
     monkeypatch: Any,
 ) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     _install(monkeypatch)
 
@@ -146,7 +146,7 @@ def test_family_scope_reports_members_drift_anchor_and_total(
 def test_human_report_prints_a_row_per_family_and_a_scope_total(
     monkeypatch: Any,
 ) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     _install(monkeypatch)
 
@@ -161,7 +161,7 @@ def test_human_report_prints_a_row_per_family_and_a_scope_total(
 def test_batch_scope_reports_the_roster_families(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     _install(monkeypatch)
     roster = tmp_path / "roster.sn_names.yaml"
@@ -178,7 +178,7 @@ def test_batch_scope_reports_the_roster_families(
 
 
 def test_all_scope_enumerates_every_family(monkeypatch: Any) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     extra = dict(_MEMBERS[0])
     extra["id"] = "gamma_base"
@@ -221,7 +221,7 @@ def test_domain_scoped_finding_is_attributed_and_counted_once(
     ``equilibrium``. Each family row carries it in ``domain_lint``; the scope
     total counts the one distinct finding once, so summing the rows agrees.
     """
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     _install(
         monkeypatch,
@@ -261,8 +261,8 @@ def test_domain_scoped_finding_is_attributed_and_counted_once(
 
 
 def test_concept_scope_reports_its_families(monkeypatch: Any) -> None:
-    from imas_codex.cli.sn import sn
-    from imas_codex.standard_names import harmonize
+    from iter_codex.cli.sn import sn
+    from iter_codex.standard_names import harmonize
 
     _install(monkeypatch)
     monkeypatch.setattr(
@@ -284,7 +284,7 @@ def test_concept_scope_reports_its_families(monkeypatch: Any) -> None:
     ],
 )
 def test_scope_must_be_exactly_one(monkeypatch: Any, argv: list[str]) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     _install(monkeypatch)
 
@@ -295,7 +295,7 @@ def test_scope_must_be_exactly_one(monkeypatch: Any, argv: list[str]) -> None:
 
 
 def test_report_flag_is_accepted_as_the_default_mode(monkeypatch: Any) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     _install(monkeypatch)
 
@@ -306,8 +306,8 @@ def test_report_flag_is_accepted_as_the_default_mode(monkeypatch: Any) -> None:
 
 def test_report_never_runs_the_writing_preflight(monkeypatch: Any) -> None:
     """The read-only decision: the embedding-writing preflight is never reached."""
-    from imas_codex.cli.sn import sn
-    from imas_codex.standard_names.review import audits
+    from iter_codex.cli.sn import sn
+    from iter_codex.standard_names.review import audits
 
     graph = _install(monkeypatch)
 
@@ -332,8 +332,8 @@ def test_the_ban_is_live_when_the_report_is_pointed_at_the_full_audit(
     succeeds above now fails on the writing preflight — the guard in
     ``test_report_never_runs_the_same_preflight`` is not vacuous.
     """
-    from imas_codex.cli.sn import sn
-    from imas_codex.standard_names.review import audits
+    from iter_codex.cli.sn import sn
+    from iter_codex.standard_names.review import audits
 
     _install(monkeypatch)
 
@@ -354,7 +354,7 @@ def test_the_ban_is_live_when_the_report_is_pointed_at_the_full_audit(
 
 
 def test_run_families_flag_is_unknown() -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     result = CliRunner().invoke(sn, ["run", "--families", "flux"])
 
@@ -363,7 +363,7 @@ def test_run_families_flag_is_unknown() -> None:
 
 
 def test_review_target_groups_is_unknown() -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     result = CliRunner().invoke(sn, ["review", "--target", "groups"])
 
@@ -373,8 +373,8 @@ def test_review_target_groups_is_unknown() -> None:
 
 def test_harmonize_calls_none_of_the_apply_helpers(monkeypatch: Any) -> None:
     """The read-only decision is a mutation ban over the apply helpers."""
-    from imas_codex.cli.sn import sn
-    from imas_codex.standard_names import harmonize
+    from iter_codex.cli.sn import sn
+    from iter_codex.standard_names import harmonize
 
     graph = _install(monkeypatch)
 

@@ -55,14 +55,14 @@ class TestVocabUniqueness:
         except ImportError:
             pytest.skip("imas-standard-names not installed")
 
-        from imas_codex.standard_names.segments import is_known_token
+        from iter_codex.standard_names.segments import is_known_token
 
         segments = is_known_token(token)
         assert segments, f"{token!r} not found in any closed segment"
 
     def test_is_known_token_returns_list(self):
         """is_known_token always returns a list, even for unknown tokens."""
-        from imas_codex.standard_names.segments import is_known_token
+        from iter_codex.standard_names.segments import is_known_token
 
         result = is_known_token("__definitely_not_a_token__")
         assert isinstance(result, list)

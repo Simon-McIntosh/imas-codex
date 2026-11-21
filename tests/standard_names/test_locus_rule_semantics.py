@@ -12,7 +12,7 @@ A genuinely foreign device — one whose documentation never names the locus's
 device either — is still refused.
 """
 
-from imas_codex.standard_names.attachment_audit import _attachment_consistency
+from iter_codex.standard_names.attachment_audit import _attachment_consistency
 
 
 def test_documented_interferometry_path_accepts_beam_locus() -> None:

@@ -129,7 +129,7 @@ JEV_RECEIPTS = {
 }
 
 # Calibrated route shares on the frozen calibration splits, read from
-# imas_codex/standard_names/review/cascade_thresholds.json.
+# iter_codex/standard_names/review/cascade_thresholds.json.
 ROUTE_SHARES = {
     "name": {
         "n": 363,

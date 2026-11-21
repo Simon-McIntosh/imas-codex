@@ -4,12 +4,12 @@ import asyncio
 
 import pytest
 
-from imas_codex.discovery.signals.enrichment import (
+from iter_codex.discovery.signals.enrichment import (
     GroupDescription,
     GroupDescriptionBatch,
     GroupStatement,
 )
-from imas_codex.discovery.signals.group_enrichment import (
+from iter_codex.discovery.signals.group_enrichment import (
     AWAITING_CONTEXT,
     DESCRIBED,
     FAILED,
@@ -428,7 +428,7 @@ class TwoCallReview:
 
 @pytest.mark.asyncio
 async def test_review_pass_removes_a_statement_its_check_refuses():
-    from imas_codex.discovery.signals.enrichment import (
+    from iter_codex.discovery.signals.enrichment import (
         DescriptionReview,
         ReviewedDescription,
         ReviewedStatement,
@@ -647,7 +647,7 @@ async def test_a_transient_lane_fault_is_retried_once_through_the_shared_call():
 @pytest.mark.asyncio
 async def test_both_enrichment_paths_review_through_one_implementation(monkeypatch):
     """Group and signal enrichment reach the same reviewed-statement helper."""
-    from imas_codex.discovery.signals import enrichment as enrichment_module
+    from iter_codex.discovery.signals import enrichment as enrichment_module
 
     seen = []
 
@@ -687,11 +687,11 @@ async def test_both_enrichment_paths_review_through_one_implementation(monkeypat
     )
     assert group_outcome.delivered
 
-    from imas_codex.discovery.signals.enrichment import (
+    from iter_codex.discovery.signals.enrichment import (
         EnrichmentOptions,
         enrich_signal_batch,
     )
-    from imas_codex.discovery.signals.models import SignalEnrichmentBatch
+    from iter_codex.discovery.signals.models import SignalEnrichmentBatch
     from tests.discovery.test_signal_enrichment_benchmark import answer
 
     batch_value = answer()

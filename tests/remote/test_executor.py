@@ -1,5 +1,5 @@
 """
-Contract tests for imas_codex/remote/executor.py.
+Contract tests for iter_codex/remote/executor.py.
 
 These tests cover the key behavioural contracts for run_python_script(),
 async_run_python_script(), and run_script_via_stdin() that MUST survive
@@ -18,8 +18,8 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
-import imas_codex.remote.executor as executor
-from imas_codex.remote.executor import (
+import iter_codex.remote.executor as executor
+from iter_codex.remote.executor import (
     async_run_python_script,
     run_python_script,
     run_script_via_stdin,
@@ -65,8 +65,8 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ stdin JSON delivery
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_script_receives_json_on_stdin(
@@ -84,8 +84,8 @@ class TestRunPythonScript:
         assert "input" in kwargs
         assert json.loads(kwargs["input"]) == input_data
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_none_input_data_sends_empty_object(
@@ -102,8 +102,8 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ stdout-only return
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_returns_stdout_only(self, mock_files, mock_run, mock_local, mock_ssh):
@@ -119,8 +119,8 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ non-zero exit raises
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_nonzero_exit_raises(self, mock_files, mock_run, mock_local, mock_ssh):
@@ -137,8 +137,8 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ local execution
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=True)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=True)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_local_execution_skips_ssh(
@@ -154,8 +154,8 @@ class TestRunPythonScript:
         assert "ssh" not in cmd, f"Expected no SSH for local host, got: {cmd}"
         assert result == "local"
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=True)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=True)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_local_execution_no_ssh_health_check(
@@ -171,8 +171,8 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ setup commands
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_setup_commands_prepended(self, mock_files, mock_run, mock_local, mock_ssh):
@@ -195,8 +195,8 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ timeout wrapper
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_timeout_wrapper_applied(self, mock_files, mock_run, mock_local, mock_ssh):
@@ -216,8 +216,8 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ nice level
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_nice_level_applied(self, mock_files, mock_run, mock_local, mock_ssh):
@@ -234,8 +234,8 @@ class TestRunPythonScript:
             f"Expected 'nice -n 10' in remote command, got: {remote_cmd!r}"
         )
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_no_nice_when_not_configured(
@@ -256,8 +256,8 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ -S flag + site-packages
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_site_packages_with_dash_S(
@@ -280,8 +280,8 @@ class TestRunPythonScript:
             f"Expected site-packages restoration in remote command, got: {remote_cmd!r}"
         )
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_custom_python_command_no_dash_S(
@@ -305,9 +305,9 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ SSH 255 invalidation
 
-    @patch("imas_codex.remote.executor._invalidate_ssh_host")
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._invalidate_ssh_host")
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_ssh_255_invalidates_host(
@@ -324,9 +324,9 @@ class TestRunPythonScript:
 
         mock_invalidate.assert_called_once_with("remote-host")
 
-    @patch("imas_codex.remote.executor._invalidate_ssh_host")
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._invalidate_ssh_host")
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_nonzero_non_255_does_not_invalidate(
@@ -345,8 +345,8 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ SSH health check
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_ssh_health_check_called_for_remote(
@@ -362,8 +362,8 @@ class TestRunPythonScript:
 
     # ------------------------------------------------------------------ anti-base64 regression gates
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_no_base64_in_remote_command(
@@ -385,8 +385,8 @@ class TestRunPythonScript:
             f"SSH command must not contain 'base64', got: {remote_cmd[:200]!r}"
         )
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     @patch("importlib.resources.files")
     def test_no_base64_import_in_runner(
@@ -433,8 +433,8 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ stdin JSON delivery
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_script_receives_json_on_stdin(
@@ -453,8 +453,8 @@ class TestAsyncRunPythonScript:
         communicated = proc.communicate.call_args[0][0]
         assert json.loads(communicated.decode()) == input_data
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_none_input_data_sends_empty_object(
@@ -474,8 +474,8 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ stdout-only return
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_returns_stdout_only(
@@ -495,8 +495,8 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ non-zero exit raises
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_nonzero_exit_raises(
@@ -514,8 +514,8 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ local execution
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=True)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=True)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_local_execution_skips_ssh(
@@ -532,8 +532,8 @@ class TestAsyncRunPythonScript:
         assert "ssh" not in cmd_args, f"Expected no SSH for local, got: {cmd_args}"
         assert result == "local-result"
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=True)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=True)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_local_no_ssh_health_check(
@@ -550,8 +550,8 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ setup commands
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_setup_commands_prepended(
@@ -575,8 +575,8 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ timeout wrapper
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_timeout_wrapper_applied(
@@ -600,8 +600,8 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ nice level
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_nice_level_applied(
@@ -623,8 +623,8 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ -S flag + site-packages
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_site_packages_with_dash_S(
@@ -648,8 +648,8 @@ class TestAsyncRunPythonScript:
             "Expected site-packages restore in remote command"
         )
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_custom_python_command_no_dash_S(
@@ -674,9 +674,9 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ SSH 255 invalidation
 
-    @patch("imas_codex.remote.executor._invalidate_ssh_host")
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._invalidate_ssh_host")
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_ssh_255_invalidates_host(
@@ -692,9 +692,9 @@ class TestAsyncRunPythonScript:
 
         mock_invalidate.assert_called_once_with("remote-host")
 
-    @patch("imas_codex.remote.executor._invalidate_ssh_host")
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._invalidate_ssh_host")
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_nonzero_non_255_does_not_invalidate(
@@ -712,8 +712,8 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ SSH health check
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_ssh_health_check_called_for_remote(
@@ -730,8 +730,8 @@ class TestAsyncRunPythonScript:
 
     # ------------------------------------------------------------------ anti-base64 regression gates
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_no_base64_in_remote_command(
@@ -753,8 +753,8 @@ class TestAsyncRunPythonScript:
             f"Async SSH command must not contain 'base64', got: {remote_cmd[:200]!r}"
         )
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("asyncio.create_subprocess_exec")
     @patch("importlib.resources.files")
     async def test_no_base64_import_in_runner(
@@ -793,7 +793,7 @@ class TestRunScriptViaStdin:
 
     # ------------------------------------------------------------------ local execution
 
-    @patch("imas_codex.remote.executor.is_local_host", return_value=True)
+    @patch("iter_codex.remote.executor.is_local_host", return_value=True)
     @patch("subprocess.run")
     def test_local_execution(self, mock_run, mock_local):
         """Local execution passes script as stdin to interpreter directly."""
@@ -806,7 +806,7 @@ class TestRunScriptViaStdin:
         assert mock_run.call_args[1].get("input") == "print('hello')"
         assert result == "hello"
 
-    @patch("imas_codex.remote.executor.is_local_host", return_value=True)
+    @patch("iter_codex.remote.executor.is_local_host", return_value=True)
     @patch("subprocess.run")
     def test_local_bash_uses_bash_s(self, mock_run, mock_local):
         """Local bash execution uses ['bash', '-s']."""
@@ -817,7 +817,7 @@ class TestRunScriptViaStdin:
         cmd = mock_run.call_args[0][0]
         assert cmd == ["bash", "-s"], f"Expected ['bash', '-s'], got {cmd}"
 
-    @patch("imas_codex.remote.executor.is_local_host", return_value=True)
+    @patch("iter_codex.remote.executor.is_local_host", return_value=True)
     @patch("subprocess.run")
     def test_local_python_uses_python3_dash(self, mock_run, mock_local):
         """Local python3 execution uses ['python3', '-']."""
@@ -830,8 +830,8 @@ class TestRunScriptViaStdin:
 
     # ------------------------------------------------------------------ remote execution
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     def test_remote_execution_uses_ssh(self, mock_run, mock_local, mock_ssh):
         """Remote execution must use SSH with script piped via stdin."""
@@ -852,8 +852,8 @@ class TestRunScriptViaStdin:
         assert mock_run.call_args[1].get("input") is not None
         assert result == "remote-result"
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     def test_remote_stdin_contains_script(self, mock_run, mock_local, mock_ssh):
         """The full script content must be passed as subprocess stdin."""
@@ -864,8 +864,8 @@ class TestRunScriptViaStdin:
 
         assert mock_run.call_args[1]["input"] == script
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     def test_remote_timeout_wrapper(self, mock_run, mock_local, mock_ssh):
         """Remote execution must wrap interpreter with timeout N+5."""
@@ -882,8 +882,8 @@ class TestRunScriptViaStdin:
             f"Expected 'timeout {timeout + 5}' in remote command: {remote_cmd!r}"
         )
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     def test_remote_nice_level(self, mock_run, mock_local, mock_ssh):
         """Remote execution must apply nice level when configured."""
@@ -900,8 +900,8 @@ class TestRunScriptViaStdin:
 
     # ------------------------------------------------------------------ no base64 (passes now)
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     def test_no_base64_in_command(self, mock_run, mock_local, mock_ssh):
         """run_script_via_stdin must NEVER use base64 in the SSH command.
@@ -921,8 +921,8 @@ class TestRunScriptViaStdin:
             f"run_script_via_stdin must not use base64, got: {remote_cmd!r}"
         )
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     def test_ssh_health_checked(self, mock_run, mock_local, mock_ssh):
         """_ensure_ssh_healthy_once() must be called for remote stdin execution."""
@@ -932,8 +932,8 @@ class TestRunScriptViaStdin:
 
         mock_ssh.assert_called_once_with("remote-host")
 
-    @patch("imas_codex.remote.executor._ensure_ssh_healthy_once")
-    @patch("imas_codex.remote.executor.is_local_host", return_value=False)
+    @patch("iter_codex.remote.executor._ensure_ssh_healthy_once")
+    @patch("iter_codex.remote.executor.is_local_host", return_value=False)
     @patch("subprocess.run")
     def test_nonzero_exit_raises_when_check(self, mock_run, mock_local, mock_ssh):
         """check=True must raise CalledProcessError on non-zero exit."""

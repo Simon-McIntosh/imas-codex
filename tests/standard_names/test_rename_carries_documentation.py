@@ -23,7 +23,7 @@ import pytest
 
 from .graph_transaction_doubles import transaction_double
 
-_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_GC_PATH = "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 # Measured live pairs. The re-rendered spellings are from the cohort a
 # rendering-rule migration minted; the meaning-changing ones are refinements
@@ -72,7 +72,7 @@ def _capture_persist(
     The preflight cannot commit against a mock, so it refuses — the statement
     it issued and the parameters bound to it are what these tests read.
     """
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         RefinedNamePersistenceRefusal,
         persist_refined_name,
     )
@@ -97,7 +97,7 @@ def _capture_persist(
 
 def _successful_persist_with_assertion() -> tuple[MagicMock, MagicMock]:
     """Run the persistence path far enough to observe both change receipts."""
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
 
@@ -133,24 +133,24 @@ def _successful_persist_with_assertion() -> tuple[MagicMock, MagicMock]:
     tx.run.side_effect = answer
     gc = _graph_client_double(tx)
     record_path = (
-        "imas_codex.standard_names.provenance_lifecycle.record_standard_name_change"
+        "iter_codex.standard_names.provenance_lifecycle.record_standard_name_change"
     )
     with (
         patch(_GC_PATH, return_value=gc),
         patch(
-            "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+            "iter_codex.standard_names.attachment_audit.guard_source_pairings",
             return_value=SimpleNamespace(
                 accepted_source_ids=[],
                 rejected=[],
             ),
         ),
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "retarget_standard_name_sources",
             return_value=0,
         ),
         patch(record_path, return_value="sn-change:recorded") as record_change,
-        patch("imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
     ):
         persist_refined_name(
             old_name=old_name,
@@ -173,7 +173,7 @@ class TestTheGrammarDecidesWhetherTheMeaningMoved:
 
     @pytest.mark.parametrize(("old", "new"), RERENDERED)
     def test_a_re_rendering_preserves_meaning(self, old: str, new: str):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             rename_preserves_meaning,
         )
 
@@ -181,7 +181,7 @@ class TestTheGrammarDecidesWhetherTheMeaningMoved:
 
     @pytest.mark.parametrize(("old", "new"), REMEANT)
     def test_a_different_quantity_does_not(self, old: str, new: str):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             rename_preserves_meaning,
         )
 
@@ -189,7 +189,7 @@ class TestTheGrammarDecidesWhetherTheMeaningMoved:
 
     def test_an_unparseable_spelling_answers_no(self):
         """Absence of evidence is not evidence of sameness."""
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             rename_preserves_meaning,
         )
 
@@ -205,14 +205,14 @@ class TestExplicitMeaningAuthority:
         self,
         pair: tuple[str, str],
     ):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             rename_preserves_meaning,
         )
 
         assert rename_preserves_meaning(*pair) is False
 
     def test_the_measured_qualifier_addition_needs_explicit_authority(self):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             rename_preserves_meaning,
         )
 
@@ -243,7 +243,7 @@ class TestExplicitMeaningAuthority:
         asserted_by: str | None,
         message: str,
     ):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             rename_preserves_meaning,
         )
 
@@ -353,7 +353,7 @@ class TestAnExistingRenameCanReceiveItsAcceptedDocument:
     """The post-rename repair is atomic, attributed, and idempotent."""
 
     def test_the_repair_writes_only_the_docs_axis_and_a_receipt(self):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             carry_accepted_documentation_across_rename,
         )
 
@@ -428,7 +428,7 @@ class TestAnExistingRenameCanReceiveItsAcceptedDocument:
         asserted_by: str,
         message: str,
     ):
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             carry_accepted_documentation_across_rename,
         )
 

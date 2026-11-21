@@ -33,8 +33,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from iter_codex.standard_names.graph_store import (
     graph_docs_persistence as _owning_graph_docs_persistence,
     graph_source_bindings as _owning_graph_source_bindings,
 )
@@ -192,7 +192,7 @@ class _LinkGraph:
         stub and fail never, which is the opposite of what the production
         writer does.
         """
-        from imas_codex.standard_names.protection import filter_protected
+        from iter_codex.standard_names.protection import filter_protected
 
         filtered, skipped = filter_protected(results)
         self.protected_by_writer.extend(skipped)
@@ -248,8 +248,8 @@ class _ApplyHarness:
 
 def _apply(graph: _LinkGraph, monkeypatch: Any) -> dict[str, Any]:
     """Run the real apply over the fixture with the graph's writer stubbed."""
-    from imas_codex.graph import client as graph_client
-    from imas_codex.standard_names import graph_ops, harmonize
+    from iter_codex.graph import client as graph_client
+    from iter_codex.standard_names import graph_ops, harmonize
 
     monkeypatch.setattr(
         _owning_graph_source_bindings,
@@ -284,7 +284,7 @@ def _apply(graph: _LinkGraph, monkeypatch: Any) -> dict[str, Any]:
 
 def _findings(graph: _LinkGraph, finding_type: str) -> list[Any]:
     """The audit's own findings over the family's post-apply links."""
-    from imas_codex.standard_names.review.audits import run_link_integrity
+    from iter_codex.standard_names.review.audits import run_link_integrity
 
     member_ids = [_ANCHOR, _BOUNDARY, _PROBE]
     known_ids = {n["id"] for n in graph.nodes}
@@ -362,8 +362,8 @@ def test_a_catalog_edited_member_is_reported_not_silently_skipped(
     the apply alone cannot reach this state. The step is reached directly here
     because it is the layer that must not overstate what it wrote.
     """
-    from imas_codex.graph import client as graph_client
-    from imas_codex.standard_names import graph_ops, harmonize
+    from iter_codex.graph import client as graph_client
+    from iter_codex.standard_names import graph_ops, harmonize
 
     graph = _LinkGraph(_family_nodes(probe_stage="approved"))
     monkeypatch.setattr(

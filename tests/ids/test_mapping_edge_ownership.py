@@ -5,7 +5,7 @@ pin the consolidation: the count-checked writer raises when the write reports
 zero edges, both production writers route through it, ``imas map clear``
 deletes through ``graph_ops``, a route string in a candidate judgment is
 refused, ``imas map status`` prints candidate routes, and the two census greps
-find MAPS_TO_IMAS query sites only in ``imas_codex/ids/graph_ops.py``.
+find MAPS_TO_IMAS query sites only in ``iter_codex/ids/graph_ops.py``.
 """
 
 from __future__ import annotations
@@ -16,12 +16,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.ids.graph_ops import (
+from iter_codex.ids.graph_ops import (
     CandidateWriteError,
     clear_mapping_bindings,
     write_mapping_binding,
 )
-from imas_codex.ids.models import (
+from iter_codex.ids.models import (
     ValidatedMappingResult,
     ValidatedSignalMapping,
     persist_mapping_result,
@@ -102,7 +102,7 @@ class TestWritersRaiseOnZeroRowWrite:
             persist_mapping_result(result, gc=_gc_zero_map_write(), status="generated")
 
     def test_run_error_derivation_only_raises(self, monkeypatch):
-        import imas_codex.ids.mapping as mapping
+        import iter_codex.ids.mapping as mapping
 
         gc = MagicMock()
 
@@ -150,9 +150,9 @@ class TestClearMappingBindings:
     def test_imas_map_clear_deletes_through_graph_ops(self, monkeypatch):
         """The CLI's MAPS_TO_IMAS delete lives in graph_ops, so the CLI issues
         no MAPS_TO_IMAS statement of its own."""
-        import imas_codex.cli.map as map_cli
-        import imas_codex.graph.client as gclient
-        import imas_codex.ids.graph_ops as graph_ops
+        import iter_codex.cli.map as map_cli
+        import iter_codex.graph.client as gclient
+        import iter_codex.ids.graph_ops as graph_ops
 
         called: dict[str, tuple] = {}
 
@@ -179,9 +179,9 @@ class TestClearMappingBindings:
 
 
 def test_map_status_prints_route_counts(monkeypatch):
-    import imas_codex.cli.map as map_cli
-    import imas_codex.graph.client as gclient
-    import imas_codex.ids.graph_ops as graph_ops
+    import iter_codex.cli.map as map_cli
+    import iter_codex.graph.client as gclient
+    import iter_codex.ids.graph_ops as graph_ops
 
     monkeypatch.setattr(
         graph_ops,
@@ -201,7 +201,7 @@ def test_map_status_prints_route_counts(monkeypatch):
 
     from click.testing import CliRunner
 
-    from imas_codex.cli.map import map_cmd
+    from iter_codex.cli.map import map_cmd
 
     runner = CliRunner()
     result = runner.invoke(map_cmd, ["status", "jet"])
@@ -220,7 +220,7 @@ _DELETE = re.compile(r"\[r:MAPS_TO_IMAS\]->\(:IMASNode\)")
 
 
 def test_maps_to_imas_query_sites_live_only_in_graph_ops():
-    root = Path(__file__).resolve().parents[2] / "imas_codex"
+    root = Path(__file__).resolve().parents[2] / "iter_codex"
     hits: dict[str, list[str]] = {"write": [], "delete": []}
     for path in root.rglob("*.py"):
         rel = path.relative_to(root.parent).as_posix()
@@ -234,6 +234,6 @@ def test_maps_to_imas_query_sites_live_only_in_graph_ops():
     assert hits["delete"], "census found no MAPS_TO_IMAS delete site"
     for kind, paths in hits.items():
         for rel in paths:
-            assert rel == "imas_codex/ids/graph_ops.py", (
+            assert rel == "iter_codex/ids/graph_ops.py", (
                 f"{kind} site outside graph_ops: {rel}"
             )

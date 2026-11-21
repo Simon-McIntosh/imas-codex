@@ -16,9 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import catalog_ordering
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import catalog_ordering
+from iter_codex.standard_names.signed_manifest import (
     SignedManifestAuthorityError,
     apply_signed_manifest,
     compose_edge_archive_authority,

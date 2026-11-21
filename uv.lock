@@ -2,21 +2,21 @@ version = 1
 revision = 3
 requires-python = "==3.12.*"
 resolution-markers = [
-    "extra != 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu' and extra != 'extra-10-imas-codex-test'",
-    "sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test'",
-    "sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test'",
-    "sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-gpu' and extra != 'extra-10-imas-codex-test'",
-    "sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-gpu' and extra != 'extra-10-imas-codex-test'",
-    "sys_platform != 'darwin' and extra != 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test'",
-    "sys_platform == 'darwin' and extra != 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test'",
-    "extra != 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-gpu' and extra != 'extra-10-imas-codex-test'",
+    "extra != 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu' and extra != 'extra-10-iter-codex-test'",
+    "sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test'",
+    "sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test'",
+    "sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-gpu' and extra != 'extra-10-iter-codex-test'",
+    "sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-gpu' and extra != 'extra-10-iter-codex-test'",
+    "sys_platform != 'darwin' and extra != 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test'",
+    "sys_platform == 'darwin' and extra != 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test'",
+    "extra != 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-gpu' and extra != 'extra-10-iter-codex-test'",
 ]
 conflicts = [[
-    { package = "imas-codex", extra = "cpu" },
-    { package = "imas-codex", extra = "gpu" },
+    { package = "iter-codex", extra = "cpu" },
+    { package = "iter-codex", extra = "gpu" },
 ], [
-    { package = "imas-codex", extra = "gpu" },
-    { package = "imas-codex", extra = "test" },
+    { package = "iter-codex", extra = "gpu" },
+    { package = "iter-codex", extra = "test" },
 ]]
 
 [[package]]
@@ -189,12 +189,12 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asv-runner" },
     { name = "build" },
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "importlib-metadata" },
     { name = "json5" },
     { name = "packaging" },
-    { name = "pympler", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "pyyaml", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "pympler", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "pyyaml", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "tabulate" },
     { name = "virtualenv" },
 ]
@@ -335,7 +335,7 @@ name = "build"
 version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "(os_name == 'nt' and sys_platform != 'darwin') or (os_name != 'nt' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (os_name != 'nt' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (os_name == 'nt' and extra != 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (os_name == 'nt' and extra != 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-test') or (sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu')" },
+    { name = "colorama", marker = "(os_name == 'nt' and sys_platform != 'darwin') or (os_name != 'nt' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (os_name != 'nt' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (os_name == 'nt' and extra != 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (os_name == 'nt' and extra != 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-test') or (sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu')" },
     { name = "packaging" },
     { name = "pyproject-hooks" },
 ]
@@ -380,7 +380,7 @@ name = "cffi"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pycparser", marker = "implementation_name != 'PyPy' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "pycparser", marker = "implementation_name != 'PyPy' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/eb/56/b1ba7935a17738ae8453301356628e8147c79dbb825bcbc73dc7401f9846/cffi-2.0.0.tar.gz", hash = "sha256:44d1b5909021139fe36001ae048dbdde8214afa20200eda0f64c068cac5d5529", size = 523588, upload-time = "2025-09-08T23:24:04.541Z" }
 wheels = [
@@ -455,7 +455,7 @@ name = "click"
 version = "8.1.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/b9/2e/0090cbf739cee7d23781ad4b89a9894a41538e4fcf4c31dcdd705b78eb8b/click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a", size = 226593, upload-time = "2024-12-21T18:38:44.339Z" }
 wheels = [
@@ -531,7 +531,7 @@ name = "cryptography"
 version = "48.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cffi", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "cffi", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9f/a9/db8f313fdcd85d767d4973515e1db101f9c71f95fced83233de224673757/cryptography-48.0.0.tar.gz", hash = "sha256:5c3932f4436d1cccb036cb0eaef46e6e2db91035166f1ad6505c3c9d5a635920", size = 832984, upload-time = "2026-05-04T22:59:38.133Z" }
 wheels = [
@@ -1064,7 +1064,7 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filelock" },
     { name = "fsspec" },
-    { name = "hf-xet", marker = "platform_machine == 'AMD64' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'arm64' or platform_machine == 'x86_64' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "hf-xet", marker = "platform_machine == 'AMD64' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'arm64' or platform_machine == 'x86_64' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "httpx" },
     { name = "packaging" },
     { name = "pyyaml" },
@@ -1105,7 +1105,7 @@ wheels = [
 ]
 
 [[package]]
-name = "imas-codex"
+name = "iter-codex"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
@@ -1148,8 +1148,8 @@ bench = [
 cpu = [
     { name = "fastapi" },
     { name = "sentence-transformers" },
-    { name = "torch", version = "2.10.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "torch", version = "2.10.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "torch", version = "2.10.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "torch", version = "2.10.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "uvicorn" },
     { name = "uvloop" },
 ]
@@ -1177,8 +1177,8 @@ test = [
     { name = "pytest-timeout" },
     { name = "pytest-xdist" },
     { name = "sentence-transformers" },
-    { name = "torch", version = "2.10.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu')" },
-    { name = "torch", version = "2.10.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra != 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'darwin' and extra != 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "torch", version = "2.10.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu')" },
+    { name = "torch", version = "2.10.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra != 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'darwin' and extra != 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 
 [package.dev-dependencies]
@@ -1206,8 +1206,8 @@ dev = [
     { name = "pykakasi" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
-    { name = "pytest-cov", version = "6.3.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra != 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (extra != 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "pytest-cov", version = "7.0.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-10-imas-codex-gpu' or extra != 'extra-10-imas-codex-test'" },
+    { name = "pytest-cov", version = "6.3.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra != 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (extra != 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "pytest-cov", version = "7.0.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-10-iter-codex-gpu' or extra != 'extra-10-iter-codex-test'" },
     { name = "pytest-timeout" },
     { name = "python-docx" },
     { name = "python-pptx" },
@@ -1271,9 +1271,9 @@ requires-dist = [
     { name = "sentence-transformers", marker = "extra == 'cpu'", specifier = ">=5.0.0" },
     { name = "sentence-transformers", marker = "extra == 'gpu'", specifier = ">=5.0.0" },
     { name = "sentence-transformers", marker = "extra == 'test'", specifier = ">=5.0.0" },
-    { name = "torch", marker = "extra == 'cpu'", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "imas-codex", extra = "cpu" } },
-    { name = "torch", marker = "extra == 'gpu'", specifier = "==2.5.1", index = "https://download.pytorch.org/whl/cu121", conflict = { package = "imas-codex", extra = "gpu" } },
-    { name = "torch", marker = "extra == 'test'", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "imas-codex", extra = "test" } },
+    { name = "torch", marker = "extra == 'cpu'", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "iter-codex", extra = "cpu" } },
+    { name = "torch", marker = "extra == 'gpu'", specifier = "==2.5.1", index = "https://download.pytorch.org/whl/cu121", conflict = { package = "iter-codex", extra = "gpu" } },
+    { name = "torch", marker = "extra == 'test'", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "iter-codex", extra = "test" } },
     { name = "tornado", specifier = ">=6.5.5" },
     { name = "urllib3", specifier = ">=2.7.0" },
     { name = "uvicorn", marker = "extra == 'cpu'", specifier = ">=0.34.0" },
@@ -1458,7 +1458,7 @@ name = "ipykernel"
 version = "7.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "appnope", marker = "sys_platform == 'darwin' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "appnope", marker = "sys_platform == 'darwin' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "comm" },
     { name = "debugpy" },
     { name = "ipython" },
@@ -1482,12 +1482,12 @@ name = "ipython"
 version = "9.10.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "decorator" },
     { name = "ipython-pygments-lexers" },
     { name = "jedi" },
     { name = "matplotlib-inline" },
-    { name = "pexpect", marker = "(sys_platform != 'emscripten' and sys_platform != 'win32') or (sys_platform == 'emscripten' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform == 'emscripten' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform == 'win32' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform == 'win32' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "pexpect", marker = "(sys_platform != 'emscripten' and sys_platform != 'win32') or (sys_platform == 'emscripten' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform == 'emscripten' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform == 'win32' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform == 'win32' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "prompt-toolkit" },
     { name = "pygments" },
     { name = "stack-data" },
@@ -1822,9 +1822,9 @@ dependencies = [
     { name = "jaraco-classes" },
     { name = "jaraco-context" },
     { name = "jaraco-functools" },
-    { name = "jeepney", marker = "sys_platform == 'linux' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "pywin32-ctypes", marker = "sys_platform == 'win32' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "secretstorage", marker = "sys_platform == 'linux' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "jeepney", marker = "sys_platform == 'linux' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "pywin32-ctypes", marker = "sys_platform == 'win32' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "secretstorage", marker = "sys_platform == 'linux' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/43/4b/674af6ef2f97d56f0ab5153bf0bfa28ccb6c3ed4d1babf4305449668807b/keyring-25.7.0.tar.gz", hash = "sha256:fe01bd85eb3f8fb3dd0405defdeac9a5b4f6f0439edbb3149577f244a2e8245b", size = 63516, upload-time = "2025-11-16T16:26:09.482Z" }
 wheels = [
@@ -2077,12 +2077,12 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pyjwt", extra = ["crypto"] },
     { name = "python-multipart" },
-    { name = "pywin32", marker = "sys_platform == 'win32' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "pywin32", marker = "sys_platform == 'win32' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "sse-starlette" },
     { name = "starlette" },
     { name = "typing-extensions" },
     { name = "typing-inspection" },
-    { name = "uvicorn", marker = "sys_platform != 'emscripten' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "uvicorn", marker = "sys_platform != 'emscripten' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/fc/6d/62e76bbb8144d6ed86e202b5edd8a4cb631e7c8130f3f4893c3f90262b10/mcp-1.26.0.tar.gz", hash = "sha256:db6e2ef491eecc1a0d93711a76f28dec2e05999f93afd48795da1c1137142c66", size = 608005, upload-time = "2026-01-24T19:40:32.468Z" }
 wheels = [
@@ -2113,7 +2113,7 @@ version = "1.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "ghp-import" },
     { name = "jinja2" },
     { name = "markdown" },
@@ -2226,7 +2226,7 @@ name = "mypy"
 version = "1.19.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "librt", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "librt", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "mypy-extensions" },
     { name = "pathspec" },
     { name = "typing-extensions" },
@@ -2365,7 +2365,7 @@ name = "nvidia-cudnn-cu12"
 version = "9.1.0.70"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-cublas-cu12", marker = "extra == 'extra-10-imas-codex-gpu'" },
+    { name = "nvidia-cublas-cu12", marker = "extra == 'extra-10-iter-codex-gpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9f/fd/713452cd72343f682b1c7b9321e23829f00b842ceaedcda96e742ea0b0b3/nvidia_cudnn_cu12-9.1.0.70-py3-none-manylinux2014_x86_64.whl", hash = "sha256:165764f44ef8c61fcdfdfdbe769d687e06374059fbb388b6c89ecb0e28793a6f", size = 664752741, upload-time = "2024-04-22T15:24:15.253Z" },
@@ -2395,9 +2395,9 @@ name = "nvidia-cusolver-cu12"
 version = "11.4.5.107"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-cublas-cu12", marker = "extra == 'extra-10-imas-codex-gpu'" },
-    { name = "nvidia-cusparse-cu12", marker = "extra == 'extra-10-imas-codex-gpu'" },
-    { name = "nvidia-nvjitlink-cu12", marker = "extra == 'extra-10-imas-codex-gpu'" },
+    { name = "nvidia-cublas-cu12", marker = "extra == 'extra-10-iter-codex-gpu'" },
+    { name = "nvidia-cusparse-cu12", marker = "extra == 'extra-10-iter-codex-gpu'" },
+    { name = "nvidia-nvjitlink-cu12", marker = "extra == 'extra-10-iter-codex-gpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bc/1d/8de1e5c67099015c834315e333911273a8c6aaba78923dd1d1e25fc5f217/nvidia_cusolver_cu12-11.4.5.107-py3-none-manylinux1_x86_64.whl", hash = "sha256:8a7ec542f0412294b15072fa7dab71d31334014a69f953004ea7a118206fe0dd", size = 124161928, upload-time = "2023-04-19T15:51:25.781Z" },
@@ -2409,7 +2409,7 @@ name = "nvidia-cusparse-cu12"
 version = "12.1.0.106"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-nvjitlink-cu12", marker = "extra == 'extra-10-imas-codex-gpu'" },
+    { name = "nvidia-nvjitlink-cu12", marker = "extra == 'extra-10-iter-codex-gpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/65/5b/cfaeebf25cd9fdec14338ccb16f6b2c4c7fa9163aefcf057d86b9cc248bb/nvidia_cusparse_cu12-12.1.0.106-py3-none-manylinux1_x86_64.whl", hash = "sha256:f3b50f42cf363f86ab21f720998517a659a48131e8d538dc02f8768237bd884c", size = 195958278, upload-time = "2023-04-19T15:51:49.939Z" },
@@ -2919,7 +2919,7 @@ name = "pympler"
 version = "1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pywin32", marker = "sys_platform == 'win32' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "pywin32", marker = "sys_platform == 'win32' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/dd/37/c384631908029676d8e7213dd956bb686af303a80db7afbc9be36bc49495/pympler-1.1.tar.gz", hash = "sha256:1eaa867cb8992c218430f1708fdaccda53df064144d1c5656b1e6f1ee6000424", size = 179954, upload-time = "2024-06-28T19:56:06.563Z" }
 wheels = [
@@ -2931,7 +2931,7 @@ name = "pynacl"
 version = "1.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cffi", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "cffi", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d9/9a/4019b524b03a13438637b11538c82781a5eda427394380381af8f04f467a/pynacl-1.6.2.tar.gz", hash = "sha256:018494d6d696ae03c7e656e5e74cdfd8ea1326962cc401bcf018f1ed8436811c", size = 3511692, upload-time = "2026-01-01T17:48:10.851Z" }
 wheels = [
@@ -3027,7 +3027,7 @@ name = "pytest"
 version = "9.0.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "iniconfig" },
     { name = "packaging" },
     { name = "pluggy" },
@@ -3073,9 +3073,9 @@ resolution-markers = [
     "sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "coverage", marker = "(extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra != 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (extra != 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "pluggy", marker = "(extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra != 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (extra != 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "pytest", marker = "(extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra != 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (extra != 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "coverage", marker = "(extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra != 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (extra != 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "pluggy", marker = "(extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra != 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (extra != 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "pytest", marker = "(extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra != 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (extra != 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/30/4c/f883ab8f0daad69f47efdf95f55a66b51a8b939c430dadce0611508d9e99/pytest_cov-6.3.0.tar.gz", hash = "sha256:35c580e7800f87ce892e687461166e1ac2bcb8fb9e13aea79032518d6e503ff2", size = 70398, upload-time = "2025-09-06T15:40:14.361Z" }
 wheels = [
@@ -3087,15 +3087,15 @@ name = "pytest-cov"
 version = "7.0.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "extra != 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu' and extra != 'extra-10-imas-codex-test'",
-    "sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-gpu' and extra != 'extra-10-imas-codex-test'",
-    "sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-gpu' and extra != 'extra-10-imas-codex-test'",
-    "extra != 'extra-10-imas-codex-cpu' and extra != 'extra-10-imas-codex-gpu' and extra != 'extra-10-imas-codex-test'",
+    "extra != 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu' and extra != 'extra-10-iter-codex-test'",
+    "sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-gpu' and extra != 'extra-10-iter-codex-test'",
+    "sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-gpu' and extra != 'extra-10-iter-codex-test'",
+    "extra != 'extra-10-iter-codex-cpu' and extra != 'extra-10-iter-codex-gpu' and extra != 'extra-10-iter-codex-test'",
 ]
 dependencies = [
-    { name = "coverage", marker = "extra == 'extra-10-imas-codex-gpu' or extra != 'extra-10-imas-codex-test'" },
-    { name = "pluggy", marker = "extra == 'extra-10-imas-codex-gpu' or extra != 'extra-10-imas-codex-test'" },
-    { name = "pytest", marker = "extra == 'extra-10-imas-codex-gpu' or extra != 'extra-10-imas-codex-test'" },
+    { name = "coverage", marker = "extra == 'extra-10-iter-codex-gpu' or extra != 'extra-10-iter-codex-test'" },
+    { name = "pluggy", marker = "extra == 'extra-10-iter-codex-gpu' or extra != 'extra-10-iter-codex-test'" },
+    { name = "pytest", marker = "extra == 'extra-10-iter-codex-gpu' or extra != 'extra-10-iter-codex-test'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/5e/f7/c933acc76f5208b3b00089573cf6a2bc26dc80a8aece8f52bb7d6b1855ca/pytest_cov-7.0.0.tar.gz", hash = "sha256:33c97eda2e049a0c5298e91f519302a1334c26ac65c1a483d6206fd458361af1", size = 54328, upload-time = "2025-09-09T10:57:02.113Z" }
 wheels = [
@@ -3257,7 +3257,7 @@ name = "pyzmq"
 version = "27.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cffi", marker = "implementation_name == 'pypy' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "cffi", marker = "implementation_name == 'pypy' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/04/0b/3c9baedbdf613ecaa7aa07027780b8867f57b6293b6ee50de316c9f3222b/pyzmq-27.1.0.tar.gz", hash = "sha256:ac0765e3d44455adb6ddbf4417dcce460fc40a05978c08efdf2948072f6db540", size = 281750, upload-time = "2025-09-08T23:10:18.157Z" }
 wheels = [
@@ -3580,9 +3580,9 @@ dependencies = [
     { name = "numpy" },
     { name = "scikit-learn" },
     { name = "scipy" },
-    { name = "torch", version = "2.5.1+cu121", source = { registry = "https://download.pytorch.org/whl/cu121" }, marker = "extra == 'extra-10-imas-codex-gpu'" },
-    { name = "torch", version = "2.10.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "torch", version = "2.10.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "torch", version = "2.5.1+cu121", source = { registry = "https://download.pytorch.org/whl/cu121" }, marker = "extra == 'extra-10-iter-codex-gpu'" },
+    { name = "torch", version = "2.10.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "torch", version = "2.10.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "tqdm" },
     { name = "transformers" },
     { name = "typing-extensions" },
@@ -3691,7 +3691,7 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "alabaster" },
     { name = "babel" },
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "docutils" },
     { name = "imagesize" },
     { name = "jinja2" },
@@ -3785,7 +3785,7 @@ name = "sqlalchemy"
 version = "2.0.46"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "greenlet", marker = "platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "greenlet", marker = "platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
     { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/06/aa/9ce0f3e7a9829ead5c8ce549392f33a12c4555a6c0609bb27d882e9c7ddf/sqlalchemy-2.0.46.tar.gz", hash = "sha256:cf36851ee7219c170bb0793dbc3da3e80c582e04a5437bc601bfe8c85c9216d7", size = 9865393, upload-time = "2026-01-21T18:03:45.119Z" }
@@ -3857,7 +3857,7 @@ name = "sympy"
 version = "1.13.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "mpmath", marker = "extra == 'extra-10-imas-codex-gpu'" },
+    { name = "mpmath", marker = "extra == 'extra-10-iter-codex-gpu'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ca/99/5a5b6f19ff9f083671ddf7b9632028436167cd3d33e11015754e41b249a4/sympy-1.13.1.tar.gz", hash = "sha256:9cebf7e04ff162015ce31c9c6c9144daa34a93bd082f54fd8f12deca4f47515f", size = 7533040, upload-time = "2024-07-19T09:26:51.238Z" }
 wheels = [
@@ -3873,7 +3873,7 @@ resolution-markers = [
     "sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "mpmath", marker = "extra == 'extra-10-imas-codex-cpu' or extra == 'extra-10-imas-codex-test'" },
+    { name = "mpmath", marker = "extra == 'extra-10-iter-codex-cpu' or extra == 'extra-10-iter-codex-test'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/83/d3/803453b36afefb7c2bb238361cd4ae6125a569b4db67cd9e79846ba2d68c/sympy-1.14.0.tar.gz", hash = "sha256:d3d3fe8df1e5a0b42f0e7bdf50541697dbe7d23746e894990c030e2b05e72517", size = 7793921, upload-time = "2025-04-27T18:05:01.611Z" }
 wheels = [
@@ -3948,25 +3948,25 @@ name = "torch"
 version = "2.5.1+cu121"
 source = { registry = "https://download.pytorch.org/whl/cu121" }
 dependencies = [
-    { name = "filelock", marker = "extra == 'extra-10-imas-codex-gpu'" },
-    { name = "fsspec", marker = "extra == 'extra-10-imas-codex-gpu'" },
-    { name = "jinja2", marker = "extra == 'extra-10-imas-codex-gpu'" },
-    { name = "networkx", marker = "extra == 'extra-10-imas-codex-gpu'" },
-    { name = "nvidia-cublas-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "nvidia-cuda-cupti-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "nvidia-cuda-nvrtc-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "nvidia-cuda-runtime-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "nvidia-cudnn-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "nvidia-cufft-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "nvidia-curand-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "nvidia-cusolver-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "nvidia-cusparse-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "nvidia-nccl-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "nvidia-nvtx-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "setuptools", marker = "extra == 'extra-10-imas-codex-gpu'" },
-    { name = "sympy", version = "1.13.1", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-10-imas-codex-gpu'" },
-    { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "typing-extensions", marker = "extra == 'extra-10-imas-codex-gpu'" },
+    { name = "filelock", marker = "extra == 'extra-10-iter-codex-gpu'" },
+    { name = "fsspec", marker = "extra == 'extra-10-iter-codex-gpu'" },
+    { name = "jinja2", marker = "extra == 'extra-10-iter-codex-gpu'" },
+    { name = "networkx", marker = "extra == 'extra-10-iter-codex-gpu'" },
+    { name = "nvidia-cublas-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "nvidia-cuda-cupti-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "nvidia-cuda-nvrtc-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "nvidia-cuda-runtime-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "nvidia-cudnn-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "nvidia-cufft-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "nvidia-curand-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "nvidia-cusolver-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "nvidia-cusparse-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "nvidia-nccl-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "nvidia-nvtx-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "setuptools", marker = "extra == 'extra-10-iter-codex-gpu'" },
+    { name = "sympy", version = "1.13.1", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-10-iter-codex-gpu'" },
+    { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (platform_machine != 'x86_64' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (sys_platform != 'linux' and extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "typing-extensions", marker = "extra == 'extra-10-iter-codex-gpu'" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-cp312-cp312-linux_x86_64.whl", hash = "sha256:222be02548c2e74a21a8fbc8e5b8d2eef9f9faee865d70385d2eb1b9aabcbc76", upload-time = "2024-10-29T23:20:25Z" },
@@ -3981,13 +3981,13 @@ resolution-markers = [
     "sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "filelock", marker = "(sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "fsspec", marker = "(sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "jinja2", marker = "(sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "networkx", marker = "(sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "setuptools", marker = "(sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "sympy", version = "1.14.0", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "typing-extensions", marker = "(sys_platform == 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "filelock", marker = "(sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "fsspec", marker = "(sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "jinja2", marker = "(sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "networkx", marker = "(sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "setuptools", marker = "(sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "sympy", version = "1.14.0", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "typing-extensions", marker = "(sys_platform == 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform == 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.10.0-1-cp312-none-macosx_11_0_arm64.whl", hash = "sha256:7fbbf409143a4fe0812a40c0b46a436030a7e1d14fe8c5234dfbe44df47f617e", upload-time = "2026-02-06T16:27:14Z" },
@@ -4003,13 +4003,13 @@ resolution-markers = [
     "sys_platform != 'darwin'",
 ]
 dependencies = [
-    { name = "filelock", marker = "(sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "fsspec", marker = "(sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "jinja2", marker = "(sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "networkx", marker = "(sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "setuptools", marker = "(sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "sympy", version = "1.14.0", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
-    { name = "typing-extensions", marker = "(sys_platform != 'darwin' and extra == 'extra-10-imas-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-imas-codex-test') or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "filelock", marker = "(sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "fsspec", marker = "(sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "jinja2", marker = "(sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "networkx", marker = "(sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "setuptools", marker = "(sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "sympy", version = "1.14.0", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
+    { name = "typing-extensions", marker = "(sys_platform != 'darwin' and extra == 'extra-10-iter-codex-cpu') or (sys_platform != 'darwin' and extra == 'extra-10-iter-codex-test') or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.10.0%2Bcpu-cp312-cp312-linux_aarch64.whl", hash = "sha256:8de5a36371b775e2d4881ed12cc7f2de400b1ad3d728aa74a281f649f87c9b8c", upload-time = "2026-01-23T15:10:22Z" },
@@ -4042,7 +4042,7 @@ name = "tqdm"
 version = "4.67.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-imas-codex-cpu' and extra == 'extra-10-imas-codex-gpu') or (extra == 'extra-10-imas-codex-gpu' and extra == 'extra-10-imas-codex-test')" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-10-iter-codex-cpu' and extra == 'extra-10-iter-codex-gpu') or (extra == 'extra-10-iter-codex-gpu' and extra == 'extra-10-iter-codex-test')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/09/a9/6ba95a270c6f1fbcd8dac228323f2777d886cb206987444e4bce66338dd4/tqdm-4.67.3.tar.gz", hash = "sha256:7d825f03f89244ef73f1d4ce193cb1774a8179fd96f31d7e1dcde62092b960bb", size = 169598, upload-time = "2026-02-03T17:35:53.048Z" }
 wheels = [
@@ -4195,7 +4195,7 @@ name = "triton"
 version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "filelock", marker = "extra == 'extra-10-imas-codex-gpu'" },
+    { name = "filelock", marker = "extra == 'extra-10-iter-codex-gpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/78/eb/65f5ba83c2a123f6498a3097746607e5b2f16add29e36765305e4ac7fdd8/triton-3.1.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c8182f42fd8080a7d39d666814fa36c5e30cc00ea7eeeb1a2983dbb4c99a0fdc", size = 209551444, upload-time = "2024-10-14T16:05:53.433Z" },

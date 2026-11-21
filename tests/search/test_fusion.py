@@ -14,13 +14,13 @@ import re
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from imas_codex.ids import slot_context
-from imas_codex.llm import search_tools
-from imas_codex.search import fusion
-from imas_codex.search.fusion import RRF_K, rrf_fuse, rrf_fuse_in_input_order
+from iter_codex.ids import slot_context
+from iter_codex.llm import search_tools
+from iter_codex.search import fusion
+from iter_codex.search.fusion import RRF_K, rrf_fuse, rrf_fuse_in_input_order
 
 _FACILITY_DIR = (
-    Path(__file__).resolve().parents[2] / "imas_codex" / "config" / "facilities"
+    Path(__file__).resolve().parents[2] / "iter_codex" / "config" / "facilities"
 )
 
 

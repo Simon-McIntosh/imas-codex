@@ -17,8 +17,8 @@ import yaml
 
 pytest.importorskip("imas_standard_names")
 
-import imas_codex.standard_names.export as export_module  # noqa: E402
-from imas_codex.standard_names.export import (  # noqa: E402
+import iter_codex.standard_names.export as export_module  # noqa: E402
+from iter_codex.standard_names.export import (  # noqa: E402
     _commit_iso_timestamp,
     _get_codex_commit_sha,
     _manifest_iso_timestamp,
@@ -55,7 +55,7 @@ class TestManifestDeterminism:
         a.mkdir()
         b.mkdir()
         with patch(
-            "imas_codex.standard_names.export._commit_iso_timestamp",
+            "iter_codex.standard_names.export._commit_iso_timestamp",
             return_value=_FIXED,
         ):
             bytes_a = _write(a)
@@ -64,7 +64,7 @@ class TestManifestDeterminism:
 
     def test_generated_and_exported_derive_from_commit(self, tmp_path: Path) -> None:
         with patch(
-            "imas_codex.standard_names.export._commit_iso_timestamp",
+            "iter_codex.standard_names.export._commit_iso_timestamp",
             return_value=_FIXED,
         ):
             _write(tmp_path)
@@ -92,7 +92,7 @@ class TestManifestDeterminism:
     def test_required_provenance_fails_clearly_when_unavailable(self) -> None:
         with (
             patch(
-                "imas_codex.standard_names.export._commit_iso_timestamp",
+                "iter_codex.standard_names.export._commit_iso_timestamp",
                 return_value=None,
             ),
             patch.dict("os.environ", {}, clear=True),
@@ -117,11 +117,11 @@ class TestCommitTimestamp:
     def test_archive_uses_packaged_sha_and_source_date_epoch(self) -> None:
         with (
             patch(
-                "imas_codex.standard_names.export.subprocess.run",
+                "iter_codex.standard_names.export.subprocess.run",
                 side_effect=FileNotFoundError,
             ),
             patch(
-                "imas_codex.standard_names.export.importlib.metadata.distribution"
+                "iter_codex.standard_names.export.importlib.metadata.distribution"
             ) as distribution,
             patch.dict("os.environ", {"SOURCE_DATE_EPOCH": "1783591200"}),
         ):
@@ -147,16 +147,16 @@ class TestCommitTimestamp:
     ) -> None:
         with (
             patch(
-                "imas_codex.standard_names.export.subprocess.run",
+                "iter_codex.standard_names.export.subprocess.run",
                 side_effect=FileNotFoundError,
             ),
             patch(
-                "imas_codex.standard_names.export.importlib.metadata.distribution"
+                "iter_codex.standard_names.export.importlib.metadata.distribution"
             ) as distribution,
         ):
             distribution.return_value.version = "0.13.dev42+gabc123def"
             distribution.return_value.locate_file.return_value = (
-                tmp_path / "other-install/imas_codex/standard_names/export.py"
+                tmp_path / "other-install/iter_codex/standard_names/export.py"
             )
             assert _get_codex_commit_sha() is None
 

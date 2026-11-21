@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at e6d4b36b9d455ec5b595a8600e3abfe977a4ab96, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.graph.dd_domain_classifier.build_domain_questions.
+# Names the tree no longer defines: iter_codex.graph.dd_domain_classifier.build_domain_questions.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Measure the typed-Choice domain classifier against reviewed standard-name labels.
@@ -21,14 +21,14 @@ import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.dd_domain_classifier import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.dd_domain_classifier import (
     build_domain_questions,
     classify_tier1_llm,
     gather_classification_context,
 )
-from imas_codex.settings import get_model
-from imas_codex.standard_names.domain_ranking import select_primary_domain
+from iter_codex.settings import get_model
+from iter_codex.standard_names.domain_ranking import select_primary_domain
 
 HERE = Path(__file__).resolve().parent
 LABELS = HERE / "scg-domain-label-sheet.json"

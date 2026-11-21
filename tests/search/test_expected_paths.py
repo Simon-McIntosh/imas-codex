@@ -135,7 +135,7 @@ class TestGenerateExpectedPaths:
 
     @pytest.fixture(scope="class")
     def graph_client(self):
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         try:
             gc = GraphClient()

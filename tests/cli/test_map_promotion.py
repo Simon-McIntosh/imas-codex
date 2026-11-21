@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import sequence
-from imas_codex.cli.map import map_cmd
+from iter_codex.cli.discover import sequence
+from iter_codex.cli.map import map_cmd
 
 
 @pytest.fixture
@@ -27,17 +27,17 @@ def mapping_graph(monkeypatch):
         raise AssertionError(f"unexpected graph query: {statement}")
 
     graph.query.side_effect = query
-    monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.client.GraphClient", lambda: graph)
     monkeypatch.setattr(
-        "imas_codex.cli.map.configure_cli_logging", lambda *a, **kw: None
+        "iter_codex.cli.map.configure_cli_logging", lambda *a, **kw: None
     )
     return graph
 
 
 @pytest.fixture
 def mapping_engine(monkeypatch, mapping_graph):
-    from imas_codex.cli.discover import common
-    from imas_codex.ids import tools, workers
+    from iter_codex.cli.discover import common
+    from iter_codex.ids import tools, workers
 
     monkeypatch.setattr(common, "use_rich_output", lambda: False)
     monkeypatch.setattr(common, "setup_logging", lambda *a, **kw: None)
@@ -70,7 +70,7 @@ def test_map_run_keeps_generated_status(mapping_engine):
 
 
 def test_map_run_records_configured_dd_version(mapping_engine, monkeypatch):
-    monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.1")
+    monkeypatch.setattr("iter_codex.settings.get_dd_version", lambda: "4.1.1")
 
     result = CliRunner().invoke(map_cmd, ["run", "jet", "-i", "magnetics"])
 
@@ -99,7 +99,7 @@ def test_activate_promotes_validated_mapping(mapping_graph):
 
 @pytest.mark.parametrize("passed", [True, False])
 def test_validate_records_only_a_pass(monkeypatch, mapping_graph, passed):
-    from imas_codex.ids import tools, validation
+    from iter_codex.ids import tools, validation
 
     monkeypatch.setattr(
         tools,

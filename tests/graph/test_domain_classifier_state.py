@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from imas_codex.graph.dd_domain_classifier import (
+from iter_codex.graph.dd_domain_classifier import (
     _format_batch_user_prompt,
     _query_unclassified_paths,
     carries_own_subject,

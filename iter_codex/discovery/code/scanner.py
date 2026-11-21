@@ -1,0 +1,724 @@
+"""File scanner for discovering source code files in scored FacilityPaths.
+
+Enumerates files at remote facilities using SSH, filtering by supported
+code extensions. Uses depth=1 since the paths pipeline has already walked
+subdirectories — each FacilityPath is processed at its own level only.
+
+Combines file enumeration with rg pattern matching in a single SSH call
+via the discover_files.py remote script, providing per-file enrichment
+evidence that feeds into dual-pass LLM scoring.
+
+Creates CodeFile nodes with status='discovered' and per-file enrichment
+data (pattern matches, line counts). Documents and images use the
+separate Document node type.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import subprocess
+from collections.abc import Callable
+
+from iter_codex.graph import GraphClient
+from iter_codex.ingestion.readers.remote import (
+    DOCUMENT_EXTENSIONS,
+    EXTENSION_TO_LANGUAGE,
+    IMAGE_EXTENSIONS,
+    detect_file_category,
+    detect_language,
+)
+
+logger = logging.getLogger(__name__)
+
+# Progress callback: (current, total, message) -> None
+ProgressCallback = Callable[[int, int, str], None]
+
+# Default file size limit: 1 MB — typical user analysis code is small.
+# Machine data files, large caches, binaries are excluded.
+DEFAULT_MAX_FILE_SIZE = 1 * 1024 * 1024
+
+# Max files per path — much lower now that we scan at depth=1
+DEFAULT_MAX_FILES_PER_PATH = 500
+
+
+def _get_extensions_list() -> list[str]:
+    """Get sorted list of source code file extensions (without dots).
+
+    Returns only code extensions (Python, Fortran, MATLAB, etc.).
+    Documents and images use _get_document_extensions_list().
+    """
+    return sorted({e.lstrip(".").lower() for e in EXTENSION_TO_LANGUAGE})
+
+
+def _get_document_extensions_list() -> list[str]:
+    """Get sorted list of document + image file extensions (without dots)."""
+    doc_and_image = set(DOCUMENT_EXTENSIONS) | set(IMAGE_EXTENSIONS)
+    return sorted({e.lstrip(".").lower() for e in doc_and_image})
+
+
+def _get_pattern_categories(facility: str | None = None) -> dict[str, str]:
+    """Get pattern categories from the paths enrichment PATTERN_REGISTRY.
+
+    Flattens into category → regex for rg execution on remote host.
+    """
+    from iter_codex.discovery.paths.enrichment import _build_enrich_patterns
+
+    return _build_enrich_patterns(facility)
+
+
+def _scan_remote_paths_batch(
+    facility: str,
+    remote_paths: list[str],
+    ssh_host: str | None = None,
+    max_depth: int = 1,
+    timeout: int = 300,
+    max_files_per_path: int = DEFAULT_MAX_FILES_PER_PATH,
+    max_file_size: int = DEFAULT_MAX_FILE_SIZE,
+) -> dict[str, list[dict]]:
+    """Scan multiple remote paths for files with enrichment in a single SSH call.
+
+    Uses the discover_files.py remote script that combines file enumeration
+    (fd/find at depth=1) with rg pattern matching. Each file gets per-file
+    enrichment data (pattern matches, line counts).
+
+    Args:
+        facility: Facility ID
+        remote_paths: Remote directory paths to scan
+        ssh_host: SSH host alias (defaults to facility)
+        max_depth: Maximum directory depth (default 1 = files at this level only)
+        timeout: SSH command timeout in seconds
+        max_files_per_path: Maximum files per path
+        max_file_size: Maximum file size in bytes (default 1 MB)
+
+    Returns:
+        Dict mapping path -> list of file info dicts with enrichment data
+    """
+    from iter_codex.discovery.base.facility import get_facility
+    from iter_codex.remote.environment import resolve_remote_environment
+    from iter_codex.remote.executor import run_python_script
+
+    if not remote_paths:
+        return {}
+
+    try:
+        config = get_facility(facility)
+    except ValueError:
+        config = {}
+
+    host = ssh_host or config.get("ssh_host") or facility
+    environment = resolve_remote_environment(config)
+
+    input_data = {
+        "paths": remote_paths,
+        "extensions": _get_extensions_list(),
+        "max_depth": max_depth,
+        "max_files_per_path": max_files_per_path,
+        "max_file_size": max_file_size,
+        "pattern_categories": _get_pattern_categories(facility),
+    }
+
+    try:
+        output = run_python_script(
+            "discover_files.py",
+            input_data=input_data,
+            ssh_host=host,
+            timeout=timeout,
+            python_command=environment.python_command,
+            setup_commands=list(environment.setup_commands),
+        )
+    except subprocess.TimeoutExpired:
+        logger.warning(
+            "Batch scan timed out after %ds for %s (%d paths)",
+            timeout,
+            facility,
+            len(remote_paths),
+        )
+        raise
+    except subprocess.CalledProcessError as e:
+        logger.warning("Batch scan failed for %s: %s", facility, e)
+        raise
+
+    # Parse JSON output
+    try:
+        if "[stderr]:" in output:
+            output = output.split("[stderr]:")[0].strip()
+        results_data = json.loads(output)
+    except json.JSONDecodeError as e:
+        logger.warning("Failed to parse scan output for %s: %s", facility, e)
+        raise
+
+    # Convert to file info dicts with enrichment data
+    result_map: dict[str, list[dict]] = {}
+    for entry in results_data:
+        path = entry.get("path", "")
+        error = entry.get("error")
+        if error:
+            logger.warning("Scan error for %s:%s: %s", facility, path, error)
+            result_map[path] = []
+            continue
+
+        files = []
+        for file_info in entry.get("files", []):
+            # file_info is now a dict with path, patterns, total_matches, line_count
+            if isinstance(file_info, str):
+                # Backwards compatibility with old scan_files.py format
+                file_path = file_info
+                patterns = {}
+                total_matches = 0
+                line_count = 0
+            else:
+                file_path = file_info.get("path", "")
+                patterns = file_info.get("patterns", {})
+                total_matches = file_info.get("total_matches", 0)
+                line_count = file_info.get("line_count", 0)
+
+            files.append(
+                {
+                    "path": file_path,
+                    "language": detect_language(file_path),
+                    "file_category": detect_file_category(file_path),
+                    "facility_id": facility,
+                    "patterns": patterns,
+                    "total_matches": total_matches,
+                    "line_count": line_count,
+                }
+            )
+
+        if entry.get("truncated"):
+            logger.warning(
+                "Path %s:%s truncated at %d files",
+                facility,
+                path,
+                max_files_per_path,
+            )
+
+        if files:
+            logger.info("Found %d files in %s:%s", len(files), facility, path)
+
+        result_map[path] = files
+
+    return result_map
+
+
+async def async_scan_remote_paths_batch(
+    facility: str,
+    remote_paths: list[str],
+    ssh_host: str | None = None,
+    max_depth: int = 1,
+    timeout: int = 300,
+    max_files_per_path: int = DEFAULT_MAX_FILES_PER_PATH,
+    max_file_size: int = DEFAULT_MAX_FILE_SIZE,
+) -> dict[str, list[dict]]:
+    """Async version of _scan_remote_paths_batch."""
+    import asyncio
+
+    return await asyncio.to_thread(
+        _scan_remote_paths_batch,
+        facility,
+        remote_paths,
+        ssh_host=ssh_host,
+        max_depth=max_depth,
+        timeout=timeout,
+        max_files_per_path=max_files_per_path,
+        max_file_size=max_file_size,
+    )
+
+
+def _scan_remote_path(
+    facility: str,
+    remote_path: str,
+    ssh_host: str | None = None,
+    max_depth: int = 1,
+    timeout: int = 60,
+    max_files_per_path: int = DEFAULT_MAX_FILES_PER_PATH,
+) -> list[dict]:
+    """Scan a single remote path for supported files via SSH.
+
+    Wraps _scan_remote_paths_batch for single-path convenience.
+    """
+    result_map = _scan_remote_paths_batch(
+        facility,
+        [remote_path],
+        ssh_host=ssh_host,
+        max_depth=max_depth,
+        timeout=timeout,
+        max_files_per_path=max_files_per_path,
+    )
+    return result_map.get(remote_path, [])
+
+
+def _persist_code_files(
+    facility: str,
+    files: list[dict],
+    source_path_id: str | None = None,
+) -> dict[str, int]:
+    """Create CodeFile nodes from scanned code files with enrichment data.
+
+    Stores per-file enrichment data (pattern matches, line counts) from
+    the discover_files.py remote script so it's available for LLM scoring.
+
+    Args:
+        facility: Facility ID
+        files: List of file info dicts (with patterns, total_matches, line_count)
+        source_path_id: FacilityPath ID that contained these files
+
+    Returns:
+        Dict with discovered, skipped counts
+    """
+    from datetime import UTC, datetime
+
+    now = datetime.now(UTC).isoformat()
+    items = []
+    for f in files:
+        file_id = f"{facility}:{f['path']}"
+        language = f.get("language")
+        if not language:
+            continue  # CodeFile requires language — skip non-code files
+        item = {
+            "id": file_id,
+            "facility_id": facility,
+            "path": f["path"],
+            "language": language,
+            "status": "discovered",
+            "discovered_at": now,
+            "in_directory": source_path_id,
+        }
+        # Store per-file enrichment from discover_files.py
+        patterns = f.get("patterns")
+        if patterns:
+            item["pattern_categories"] = json.dumps(patterns)
+            item["total_pattern_matches"] = f.get("total_matches", 0)
+            item["is_enriched"] = True
+        line_count = f.get("line_count", 0)
+        if line_count:
+            item["line_count"] = line_count
+        items.append(item)
+
+    if not items:
+        return {"discovered": 0, "skipped": 0}
+
+    # Batch large writes to avoid overwhelming Neo4j.
+    # Keep batches small (100) to reduce lock contention with concurrent
+    # score workers that claim CodeFile nodes.
+    BATCH_SIZE = 100
+    total_discovered = 0
+    total_skipped = 0
+
+    with GraphClient() as client:
+        for batch_start in range(0, len(items), BATCH_SIZE):
+            batch = items[batch_start : batch_start + BATCH_SIZE]
+
+            # MERGE to skip already-discovered files.
+            # Catch constraint violations from concurrent scan workers
+            # racing on the same file id.
+            try:
+                result = client.query(
+                    """
+                    UNWIND $items AS item
+                    MERGE (sf:CodeFile {id: item.id})
+                    ON CREATE SET sf += item
+                    WITH sf, item
+                    WHERE sf.status = 'discovered' AND sf.discovered_at = item.discovered_at
+                    MATCH (f:Facility {id: item.facility_id})
+                    MERGE (sf)-[:AT_FACILITY]->(f)
+                    RETURN count(CASE WHEN sf.discovered_at = item.discovered_at THEN 1 END) AS discovered,
+                           count(CASE WHEN sf.discovered_at <> item.discovered_at THEN 1 END) AS skipped
+                    """,
+                    items=batch,
+                )
+            except Exception as e:
+                if "ConstraintValidation" in str(
+                    type(e).__name__
+                ) or "ConstraintValidation" in str(e):
+                    logger.debug(
+                        "Constraint violation (concurrent scan), retrying individually: %s",
+                        e,
+                    )
+                    result = [{"discovered": 0, "skipped": len(batch)}]
+                else:
+                    raise
+
+            counts = result[0] if result else {"discovered": 0, "skipped": 0}
+            total_discovered += counts.get("discovered", len(batch))
+            total_skipped += counts.get("skipped", 0)
+
+            # Link to parent FacilityPath
+            if source_path_id:
+                client.query(
+                    """
+                    UNWIND $items AS item
+                    MATCH (sf:CodeFile {id: item.id})
+                    MATCH (p:FacilityPath {id: $parent_id})
+                    MERGE (sf)-[:IN_DIRECTORY]->(p)
+                    """,
+                    items=batch,
+                    parent_id=source_path_id,
+                )
+
+        # Update FacilityPath scan count (once, after all batches)
+        if source_path_id:
+            client.query(
+                """
+                MATCH (p:FacilityPath {id: $parent_id})
+                SET p.files_scanned = $count,
+                    p.last_file_scan_at = datetime()
+                """,
+                parent_id=source_path_id,
+                count=len(files),
+            )
+
+        return {
+            "discovered": total_discovered,
+            "skipped": total_skipped,
+        }
+
+
+def scan_facility_files(
+    facility: str,
+    min_score: float | None = None,
+    max_paths: int = 100,
+    max_depth: int = 5,
+    ssh_host: str | None = None,
+    progress_callback: ProgressCallback | None = None,
+    path_prefixes: list[str] | None = None,
+) -> dict[str, int]:
+    """Scan scored FacilityPaths for source code files.
+
+    Enumerates code files in high-scoring directories, creates CodeFile nodes.
+    Uses claim coordination via ``files_claimed_at`` on FacilityPath to
+    enable safe parallel execution.
+
+    Args:
+        facility: Facility ID
+        min_score: Minimum FacilityPath score to scan
+        max_paths: Maximum paths to scan
+        max_depth: Maximum directory depth per path
+        ssh_host: SSH host override
+        progress_callback: Optional progress callback
+        path_prefixes: When given, only FacilityPaths whose ``path`` starts
+            with one of these prefixes are claimed.
+
+    Returns:
+        Dict with total_files, total_paths, new_files, skipped_files
+    """
+    from iter_codex.discovery.code.graph_ops import (
+        claim_paths_for_file_scan,
+        release_path_file_scan_claim,
+    )
+
+    stats = {
+        "total_files": 0,
+        "total_paths": 0,
+        "new_files": 0,
+        "skipped_files": 0,
+    }
+
+    def report(current: int, total: int, msg: str) -> None:
+        if progress_callback:
+            progress_callback(current, total, msg)
+        logger.info("[%d/%d] %s", current, total, msg)
+
+    # Claim paths atomically (parallel-safe)
+    paths = claim_paths_for_file_scan(
+        facility,
+        min_score=min_score,
+        limit=max_paths,
+        path_prefixes=path_prefixes,
+    )
+    if not paths:
+        report(0, 0, "No scored paths to scan (or all claimed by another worker)")
+        return stats
+
+    # Ensure Facility node exists so AT_FACILITY relationships don't fail
+    with GraphClient() as gc:
+        gc.ensure_facility(facility)
+
+    total = len(paths)
+    report(0, total, f"Scanning {total} paths for source files")
+
+    for idx, path_info in enumerate(paths):
+        path = path_info["path"]
+        path_id = path_info["id"]
+        score = path_info.get("score", 0)
+
+        report(idx, total, f"Scanning {path} (score={score:.2f})")
+
+        try:
+            files = _scan_remote_path(
+                facility, path, ssh_host=ssh_host, max_depth=max_depth
+            )
+
+            if files:
+                result = _persist_code_files(facility, files, source_path_id=path_id)
+                stats["new_files"] += result["discovered"]
+                stats["skipped_files"] += result["skipped"]
+                stats["total_files"] += len(files)
+
+            stats["total_paths"] += 1
+
+        except Exception as e:
+            logger.warning("Error scanning %s: %s", path, e)
+            # Release claim on error so another worker can retry
+            release_path_file_scan_claim(path_id)
+            continue
+
+        # Release claim after successful scan
+        release_path_file_scan_claim(path_id)
+
+    report(
+        total,
+        total,
+        f"Scan complete: {stats['new_files']} new files in {stats['total_paths']} paths",
+    )
+    return stats
+
+
+def get_code_discovery_stats(facility: str) -> dict[str, int]:
+    """Get code file discovery statistics for a facility.
+
+    Returns:
+        Dict with counts by status, total
+    """
+    with GraphClient() as client:
+        result = client.query(
+            """
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            RETURN sf.status AS status, count(*) AS count
+            """,
+            facility=facility,
+        )
+        stats = {row["status"]: row["count"] for row in result}
+        stats["total"] = sum(stats.values())
+
+        # Count by language
+        lang_result = client.query(
+            """
+            MATCH (sf:CodeFile)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            RETURN sf.language AS language, count(*) AS count
+            """,
+            facility=facility,
+        )
+        for row in lang_result:
+            if row["language"]:
+                stats[f"lang_{row['language']}"] = row["count"]
+
+        return stats
+
+
+def get_document_discovery_stats(facility: str) -> dict[str, int]:
+    """Get document discovery statistics for a facility."""
+    with GraphClient() as client:
+        result = client.query(
+            """
+            MATCH (d:Document)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            RETURN d.status AS status, count(*) AS count
+            """,
+            facility=facility,
+        )
+        stats = {row["status"]: row["count"] for row in result}
+        stats["total"] = sum(stats.values())
+
+        # Count by document type
+        type_result = client.query(
+            """
+            MATCH (d:Document)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            RETURN d.document_type AS doc_type, count(*) AS count
+            """,
+            facility=facility,
+        )
+        for row in type_result:
+            if row["doc_type"]:
+                stats[f"type_{row['doc_type']}"] = row["count"]
+
+        return stats
+
+
+def clear_facility_code(facility: str, batch_size: int = 1000) -> dict[str, int]:
+    """Clear all CodeFile nodes and dependent nodes for a facility.
+
+    Cascades in referential-integrity order:
+    1. CodeChunk nodes linked to CodeExamples from facility CodeFiles
+    2. CodeExample nodes linked to facility CodeFiles
+    3. DataReference nodes for the facility
+    4. CodeFile nodes by facility_id
+
+    Also resets file scan markers on FacilityPaths so scan_worker
+    will re-enumerate files on the next run.
+
+    Args:
+        facility: Facility ID
+        batch_size: Nodes to delete per batch (default 1000)
+
+    Returns:
+        Dict with counts of deleted nodes
+    """
+    results = {
+        "code_files_deleted": 0,
+        "code_chunks_deleted": 0,
+        "data_references_deleted": 0,
+    }
+
+    with GraphClient() as client:
+        # Delete CodeChunks (and their DataReferences cascade via DETACH)
+        while True:
+            result = client.query(
+                """
+                MATCH (sf:CodeFile {facility_id: $facility})
+                      <-[:FROM_FILE]-(ce)
+                      -[:HAS_CHUNK]->(cc:CodeChunk)
+                WITH cc LIMIT $batch_size
+                DETACH DELETE cc
+                RETURN count(cc) AS deleted
+                """,
+                facility=facility,
+                batch_size=batch_size,
+            )
+            deleted = result[0]["deleted"] if result else 0
+            results["code_chunks_deleted"] += deleted
+            if deleted < batch_size:
+                break
+
+        # Delete CodeExample nodes linked to facility CodeFiles
+        while True:
+            result = client.query(
+                """
+                MATCH (sf:CodeFile {facility_id: $facility})
+                      <-[:FROM_FILE]-(ce)
+                WITH ce LIMIT $batch_size
+                DETACH DELETE ce
+                RETURN count(ce) AS deleted
+                """,
+                facility=facility,
+                batch_size=batch_size,
+            )
+            deleted = result[0]["deleted"] if result else 0
+            if deleted < batch_size:
+                break
+
+        # Delete CodeFile nodes in batches
+        while True:
+            result = client.query(
+                """
+                MATCH (sf:CodeFile {facility_id: $facility})
+                WITH sf LIMIT $batch_size
+                DETACH DELETE sf
+                RETURN count(sf) AS deleted
+                """,
+                facility=facility,
+                batch_size=batch_size,
+            )
+            deleted = result[0]["deleted"] if result else 0
+            results["code_files_deleted"] += deleted
+            if deleted < batch_size:
+                break
+
+        # Delete orphaned DataReference nodes for the facility
+        result = client.query(
+            """
+            MATCH (dr:DataReference {facility_id: $facility})
+            DETACH DELETE dr
+            RETURN count(dr) AS deleted
+            """,
+            facility=facility,
+        )
+        results["data_references_deleted"] = result[0]["deleted"] if result else 0
+
+        # Reset FacilityPath scan markers so paths are re-scanned
+        client.query(
+            """
+            MATCH (fp:FacilityPath {facility_id: $facility})
+            WHERE fp.files_scanned IS NOT NULL
+            SET fp.files_scanned = null,
+                fp.last_file_scan_at = null,
+                fp.evidence_linked = null
+            """,
+            facility=facility,
+        )
+
+        # Clear code evidence from FacilitySignal nodes
+        client.query(
+            """
+            MATCH (fs:FacilitySignal {facility_id: $facility})
+            WHERE fs.code_evidence_count IS NOT NULL
+            SET fs.code_evidence_count = null,
+                fs.has_code_evidence = null
+            """,
+            facility=facility,
+        )
+
+        logger.info(
+            "Deleted %d CodeFile + %d CodeChunk + %d DataReference nodes for %s",
+            results["code_files_deleted"],
+            results["code_chunks_deleted"],
+            results.get("data_references_deleted", 0),
+            facility,
+        )
+
+    return results
+
+
+def clear_facility_documents(facility: str, batch_size: int = 1000) -> dict[str, int]:
+    """Clear all Document nodes for a facility.
+
+    Args:
+        facility: Facility ID
+        batch_size: Nodes to delete per batch (default 1000)
+
+    Returns:
+        Dict with counts of deleted nodes
+    """
+    results = {"documents_deleted": 0, "images_deleted": 0}
+
+    with GraphClient() as client:
+        while True:
+            result = client.query(
+                """
+                MATCH (d:Document {facility_id: $facility})
+                WITH d LIMIT $batch_size
+                DETACH DELETE d
+                RETURN count(d) AS deleted
+                """,
+                facility=facility,
+                batch_size=batch_size,
+            )
+            deleted = result[0]["deleted"] if result else 0
+            results["documents_deleted"] += deleted
+            if deleted < batch_size:
+                break
+
+        # Delete orphaned Image nodes
+        while True:
+            result = client.query(
+                """
+                MATCH (img:Image {facility_id: $facility})
+                WHERE NOT (img)<-[:HAS_IMAGE]-()
+                WITH img LIMIT $batch_size
+                DETACH DELETE img
+                RETURN count(img) AS deleted
+                """,
+                facility=facility,
+                batch_size=batch_size,
+            )
+            deleted = result[0]["deleted"] if result else 0
+            results["images_deleted"] += deleted
+            if deleted < batch_size:
+                break
+
+        logger.info(
+            "Deleted %d Document + %d Image nodes for %s",
+            results["documents_deleted"],
+            results["images_deleted"],
+            facility,
+        )
+
+    return results
+
+
+__all__ = [
+    "clear_facility_code",
+    "clear_facility_documents",
+    "get_code_discovery_stats",
+    "get_document_discovery_stats",
+    "scan_facility_files",
+]

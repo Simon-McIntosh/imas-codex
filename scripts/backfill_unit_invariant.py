@@ -36,7 +36,7 @@ import json
 import sys
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 ARTEFACT_PATH = (
     Path(__file__).resolve().parent.parent

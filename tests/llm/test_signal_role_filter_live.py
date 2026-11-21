@@ -67,8 +67,8 @@ def _use_production_embeddings(monkeypatch):
     anything. Deleting the two overrides lets ``EncoderConfig`` resolve the
     production backend.
     """
-    monkeypatch.delenv("IMAS_CODEX_EMBEDDING_LOCATION", raising=False)
-    monkeypatch.delenv("IMAS_CODEX_EMBEDDING_MODEL", raising=False)
+    monkeypatch.delenv("ITER_CODEX_EMBEDDING_LOCATION", raising=False)
+    monkeypatch.delenv("ITER_CODEX_EMBEDDING_MODEL", raising=False)
 
 
 def _served_top(
@@ -87,7 +87,7 @@ def _served_top(
     one call serves both the control checks (which slice to :data:`TOP_N`) and
     the reach check.
     """
-    from imas_codex.llm import search_tools
+    from iter_codex.llm import search_tools
 
     captured: dict[str, list[dict]] = {}
     real = search_tools.format_signals_report

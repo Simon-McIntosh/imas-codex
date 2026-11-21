@@ -6,13 +6,13 @@ from pathlib import Path
 import pytest
 import yaml
 
-from imas_codex.graph.models import (
+from iter_codex.graph.models import (
     DDResolutionField,
     DDResolutionStatus,
     DDResolutionValueKind,
 )
-from imas_codex.graph.schema import GraphSchema
-from imas_codex.standard_names.dd_resolutions import (
+from iter_codex.graph.schema import GraphSchema
+from iter_codex.standard_names.dd_resolutions import (
     _GRAPH_RESOLUTION_QUERY,
     IONISATION_POTENTIAL_RESOLUTION_PATHS,
     DDResolutionGraphPathAction,
@@ -66,7 +66,7 @@ def _ionisation_graph(seed_dd_resolutions):
 
 @pytest.fixture
 def _exclusion_graph(seed_dd_resolutions):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     seed_dd_resolutions([{"path": "synthetic_ids/exclusion/value", "effective": "1"}])
     rows = [
@@ -102,7 +102,7 @@ def _exclusion_graph(seed_dd_resolutions):
 
 
 def test_schema_declares_resolution_provenance_and_surviving_gates() -> None:
-    schema = yaml.safe_load(Path("imas_codex/schemas/standard_name.yaml").read_text())
+    schema = yaml.safe_load(Path("iter_codex/schemas/standard_name.yaml").read_text())
     assert "DDResolutionStateChange" not in schema["classes"]
     attributes = schema["classes"]["DDResolution"]["attributes"]
 
@@ -123,7 +123,7 @@ def test_schema_declares_resolution_provenance_and_surviving_gates() -> None:
 
 
 def test_graph_schema_derives_required_relationship_directions() -> None:
-    schema = GraphSchema("imas_codex/schemas/imas_dd.yaml")
+    schema = GraphSchema("iter_codex/schemas/imas_dd.yaml")
     relationships = {
         relationship.cypher_type: (
             relationship.from_class,
@@ -196,8 +196,8 @@ def test_exclusion_taxonomy_is_sixteen_distinct_paths() -> None:
 
 
 def test_exact_release_contains_only_the_four_unitless_indices() -> None:
-    from imas_codex.graph.dd_lifecycle import dd_path_index
-    from imas_codex.units import resolve_dd_unit
+    from iter_codex.graph.dd_lifecycle import dd_path_index
+    from iter_codex.units import resolve_dd_unit
 
     release_paths, _ = dd_path_index("4.1.1")
     manifest = load_dd_resolution_manifest()
@@ -216,7 +216,7 @@ def test_exact_release_contains_only_the_four_unitless_indices() -> None:
 
 
 def test_exact_release_omits_all_four_error_index_claims() -> None:
-    from imas_codex.graph.dd_lifecycle import dd_path_index
+    from iter_codex.graph.dd_lifecycle import dd_path_index
 
     release_paths, _ = dd_path_index("4.1.1")
     manifest = load_dd_resolution_manifest()
@@ -234,8 +234,8 @@ def test_exact_release_omits_all_four_error_index_claims() -> None:
 
 
 def test_exact_release_retains_all_eight_charge_paths_without_resolution() -> None:
-    from imas_codex.graph.dd_lifecycle import dd_path_index
-    from imas_codex.units import resolve_dd_unit
+    from iter_codex.graph.dd_lifecycle import dd_path_index
+    from iter_codex.units import resolve_dd_unit
 
     release_paths, _ = dd_path_index("4.1.1")
     manifest = load_dd_resolution_manifest()
@@ -345,7 +345,7 @@ def test_graph_port_classifies_effective_replay_as_unchanged() -> None:
 def test_live_ionisation_potential_cohort_has_exact_edges_and_units(
     _ionisation_graph,
 ) -> None:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as graph:
         rows = graph.query(
@@ -380,8 +380,8 @@ def test_live_ionisation_potential_cohort_has_exact_edges_and_units(
 def test_live_exclusion_census_is_read_only_and_matches_exact_release(
     _exclusion_graph,
 ) -> None:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.graph.dd_lifecycle import dd_path_index
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.graph.dd_lifecycle import dd_path_index
 
     all_paths = (
         _PRESENT_UNITLESS_INDEX_PATHS

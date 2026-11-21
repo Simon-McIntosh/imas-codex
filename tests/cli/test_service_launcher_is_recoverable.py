@@ -8,7 +8,7 @@ from unittest.mock import patch
 def _captured_submission(
     *, cpus: int, mem: str, gpus: int, job_name: str = "codex-embed"
 ) -> str:
-    from imas_codex.cli import services
+    from iter_codex.cli import services
 
     commands: list[str] = []
 
@@ -42,7 +42,7 @@ def _captured_submission(
 def test_service_submission_preserves_its_script_beside_the_log() -> None:
     submit_command = _captured_submission(cpus=2, mem="16G", gpus=1)
 
-    service_dir = "/home/service-user/.local/share/imas-codex/services"
+    service_dir = "/home/service-user/.local/share/iter-codex/services"
     script_path = f"{service_dir}/codex-embed.sh"
 
     assert f"> {script_path}" in submit_command
@@ -55,7 +55,7 @@ def test_service_submission_preserves_its_script_beside_the_log() -> None:
 
 
 def test_embed_footprint_matches_the_submitted_directives() -> None:
-    from imas_codex.cli import services
+    from iter_codex.cli import services
 
     requested: dict[str, object] = {}
 

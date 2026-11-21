@@ -14,8 +14,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import families
-from imas_codex.standard_names.families import AnchorScore, score_family_anchor
+from iter_codex.standard_names import families
+from iter_codex.standard_names.families import AnchorScore, score_family_anchor
 
 QUESTION = families.TEMPLATE_FITNESS_QUESTION
 TEMPLATE_MARKER = "The <base quantity> at <locus>, in SI units."
@@ -78,7 +78,7 @@ def _stub_template(monkeypatch):
 
 
 def _patch_decisions(monkeypatch, fake):
-    monkeypatch.setattr("imas_codex.discovery.base.judgment.decide_batch", fake)
+    monkeypatch.setattr("iter_codex.discovery.base.judgment.decide_batch", fake)
 
 
 # ---------------------------------------------------------------------------
@@ -359,7 +359,7 @@ def test_template_accessor_reuses_the_docs_context(monkeypatch):
         }
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.context.conventions_context_for", fake_context
+        "iter_codex.standard_names.context.conventions_context_for", fake_context
     )
 
     text = families._house_style_template("electron_temperature")

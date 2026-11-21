@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.discovery.base.evaluation import bootstrap_interval, roc_auc
-from imas_codex.discovery.paths.scorer import (
+from iter_codex.discovery.base.evaluation import bootstrap_interval, roc_auc
+from iter_codex.discovery.paths.scorer import (
     CODE_BEARING_PURPOSES,
     build_path_judgment_questions,
     path_category_gate,
@@ -52,7 +52,7 @@ def test_category_actions_ignore_high_facet_scores(purpose, children, scan, expa
 
 
 def test_scored_container_claim_excludes_archive(monkeypatch):
-    from imas_codex.discovery.paths import parallel
+    from iter_codex.discovery.paths import parallel
 
     queries = []
 
@@ -76,7 +76,7 @@ def test_scored_container_claim_excludes_archive(monkeypatch):
                 ]
             return []
 
-    monkeypatch.setattr("imas_codex.graph.GraphClient", FakeGraph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", FakeGraph)
     claimed = parallel.claim_paths_for_expanding(
         "jt-60sa", limit=1, root_filter=["/home/example"]
     )
@@ -94,7 +94,7 @@ def test_scored_container_claim_excludes_archive(monkeypatch):
 
 
 def test_stored_judgments_refresh_scan_gate_without_rejudging(monkeypatch):
-    from imas_codex.discovery.paths import parallel
+    from iter_codex.discovery.paths import parallel
 
     calls = []
 
@@ -109,7 +109,7 @@ def test_stored_judgments_refresh_scan_gate_without_rejudging(monkeypatch):
             calls.append((statement, params))
             return [{"updated": 1 if len(calls) == 1 else 0}]
 
-    monkeypatch.setattr("imas_codex.graph.GraphClient", FakeGraph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", FakeGraph)
     assert parallel.refresh_stored_path_gates("jt-60sa", batch_size=1) == 1
     query, params = calls[0]
     assert "p.path_purpose_probs[index]" in query

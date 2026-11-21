@@ -1,0 +1,927 @@
+"""
+Main relationship extractor class.
+
+Uses hierarchical clustering (global/domain/IDS levels) to discover
+clusters that may be hidden by density competition in the global
+embedding space.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import logging
+from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
+
+from iter_codex import dd_version
+from iter_codex.embeddings import EmbeddingCache
+from iter_codex.embeddings.encoder import Encoder
+from iter_codex.resource_path_accessor import ResourcePathAccessor
+from iter_codex.search.document_store import DocumentStore
+
+if TYPE_CHECKING:
+    from iter_codex.graph.client import GraphClient
+
+from .clustering import EmbeddingClusterer, RelationshipBuilder
+from .config import RelationshipExtractionConfig
+from .hierarchical import HierarchicalClusterer
+from .label_cache import LabelCache
+from .models import (
+    ClusteringParameters,
+    ClusteringStatistics,
+    CrossIDSSummary,
+    IntraIDSSummary,
+    RelationshipMetadata,
+    RelationshipSet,
+)
+from .preprocessing import PathFilter, UnitFamilyBuilder
+
+
+class RelationshipExtractor:
+    """
+    Main class for extracting relationships between IMAS data paths.
+
+    Uses hierarchical clustering at three levels:
+    - Global: Full embedding space (all IDS)
+    - Domain: Per physics domain (e.g., transport, equilibrium)
+    - IDS: Per individual IDS (e.g., core_profiles, magnetics)
+
+    All clusters are stored in a flat index with UUID identifiers
+    and enrichment metadata.
+    """
+
+    def __init__(
+        self,
+        config: RelationshipExtractionConfig | None = None,
+        graph_client: GraphClient | None = None,
+    ):
+        """Initialize the relationship extractor.
+
+        Args:
+            config: Extraction configuration. Defaults to RelationshipExtractionConfig().
+            graph_client: Optional Neo4j client. When provided, embeddings are
+                loaded directly from IMASNode nodes in the graph instead of
+                regenerating them from scratch.
+        """
+        self.config = config or RelationshipExtractionConfig()
+        self._use_rich = getattr(self.config, "use_rich", True)
+        self.logger = logging.getLogger(__name__)
+        self._graph_client = graph_client
+
+        # Initialize components
+        self.path_filter = PathFilter(self.config)
+        self.unit_builder = UnitFamilyBuilder()
+        # Legacy single-level clusterer (kept for compatibility)
+        self.clusterer = EmbeddingClusterer(self.config, self.logger)
+        # New hierarchical clusterer
+        self.hierarchical_clusterer = HierarchicalClusterer(
+            min_cluster_size=self.config.min_cluster_size,
+            min_samples=self.config.min_samples,
+            cluster_selection_method=self.config.cluster_selection_method,
+        )
+        self.relationship_builder = RelationshipBuilder(self.config, self.logger)
+
+        # Use shared embedding infrastructure
+        self._embedding_manager: Any | None = None
+
+    def extract_relationships(
+        self, input_dir: Path | None = None, force_rebuild: bool = False
+    ) -> RelationshipSet:
+        """
+        Extract cluster-based relationships from IDS data.
+
+        Uses hierarchical clustering at global, domain, and IDS levels
+        to discover clusters that may be hidden by density competition.
+
+        Args:
+            input_dir: Directory containing detailed IDS JSON files
+            force_rebuild: Force rebuilding even if cache exists
+
+        Returns:
+            RelationshipSet containing all extracted cluster relationships
+        """
+        input_dir = input_dir or self.config.input_dir
+
+        self.logger.info("Starting hierarchical relationship extraction...")
+
+        # Load IDS data
+        self.logger.info("Loading IDS data from %s", input_dir)
+        ids_data = self._load_ids_data(input_dir)
+
+        # Filter meaningful paths
+        self.logger.info("Filtering meaningful paths...")
+        filtered_paths = self.path_filter.filter_meaningful_paths(ids_data)
+
+        # Generate embeddings
+        self.logger.info("Generating embeddings for %d paths...", len(filtered_paths))
+        embeddings, path_list, source_doc_count = self._generate_embeddings(
+            filtered_paths
+        )
+
+        # Cluster embeddings using hierarchical approach
+        self.logger.info("Running hierarchical clustering (global/domain/IDS)...")
+        all_clusters = self.hierarchical_clusterer.cluster_all_levels(
+            embeddings=embeddings,
+            paths=path_list,
+            include_global=True,
+            include_domain=True,
+            include_ids=True,
+        )
+
+        # Build path index for multi-membership
+        path_index = self._build_path_index(all_clusters)
+
+        # Compute statistics
+        statistics = self._compute_hierarchical_statistics(all_clusters, path_index)
+
+        # Build additional groupings for tool compatibility
+        self.logger.info("Building unit families...")
+        unit_families = self.unit_builder.build_unit_families(filtered_paths)
+
+        # Build summaries
+        cross_ids_summary = self._build_cross_ids_summary(all_clusters)
+        intra_ids_summary = self._build_intra_ids_summary(all_clusters)
+
+        # Create metadata
+        generation_timestamp = datetime.now().isoformat()
+
+        clustering_stats = ClusteringStatistics(
+            cross_ids_clustering=statistics["cross_ids_clustering"],
+            intra_ids_clustering=statistics["intra_ids_clustering"],
+            multi_membership_paths=statistics["multi_membership_paths"],
+            isolated_paths=statistics["isolated_paths"],
+        )
+
+        metadata = RelationshipMetadata(
+            generation_timestamp=generation_timestamp,
+            total_paths_processed=len(filtered_paths),
+            source_document_count=source_doc_count,
+            clustering_parameters={
+                "cross_ids": ClusteringParameters(
+                    eps=self.config.cross_ids_eps,
+                    min_samples=self.config.cross_ids_min_samples,
+                    metric="cosine",
+                ),
+                "intra_ids": ClusteringParameters(
+                    eps=self.config.intra_ids_eps,
+                    min_samples=self.config.intra_ids_min_samples,
+                    metric="cosine",
+                ),
+            },
+            statistics=clustering_stats,
+        )
+
+        # Build final relationship set
+        relationships = RelationshipSet(
+            metadata=metadata,
+            clusters=all_clusters,
+            path_index=path_index,
+            cross_ids_summary=cross_ids_summary,
+            intra_ids_summary=intra_ids_summary,
+        )
+
+        # Store additional groupings for saving
+        relationships._unit_families = unit_families
+
+        self.logger.info("Relationship extraction completed successfully")
+        self.logger.info(
+            f"Generated {len(all_clusters)} total clusters: "
+            f"{len([c for c in all_clusters if c.is_cross_ids])} cross-IDS, "
+            f"{len([c for c in all_clusters if not c.is_cross_ids])} intra-IDS"
+        )
+        return relationships
+
+    def _build_path_index(self, clusters: list) -> dict[str, list[str]]:
+        """Build path-to-cluster index for multi-membership lookup.
+
+        Args:
+            clusters: List of ClusterInfo objects
+
+        Returns:
+            Dict mapping path to list of cluster UUIDs
+        """
+        path_index: dict[str, list[str]] = {}
+        for cluster in clusters:
+            for path in cluster.paths:
+                if path not in path_index:
+                    path_index[path] = []
+                path_index[path].append(cluster.id)
+        return path_index
+
+    def _compute_hierarchical_statistics(
+        self, clusters: list, path_index: dict[str, list[str]]
+    ) -> dict[str, Any]:
+        """Compute statistics for hierarchical clustering.
+
+        Args:
+            clusters: List of ClusterInfo objects
+            path_index: Path-to-cluster index
+
+        Returns:
+            Dict with clustering statistics
+        """
+        # Count by scope
+        global_clusters = [c for c in clusters if c.scope == "global"]
+        domain_clusters = [c for c in clusters if c.scope == "domain"]
+        ids_clusters = [c for c in clusters if c.scope == "ids"]
+
+        # Count cross-IDS vs intra-IDS
+        cross_ids_clusters = [c for c in clusters if c.is_cross_ids]
+        intra_ids_clusters = [c for c in clusters if not c.is_cross_ids]
+
+        # Multi-membership paths (in more than one cluster)
+        multi_membership_paths = sum(
+            1 for paths in path_index.values() if len(paths) > 1
+        )
+        isolated_paths = sum(1 for paths in path_index.values() if len(paths) == 1)
+
+        return {
+            "total_clusters": len(clusters),
+            "global_count": len(global_clusters),
+            "domain_count": len(domain_clusters),
+            "ids_count": len(ids_clusters),
+            "cross_ids_clustering": {
+                "total_clusters": len(cross_ids_clusters),
+                "avg_cluster_size": (
+                    sum(c.size for c in cross_ids_clusters) / len(cross_ids_clusters)
+                    if cross_ids_clusters
+                    else 0
+                ),
+            },
+            "intra_ids_clustering": {
+                "total_clusters": len(intra_ids_clusters),
+                "avg_cluster_size": (
+                    sum(c.size for c in intra_ids_clusters) / len(intra_ids_clusters)
+                    if intra_ids_clusters
+                    else 0
+                ),
+            },
+            "multi_membership_paths": multi_membership_paths,
+            "isolated_paths": isolated_paths,
+        }
+
+    def _build_cross_ids_summary(self, all_clusters: list) -> CrossIDSSummary:
+        """Build summary for cross-IDS clusters."""
+        cross_clusters = [c for c in all_clusters if c.is_cross_ids]
+        if not cross_clusters:
+            return CrossIDSSummary(
+                cluster_count=0,
+                cluster_index=[],
+                avg_similarity=0.0,
+                total_paths=0,
+            )
+
+        cluster_indices = [c.id for c in cross_clusters]
+        avg_similarity = sum(c.similarity_score for c in cross_clusters) / len(
+            cross_clusters
+        )
+        total_paths = sum(c.size for c in cross_clusters)
+
+        return CrossIDSSummary(
+            cluster_count=len(cross_clusters),
+            cluster_index=cluster_indices,
+            avg_similarity=avg_similarity,
+            total_paths=total_paths,
+        )
+
+    def _build_intra_ids_summary(self, all_clusters: list) -> IntraIDSSummary:
+        """Build summary for intra-IDS clusters."""
+        intra_clusters = [c for c in all_clusters if not c.is_cross_ids]
+        if not intra_clusters:
+            return IntraIDSSummary(
+                cluster_count=0,
+                cluster_index=[],
+                by_ids={},
+                avg_similarity=0.0,
+                total_paths=0,
+            )
+
+        cluster_indices = [c.id for c in intra_clusters]
+        avg_similarity = sum(c.similarity_score for c in intra_clusters) / len(
+            intra_clusters
+        )
+        total_paths = sum(c.size for c in intra_clusters)
+
+        # Group by IDS
+        by_ids = {}
+        for cluster in intra_clusters:
+            ids_name = cluster.ids_names[0]  # Intra-IDS clusters have exactly one IDS
+            if ids_name not in by_ids:
+                by_ids[ids_name] = {
+                    "cluster_index": [],
+                    "path_count": 0,
+                }
+            by_ids[ids_name]["cluster_index"].append(cluster.id)
+            by_ids[ids_name]["path_count"] += cluster.size
+
+        return IntraIDSSummary(
+            cluster_count=len(intra_clusters),
+            cluster_index=cluster_indices,
+            by_ids=by_ids,
+            avg_similarity=avg_similarity,
+            total_paths=total_paths,
+        )
+
+    def save_relationships(
+        self, relationships: RelationshipSet, output_file: Path | None = None
+    ) -> None:
+        """Save clusters to JSON file with LLM-generated labels.
+
+        Saves a single clusters.json with labels and indexes. Embeddings
+        (centroids and label embeddings) are stored separately in .npz format.
+        """
+        output_file = output_file or self.config.output_file
+
+        # Ensure output directory exists
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+
+        # Save clusters with labels (embeddings in separate .npz file)
+        self._save_clusters_json(relationships, output_file)
+
+    def _save_clusters_json(
+        self,
+        relationships: RelationshipSet,
+        output_file: Path,
+    ) -> None:
+        """Save clusters with enrichment metadata and hierarchical scope.
+
+        Uses UUID-based cluster IDs and includes:
+        - Hierarchical scope (global/domain/ids)
+        - Enrichment fields (physics_concepts, data_type, tags, mapping_relevance)
+        - Composite ranking support
+
+        Args:
+            relationships: The extracted relationships
+            output_file: Path to clusters.json
+        """
+        from iter_codex import dd_version
+
+        clusters_list = relationships.clusters
+
+        # Use content-addressed label cache
+        label_cache = LabelCache(output_file.parent / "label_cache.db")
+        labels_map = self._get_labels_with_cache(clusters_list, label_cache)
+
+        # Generate label embeddings for semantic search
+        label_embeddings_map = self._generate_label_embeddings(labels_map)
+
+        # Build clusters array with labels and enrichment
+        clusters_data = []
+        centroid_embeddings = []
+        label_embeddings_list = []
+        centroid_cluster_ids: list[str] = []
+        label_cluster_ids: list[str] = []
+
+        for cluster in clusters_list:
+            cluster_id = cluster.id  # UUID string
+            label_info = labels_map.get(cluster_id, {})
+
+            cluster_entry: dict[str, Any] = {
+                "id": cluster_id,
+                "label": label_info.get("label", f"Cluster {cluster_id[:8]}"),
+                "description": label_info.get("description", ""),
+                "type": "cross_ids" if cluster.is_cross_ids else "intra_ids",
+                "scope": cluster.scope,
+                "similarity": round(cluster.similarity_score, 4),
+                "ids": cluster.ids_names,
+                "paths": cluster.paths,
+            }
+
+            # Add scope_detail if present
+            if cluster.scope_detail:
+                cluster_entry["scope_detail"] = cluster.scope_detail
+
+            # Add enrichment fields from labels
+            if label_info.get("physics_concepts"):
+                cluster_entry["physics_concepts"] = label_info["physics_concepts"]
+            if label_info.get("data_type"):
+                cluster_entry["data_type"] = label_info["data_type"]
+            if label_info.get("tags"):
+                cluster_entry["tags"] = label_info["tags"]
+            if label_info.get("mapping_relevance"):
+                cluster_entry["mapping_relevance"] = label_info["mapping_relevance"]
+
+            # Collect embeddings for .npz file
+            if cluster.embedding is not None and len(cluster.embedding) > 0:
+                centroid_embeddings.append(cluster.embedding)
+                centroid_cluster_ids.append(cluster_id)
+
+            if cluster_id in label_embeddings_map:
+                label_embeddings_list.append(label_embeddings_map[cluster_id])
+                label_cluster_ids.append(cluster_id)
+
+            clusters_data.append(cluster_entry)
+
+        # Build indexes with string IDs
+        path_to_cluster: dict[str, list[str]] = {}
+        ids_to_clusters: dict[str, list[str]] = {}
+        scope_to_clusters: dict[str, list[str]] = {
+            "global": [],
+            "domain": [],
+            "ids": [],
+        }
+        cross_ids_list: list[str] = []
+        intra_ids_list: list[str] = []
+
+        for cluster in clusters_list:
+            cluster_id = cluster.id
+
+            # Path index (supports multi-membership)
+            for path in cluster.paths:
+                if path not in path_to_cluster:
+                    path_to_cluster[path] = []
+                path_to_cluster[path].append(cluster_id)
+
+            # IDS index
+            for ids_name in cluster.ids_names:
+                if ids_name not in ids_to_clusters:
+                    ids_to_clusters[ids_name] = []
+                if cluster_id not in ids_to_clusters[ids_name]:
+                    ids_to_clusters[ids_name].append(cluster_id)
+
+            # Scope index
+            scope_to_clusters[cluster.scope].append(cluster_id)
+
+            # Type lists
+            if cluster.is_cross_ids:
+                cross_ids_list.append(cluster_id)
+            else:
+                intra_ids_list.append(cluster_id)
+
+        # Save embeddings to .npz file
+        embeddings_stem = output_file.stem.replace("clusters", "cluster_embeddings")
+        embeddings_file = output_file.parent / f"{embeddings_stem}.npz"
+        embeddings_hash = self._save_embeddings_npz(
+            embeddings_file,
+            centroid_embeddings,
+            centroid_cluster_ids,
+            label_embeddings_list,
+            label_cluster_ids,
+        )
+
+        # Build final structure
+        output_data = {
+            "version": "3.0",  # New version for hierarchical + enrichment
+            "dd_version": dd_version,
+            "generated": datetime.now().isoformat(),
+            "labeling_model": self._get_labeling_model(),
+            "embeddings_file": embeddings_file.name,
+            "embeddings_hash": embeddings_hash,
+            "clusters": clusters_data,
+            "indexes": {
+                "path": path_to_cluster,
+                "ids": ids_to_clusters,
+                "scope": scope_to_clusters,
+                "cross_ids": cross_ids_list,
+                "intra_ids": intra_ids_list,
+            },
+            "statistics": {
+                "total_clusters": len(clusters_list),
+                "global_count": len(scope_to_clusters["global"]),
+                "domain_count": len(scope_to_clusters["domain"]),
+                "ids_count": len(scope_to_clusters["ids"]),
+                "cross_ids_count": len(cross_ids_list),
+                "intra_ids_count": len(intra_ids_list),
+                "total_paths": len(path_to_cluster),
+                "source_document_count": relationships.metadata.source_document_count,
+                "centroid_embeddings_count": len(centroid_cluster_ids),
+                "label_embeddings_count": len(label_cluster_ids),
+            },
+        }
+
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(output_data, f, indent=2, ensure_ascii=False)
+
+        self.logger.info(f"Saved clusters.json to {output_file}")
+        self.logger.info(
+            f"Statistics: {len(scope_to_clusters['global'])} global, "
+            f"{len(scope_to_clusters['domain'])} domain, "
+            f"{len(scope_to_clusters['ids'])} ids-level clusters"
+        )
+
+    def _save_embeddings_npz(
+        self,
+        embeddings_file: Path,
+        centroid_embeddings: list,
+        centroid_cluster_ids: list[str],
+        label_embeddings: list,
+        label_cluster_ids: list[str],
+    ) -> str:
+        """Save embeddings to compressed .npz file and compute hash.
+
+        Args:
+            embeddings_file: Path to output .npz file
+            centroid_embeddings: List of centroid embedding vectors
+            centroid_cluster_ids: List of cluster UUIDs for centroids
+            label_embeddings: List of label embedding vectors
+            label_cluster_ids: List of cluster UUIDs for label embeddings
+
+        Returns:
+            SHA256 hash (first 16 chars) of the saved file
+        """
+        # Convert to numpy arrays
+        centroids_array = (
+            np.array(centroid_embeddings, dtype=np.float32)
+            if centroid_embeddings
+            else np.array([], dtype=np.float32)
+        )
+        # Store UUIDs as string array
+        centroid_ids_array = np.array(centroid_cluster_ids, dtype=object)
+
+        labels_array = (
+            np.array(label_embeddings, dtype=np.float32)
+            if label_embeddings
+            else np.array([], dtype=np.float32)
+        )
+        # Store UUIDs as string array
+        label_ids_array = np.array(label_cluster_ids, dtype=object)
+
+        # Save compressed
+        np.savez_compressed(
+            embeddings_file,
+            centroids=centroids_array,
+            centroid_cluster_ids=centroid_ids_array,
+            label_embeddings=labels_array,
+            label_cluster_ids=label_ids_array,
+        )
+
+        # Compute hash of saved file
+        file_hash = hashlib.sha256(embeddings_file.read_bytes()).hexdigest()[:16]
+
+        self.logger.debug(
+            f"Saved embeddings: centroids={centroids_array.shape}, "
+            f"labels={labels_array.shape}, hash={file_hash}"
+        )
+
+        return file_hash
+
+    def _get_labeling_model(self) -> str:
+        """Get the labeling model name."""
+        from iter_codex.settings import get_model
+
+        return get_model("cluster-labels")
+
+    def _get_labels_with_cache(
+        self, clusters: list, label_cache: LabelCache
+    ) -> dict[str, dict[str, Any]]:
+        """Get labels and enrichment for clusters, using cache when available.
+
+        Uses content-addressed caching: each cluster is keyed by a hash of its
+        sorted paths. This enables incremental cache growth and reuse across
+        different clustering runs.
+
+        Args:
+            clusters: List of ClusterInfo objects
+            label_cache: LabelCache instance for persistence
+
+        Returns:
+            Dict mapping cluster_id (UUID) to enrichment dict with:
+            - label, description
+            - physics_concepts, data_type, tags, mapping_relevance
+        """
+        model = self._get_labeling_model()
+
+        # Convert clusters to dicts for cache lookup, including scope info
+        cluster_dicts = [
+            {
+                "id": c.id,
+                "is_cross_ids": c.is_cross_ids,
+                "ids_names": c.ids_names,
+                "paths": c.paths,
+                "scope": c.scope,
+                "scope_detail": c.scope_detail,
+            }
+            for c in clusters
+        ]
+
+        # Check cache for existing labels
+        cached, uncached = label_cache.get_many(cluster_dicts, model=model)
+
+        # Convert cached labels to the expected format
+        labels_map: dict[str, dict[str, Any]] = {
+            cluster_id: {
+                "label": cached_label.label,
+                "description": cached_label.description,
+            }
+            for cluster_id, cached_label in cached.items()
+        }
+
+        if not uncached:
+            self.logger.info(f"All {len(clusters)} labels retrieved from cache")
+            return labels_map
+
+        # Generate labels for uncached clusters with enrichment
+        self.logger.info(f"Generating labels for {len(uncached)} uncached clusters")
+        generated = self._generate_cluster_labels_for_batch(uncached)
+
+        # Store generated labels in cache
+        labels_to_cache = []
+        for cluster in uncached:
+            cluster_id = cluster["id"]
+            if cluster_id in generated:
+                info = generated[cluster_id]
+                labels_to_cache.append(
+                    (cluster["paths"], info["label"], info["description"])
+                )
+                labels_map[cluster_id] = info
+
+        if labels_to_cache:
+            label_cache.set_many(labels_to_cache, model=model)
+
+        return labels_map
+
+    def _generate_cluster_labels_for_batch(
+        self, clusters: list[dict]
+    ) -> dict[str, dict[str, Any]]:
+        """Generate labels and enrichment for a batch of clusters using LLM.
+
+        Args:
+            clusters: List of cluster dicts with id, is_cross_ids, ids_names, paths, scope
+
+        Returns:
+            Dict mapping cluster_id (UUID) to enrichment dict
+        """
+        from .labeler import ClusterLabeler
+
+        labeler = ClusterLabeler()
+        labels = labeler.label_clusters(clusters)
+
+        # Save any proposed new vocabulary terms
+        labeler.save_proposed_terms()
+
+        return {
+            label.cluster_id: {
+                "label": label.label,
+                "description": label.description,
+                "physics_concepts": label.physics_concepts,
+                "data_type": label.data_type,
+                "tags": label.tags,
+                "mapping_relevance": label.mapping_relevance,
+            }
+            for label in labels
+        }
+
+    def _generate_label_embeddings(
+        self, labels_map: dict[str, dict[str, Any]]
+    ) -> dict[str, list[float]]:
+        """Generate embeddings for cluster labels+descriptions.
+
+        Args:
+            labels_map: Dict mapping cluster_id to {"label": str, "description": str}
+
+        Returns:
+            Dict mapping cluster_id to embedding vector
+        """
+        if not labels_map:
+            return {}
+
+        try:
+            encoder_config = self.config.get_encoder_config()
+            encoder = Encoder(encoder_config)
+
+            # Combine label and description for embedding
+            texts = []
+            cluster_ids = []
+            for cluster_id, info in labels_map.items():
+                text = f"{info['label']}: {info['description']}"
+                texts.append(text)
+                cluster_ids.append(cluster_id)
+
+            # Generate embeddings
+            embeddings = encoder.embed_texts(texts)
+
+            return {
+                cluster_id: embedding.tolist()
+                for cluster_id, embedding in zip(cluster_ids, embeddings, strict=True)
+            }
+
+        except Exception as e:
+            self.logger.warning(f"Failed to generate label embeddings: {e}")
+            return {}
+
+    def _load_ids_data(self, input_dir: Path) -> dict[str, Any]:
+        """Load detailed IDS JSON files, optionally filtered by ids_set."""
+        ids_data = {}
+        json_files = list(input_dir.glob("*.json"))
+
+        # Filter files based on ids_set if provided
+        if self.config.ids_set:
+            filtered_files = []
+            for json_file in json_files:
+                if json_file.stem in self.config.ids_set:
+                    filtered_files.append(json_file)
+            json_files = filtered_files
+            self.logger.info(
+                f"Filtered to {len(json_files)} IDS files based on ids_set: {sorted(self.config.ids_set)}"
+            )
+        else:
+            self.logger.info(f"Found {len(json_files)} IDS files")
+
+        for json_file in json_files:
+            try:
+                with open(json_file, encoding="utf-8") as f:
+                    data = json.load(f)
+                ids_data[json_file.stem] = data
+            except Exception as e:
+                self.logger.warning(f"Failed to load {json_file.name}: {e}")
+
+        return ids_data
+
+    def _generate_embeddings(
+        self, filtered_paths: dict[str, dict[str, Any]]
+    ) -> tuple[np.ndarray, list[str], int]:
+        """Generate embeddings for filtered paths.
+
+        Tries to load embeddings from the Neo4j graph first (where ``imas build``
+        stores them on IMASNode nodes). Falls back to the local encoder cache /
+        fresh generation only when the graph is unavailable or incomplete.
+
+        Returns:
+            Tuple of (embeddings array, path identifiers, source document count)
+        """
+        # Try loading from graph first — this is the fast path during `imas build`
+        if self._graph_client is not None:
+            result = self._load_embeddings_from_graph(filtered_paths)
+            if result is not None:
+                return result
+            self.logger.info(
+                "Graph embeddings incomplete or unavailable, "
+                "falling back to local generation"
+            )
+
+        return self._generate_embeddings_local(filtered_paths)
+
+    def _load_embeddings_from_graph(
+        self, filtered_paths: dict[str, dict[str, Any]]
+    ) -> tuple[np.ndarray, list[str], int] | None:
+        """Load embeddings from IMASNode nodes in the Neo4j graph.
+
+        Returns None if the graph doesn't have enough coverage.
+        """
+        assert self._graph_client is not None
+
+        path_ids = list(filtered_paths.keys())
+        batch_size = 500
+        graph_embeddings: dict[str, list[float]] = {}
+
+        try:
+            for i in range(0, len(path_ids), batch_size):
+                batch = path_ids[i : i + batch_size]
+                results = self._graph_client.query(
+                    """
+                    UNWIND $paths AS pid
+                    MATCH (p:IMASNode {id: pid})
+                    WHERE p.embedding IS NOT NULL
+                    RETURN p.id AS id, p.embedding AS embedding
+                    """,
+                    paths=batch,
+                )
+                for r in results:
+                    graph_embeddings[r["id"]] = r["embedding"]
+
+            coverage = len(graph_embeddings) / len(path_ids) if path_ids else 0
+            self.logger.info(
+                f"Graph embeddings: {len(graph_embeddings)}/{len(path_ids)} "
+                f"paths ({coverage:.0%} coverage)"
+            )
+
+            # Require ≥95% coverage to use graph embeddings
+            if coverage < 0.95:
+                return None
+
+            # Build arrays in deterministic order
+            ordered_ids = [pid for pid in path_ids if pid in graph_embeddings]
+            embeddings = np.array(
+                [graph_embeddings[pid] for pid in ordered_ids], dtype=np.float32
+            )
+
+            self.logger.info(
+                f"Loaded {embeddings.shape[0]} embeddings from graph "
+                f"(dim={embeddings.shape[1]})"
+            )
+
+            # Store cache for compatibility
+            self._embeddings_cache = EmbeddingCache(
+                embeddings=embeddings,
+                path_ids=ordered_ids,
+                model_name=self.config.encoder_config.model_name,
+                document_count=len(filtered_paths),
+            )
+            self._source_document_count = len(ordered_ids)
+
+            return embeddings, ordered_ids, len(ordered_ids)
+
+        except Exception as e:
+            self.logger.warning(f"Failed to load embeddings from graph: {e}")
+            return None
+
+    def _generate_embeddings_local(
+        self, filtered_paths: dict[str, dict[str, Any]]
+    ) -> tuple[np.ndarray, list[str], int]:
+        """Generate embeddings via local encoder with pickle cache.
+
+        This is the fallback path when graph embeddings are unavailable.
+
+        Returns:
+            Tuple of (embeddings array, path identifiers, source document count)
+        """
+
+        # Create DocumentStore with same configuration as build_embeddings.py
+        if self.config.ids_set:
+            self.logger.info(
+                f"Creating document store with IDS filter: {sorted(self.config.ids_set)}"
+            )
+            document_store = DocumentStore(ids_set=self.config.ids_set)
+        else:
+            self.logger.info("Creating document store with all available IDS")
+            document_store = DocumentStore()
+
+        # Get all documents (same as build_embeddings.py does)
+        all_documents = document_store.get_all_documents()
+        all_texts = [doc.embedding_text for doc in all_documents]
+        all_identifiers = [doc.metadata.path_id for doc in all_documents]
+
+        self.logger.info(
+            f"Found {len(all_documents)} total documents in document store"
+        )
+
+        # Use encoder config from relationship config (single source of truth)
+        encoder_config = self.config.get_encoder_config()
+        encoder = Encoder(encoder_config)
+
+        # Generate cache key using same method as build_embeddings.py and SemanticSearch
+        cache_key = encoder_config.generate_cache_key()
+
+        # Get source data directory for validation (same as build_embeddings.py)
+        source_data_dir = None
+        try:
+            path_accessor = ResourcePathAccessor(dd_version=dd_version)
+            source_data_dir = path_accessor.schemas_dir
+        except Exception:
+            pass
+
+        # Get embeddings for ALL documents (same approach as build_embeddings.py)
+        # This will reuse the cache if it exists
+        try:
+            all_embeddings, all_result_identifiers, was_cached = (
+                encoder.build_document_embeddings(
+                    texts=all_texts,
+                    identifiers=all_identifiers,
+                    cache_key=cache_key,
+                    force_rebuild=False,
+                    source_data_dir=source_data_dir,
+                )
+            )
+
+            cache_status = "loaded from cache" if was_cached else "generated fresh"
+            self.logger.info(f"Embeddings {cache_status}: {all_embeddings.shape}")
+
+            # Now filter to only the paths we need for relationships
+            # Create mapping from identifier to index
+            id_to_idx = {
+                identifier: idx for idx, identifier in enumerate(all_result_identifiers)
+            }
+
+            # Extract embeddings for our filtered paths
+            filtered_embeddings = []
+            filtered_identifiers = []
+
+            for path in filtered_paths.keys():
+                if path in id_to_idx:
+                    idx = id_to_idx[path]
+                    filtered_embeddings.append(all_embeddings[idx])
+                    filtered_identifiers.append(path)
+                else:
+                    self.logger.warning(
+                        f"Path {path} not found in embeddings, skipping"
+                    )
+
+            if not filtered_embeddings:
+                raise ValueError("No embeddings found for filtered paths")
+
+            embeddings = np.vstack(filtered_embeddings)
+
+            self.logger.info(
+                f"Extracted {len(filtered_embeddings)} embeddings for clustering"
+            )
+
+            # Store cache for compatibility
+            self._embeddings_cache = EmbeddingCache(
+                embeddings=embeddings,
+                path_ids=filtered_identifiers,
+                model_name=self.config.encoder_config.model_name,
+                document_count=len(filtered_paths),
+            )
+
+            # Store source document count for cluster rebuild detection
+            self._source_document_count = len(all_documents)
+
+            return embeddings, filtered_identifiers, len(all_documents)
+
+        except Exception as e:
+            self.logger.error(f"Failed to get embeddings using shared approach: {e}")
+            raise

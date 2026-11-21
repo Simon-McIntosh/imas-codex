@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.wiki.adapters import (
+from iter_codex.discovery.wiki.adapters import (
     DiscoveredPage,
     TWikiAdapter,
     get_adapter,
@@ -272,7 +272,7 @@ class TestHTMLToTextTWiki:
     """Test html_to_text extracts content from TWiki rendered HTML."""
 
     def test_extracts_twiki_pattern_topic(self):
-        from imas_codex.discovery.wiki.pipeline import html_to_text
+        from iter_codex.discovery.wiki.pipeline import html_to_text
 
         html = """
         <html><head><title>Test</title></head><body>
@@ -292,7 +292,7 @@ class TestHTMLToTextTWiki:
         assert "edit buttons" not in text
 
     def test_falls_back_to_mediawiki(self):
-        from imas_codex.discovery.wiki.pipeline import html_to_text
+        from iter_codex.discovery.wiki.pipeline import html_to_text
 
         html = """
         <div id="bodyContent">

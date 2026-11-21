@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 7b33eedd90048a1a2043f319842423698ee440b8, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.workers._bound_docs_review_dd_paths, imas_codex.standard_names.workers._documentation_banned_prose_note, imas_codex.standard_names.workers._documentation_conformance_note, imas_codex.standard_names.workers._documentation_contradiction_note, imas_codex.standard_names.workers._load_docs_review_source_item.
+# Names the tree no longer defines: iter_codex.standard_names.workers._bound_docs_review_dd_paths, iter_codex.standard_names.workers._documentation_banned_prose_note, iter_codex.standard_names.workers._documentation_conformance_note, iter_codex.standard_names.workers._documentation_contradiction_note, iter_codex.standard_names.workers._load_docs_review_source_item.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Attribute the 0.849 documentation hold on each rewritten anchor member.
@@ -10,9 +10,9 @@ The anchor A/B of the Jev-anchor campaign recorded a documentation score of
 0.849 for one member in most arms. That value is the acceptance floor minus one
 thousandth, reachable by two production paths: the documentation-review hold
 clamp (``_documentation_conformance_note``, ``_documentation_banned_prose_note``
-and ``_documentation_contradiction_note`` in ``imas_codex/standard_names/
+and ``_documentation_contradiction_note`` in ``iter_codex/standard_names/
 workers.py``) and the error-severity lint cap
-(``_cap_docs_scores_for_lint_errors`` in ``imas_codex/standard_names/review/
+(``_cap_docs_scores_for_lint_errors`` in ``iter_codex/standard_names/review/
 pipeline.py``).
 
 This driver reads every arm record whose ``scores_after`` holds 0.849, takes the
@@ -167,9 +167,9 @@ class _RefusingBudget:
 
 async def reproduce(member: str) -> dict:
     """Reconstruct the member's review item and run the three notes on it."""
-    from imas_codex.standard_names.prose_policy import banned_prose_findings
-    from imas_codex.standard_names.review.pipeline import _fetch_review_dd_context
-    from imas_codex.standard_names.workers import (
+    from iter_codex.standard_names.prose_policy import banned_prose_findings
+    from iter_codex.standard_names.review.pipeline import _fetch_review_dd_context
+    from iter_codex.standard_names.workers import (
         _bound_docs_review_dd_paths,
         _documentation_banned_prose_note,
         _documentation_conformance_note,

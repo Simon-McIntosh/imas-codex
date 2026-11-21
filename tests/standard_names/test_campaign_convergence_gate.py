@@ -22,13 +22,13 @@ from __future__ import annotations
 
 import logging
 
-from imas_codex.standard_names.campaign import (
+from iter_codex.standard_names.campaign import (
     ConvergenceThresholds,
     evaluate_convergence,
     measure_batch,
 )
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.harmonize import apply_families
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.harmonize import apply_families
 
 
 def _row(sid: str, *, name_stage: str, docs_stage: str, score: float | None = None):
@@ -103,7 +103,7 @@ _MEMBERS = [row["id"] for row in _INHERITED]
 
 def test_member_outside_accepted_before_the_drain_is_skipped_not_drift():
     """Two names the campaign never wrote are skipped, not reported as drift."""
-    from imas_codex.standard_names.harmonize import _split_name_accepted
+    from iter_codex.standard_names.harmonize import _split_name_accepted
 
     eligible, skipped = _split_name_accepted(
         _MEMBERS, {row["id"]: row["name_stage"] for row in _INHERITED}
@@ -248,8 +248,8 @@ def test_planner_skip_reaches_the_apply_summary(monkeypatch, caplog):
     """
     from types import SimpleNamespace
 
-    from imas_codex.standard_names import harmonize
-    from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+    from iter_codex.standard_names import harmonize
+    from iter_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
 
     anchor = "electrostatic_potential"
     member = "electrostatic_potential_at_wall"
@@ -287,7 +287,7 @@ def test_planner_skip_reaches_the_apply_summary(monkeypatch, caplog):
         harmonize, "refuse_recommended_members", lambda gc, targets, **k: {}
     )
 
-    logger_name = "imas_codex.standard_names.harmonize"
+    logger_name = "iter_codex.standard_names.harmonize"
     with caplog.at_level(logging.INFO, logger=logger_name):
         summary = harmonize.apply_families(
             graph,

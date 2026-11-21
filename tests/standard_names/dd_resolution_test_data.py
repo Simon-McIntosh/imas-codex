@@ -56,7 +56,7 @@ SYNTHETIC_ACTIVE_DIRECTION_ROW = {
 
 def load_synthetic_resolution_authority(*rows):
     """Validate explicit synthetic rows through the public graph-loader seam."""
-    from imas_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
+    from iter_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
 
     class _Reader:
         def read_resolutions(self):

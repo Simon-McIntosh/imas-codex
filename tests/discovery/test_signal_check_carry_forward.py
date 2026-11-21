@@ -3,9 +3,9 @@
 import asyncio
 from unittest.mock import AsyncMock, patch
 
-from imas_codex.discovery.signals import parallel
-from imas_codex.discovery.signals.parallel import DataDiscoveryState, check_worker
-from imas_codex.graph.models import FacilitySignalStatus
+from iter_codex.discovery.signals import parallel
+from iter_codex.discovery.signals.parallel import DataDiscoveryState, check_worker
+from iter_codex.graph.models import FacilitySignalStatus
 
 
 class CapturingGraph:

@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from imas_codex.ids.tools import discover_mappable_ids
+from iter_codex.ids.tools import discover_mappable_ids
 
 
 def test_selected_candidate_home_extends_default_ids():

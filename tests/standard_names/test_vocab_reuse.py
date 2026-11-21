@@ -22,7 +22,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.segments import grammar_token_index
+from iter_codex.standard_names.segments import grammar_token_index
 
 
 def _isn_available() -> bool:
@@ -88,7 +88,7 @@ class TestAdvisoryAlias:
     def test_public_contract_resolves_the_accepted_aliases(
         self, segment, source, canonical
     ):
-        from imas_codex.standard_names.vocab_reuse import (
+        from iter_codex.standard_names.vocab_reuse import (
             clear_reuse_caches,
             registered_reuse,
         )
@@ -122,7 +122,7 @@ class TestAdvisoryAlias:
     def test_context_dependent_shape_curve_and_orientation_terms_are_excluded(
         self, source
     ):
-        from imas_codex.standard_names.vocab_reuse import (
+        from iter_codex.standard_names.vocab_reuse import (
             clear_reuse_caches,
             registered_reuse,
         )
@@ -138,7 +138,7 @@ class TestAdvisoryAlias:
         assert finding is None
 
     def test_alias_is_scoped_to_its_declared_segment(self):
-        from imas_codex.standard_names.vocab_reuse import (
+        from iter_codex.standard_names.vocab_reuse import (
             clear_reuse_caches,
             registered_reuse,
         )
@@ -154,7 +154,7 @@ class TestAdvisoryAlias:
         assert finding is None
 
     def test_advisory_alias_precedes_word_order_detection(self):
-        from imas_codex.standard_names.vocab_reuse import (
+        from iter_codex.standard_names.vocab_reuse import (
             clear_reuse_caches,
             registered_reuse,
         )
@@ -180,7 +180,7 @@ class TestAdvisoryAlias:
         assert finding.detail == "The grammar owns the canonical modifier order."
 
     def test_missing_contract_preserves_existing_reuse_behavior(self):
-        from imas_codex.standard_names.vocab_reuse import (
+        from iter_codex.standard_names.vocab_reuse import (
             clear_reuse_caches,
             registered_reuse,
         )
@@ -201,8 +201,8 @@ class TestAdvisoryAlias:
         assert order.mechanism == "word_order"
 
     def test_grammar_cache_clear_reloads_the_public_contract(self):
-        from imas_codex.standard_names.segments import clear_grammar_caches
-        from imas_codex.standard_names.vocab_reuse import registered_reuse
+        from iter_codex.standard_names.segments import clear_grammar_caches
+        from iter_codex.standard_names.vocab_reuse import registered_reuse
 
         context = _grammar_context()
         with patch(
@@ -239,7 +239,7 @@ class TestStructuralSuffix:
         ],
     )
     def test_suffix_hit_names_the_registered_target(self, segment, token, target):
-        from imas_codex.standard_names.vocab_reuse import registered_reuse
+        from iter_codex.standard_names.vocab_reuse import registered_reuse
 
         assert target in grammar_token_index(), f"fixture stale: {target} unregistered"
         finding = registered_reuse(segment, token)
@@ -249,7 +249,7 @@ class TestStructuralSuffix:
 
     def test_an_unregistered_stem_is_not_a_reuse_claim(self):
         """The suffix alone proves nothing — the stem must be registered."""
-        from imas_codex.standard_names.vocab_reuse import registered_reuse
+        from iter_codex.standard_names.vocab_reuse import registered_reuse
 
         assert registered_reuse("device", "wibble_frobnicator_module") is None
 
@@ -259,7 +259,7 @@ class TestWordOrderVariant:
     """The same words in another order are one token, not two."""
 
     def test_order_variant_names_the_registered_spelling(self):
-        from imas_codex.standard_names.vocab_reuse import registered_reuse
+        from iter_codex.standard_names.vocab_reuse import registered_reuse
 
         finding = registered_reuse("subject", "methane_deuterated")
         assert finding is not None
@@ -268,7 +268,7 @@ class TestWordOrderVariant:
 
     def test_the_check_holds_whatever_segment_it_was_reported_against(self):
         """The stored population carries the same token under two segments."""
-        from imas_codex.standard_names.vocab_reuse import registered_reuse
+        from iter_codex.standard_names.vocab_reuse import registered_reuse
 
         finding = registered_reuse("qualifier", "methane_deuterated")
         assert finding is not None
@@ -292,7 +292,7 @@ class TestSettledSynonym:
     """A synonym settled in review is named back to the composer."""
 
     def test_optical_depth_points_at_opacity(self):
-        from imas_codex.standard_names.vocab_reuse import registered_reuse
+        from iter_codex.standard_names.vocab_reuse import registered_reuse
 
         finding = registered_reuse("physical_base", "optical_depth")
         assert finding is not None
@@ -301,7 +301,7 @@ class TestSettledSynonym:
 
     def test_every_synonym_target_is_registered(self):
         """A mapping whose target ISN dropped must fall silent, not mislead."""
-        from imas_codex.standard_names.vocab_reuse import settled_synonyms
+        from iter_codex.standard_names.vocab_reuse import settled_synonyms
 
         for source, target in settled_synonyms().items():
             assert target in grammar_token_index(), (
@@ -315,7 +315,7 @@ class TestNegatives:
 
     def test_an_isotope_is_not_reuse_of_its_element(self):
         """``lithium_6`` is a genuine isotope distinction, not a spelling of ``lithium``."""
-        from imas_codex.standard_names.vocab_reuse import registered_reuse
+        from iter_codex.standard_names.vocab_reuse import registered_reuse
 
         assert "lithium" in grammar_token_index()
         assert registered_reuse("subject", "lithium_6") is None
@@ -324,12 +324,12 @@ class TestNegatives:
         "token", ["substrate", "wibble_frobnicator", "detection_efficiency"]
     )
     def test_genuine_demand_is_not_reclassified_as_reuse(self, token):
-        from imas_codex.standard_names.vocab_reuse import registered_reuse
+        from iter_codex.standard_names.vocab_reuse import registered_reuse
 
         assert registered_reuse("physical_base", token) is None
 
     def test_a_registered_token_is_not_reuse_of_itself(self):
-        from imas_codex.standard_names.vocab_reuse import registered_reuse
+        from iter_codex.standard_names.vocab_reuse import registered_reuse
 
         assert registered_reuse("physical_base", "density") is None
 
@@ -382,7 +382,7 @@ class TestStoredVerdictAudit:
     ]
 
     def test_audit_finds_the_reuse_cases_and_leaves_the_rest(self):
-        from imas_codex.standard_names.vocab_reuse import audit_stored_verdicts
+        from iter_codex.standard_names.vocab_reuse import audit_stored_verdicts
 
         audits = audit_stored_verdicts(self.RECORDS)
         assert {a.token for a in audits} == {
@@ -392,7 +392,7 @@ class TestStoredVerdictAudit:
         }
 
     def test_audit_carries_the_stored_decision_it_overrides(self):
-        from imas_codex.standard_names.vocab_reuse import audit_stored_verdicts
+        from iter_codex.standard_names.vocab_reuse import audit_stored_verdicts
 
         by_token = {a.token: a for a in audit_stored_verdicts(self.RECORDS)}
         assert by_token["lower_hybrid_antenna_module"].stored_decision == (
@@ -405,7 +405,7 @@ class TestStoredVerdictAudit:
 
     def test_audit_reads_a_records_dedup_under_either_key(self):
         """The graph projects the property as ``dedup_decision``; the dump abbreviates it."""
-        from imas_codex.standard_names.vocab_reuse import audit_stored_verdicts
+        from iter_codex.standard_names.vocab_reuse import audit_stored_verdicts
 
         audits = audit_stored_verdicts(
             [
@@ -419,7 +419,7 @@ class TestStoredVerdictAudit:
         assert [a.stored_decision for a in audits] == ["distinct_confirmed"]
 
     def test_audit_is_read_only_over_its_input(self):
-        from imas_codex.standard_names.vocab_reuse import audit_stored_verdicts
+        from iter_codex.standard_names.vocab_reuse import audit_stored_verdicts
 
         before = [dict(r) for r in self.RECORDS]
         audit_stored_verdicts(self.RECORDS)
@@ -430,7 +430,7 @@ class TestApplyReuseVerdicts:
     """The write half: stamping derived verdicts onto stored nodes."""
 
     def _audits(self):
-        from imas_codex.standard_names.vocab_reuse import audit_stored_verdicts
+        from iter_codex.standard_names.vocab_reuse import audit_stored_verdicts
 
         return audit_stored_verdicts(
             [
@@ -451,7 +451,7 @@ class TestApplyReuseVerdicts:
     def test_dry_run_counts_without_writing(self):
         from unittest.mock import MagicMock
 
-        from imas_codex.standard_names.vocab_reuse import apply_reuse_verdicts
+        from iter_codex.standard_names.vocab_reuse import apply_reuse_verdicts
 
         gc = MagicMock()
         n = apply_reuse_verdicts(gc, self._audits(), dry_run=True)
@@ -461,7 +461,7 @@ class TestApplyReuseVerdicts:
     def test_stamps_verdict_target_mechanism_and_detail(self):
         from unittest.mock import MagicMock
 
-        from imas_codex.standard_names.vocab_reuse import apply_reuse_verdicts
+        from iter_codex.standard_names.vocab_reuse import apply_reuse_verdicts
 
         gc = MagicMock()
         n = apply_reuse_verdicts(gc, self._audits())
@@ -476,7 +476,7 @@ class TestApplyReuseVerdicts:
     def test_no_audits_is_a_no_op(self):
         from unittest.mock import MagicMock
 
-        from imas_codex.standard_names.vocab_reuse import apply_reuse_verdicts
+        from iter_codex.standard_names.vocab_reuse import apply_reuse_verdicts
 
         gc = MagicMock()
         assert apply_reuse_verdicts(gc, []) == 0

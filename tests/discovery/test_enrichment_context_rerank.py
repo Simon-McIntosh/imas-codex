@@ -14,9 +14,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.base.progress import WorkerStats
-from imas_codex.discovery.signals import parallel as parallel_mod
-from imas_codex.discovery.signals.scanners import wiki as wiki_mod
+from iter_codex.discovery.base.progress import WorkerStats
+from iter_codex.discovery.signals import parallel as parallel_mod
+from iter_codex.discovery.signals.scanners import wiki as wiki_mod
 
 _POOL = parallel_mod.CONTEXT_CANDIDATE_POOL
 
@@ -30,11 +30,11 @@ def _fake_encoder():
 
 
 def _patch_encoder():
-    return patch("imas_codex.embeddings.encoder.Encoder", return_value=_fake_encoder())
+    return patch("iter_codex.embeddings.encoder.Encoder", return_value=_fake_encoder())
 
 
 def _patch_encoder_config():
-    return patch("imas_codex.embeddings.config.EncoderConfig", return_value=MagicMock())
+    return patch("iter_codex.embeddings.config.EncoderConfig", return_value=MagicMock())
 
 
 def _gc_returning(rows):
@@ -76,7 +76,7 @@ def test_code_fetch_reranks_with_the_query_and_keeps_jev_order():
         patch.object(parallel_mod, "GraphClient", return_value=gc),
         _patch_encoder(),
         _patch_encoder_config(),
-        patch("imas_codex.discovery.base.judgment.rerank_pool", rerank),
+        patch("iter_codex.discovery.base.judgment.rerank_pool", rerank),
     ):
         kept = parallel_mod._fetch_code_chunks("jt-60sa", "plasma current")
 
@@ -107,7 +107,7 @@ def test_code_fetch_falls_back_to_embedding_order_when_unordered():
         patch.object(parallel_mod, "GraphClient", return_value=gc),
         _patch_encoder(),
         _patch_encoder_config(),
-        patch("imas_codex.discovery.base.judgment.rerank_pool", rerank),
+        patch("iter_codex.discovery.base.judgment.rerank_pool", rerank),
     ):
         kept = parallel_mod._fetch_code_chunks("jt-60sa", "plasma current")
 
@@ -124,7 +124,7 @@ def test_code_fetch_adds_the_rerank_cost_to_the_run_cost_total():
         patch.object(parallel_mod, "GraphClient", return_value=gc),
         _patch_encoder(),
         _patch_encoder_config(),
-        patch("imas_codex.discovery.base.judgment.rerank_pool", rerank),
+        patch("iter_codex.discovery.base.judgment.rerank_pool", rerank),
     ):
         parallel_mod._fetch_code_chunks("jt-60sa", "plasma current", spend=spend)
 
@@ -145,7 +145,7 @@ def test_wiki_fetch_searches_the_wider_pool_and_reranks():
         patch.object(wiki_mod, "GraphClient", return_value=gc),
         _patch_encoder(),
         _patch_encoder_config(),
-        patch("imas_codex.discovery.base.judgment.rerank_pool", rerank),
+        patch("iter_codex.discovery.base.judgment.rerank_pool", rerank),
     ):
         kept = wiki_mod.fetch_semantic_wiki_context(
             "jt-60sa", "plasma current", k=3, spend=spend

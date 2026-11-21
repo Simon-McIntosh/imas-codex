@@ -13,8 +13,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
     graph_lineage as _owning_graph_lineage,
 )
@@ -74,7 +74,7 @@ def _drive_rederive(
     with (
         patch.object(_owning_graph_foundation, "GraphClient", return_value=graph),
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.automatic_deletion_protections",
+            "iter_codex.standard_names.graph_store.graph_foundation.automatic_deletion_protections",
             side_effect=lambda _gc, name_ids: {
                 name_id: "unchanged_ratification"
                 for name_id in name_ids

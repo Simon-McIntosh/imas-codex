@@ -37,7 +37,7 @@ class TestBulkImportRemoved:
         ],
     )
     def test_symbol_gone(self, attr: str) -> None:
-        from imas_codex.standard_names import catalog_import
+        from iter_codex.standard_names import catalog_import
 
         assert not hasattr(catalog_import, attr), (
             f"{attr} was removed with bulk import — it must not be re-added. "
@@ -46,7 +46,7 @@ class TestBulkImportRemoved:
 
     def test_import_verb_gone_from_cli(self) -> None:
         """The `sn import` command must no longer be registered."""
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         assert "import" not in sn.commands, (
             "`sn import` was removed — the CLI must not expose a bulk-import verb."
@@ -60,7 +60,7 @@ class TestCheckCatalogSurvives:
     """The read-only divergence report must keep working."""
 
     def test_check_catalog_importable(self) -> None:
-        from imas_codex.standard_names.catalog_import import CheckResult, check_catalog
+        from iter_codex.standard_names.catalog_import import CheckResult, check_catalog
 
         assert callable(check_catalog)
         # CheckResult is the report dataclass check_catalog returns.

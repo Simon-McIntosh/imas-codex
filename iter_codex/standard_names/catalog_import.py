@@ -1,0 +1,609 @@
+"""Catalog check and receipt recording without editorial graph writes.
+
+``check_catalog`` reports which names are only in the catalog, only in the
+graph, or present in both but with differing editorial fields.  It never
+writes to the graph.
+
+Two other paths own the write side and do NOT live here:
+
+- restoring / bootstrapping the graph from a published catalog (which replays
+  each entry's ``sources:`` block and rebuilds provenance) is the diff-by-id
+  reconciler ``catalog_reconcile.reconcile_catalog``;
+- folding reviewed curator edits from a merged catalog PR back into the ledger
+  is ``sn approve``;
+- recording that a catalog was observed may stamp ``imported_at`` and
+  ``catalog_commit_sha`` on an existing identity, but cannot carry catalog
+  content or lifecycle fields into the graph.
+
+This module never recreates nodes and never rebuilds provenance.
+"""
+
+from __future__ import annotations
+
+import logging
+import re
+import subprocess
+from contextlib import nullcontext
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+#: Computed fields — re-derived from graph edges (HAS_PARENT / HAS_ERROR) on
+#: export.  A curator edit to one has no effect (it is overwritten on the next
+#: export), so ``check_catalog`` warns about it and strips it before ISN model
+#: validation; it is never compared against the graph.
+COMPUTED_FIELDS: frozenset[str] = frozenset({"arguments", "error_variants"})
+
+#: Name of the manifest sidecar written beside the published domain files.
+MANIFEST_FILENAME = "catalog.yml"
+
+#: Machine-derived per-name fields the published entry no longer carries. They
+#: are read off the sidecar's ``names`` block and overlaid onto the entry
+#: before model validation, so the comparison below still sees every field it
+#: compares against the graph rather than silently passing on an absent one.
+SIDECAR_NAME_FIELDS: frozenset[str] = frozenset(
+    {"kind", "status", "physics_domain", "links", "arguments", "sources"}
+)
+
+
+def record_catalog_import_provenance(
+    entries: list[dict[str, Any]],
+    *,
+    gc: Any | None = None,
+) -> int:
+    """Stamp import receipts on existing names through a positive allow-list.
+
+    Caller payloads are reduced to the identity and catalog commit before they
+    reach Cypher. The database supplies the timestamp, and ``MATCH`` prevents
+    the receipt path from creating an identity. Consequently catalog payloads
+    cannot set, clear, or replace ``origin`` or ``status`` through this
+    boundary even when callers supply those keys.
+    """
+    if not entries:
+        return 0
+
+    batch: list[dict[str, Any]] = []
+    refused: list[str] = []
+    for entry in entries:
+        name_id = entry.get("id")
+        if not name_id:
+            raise ValueError("catalog import provenance requires a non-empty id")
+        if "origin" in entry or "status" in entry:
+            refused.append(str(name_id))
+        batch.append(
+            {
+                "id": str(name_id),
+                "catalog_commit_sha": entry.get("catalog_commit_sha"),
+            }
+        )
+
+    if refused:
+        logger.warning(
+            "Refused catalog import origin/status fields for %d existing name(s): %s",
+            len(refused),
+            ", ".join(refused[:5]),
+        )
+
+    from iter_codex.graph.client import GraphClient
+
+    with nullcontext(gc) if gc is not None else GraphClient() as write_gc:
+        rows = list(
+            write_gc.query(
+                """
+                UNWIND $batch AS b
+                MATCH (sn:StandardName {id: b.id})
+                SET sn.imported_at = datetime(),
+                    sn.catalog_commit_sha = coalesce(
+                        b.catalog_commit_sha, sn.catalog_commit_sha)
+                RETURN count(sn) AS updated
+                """,
+                batch=batch,
+            )
+            or []
+        )
+    return int(rows[0].get("updated", 0)) if rows else 0
+
+
+def guard_catalog_write_payloads(
+    entries: list[dict[str, Any]],
+    *,
+    current_by_id: dict[str, dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    """Refuse catalog entries that would overwrite pipeline review authority.
+
+    This is the catalog-shape adapter for the symmetric ownership guard.
+    Catalog entries identify a row with ``name`` while graph write batches use
+    ``id``; the ownership vocabulary and comparison remain centralized in
+    :mod:`iter_codex.standard_names.protection`.
+    """
+    from iter_codex.standard_names.protection import (
+        refuse_pipeline_authority_loss,
+    )
+
+    return refuse_pipeline_authority_loss(
+        entries,
+        current_by_id=current_by_id,
+        identity_key="name",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Data classes
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class CheckResult:
+    """Summary of a catalog-vs-graph sync check."""
+
+    only_in_catalog: list[str] = field(default_factory=list)
+    only_in_graph: list[str] = field(default_factory=list)
+    diverged: list[dict[str, Any]] = field(default_factory=list)
+    in_sync: int = 0
+    catalog_commit_sha: str | None = None
+    graph_commit_sha: str | None = None
+
+    def describe_divergence(self, limit: int = 5) -> str | None:
+        """Render the divergence signal as an actionable refusal string.
+
+        Returns ``None`` when nothing diverged — the published tree agrees
+        with the graph on every compared field. Otherwise names the count and
+        the first diverged identities so a publish that refuses the tree can
+        point the operator at what disagreed rather than at an opaque number.
+
+        *limit* caps how many identities are named; the remainder is counted
+        in the trailing clause.
+        """
+        if not self.diverged:
+            return None
+        sample = ", ".join(
+            str(entry.get("name")) for entry in self.diverged[:limit] if entry
+        )
+        total = len(self.diverged)
+        if len(self.diverged) > limit:
+            sample = f"{sample} … and {total - limit} more"
+        return (
+            f"post-copy check found {total} diverged entr"
+            f"{'y' if total == 1 else 'ies'} (published tree disagrees with "
+            f"the graph): {sample}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Git helpers
+# ---------------------------------------------------------------------------
+
+
+def _resolve_catalog_sha(catalog_dir: Path) -> str | None:
+    """Resolve the git HEAD SHA of the catalog directory."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(catalog_dir),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0:
+            sha = result.stdout.strip()
+            logger.debug("Catalog commit SHA: %s", sha)
+            return sha
+        logger.debug("git rev-parse failed: %s", result.stderr.strip())
+        return None
+    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+        logger.debug("Could not resolve catalog SHA: %s", exc)
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Domain-from-path derivation
+# ---------------------------------------------------------------------------
+
+#: Pattern: standard_names/<domain>.yml or standard_names/<domain>.yaml
+#: (domain = file basename without extension; per-domain layout)
+_DOMAIN_PATH_RE = re.compile(r"standard_names/([^/]+)\.ya?ml$")
+
+
+def _derive_domain_from_path(yaml_path: Path) -> str | None:
+    """Derive physics_domain from the file path convention.
+
+    Expects ``<root>/standard_names/<domain>.yml`` (per-domain layout).
+    Returns the domain string or None if the path doesn't match.
+    Rejects names containing ``/``.
+    """
+    path_str = str(yaml_path).replace("\\", "/")
+    m = _DOMAIN_PATH_RE.search(path_str)
+    if m:
+        domain = m.group(1)
+        if "/" in domain:
+            return None
+        return domain
+    return None
+
+
+def _load_sidecar_metadata(catalog_dir: Path) -> dict[str, dict[str, Any]]:
+    """Return the manifest sidecar's per-name metadata block, keyed by name.
+
+    The published layout puts ``catalog.yml`` beside the ``standard_names``
+    directory, so a caller may hand either level. An absent or unreadable
+    sidecar yields an empty mapping and the comparison then reports the
+    machine-derived fields as absent rather than as agreeing.
+    """
+    import yaml
+
+    for candidate in (
+        catalog_dir / MANIFEST_FILENAME,
+        catalog_dir.parent / MANIFEST_FILENAME,
+    ):
+        if not candidate.is_file():
+            continue
+        try:
+            manifest = yaml.safe_load(candidate.read_text(encoding="utf-8"))
+        except Exception as exc:
+            logger.warning("Cannot parse catalog sidecar %s: %s", candidate, exc)
+            return {}
+        if not isinstance(manifest, dict):
+            continue
+        names = manifest.get("names") or {}
+        if not isinstance(names, dict):
+            return {}
+        return {
+            str(identity): dict(block)
+            for identity, block in names.items()
+            if isinstance(block, dict)
+        }
+    return {}
+
+
+# ---------------------------------------------------------------------------
+# Grammar decomposition (re-uses graph_ops helper)
+# ---------------------------------------------------------------------------
+
+
+def _grammar_decomposition(name: str) -> dict[str, str | None]:
+    """Parse name via ISN grammar.
+
+    Returns the bare-name segment columns plus ``grammar_parse_version``
+    and ``validation_diagnostics_json`` — the same dict the persist path
+    writes (single extraction authority).
+    """
+    from iter_codex.standard_names.graph_store.graph_foundation import _parse_grammar
+
+    return _parse_grammar(name)
+
+
+# ---------------------------------------------------------------------------
+# Entry conversion
+# ---------------------------------------------------------------------------
+
+
+def _entry_to_graph_dict(
+    entry: Any,
+    *,
+    physics_domain: list[str] | str | None,
+) -> dict[str, Any]:
+    """Convert a validated ISN entry to a graph-comparison dict.
+
+    Does NOT include graph-only fields (source_paths, etc.).
+    Grammar fields are derived from the entry name.
+
+    ``physics_domain`` is the scalar primary domain and ``source_domains``
+    carries the full list.  Accepts either a list (legacy catalog form) or a
+    scalar.
+    """
+    grammar = _grammar_decomposition(entry.name)
+
+    links = [str(lnk) for lnk in entry.links] if entry.links else []
+    raw_constraints = getattr(entry, "constraints", None)
+    constraints = list(raw_constraints) if raw_constraints else []
+
+    if isinstance(physics_domain, list):
+        source_domains = list(physics_domain)
+        primary_domain = source_domains[0] if source_domains else None
+    elif isinstance(physics_domain, str) and physics_domain:
+        primary_domain = physics_domain
+        source_domains = [physics_domain]
+    else:
+        primary_domain = None
+        source_domains = []
+
+    # Descriptions are plain Unicode text — strip any LaTeX/math markup that a
+    # stale catalog YAML carries so it is not compared verbatim against the
+    # graph. documentation keeps LaTeX.
+    from iter_codex.standard_names.worker_tasks.worker_common import (
+        normalize_description_text,
+    )
+
+    result: dict[str, Any] = {
+        "id": entry.name,
+        "description": normalize_description_text(entry.description)
+        if entry.description
+        else None,
+        "documentation": entry.documentation or None,
+        "kind": str(entry.kind) if hasattr(entry, "kind") and entry.kind else None,
+        "unit": str(entry.unit) if hasattr(entry, "unit") and entry.unit else None,
+        "links": links or None,
+        "validity_domain": getattr(entry, "validity_domain", None) or None,
+        "constraints": constraints or None,
+        "physics_domain": primary_domain,
+        "source_domains": source_domains,
+        "status": str(entry.status) if entry.status else "draft",
+        "deprecates": str(entry.deprecates) if entry.deprecates else None,
+    }
+
+    # Merge grammar fields
+    result.update(grammar)
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Check mode (catalog-vs-graph comparison)
+# ---------------------------------------------------------------------------
+
+_CHECK_FIELDS = (
+    "description",
+    "documentation",
+    "kind",
+    "unit",
+    "validity_domain",
+    "constraints",
+    "physics_domain",
+)
+
+# Fields that are graph-only extensions (not in the ISN catalog model)
+# but may appear in YAML files. Strip before model validation.
+# ``physics_domain`` is deliberately absent: the ISN entry model declares it and
+# requires it, so stripping it made every entry fail validation and the whole
+# comparison silently report nothing.
+_GRAPH_ONLY_FIELDS = {
+    "dd_paths",
+    "cocos_transformation_type",
+    "cocos",
+}
+
+# Fields removed from the ISN Pydantic model in a prior ISN release.
+# Strip before model validation to avoid ``extra_forbidden`` errors;
+# read back with ``getattr`` + default to avoid AttributeError.
+_ISN_REMOVED_FIELDS: frozenset[str] = frozenset({"constraints", "validity_domain"})
+
+
+def _catalog_entry_files(catalog_dir: Path) -> list[Path]:
+    """Return the catalog's own per-domain entry files, one level deep.
+
+    Entry files live directly under ``standard_names/``, one file per
+    domain (``standard_names/equilibrium.yml``) — the same flat layout the
+    exporter writes and every other reader globs. A set is named here
+    explicitly so the check walks only the catalog's own entry directory
+    rather than the whole checkout: a whole-tree walk reaches the virtual
+    environment and any other nested YAML, none of which are entries.
+
+    An absent ``standard_names/`` directory yields an empty set, matching
+    the exporter's ``_catalog_entry_records`` behaviour of reading a flat
+    layout that has not yet been written.
+    """
+    sn_dir = catalog_dir / "standard_names"
+    if not sn_dir.is_dir():
+        return []
+    return sorted(
+        p
+        for p in sn_dir.iterdir()
+        if p.suffix in (".yml", ".yaml") and p.is_file() and p.name != MANIFEST_FILENAME
+    )
+
+
+def check_catalog(
+    catalog_dir: Path,
+) -> CheckResult:
+    """Compare catalog entries against graph without importing.
+
+    Returns a :class:`CheckResult` describing which entries are only in
+    the catalog, only in the graph, or present in both but with differing
+    field values.
+
+    Parameters
+    ----------
+    catalog_dir:
+        Path to directory containing YAML catalog entries.
+
+    Returns
+    -------
+    CheckResult with sync status details.
+    """
+    import yaml
+    from imas_standard_names.models import StandardNameEntry
+    from pydantic import TypeAdapter
+
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.source_reads import source_paths_projection
+
+    ta = TypeAdapter(StandardNameEntry)
+    sidecar = _load_sidecar_metadata(catalog_dir)
+    catalog_sha = _resolve_catalog_sha(catalog_dir)
+    result = CheckResult(catalog_commit_sha=catalog_sha)
+
+    # Parse catalog entries — the catalog's own per-domain files, never a
+    # whole-tree walk (a walk reaches the virtual environment and other
+    # nested YAML under the checkout that are not entries).
+    yaml_files = _catalog_entry_files(catalog_dir)
+
+    catalog_entries: dict[str, dict[str, Any]] = {}
+    warnings: list[str] = []
+    for yaml_path in yaml_files:
+        try:
+            with open(yaml_path) as f:
+                data = yaml.safe_load(f)
+
+            if isinstance(data, dict):
+                # Legacy per-file layout — skip with warning
+                continue
+
+            if not isinstance(data, list):
+                continue
+
+            path_domain = _derive_domain_from_path(yaml_path) or "unscoped"
+
+            for entry_data in data:
+                if not isinstance(entry_data, dict):
+                    continue
+
+                # Warn about computed-field edits (curator warning)
+                for cf in COMPUTED_FIELDS:
+                    if cf in entry_data:
+                        warnings.append(
+                            f"{cf} is computed from HAS_PARENT / HAS_ERROR "
+                            f"graph edges and will be overwritten on next "
+                            f"export — edit has no effect.  See "
+                            f"COMPUTED_FIELDS."
+                        )
+                        logger.warning(
+                            "%s is computed from HAS_PARENT / HAS_ERROR "
+                            "graph edges and will be overwritten on next "
+                            "export — edit has no effect.  See "
+                            "COMPUTED_FIELDS.",
+                            cf,
+                        )
+
+                # The entry carries only the reviewable fields; the sidecar
+                # supplies the machine-derived ones the model still declares
+                # and the comparison below still checks.
+                identity = entry_data.get("name")
+                resolved = {
+                    **entry_data,
+                    **{
+                        k: v
+                        for k, v in sidecar.get(str(identity), {}).items()
+                        if k in SIDECAR_NAME_FIELDS
+                    },
+                }
+
+                # Strip computed + graph-only fields before ISN model validation
+                model_data = {
+                    k: v
+                    for k, v in resolved.items()
+                    if k not in _GRAPH_ONLY_FIELDS
+                    and k not in COMPUTED_FIELDS
+                    and k not in _ISN_REMOVED_FIELDS
+                }
+                entry = ta.validate_python(model_data)
+
+                raw_pd = resolved.get("physics_domain")
+                if isinstance(raw_pd, list):
+                    pd_value: list[str] | str = raw_pd
+                elif isinstance(raw_pd, str) and raw_pd:
+                    pd_value = raw_pd
+                else:
+                    pd_value = [path_domain]
+                graph_dict = _entry_to_graph_dict(entry, physics_domain=pd_value)
+                catalog_entries[graph_dict["id"]] = graph_dict
+
+        except Exception as exc:
+            # A file that cannot be read or validated must not pass as agreeing
+            # with the graph, so say so rather than dropping it in silence.
+            logger.warning("Cannot compare catalog file %s: %s", yaml_path, exc)
+            continue
+
+    if not catalog_entries:
+        return result
+
+    # Fetch graph entries.  An identity's domain is the node's stored
+    # ``physics_domain`` — the value :func:`write_name_domain` wrote — so the
+    # comparison reads that scalar directly rather than re-deriving one from
+    # the sources.  A node storing none compares with no domain, and the
+    # difference is counted, not resolved by a second selector.
+    with GraphClient() as gc:
+        rows = gc.query(
+            f"""
+            MATCH (sn:StandardName)
+            WHERE sn.name_stage IN ['accepted', 'approved']
+            RETURN sn.id AS id,
+                   sn.description AS description,
+                   sn.documentation AS documentation,
+                   sn.kind AS kind,
+                   sn.unit AS unit,
+                   {source_paths_projection()} AS source_paths,
+                   sn.validity_domain AS validity_domain,
+                   sn.constraints AS constraints,
+                   sn.catalog_commit_sha AS catalog_commit_sha,
+                   sn.physics_domain AS physics_domain
+            """
+        )
+
+    graph_entries: dict[str, dict[str, Any]] = {}
+    graph_sha: str | None = None
+    for row in rows:
+        entry = dict(row)
+        stored = row.get("physics_domain")
+        entry["physics_domain"] = (
+            str(stored) if stored is not None and str(stored) else None
+        )
+        graph_entries[row["id"]] = entry
+        if row.get("catalog_commit_sha") and not graph_sha:
+            graph_sha = row["catalog_commit_sha"]
+
+    result.graph_commit_sha = graph_sha
+
+    # Compare
+    catalog_names = set(catalog_entries.keys())
+    graph_names = set(graph_entries.keys())
+
+    result.only_in_catalog = sorted(catalog_names - graph_names)
+    result.only_in_graph = sorted(graph_names - catalog_names)
+
+    for name in sorted(catalog_names & graph_names):
+        cat = catalog_entries[name]
+        graph = graph_entries[name]
+
+        diffs: dict[str, Any] = {}
+        for fld in _CHECK_FIELDS:
+            if fld in _PROSE_FIELDS:
+                # Folded prose renders with line breaks the graph stores flat;
+                # compare the content with whitespace collapsed, not the bytes.
+                cat_val = _collapse_prose_whitespace(cat.get(fld))
+                graph_val = _collapse_prose_whitespace(graph.get(fld))
+            else:
+                cat_val = _normalize_field(cat.get(fld))
+                graph_val = _normalize_field(graph.get(fld))
+            if cat_val != graph_val:
+                diffs[fld] = {"catalog": cat_val, "graph": graph_val}
+
+        if diffs:
+            result.diverged.append({"name": name, "fields": diffs})
+        else:
+            result.in_sync += 1
+
+    return result
+
+
+#: Prose fields whose published rendering folds at the catalog writer's line
+#: width while the graph stores the same text flat.  Whitespace is therefore a
+#: render artifact of the byte comparison, not a content difference, so it is
+#: collapsed before comparing; a genuine wording difference survives the
+#: collapse and still refuses.
+_PROSE_FIELDS: frozenset[str] = frozenset({"description", "documentation"})
+
+
+def _collapse_prose_whitespace(val: Any) -> Any:
+    """Collapse internal whitespace runs in a prose string for comparison."""
+    if not isinstance(val, str):
+        return val
+    return " ".join(val.split())
+
+
+def _normalize_field(val: Any) -> Any:
+    """Normalize a field value for comparison."""
+    if val is None:
+        return None
+    if isinstance(val, list):
+        return tuple(sorted(str(v) for v in val)) if val else None
+    if isinstance(val, str):
+        return val.strip() if val.strip() else None
+    return val
+
+
+#: Field comparison is shared with the catalog reconciler, which must compare a
+#: candidate against stored entries by exactly the normalization an import
+#: applies. Moving it would let the two comparisons drift.
+normalize_field = _normalize_field

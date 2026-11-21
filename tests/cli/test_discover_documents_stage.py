@@ -16,11 +16,11 @@ import importlib
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import discover
-from imas_codex.cli.discover.documents import DocumentsOptions, run_documents_stage
+from iter_codex.cli.discover import discover
+from iter_codex.cli.discover.documents import DocumentsOptions, run_documents_stage
 
 # Resolve the module explicitly so the stage function can be patched.
-_DOCUMENTS_MODULE = importlib.import_module("imas_codex.cli.discover.documents")
+_DOCUMENTS_MODULE = importlib.import_module("iter_codex.cli.discover.documents")
 
 FACILITY = "tcv"
 SSH_HOST = "tcv.example.org"
@@ -36,8 +36,8 @@ class _Recorder:
 
 @pytest.fixture(autouse=True)
 def bare_discover_stage(monkeypatch, tmp_path):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import sequence
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import sequence
 
     monkeypatch.setattr(
         sequence,
@@ -48,7 +48,7 @@ def bare_discover_stage(monkeypatch, tmp_path):
     )
     monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: {}
     )
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
     monkeypatch.setattr(
@@ -60,9 +60,9 @@ def bare_discover_stage(monkeypatch, tmp_path):
 def documents_env(monkeypatch):
     """Replace graph, scanner, engine, and facility access with local doubles."""
     rec = _Recorder()
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda name: {"id": name, "ssh_host": SSH_HOST},
     )
 
@@ -85,7 +85,7 @@ def documents_env(monkeypatch):
                 for prefix in params["prefixes"]
             ]
 
-    monkeypatch.setattr("imas_codex.graph.GraphClient", Graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", Graph)
 
     def fake_scan(
         facility,
@@ -110,7 +110,7 @@ def documents_env(monkeypatch):
         }
 
     monkeypatch.setattr(
-        "imas_codex.discovery.documents.scanner.scan_facility_documents",
+        "iter_codex.discovery.documents.scanner.scan_facility_documents",
         fake_scan,
     )
 
@@ -131,7 +131,7 @@ def documents_env(monkeypatch):
         }
 
     monkeypatch.setattr(
-        "imas_codex.discovery.documents.pipeline.run_document_discovery",
+        "iter_codex.discovery.documents.pipeline.run_document_discovery",
         fake_pipeline,
     )
 
@@ -140,7 +140,7 @@ def documents_env(monkeypatch):
         return {}
 
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.run_discovery", fake_run_discovery
+        "iter_codex.cli.discover.common.run_discovery", fake_run_discovery
     )
     return rec
 

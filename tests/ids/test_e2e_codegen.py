@@ -32,7 +32,7 @@ class TestGenerateExtractionScript:
     """Tests for generate_extraction_script()."""
 
     def _make_script(self, **kwargs):
-        from imas_codex.ids.codegen import generate_extraction_script
+        from iter_codex.ids.codegen import generate_extraction_script
 
         section_signals = kwargs.pop(
             "section_signals",
@@ -116,7 +116,7 @@ class TestValidateAssemblyCode:
     """Tests for validate_assembly_code()."""
 
     def test_valid_code_passes(self):
-        from imas_codex.ids.codegen import validate_assembly_code
+        from iter_codex.ids.codegen import validate_assembly_code
 
         code = """
 def assemble_coil(ids, signals, mappings):
@@ -127,28 +127,28 @@ def assemble_coil(ids, signals, mappings):
         assert errors == []
 
     def test_catches_syntax_error(self):
-        from imas_codex.ids.codegen import validate_assembly_code
+        from iter_codex.ids.codegen import validate_assembly_code
 
         code = "def assemble_coil(ids, signals, mappings)\n    pass"
         errors = validate_assembly_code(code, "assemble_coil")
         assert any("Syntax error" in e for e in errors)
 
     def test_catches_missing_function(self):
-        from imas_codex.ids.codegen import validate_assembly_code
+        from iter_codex.ids.codegen import validate_assembly_code
 
         code = "def wrong_name(ids, signals, mappings):\n    pass"
         errors = validate_assembly_code(code, "assemble_coil")
         assert any("not found" in e for e in errors)
 
     def test_catches_bad_signature(self):
-        from imas_codex.ids.codegen import validate_assembly_code
+        from iter_codex.ids.codegen import validate_assembly_code
 
         code = "def assemble_coil(x, y):\n    pass"
         errors = validate_assembly_code(code, "assemble_coil")
         assert any("must accept" in e for e in errors)
 
     def test_catches_forbidden_import(self):
-        from imas_codex.ids.codegen import validate_assembly_code
+        from iter_codex.ids.codegen import validate_assembly_code
 
         code = """
 import os
@@ -159,7 +159,7 @@ def assemble_coil(ids, signals, mappings):
         assert any("Forbidden import" in e for e in errors)
 
     def test_allows_numpy_import(self):
-        from imas_codex.ids.codegen import validate_assembly_code
+        from iter_codex.ids.codegen import validate_assembly_code
 
         code = """
 import numpy as np
@@ -170,7 +170,7 @@ def assemble_coil(ids, signals, mappings):
         assert errors == []
 
     def test_allows_math_import(self):
-        from imas_codex.ids.codegen import validate_assembly_code
+        from iter_codex.ids.codegen import validate_assembly_code
 
         code = """
 import math
@@ -190,7 +190,7 @@ class TestGenerateAssemblyCode:
     """Tests for generate_assembly_code()."""
 
     def test_array_per_node_pattern(self):
-        from imas_codex.ids.codegen import generate_assembly_code
+        from iter_codex.ids.codegen import generate_assembly_code
 
         mappings = [
             {
@@ -213,7 +213,7 @@ class TestGenerateAssemblyCode:
         ast.parse(code)
 
     def test_concatenate_pattern(self):
-        from imas_codex.ids.codegen import generate_assembly_code
+        from iter_codex.ids.codegen import generate_assembly_code
 
         mappings = [
             {
@@ -230,7 +230,7 @@ class TestGenerateAssemblyCode:
         ast.parse(code)
 
     def test_generic_fallback_pattern(self):
-        from imas_codex.ids.codegen import generate_assembly_code
+        from iter_codex.ids.codegen import generate_assembly_code
 
         mappings = [
             {"source_id": "s1", "target_id": "x/y", "source_property": "value"},
@@ -252,7 +252,7 @@ class TestBinaryTransferRoundtrip:
     """Tests for pack_array/unpack_array and decode_extraction_output."""
 
     def test_pack_unpack_1d(self):
-        from imas_codex.remote.serialization import pack_array, unpack_array
+        from iter_codex.remote.serialization import pack_array, unpack_array
 
         arr = np.array([1.0, 2.0, 3.0])
         packed = pack_array(arr)
@@ -264,7 +264,7 @@ class TestBinaryTransferRoundtrip:
         np.testing.assert_array_equal(arr, unpacked)
 
     def test_pack_unpack_2d(self):
-        from imas_codex.remote.serialization import pack_array, unpack_array
+        from iter_codex.remote.serialization import pack_array, unpack_array
 
         arr = np.array([[1, 2], [3, 4]], dtype=np.int32)
         packed = pack_array(arr)
@@ -274,13 +274,13 @@ class TestBinaryTransferRoundtrip:
         np.testing.assert_array_equal(arr, unpacked)
 
     def test_scalar_passthrough(self):
-        from imas_codex.remote.serialization import pack_array, unpack_array
+        from iter_codex.remote.serialization import pack_array, unpack_array
 
         assert pack_array(42) == 42
         assert unpack_array(42) == 42
 
     def test_decode_json_output(self):
-        from imas_codex.remote.serialization import decode_extraction_output
+        from iter_codex.remote.serialization import decode_extraction_output
 
         data = {"results": {"sig1": {"data": [1, 2, 3]}}}
         raw = json.dumps(data).encode()
@@ -288,7 +288,7 @@ class TestBinaryTransferRoundtrip:
         assert result["results"]["sig1"]["data"] == [1, 2, 3]
 
     def test_decode_json_string(self):
-        from imas_codex.remote.serialization import decode_extraction_output
+        from iter_codex.remote.serialization import decode_extraction_output
 
         data = {"results": {"sig1": {"data": [1, 2, 3]}}}
         raw = json.dumps(data)
@@ -296,7 +296,7 @@ class TestBinaryTransferRoundtrip:
         assert result["results"]["sig1"]["data"] == [1, 2, 3]
 
     def test_decode_empty(self):
-        from imas_codex.remote.serialization import decode_extraction_output
+        from iter_codex.remote.serialization import decode_extraction_output
 
         result = decode_extraction_output(b"")
         assert result == {"results": {}}
@@ -308,7 +308,7 @@ class TestBinaryTransferRoundtrip:
         except ImportError:
             pytest.skip("msgpack not installed")
 
-        from imas_codex.remote.serialization import decode_extraction_output
+        from iter_codex.remote.serialization import decode_extraction_output
 
         data = {"results": {"sig1": {"data": [1.0, 2.0, 3.0]}}}
         raw = msgpack.packb(data, use_bin_type=True)
@@ -325,7 +325,7 @@ class TestExtractionCaching:
     """Tests for cache_extraction_result/load_cached_extraction."""
 
     def test_cache_roundtrip(self, tmp_path, monkeypatch):
-        from imas_codex.ids import codegen
+        from iter_codex.ids import codegen
 
         monkeypatch.setattr(codegen, "CACHE_DIR", tmp_path / "cache")
 
@@ -337,7 +337,7 @@ class TestExtractionCaching:
         assert loaded == results
 
     def test_cache_miss(self, tmp_path, monkeypatch):
-        from imas_codex.ids import codegen
+        from iter_codex.ids import codegen
 
         monkeypatch.setattr(codegen, "CACHE_DIR", tmp_path / "cache")
 
@@ -353,9 +353,9 @@ class TestExtractionCaching:
 class TestStrategySelection:
     """Tests for probe_remote_capabilities and strategy decisions."""
 
-    @patch("imas_codex.remote.executor.run_script_via_stdin")
+    @patch("iter_codex.remote.executor.run_script_via_stdin")
     def test_probe_parses_json(self, mock_run):
-        from imas_codex.remote.executor import probe_remote_capabilities
+        from iter_codex.remote.executor import probe_remote_capabilities
 
         mock_run.return_value = json.dumps(
             {"imas": True, "msgpack": True, "numpy": True, "h5py": False}
@@ -365,9 +365,9 @@ class TestStrategySelection:
         assert caps["msgpack"] is True
         assert caps["h5py"] is False
 
-    @patch("imas_codex.remote.executor.run_script_via_stdin")
+    @patch("iter_codex.remote.executor.run_script_via_stdin")
     def test_probe_handles_failure(self, mock_run):
-        from imas_codex.remote.executor import probe_remote_capabilities
+        from iter_codex.remote.executor import probe_remote_capabilities
 
         mock_run.side_effect = Exception("Connection refused")
         caps = probe_remote_capabilities("badhost")
@@ -447,14 +447,14 @@ class TestAssemblyConfigExtensions:
     """Test assembly_code and assembly_function_name on AssemblyConfig."""
 
     def test_assembly_code_default_none(self):
-        from imas_codex.ids.models import AssemblyConfig
+        from iter_codex.ids.models import AssemblyConfig
 
         config = AssemblyConfig(target_path="pf_active/coil")
         assert config.assembly_code is None
         assert config.assembly_function_name is None
 
     def test_assembly_code_set(self):
-        from imas_codex.ids.models import AssemblyConfig
+        from iter_codex.ids.models import AssemblyConfig
 
         config = AssemblyConfig(
             target_path="pf_active/coil",
@@ -465,7 +465,7 @@ class TestAssemblyConfigExtensions:
         assert config.assembly_function_name == "f"
 
     def test_assembly_code_json_roundtrip(self):
-        from imas_codex.ids.models import AssemblyConfig
+        from iter_codex.ids.models import AssemblyConfig
 
         config = AssemblyConfig(
             target_path="test",
@@ -488,7 +488,7 @@ class TestDecimationPreservesShape:
 
     def test_decimation_code_structure(self):
         """Decimation block checks length and uses step."""
-        from imas_codex.ids.codegen import generate_extraction_script
+        from iter_codex.ids.codegen import generate_extraction_script
 
         script = generate_extraction_script(
             "tcv",

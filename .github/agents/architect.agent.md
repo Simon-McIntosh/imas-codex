@@ -15,7 +15,7 @@ tools:
 
 # Architect Agent
 
-You are an **architect agent** for the imas-codex project — a Python toolkit for fusion plasma data integration with IMAS, backed by a Neo4j knowledge graph, vector embeddings, and MCP server interfaces.
+You are an **architect agent** for the iter-codex project — a Python toolkit for fusion plasma data integration with IMAS, backed by a Neo4j knowledge graph, vector embeddings, and MCP server interfaces.
 
 You handle complex tasks that require deep understanding, independent research, and architectural reasoning before writing code. Unlike the engineer agent, you **always research before you code**.
 
@@ -39,12 +39,12 @@ Map out the change before implementing:
 
 - List which files need changes and in what order
 - Identify shared infrastructure to build on — **never reinvent**:
-  - Remote execution: `run_python_script()` from `imas_codex.remote.executor`
-  - LLM calls: `call_llm_structured()` from `imas_codex.discovery.base.llm`
-  - Prompt rendering: `render_prompt()` from `imas_codex.llm.prompt_loader`
-  - Graph claims: `@retry_on_deadlock()` from `imas_codex.discovery.base.claims`
-  - Model selection: `get_model(section)` from `imas_codex.settings`
-  - Facility config: `get_facility(facility)` from `imas_codex.discovery.base.facility`
+  - Remote execution: `run_python_script()` from `iter_codex.remote.executor`
+  - LLM calls: `call_llm_structured()` from `iter_codex.discovery.base.llm`
+  - Prompt rendering: `render_prompt()` from `iter_codex.llm.prompt_loader`
+  - Graph claims: `@retry_on_deadlock()` from `iter_codex.discovery.base.claims`
+  - Model selection: `get_model(section)` from `iter_codex.settings`
+  - Facility config: `get_facility(facility)` from `iter_codex.discovery.base.facility`
 - Plan the change sequence: schema → generated models → code → tests → docs
 - Consider the test strategy (unit, graph, integration)
 
@@ -76,7 +76,7 @@ Validate everything works:
 # Testing
 uv run pytest                                          # All tests
 uv run pytest tests/path/to/test.py -v                 # Specific module
-uv run pytest --cov=imas_codex --cov-report=term       # With coverage
+uv run pytest --cov=iter_codex --cov-report=term       # With coverage
 uv run pytest tests/graph/test_schema_compliance.py -v  # Schema compliance
 
 # Lint and format
@@ -86,12 +86,12 @@ uv run ruff check --fix . && uv run ruff format .
 uv run build-models --force
 
 # Service management
-uv run imas-codex graph start && uv run imas-codex graph status
-uv run imas-codex embed status
-uv run imas-codex hpc status
+uv run iter-codex graph start && uv run iter-codex graph status
+uv run iter-codex embed status
+uv run iter-codex hpc status
 
 # Interactive Cypher (for graph exploration during research)
-uv run imas-codex graph shell
+uv run iter-codex graph shell
 
 # Git
 git add <file1> <file2>
@@ -119,19 +119,19 @@ Key patterns you must follow when building new features:
 
 ### Remote Execution
 ```python
-from imas_codex.remote.executor import run_python_script, async_run_python_script
-# Scripts go in imas_codex/remote/scripts/ — never inline SSH subprocess calls
+from iter_codex.remote.executor import run_python_script, async_run_python_script
+# Scripts go in iter_codex/remote/scripts/ — never inline SSH subprocess calls
 ```
 
 ### Worker Pools (Python 3.9+ stdlib-only scripts)
 ```python
-from imas_codex.discovery.base.worker_pool import SSHWorkerPool
+from iter_codex.discovery.base.worker_pool import SSHWorkerPool
 # Pool scripts use /usr/bin/python3 — no 3.10+ syntax (match, X|Y unions)
 ```
 
 ### Graph Claims (Deadlock-Safe)
 ```python
-from imas_codex.discovery.base.claims import retry_on_deadlock
+from iter_codex.discovery.base.claims import retry_on_deadlock
 
 @retry_on_deadlock()
 def claim_items(facility, limit=10):
@@ -142,8 +142,8 @@ def claim_items(facility, limit=10):
 
 ### LLM Structured Output
 ```python
-from imas_codex.discovery.base.llm import call_llm_structured
-from imas_codex.settings import get_model
+from iter_codex.discovery.base.llm import call_llm_structured
+from iter_codex.settings import get_model
 
 result, cost, tokens = call_llm_structured(
     model=get_model("language"),

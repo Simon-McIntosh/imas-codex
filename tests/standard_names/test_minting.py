@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.minting import MintResult, mint_sn_list
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.minting import MintResult, mint_sn_list
 
 # ── Pure behavior over a stubbed graph ─────────────────────────────────────
 

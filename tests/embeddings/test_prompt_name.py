@@ -8,7 +8,7 @@ import pytest
 
 def test_embed_request_accepts_prompt_name():
     """EmbedRequest should accept a prompt_name field."""
-    from imas_codex.embeddings.server import EmbedRequest
+    from iter_codex.embeddings.server import EmbedRequest
 
     req = EmbedRequest(texts=["hello"], prompt_name="query")
     assert req.prompt_name == "query"
@@ -16,7 +16,7 @@ def test_embed_request_accepts_prompt_name():
 
 def test_embed_request_prompt_name_defaults_none():
     """EmbedRequest prompt_name should default to None."""
-    from imas_codex.embeddings.server import EmbedRequest
+    from iter_codex.embeddings.server import EmbedRequest
 
     req = EmbedRequest(texts=["hello"])
     assert req.prompt_name is None
@@ -24,7 +24,7 @@ def test_embed_request_prompt_name_defaults_none():
 
 def test_embed_texts_accepts_prompt_name():
     """embed_texts() should accept prompt_name without error (local backend mock)."""
-    from imas_codex.embeddings.encoder import Encoder
+    from iter_codex.embeddings.encoder import Encoder
 
     mock_model = MagicMock()
     mock_model.encode.return_value = np.array([[0.1, 0.2, 0.3]])
@@ -39,8 +39,8 @@ def test_embed_texts_accepts_prompt_name():
 
 def test_embed_texts_local_passes_prompt_name():
     """embed_texts() passes prompt_name to model.encode() for local backend."""
-    from imas_codex.embeddings.config import EmbeddingBackend, EncoderConfig
-    from imas_codex.embeddings.encoder import Encoder
+    from iter_codex.embeddings.config import EmbeddingBackend, EncoderConfig
+    from iter_codex.embeddings.encoder import Encoder
 
     config = EncoderConfig(
         model_name="test-model",
@@ -61,8 +61,8 @@ def test_embed_texts_local_passes_prompt_name():
 
 def test_embed_texts_local_no_prompt_name_omitted():
     """embed_texts() does NOT pass prompt_name to model.encode() when None."""
-    from imas_codex.embeddings.config import EmbeddingBackend, EncoderConfig
-    from imas_codex.embeddings.encoder import Encoder
+    from iter_codex.embeddings.config import EmbeddingBackend, EncoderConfig
+    from iter_codex.embeddings.encoder import Encoder
 
     config = EncoderConfig(
         model_name="test-model",
@@ -82,7 +82,7 @@ def test_embed_texts_local_no_prompt_name_omitted():
 
 def test_remote_client_embed_passes_prompt_name():
     """RemoteEmbeddingClient.embed() includes prompt_name in HTTP request body."""
-    from imas_codex.embeddings.client import RemoteEmbeddingClient
+    from iter_codex.embeddings.client import RemoteEmbeddingClient
 
     client = RemoteEmbeddingClient(base_url="http://localhost:8765")
     mock_http = MagicMock()
@@ -107,7 +107,7 @@ def test_remote_client_embed_passes_prompt_name():
 
 def test_remote_client_embed_omits_prompt_name_when_none():
     """RemoteEmbeddingClient._embed_single() omits prompt_name when None."""
-    from imas_codex.embeddings.client import RemoteEmbeddingClient
+    from iter_codex.embeddings.client import RemoteEmbeddingClient
 
     client = RemoteEmbeddingClient(base_url="http://localhost:8765")
     mock_http = MagicMock()
@@ -129,7 +129,7 @@ def test_remote_client_embed_omits_prompt_name_when_none():
 
 def test_embed_query_uses_prompt_name():
     """_embed_query() in graph_search should call embed_texts with prompt_name='query'."""
-    from imas_codex.tools import graph_search
+    from iter_codex.tools import graph_search
 
     mock_encoder = MagicMock()
     mock_encoder.embed_texts.return_value = np.array([[0.1, 0.2, 0.3]])

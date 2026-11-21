@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names.promote import run_approval
+from iter_codex.standard_names.promote import run_approval
 
 _PR = {
     "catalog_pr_number": 12,
@@ -16,13 +16,13 @@ _PR = {
 def _approve(*, tmp_path, batch, review_evidence):
     graph = MagicMock()
     with (
-        patch("imas_codex.standard_names.promote.read_pr_changes", return_value=[]),
+        patch("iter_codex.standard_names.promote.read_pr_changes", return_value=[]),
         patch(
-            "imas_codex.standard_names.promote._prepare_additive_catalog_delta",
+            "iter_codex.standard_names.promote._prepare_additive_catalog_delta",
             return_value=None,
         ),
         patch(
-            "imas_codex.standard_names.promote.mark_catalog_name_approved",
+            "iter_codex.standard_names.promote.mark_catalog_name_approved",
             return_value=True,
         ) as mark,
     ):

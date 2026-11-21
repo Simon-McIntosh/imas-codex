@@ -29,7 +29,7 @@ class MemoryBenchmarks:
 
     def peakmem_server_idle(self):
         """Base memory footprint of AgentsServer at rest."""
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         AgentsServer()
 
@@ -58,7 +58,7 @@ class MemoryBenchmarks:
 
     def peakmem_encoder_loaded(self):
         """Embedding model memory footprint."""
-        from imas_codex.embeddings.encoder import Encoder
+        from iter_codex.embeddings.encoder import Encoder
 
         enc = Encoder()
         enc.embed_texts(["warmup"])

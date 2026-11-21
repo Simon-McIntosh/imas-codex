@@ -41,7 +41,7 @@ def _version(paths: dict[str, dict]) -> dict:
 
 def _run_build(gc, version_data: dict[str, dict]) -> None:
     """Run the build phase over exactly the given scope."""
-    from imas_codex.graph.build_dd import phase_build
+    from iter_codex.graph.build_dd import phase_build
 
     phase_build(
         gc,
@@ -66,7 +66,7 @@ def _labels(gc) -> dict[str, dict]:
 
 def test_full_sharded_build_keeps_every_shards_labels(disposable_graph):
     """Each IDS shard of a full build keeps the labels the others derived."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     psi = "equilibrium/time_slice/profiles_1d/psi"
     temp = "core_profiles/profiles_1d/electrons/temperature"
@@ -94,7 +94,7 @@ def test_full_sharded_build_keeps_every_shards_labels(disposable_graph):
 
 def test_scoped_build_leaves_out_of_scope_labels_intact(disposable_graph):
     """A build over one IDS must not touch a label outside that IDS."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     outside = "equilibrium/time_slice/profiles_1d/psi"
     inside = "core_profiles/profiles_1d/electrons/temperature"
@@ -121,7 +121,7 @@ def test_scoped_build_leaves_out_of_scope_labels_intact(disposable_graph):
 
 def test_full_rebuild_is_idempotent_on_labels(disposable_graph):
     """Rebuilding twice yields the same labels, including 3.x-only paths."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     psi = "equilibrium/time_slice/profiles_1d/psi"
     only_3x = "equilibrium/time_slice/profiles_1d/psi_removed_in_4x"
@@ -159,7 +159,7 @@ def test_older_version_only_path_takes_its_declaring_versions_label(disposable_g
     longer carries the path, so the forward-port never reaches it. Its label is
     still the statement of the newest version that declares one.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     psi = "equilibrium/time_slice/profiles_1d/psi"
     dropped = "equilibrium/time_slice/profiles_1d/j_tor"
@@ -185,7 +185,7 @@ def test_older_version_only_path_takes_its_declaring_versions_label(disposable_g
 
 def test_scoped_build_leaves_older_version_label_intact(disposable_graph):
     """A shard build over another IDS must not clear an older-version label."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     psi = "equilibrium/time_slice/profiles_1d/psi"
     dropped = "equilibrium/time_slice/profiles_1d/j_tor"
@@ -215,7 +215,7 @@ def test_scoped_build_leaves_older_version_label_intact(disposable_graph):
 
 def test_path_the_dd_stops_labelling_loses_its_label(disposable_graph):
     """A label leaves when a version the build covers carries the path unlabelled."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     psi = "equilibrium/time_slice/profiles_1d/psi"
     dropped = "equilibrium/time_slice/profiles_1d/j_tor"
@@ -258,7 +258,7 @@ def test_ids_scoped_rebuild_without_a_declaring_version_keeps_older_label(
     version outside the window stays. This is the shape that stripped every
     shard's labels when the clear was global.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     dropped = "equilibrium/time_slice/profiles_1d/j_tor"
     psi = "equilibrium/time_slice/profiles_1d/psi"

@@ -1,7 +1,7 @@
 """One domain precedence, read by both the selector and the classifier tree.
 
 An overlap between two physics domains is settled by a single declared order in
-``imas_codex/definitions/physics/domains.yaml``. These tests hold the two
+``iter_codex/definitions/physics/domains.yaml``. These tests hold the two
 readers to that one order — the standard-name selector and the rendered
 classifier questions — and hold the guidance loader to refusing an order that
 misses or repeats a domain of ISN's vocabulary. Each test names the mechanism
@@ -12,11 +12,11 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.definitions.physics import (
+from iter_codex.definitions.physics import (
     load_domain_precedence,
     load_isn_physics_domains,
 )
-from imas_codex.graph.dd_domain_classifier import (
+from iter_codex.graph.dd_domain_classifier import (
     CATEGORY_QUESTION,
     DOMAIN_QUESTION,
     PRECEDENCE_TIEBREAK_RULE,
@@ -25,8 +25,8 @@ from imas_codex.graph.dd_domain_classifier import (
     build_category_question,
     build_domain_question,
 )
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names.domain_ranking import select_primary_domain
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.standard_names.domain_ranking import select_primary_domain
 
 #: The phrase both the rendered questions and the chat prompt carry, so a reader
 #: sent to the prompt can find the tie-break by the same words.
@@ -48,7 +48,7 @@ def test_precedence_is_a_permutation_of_the_isn_vocabulary() -> None:
 
 def test_loader_refuses_an_order_missing_a_domain(monkeypatch) -> None:
     """A precedence missing a domain of the vocabulary is refused, not accepted."""
-    import imas_codex.definitions.physics as physics
+    import iter_codex.definitions.physics as physics
 
     complete = physics._declared_precedence()
     monkeypatch.setattr(physics, "_declared_precedence", lambda: complete[:-1])
@@ -62,7 +62,7 @@ def test_loader_refuses_an_order_missing_a_domain(monkeypatch) -> None:
 
 def test_loader_refuses_an_order_repeating_a_domain(monkeypatch) -> None:
     """A precedence that names one domain twice is refused, not accepted."""
-    import imas_codex.definitions.physics as physics
+    import iter_codex.definitions.physics as physics
 
     complete = physics._declared_precedence()
     monkeypatch.setattr(

@@ -11,14 +11,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_store.graph_supersession import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_store.graph_supersession import (
     classify_sourceless_standard_names,
     supersede_exhausted_standard_name_orphans,
 )
-from imas_codex.standard_names.ledger import find_provenance_orphans
-from imas_codex.standard_names.loop import _report_source_loss_probe
-from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+from iter_codex.standard_names.ledger import find_provenance_orphans
+from iter_codex.standard_names.loop import _report_source_loss_probe
+from iter_codex.standard_names.source_invariant import find_sourceless_live_names
 
 
 @pytest.fixture()
@@ -27,7 +27,7 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
     client = GraphClient(
         uri=disposable_neo4j_uri,
         username="neo4j",
-        password=os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", ""),
+        password=os.environ.get("ITER_CODEX_TEST_NEO4J_PASSWORD", ""),
         graph_name="source-audit-fixture",
     )
     client.query(
@@ -101,7 +101,7 @@ def test_planted_names_follow_one_source_audit(planted_graph: GraphClient) -> No
 def test_derived_parent_requires_live_child_evidence(
     planted_graph: GraphClient,
 ) -> None:
-    from imas_codex.standard_names.export import _fetch_export_population
+    from iter_codex.standard_names.export import _fetch_export_population
 
     planted_graph.query(
         "MATCH (child:StandardName {id:'audit_child'}) SET child.status = 'deprecated'"
@@ -110,7 +110,7 @@ def test_derived_parent_requires_live_child_evidence(
     parent = next(row for row in rows if row["id"] == "audit_parent")
     assert parent["population"] == "never_bound"
     with patch(
-        "imas_codex.graph.client.GraphClient", return_value=nullcontext(planted_graph)
+        "iter_codex.graph.client.GraphClient", return_value=nullcontext(planted_graph)
     ):
         population = _fetch_export_population(require_docs_review=False)
     exported_parent = next(row for row in population if row["id"] == "audit_parent")
@@ -184,7 +184,7 @@ def test_recorded_identity_operations_link_transferred_sources(
 def test_export_refuses_live_losses_before_population(
     planted_graph: GraphClient, tmp_path, skip_gate: bool
 ) -> None:
-    from imas_codex.standard_names.export import run_export
+    from iter_codex.standard_names.export import run_export
 
     # A live-stage loss blocks the export; the exhausted loss stays dormant.
     planted_graph.query(
@@ -193,14 +193,14 @@ def test_export_refuses_live_losses_before_population(
     )
     with (
         patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=nullcontext(planted_graph),
         ),
         patch(
-            "imas_codex.standard_names.export._load_waived_source_paths",
+            "iter_codex.standard_names.export._load_waived_source_paths",
             return_value=set(),
         ),
-        patch("imas_codex.standard_names.export._fetch_export_population") as fetch,
+        patch("iter_codex.standard_names.export._fetch_export_population") as fetch,
     ):
         report = run_export(tmp_path, skip_gate=skip_gate, force=skip_gate)
     assert not report.all_gates_passed
@@ -219,14 +219,14 @@ def test_export_refuses_live_losses_before_population(
     )
     with (
         patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=nullcontext(planted_graph),
         ),
         patch(
-            "imas_codex.standard_names.export._load_waived_source_paths",
+            "iter_codex.standard_names.export._load_waived_source_paths",
             return_value=set(),
         ),
-        patch("imas_codex.standard_names.export._fetch_export_population") as fetch,
+        patch("iter_codex.standard_names.export._fetch_export_population") as fetch,
     ):
         fetch.side_effect = RuntimeError("population reached")
         with pytest.raises(RuntimeError, match="population reached"):
@@ -335,32 +335,32 @@ def _run_export_with_audit(
     staging_dir: Path, population: list[dict], audit_rows: list[dict]
 ):
     """Run an export against a stubbed source audit and population."""
-    from imas_codex.standard_names.export import run_export
+    from iter_codex.standard_names.export import run_export
 
     fetch = MagicMock(return_value=population)
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
+            "iter_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
             return_value=audit_rows,
         ),
-        patch("imas_codex.standard_names.export._fetch_export_population", fetch),
+        patch("iter_codex.standard_names.export._fetch_export_population", fetch),
         patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=_EmptyGraphClient(),
         ),
         patch(
-            "imas_codex.standard_names.export._validate_entry",
+            "iter_codex.standard_names.export._validate_entry",
             side_effect=lambda entry: entry,
         ),
         patch(
-            "imas_codex.standard_names.export._fetch_deprecation_stubs",
+            "iter_codex.standard_names.export._fetch_deprecation_stubs",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+            "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
             return_value=([], set()),
         ),
-        patch("imas_codex.standard_names.export._write_domain_yaml"),
+        patch("iter_codex.standard_names.export._write_domain_yaml"),
     ):
         report = run_export(
             staging_dir,
@@ -379,7 +379,7 @@ def test_the_population_read_is_inside_the_ten_second_ceiling() -> None:
     it on the bare client — as it was before this guard — was the only statement
     in the function with no ceiling.
     """
-    from imas_codex.standard_names.graph_store import graph_supersession
+    from iter_codex.standard_names.graph_store import graph_supersession
 
     class _SlowClock:
         def __init__(self) -> None:
@@ -480,7 +480,7 @@ def test_failed_probe_is_reported_as_not_run(caplog) -> None:
 
 
 def test_rebuild_excludes_exhausted_audit_findings_from_repair_and_retirement() -> None:
-    import imas_codex.standard_names.provenance_rebuild as rebuild
+    import iter_codex.standard_names.provenance_rebuild as rebuild
 
     active = {"sn_id": "active_loss", "name_stage": "accepted", "origin": "pipeline"}
     exhausted = [

@@ -23,11 +23,11 @@ def _make_client():
     """Create a GraphClient using profile-aware connection resolution.
 
     Uses ``get_graph_uri()`` / ``get_graph_username()`` / ``get_graph_password()``
-    from ``imas_codex.settings`` which handle SLURM node discovery, SSH tunnels,
+    from ``iter_codex.settings`` which handle SLURM node discovery, SSH tunnels,
     and env var overrides automatically.
     """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.settings import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.settings import (
         get_graph_password,
         get_graph_uri,
         get_graph_username,

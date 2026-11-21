@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.static.state import StaticDiscoveryState
+from iter_codex.discovery.static.state import StaticDiscoveryState
 
 # ===========================================================================
 # StaticDiscoveryState tests
@@ -91,16 +91,16 @@ class TestStaticDiscoveryState:
 class TestGraphOps:
     """Tests for graph operations with mocked GraphClient."""
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_seed_versions_empty(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import seed_versions
+        from iter_codex.discovery.mdsplus.graph_ops import seed_versions
 
         result = seed_versions("tcv", "static", [])
         assert result == 0
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_seed_versions_creates_nodes(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import seed_versions
+        from iter_codex.discovery.mdsplus.graph_ops import seed_versions
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -119,9 +119,9 @@ class TestGraphOps:
             pass
         assert mock_gc.ensure_facility.called
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_seed_versions_with_config(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import seed_versions
+        from iter_codex.discovery.mdsplus.graph_ops import seed_versions
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -135,9 +135,9 @@ class TestGraphOps:
         result = seed_versions("tcv", "static", [1, 3], version_config)
         assert result == 2
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_claim_version_returns_dict(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import claim_version_for_extraction
+        from iter_codex.discovery.mdsplus.graph_ops import claim_version_for_extraction
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -151,9 +151,9 @@ class TestGraphOps:
         assert result["version"] == 1
         assert result["id"] == "tcv:static:v1"
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_claim_version_returns_none_when_empty(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import claim_version_for_extraction
+        from iter_codex.discovery.mdsplus.graph_ops import claim_version_for_extraction
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -163,9 +163,9 @@ class TestGraphOps:
         result = claim_version_for_extraction("tcv", "static")
         assert result is None
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_mark_version_extracted(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import mark_version_extracted
+        from iter_codex.discovery.mdsplus.graph_ops import mark_version_extracted
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -174,9 +174,9 @@ class TestGraphOps:
         mark_version_extracted("tcv:static:v1", 47976)
         mock_gc.query.assert_called_once()
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_has_pending_extract_work(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import has_pending_extract_work
+        from iter_codex.discovery.mdsplus.graph_ops import has_pending_extract_work
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -185,9 +185,9 @@ class TestGraphOps:
 
         assert has_pending_extract_work("tcv", "static") is True
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_has_pending_enrich_work(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import has_pending_enrich_work
+        from iter_codex.discovery.mdsplus.graph_ops import has_pending_enrich_work
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -204,13 +204,13 @@ class TestGraphOps:
         assert has_pending_enrich_work("tcv", "static") is False
 
     def test_has_pending_ingest_work_always_false(self):
-        from imas_codex.discovery.mdsplus.graph_ops import has_pending_ingest_work
+        from iter_codex.discovery.mdsplus.graph_ops import has_pending_ingest_work
 
         assert has_pending_ingest_work("tcv", "static") is False
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_has_pending_units_work(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import has_pending_units_work
+        from iter_codex.discovery.mdsplus.graph_ops import has_pending_units_work
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -219,9 +219,9 @@ class TestGraphOps:
 
         assert has_pending_units_work("tcv", "static") is True
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_has_pending_units_work_none(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import has_pending_units_work
+        from iter_codex.discovery.mdsplus.graph_ops import has_pending_units_work
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -230,9 +230,9 @@ class TestGraphOps:
 
         assert has_pending_units_work("tcv", "static") is False
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_merge_units_to_graph(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import merge_units_to_graph
+        from iter_codex.discovery.mdsplus.graph_ops import merge_units_to_graph
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -251,9 +251,9 @@ class TestGraphOps:
         assert "MERGE (unit:Unit {id: u.symbol})" in call_args[0][0]
         assert "MERGE (n)-[:HAS_UNIT]->(unit)" in call_args[0][0]
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_get_static_discovery_stats(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import get_static_discovery_stats
+        from iter_codex.discovery.mdsplus.graph_ops import get_static_discovery_stats
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -310,9 +310,9 @@ class TestGraphOps:
         assert stats["pending_patterns"] == 40
         assert stats["accumulated_cost"] == 1.23
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_release_parent_claim(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import release_parent_claim
+        from iter_codex.discovery.mdsplus.graph_ops import release_parent_claim
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -321,9 +321,9 @@ class TestGraphOps:
         release_parent_claim("tcv:static:TOP.W")
         mock_gc.query.assert_called_once()
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_mark_parent_children_enriched_empty(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import mark_parent_children_enriched
+        from iter_codex.discovery.mdsplus.graph_ops import mark_parent_children_enriched
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -334,9 +334,9 @@ class TestGraphOps:
 
     # --- Pattern tests ---
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_detect_and_create_signal_sources_empty(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import (
+        from iter_codex.discovery.mdsplus.graph_ops import (
             detect_and_create_signal_sources,
         )
 
@@ -348,9 +348,9 @@ class TestGraphOps:
         result = detect_and_create_signal_sources("tcv", "static")
         assert result == 0
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_detect_and_create_signal_sources_finds_groups(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import (
+        from iter_codex.discovery.mdsplus.graph_ops import (
             detect_and_create_signal_sources,
         )
 
@@ -387,9 +387,9 @@ class TestGraphOps:
         # Verify ensure_facility was called
         mock_gc.ensure_facility.assert_called_once_with("tcv")
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_claim_signal_sources(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import claim_signal_sources
+        from iter_codex.discovery.mdsplus.graph_ops import claim_signal_sources
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -413,16 +413,16 @@ class TestGraphOps:
         assert result[0]["leaf_name"] == "R"
         assert result[0]["index_count"] == 830
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_mark_signal_sources_enriched_empty(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import mark_signal_sources_enriched
+        from iter_codex.discovery.mdsplus.graph_ops import mark_signal_sources_enriched
 
         result = mark_signal_sources_enriched([], {})
         assert result == 0
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_mark_signal_sources_enriched_propagates(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import mark_signal_sources_enriched
+        from iter_codex.discovery.mdsplus.graph_ops import mark_signal_sources_enriched
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -443,9 +443,9 @@ class TestGraphOps:
         )
         assert result == 830
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_mark_signal_sources_enriched_writes_cost(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import mark_signal_sources_enriched
+        from iter_codex.discovery.mdsplus.graph_ops import mark_signal_sources_enriched
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -469,14 +469,14 @@ class TestGraphOps:
         assert "llm_cost" in cost_call[1] or "per_node_cost" in cost_call[1]
 
     def test_release_signal_source_claims_empty(self):
-        from imas_codex.discovery.mdsplus.graph_ops import release_signal_source_claims
+        from iter_codex.discovery.mdsplus.graph_ops import release_signal_source_claims
 
         result = release_signal_source_claims([])
         assert result == 0
 
-    @patch("imas_codex.discovery.mdsplus.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.GraphClient")
     def test_has_pending_signal_source_work(self, mock_gc_cls):
-        from imas_codex.discovery.mdsplus.graph_ops import (
+        from iter_codex.discovery.mdsplus.graph_ops import (
             has_pending_signal_source_work,
         )
 
@@ -496,9 +496,9 @@ class TestGraphOps:
 class TestParallelHelpers:
     """Tests for parallel module helper functions."""
 
-    @patch("imas_codex.discovery.static.parallel.GraphClient")
+    @patch("iter_codex.discovery.static.parallel.GraphClient")
     def test_force_reset_versions(self, mock_gc_cls):
-        from imas_codex.discovery.static.parallel import _force_reset_versions
+        from iter_codex.discovery.static.parallel import _force_reset_versions
 
         mock_gc = MagicMock()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)

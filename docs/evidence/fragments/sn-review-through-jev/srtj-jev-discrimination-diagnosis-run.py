@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at bab7c8b2c2adf60fa8526336fb82ad8f73712e30, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.review.cascade, imas_codex.standard_names.review.cascade_calibration.
+# Names the tree no longer defines: iter_codex.standard_names.review.cascade, iter_codex.standard_names.review.cascade_calibration.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Diagnose frozen review discrimination without making judge or graph calls."""
@@ -375,7 +375,7 @@ def paired_edits(rows):
 
 def docs_context_replay(rows, frozen, checks, block, cascade, jev):
     """Replay link audits with the catalog already present in the frozen receipt."""
-    from imas_codex.standard_names.review.audits import AuditReport, run_link_integrity
+    from iter_codex.standard_names.review.audits import AuditReport, run_link_integrity
 
     result = {}
     link_checks = [
@@ -764,12 +764,12 @@ def main():
     parser.add_argument("--model-root", type=Path, default=ROOT)
     args = parser.parse_args()
     sys.path.insert(0, str(args.model_root.resolve()))
-    from imas_codex.standard_names.review import (
+    from iter_codex.standard_names.review import (
         cascade,
         cascade_calibration as cal,
         jev_review as jev,
     )
-    from imas_codex.standard_names.review.checks import load_review_checks
+    from iter_codex.standard_names.review.checks import load_review_checks
 
     def refuse(*args, **kwargs):
         raise RuntimeError("Offline diagnosis refuses judge calls")
@@ -788,7 +788,7 @@ def main():
         Path(cascade.__file__),
         Path(cal.__file__),
         Path(jev.__file__),
-        args.model_root / "imas_codex/llm/prompts/sn/review_checks.yaml",
+        args.model_root / "iter_codex/llm/prompts/sn/review_checks.yaml",
     ]
     for name in (
         "srtj-evidence-supply-results.json",

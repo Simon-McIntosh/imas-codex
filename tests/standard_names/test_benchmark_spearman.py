@@ -15,14 +15,14 @@ from io import StringIO
 
 from rich.console import Console
 
-from imas_codex.standard_names import benchmark as bm
-from imas_codex.standard_names.benchmark import (
+from iter_codex.standard_names import benchmark as bm
+from iter_codex.standard_names.benchmark import (
     BenchmarkConfig,
     BenchmarkReport,
     ModelResult,
     ReviewerScores,
 )
-from imas_codex.standard_names.benchmark_roles import spearman_rho
+from iter_codex.standard_names.benchmark_roles import spearman_rho
 
 # A tied reviewer pair: reviewer "A" ties its two lowest scores, and the
 # no-ties shortcut diverges from the rank correlation precisely here.

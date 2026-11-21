@@ -27,9 +27,9 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.catalog_import import CheckResult
-from imas_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
-from imas_codex.standard_names.publish import run_publish
+from iter_codex.standard_names.catalog_import import CheckResult
+from iter_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
+from iter_codex.standard_names.publish import run_publish
 
 
 @pytest.fixture()
@@ -114,7 +114,7 @@ def _head_commit_isnc(isnc: Path) -> str:
 def _patch_check(check_result: CheckResult):
     """Patch the in-scope check_catalog the publish path imports at call time."""
     return patch(
-        "imas_codex.standard_names.catalog_import.check_catalog",
+        "iter_codex.standard_names.catalog_import.check_catalog",
         return_value=check_result,
     )
 
@@ -197,7 +197,7 @@ class TestPublishRefusesDivergedTree:
     def test_uncomparable_tree_still_publishes(self, staging_dir, isnc_repo):
         """Healthy direction: a graph-unavailable check is skipped, not a block."""
         with patch(
-            "imas_codex.standard_names.catalog_import.check_catalog",
+            "iter_codex.standard_names.catalog_import.check_catalog",
             side_effect=RuntimeError("graph unreachable"),
         ):
             report = run_publish(staging_dir, isnc_repo)

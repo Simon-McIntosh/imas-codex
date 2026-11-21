@@ -7,7 +7,7 @@ import io
 import pytest
 from openpyxl import Workbook
 
-from imas_codex.discovery.wiki.excel import (
+from iter_codex.discovery.wiki.excel import (
     FULL_MAX_ROWS_PER_SHEET,
     MIN_TEXT_CELL_FRACTION,
     PREVIEW_MAX_ROWS,

@@ -1,4 +1,4 @@
-"""IMAS Codex performance benchmarking utilities."""
+"""ITER Codex performance benchmarking utilities."""
 
 from .benchmark_runner import BenchmarkRunner
 

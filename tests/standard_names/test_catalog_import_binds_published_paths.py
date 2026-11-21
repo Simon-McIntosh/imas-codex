@@ -14,7 +14,7 @@ from collections.abc import Iterator
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 _NAME = "electron_temperature"
 _SCALAR = "import/bound"
@@ -30,7 +30,7 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
     client = GraphClient(
         uri=disposable_neo4j_uri,
         username="neo4j",
-        password=os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", ""),
+        password=os.environ.get("ITER_CODEX_TEST_NEO4J_PASSWORD", ""),
         graph_name="catalog-import-fixture",
     )
     client.query(
@@ -89,7 +89,7 @@ def _entry() -> dict:
 
 @pytest.mark.graph
 def test_import_binds_every_published_leaf_path(planted_graph: GraphClient) -> None:
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         write_standard_names,
     )
 
@@ -116,7 +116,7 @@ def test_import_binds_every_published_leaf_path(planted_graph: GraphClient) -> N
 def test_container_path_does_not_bind_the_container(
     planted_graph: GraphClient,
 ) -> None:
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         write_standard_names,
     )
 
@@ -137,7 +137,7 @@ def test_container_whose_leaf_is_absent_is_reported(
     planted_graph: GraphClient,
 ) -> None:
     """A container with no leaf node is reported, never quietly left unbound."""
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         write_standard_names,
     )
 

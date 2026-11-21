@@ -28,8 +28,8 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 
-from imas_codex.graph.client import GraphClient  # noqa: E402
-from imas_codex.standard_names import catalog_ordering  # noqa: E402
+from iter_codex.graph.client import GraphClient  # noqa: E402
+from iter_codex.standard_names import catalog_ordering  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 STEM = Path(__file__).stem.removesuffix("-run")
@@ -355,9 +355,9 @@ def capture(run_dir):
 
 def reproduce(run_dir):
     """Exercise the actual writers against an empty, isolated local database."""
-    from imas_codex.graph import temp_neo4j
-    from imas_codex.standard_names import edit
-    from imas_codex.standard_names.graph_store import graph_refinement
+    from iter_codex.graph import temp_neo4j
+    from iter_codex.standard_names import edit
+    from iter_codex.standard_names.graph_store import graph_refinement
 
     def port():
         with socket.socket() as sock:
@@ -559,7 +559,7 @@ def reproduce(run_dir):
 
 WRITERS = {
     "fold_identity": {
-        "file": "imas_codex/standard_names/edit.py",
+        "file": "iter_codex/standard_names/edit.py",
         "line": 1553,
         "guard_line": 2323,
         "receipt_line": 1469,
@@ -568,25 +568,25 @@ WRITERS = {
         "history": "a4b21a4e6d190063f9ab8169723ef35b73ea162a: edit.py:1241 writes the edge; :1654 exempts closing_straight_chain from the cycle refusal",
     },
     "refinement": {
-        "file": "imas_codex/standard_names/graph_store/graph_refinement.py",
+        "file": "iter_codex/standard_names/graph_store/graph_refinement.py",
         "line": 1181,
         "guard_line": 822,
         "receipt_line": 1350,
         "status": "partly open: superseded/accepted targets refuse; a pending ancestor can cycle; an existing live branch can gain another tip",
         "reproduction": "refine_pending_ancestor; refine_existing_live_branch",
-        "history": "1f95b7565be13a6355d24d8299bf213d77b67315: imas_codex/standard_names/graph_ops.py:9526; atomic persistence added in b045fa23e; current owner extracted by ec4257ab3",
+        "history": "1f95b7565be13a6355d24d8299bf213d77b67315: iter_codex/standard_names/graph_ops.py:9526; atomic persistence added in b045fa23e; current owner extracted by ec4257ab3",
     },
     "regeneration": {
-        "file": "imas_codex/standard_names/graph_store/graph_supersession.py",
+        "file": "iter_codex/standard_names/graph_store/graph_supersession.py",
         "line": 431,
         "guard_line": 355,
         "receipt_line": 265,
         "status": "cycle predicate present in transaction; not independently exercised in this census",
         "reproduction": None,
-        "history": "1f95b7565be13a6355d24d8299bf213d77b67315: imas_codex/standard_names/graph_ops.py:9814",
+        "history": "1f95b7565be13a6355d24d8299bf213d77b67315: iter_codex/standard_names/graph_ops.py:9814",
     },
     "fold": {
-        "file": "imas_codex/standard_names/graph_store/graph_supersession.py",
+        "file": "iter_codex/standard_names/graph_store/graph_supersession.py",
         "line": 636,
         "guard_line": 624,
         "receipt_line": 614,
@@ -594,7 +594,7 @@ WRITERS = {
         "reproduction": None,
     },
     "reclaim": {
-        "file": "imas_codex/standard_names/edit.py",
+        "file": "iter_codex/standard_names/edit.py",
         "line": 3333,
         "guard_line": 3434,
         "receipt_line": 3334,
@@ -972,7 +972,7 @@ def report(run_dir, out_dir=HERE):
         "raw_snapshot_sha256": hashlib.sha256(raw_bytes).hexdigest(),
         "summary": summary,
         "cycle_detector": {
-            "owner": "imas_codex.standard_names.catalog_ordering._find_cyclic_components",
+            "owner": "iter_codex.standard_names.catalog_ordering._find_cyclic_components",
             "source_sha256": hashlib.sha256(
                 Path(catalog_ordering.__file__).read_bytes()
             ).hexdigest(),

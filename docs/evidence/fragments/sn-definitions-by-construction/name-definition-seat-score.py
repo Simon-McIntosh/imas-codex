@@ -16,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-from imas_codex.standard_names.review.name_definition_seat import (  # noqa: E402
+from iter_codex.standard_names.review.name_definition_seat import (  # noqa: E402
     judge_name_definitions,
     review_model,
 )

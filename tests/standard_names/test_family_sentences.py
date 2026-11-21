@@ -14,8 +14,8 @@ import re
 
 import pytest
 
-from imas_codex.standard_names.context import conventions_context_for
-from imas_codex.standard_names.docs_gates import (
+from iter_codex.standard_names.context import conventions_context_for
+from iter_codex.standard_names.docs_gates import (
     SPECIES_FAMILY_SENTENCES,
     SPECIES_POPULATION_SENTENCE,
     HouseStyleFindingClass,
@@ -28,7 +28,7 @@ from imas_codex.standard_names.docs_gates import (
     species_family_description,
     species_family_sentence,
 )
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_generate_docs as owning_worker,
 )
 

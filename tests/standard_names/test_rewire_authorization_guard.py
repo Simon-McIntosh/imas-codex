@@ -8,8 +8,8 @@ from collections.abc import Iterator
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_store.graph_lineage import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_store.graph_lineage import (
     _rewire_has_parent_off_superseded,
 )
 
@@ -41,7 +41,7 @@ TEST_NODE_IDS = [
 
 @pytest.fixture()
 def disposable_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+    password = os.environ.get("ITER_CODEX_TEST_NEO4J_PASSWORD", "")
     client = GraphClient(
         uri=disposable_neo4j_uri,
         username="neo4j",

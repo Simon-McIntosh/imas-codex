@@ -27,7 +27,7 @@ class TestExportHandlersNoIncludeErrors:
 
     def test_export_dd_ids_tool_has_no_include_errors_param(self):
         """GraphStructureTool.export_dd_ids must not accept include_errors."""
-        from imas_codex.tools.graph_search import GraphStructureTool
+        from iter_codex.tools.graph_search import GraphStructureTool
 
         sig = inspect.signature(GraphStructureTool.export_dd_ids)
         assert "include_errors" not in sig.parameters, (
@@ -38,7 +38,7 @@ class TestExportHandlersNoIncludeErrors:
 
     def test_export_dd_domain_tool_has_no_include_errors_param(self):
         """GraphStructureTool.export_dd_domain must not accept include_errors."""
-        from imas_codex.tools.graph_search import GraphStructureTool
+        from iter_codex.tools.graph_search import GraphStructureTool
 
         sig = inspect.signature(GraphStructureTool.export_dd_domain)
         assert "include_errors" not in sig.parameters, (
@@ -59,7 +59,7 @@ class TestShortPhysicsTermsPreserved:
 
     def test_physics_short_terms_set_exists(self):
         """A mapping of short physics terms to expansions must be defined."""
-        from imas_codex.tools.graph_search import _PHYSICS_SHORT_TERMS
+        from iter_codex.tools.graph_search import _PHYSICS_SHORT_TERMS
 
         assert isinstance(_PHYSICS_SHORT_TERMS, dict)
         # Must contain the canonical short physics abbreviations
@@ -70,7 +70,7 @@ class TestShortPhysicsTermsPreserved:
 
     def test_search_dd_paths_path_segment_boost_preserves_short_terms(self):
         """query_words in hybrid_dd_search must exempt _PHYSICS_SHORT_TERMS."""
-        from imas_codex.graph.dd_search import hybrid_dd_search
+        from iter_codex.graph.dd_search import hybrid_dd_search
 
         source = inspect.getsource(hybrid_dd_search)
 
@@ -84,7 +84,7 @@ class TestShortPhysicsTermsPreserved:
 
     def test_text_search_query_words_preserves_short_terms(self):
         """_text_search_dd_paths query_words must exempt short physics terms."""
-        from imas_codex.tools.graph_search import _text_search_dd_paths
+        from iter_codex.tools.graph_search import _text_search_dd_paths
 
         source = inspect.getsource(_text_search_dd_paths)
 
@@ -96,7 +96,7 @@ class TestShortPhysicsTermsPreserved:
 
     def test_physics_abbreviations_include_short_terms(self):
         """PHYSICS_ABBREVIATIONS must contain common short-form terms."""
-        from imas_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
+        from iter_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
 
         for term in ("ip", "q", "te", "ne", "ti", "ni", "li"):
             assert term in PHYSICS_ABBREVIATIONS, (
@@ -112,7 +112,7 @@ class TestShortPhysicsTermsPreserved:
         terminal segment exactly matches the original (pre-expansion)
         query.  This ensures .../ip ranks above .../bootstrap_current.
         """
-        from imas_codex.tools.graph_search import GraphSearchTool
+        from iter_codex.tools.graph_search import GraphSearchTool
 
         source = inspect.getsource(GraphSearchTool.search_dd_paths)
 
@@ -141,7 +141,7 @@ class TestCoordinateChannelTargetsIMASCoordinateSpec:
 
     def test_coordinate_query_uses_coordinate_spec_label(self):
         """The HAS_COORDINATE Cypher must traverse (coord:IMASCoordinateSpec)."""
-        from imas_codex.graph.dd_search import related_dd_search
+        from iter_codex.graph.dd_search import related_dd_search
 
         source = inspect.getsource(related_dd_search)
 
@@ -158,7 +158,7 @@ class TestCoordinateChannelTargetsIMASCoordinateSpec:
     @pytest.mark.asyncio
     async def test_coordinate_query_dispatched_correctly(self):
         """Mock-verify the coordinate Cypher sent to the graph client."""
-        from imas_codex.tools.graph_search import GraphPathContextTool
+        from iter_codex.tools.graph_search import GraphPathContextTool
 
         gc = MagicMock()
         gc.query.return_value = []
@@ -208,10 +208,10 @@ class TestClusterSearchIncreasesKWithIdsFilter:
                     k_values.append(k)
         return k_values
 
-    @patch("imas_codex.tools.graph_search._get_encoder")
+    @patch("iter_codex.tools.graph_search._get_encoder")
     def test_k_increases_with_ids_filter(self, mock_encoder):
         """Vector search is dispatched for both filtered and unfiltered queries."""
-        from imas_codex.tools.graph_search import GraphClustersTool
+        from iter_codex.tools.graph_search import GraphClustersTool
 
         mock_enc = MagicMock()
         mock_enc.encode.return_value = [0.1] * 384
@@ -260,7 +260,7 @@ class TestMigrationRemovalsWhereClause:
         node instead of the removed path. Using NOT EXISTS subqueries rather
         than OPTIONAL MATCH removes the clause-ordering hazard entirely.
         """
-        from imas_codex.tools.migration_guide import _get_removals
+        from iter_codex.tools.migration_guide import _get_removals
 
         source = inspect.getsource(_get_removals)
 
@@ -276,7 +276,7 @@ class TestMigrationRemovalsWhereClause:
 
     def test_get_removals_ids_filter_restricts_path_not_replacement(self):
         """With ids_filter, only paths from that IDS are returned."""
-        from imas_codex.tools.migration_guide import _get_removals
+        from iter_codex.tools.migration_guide import _get_removals
 
         gc = MagicMock()
         gc.query.return_value = []
@@ -327,7 +327,7 @@ class TestServerFormatterImports:
     )
     def test_formatter_import_resolves(self, func_name: str):
         """Each formatter used by server.py must be importable."""
-        from imas_codex.llm import search_formatters
+        from iter_codex.llm import search_formatters
 
         func = getattr(search_formatters, func_name, None)
         assert func is not None, (

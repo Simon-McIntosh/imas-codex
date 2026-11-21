@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.discovery.paths.models import ResourcePurpose, TriageBatch, TriageResult
-from imas_codex.discovery.paths.scorer import (
+from iter_codex.discovery.paths.models import ResourcePurpose, TriageBatch, TriageResult
+from iter_codex.discovery.paths.scorer import (
     DirectoryTriager,
     combined_score,
 )
@@ -355,12 +355,12 @@ class TestIsRepoAccessibleElsewhere:
     """Tests for the standalone is_repo_accessible_elsewhere function."""
 
     def test_none_url_returns_false(self):
-        from imas_codex.config.discovery_config import is_repo_accessible_elsewhere
+        from iter_codex.config.discovery_config import is_repo_accessible_elsewhere
 
         assert is_repo_accessible_elsewhere(None) is False
 
     def test_github_iterorganization_is_accessible(self):
-        from imas_codex.config.discovery_config import is_repo_accessible_elsewhere
+        from iter_codex.config.discovery_config import is_repo_accessible_elsewhere
 
         assert (
             is_repo_accessible_elsewhere("git@github.com/iterorganization/repo.git")
@@ -368,7 +368,7 @@ class TestIsRepoAccessibleElsewhere:
         )
 
     def test_git_iter_org_is_accessible(self):
-        from imas_codex.config.discovery_config import is_repo_accessible_elsewhere
+        from iter_codex.config.discovery_config import is_repo_accessible_elsewhere
 
         assert (
             is_repo_accessible_elsewhere("https://git.iter.org/scm/imas/repo.git")
@@ -376,14 +376,14 @@ class TestIsRepoAccessibleElsewhere:
         )
 
     def test_unknown_host_not_accessible_without_scanner(self):
-        from imas_codex.config.discovery_config import is_repo_accessible_elsewhere
+        from iter_codex.config.discovery_config import is_repo_accessible_elsewhere
 
         assert (
             is_repo_accessible_elsewhere("ssh://internal.example.com/repo.git") is False
         )
 
     def test_scanner_true_overrides_unknown_host(self):
-        from imas_codex.config.discovery_config import is_repo_accessible_elsewhere
+        from iter_codex.config.discovery_config import is_repo_accessible_elsewhere
 
         assert (
             is_repo_accessible_elsewhere(
@@ -393,7 +393,7 @@ class TestIsRepoAccessibleElsewhere:
         )
 
     def test_scanner_false_does_not_override(self):
-        from imas_codex.config.discovery_config import is_repo_accessible_elsewhere
+        from iter_codex.config.discovery_config import is_repo_accessible_elsewhere
 
         assert (
             is_repo_accessible_elsewhere(
@@ -404,11 +404,11 @@ class TestIsRepoAccessibleElsewhere:
 
     def test_config_pattern_takes_precedence_over_scanner_false(self):
         """Config match wins even if scanner says False."""
-        from imas_codex.config.discovery_config import is_repo_accessible_elsewhere
+        from iter_codex.config.discovery_config import is_repo_accessible_elsewhere
 
         assert (
             is_repo_accessible_elsewhere(
-                "https://github.com/iterorganization/imas-codex.git",
+                "https://github.com/iterorganization/iter-codex.git",
                 scanner_accessible=False,
             )
             is True

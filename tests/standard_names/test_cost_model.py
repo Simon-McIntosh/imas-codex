@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.cost_model import (
+from iter_codex.standard_names.cost_model import (
     CycleEstimates,
     PipelineBuckets,
     PoolCpi,

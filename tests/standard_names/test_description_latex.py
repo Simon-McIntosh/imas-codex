@@ -29,7 +29,7 @@ import pytest
 
 class TestNormalizerStripsLatex:
     def _norm(self, text: str) -> str:
-        from imas_codex.standard_names.worker_tasks.worker_common import (
+        from iter_codex.standard_names.worker_tasks.worker_common import (
             normalize_description_text,
         )
 
@@ -102,7 +102,7 @@ class TestNormalizerStripsLatex:
 
 class TestGraphDictNormalizesDescription:
     def test_entry_to_graph_dict_normalizes_description(self) -> None:
-        from imas_codex.standard_names import catalog_import
+        from iter_codex.standard_names import catalog_import
 
         entry = MagicMock()
         entry.name = "toroidal_angle"
@@ -133,12 +133,12 @@ class TestGraphDictNormalizesDescription:
 
 class TestDescriptionLatexGate:
     def test_check_is_registered_critical(self) -> None:
-        from imas_codex.standard_names.audits import CRITICAL_CHECKS
+        from iter_codex.standard_names.audits import CRITICAL_CHECKS
 
         assert "description_notation_check" in CRITICAL_CHECKS
 
     def test_dollar_description_flagged_critical(self) -> None:
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             description_notation_check,
             has_critical_audit_failure,
         )
@@ -150,14 +150,14 @@ class TestDescriptionLatexGate:
         assert has_critical_audit_failure(issues) is True
 
     def test_stranded_backslash_description_flagged(self) -> None:
-        from imas_codex.standard_names.audits import description_notation_check
+        from iter_codex.standard_names.audits import description_notation_check
 
         # No '$', but a stranded backslash (the \φ corruption) must still fire.
         issues = description_notation_check({"description": "coordinate (R, \\φ, Z)"})
         assert issues
 
     def test_clean_description_not_flagged(self) -> None:
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             description_notation_check,
             has_critical_audit_failure,
         )
@@ -169,7 +169,7 @@ class TestDescriptionLatexGate:
         assert has_critical_audit_failure(issues) is False
 
     def test_documentation_latex_not_flagged(self) -> None:
-        from imas_codex.standard_names.audits import description_notation_check
+        from iter_codex.standard_names.audits import description_notation_check
 
         # LaTeX in documentation is legitimate; the description is clean.
         issues = description_notation_check(
@@ -181,7 +181,7 @@ class TestDescriptionLatexGate:
         assert issues == []
 
     def test_run_audits_wires_the_check(self) -> None:
-        from imas_codex.standard_names.audits import run_audits
+        from iter_codex.standard_names.audits import run_audits
 
         issues = run_audits(
             {
@@ -194,7 +194,7 @@ class TestDescriptionLatexGate:
         assert any("audit:description_notation_check:" in i for i in issues)
 
     def test_is_quarantined_on_latex_description(self) -> None:
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             _is_quarantined,
         )
 

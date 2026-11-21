@@ -21,7 +21,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-_GC = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_GC = "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 
 def _committed_graph(node_id: str, winner_token: str, winner_seq: int):
@@ -49,7 +49,7 @@ class TestVerifierClosesRace:
 
     @pytest.mark.parametrize("n", [2, 5, 20])
     def test_exactly_one_paid_call_proceeds(self, n: int):
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             _verify_docs_claim_winners,
         )
 
@@ -73,7 +73,7 @@ class TestVerifierClosesRace:
         assert survivors == 1, f"{survivors} racers passed verify — expected 1"
 
     def test_names_axis_uses_same_mechanism(self):
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             _verify_name_claim_winners,
         )
 
@@ -91,7 +91,7 @@ class TestVerifierClosesRace:
     def test_seq_mismatch_drops_even_when_token_matches(self):
         """Defensive: our token is on the node but a higher committed seq means
         a later claim superseded us — we must NOT proceed."""
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             _verify_docs_claim_winners,
         )
 
@@ -108,7 +108,7 @@ class TestVerifierClosesRace:
         assert kept == []
 
     def test_matching_seq_survives(self):
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             _verify_docs_claim_winners,
         )
 
@@ -127,7 +127,7 @@ class TestVerifierClosesRace:
     def test_missing_claim_seq_falls_back_to_token_only(self):
         """Legacy claims / mocked readbacks without claim_seq keep the prior
         token-only behaviour (never over-drop on missing data)."""
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             _verify_docs_claim_winners,
         )
 
@@ -144,7 +144,7 @@ class TestVerifierClosesRace:
         assert [it["id"] for it in kept] == ["x"]
 
     def test_empty_batch_short_circuits(self):
-        from imas_codex.standard_names.graph_store.graph_claim_release import (
+        from iter_codex.standard_names.graph_store.graph_claim_release import (
             _verify_docs_claim_winners,
         )
 
@@ -155,7 +155,7 @@ class TestSeedStampsClaimSeq:
     """The shared seed must emit a monotonic claim_seq for the verifier."""
 
     def test_seed_and_readback_cypher_carry_claim_seq(self):
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             _claim_sn_atomic,
         )
 
@@ -208,7 +208,7 @@ class TestPersistOutcomeTripwire:
     """The wasted-paid-call ledger feeding the run-summary tripwire."""
 
     def test_records_attempts_and_waste(self):
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             _record_persist_outcome,
             persist_outcome_snapshot,
             reset_persist_outcomes,
@@ -231,7 +231,7 @@ class TestPersistOutcomeTripwire:
         assert persist_outcome_snapshot(run) == {}
 
     def test_runs_are_isolated(self):
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             _record_persist_outcome,
             persist_outcome_snapshot,
             reset_persist_outcomes,
@@ -253,13 +253,13 @@ class TestScopedReplicaCap:
     """Scoped drains cap docs-pool replicas at ~half the scope size."""
 
     def _build(self, scope_run_id, scope_size, configured=20, **kw):
-        from imas_codex.standard_names import loop as loopmod
+        from iter_codex.standard_names import loop as loopmod
 
         mgr = MagicMock()
         stop = asyncio.Event()
         with (
             patch.object(loopmod, "_count_scope_names", return_value=scope_size),
-            patch("imas_codex.settings.get_pool_replicas", return_value=configured),
+            patch("iter_codex.settings.get_pool_replicas", return_value=configured),
         ):
             specs = loopmod._build_pool_specs(
                 mgr, stop, scope_run_id=scope_run_id, docs_only=True, **kw
@@ -282,13 +282,13 @@ class TestScopedReplicaCap:
         assert by["refine_docs"].replicas == 20
 
     def test_unscoped_run_is_unaffected(self):
-        from imas_codex.standard_names import loop as loopmod
+        from iter_codex.standard_names import loop as loopmod
 
         mgr = MagicMock()
         stop = asyncio.Event()
         with (
             patch.object(loopmod, "_count_scope_names", return_value=2) as counter,
-            patch("imas_codex.settings.get_pool_replicas", return_value=20),
+            patch("iter_codex.settings.get_pool_replicas", return_value=20),
         ):
             specs = loopmod._build_pool_specs(mgr, stop, docs_only=True)
         by = {s.name: s for s in specs}
@@ -298,19 +298,19 @@ class TestScopedReplicaCap:
 
 class TestCountScopeNames:
     def test_returns_count(self):
-        from imas_codex.standard_names import loop as loopmod
+        from iter_codex.standard_names import loop as loopmod
 
         gc = MagicMock()
         gc.__enter__ = MagicMock(return_value=gc)
         gc.__exit__ = MagicMock(return_value=False)
         gc.query = MagicMock(return_value=[{"n": 7}])
-        with patch("imas_codex.graph.client.GraphClient", return_value=gc):
+        with patch("iter_codex.graph.client.GraphClient", return_value=gc):
             assert loopmod._count_scope_names("run-x") == 7
 
     def test_zero_on_error(self):
-        from imas_codex.standard_names import loop as loopmod
+        from iter_codex.standard_names import loop as loopmod
 
         with patch(
-            "imas_codex.graph.client.GraphClient", side_effect=RuntimeError("boom")
+            "iter_codex.graph.client.GraphClient", side_effect=RuntimeError("boom")
         ):
             assert loopmod._count_scope_names("run-x") == 0

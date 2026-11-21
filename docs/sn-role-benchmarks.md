@@ -5,7 +5,7 @@ a different capability, so a compose-benchmark result must **not** be
 extrapolated across seats — every seat gets its own measured row, its own
 production prompt, its own real fixtures, and its own production
 reasoning-effort. Reports live under
-`~/.local/share/imas-codex/benchmarks/sn_rolebench_<role>_<ts>.json`.
+`~/.local/share/iter-codex/benchmarks/sn_rolebench_<role>_<ts>.json`.
 
 Candidate slate: incumbent + the GPT-5.6 tiers the plan lists for each seat
 (`gpt-5.6-luna`, `-terra`, `-sol`). Held-out judge where a seat needs one:
@@ -34,7 +34,7 @@ forced (compose re-bench 47→20 paths — see that section); no other reduction
   (`qwen3.7-max` + `minimax-m3`); docs regenerates documentation for a
   stratified accepted-name sample; classifier runs the 209-path domain gold set.
 - **Two refine bench-fidelity fixes landed before the refine numbers were
-  trusted** (imas-codex `0a05c173`, `0baa04ee`). The first refine run produced a
+  trusted** (iter-codex `0a05c173`, `0baa04ee`). The first refine run produced a
   hollow all-zeros report because the bench under-fed the incumbent:
   1. It built the refine prompt without the compose grammar vocabulary, so the
      system prompt's grammar-reference include rendered an empty token map and
@@ -52,7 +52,7 @@ forced (compose re-bench 47→20 paths — see that section); no other reduction
   valid `kind` values *only* through the scored-examples include
   (`kind=<scalar|vector|metadata>`). Had example loading ever failed in
   production, refine would have degraded exactly as the bench did. The source
-  was since hardened (imas-codex `6ef0ab2c`: `kind` is now a `Literal` enum
+  was since hardened (iter-codex `6ef0ab2c`: `kind` is now a `Literal` enum
   mirroring the ISN catalog Kind, and the prompts enumerate the kinds). A
   hardening followup is queued by the lead.
 - **Cost is OpenRouter `response_cost` summed from each report.** A refine case

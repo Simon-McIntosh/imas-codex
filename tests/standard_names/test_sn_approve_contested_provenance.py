@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.standard_names.promote import (
+from iter_codex.standard_names.promote import (
     ApprovalChange,
     ApprovalReport,
     run_approval,
@@ -55,11 +55,11 @@ def test_contested_reviewer_edit_retains_merged_pr_provenance() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.promote.read_pr_changes",
+            "iter_codex.standard_names.promote.read_pr_changes",
             return_value=[change],
         ),
-        patch("imas_codex.standard_names.promote.apply_edit", return_value=edit_plan),
-        patch("imas_codex.standard_names.promote._score_proposal", return_value=0.5),
+        patch("iter_codex.standard_names.promote.apply_edit", return_value=edit_plan),
+        patch("iter_codex.standard_names.promote._score_proposal", return_value=0.5),
     ):
         report = run_approval(
             isnc_dir="/unused/catalog",
@@ -78,7 +78,7 @@ def test_contested_reviewer_edit_retains_merged_pr_provenance() -> None:
 
 
 def test_approval_keeps_frozen_review_artifact_byte_exact(tmp_path: Path) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     artifact = tmp_path / "review.sn_names.yaml"
     original = (
@@ -92,7 +92,7 @@ def test_approval_keeps_frozen_review_artifact_byte_exact(tmp_path: Path) -> Non
     artifact.write_bytes(original)
 
     with patch(
-        "imas_codex.standard_names.promote.run_approval",
+        "iter_codex.standard_names.promote.run_approval",
         return_value=ApprovalReport(threshold=0.85),
     ):
         result = CliRunner().invoke(

@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from pydantic import BaseModel, Field
 
-from imas_codex.discovery.base.llm import (
+from iter_codex.discovery.base.llm import (
     LLMStructuredCallError,
     ProviderBudgetExhausted,
     _acall_frozen_structured_transport,
@@ -24,7 +24,7 @@ from imas_codex.discovery.base.llm import (
     acall_llm_structured,
     call_llm_structured,
 )
-from imas_codex.standard_names.models import (
+from iter_codex.standard_names.models import (
     StandardNameQualityReviewDocs,
     StandardNameQualityReviewDocsBatch,
 )
@@ -294,7 +294,7 @@ class _MissingCostResponse(_FakeResponse):
 
 async def test_acall_structured_coerces_bare_item_no_retry(monkeypatch):
     """qwen-style bare inner object → coerced, single API call, no retry."""
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-test")
 
     bare_inner = (
         '{"source_id": "dd:foo/bar", "standard_name": "foo_bar", '
@@ -322,7 +322,7 @@ async def test_acall_structured_coerces_bare_item_no_retry(monkeypatch):
 
 async def test_structured_failure_exposes_accumulated_billed_telemetry(monkeypatch):
     """Terminal schema failure carries every completed response's telemetry."""
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-test")
     responses = [
         _MeteredResponse(
             '{"name": "candidate"}',
@@ -472,7 +472,7 @@ async def test_async_frozen_transport_does_not_retry_an_ambiguous_send_failure()
 
 async def test_pre_response_network_failure_keeps_unmetered_error(monkeypatch):
     """A call with no provider response has no telemetry-bearing wrapper."""
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-test")
 
     with (
         patch(
@@ -501,7 +501,7 @@ async def test_async_provider_budget_error_carries_prior_response_telemetry(
     monkeypatch,
 ):
     """Async hard-stop preserves telemetry from earlier invalid responses."""
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-test")
     fake = AsyncMock(
         side_effect=[
             _MeteredResponse(
@@ -537,7 +537,7 @@ async def test_async_provider_budget_error_carries_prior_response_telemetry(
 
 def test_sync_provider_budget_error_carries_prior_response_telemetry(monkeypatch):
     """Sync hard-stop preserves telemetry from earlier invalid responses."""
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-test")
 
     with (
         patch(
@@ -576,7 +576,7 @@ async def test_provider_budget_error_before_response_has_zero_telemetry(
     monkeypatch, is_async: bool
 ):
     """A pure pre-response hard-stop retains its type without billable usage."""
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-test")
 
     if is_async:
         with (
@@ -618,7 +618,7 @@ class TestReasoningEffortProviderShape:
 
     @staticmethod
     def _kwargs(model: str) -> dict:
-        from imas_codex.discovery.base.llm import _build_kwargs
+        from iter_codex.discovery.base.llm import _build_kwargs
 
         return _build_kwargs(
             model=model,
@@ -656,7 +656,7 @@ class TestReasoningEffortProviderShape:
 
     @staticmethod
     def _kwargs_effort(model: str, effort: str) -> dict:
-        from imas_codex.discovery.base.llm import _build_kwargs
+        from iter_codex.discovery.base.llm import _build_kwargs
 
         return _build_kwargs(
             model=model,
@@ -738,7 +738,7 @@ _VALID_REVIEW_JSON = (
 
 def test_empty_response_error_is_retryable():
     """The empty-content sentinel message lands in the retry path."""
-    from imas_codex.discovery.base.llm import EmptyResponseError, _is_retryable
+    from iter_codex.discovery.base.llm import EmptyResponseError, _is_retryable
 
     err = EmptyResponseError("length")
     assert _is_retryable(str(err)) is True
@@ -751,7 +751,7 @@ def test_upstream_500_is_retryable_but_not_rate_limited():
     A 500 is a backend transient, distinct from a 429: retrying recovers it,
     whereas the AIMD governor's concurrency pullback (429-only) would not.
     """
-    from imas_codex.discovery.base.llm import _is_rate_limited, _is_retryable
+    from iter_codex.discovery.base.llm import _is_rate_limited, _is_retryable
 
     openrouter_500 = (
         "litellm.APIError: APIError: OpenrouterException - The server had an "
@@ -767,7 +767,7 @@ def test_upstream_500_is_retryable_but_not_rate_limited():
 
 def test_bump_max_tokens_grows_then_caps():
     """The length-retry budget bump doubles up to a hard cap, then stops."""
-    from imas_codex.discovery.base.llm import (
+    from iter_codex.discovery.base.llm import (
         _LENGTH_RETRY_TOKEN_CAP,
         _bump_max_tokens_for_length,
     )
@@ -789,7 +789,7 @@ def test_bump_max_tokens_grows_then_caps():
 
 def test_bump_max_tokens_honors_prepriced_ceiling():
     """A typed dispatch retry cannot exceed its receipt's output allowance."""
-    from imas_codex.discovery.base.llm import _bump_max_tokens_for_length
+    from iter_codex.discovery.base.llm import _bump_max_tokens_for_length
 
     kwargs = {"max_tokens": 64}
     assert _bump_max_tokens_for_length(kwargs, output_token_ceiling=64) is None
@@ -815,7 +815,7 @@ def test_structured_transport_rejects_unbounded_initial_allowance(monkeypatch):
 
 async def test_empty_length_response_retries_and_bumps_budget(monkeypatch):
     """finish_reason='length' empty → retry succeeds AND the budget grows."""
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-test")
 
     seen_max_tokens: list[int | None] = []
 
@@ -849,7 +849,7 @@ async def test_empty_length_response_retries_and_bumps_budget(monkeypatch):
 async def test_empty_nonlength_response_retries_without_bump(monkeypatch):
     """A transient empty that is NOT length-exhaustion still retries, but the
     token budget is left unchanged (no spurious growth)."""
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-test")
 
     seen_max_tokens: list[int | None] = []
 

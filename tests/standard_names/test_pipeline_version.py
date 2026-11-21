@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names import pipeline_version
-from imas_codex.standard_names.pipeline_version import (
+from iter_codex.standard_names import pipeline_version
+from iter_codex.standard_names.pipeline_version import (
     PIPELINE_CODE,
     PIPELINE_PROMPTS,
     compute_pipeline_hash,
@@ -121,9 +121,9 @@ def test_compute_pipeline_hash_raises_if_declared_file_missing(
 ) -> None:
     """If a declared pipeline input is missing at runtime, compute_pipeline_hash
     must raise FileNotFoundError rather than silently producing an incomplete hash."""
-    from imas_codex.standard_names import pipeline_version
+    from iter_codex.standard_names import pipeline_version
 
-    bogus = Path("imas_codex/llm/prompts/sn/NONEXISTENT_FOR_TEST.md")
+    bogus = Path("iter_codex/llm/prompts/sn/NONEXISTENT_FOR_TEST.md")
     monkeypatch.setattr(
         pipeline_version, "PIPELINE_PROMPTS", [*PIPELINE_PROMPTS, bogus]
     )
@@ -196,18 +196,18 @@ def _make_gc_mock(composite: str, detail_dict: dict, name_count: int) -> MagicMo
 
 def test_drift_note_silent_when_hashes_match(caplog) -> None:
     """No drift log when current and stored hashes match."""
-    from imas_codex.cli.sn import _note_pipeline_version_drift
+    from iter_codex.cli.sn import _note_pipeline_version_drift
 
     current = compute_pipeline_hash()
     gc_mock = _make_gc_mock(current["_composite"], {}, 100)
 
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
+        patch("iter_codex.graph.client.GraphClient", return_value=gc_mock),
         patch(
-            "imas_codex.standard_names.pipeline_version.compute_pipeline_hash",
+            "iter_codex.standard_names.pipeline_version.compute_pipeline_hash",
             return_value=current,
         ),
-        caplog.at_level("INFO", logger="imas_codex.cli.sn"),
+        caplog.at_level("INFO", logger="iter_codex.cli.sn"),
     ):
         _note_pipeline_version_drift()
     assert "drift" not in caplog.text.lower()
@@ -215,14 +215,14 @@ def test_drift_note_silent_when_hashes_match(caplog) -> None:
 
 def test_drift_note_silent_when_no_prior_run() -> None:
     """No drift log on a fresh graph (no SNRun with pipeline_hash)."""
-    from imas_codex.cli.sn import _note_pipeline_version_drift
+    from iter_codex.cli.sn import _note_pipeline_version_drift
 
     gc = MagicMock()
     gc.__enter__ = MagicMock(return_value=gc)
     gc.__exit__ = MagicMock(return_value=False)
     gc.query = MagicMock(return_value=[])  # no rows
 
-    with patch("imas_codex.graph.client.GraphClient", return_value=gc):
+    with patch("iter_codex.graph.client.GraphClient", return_value=gc):
         _note_pipeline_version_drift()  # must not raise
 
 
@@ -233,19 +233,19 @@ def test_drift_note_logs_but_never_blocks_when_hash_differs(caplog) -> None:
     existing names are refined through edits/campaigns, never wiped. The
     old clear gate (SystemExit(1) + a wipe recommendation) is retired.
     """
-    from imas_codex.cli.sn import _note_pipeline_version_drift
+    from iter_codex.cli.sn import _note_pipeline_version_drift
 
     current = compute_pipeline_hash()
     # Store a deliberately different composite
     gc_mock = _make_gc_mock("deadbeef12345678", {}, 50)
 
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
+        patch("iter_codex.graph.client.GraphClient", return_value=gc_mock),
         patch(
-            "imas_codex.standard_names.pipeline_version.compute_pipeline_hash",
+            "iter_codex.standard_names.pipeline_version.compute_pipeline_hash",
             return_value=current,
         ),
-        caplog.at_level("INFO", logger="imas_codex.cli.sn"),
+        caplog.at_level("INFO", logger="iter_codex.cli.sn"),
     ):
         _note_pipeline_version_drift()  # must not raise
 
@@ -254,15 +254,15 @@ def test_drift_note_logs_but_never_blocks_when_hash_differs(caplog) -> None:
 
 def test_drift_note_handles_empty_graph() -> None:
     """Drift note tolerates an empty graph (no names) without raising."""
-    from imas_codex.cli.sn import _note_pipeline_version_drift
+    from iter_codex.cli.sn import _note_pipeline_version_drift
 
     current = compute_pipeline_hash()
     gc_mock = _make_gc_mock("deadbeef12345678", {}, 0)
 
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
+        patch("iter_codex.graph.client.GraphClient", return_value=gc_mock),
         patch(
-            "imas_codex.standard_names.pipeline_version.compute_pipeline_hash",
+            "iter_codex.standard_names.pipeline_version.compute_pipeline_hash",
             return_value=current,
         ),
     ):
@@ -271,10 +271,10 @@ def test_drift_note_handles_empty_graph() -> None:
 
 def test_drift_note_skips_silently_on_graph_error() -> None:
     """Drift note must not raise when the graph is unreachable."""
-    from imas_codex.cli.sn import _note_pipeline_version_drift
+    from iter_codex.cli.sn import _note_pipeline_version_drift
 
     with patch(
-        "imas_codex.graph.client.GraphClient",
+        "iter_codex.graph.client.GraphClient",
         side_effect=Exception("connection refused"),
     ):
         _note_pipeline_version_drift()  # must not raise

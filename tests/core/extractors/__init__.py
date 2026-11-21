@@ -1,1 +1,1 @@
-"""Tests for imas_codex.core.extractors module."""
+"""Tests for iter_codex.core.extractors module."""

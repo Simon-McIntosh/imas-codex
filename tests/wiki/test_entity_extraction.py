@@ -6,7 +6,7 @@ from entity_extraction.py.
 
 import pytest
 
-from imas_codex.discovery.wiki.entity_extraction import (
+from iter_codex.discovery.wiki.entity_extraction import (
     ExtractionResult,
     FacilityEntityExtractor,
     _build_imas_pattern,

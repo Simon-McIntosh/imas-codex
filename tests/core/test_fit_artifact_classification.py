@@ -1,6 +1,6 @@
 """Construct-level contracts for fit-artifact classification."""
 
-from imas_codex.core.node_classifier import classify_node_pass1
+from iter_codex.core.node_classifier import classify_node_pass1
 
 
 def test_constraint_and_profile_weights_share_fit_artifact_category() -> None:

@@ -1,6 +1,6 @@
 """The physics-domain guidance file must track the ISN vocabulary it is keyed by.
 
-The guidance file (``imas_codex/definitions/physics/domains.yaml``) gives each
+The guidance file (``iter_codex/definitions/physics/domains.yaml``) gives each
 physics domain and each category a scope, and each domain the quantity kinds it
 covers and the exclusions that separate it from a named neighbour. It is keyed
 by ISN's values, so it must not fall behind that vocabulary: a domain or a
@@ -17,13 +17,13 @@ from __future__ import annotations
 import json
 import re
 
-from imas_codex.core.physics_domain import PhysicsDomain
-from imas_codex.definitions.physics import (
+from iter_codex.core.physics_domain import PhysicsDomain
+from iter_codex.definitions.physics import (
     IDS_DOMAINS_FILE,
     load_domain_guidance,
     load_isn_physics_domains,
 )
-from imas_codex.llm.prompt_loader import _provide_physics_domains
+from iter_codex.llm.prompt_loader import _provide_physics_domains
 
 
 def test_domain_keys_are_exactly_the_enum_values() -> None:

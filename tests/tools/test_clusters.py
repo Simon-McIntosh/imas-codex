@@ -8,7 +8,7 @@ over related IMAS paths using LLM-generated labels.
 import numpy as np
 import pytest
 
-from imas_codex.clusters.search import ClusterSearcher
+from iter_codex.clusters.search import ClusterSearcher
 
 
 class TestClusterSearcher:

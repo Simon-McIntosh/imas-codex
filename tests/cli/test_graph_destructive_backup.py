@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import click
 from click.testing import CliRunner
 
-from imas_codex.cli.graph import data, registry
+from iter_codex.cli.graph import data, registry
 
 
 def _local_profile(tmp_path):
@@ -28,12 +28,12 @@ def test_load_aborts_before_archive_replacement_when_dump_fails(tmp_path, monkey
     continued = Mock(side_effect=AssertionError("archive replacement continued"))
     operation = SimpleNamespace(was_running=False)
 
-    monkeypatch.setattr("imas_codex.graph.profiles.resolve_neo4j", lambda: profile)
-    monkeypatch.setattr("imas_codex.settings.get_graph_password", lambda: "secret")
+    monkeypatch.setattr("iter_codex.graph.profiles.resolve_neo4j", lambda: profile)
+    monkeypatch.setattr("iter_codex.settings.get_graph_password", lambda: "secret")
     monkeypatch.setattr(
-        "imas_codex.graph.remote.is_remote_location", lambda _host: False
+        "iter_codex.graph.remote.is_remote_location", lambda _host: False
     )
-    monkeypatch.setattr("imas_codex.graph.ghcr.require_apptainer", lambda: None)
+    monkeypatch.setattr("iter_codex.graph.ghcr.require_apptainer", lambda: None)
     monkeypatch.setattr(
         data, "Neo4jOperation", lambda *args, **kwargs: nullcontext(operation)
     )
@@ -54,9 +54,9 @@ def test_pull_aborts_before_registry_fetch_when_dump_fails(tmp_path, monkeypatch
     continued = Mock(side_effect=AssertionError("registry fetch continued"))
     operation = SimpleNamespace(was_running=False)
 
-    monkeypatch.setattr("imas_codex.graph.profiles.resolve_neo4j", lambda: profile)
+    monkeypatch.setattr("iter_codex.graph.profiles.resolve_neo4j", lambda: profile)
     monkeypatch.setattr(
-        "imas_codex.graph.remote.is_remote_location", lambda _host: False
+        "iter_codex.graph.remote.is_remote_location", lambda _host: False
     )
     monkeypatch.setattr(registry, "get_git_info", lambda: {})
     monkeypatch.setattr(registry, "get_registry", lambda *_args: "registry.example")
@@ -70,7 +70,7 @@ def test_pull_aborts_before_registry_fetch_when_dump_fails(tmp_path, monkeypatch
     )
     monkeypatch.setattr(registry, "backup_graph_dump", dump, raising=False)
     monkeypatch.setattr(
-        "imas_codex.cli.graph_progress.GraphProgress",
+        "iter_codex.cli.graph_progress.GraphProgress",
         continued,
     )
 

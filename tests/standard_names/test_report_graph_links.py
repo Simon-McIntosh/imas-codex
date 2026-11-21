@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from iter_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
 
 #: Two members of one family, linking out to a third name outside it.
 _MEMBERS = [
@@ -54,7 +54,7 @@ class _ScopeGraph:
 
 
 def _dead_links(known_ids: set[str]) -> int:
-    from imas_codex.standard_names.harmonize import report_family_rows
+    from iter_codex.standard_names.harmonize import report_family_rows
 
     rows = report_family_rows(_ScopeGraph(known_ids))
     assert len(rows) == 1
@@ -73,7 +73,7 @@ def test_target_absent_from_graph_is_dead() -> None:
 
 def test_run_link_integrity_resolves_against_the_known_set() -> None:
     """The library call takes the graph-wide set for its dead-link test."""
-    from imas_codex.standard_names.review.audits import run_link_integrity
+    from iter_codex.standard_names.review.audits import run_link_integrity
 
     scoped = [dict(m) for m in _MEMBERS]
 
@@ -90,7 +90,7 @@ def test_run_link_integrity_resolves_against_the_known_set() -> None:
 
 def test_scoped_call_without_known_ids_keeps_the_scoped_set() -> None:
     """A caller that passes no graph set falls back to the scoped ids."""
-    from imas_codex.standard_names.review.audits import run_link_integrity
+    from iter_codex.standard_names.review.audits import run_link_integrity
 
     findings = run_link_integrity([dict(m) for m in _MEMBERS])
     dead = [f for f in findings if f.finding_type == "dead_link"]

@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.schema import GraphSchema
+from iter_codex.graph.schema import GraphSchema
 
 pytestmark = pytest.mark.graph
 

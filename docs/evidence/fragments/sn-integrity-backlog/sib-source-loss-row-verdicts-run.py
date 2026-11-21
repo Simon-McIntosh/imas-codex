@@ -37,10 +37,10 @@ excluded by design      the path has no StandardNameSource record at all and its
                         IMASNode.node_category is outside SN_SOURCE_CATEGORIES, so
                         extraction never admits it. The rule: a '/data' leaf under a
                         STRUCTURE parent classifies 'structural' (node_classifier.py
-                        Rule 7, imas_codex/core/node_classifier.py:489), GGD
+                        Rule 7, iter_codex/core/node_classifier.py:489), GGD
                         representation nodes classify 'representation', and
                         SN_SOURCE_CATEGORIES is quantity|geometry|coordinate
-                        (imas_codex/core/node_categories.py:30).
+                        (iter_codex/core/node_categories.py:30).
 stale source            a StandardNameSource exists with status 'stale': refreshed,
                         not restored.
 instrument artefact     the path is not in the DD versions read and is not a DD node
@@ -73,7 +73,7 @@ OUT_HTML = HERE / "sib-source-loss-row-verdicts.html"
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES  # noqa: E402
+from iter_codex.core.node_categories import SN_SOURCE_CATEGORIES  # noqa: E402
 
 DD_VERSIONS_4 = ("4.1.1", "4.1.0", "4.0.0")
 DD_VERSION_3 = "3.42.2"
@@ -85,9 +85,9 @@ SAMPLE_SIZE = 15
 # category set decides what may seed a StandardNameSource at all.
 EXTRACTION_RULE = {
     "rule": "/data leaf under a STRUCTURE parent classifies 'structural', which the source gate refuses",
-    "classified_at": "imas_codex/core/node_classifier.py:489 (Rule 7)",
-    "gate": "imas_codex/standard_names/sources/dd.py:678",
-    "categories_at": "imas_codex/core/node_categories.py:30",
+    "classified_at": "iter_codex/core/node_classifier.py:489 (Rule 7)",
+    "gate": "iter_codex/standard_names/sources/dd.py:678",
+    "categories_at": "iter_codex/core/node_categories.py:30",
 }
 
 PATH_VERDICTS = (
@@ -134,7 +134,7 @@ def load_dd_paths() -> tuple[dict, dict, dict]:
     """Return (newest DD 4 paths, union of DD 4 paths, DD 3 paths)."""
     if str(REPO) not in sys.path:
         sys.path.insert(0, str(REPO))
-    from imas_codex.graph.build_dd import extract_paths_for_version
+    from iter_codex.graph.build_dd import extract_paths_for_version
 
     per_version = {
         version: extract_paths_for_version(version)["paths"]
@@ -169,7 +169,7 @@ def read_graph(names: list[str], paths: list[str]) -> dict:
     """Read name facts, every source record per path, live holders and lineage."""
     if str(REPO) not in sys.path:
         sys.path.insert(0, str(REPO))
-    from imas_codex.graph import GraphClient
+    from iter_codex.graph import GraphClient
 
     out: dict = {
         "names": {},
@@ -863,7 +863,7 @@ def negative_control(dd4_any: dict) -> dict:
     """The declared control: the wall path must read as repaired by the rebind."""
     if str(REPO) not in sys.path:
         sys.path.insert(0, str(REPO))
-    from imas_codex.graph import GraphClient
+    from iter_codex.graph import GraphClient
 
     name = "electrostatic_potential_at_wall"
     path = "wall/description_ggd/ggd/phi_potential/values"

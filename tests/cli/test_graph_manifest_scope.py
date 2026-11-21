@@ -9,7 +9,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.cli.graph.data import graph_export
+from iter_codex.cli.graph.data import graph_export
 
 
 def _read_archive_manifest(archive: Path) -> dict:
@@ -33,13 +33,13 @@ def export_graph(tmp_path, monkeypatch):
     source_dump = tmp_path / "source.dump"
     source_dump.write_bytes(b"graph dump")
 
-    monkeypatch.setattr("imas_codex.graph.profiles.resolve_neo4j", lambda: profile)
+    monkeypatch.setattr("iter_codex.graph.profiles.resolve_neo4j", lambda: profile)
     monkeypatch.setattr(
-        "imas_codex.graph.remote.is_remote_location", lambda _host: False
+        "iter_codex.graph.remote.is_remote_location", lambda _host: False
     )
-    monkeypatch.setattr("imas_codex.graph.ghcr.require_apptainer", lambda: None)
+    monkeypatch.setattr("iter_codex.graph.ghcr.require_apptainer", lambda: None)
     monkeypatch.setattr(
-        "imas_codex.cli.graph.data.get_git_info",
+        "iter_codex.cli.graph.data.get_git_info",
         lambda: {
             "commit": "0123456789abcdef0123456789abcdef01234567",
             "commit_short": "0123456",
@@ -55,7 +55,7 @@ def export_graph(tmp_path, monkeypatch):
     ) -> dict:
         archive = tmp_path / f"archive-{len(list(tmp_path.glob('archive-*')))}.tar.gz"
         monkeypatch.setattr(
-            "imas_codex.cli.graph.data._measure_dump_scope",
+            "iter_codex.cli.graph.data._measure_dump_scope",
             measure or (lambda dump_path: counts),
             raising=False,
         )
@@ -108,7 +108,7 @@ def test_filtered_archive_manifest_records_post_filter_scope(export_graph, monke
             "labels": {"Facility": 1, "Shared": 2},
         }
 
-    monkeypatch.setattr("imas_codex.cli.graph.data._create_facility_dump", filter_dump)
+    monkeypatch.setattr("iter_codex.cli.graph.data._create_facility_dump", filter_dump)
     manifest = export_graph(
         counts={
             "nodes": 4,

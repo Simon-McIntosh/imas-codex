@@ -18,11 +18,11 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from imas_codex.cli.sn import _compute_pool_pending
+from iter_codex.cli.sn import _compute_pool_pending
 
 # Module paths used for patching (lazy imports inside loop.py / graph_ops.py).
-_GO = "imas_codex.standard_names.graph_ops"
-_LOOP = "imas_codex.standard_names.loop"
+_GO = "iter_codex.standard_names.graph_ops"
+_LOOP = "iter_codex.standard_names.loop"
 
 # Unique prefix for all test nodes — prevents interference with production data
 # and is cleaned up before and after each test.
@@ -43,7 +43,7 @@ _TEST_DOMAIN = "regression_test_no_stuck_idle"
 def _gc():
     """Function-scoped real GraphClient; skip test if Neo4j is unreachable."""
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -154,7 +154,7 @@ async def test_pipeline_does_not_spin_when_all_work_complete(_gc, _clean) -> Non
     # fields, nodes with enriched_at / reviewed_name_at set would appear as
     # pending and this assertion would fail before run_sn_pools is even
     # called.
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as probe_gc:
         pre_counts = _compute_pool_pending(
@@ -196,8 +196,8 @@ async def test_pipeline_does_not_spin_when_all_work_complete(_gc, _clean) -> Non
     # so the watchdog fires in < 2 s instead of the default 30 s (1.0 s × 30).
     # The wrapper does NOT change any correctness invariants — it only reduces
     # the consecutive-idle-poll count from 30 to 3 for test speed.
-    from imas_codex.standard_names import pools as _pools_mod
-    from imas_codex.standard_names.loop import run_sn_pools
+    from iter_codex.standard_names import pools as _pools_mod
+    from iter_codex.standard_names.loop import run_sn_pools
 
     _orig_run_pools = _pools_mod.run_pools
 
@@ -208,31 +208,31 @@ async def test_pipeline_does_not_spin_when_all_work_complete(_gc, _clean) -> Non
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
+            "iter_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_review_name_batch",
+            "iter_codex.standard_names.graph_store.graph_cost_and_claims.claim_review_name_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch",
+            "iter_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
+            "iter_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_review_persistence.claim_review_docs_batch",
+            "iter_codex.standard_names.graph_store.graph_review_persistence.claim_review_docs_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch",
+            "iter_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
             return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
         ),
         patch(
@@ -240,7 +240,7 @@ async def test_pipeline_does_not_spin_when_all_work_complete(_gc, _clean) -> Non
             new=AsyncMock(return_value=0),
         ),
         # Inject tighter idle thresholds so the watchdog fires in ~0.3 s.
-        patch("imas_codex.standard_names.pools.run_pools", new=_fast_run_pools),
+        patch("iter_codex.standard_names.pools.run_pools", new=_fast_run_pools),
     ):
         result = await asyncio.wait_for(
             run_sn_pools(

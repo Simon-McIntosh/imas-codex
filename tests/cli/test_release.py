@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.cli.release import (
+from iter_codex.cli.release import (
     _apply_bump,
     _detect_state,
     _format_git_tag,
@@ -73,21 +73,21 @@ class TestApplyBump:
 
 
 class TestDetectState:
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0")
     def test_stable(self, _):
         info = _detect_state()
         assert info["state"] == "stable"
         assert info["tag"] == "v5.0.0"
         assert info["rc"] is None
 
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0-rc3")
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0-rc3")
     def test_rc_mode(self, _):
         info = _detect_state()
         assert info["state"] == "rc"
         assert info["tag"] == "v5.0.0-rc3"
         assert info["rc"] == 3
 
-    @patch("imas_codex.cli.release._get_latest_tag", return_value=None)
+    @patch("iter_codex.cli.release._get_latest_tag", return_value=None)
     def test_no_tags(self, _):
         info = _detect_state()
         assert info["state"] is None
@@ -99,61 +99,61 @@ class TestComputeNextVersion:
 
     # --- Stable state transitions ---
 
-    @patch("imas_codex.cli.release._tag_exists", return_value=False)
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._tag_exists", return_value=False)
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0")
     def test_stable_bump_major(self, *_):
         tag, pep = compute_next_version("major")
         assert tag == "v6.0.0-rc1"
         assert pep == "6.0.0rc1"
 
-    @patch("imas_codex.cli.release._tag_exists", return_value=False)
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._tag_exists", return_value=False)
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0")
     def test_stable_bump_minor(self, *_):
         tag, pep = compute_next_version("minor")
         assert tag == "v5.1.0-rc1"
         assert pep == "5.1.0rc1"
 
-    @patch("imas_codex.cli.release._tag_exists", return_value=False)
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._tag_exists", return_value=False)
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0")
     def test_stable_bump_patch(self, *_):
         tag, pep = compute_next_version("patch")
         assert tag == "v5.0.1-rc1"
         assert pep == "5.0.1rc1"
 
-    @patch("imas_codex.cli.release._tag_exists", return_value=False)
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._tag_exists", return_value=False)
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0")
     def test_stable_bump_major_final(self, *_):
         tag, pep = compute_next_version("major", final=True)
         assert tag == "v6.0.0"
         assert pep == "6.0.0"
 
-    @patch("imas_codex.cli.release._tag_exists", return_value=False)
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._tag_exists", return_value=False)
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0")
     def test_stable_bump_patch_final(self, *_):
         tag, pep = compute_next_version("patch", final=True)
         assert tag == "v5.0.1"
         assert pep == "5.0.1"
 
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0")
     def test_stable_no_bump_errors(self, _):
         with pytest.raises(Exception, match="Specify --bump"):
             compute_next_version(None)
 
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0")
     def test_stable_final_only_errors(self, _):
         with pytest.raises(Exception, match="Not in RC mode"):
             compute_next_version(None, final=True)
 
     # --- RC mode transitions ---
 
-    @patch("imas_codex.cli.release._tag_exists", return_value=False)
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0-rc1")
+    @patch("iter_codex.cli.release._tag_exists", return_value=False)
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0-rc1")
     def test_rc_increment(self, *_):
         tag, pep = compute_next_version(None)
         assert tag == "v5.0.0-rc2"
         assert pep == "5.0.0rc2"
 
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0-rc3")
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0-rc3")
     def test_rc_finalize(self, _):
         tag, pep = compute_next_version(None, final=True)
         assert tag == "v5.0.0"
@@ -161,44 +161,44 @@ class TestComputeNextVersion:
 
     # --- RC mode + --bump: abandon and bump from last STABLE ---
 
-    @patch("imas_codex.cli.release._tag_exists", return_value=False)
-    @patch("imas_codex.cli.release._get_latest_stable_tag", return_value="v5.0.0")
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v6.0.0-rc3")
+    @patch("iter_codex.cli.release._tag_exists", return_value=False)
+    @patch("iter_codex.cli.release._get_latest_stable_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v6.0.0-rc3")
     def test_rc_bump_minor_from_stable(self, *_):
         """v6.0.0-rc3 + --bump minor → v5.1.0-rc1 (from stable v5.0.0)."""
         tag, pep = compute_next_version("minor")
         assert tag == "v5.1.0-rc1"
         assert pep == "5.1.0rc1"
 
-    @patch("imas_codex.cli.release._tag_exists", return_value=False)
-    @patch("imas_codex.cli.release._get_latest_stable_tag", return_value="v5.0.0")
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v6.0.0-rc3")
+    @patch("iter_codex.cli.release._tag_exists", return_value=False)
+    @patch("iter_codex.cli.release._get_latest_stable_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v6.0.0-rc3")
     def test_rc_bump_patch_from_stable(self, *_):
         """v6.0.0-rc3 + --bump patch → v5.0.1-rc1 (from stable v5.0.0)."""
         tag, pep = compute_next_version("patch")
         assert tag == "v5.0.1-rc1"
         assert pep == "5.0.1rc1"
 
-    @patch("imas_codex.cli.release._tag_exists", return_value=False)
-    @patch("imas_codex.cli.release._get_latest_stable_tag", return_value="v5.0.0")
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v6.0.0-rc3")
+    @patch("iter_codex.cli.release._tag_exists", return_value=False)
+    @patch("iter_codex.cli.release._get_latest_stable_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v6.0.0-rc3")
     def test_rc_bump_major_from_stable(self, *_):
         """v6.0.0-rc3 + --bump major → v6.0.0-rc1 (from stable v5.0.0)."""
         tag, pep = compute_next_version("major")
         assert tag == "v6.0.0-rc1"
         assert pep == "6.0.0rc1"
 
-    @patch("imas_codex.cli.release._tag_exists", return_value=False)
-    @patch("imas_codex.cli.release._get_latest_stable_tag", return_value="v5.0.0")
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v6.0.0-rc3")
+    @patch("iter_codex.cli.release._tag_exists", return_value=False)
+    @patch("iter_codex.cli.release._get_latest_stable_tag", return_value="v5.0.0")
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v6.0.0-rc3")
     def test_rc_bump_patch_final_from_stable(self, *_):
         """v6.0.0-rc3 + --bump patch --final → v5.0.1 (from stable v5.0.0)."""
         tag, pep = compute_next_version("patch", final=True)
         assert tag == "v5.0.1"
         assert pep == "5.0.1"
 
-    @patch("imas_codex.cli.release._get_latest_stable_tag", return_value=None)
-    @patch("imas_codex.cli.release._get_latest_tag", return_value="v5.0.0-rc1")
+    @patch("iter_codex.cli.release._get_latest_stable_tag", return_value=None)
+    @patch("iter_codex.cli.release._get_latest_tag", return_value="v5.0.0-rc1")
     def test_rc_bump_no_stable_tag_errors(self, *_):
         """Error when bumping in RC mode with no stable tags."""
         with pytest.raises(Exception, match="No stable"):
@@ -206,7 +206,7 @@ class TestComputeNextVersion:
 
     # --- Edge cases ---
 
-    @patch("imas_codex.cli.release._get_latest_tag", return_value=None)
+    @patch("iter_codex.cli.release._get_latest_tag", return_value=None)
     def test_no_tags_errors(self, _):
         with pytest.raises(Exception, match="No existing version tags"):
             compute_next_version("major")
@@ -236,7 +236,7 @@ class TestGitHubReadsUseTheSharedTransport:
                 raise AssertionError("release CLI shelled out to the gh CLI")
             return real(args, *rest, **kwargs)
 
-        monkeypatch.setattr("imas_codex.cli.release.subprocess.run", guard)
+        monkeypatch.setattr("iter_codex.cli.release.subprocess.run", guard)
 
     def _patch_call(self, monkeypatch, status=200, body=None):
         seen: list[tuple[str, str]] = []
@@ -245,11 +245,11 @@ class TestGitHubReadsUseTheSharedTransport:
             seen.append((method, path))
             return status, body
 
-        monkeypatch.setattr("imas_codex.graph.ghcr.github_api_call", fake_call)
+        monkeypatch.setattr("iter_codex.graph.ghcr.github_api_call", fake_call)
         return seen
 
     def test_merged_pull_requests_keeps_only_merged_rows(self, monkeypatch):
-        from imas_codex.cli.release import _merged_pull_requests
+        from iter_codex.cli.release import _merged_pull_requests
 
         self._forbid_subprocess_gh(monkeypatch)
         rows = [
@@ -258,7 +258,7 @@ class TestGitHubReadsUseTheSharedTransport:
         ]
         seen = self._patch_call(monkeypatch, body=rows)
         monkeypatch.setattr(
-            "imas_codex.cli.release._remote_slug", lambda remote="origin": ("o", "r")
+            "iter_codex.cli.release._remote_slug", lambda remote="origin": ("o", "r")
         )
 
         merged = _merged_pull_requests()
@@ -270,17 +270,17 @@ class TestGitHubReadsUseTheSharedTransport:
     def test_merged_pull_requests_degrades_to_empty_on_a_rejected_read(
         self, monkeypatch
     ):
-        from imas_codex.cli.release import _merged_pull_requests
+        from iter_codex.cli.release import _merged_pull_requests
 
         self._patch_call(monkeypatch, status=403, body={"message": "Forbidden"})
         monkeypatch.setattr(
-            "imas_codex.cli.release._remote_slug", lambda remote="origin": ("o", "r")
+            "iter_codex.cli.release._remote_slug", lambda remote="origin": ("o", "r")
         )
 
         assert _merged_pull_requests() == []
 
     def test_ci_check_reads_check_runs_for_head(self, monkeypatch, capsys):
-        from imas_codex.cli.release import _check_ci_passed
+        from iter_codex.cli.release import _check_ci_passed
 
         self._forbid_subprocess_gh(monkeypatch)
         seen = self._patch_call(
@@ -292,7 +292,7 @@ class TestGitHubReadsUseTheSharedTransport:
             },
         )
         monkeypatch.setattr(
-            "imas_codex.cli.release._remote_slug", lambda remote: ("o", "r")
+            "iter_codex.cli.release._remote_slug", lambda remote: ("o", "r")
         )
 
         _check_ci_passed("origin", dry_run=False)
@@ -304,15 +304,15 @@ class TestGitHubReadsUseTheSharedTransport:
     def test_missing_token_skips_the_ci_check_instead_of_failing(
         self, monkeypatch, capsys
     ):
-        from imas_codex.cli.release import _check_ci_passed
-        from imas_codex.graph.ghcr import GitHubRestError
+        from iter_codex.cli.release import _check_ci_passed
+        from iter_codex.graph.ghcr import GitHubRestError
 
         def refuse(*args, **kwargs):
             raise GitHubRestError("no GitHub token is available for the REST API")
 
-        monkeypatch.setattr("imas_codex.graph.ghcr.github_api_call", refuse)
+        monkeypatch.setattr("iter_codex.graph.ghcr.github_api_call", refuse)
         monkeypatch.setattr(
-            "imas_codex.cli.release._remote_slug", lambda remote: ("o", "r")
+            "iter_codex.cli.release._remote_slug", lambda remote: ("o", "r")
         )
 
         _check_ci_passed("origin", dry_run=False)

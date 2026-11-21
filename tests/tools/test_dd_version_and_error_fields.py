@@ -4,9 +4,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.tools import Tools
-from imas_codex.tools.graph_search import GraphPathTool
-from imas_codex.tools.version_tool import VersionTool
+from iter_codex.tools import Tools
+from iter_codex.tools.graph_search import GraphPathTool
+from iter_codex.tools.version_tool import VersionTool
 
 
 @pytest.mark.asyncio

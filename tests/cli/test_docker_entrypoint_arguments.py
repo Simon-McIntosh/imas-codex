@@ -46,7 +46,7 @@ def _start_command(tmp_path: Path, argv: list[str], env_extra: dict | None = Non
     _write_executable(stubs / "curl", "#!/bin/sh\nexit 0\n")
     arguments = tmp_path / "arguments"
     _write_executable(
-        stubs / "imas-codex",
+        stubs / "iter-codex",
         '#!/bin/sh\nprintf "%s\\n" "$@" > "$ARGS_FILE"\n',
     )
 
@@ -80,7 +80,7 @@ def _dockerfile_cmd() -> list[str]:
 
 def _compose_plant_command() -> list[str]:
     services = yaml.safe_load(COMPOSE.read_text())["services"]
-    return services["imas-codex-plant"]["command"]
+    return services["iter-codex-plant"]["command"]
 
 
 def test_the_data_dictionary_image_starts_the_mode_its_cmd_names(tmp_path):
@@ -95,13 +95,13 @@ def test_the_plant_image_starts_the_mode_its_service_command_names(tmp_path):
 
 def test_the_entrypoint_inserts_no_mode_of_its_own(tmp_path):
     """An environment the plant image never sets cannot change the argument list."""
-    assert "IMAS_CODEX_SERVE_MODE" not in ENTRYPOINT.read_text()
+    assert "ITER_CODEX_SERVE_MODE" not in ENTRYPOINT.read_text()
     assert "SERVE_MODE" not in (REPO / "Dockerfile").read_text()
     assert (
         _start_command(
             tmp_path,
             DD_COMMAND,
-            {"IMAS_CODEX_SERVE_MODE": "--plant-only"},
+            {"ITER_CODEX_SERVE_MODE": "--plant-only"},
         )
         == DD_COMMAND
     )

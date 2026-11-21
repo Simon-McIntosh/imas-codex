@@ -17,11 +17,11 @@ from __future__ import annotations
 
 import logging
 
-from imas_codex.core.node_categories import (
+from iter_codex.core.node_categories import (
     CLUSTERABLE_CATEGORIES,
     SEARCHABLE_CATEGORIES,
 )
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 from tests.search.benchmark_data import BenchmarkQuery
 
 logger = logging.getLogger(__name__)

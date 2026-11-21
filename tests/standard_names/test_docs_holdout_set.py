@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.standard_names.benchmark_reference import (
+from iter_codex.standard_names.benchmark_reference import (
     DOCS_HOLDOUT_FIELDS,
     curated_example_names,
     curated_example_split_keys,

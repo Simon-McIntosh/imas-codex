@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.models.migration_models import (
+from iter_codex.models.migration_models import (
     CocosMigrationAdvice,
     CodeMigrationGuide,
     CodeUpdateAction,
@@ -12,7 +12,7 @@ from imas_codex.models.migration_models import (
     TypeUpdateAdvice,
     generate_search_patterns,
 )
-from imas_codex.tools.migration_guide import (
+from iter_codex.tools.migration_guide import (
     _compute_cocos_factors,
     _get_rename_lineages,
     _get_version_cocos,
@@ -1174,7 +1174,7 @@ class TestRenameLineagesLiveGraph:
     def _skip_without_neo4j(self):
         """Skip if the graph client is unavailable."""
         try:
-            from imas_codex.graph.client import get_graph_client
+            from iter_codex.graph.client import get_graph_client
 
             gc = get_graph_client()
             gc.query("RETURN 1 AS ok")

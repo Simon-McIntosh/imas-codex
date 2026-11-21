@@ -13,11 +13,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_store.graph_audits import (
+from iter_codex.standard_names.graph_store.graph_audits import (
     reconcile_grammar_segments,
 )
-from imas_codex.standard_names.graph_store.graph_catalog import _GRAMMAR_SEGMENT_COLUMNS
-from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
+from iter_codex.standard_names.graph_store.graph_catalog import _GRAMMAR_SEGMENT_COLUMNS
+from iter_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
 
 def test_reconcile_grammar_segments_returns_count():
@@ -40,7 +40,7 @@ def test_drifted_segments_are_written_back_to_the_parse():
     graph_client.return_value.__enter__.return_value = graph
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         graph_client,
     ):
         result = reconcile_grammar_segments()
@@ -64,7 +64,7 @@ def test_aligned_segments_are_left_alone():
     graph_client.return_value.__enter__.return_value = graph
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         graph_client,
     ):
         result = reconcile_grammar_segments()
@@ -84,7 +84,7 @@ def test_unparseable_names_keep_their_stored_segments():
     graph_client.return_value.__enter__.return_value = graph
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         graph_client,
     ):
         result = reconcile_grammar_segments()
@@ -97,8 +97,8 @@ def test_unparseable_names_keep_their_stored_segments():
 def test_reconcile_grammar_segments_idempotent_and_no_drift():
     """After reconcile, no parseable live name's stored segments disagree with
     the parse of its own id, and a second run is a no-op (idempotent)."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.ledger import LIVE_NAME
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.ledger import LIVE_NAME
 
     reconcile_grammar_segments()
     second = reconcile_grammar_segments()

@@ -8,10 +8,10 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.derivation import derive_edges
-from imas_codex.standard_names.repair_authority import build_repair_authority
-from imas_codex.standard_names.signed_manifest import apply_signed_manifest
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.derivation import derive_edges
+from iter_codex.standard_names.repair_authority import build_repair_authority
+from iter_codex.standard_names.signed_manifest import apply_signed_manifest
 
 _OPERATION = "retire_unauthorized_has_parent_relocations"
 _REASON = "restore current structural derivation after successor relocation"

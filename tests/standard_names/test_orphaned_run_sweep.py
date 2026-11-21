@@ -15,8 +15,8 @@ from __future__ import annotations
 from typing import Any
 from unittest.mock import patch
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_audits as _owning_graph_audits,
     graph_foundation as _owning_graph_foundation,
 )

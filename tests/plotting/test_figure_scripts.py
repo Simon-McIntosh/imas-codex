@@ -15,7 +15,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Rectangle
 from PIL import Image
 
-from imas_codex.plotting import save_figure, style
+from iter_codex.plotting import save_figure, style
 
 SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
 

@@ -8,7 +8,7 @@ Code ingestion pipeline for processing discovered source files into the knowledg
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │  SCOUT (LLM)    │     │   GRAPH (Neo4j) │     │    CLI (User)   │
 │                 │     │                 │     │                 │
-│  run() + rg/fd  │── ─▶│  SourceFile     │────▶│  imas-codex     │
+│  run() + rg/fd  │── ─▶│  SourceFile     │────▶│  iter-codex     │
 │  ingest_nodes() │     │  status=        │     │  ingest run     │
 │                 │     │  discovered     │     │                 │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
@@ -51,50 +51,50 @@ ingest_nodes("SourceFile", [
 
 ```bash
 # Queue specific files
-uv run imas-codex ingest queue tcv /path/a.py /path/b.py
+uv run iter-codex ingest queue tcv /path/a.py /path/b.py
 
 # Pipe from remote search (use run() in MCP or ssh in terminal)
-uv run imas-codex tools check tcv  # Ensure rg is available
+uv run iter-codex tools check tcv  # Ensure rg is available
 ssh tcv 'rg -l "equilibrium|IMAS" /home/codes -g "*.py"' | \
-  uv run imas-codex ingest queue tcv --stdin
+  uv run iter-codex ingest queue tcv --stdin
 
 # From file list
-uv run imas-codex ingest queue tcv -f files.txt
+uv run iter-codex ingest queue tcv -f files.txt
 ```
 
 ## Run Ingestion
 
 ```bash
 # Check queue status
-uv run imas-codex ingest status tcv
+uv run iter-codex ingest status tcv
 
 # Process discovered files
-uv run imas-codex ingest run tcv
+uv run iter-codex ingest run tcv
 
 # Process high-priority only
-uv run imas-codex ingest run tcv --min-score 0.7
+uv run iter-codex ingest run tcv --min-score 0.7
 
 # Process more files
-uv run imas-codex ingest run tcv -n 500
+uv run iter-codex ingest run tcv -n 500
 
 # Preview without processing
-uv run imas-codex ingest run tcv --dry-run
+uv run iter-codex ingest run tcv --dry-run
 
 # Force re-ingestion
-uv run imas-codex ingest run tcv --force
+uv run iter-codex ingest run tcv --force
 ```
 
 ## Monitor Status
 
 ```bash
 # List discovered files
-uv run imas-codex ingest list tcv
+uv run iter-codex ingest list tcv
 
 # List failed files
-uv run imas-codex ingest list tcv -s failed
+uv run iter-codex ingest list tcv -s failed
 
 # List ingested files
-uv run imas-codex ingest list tcv -s ingested
+uv run iter-codex ingest list tcv -s ingested
 ```
 
 ## Key Features
@@ -108,16 +108,16 @@ uv run imas-codex ingest list tcv -s ingested
 
 If ingestion is interrupted:
 1. `SourceFile` nodes retain their status
-2. Rerun `uv run imas-codex ingest run tcv` to continue
+2. Rerun `uv run iter-codex ingest run tcv` to continue
 3. Already-ingested files are skipped automatically
 
 For failed files:
 ```bash
 # List failures
-uv run imas-codex ingest list tcv -s failed
+uv run iter-codex ingest list tcv -s failed
 
 # Retry failed files
-uv run imas-codex ingest run tcv --retry-failed
+uv run iter-codex ingest run tcv --retry-failed
 ```
 
 ## What Gets Extracted

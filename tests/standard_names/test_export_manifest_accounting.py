@@ -23,10 +23,10 @@ import yaml
 
 pytest.importorskip("imas_standard_names")
 
-from imas_codex.standard_names.defaults import (  # noqa: E402
+from iter_codex.standard_names.defaults import (  # noqa: E402
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
-from imas_codex.standard_names.export import (  # noqa: E402
+from iter_codex.standard_names.export import (  # noqa: E402
     ExportReport,
     _run_gate_c,
     _write_manifest,

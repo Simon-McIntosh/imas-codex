@@ -5,14 +5,14 @@ import json
 import numpy as np
 import pytest
 
-from imas_codex.discovery.signals.controls_metadata import (
+from iter_codex.discovery.signals.controls_metadata import (
     FEED_SOURCE,
     import_controls_metadata,
 )
-from imas_codex.discovery.signals.scanners.codac_uda import _persist_archives
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import ArchiveEndpoint, FacilitySignal
-from imas_codex.remote.archive_catalogue import ArchiveCatalogue
+from iter_codex.discovery.signals.scanners.codac_uda import _persist_archives
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.models import ArchiveEndpoint, FacilitySignal
+from iter_codex.remote.archive_catalogue import ArchiveCatalogue
 
 pytestmark = pytest.mark.graph
 
@@ -151,7 +151,7 @@ def test_controls_import_preserves_archive_state_and_excludes_unknowns(
 def test_description_provenance_survives_reembedding_but_not_a_rewrite(
     disposable_graph,
 ):
-    from imas_codex.discovery.signals.parallel import write_signal_descriptions
+    from iter_codex.discovery.signals.parallel import write_signal_descriptions
 
     with GraphClient() as graph:
         graph.query(
@@ -207,7 +207,7 @@ def test_description_provenance_survives_reembedding_but_not_a_rewrite(
 
 
 def test_archive_rescan_preserves_feed_unit_type_and_description(disposable_graph):
-    from imas_codex.discovery.signals.scanners.codac_uda import (
+    from iter_codex.discovery.signals.scanners.codac_uda import (
         CodacUDAScanner,
         _access,
         _persist_signals,

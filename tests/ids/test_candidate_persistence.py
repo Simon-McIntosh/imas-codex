@@ -14,7 +14,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.ids.graph_ops import (
+from iter_codex.ids.graph_ops import (
     CandidateWriteError,
     clear_candidates,
     read_candidates,
@@ -384,7 +384,7 @@ class TestSelectCandidates:
 
 class TestCandidateRecordsStrict:
     def test_a_judgment_without_a_candidate_is_refused(self):
-        from imas_codex.ids.workers import _candidate_records
+        from iter_codex.ids.workers import _candidate_records
 
         candidate = MagicMock()
         candidate.hit.path = "equilibrium/time_slice/profiles_1d/psi"
@@ -402,7 +402,7 @@ class TestCandidateRecordsStrict:
             _candidate_records([judgment], [candidate], set())
 
     def test_a_matched_judgment_records_the_candidate_arms(self):
-        from imas_codex.ids.workers import _candidate_records
+        from iter_codex.ids.workers import _candidate_records
 
         candidate = MagicMock()
         candidate.hit.path = "equilibrium/time_slice/profiles_1d/psi"
@@ -432,7 +432,7 @@ class TestCandidateRecordsStrict:
 @pytest.mark.graph
 def test_write_and_clear_candidates_round_trip():
     """Write and remove a fixture source's candidates against the live graph."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     marker = uuid.uuid4().hex[:12]
     facility = f"pytest-candidates-{marker}"
@@ -619,7 +619,7 @@ def test_write_and_clear_candidates_round_trip():
 @pytest.mark.graph
 def test_read_and_select_candidates_round_trip():
     """Read a source's edges in Jev order and mark a two-IDS pick."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     marker = uuid.uuid4().hex[:12]
     facility = f"pytest-read-candidates-{marker}"

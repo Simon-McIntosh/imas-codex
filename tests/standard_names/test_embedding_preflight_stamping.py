@@ -34,7 +34,7 @@ class _RecordingGraphClient:
 @pytest.mark.timeout(120)
 def test_preflight_timestamps_and_counts_only_written_vectors() -> None:
     """A candidate without description must not be represented as embedded."""
-    from imas_codex.standard_names.review.audits import run_embedding_preflight
+    from iter_codex.standard_names.review.audits import run_embedding_preflight
 
     rows: dict[str, dict[str, object]] = {
         "missing_description": {
@@ -67,10 +67,10 @@ def test_preflight_timestamps_and_counts_only_written_vectors() -> None:
 
     with (
         patch(
-            "imas_codex.embeddings.description.embed_descriptions_batch",
+            "iter_codex.embeddings.description.embed_descriptions_batch",
             side_effect=embed_available_descriptions,
         ),
-        patch("imas_codex.graph.client.GraphClient", return_value=graph),
+        patch("iter_codex.graph.client.GraphClient", return_value=graph),
     ):
         report = run_embedding_preflight(list(rows.values()))
 

@@ -10,7 +10,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     ExportReport,
     GateResult,
     _classify_export_population,
@@ -76,45 +76,45 @@ def _run_fixture_export(
     with ExitStack() as stack:
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_export_population",
+                "iter_codex.standard_names.export._fetch_export_population",
                 return_value=population,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
                 return_value=_ReadOnlyGraphClient(),
             )
         )
         if not validate_entries:
             stack.enter_context(
                 patch(
-                    "imas_codex.standard_names.export._validate_entry",
+                    "iter_codex.standard_names.export._validate_entry",
                     side_effect=lambda entry: entry,
                 )
             )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_deprecation_stubs",
+                "iter_codex.standard_names.export._fetch_deprecation_stubs",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+                "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
                 return_value=([], set()),
             )
         )
         if source_bindings is not None:
             stack.enter_context(
                 patch(
-                    "imas_codex.standard_names.export._fetch_sources_for_entry",
+                    "iter_codex.standard_names.export._fetch_sources_for_entry",
                     return_value=source_bindings,
                 )
             )
         if not write_domain_yaml:
             stack.enter_context(
-                patch("imas_codex.standard_names.export._write_domain_yaml")
+                patch("iter_codex.standard_names.export._write_domain_yaml")
             )
         return run_export(
             staging_dir,
@@ -233,34 +233,34 @@ def test_post_gate_empty_population_is_refused_without_skipping_gates(
     with ExitStack() as stack:
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_export_population",
+                "iter_codex.standard_names.export._fetch_export_population",
                 return_value=population,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_graph_name_ids",
+                "iter_codex.standard_names.export._fetch_graph_name_ids",
                 return_value={"low_score_name"},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._run_gate_a",
+                "iter_codex.standard_names.export._run_gate_a",
                 return_value=GateResult(gate="graph_tests", passed=True),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._run_gate_b",
+                "iter_codex.standard_names.export._run_gate_b",
                 return_value=GateResult(gate="cross_field_consistency", passed=True),
             )
         )
         stack.enter_context(
-            patch("imas_codex.settings.get_sn_isnc_dir", return_value=None)
+            patch("iter_codex.settings.get_sn_isnc_dir", return_value=None)
         )
         stack.enter_context(
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
                 return_value=_ReadOnlyGraphClient(),
             )
         )
@@ -466,7 +466,7 @@ def test_export_refuses_when_ledger_does_not_close(tmp_path: Path) -> None:
     population = [_candidate("emitted_name"), _candidate("silently_dropped_name")]
 
     with patch(
-        "imas_codex.standard_names.export._classify_export_population",
+        "iter_codex.standard_names.export._classify_export_population",
         return_value=([population[0]], []),
     ):
         report = _run_fixture_export(tmp_path, population)
@@ -822,7 +822,7 @@ def test_manifest_sources_reconcile_emitted_excluded_and_non_nameable(
 
 
 def test_manifest_source_projection_follows_superseded_identity() -> None:
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         fetch_manifest_source_release_rows,
     )
 

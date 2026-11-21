@@ -21,7 +21,7 @@ import pytest
 
 
 def test_name_only_score_total_and_tier() -> None:
-    from imas_codex.standard_names.models import StandardNameQualityScoreNameOnly
+    from iter_codex.standard_names.models import StandardNameQualityScoreNameOnly
 
     s = StandardNameQualityScoreNameOnly(
         grammar=20, semantic=18, convention=19, completeness=18
@@ -54,7 +54,7 @@ def test_name_only_score_total_and_tier() -> None:
 
 
 def test_name_only_batch_model_parses_minimal_json() -> None:
-    from imas_codex.standard_names.models import (
+    from iter_codex.standard_names.models import (
         StandardNameQualityReviewNameOnlyBatch,
     )
 
@@ -95,8 +95,8 @@ def _make_review(score_cls, source_id: str, name: str, **scores: int):
 
 
 def test_match_stamps_name_only_mode() -> None:
-    from imas_codex.standard_names.models import StandardNameQualityScoreNameOnly
-    from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+    from iter_codex.standard_names.models import StandardNameQualityScoreNameOnly
+    from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
     wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
     names = [{"id": "electron_temperature", "source_id": "electron_temperature"}]
@@ -122,8 +122,8 @@ def test_match_stamps_name_only_mode() -> None:
 
 def test_match_does_not_stamp_review_mode() -> None:
     """_match_reviews_to_entries no longer stamps a review_mode key onto entries."""
-    from imas_codex.standard_names.models import StandardNameQualityScore
-    from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+    from iter_codex.standard_names.models import StandardNameQualityScore
+    from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
     wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
     names = [{"id": "electron_temperature", "source_id": "electron_temperature"}]
@@ -151,7 +151,7 @@ def test_match_does_not_stamp_review_mode() -> None:
 
 
 def test_name_only_prompt_omits_documentation_and_compliance() -> None:
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     rendered = render_prompt(
         "sn/review_names",
@@ -184,7 +184,7 @@ def test_name_only_prompt_omits_documentation_and_compliance() -> None:
 
 
 def test_full_prompt_still_renders_six_dimensions() -> None:
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     rendered = render_prompt(
         "sn/review",
@@ -214,8 +214,8 @@ def test_review_name_only_renders_candidate() -> None:
     ``{"item": item}`` context yields no candidates and the LLM is handed an
     empty prompt — a failure that costs a call and returns no scores.
     """
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.context import _build_enum_lists
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.context import _build_enum_lists
 
     item = {
         "id": "electron_temperature",

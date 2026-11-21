@@ -9,16 +9,16 @@ from uuid import uuid4
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_graph_uri
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.defaults import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.settings import get_graph_uri
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_claim_scope as _owning_graph_claim_scope,
 )
-from imas_codex.standard_names.graph_store.graph_claim_scope import (
+from iter_codex.standard_names.graph_store.graph_claim_scope import (
     ManifestDrainConflict,
     build_manifest_drain_plan,
     claim_manifest_drain_scope,
@@ -26,36 +26,36 @@ from imas_codex.standard_names.graph_store.graph_claim_scope import (
     prepare_manifest_drain_scope,
     release_manifest_drain_claims,
 )
-from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
     claim_generate_name_batch,
     claim_review_name_batch,
 )
-from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+from iter_codex.standard_names.graph_store.graph_docs_persistence import (
     claim_generate_docs_batch,
     claim_refine_docs_batch,
 )
-from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
     claim_enrich_parents_batch,
 )
-from imas_codex.standard_names.graph_store.graph_refinement import (
+from iter_codex.standard_names.graph_store.graph_refinement import (
     claim_refine_name_batch,
 )
-from imas_codex.standard_names.graph_store.graph_review_persistence import (
+from iter_codex.standard_names.graph_store.graph_review_persistence import (
     claim_review_docs_batch,
 )
-from imas_codex.standard_names.orphan_sweep import recover_manifest_drain_scope
+from iter_codex.standard_names.orphan_sweep import recover_manifest_drain_scope
 
 pytestmark = pytest.mark.graph
 
 
 @pytest.fixture(scope="module")
 def ephemeral_driver() -> Iterator:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    uri = os.environ.get("ITER_CODEX_TEST_NEO4J_URI")
     if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.skip("ITER_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("ITER_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
         pytest.fail("stateful manifest-drain tests require an ephemeral graph")
-    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
+    project_uri = os.environ.get("ITER_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
     if uri == project_uri:
         pytest.fail("manifest-drain tests refuse the configured project graph")
     driver = GraphDatabase.driver(uri, auth=None)
@@ -108,7 +108,7 @@ def graph_case(ephemeral_driver) -> Iterator[dict[str, str]]:
 
 def _client() -> GraphClient:
     return GraphClient(
-        uri=os.environ["IMAS_CODEX_TEST_NEO4J_URI"],
+        uri=os.environ["ITER_CODEX_TEST_NEO4J_URI"],
         username="neo4j",
         password="",
         graph_name="ephemeral-manifest-drain",

@@ -11,7 +11,7 @@ from pathlib import Path
 
 from neo4j import READ_ACCESS, unit_of_work
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 HERE = Path(__file__).resolve().parent
 BUILDER = HERE / "srtj-refine-ab-run.py"

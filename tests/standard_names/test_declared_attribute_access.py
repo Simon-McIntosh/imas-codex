@@ -33,7 +33,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PACKAGE_NAME = "imas_codex"
+PACKAGE_NAME = "iter_codex"
 REVIEW_SUBTREE = "standard_names/review"
 
 # Measured on the base revision: five of eighteen sites resolve to an annotated
@@ -423,7 +423,7 @@ class Target(Base):
 
 
 def _fixture(tmp_path: Path, body: str, extra: str = "") -> Path:
-    pkg = tmp_path / "imas_codex"
+    pkg = tmp_path / "iter_codex"
     review = pkg / "standard_names" / "review"
     review.mkdir(parents=True)
     for init in (pkg / "__init__.py", pkg / "standard_names" / "__init__.py"):
@@ -432,7 +432,7 @@ def _fixture(tmp_path: Path, body: str, extra: str = "") -> Path:
     (review / "state.py").write_text(_STATE_FIXTURE)
     (review / "probe.py").write_text(
         "from __future__ import annotations\n"
-        "from imas_codex.standard_names.review.state import Target\n\n"
+        "from iter_codex.standard_names.review.state import Target\n\n"
         f"{extra}\n"
         "def worker(state: Target) -> None:\n"
         f"{body}"

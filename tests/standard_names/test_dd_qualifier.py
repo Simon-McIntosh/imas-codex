@@ -12,12 +12,12 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.sources.base import (
+from iter_codex.standard_names.sources.base import (
     ExtractionBatch,
     QualificationStatus,
     SourceCandidate,
 )
-from imas_codex.standard_names.sources.dd_qualifier import qualify_dd
+from iter_codex.standard_names.sources.dd_qualifier import qualify_dd
 
 # ============================================================================
 # Helpers
@@ -87,16 +87,16 @@ def _extract_with_graph(
     graph: _ExtractionGraph,
     **kwargs: object,
 ) -> list[ExtractionBatch]:
-    from imas_codex.standard_names.sources import dd
+    from iter_codex.standard_names.sources import dd
 
-    monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.client.GraphClient", lambda: graph)
     monkeypatch.setattr(dd, "_apply_typed_dd_resolutions", lambda rows, _version: rows)
     monkeypatch.setattr(dd, "_apply_unit_overrides", lambda rows, **_kwargs: rows)
     monkeypatch.setattr(
-        "imas_codex.standard_names.enrichment.enrich_paths", lambda rows: rows
+        "iter_codex.standard_names.enrichment.enrich_paths", lambda rows: rows
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.enrichment.group_by_concept_and_unit",
+        "iter_codex.standard_names.enrichment.group_by_concept_and_unit",
         lambda *_args, **_kwargs: [
             ExtractionBatch(
                 source="dd",

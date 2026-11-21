@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.standard_names.families import (
+from iter_codex.standard_names.families import (
     AXIS_ORDER,
     DD_DERIVATIVE_MAP,
     detect_families,

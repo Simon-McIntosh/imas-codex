@@ -71,7 +71,7 @@ def _source(
 def test_live_binding_is_withheld_without_charge_while_unbound_source_advances(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         claim_explicit_standard_name_sources,
     )
 
@@ -91,10 +91,10 @@ def test_live_binding_is_withheld_without_charge_while_unbound_source_advances(
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ),
-        caplog.at_level(logging.WARNING, logger="imas_codex.standard_names.graph_ops"),
+        caplog.at_level(logging.WARNING, logger="iter_codex.standard_names.graph_ops"),
     ):
         result = claim_explicit_standard_name_sources([bound_path, unbound_path])
 
@@ -120,7 +120,7 @@ def test_live_binding_is_withheld_without_charge_while_unbound_source_advances(
 def test_source_bound_only_to_settled_name_remains_claimable(
     settled_stage: str,
 ) -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         claim_explicit_standard_name_sources,
     )
 
@@ -136,7 +136,7 @@ def test_source_bound_only_to_settled_name_remains_claimable(
     before = graph.sources[f"dd:{source_path}"]["attempt_count"]
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         result = claim_explicit_standard_name_sources([source_path])

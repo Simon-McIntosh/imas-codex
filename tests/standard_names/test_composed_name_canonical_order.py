@@ -1,7 +1,7 @@
 """Composition follows the strict parser's runtime-owned segment order."""
 
-from imas_codex.standard_names.consolidation import consolidate_candidates
-from imas_codex.standard_names.grammar_adapter import (
+from iter_codex.standard_names.consolidation import consolidate_candidates
+from iter_codex.standard_names.grammar_adapter import (
     is_canonical_name,
     normalize_canonical_name,
     parse_canonical_name,

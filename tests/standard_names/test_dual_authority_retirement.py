@@ -12,8 +12,8 @@ from pathlib import Path
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_ops import (
     retire_signed_dual_authority_targets,
 )
 

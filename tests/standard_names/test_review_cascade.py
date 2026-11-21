@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_cost_and_claims as _owning_graph_cost_and_claims,
     graph_doc_links as _owning_graph_doc_links,
@@ -18,12 +18,12 @@ from imas_codex.standard_names.graph_store import (
     graph_review_persistence as _owning_graph_review_persistence,
     resolve_owned_name,
 )
-from imas_codex.standard_names.review import cascade
-from imas_codex.standard_names.review.cascade import (
+from iter_codex.standard_names.review import cascade
+from iter_codex.standard_names.review.cascade import (
     route_docs,
     route_name,
 )
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_extraction_and_enrichment as _owning_worker_extraction_and_enrichment,
     worker_refine_names as _owning_worker_refine_names,
     worker_review_docs as _owning_worker_review_docs,
@@ -35,7 +35,7 @@ _CALIBRATION_SHA256 = "4ae713f939c94e3a0a47d2ea276b2e9ab5cf9bd2cc6f1ad6e4e5d3908
 
 
 def _decision(route, probability, failed_checks=()):
-    from imas_codex.standard_names.review.checks import NAME_DIMENSIONS
+    from iter_codex.standard_names.review.checks import NAME_DIMENSIONS
 
     total = 0.85 if route == "accept" else 0.60
     return cascade.CascadeRoute(
@@ -117,7 +117,7 @@ class _AggregateGraph:
 
 @pytest.mark.parametrize("shadow_score", [None, 0.99])
 def test_shadow_jev_row_does_not_change_review_aggregates(monkeypatch, shadow_score):
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     graph = _AggregateGraph()
     monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
@@ -134,7 +134,7 @@ def test_shadow_jev_row_does_not_change_review_aggregates(monkeypatch, shadow_sc
 async def test_shadow_review_record_is_noncanonical(monkeypatch):
     import json
 
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     stored = []
     monkeypatch.setattr(
@@ -158,8 +158,8 @@ async def test_shadow_review_record_is_noncanonical(monkeypatch):
 def test_failed_checks_feed_existing_refine_trigger():
     import json
 
-    from imas_codex.standard_names.fanout.trigger import should_trigger_fanout
-    from imas_codex.standard_names.review.checks import load_review_checks
+    from iter_codex.standard_names.fanout.trigger import should_trigger_fanout
+    from iter_codex.standard_names.review.checks import load_review_checks
 
     route = _decision("refine", 0.1, ("source_fidelity_unsupported_qualifier",))
     result = cascade._direct_result(
@@ -183,9 +183,9 @@ def test_failed_checks_feed_existing_refine_trigger():
 
 @pytest.mark.asyncio
 async def test_contradiction_note_uses_named_reason(monkeypatch):
-    from imas_codex import settings
-    from imas_codex.standard_names import workers
-    from imas_codex.standard_names.review import jev_review
+    from iter_codex import settings
+    from iter_codex.standard_names import workers
+    from iter_codex.standard_names.review import jev_review
 
     class Lease:
         def charge_event(self, *_args):
@@ -237,8 +237,8 @@ async def test_contradiction_note_uses_named_reason(monkeypatch):
 
 
 def test_docs_audit_calls_house_style_owner(monkeypatch):
-    from imas_codex.standard_names.context import conventions_context_for
-    from imas_codex.standard_names.review import audits, jev_review
+    from iter_codex.standard_names.context import conventions_context_for
+    from iter_codex.standard_names.review import audits, jev_review
 
     name_id = "flux_surface_averaged_argon_density_at_plasma_boundary"
     marker = audits.LintFinding(
@@ -265,7 +265,7 @@ def planted_thresholds(monkeypatch):
         for axis in ("name", "docs")
     }
     monkeypatch.setattr(cascade, "_calibration", lambda: thresholds)
-    from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS, NAME_DIMENSIONS
+    from iter_codex.standard_names.review.checks import DOCS_DIMENSIONS, NAME_DIMENSIONS
 
     monkeypatch.setattr(
         cascade,
@@ -383,7 +383,7 @@ def test_unsupported_claim_is_not_a_contradiction_veto(planted_thresholds):
 def test_decided_review_preserves_rubric_and_failed_checks(
     axis, veto, quality, planted_thresholds
 ):
-    from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS, NAME_DIMENSIONS
+    from iter_codex.standard_names.review.checks import DOCS_DIMENSIONS, NAME_DIMENSIONS
 
     check_id = (
         "source_fidelity_unsupported_qualifier"
@@ -436,8 +436,8 @@ def test_consumer_predicates_agree_with_rubric_route(
     import re
     from contextlib import contextmanager
 
-    from imas_codex.standard_names import graph_ops
-    from imas_codex.standard_names.export import _run_gate_c
+    from iter_codex.standard_names import graph_ops
+    from iter_codex.standard_names.export import _run_gate_c
 
     raw = 0.1 if kind == "low" else 0.4
     judgment = {"quality": raw, "contradiction_veto": False, "checks": {}}
@@ -452,7 +452,7 @@ def test_consumer_predicates_agree_with_rubric_route(
     # the rule written here: the docs axis only accepts a passing score with no
     # open documentation hold, so a contradiction veto refuses the item however
     # high its judged score is.
-    from imas_codex.standard_names.review import holds as review_holds
+    from iter_codex.standard_names.review import holds as review_holds
 
     class _Holds:
         def __init__(self, rows):
@@ -575,7 +575,7 @@ def test_consumer_predicates_agree_with_rubric_route(
     assert bool(exported) == (score >= min_score)
     assert below == int(score < min_score)
 
-    from imas_codex.standard_names.export import _classify_export_population
+    from iter_codex.standard_names.export import _classify_export_population
 
     published, _ = _classify_export_population(
         [
@@ -600,8 +600,8 @@ def test_consumer_predicates_agree_with_rubric_route(
 @pytest.mark.asyncio
 async def test_deciding_name_pass_does_not_reconcile_docs_holds(monkeypatch):
     """The deciding entrypoint passes its axis to hold reconciliation."""
-    from imas_codex import settings
-    from imas_codex.standard_names.review import holds
+    from iter_codex import settings
+    from iter_codex.standard_names.review import holds
 
     route = _decision("accept", 0.9)
     reconciled = []
@@ -623,7 +623,7 @@ async def test_deciding_name_pass_does_not_reconcile_docs_holds(monkeypatch):
         return []
 
     monkeypatch.setattr(
-        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+        "iter_codex.discovery.base.judgment.decisions_key_present", lambda: True
     )
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(cascade, "_name_judgment", judgment)
@@ -642,7 +642,7 @@ async def test_deciding_name_pass_does_not_reconcile_docs_holds(monkeypatch):
 
 
 def test_rubric_uses_only_a_dimensions_own_answers():
-    from imas_codex.standard_names.review.checks import NAME_DIMENSIONS
+    from iter_codex.standard_names.review.checks import NAME_DIMENSIONS
 
     fit = {
         "offset": 0.0,
@@ -654,7 +654,7 @@ def test_rubric_uses_only_a_dimensions_own_answers():
     fit["dimensions"]["semantic"]["weights"][
         "source_fidelity_unsupported_qualifier"
     ] = 1.0
-    from imas_codex.standard_names.review.jev_review import _DIMENSION_LEVELS
+    from iter_codex.standard_names.review.jev_review import _DIMENSION_LEVELS
 
     judgment = {
         "categories": {
@@ -684,7 +684,7 @@ def test_rubric_uses_only_a_dimensions_own_answers():
 
 @pytest.mark.asyncio
 async def test_shadow_records_route_and_keeps_incumbent_result(monkeypatch):
-    from imas_codex import settings
+    from iter_codex import settings
 
     records = []
     calls = []
@@ -732,7 +732,7 @@ async def test_shadow_records_route_and_keeps_incumbent_result(monkeypatch):
 async def test_deciding_never_calls_chat(
     monkeypatch, planted_thresholds, axis, raw, expected_route
 ):
-    from imas_codex import settings
+    from iter_codex import settings
 
     calls = []
 
@@ -752,7 +752,7 @@ async def test_deciding_never_calls_chat(
 
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(
-        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+        "iter_codex.discovery.base.judgment.decisions_key_present", lambda: True
     )
     monkeypatch.setattr(
         cascade, "_name_judgment" if axis == "name" else "_docs_judgment", judgment
@@ -775,7 +775,7 @@ async def test_deciding_never_calls_chat(
     "route,expected_stage", [("accept", "accepted"), ("refine", "reviewed")]
 )
 def test_deciding_result_reaches_name_stage(monkeypatch, route, expected_stage):
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     gc = MagicMock()
     gc.__enter__.return_value = gc
@@ -814,7 +814,7 @@ def test_deciding_result_reaches_name_stage(monkeypatch, route, expected_stage):
 @pytest.mark.parametrize("failure", ["lease", "judgment"])
 @pytest.mark.parametrize("deciding", [False, True])
 async def test_unjudged_review_keeps_full_incumbent(monkeypatch, failure, deciding):
-    from imas_codex import settings
+    from iter_codex import settings
 
     stored = []
     calls = []
@@ -858,8 +858,8 @@ async def test_unjudged_review_keeps_full_incumbent(monkeypatch, failure, decidi
 async def test_unjudged_shadow_row_preserves_incumbent_and_aggregate(
     monkeypatch, axis, failure
 ):
-    from imas_codex import settings
-    from imas_codex.standard_names import graph_ops
+    from iter_codex import settings
+    from iter_codex.standard_names import graph_ops
 
     graph = _AggregateGraph()
     stored = []
@@ -913,7 +913,7 @@ async def test_unjudged_shadow_row_preserves_incumbent_and_aggregate(
 
 @pytest.mark.asyncio
 async def test_empty_docs_judgment_is_unjudged(monkeypatch):
-    from imas_codex.standard_names.review import jev_review
+    from iter_codex.standard_names.review import jev_review
 
     monkeypatch.setattr(jev_review, "_default_checks", lambda: [])
     monkeypatch.setattr(
@@ -935,7 +935,7 @@ async def test_empty_docs_judgment_is_unjudged(monkeypatch):
 async def test_empty_name_judgment_is_unjudged(monkeypatch):
     from types import SimpleNamespace
 
-    from imas_codex.standard_names.review import jev_review
+    from iter_codex.standard_names.review import jev_review
 
     async def unanswered(*_args, **_kwargs):
         return SimpleNamespace(items=[{"answered": False}], cost=0.0)
@@ -947,8 +947,8 @@ async def test_empty_name_judgment_is_unjudged(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_refine_worker_receives_named_checks(monkeypatch):
-    from imas_codex.standard_names import fanout, workers
-    from imas_codex.standard_names.models import RefinedName
+    from iter_codex.standard_names import fanout, workers
+    from iter_codex.standard_names.models import RefinedName
 
     route = _decision("refine", 0.1, ("source_fidelity_unsupported_qualifier",))
     result = cascade._direct_result(
@@ -997,17 +997,17 @@ async def test_refine_worker_receives_named_checks(monkeypatch):
         return refined, 0.0, {}
 
     monkeypatch.setattr(fanout, "should_trigger_fanout", capture_trigger)
-    monkeypatch.setattr("imas_codex.llm.prompt_loader.render_prompt", capture_prompt)
-    monkeypatch.setattr("imas_codex.discovery.base.llm.acall_llm_structured", llm)
-    monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: gc)
-    monkeypatch.setattr("imas_codex.settings.get_model", lambda _seat: "mock")
+    monkeypatch.setattr("iter_codex.llm.prompt_loader.render_prompt", capture_prompt)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.acall_llm_structured", llm)
+    monkeypatch.setattr("iter_codex.graph.client.GraphClient", lambda: gc)
+    monkeypatch.setattr("iter_codex.settings.get_model", lambda _seat: "mock")
     monkeypatch.setattr(
         _owning_worker_extraction_and_enrichment,
         "_hybrid_search_neighbours",
         lambda *_args: [],
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
+        "iter_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
         lambda **_kwargs: {"new_name": "new_name", "old_name": "test_name"},
     )
     await _owning_worker_refine_names.process_refine_name_batch(
@@ -1049,8 +1049,8 @@ def _ordering_incumbent(writes, *, produces):
 
 @pytest.mark.asyncio
 async def test_shadow_row_is_written_after_the_incumbents_rows(monkeypatch):
-    from imas_codex import settings
-    from imas_codex.standard_names import graph_ops
+    from iter_codex import settings
+    from iter_codex.standard_names import graph_ops
 
     writes = []
 
@@ -1059,7 +1059,7 @@ async def test_shadow_row_is_written_after_the_incumbents_rows(monkeypatch):
 
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(
-        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+        "iter_codex.discovery.base.judgment.decisions_key_present", lambda: True
     )
     monkeypatch.setattr(cascade, "_name_judgment", judgment)
     monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: False)
@@ -1084,8 +1084,8 @@ async def test_shadow_row_is_written_after_the_incumbents_rows(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_failed_incumbent_cycle_writes_no_shadow_row(monkeypatch):
-    from imas_codex import settings
-    from imas_codex.standard_names import graph_ops
+    from iter_codex import settings
+    from iter_codex.standard_names import graph_ops
 
     writes = []
 
@@ -1094,7 +1094,7 @@ async def test_failed_incumbent_cycle_writes_no_shadow_row(monkeypatch):
 
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(
-        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+        "iter_codex.discovery.base.judgment.decisions_key_present", lambda: True
     )
     monkeypatch.setattr(cascade, "_name_judgment", judgment)
     monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: False)

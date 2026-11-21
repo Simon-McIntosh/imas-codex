@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.tools.query_analysis import (
+from iter_codex.tools.query_analysis import (
     ACCESSOR_TERMINALS,
     PHYSICS_ABBREVIATIONS,
     QueryAnalyzer,

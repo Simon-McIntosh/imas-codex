@@ -36,7 +36,7 @@ import sys
 import time
 from datetime import UTC, datetime
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 # 12 reference DD paths: a mix of historically-refine-prone species-unresolved
 # distributions densities, the dimensionless q-family, and the compound-unit
@@ -105,13 +105,13 @@ def _run_arm(
     import os
 
     env = dict(os.environ)
-    env["IMAS_CODEX_SN_COMPOSE_SELF_REFINE"] = "true" if self_refine else "false"
+    env["ITER_CODEX_SN_COMPOSE_SELF_REFINE"] = "true" if self_refine else "false"
 
     cmd = [
         "uv",
         "run",
         "--no-sync",
-        "imas-codex",
+        "iter-codex",
         "sn",
         "run",
         "--cost-limit",

@@ -5,13 +5,13 @@ from unittest.mock import Mock
 
 import pytest
 
-from imas_codex.remote.codac_uda import (
+from iter_codex.remote.codac_uda import (
     ArchiveReader,
     ArchiveReadError,
     ArchiveSignalLoader,
 )
-from imas_codex.remote.pulse_catalogue import collect_pulses, snapshot_models
-from imas_codex.remote.scripts import codac_uda as native
+from iter_codex.remote.pulse_catalogue import collect_pulses, snapshot_models
+from iter_codex.remote.scripts import codac_uda as native
 
 
 def fake_reader():
@@ -173,7 +173,7 @@ def test_open_pulse_requires_explicit_window_before_data_read():
 def test_catalogue_command_reads_private_yaml_kind_rules(tmp_path, monkeypatch):
     import json
 
-    from imas_codex.remote import pulse_catalogue
+    from iter_codex.remote import pulse_catalogue
 
     config = tmp_path / "config.yaml"
     config.write_text("data_systems: {}\n")

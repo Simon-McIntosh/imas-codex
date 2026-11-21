@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import BaseModel, Field
 
-from imas_codex.discovery.base.scoring import (
+from iter_codex.discovery.base.scoring import (
     CODE_SCORE_DIMENSIONS,
     CONTENT_SCORE_DIMENSIONS,
     PATH_EXTRA_DIMENSIONS,
@@ -15,7 +15,7 @@ from imas_codex.discovery.base.scoring import (
     max_composite,
     purpose_weighted_composite,
 )
-from imas_codex.graph.models import ContentPurpose
+from iter_codex.graph.models import ContentPurpose
 
 # ============================================================================
 # Max composite (code/path family)

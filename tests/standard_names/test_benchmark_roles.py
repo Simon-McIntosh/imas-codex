@@ -6,7 +6,7 @@ live graph or LLM — corpus loaders take an injected fake GraphClient.
 
 from __future__ import annotations
 
-from imas_codex.standard_names import benchmark_roles as br
+from iter_codex.standard_names import benchmark_roles as br
 
 
 class TestSpearmanRho:

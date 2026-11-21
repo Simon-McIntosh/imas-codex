@@ -23,10 +23,10 @@ from dotenv import load_dotenv
 from imas_data_dictionaries import dd_xml_versions, get_dd_xml
 from linkml_runtime.utils.schemaview import SchemaView
 
-from imas_codex.core.data_model import PhysicsDomain
-from imas_codex.definitions.physics import DOMAINS_SCHEMA, IDS_DOMAINS_FILE
-from imas_codex.embeddings.openrouter_client import OpenRouterClient
-from imas_codex.settings import get_model
+from iter_codex.core.data_model import PhysicsDomain
+from iter_codex.definitions.physics import DOMAINS_SCHEMA, IDS_DOMAINS_FILE
+from iter_codex.embeddings.openrouter_client import OpenRouterClient
+from iter_codex.settings import get_model
 
 # Load environment variables from .env file, overriding any existing values
 load_dotenv(override=True)

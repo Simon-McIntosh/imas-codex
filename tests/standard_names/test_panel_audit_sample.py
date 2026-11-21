@@ -7,12 +7,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_foundation as _owning_graph_foundation,
 )
-from imas_codex.standard_names.review import cascade, panel_audit
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.review import cascade, panel_audit
+from iter_codex.standard_names.worker_tasks import (
     worker_review_names as _owning_worker_review_names,
 )
 
@@ -21,7 +21,7 @@ _PANEL_SCORE = 0.2
 
 
 def _route(axis, route="accept", decision_score=_JEV_DECISION_SCORE):
-    from imas_codex.standard_names.review.checks import (
+    from iter_codex.standard_names.review.checks import (
         DOCS_DIMENSIONS,
         NAME_DIMENSIONS,
     )
@@ -124,7 +124,7 @@ class _AggregateGraph:
 
 
 def _install_cascade(monkeypatch, *, axis, rate, panel_result, declare=True):
-    from imas_codex import settings
+    from iter_codex import settings
 
     capture = _AuditCapture()
     incumbent = capture.install(monkeypatch, panel_result, declare=declare)
@@ -138,7 +138,7 @@ def _install_cascade(monkeypatch, *, axis, rate, panel_result, declare=True):
 
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(
-        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+        "iter_codex.discovery.base.judgment.decisions_key_present", lambda: True
     )
     monkeypatch.setattr(
         cascade, "_name_judgment" if axis == "name" else "_docs_judgment", judgment
@@ -174,7 +174,7 @@ def test_rate_bounds_select_nothing_or_everything():
 
 
 def test_rate_setting_defaults_to_five_percent(monkeypatch):
-    from imas_codex import settings
+    from iter_codex import settings
 
     monkeypatch.setattr(settings, "_get_section", lambda _name: {})
     assert settings.get_sn_review_panel_audit_rate() == 0.05
@@ -225,7 +225,7 @@ async def test_audited_item_keeps_jev_stage_score_route(monkeypatch, axis):
 
 @pytest.mark.asyncio
 async def test_audit_row_is_excluded_from_the_review_aggregates(monkeypatch):
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     graph = _AggregateGraph()
     monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
@@ -289,8 +289,8 @@ async def test_audit_runs_the_quorum_without_persisting_its_rows(monkeypatch):
     """The real persisting seam runs the quorum but writes only the audit row."""
     from functools import partial
 
-    from imas_codex import settings
-    from imas_codex.standard_names import graph_ops, workers
+    from iter_codex import settings
+    from iter_codex.standard_names import graph_ops, workers
 
     written = []
     canonical_row = {
@@ -320,7 +320,7 @@ async def test_audit_runs_the_quorum_without_persisting_its_rows(monkeypatch):
 
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
     monkeypatch.setattr(
-        "imas_codex.discovery.base.judgment.decisions_key_present", lambda: True
+        "iter_codex.discovery.base.judgment.decisions_key_present", lambda: True
     )
     monkeypatch.setattr(cascade, "_name_judgment", judgment)
     monkeypatch.setattr(cascade, "_store_route", store)
@@ -353,7 +353,7 @@ async def test_audit_runs_the_quorum_without_persisting_its_rows(monkeypatch):
 
 
 def test_report_pairs_jev_and_panel_routes(monkeypatch):
-    from imas_codex.graph import client as graph_client
+    from iter_codex.graph import client as graph_client
 
     rows = [
         {
@@ -483,8 +483,8 @@ def _worker_module_sources() -> list[str]:
     import inspect
     import pkgutil
 
-    import imas_codex.standard_names.worker_tasks as worker_tasks
-    from imas_codex.standard_names import workers
+    import iter_codex.standard_names.worker_tasks as worker_tasks
+    from iter_codex.standard_names import workers
 
     sources = [inspect.getsource(workers)]
     for info in pkgutil.iter_modules(worker_tasks.__path__):
@@ -653,7 +653,7 @@ async def test_audit_row_carries_the_group_id_its_own_cycle_rows_carry(
     Only the model call is stubbed: the real ``_run_rd_quorum_cycles`` builds
     the rows and returns the group id the audit row must join them under.
     """
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     async def stub_call(**_kwargs):
         return _Batch(_ReviewItem(0.44)), 0.0, (0, 0)
@@ -744,8 +744,8 @@ def test_the_real_writer_stores_the_audit_row_and_the_aggregate_ignores_it(
     disposable_graph_uri: str,
 ):
     """The audit row on a real graph, written unstubbed and read back whole."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         update_review_aggregates,
         write_reviews,
     )

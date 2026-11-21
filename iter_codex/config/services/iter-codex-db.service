@@ -1,0 +1,60 @@
+# Neo4j Graph Database service for ITER Codex
+# Install: iter-codex data db service install
+# Uses systemd specifiers: %h = home directory
+#
+# This file is version-controlled as a reference template.
+# The actual installed service uses absolute paths resolved at install time.
+
+[Unit]
+Description=Neo4j Graph Database (ITER Codex)
+After=network.target
+# Limit restart attempts: 5 in 10 minutes, then stop trying
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=simple
+
+# 1. Kill orphaned Apptainer/Neo4j processes
+ExecStartPre=-/bin/bash -c 'pkill -9 -f "neo4j_.*community.sif" 2>/dev/null || true'
+ExecStartPre=-/bin/bash -c 'sleep 3'
+# 2. Break GPFS/NFS stale POSIX locks via inode replacement on neostore files,
+#    then remove coordination locks (store_lock, database_lock) only.
+#    NEVER delete Lucene write.lock files — doing so corrupts vector indexes.
+ExecStartPre=-/bin/bash -c '\
+  DATA=%h/.local/share/iter-codex/neo4j/data/databases; \
+  for db in system neo4j; do \
+    for f in "$DATA/$db"/neostore*; do \
+      [ -f "$f" ] || continue; \
+      cp "$f" "${f}.unlock" && mv -f "${f}.unlock" "$f"; \
+    done; \
+  done; \
+  rm -f "$DATA"/store_lock "$DATA"/*/database_lock 2>/dev/null; \
+  echo "GPFS lock cleanup complete"'
+
+ExecStart=/usr/bin/apptainer exec \
+    --bind %h/.local/share/iter-codex/neo4j/data:/data \
+    --bind %h/.local/share/iter-codex/neo4j/logs:/logs \
+    --bind %h/.local/share/iter-codex/neo4j/import:/import \
+    --bind %h/.local/share/iter-codex/neo4j/conf:/var/lib/neo4j/conf \
+    --writable-tmpfs \
+    --env "NEO4J_server_jvm_additional=-Dfile.encoding=UTF-8 --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED" \
+    %h/apptainer/neo4j_2026.01.4-community.sif \
+    neo4j console
+
+# Graceful shutdown with timeout
+ExecStop=-/bin/bash -c 'pkill -15 -f "neo4j_.*community.sif"; sleep 10; pkill -9 -f "neo4j_.*community.sif" || true'
+TimeoutStopSec=60
+
+Restart=on-failure
+RestartSec=30
+
+# Resource limits - sized for shared HPC login node (64 GiB cgroup)
+# Neo4j needs heap + pagecache + JVM overhead; allow ~12G total
+CPUQuota=400%
+MemoryMax=12G
+MemoryHigh=10G
+Nice=10
+
+[Install]
+WantedBy=default.target

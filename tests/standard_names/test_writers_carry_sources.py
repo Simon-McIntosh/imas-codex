@@ -8,13 +8,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.attachment_audit import _find_orphaned_names
-from imas_codex.standard_names.graph_store import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.attachment_audit import _find_orphaned_names
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_lineage as _owning_graph_lineage,
 )
-from imas_codex.standard_names.source_invariant import (
+from iter_codex.standard_names.source_invariant import (
     MissingStandardNameSource,
     require_producing_sources,
 )
@@ -103,7 +103,7 @@ def test_real_invariant_allows_one_source(source_graph: GraphClient) -> None:
 def test_real_name_creation_rolls_back_without_source(
     source_graph: GraphClient,
 ) -> None:
-    from imas_codex.standard_names.graph_store.graph_catalog import write_standard_names
+    from iter_codex.standard_names.graph_store.graph_catalog import write_standard_names
 
     with pytest.raises(MissingStandardNameSource, match="electron_temperature"):
         write_standard_names([{"id": "electron_temperature"}], gc=source_graph)
@@ -116,7 +116,7 @@ def test_real_name_creation_rolls_back_without_source(
 
 @pytest.mark.parametrize("stage", ["drafted", "superseded"])
 def test_rename_refuses_a_sourceless_predecessor(stage: str) -> None:
-    from imas_codex.standard_names.edit import apply_edit
+    from iter_codex.standard_names.edit import apply_edit
     from tests.standard_names.test_edit_engine import FakeGraph, _patched_graph
 
     class SourcelessGraph(FakeGraph):
@@ -139,7 +139,7 @@ def test_rename_refuses_a_sourceless_predecessor(stage: str) -> None:
 
 
 def test_rename_transaction_rolls_back_an_unbound_successor() -> None:
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
     from tests.standard_names.test_edit_engine import FakeGraph, _patched_graph
@@ -168,7 +168,7 @@ def test_rename_transaction_rolls_back_an_unbound_successor() -> None:
 
 
 def test_name_creation_refuses_an_unbound_identity() -> None:
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     graph = MagicMock()
 
@@ -180,7 +180,7 @@ def test_name_creation_refuses_an_unbound_identity() -> None:
     graph.query.side_effect = query
     with (
         patch(
-            "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+            "iter_codex.standard_names.protection._fetch_catalog_edit_names",
             return_value=set(),
         ),
         patch.object(
@@ -197,7 +197,7 @@ def test_name_creation_refuses_an_unbound_identity() -> None:
 
 
 def test_consistency_reconciliation_refuses_last_source_removal() -> None:
-    from imas_codex.standard_names import attachment_audit as audit
+    from iter_codex.standard_names import attachment_audit as audit
 
     graph = MagicMock()
 
@@ -228,7 +228,7 @@ def test_consistency_reconciliation_refuses_last_source_removal() -> None:
 
 
 def test_signed_detachment_refuses_nonderived_parent_without_source() -> None:
-    from imas_codex.standard_names import signed_manifest as signed
+    from iter_codex.standard_names import signed_manifest as signed
 
     authority = SimpleNamespace(
         data={

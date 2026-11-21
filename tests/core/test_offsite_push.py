@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.graph.neo4j_ops import OffsiteCurrency
-from imas_codex.graph.offsite import (
+from iter_codex.graph.neo4j_ops import OffsiteCurrency
+from iter_codex.graph.offsite import (
     GraphActivity,
     GraphCensus,
     OffsiteCountMismatch,
@@ -25,7 +25,7 @@ IDLE = GraphActivity(window_seconds=600.0, transactions_started=0, open_queries=
 def _currency(status: str) -> OffsiteCurrency:
     return OffsiteCurrency(
         status=status,
-        offsite_ref="ghcr.io/example/imas-codex-graph:existing",
+        offsite_ref="ghcr.io/example/iter-codex-graph:existing",
         offsite_modified_at=datetime(2026, 7, 7, tzinfo=UTC),
         live_path=Path("/graph/data/store"),
         live_modified_at=datetime(2026, 9, 1, tzinfo=UTC),
@@ -48,13 +48,13 @@ def _archive(tmp_path: Path, census: GraphCensus) -> Path:
     )
     archive = tmp_path / "graph.tar.gz"
     with tarfile.open(archive, "w:gz") as bundle:
-        bundle.add(root, arcname="imas-codex-graph-test")
+        bundle.add(root, arcname="iter-codex-graph-test")
     return archive
 
 
 def test_current_copy_records_no_op_without_export(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "imas_codex.graph.offsite.graph_archive_stamp", lambda created_at: "stamp"
+        "iter_codex.graph.offsite.graph_archive_stamp", lambda created_at: "stamp"
     )
     exported = False
 
@@ -81,7 +81,7 @@ def test_current_copy_records_no_op_without_export(tmp_path, monkeypatch):
 
 def test_matching_archive_is_pushed_and_receipted(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "imas_codex.graph.offsite.graph_archive_stamp", lambda created_at: "stamp"
+        "iter_codex.graph.offsite.graph_archive_stamp", lambda created_at: "stamp"
     )
     counts = GraphCensus(11, 7, {"Facility": 2, "Shared": 3})
     archive = _archive(tmp_path, counts)
@@ -91,7 +91,7 @@ def test_matching_archive_is_pushed_and_receipted(tmp_path, monkeypatch):
         currency=_currency("stale"),
         export_archive=lambda stamp: archive,
         push_archive=lambda path, stamp: (
-            pushed.append((path, stamp)) or "ghcr.io/example/imas-codex-graph:stamp"
+            pushed.append((path, stamp)) or "ghcr.io/example/iter-codex-graph:stamp"
         ),
         census=lambda: counts,
         activity=lambda: IDLE,
@@ -109,7 +109,7 @@ def test_matching_archive_is_pushed_and_receipted(tmp_path, monkeypatch):
 
 def test_count_mismatch_refuses_push_and_records_receipt(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "imas_codex.graph.offsite.graph_archive_stamp", lambda created_at: "stamp"
+        "iter_codex.graph.offsite.graph_archive_stamp", lambda created_at: "stamp"
     )
     archive = _archive(tmp_path, GraphCensus(10, 7, {"Facility": 2}))
     pushed = False
@@ -139,7 +139,7 @@ def test_count_mismatch_refuses_push_and_records_receipt(tmp_path, monkeypatch):
 
 def test_upload_failure_records_archive_and_error_receipt(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "imas_codex.graph.offsite.graph_archive_stamp", lambda created_at: "stamp"
+        "iter_codex.graph.offsite.graph_archive_stamp", lambda created_at: "stamp"
     )
     counts = GraphCensus(11, 7, {"Facility": 2})
     archive = _archive(tmp_path, counts)
@@ -241,7 +241,7 @@ def _own(tx: int) -> dict:
 
 def _activity(monkeypatch, probes) -> GraphActivity:
     monkeypatch.setattr(
-        "imas_codex.graph.client.GraphClient", lambda: _ProbeGraph(probes)
+        "iter_codex.graph.client.GraphClient", lambda: _ProbeGraph(probes)
     )
     return live_graph_activity(
         window_seconds=120.0, interval_seconds=60.0, sleep=lambda _s: None

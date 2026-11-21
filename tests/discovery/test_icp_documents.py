@@ -6,7 +6,7 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from imas_codex.discovery.icp import ICPClient, ICPRequestRefused, client as module
+from iter_codex.discovery.icp import ICPClient, ICPRequestRefused, client as module
 
 RECORDS = "https://records.example.test"
 DOCUMENTS = "https://documents.example.test"
@@ -29,8 +29,8 @@ def document_client(monkeypatch):
         "sign_in_origins": [IDENTITY, GATEWAY, RECORDS, DOCUMENTS],
         "gateway_sign_in_paths": ["/gateway/sign-in"],
     }
-    monkeypatch.delenv("IMAS_CODEX_ICP_ORIGIN", raising=False)
-    monkeypatch.delenv("IMAS_CODEX_ICP_DESCRIPTION_PATH", raising=False)
+    monkeypatch.delenv("ITER_CODEX_ICP_ORIGIN", raising=False)
+    monkeypatch.delenv("ITER_CODEX_ICP_DESCRIPTION_PATH", raising=False)
     monkeypatch.setattr(
         module, "get_facility_infrastructure", lambda _: {"icp": config}
     )
@@ -234,7 +234,7 @@ def test_document_request_budget_is_per_identity(document_client):
 async def test_sign_in_and_error_bodies_store_nothing(
     document_client, monkeypatch, tmp_path, body, content_type, expected_type
 ):
-    from imas_codex.discovery.icp.documents import ICPDocuments
+    from iter_codex.discovery.icp.documents import ICPDocuments
 
     client, sent, _ = document_client
 
@@ -292,7 +292,7 @@ async def test_pdf_stored_only_after_signature_and_page_validation(
 
     from pypdf import PdfWriter
 
-    from imas_codex.discovery.icp.documents import ICPDocuments
+    from iter_codex.discovery.icp.documents import ICPDocuments
 
     client, sent, install = file_transport
     writer = PdfWriter()
@@ -319,8 +319,8 @@ async def test_workbook_uses_existing_extraction_and_counts_all_sheets(
 ):
     from openpyxl import Workbook
 
-    from imas_codex.discovery.icp.documents import ICPDocuments
-    from imas_codex.discovery.wiki import excel
+    from iter_codex.discovery.icp.documents import ICPDocuments
+    from iter_codex.discovery.wiki import excel
 
     client, _, install = file_transport
     workbook = Workbook()
@@ -351,7 +351,7 @@ async def test_workbook_uses_existing_extraction_and_counts_all_sheets(
 async def test_failed_size_probe_stores_nothing_and_sends_no_get(
     file_transport, tmp_path, status
 ):
-    from imas_codex.discovery.icp.documents import ICPDocuments
+    from iter_codex.discovery.icp.documents import ICPDocuments
 
     client, sent, install = file_transport
     install(b"error", "text/plain", head_status=status)
@@ -379,7 +379,7 @@ async def test_failed_size_probe_stores_nothing_and_sends_no_get(
 async def test_failed_get_has_explicit_outcome_and_no_file(
     file_transport, tmp_path, status, outcome
 ):
-    from imas_codex.discovery.icp.documents import ICPDocuments
+    from iter_codex.discovery.icp.documents import ICPDocuments
 
     client, sent, install = file_transport
     install(b"<html>error</html>", "text/html", get_status=status)
@@ -398,7 +398,7 @@ async def test_failed_get_has_explicit_outcome_and_no_file(
 async def test_document_identity_refused_before_authentication_or_size_probe(
     document_client, tmp_path
 ):
-    from imas_codex.discovery.icp.documents import ICPDocuments
+    from iter_codex.discovery.icp.documents import ICPDocuments
 
     client, sent, _ = document_client
     client._authenticated = False
@@ -412,7 +412,7 @@ async def test_document_identity_refused_before_authentication_or_size_probe(
 
 @pytest.mark.asyncio
 async def test_size_probe_prevents_oversized_get(file_transport, tmp_path):
-    from imas_codex.discovery.icp.documents import ICPDocuments
+    from iter_codex.discovery.icp.documents import ICPDocuments
 
     client, sent, install = file_transport
     install(b"too large", "application/pdf")
@@ -438,7 +438,7 @@ async def test_size_probe_prevents_oversized_get(file_transport, tmp_path):
     ],
 )
 def test_document_private_config_fails_closed(document_client, field, value):
-    from imas_codex.discovery.icp import ICPConfigurationError
+    from iter_codex.discovery.icp import ICPConfigurationError
 
     _, sent, config = document_client
     config[field] = value
@@ -449,7 +449,7 @@ def test_document_private_config_fails_closed(document_client, field, value):
 
 def test_total_document_budget_applies_across_identities(document_client):
     client, sent, _ = document_client
-    from imas_codex.discovery.icp.client import _DocumentAccess
+    from iter_codex.discovery.icp.client import _DocumentAccess
 
     identities = frozenset(f"SAMPLE{i}" for i in range(9))
     client._policy.documents = _DocumentAccess(DOCUMENTS, "/", identities)
@@ -505,7 +505,7 @@ def test_records_only_session_refuses_documents_before_transport(
 async def test_probe_network_failure_stops_without_a_get(
     document_client, monkeypatch, tmp_path
 ):
-    from imas_codex.discovery.icp.documents import ICPDocuments
+    from iter_codex.discovery.icp.documents import ICPDocuments
 
     client, sent, _ = document_client
 

@@ -25,9 +25,9 @@ def _run_fresh_interpreter(source: str) -> subprocess.CompletedProcess[str]:
 def test_engine_import_does_not_load_cli() -> None:
     result = _run_fresh_interpreter(
         "import sys\n"
-        "import imas_codex.discovery.base.engine as engine\n"
-        "assert 'imas_codex.cli' not in sys.modules, "
-        "sorted(name for name in sys.modules if name.startswith('imas_codex.cli'))\n"
+        "import iter_codex.discovery.base.engine as engine\n"
+        "assert 'iter_codex.cli' not in sys.modules, "
+        "sorted(name for name in sys.modules if name.startswith('iter_codex.cli'))\n"
         "print(engine.__file__)\n"
     )
     assert result.returncode == 0, result.stderr
@@ -35,28 +35,28 @@ def test_engine_import_does_not_load_cli() -> None:
 
 def test_cli_then_discovery_engines_import() -> None:
     result = _run_fresh_interpreter(
-        "import imas_codex.cli.discover\n"
-        "import imas_codex.discovery.wiki.parallel\n"
-        "import imas_codex.discovery.paths.parallel\n"
-        "import imas_codex.discovery.code.parallel\n"
+        "import iter_codex.cli.discover\n"
+        "import iter_codex.discovery.wiki.parallel\n"
+        "import iter_codex.discovery.paths.parallel\n"
+        "import iter_codex.discovery.code.parallel\n"
     )
     assert result.returncode == 0, result.stderr
 
 
 _DEFERRED_MODULES = (
-    "imas_codex.cli.compute",
-    "imas_codex.cli.config_cli",
-    "imas_codex.cli.credentials",
-    "imas_codex.cli.discover",
-    "imas_codex.cli.embed",
-    "imas_codex.cli.facilities",
-    "imas_codex.cli.graph",
-    "imas_codex.cli.host",
-    "imas_codex.cli.imas_dd",
-    "imas_codex.cli.release",
-    "imas_codex.cli.sn",
-    "imas_codex.cli.tools",
-    "imas_codex.cli.tunnel",
+    "iter_codex.cli.compute",
+    "iter_codex.cli.config_cli",
+    "iter_codex.cli.credentials",
+    "iter_codex.cli.discover",
+    "iter_codex.cli.embed",
+    "iter_codex.cli.facilities",
+    "iter_codex.cli.graph",
+    "iter_codex.cli.host",
+    "iter_codex.cli.imas_dd",
+    "iter_codex.cli.release",
+    "iter_codex.cli.sn",
+    "iter_codex.cli.tools",
+    "iter_codex.cli.tunnel",
 )
 
 
@@ -72,11 +72,11 @@ def _loaded_from(models: tuple[str, ...]) -> str:
 
 
 def test_help_imports_no_command_module() -> None:
-    """`imas-codex --help` answers from the command table alone."""
+    """`iter-codex --help` answers from the command table alone."""
     result = _run_fresh_interpreter(
         "import sys\n"
         "from click.testing import CliRunner\n"
-        "from imas_codex.cli import main\n"
+        "from iter_codex.cli import main\n"
         "outcome = CliRunner().invoke(main, ['--help'])\n"
         "assert outcome.exit_code == 0, outcome.output\n"
         "assert 'Commands:' in outcome.output, outcome.output\n"
@@ -86,13 +86,13 @@ def test_help_imports_no_command_module() -> None:
 
 
 _SUPPRESSED_WARMUP = (
-    "import imas_codex.llm\n"
-    "stub = types.ModuleType('imas_codex.llm._warmup')\n"
+    "import iter_codex.llm\n"
+    "stub = types.ModuleType('iter_codex.llm._warmup')\n"
     "class _NeverStarts:\n"
     "    def start(self):\n"
     "        pass\n"
     "stub.warmup = _NeverStarts()\n"
-    "sys.modules['imas_codex.llm._warmup'] = stub\n"
+    "sys.modules['iter_codex.llm._warmup'] = stub\n"
 )
 
 
@@ -102,8 +102,8 @@ def _no_schema_runtime() -> str:
         "    m\n"
         "    for m in list(sys.modules)\n"
         "    if m == 'litellm'\n"
-        "    or m == 'imas_codex.graph'\n"
-        "    or m.startswith('imas_codex.graph.')\n"
+        "    or m == 'iter_codex.graph'\n"
+        "    or m.startswith('iter_codex.graph.')\n"
         "    or m.startswith('linkml_runtime')\n"
         ")\n"
         "assert not bad, bad\n"
@@ -131,9 +131,9 @@ def test_initialize_path_imports_no_command_module_or_schema_runtime(
         "import sys\n"
         "import types\n"
         "import click\n"
-        "from imas_codex.cli import main\n"
+        "from iter_codex.cli import main\n"
         + (_SUPPRESSED_WARMUP if warmup_state == "suppressed" else "")
-        + "from imas_codex.llm.server import AgentsServer\n"
+        + "from iter_codex.llm.server import AgentsServer\n"
         "served = main.get_command(click.Context(main), 'serve')\n"
         "assert served is not None\n"
         "server = AgentsServer(dd_only=True)\n"

@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names import case_file
-from imas_codex.standard_names.case_file import (
+from iter_codex.standard_names import case_file
+from iter_codex.standard_names.case_file import (
     CaseFile,
     assert_read_only,
     build_name_case_file,

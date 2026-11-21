@@ -5,15 +5,15 @@ from unittest.mock import Mock
 
 import pytest
 
-from imas_codex.config.codac_uda import create_archive_pulse
-from imas_codex.discovery.signals.archive_pulses import (
+from iter_codex.config.codac_uda import create_archive_pulse
+from iter_codex.discovery.signals.archive_pulses import (
     PulseKindRule,
     classify_categories,
     pulse_metadata_counts,
 )
-from imas_codex.graph.models import PulseCategory
-from imas_codex.remote.codac_uda import ArchiveReader
-from imas_codex.remote.scripts import codac_uda as native
+from iter_codex.graph.models import PulseCategory
+from iter_codex.remote.codac_uda import ArchiveReader
+from iter_codex.remote.scripts import codac_uda as native
 
 
 def category(name="DEMO:coil-fast-discharge"):

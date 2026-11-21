@@ -8,14 +8,14 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.fanout.runners import (
+from iter_codex.standard_names.fanout.runners import (
     _run_with_timeout,
     run_find_related_dd_paths,
     run_search_dd_clusters,
     run_search_dd_paths,
     run_search_existing_names,
 )
-from imas_codex.standard_names.fanout.schemas import (
+from iter_codex.standard_names.fanout.schemas import (
     FanoutScope,
     _FindRelatedDDPaths,
     _SearchDDClusters,
@@ -104,7 +104,7 @@ class TestRunnerHappyPaths:
             ]
 
         monkeypatch.setattr(
-            "imas_codex.standard_names.search.search_standard_names_vector",
+            "iter_codex.standard_names.search.search_standard_names_vector",
             _fake,
         )
         args = _SearchExistingNames(fn_id="search_existing_names", query="T_e", k=3)
@@ -130,7 +130,7 @@ class TestRunnerHappyPaths:
             assert ids_filter == "core_profiles"
             return [_Hit()]
 
-        monkeypatch.setattr("imas_codex.graph.dd_search.hybrid_dd_search", _fake)
+        monkeypatch.setattr("iter_codex.graph.dd_search.hybrid_dd_search", _fake)
         args = _SearchDDPaths(fn_id="search_dd_paths", query="ne", k=8)
         r = await run_search_dd_paths(
             args,
@@ -159,7 +159,7 @@ class TestRunnerHappyPaths:
             assert max_results == 5
             return _Result()
 
-        monkeypatch.setattr("imas_codex.graph.dd_search.related_dd_search", _fake)
+        monkeypatch.setattr("iter_codex.graph.dd_search.related_dd_search", _fake)
         args = _FindRelatedDDPaths(
             fn_id="find_related_dd_paths",
             path="core_profiles/.../temperature",
@@ -185,7 +185,7 @@ class TestRunnerHappyPaths:
         def _fake(gc, query, *, k, dd_version):
             return [_Cluster()]
 
-        monkeypatch.setattr("imas_codex.graph.dd_search.cluster_search", _fake)
+        monkeypatch.setattr("iter_codex.graph.dd_search.cluster_search", _fake)
         args = _SearchDDClusters(fn_id="search_dd_clusters", query="electron temp")
         r = await run_search_dd_clusters(
             args, gc=object(), scope=FanoutScope(), timeout_s=2.0

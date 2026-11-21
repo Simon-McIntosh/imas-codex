@@ -17,14 +17,14 @@ from imas_standard_names.grammar.terms import (
     select_conventions,
 )
 
-from imas_codex.standard_names.docs_gates import (
+from iter_codex.standard_names.docs_gates import (
     HouseStyleFindingClass,
     conformance_findings,
     house_style_findings,
     replace_altered_shared_parts,
     shared_part_sentences,
 )
-from imas_codex.standard_names.review.audits import (
+from iter_codex.standard_names.review.audits import (
     run_all_audits,
     run_house_style_checks,
 )
@@ -45,11 +45,11 @@ _CANONICAL_OPENING = "Number density of argon ions on the last closed flux surfa
 def _roster_graph(disposable_neo4j_uri):
     from pathlib import Path
 
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.sources_manifest import load_names_file
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.sources_manifest import load_names_file
 
     roster = Path(
-        "imas_codex/standard_names/manifests/reviews/"
+        "iter_codex/standard_names/manifests/reviews/"
         "v0.4.0rc7+west-task-2e.sn_names.yaml"
     )
     names = load_names_file(roster)
@@ -216,7 +216,7 @@ def test_a_raising_shared_part_check_is_not_silently_dropped(monkeypatch) -> Non
         raise RuntimeError("shared-part check blew up")
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.docs_gates.shared_part_findings", _boom
+        "iter_codex.standard_names.docs_gates.shared_part_findings", _boom
     )
     with pytest.raises(RuntimeError, match="shared-part check blew up"):
         run_house_style_checks([{"id": _ARGON, "documentation": _SURFACE_FORM}])
@@ -238,10 +238,10 @@ def test_live_roster_census_records_per_class_counts(_roster_graph) -> None:
 
     from imas_standard_names.grammar.terms import load_conventions
 
-    from imas_codex.standard_names.sources_manifest import load_names_file
+    from iter_codex.standard_names.sources_manifest import load_names_file
 
     roster = Path(
-        "imas_codex/standard_names/manifests/reviews/"
+        "iter_codex/standard_names/manifests/reviews/"
         "v0.4.0rc7+west-task-2e.sn_names.yaml"
     )
     names = load_names_file(roster)
@@ -281,7 +281,7 @@ def test_live_roster_census_records_per_class_counts(_roster_graph) -> None:
 
 
 def _live_name_rows(names: list[str]) -> list[dict]:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     rows: list[dict] = []
     with GraphClient() as gc:

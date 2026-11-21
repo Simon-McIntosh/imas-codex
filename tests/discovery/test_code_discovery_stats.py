@@ -4,8 +4,8 @@ import asyncio
 import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from imas_codex.cli.discover import common
-from imas_codex.discovery.code.parallel import get_code_discovery_stats
+from iter_codex.cli.discover import common
+from iter_codex.discovery.code.parallel import get_code_discovery_stats
 
 
 def test_code_progress_queries_have_single_cypher_braces():
@@ -20,7 +20,7 @@ def test_code_progress_queries_have_single_cypher_braces():
     context = MagicMock()
     context.__enter__.return_value = graph
 
-    with patch("imas_codex.discovery.code.parallel.GraphClient", return_value=context):
+    with patch("iter_codex.discovery.code.parallel.GraphClient", return_value=context):
         get_code_discovery_stats(
             "jt-60sa",
             min_relevance=0.5,
@@ -73,8 +73,8 @@ def test_graph_refresh_logs_each_distinct_error_and_keeps_running():
     try:
         with (
             patch.object(common, "create_discovery_monitor", return_value=monitor),
-            patch("imas_codex.cli.shutdown.safe_asyncio_run", side_effect=asyncio.run),
-            patch("imas_codex.cli.shutdown.install_shutdown_handlers"),
+            patch("iter_codex.cli.shutdown.safe_asyncio_run", side_effect=asyncio.run),
+            patch("iter_codex.cli.shutdown.install_shutdown_handlers"),
         ):
             common.run_discovery(config, main, on_complete=lambda _result: None)
     finally:

@@ -27,9 +27,9 @@ import sys
 import time
 from pathlib import Path
 
-from imas_codex.discovery.base.judgment import decide_batch
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.dd_domain_classifier import (
+from iter_codex.discovery.base.judgment import decide_batch
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.dd_domain_classifier import (
     CATEGORY_QUESTION,
     DOMAIN_QUESTION,
     SERVICE_TAG,
@@ -44,7 +44,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[3]
 RESULTS = HERE / "scg-ids-map-jev-results.json"
 FRAGMENT = HERE / "scg-ids-map-jev.html"
-IDS_MAP_PATH = REPO / "imas_codex" / "definitions" / "physics" / "ids_domains.json"
+IDS_MAP_PATH = REPO / "iter_codex" / "definitions" / "physics" / "ids_domains.json"
 DESIGN_RESULTS = HERE / "scg-ids-domain-design-results.json"
 
 SAMPLE_PER_IDS = 30
@@ -55,7 +55,7 @@ LOW_CONFIDENCE = 0.5
 
 
 def model_id() -> str:
-    from imas_codex.settings import get_model
+    from iter_codex.settings import get_model
 
     return get_model(SEAT)
 

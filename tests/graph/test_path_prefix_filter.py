@@ -6,7 +6,7 @@ the clause for the node alias, the parameter dict that fills it, and the
 empty result that leaves a query untouched when no scope is offered.
 """
 
-from imas_codex.graph.query_builder import (
+from iter_codex.graph.query_builder import (
     build_path_prefix_filter,
     render_path_prefix_clause,
 )
@@ -73,7 +73,7 @@ class TestFacilityExclusionFilter:
     def test_renders_a_negated_clause_with_its_own_parameter(self):
         from unittest.mock import patch
 
-        from imas_codex.config.discovery_config import (
+        from iter_codex.config.discovery_config import (
             ExclusionConfig,
             build_facility_exclusion_filter,
         )
@@ -81,7 +81,7 @@ class TestFacilityExclusionFilter:
         cfg = ExclusionConfig()
         cfg.path_prefixes = ["/scratch"]
         with patch(
-            "imas_codex.config.discovery_config.get_exclusion_config_for_facility",
+            "iter_codex.config.discovery_config.get_exclusion_config_for_facility",
             return_value=cfg,
         ):
             clause, params = build_facility_exclusion_filter("iter", "p")
@@ -93,13 +93,13 @@ class TestFacilityExclusionFilter:
     def test_no_prefixes_yields_an_empty_clause(self):
         from unittest.mock import patch
 
-        from imas_codex.config.discovery_config import (
+        from iter_codex.config.discovery_config import (
             ExclusionConfig,
             build_facility_exclusion_filter,
         )
 
         with patch(
-            "imas_codex.config.discovery_config.get_exclusion_config_for_facility",
+            "iter_codex.config.discovery_config.get_exclusion_config_for_facility",
             return_value=ExclusionConfig(),
         ):
             assert build_facility_exclusion_filter("iter", "p") == ("", {})

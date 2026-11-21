@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 DESIGN = Path(__file__).with_name("srtj-graph-ops-split-design.json")
-BASE = "imas_codex.standard_names"
+BASE = "iter_codex.standard_names"
 FACADES = {"graph_ops": "graph_store", "workers": "worker_tasks"}
 
 
@@ -292,7 +292,7 @@ def main() -> int:
     if args.scope_manifest:
         paths = [name for name in paths if name in allowed]
     if args.only == "product":
-        paths = [name for name in paths if name.startswith("imas_codex/")]
+        paths = [name for name in paths if name.startswith("iter_codex/")]
     elif args.only == "tests":
         paths = [name for name in paths if name.startswith("tests/")]
     paths = [name for name in paths if name not in args.exclude]
@@ -301,7 +301,7 @@ def main() -> int:
     forwarders: dict[str, list[str]] = {}
     value_aliases: dict[str, list[str]] = {}
     for facade in FACADES:
-        module = ROOT / "imas_codex" / "standard_names" / f"{facade}.py"
+        module = ROOT / "iter_codex" / "standard_names" / f"{facade}.py"
         tree = ast.parse(module.read_text())
         forwarders[facade] = [
             node.name

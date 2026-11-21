@@ -2,20 +2,20 @@
 """Positive control for the comparator-rerank batch acceptance measure.
 
 The measure is a paired held-out batch run with
-``IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS`` off (arm A) and on (arm B). Both
+``ITER_CODEX_SN_COMPOSE_RERANK_COMPARATORS`` off (arm A) and on (arm B). Both
 arms must feed the same harness compose path, and the switch must be shown to
 change the compose prompt that the harness actually renders — otherwise the
 two arms are the same run and any acceptance difference is noise.
 
 This driver renders the harness compose prompt exactly as
-``imas_codex.standard_names.benchmark._run_model`` builds it (the
+``iter_codex.standard_names.benchmark._run_model`` builds it (the
 ``sn/generate_name_dd`` template with that function's ``user_context``), under
 both switch settings, and compares the rendered-message hashes. It makes no
 paid call.
 
 It also renders the same template once with a populated
 ``nearby_existing_names`` block, which is the block the switch reranks in
-production (``imas_codex/standard_names/workers.py:4032-4033``). That render is
+production (``iter_codex/standard_names/workers.py:4032-4033``). That render is
 the instrument check: the template must render the block, so a differing hash
 there shows the comparator block is injective in the rendered prompt (touching
 it MUST change the prompt). If arm A and arm B hash identically while the
@@ -33,7 +33,7 @@ import os
 import sys
 from pathlib import Path
 
-SWITCH_ENV = "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS"
+SWITCH_ENV = "ITER_CODEX_SN_COMPOSE_RERANK_COMPARATORS"
 
 
 def _item() -> dict:
@@ -80,12 +80,12 @@ def _harness_messages(
 ) -> list[dict]:
     """Build the compose messages exactly as ``benchmark._run_model`` does.
 
-    Mirrors ``imas_codex/standard_names/benchmark.py`` lines 1613-1642: the
+    Mirrors ``iter_codex/standard_names/benchmark.py`` lines 1613-1642: the
     harness sets ``ids_name``, ``existing_names`` and ``cluster_context`` and
     nothing else. ``nearby`` is passed only in the instrument check, which
     supplies the block the harness omits, to prove the template renders it.
     """
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     user_context = {
         "items": items,
@@ -106,7 +106,7 @@ def _harness_messages(
 
 
 def _hash(messages: list[dict]) -> str:
-    from imas_codex.standard_names.benchmark import _rendered_messages_hash
+    from iter_codex.standard_names.benchmark import _rendered_messages_hash
 
     return _rendered_messages_hash(messages)
 
@@ -116,7 +116,7 @@ def _render_under(switch: str | None, context: dict, nearby: list | None) -> dic
         os.environ.pop(SWITCH_ENV, None)
     else:
         os.environ[SWITCH_ENV] = switch
-    from imas_codex.standard_names.context import comparator_rerank_enabled
+    from iter_codex.standard_names.context import comparator_rerank_enabled
 
     msgs = _harness_messages(context, [_item()], nearby)
     return {
@@ -133,7 +133,7 @@ def main() -> int:
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
-    from imas_codex.standard_names.context import build_compose_context
+    from iter_codex.standard_names.context import build_compose_context
 
     context = build_compose_context()
 

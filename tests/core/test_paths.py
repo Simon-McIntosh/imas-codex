@@ -1,8 +1,8 @@
-"""Tests for imas_codex.core.paths."""
+"""Tests for iter_codex.core.paths."""
 
 import pytest
 
-from imas_codex.core.paths import (
+from iter_codex.core.paths import (
     _looks_like_path,
     normalize_imas_path,
     section_of,
@@ -274,7 +274,7 @@ class TestNormalizePaths:
 
     @pytest.fixture(autouse=True)
     def _import(self) -> None:
-        from imas_codex.tools.graph_search import _normalize_paths
+        from iter_codex.tools.graph_search import _normalize_paths
 
         self._normalize = _normalize_paths
 

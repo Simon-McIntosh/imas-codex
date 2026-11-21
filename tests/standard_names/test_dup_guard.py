@@ -1,6 +1,6 @@
 """Tests for the deterministic name-key duplicate guard.
 
-Helpers in ``imas_codex.standard_names.canonical`` enumerate the
+Helpers in ``iter_codex.standard_names.canonical`` enumerate the
 lexical-variant set for a candidate name and look up colliding
 ``StandardName.id`` values via Cypher. No LLM, no vector search.
 """
@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.canonical import (
+from iter_codex.standard_names.canonical import (
     find_name_key_duplicate,
     lexical_variants,
     name_key_normalise,
@@ -165,7 +165,7 @@ class TestFindNameKeyDuplicate:
         importing the module's namespace and confirming no llm/litellm
         attribute is referenced. (Compile-time / signature check — the
         tests above already exercise behaviour with only a graph mock.)"""
-        import imas_codex.standard_names.canonical as canon
+        import iter_codex.standard_names.canonical as canon
 
         src = open(canon.__file__).read()
         assert "litellm" not in src

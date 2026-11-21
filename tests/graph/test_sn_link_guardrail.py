@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.graph.sn_link_guardrail import (
+from iter_codex.graph.sn_link_guardrail import (
     SNLinkCounts,
     capture_sn_link_counts,
     check_sn_links_safe,

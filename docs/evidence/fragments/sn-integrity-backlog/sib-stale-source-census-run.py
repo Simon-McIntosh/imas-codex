@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at e3d2f9f4aa66ad04b3db831c41130d8f4073723c, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.sources.dd.
+# Names the tree no longer defines: iter_codex.standard_names.sources.dd.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Read-only census of stale DD sources using the live extraction selector."""
@@ -17,12 +17,12 @@ from datetime import UTC, datetime
 from html import escape
 from pathlib import Path
 
-from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.sources import dd
-from imas_codex.standard_names.sources.base import SourceCandidate
-from imas_codex.standard_names.sources.dd_qualifier import qualify_dd
-from imas_codex.standard_names.unit_overrides import resolve_unit
+from iter_codex.core.node_categories import SN_SOURCE_CATEGORIES
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.sources import dd
+from iter_codex.standard_names.sources.base import SourceCandidate
+from iter_codex.standard_names.sources.dd_qualifier import qualify_dd
+from iter_codex.standard_names.unit_overrides import resolve_unit
 
 HERE = Path(__file__).resolve().parent
 DATA = HERE / "sib-stale-source-census.json"
@@ -436,8 +436,8 @@ def main() -> None:
             "mode": "production selector with force=True, followed by unit resolution and qualify_dd",
             "rows": positive,
         },
-        "selector_owner": "imas_codex.standard_names.sources.dd.extract_dd_candidates",
-        "stale_writer": "imas_codex.standard_names.graph_ops.mark_sources_stale",
+        "selector_owner": "iter_codex.standard_names.sources.dd.extract_dd_candidates",
+        "stale_writer": "iter_codex.standard_names.graph_ops.mark_sources_stale",
         "columns": [
             "source_id",
             "ids",

@@ -11,10 +11,10 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.review import cascade, jev_review
-from imas_codex.standard_names.review.audits import AuditReport
-from imas_codex.standard_names.review.checks import load_review_checks
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.review import cascade, jev_review
+from iter_codex.standard_names.review.audits import AuditReport
+from iter_codex.standard_names.review.checks import load_review_checks
 
 PLACEMENT = "equilibrium/time_slice/profiles_1d/poloidal_mode_number"
 CLAIM = "The quantity is the poloidal mode number of the flux surface."

@@ -1,6 +1,6 @@
 """Tests for unified progress section builders.
 
-Tests the composable building blocks in ``imas_codex.discovery.base.progress``
+Tests the composable building blocks in ``iter_codex.discovery.base.progress``
 that all discovery CLIs share:
     - ``build_pipeline_section`` (unified pipeline: progress bars + activity)
     - ``build_resource_section`` (TIME, COST, TOTAL, STATS)
@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 from rich.text import Text
 
-from imas_codex.discovery.base.progress import (
+from iter_codex.discovery.base.progress import (
     LABEL_WIDTH,
     METRICS_WIDTH,
     PipelineRowConfig,
@@ -566,7 +566,7 @@ class TestDisplayClassIntegration:
         """WikiProgressDisplay._build_display() produces a Panel."""
         from rich.panel import Panel
 
-        from imas_codex.discovery.wiki.progress import WikiProgressDisplay
+        from iter_codex.discovery.wiki.progress import WikiProgressDisplay
 
         display = WikiProgressDisplay(facility="test", cost_limit=1.0, console=None)
         # Seed some state
@@ -580,7 +580,7 @@ class TestDisplayClassIntegration:
         """DataProgressDisplay._build_display() produces a Panel."""
         from rich.panel import Panel
 
-        from imas_codex.discovery.signals.progress import DataProgressDisplay
+        from iter_codex.discovery.signals.progress import DataProgressDisplay
 
         display = DataProgressDisplay(facility="test", cost_limit=1.0, console=None)
         display.state.total_signals = 50
@@ -592,7 +592,7 @@ class TestDisplayClassIntegration:
         """ParallelProgressDisplay._build_display() produces a Panel."""
         from rich.panel import Panel
 
-        from imas_codex.discovery.paths.progress import ParallelProgressDisplay
+        from iter_codex.discovery.paths.progress import ParallelProgressDisplay
 
         display = ParallelProgressDisplay(facility="test", cost_limit=1.0, console=None)
         display.state.total = 100
@@ -602,7 +602,7 @@ class TestDisplayClassIntegration:
 
     def test_wiki_display_scan_only_renders(self):
         """Wiki display in scan_only mode skips SCORE/PAGE sections."""
-        from imas_codex.discovery.wiki.progress import WikiProgressDisplay
+        from iter_codex.discovery.wiki.progress import WikiProgressDisplay
 
         display = WikiProgressDisplay(facility="test", cost_limit=1.0, scan_only=True)
         panel = display._build_display()
@@ -620,7 +620,7 @@ class TestBuildServersSection:
     """Tests for build_servers_section error label rendering."""
 
     def _status(self, **kwargs):
-        from imas_codex.discovery.base.services import ServiceState, ServiceStatus
+        from iter_codex.discovery.base.services import ServiceState, ServiceStatus
 
         defaults = {
             "name": "llm",
@@ -631,14 +631,14 @@ class TestBuildServersSection:
         return ServiceStatus(**defaults)
 
     def test_healthy_shows_detail(self):
-        from imas_codex.discovery.base.services import ServiceState
+        from iter_codex.discovery.base.services import ServiceState
 
         s = self._status(state=ServiceState.healthy, detail="titan")
         result = build_servers_section([s])
         assert "titan" in result.plain
 
     def test_unknown_shows_pending(self):
-        from imas_codex.discovery.base.services import ServiceState
+        from iter_codex.discovery.base.services import ServiceState
 
         s = self._status(state=ServiceState.unknown)
         result = build_servers_section([s])
@@ -711,7 +711,7 @@ class TestBuildServersSection:
         assert build_servers_section(None) is None
 
     def test_healthy_with_load_indicator(self):
-        from imas_codex.discovery.base.services import ServiceState
+        from iter_codex.discovery.base.services import ServiceState
 
         s = self._status(state=ServiceState.healthy, detail="iter ↑62%")
         result = build_servers_section([s])
@@ -720,7 +720,7 @@ class TestBuildServersSection:
         assert "↑62%" in plain
 
     def test_healthy_without_load_indicator(self):
-        from imas_codex.discovery.base.services import ServiceState
+        from iter_codex.discovery.base.services import ServiceState
 
         s = self._status(state=ServiceState.healthy, detail="iter")
         result = build_servers_section([s])
@@ -737,7 +737,7 @@ class TestWikiDisplayTransient:
 
     def test_live_not_transient(self):
         """Live display should persist after exit (transient=False)."""
-        from imas_codex.discovery.wiki.progress import WikiProgressDisplay
+        from iter_codex.discovery.wiki.progress import WikiProgressDisplay
 
         display = WikiProgressDisplay(facility="test", cost_limit=1.0)
         display.__enter__()
@@ -755,7 +755,7 @@ class TestStageDisplaySpec:
     """Tests for StageDisplaySpec dataclass."""
 
     def test_defaults(self):
-        from imas_codex.discovery.base.progress import StageDisplaySpec
+        from iter_codex.discovery.base.progress import StageDisplaySpec
 
         spec = StageDisplaySpec("SCAN", "bold blue", "scan", "scan_stats")
         assert spec.name == "SCAN"
@@ -767,7 +767,7 @@ class TestStageDisplaySpec:
         assert spec.disabled_msg == "disabled"
 
     def test_with_phase(self):
-        from imas_codex.discovery.base.progress import StageDisplaySpec
+        from iter_codex.discovery.base.progress import StageDisplaySpec
 
         spec = StageDisplaySpec(
             "VLM", "bold magenta", "vlm", "vlm_stats", "vlm_phase", disabled=True
@@ -780,7 +780,7 @@ class TestDataDrivenProgressDisplay:
     """Tests for the data-driven progress display."""
 
     def _make_display(self, stages=None, **kwargs):
-        from imas_codex.discovery.base.progress import (
+        from iter_codex.discovery.base.progress import (
             DataDrivenProgressDisplay,
             StageDisplaySpec,
         )
@@ -824,7 +824,7 @@ class TestDataDrivenProgressDisplay:
         """Pipeline renders stats from engine state."""
         from dataclasses import dataclass, field
 
-        from imas_codex.discovery.base.progress import WorkerStats
+        from iter_codex.discovery.base.progress import WorkerStats
 
         @dataclass
         class MockState:
@@ -841,7 +841,7 @@ class TestDataDrivenProgressDisplay:
 
     def test_pipeline_disabled_stage(self):
         """Disabled stages are excluded from rendered pipeline."""
-        from imas_codex.discovery.base.progress import StageDisplaySpec
+        from iter_codex.discovery.base.progress import StageDisplaySpec
 
         stages = [
             StageDisplaySpec("FETCH", "bold blue", "image", "image_stats"),
@@ -862,7 +862,7 @@ class TestDataDrivenProgressDisplay:
     def test_resources_section_with_cost(self):
         from dataclasses import dataclass, field
 
-        from imas_codex.discovery.base.progress import WorkerStats
+        from iter_codex.discovery.base.progress import WorkerStats
 
         @dataclass
         class MockState:

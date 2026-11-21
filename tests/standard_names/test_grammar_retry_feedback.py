@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.worker_tasks.worker_common import (
+from iter_codex.standard_names.worker_tasks.worker_common import (
     _build_grammar_retry_reason,
     _grammar_round_trip_failures,
 )
@@ -124,27 +124,27 @@ class TestRescuedGapCarriesAReason:
     """A gap rescued from pydantic validation records why, not that."""
 
     def test_reason_names_the_slot_for_an_operator(self):
-        from imas_codex.standard_names.models import _gap_reason
+        from iter_codex.standard_names.models import _gap_reason
 
         reason = _gap_reason("qualifier", "square")
         assert "operator" in reason.lower()
         assert "qualifier" in reason
 
     def test_reason_is_not_a_restatement_of_the_fields(self):
-        from imas_codex.standard_names.models import _gap_reason
+        from iter_codex.standard_names.models import _gap_reason
 
         reason = _gap_reason("qualifier", "square")
         assert reason != "LLM proposed unregistered qualifier token"
 
     def test_absent_token_reason_states_the_deficiency(self):
-        from imas_codex.standard_names.models import _gap_reason
+        from iter_codex.standard_names.models import _gap_reason
 
         reason = _gap_reason("physical_base", "zzz_unknown_xyzzy")
         assert "zzz_unknown_xyzzy" in reason
         assert reason.strip()
 
     def test_rescued_gap_in_a_batch_has_a_nonempty_reason(self):
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         batch = StandardNameComposeBatch.model_validate(
             {

@@ -21,12 +21,12 @@ from unittest.mock import MagicMock, patch
 import click
 import pytest
 
-from imas_codex.cli.discover.signals import (
+from iter_codex.cli.discover.signals import (
     SignalsStageOptions,
     _validate_focus,
     run_signals_stage,
 )
-from imas_codex.discovery.signals.parallel import (
+from iter_codex.discovery.signals.parallel import (
     build_focus_predicate,
     claim_signals_for_check,
     claim_signals_for_enrichment,
@@ -117,7 +117,7 @@ def test_empty_focus_renders_no_predicate() -> None:
 @pytest.mark.parametrize("claim", CLAIMS)
 def test_focus_reaches_each_claim_query(claim) -> None:
     focus = [SOURCE, SIGNAL, ACCESSOR]
-    with patch("imas_codex.discovery.signals.parallel.GraphClient") as gc_class:
+    with patch("iter_codex.discovery.signals.parallel.GraphClient") as gc_class:
         graph = gc_class.return_value.__enter__.return_value
         graph.query.return_value = []
         claim("jt-60sa", focus_items=focus)
@@ -139,7 +139,7 @@ def test_focus_reaches_each_claim_query(claim) -> None:
 
 @pytest.mark.parametrize("claim", CLAIMS)
 def test_empty_focus_keeps_claim_unfiltered(claim) -> None:
-    with patch("imas_codex.discovery.signals.parallel.GraphClient") as gc_class:
+    with patch("iter_codex.discovery.signals.parallel.GraphClient") as gc_class:
         graph = gc_class.return_value.__enter__.return_value
         graph.query.return_value = []
         claim("jt-60sa", focus_items=[])
@@ -162,7 +162,7 @@ def test_unnamed_source_in_the_same_facility_stays_unclaimed(claim) -> None:
         ]
     )
     with patch(
-        "imas_codex.discovery.signals.parallel.GraphClient", return_value=catalogue
+        "iter_codex.discovery.signals.parallel.GraphClient", return_value=catalogue
     ):
         claim("jt-60sa", focus_items=["src-named"])
 
@@ -178,7 +178,7 @@ def test_named_source_claims_every_member() -> None:
         ]
     )
     with patch(
-        "imas_codex.discovery.signals.parallel.GraphClient", return_value=catalogue
+        "iter_codex.discovery.signals.parallel.GraphClient", return_value=catalogue
     ):
         claim_signals_for_enrichment("jt-60sa", focus_items=["src-named"])
 
@@ -215,7 +215,7 @@ def test_source_array_names_every_member_of_its_source() -> None:
         ]
     )
     with patch(
-        "imas_codex.discovery.signals.parallel.GraphClient", return_value=catalogue
+        "iter_codex.discovery.signals.parallel.GraphClient", return_value=catalogue
     ):
         claim_signals_for_enrichment("jt-60sa", focus_items=["magPbTC10"])
 
@@ -223,7 +223,7 @@ def test_source_array_names_every_member_of_its_source() -> None:
 
 
 def test_validate_focus_names_the_unknown_item() -> None:
-    with patch("imas_codex.graph.GraphClient") as gc_class:
+    with patch("iter_codex.graph.GraphClient") as gc_class:
         gc_class.return_value.__enter__.return_value.query.return_value = [
             {"id": "known-source", "accessor": None, "data_source_path": None}
         ]
@@ -235,7 +235,7 @@ def test_validate_focus_names_the_unknown_item() -> None:
 
 
 def test_stage_refuses_an_unknown_focus_item() -> None:
-    with patch("imas_codex.graph.GraphClient") as gc_class:
+    with patch("iter_codex.graph.GraphClient") as gc_class:
         gc_class.return_value.__enter__.return_value.query.return_value = []
         with pytest.raises(click.UsageError) as excinfo:
             run_signals_stage("jt-60sa", SignalsStageOptions(focus=("ghost",)))
@@ -259,25 +259,25 @@ def test_stage_passes_focus_items_without_changing_topic(monkeypatch) -> None:
         return asyncio.run(async_main(asyncio.Event(), None))
 
     monkeypatch.setattr(
-        "imas_codex.cli.discover.signals._validate_focus", lambda facility, items: None
+        "iter_codex.cli.discover.signals._validate_focus", lambda facility, items: None
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda facility: {"ssh_host": "jt-60sa", "data_systems": {}},
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.scanners.base.get_scanners_for_facility",
+        "iter_codex.discovery.signals.scanners.base.get_scanners_for_facility",
         lambda facility: [MagicMock(scanner_type="edas")],
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.ensure_remote_environment", lambda config: None
+        "iter_codex.cli.discover.common.ensure_remote_environment", lambda config: None
     )
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.run_discovery", fake_run_discovery
+        "iter_codex.cli.discover.common.run_discovery", fake_run_discovery
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.parallel.run_parallel_data_discovery",
+        "iter_codex.discovery.signals.parallel.run_parallel_data_discovery",
         fake_engine,
     )
 

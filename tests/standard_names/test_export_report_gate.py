@@ -5,8 +5,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from imas_codex.standard_names.catalog_release import run_review_release
-from imas_codex.standard_names.export import ExportReport, GateResult
+from iter_codex.standard_names.catalog_release import run_review_release
+from iter_codex.standard_names.export import ExportReport, GateResult
 
 
 def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -69,7 +69,7 @@ def test_unsuccessful_export_stops_assembly_and_publication(
         raise AssertionError("publication must not consume a failed export")
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.export.assemble_review_catalog",
+        "iter_codex.standard_names.export.assemble_review_catalog",
         unexpected_assembly,
     )
 

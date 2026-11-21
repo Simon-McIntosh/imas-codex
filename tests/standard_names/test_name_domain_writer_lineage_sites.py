@@ -2,7 +2,7 @@
 
 Every site in the graph-store lineage modules that sets a standard name's
 ``physics_domain``, its ``source_domains`` or a ``HAS_PHYSICS_DOMAIN`` edge goes
-through :func:`imas_codex.standard_names.domain_decision.write_name_domain`, so
+through :func:`iter_codex.standard_names.domain_decision.write_name_domain`, so
 the three cannot disagree. Each test here plants a name on a disposable graph,
 runs the real site, and reads the three back.
 """
@@ -14,11 +14,11 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import (  # noqa: F401 — wires the graph services
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import (  # noqa: F401 — wires the graph services
     graph_ops,
 )
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_foundation as foundation,
     graph_lineage as lineage,
 )

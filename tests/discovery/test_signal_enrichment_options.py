@@ -6,13 +6,13 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.discovery.base import llm
-from imas_codex.discovery.signals.enrichment import (
+from iter_codex.discovery.base import llm
+from iter_codex.discovery.signals.enrichment import (
     EnrichmentOptions,
     fit_enrichment_prompt,
     get_enrichment_options,
 )
-from imas_codex.discovery.signals.models import SignalEnrichmentBatch
+from iter_codex.discovery.signals.models import SignalEnrichmentBatch
 from tests.discovery.test_signal_enrichment_benchmark import answer
 
 
@@ -44,7 +44,7 @@ def test_each_seat_option_is_explicit_and_other_models_keep_defaults(
     settings, expected
 ):
     with patch(
-        "imas_codex.settings._get_section", return_value={"signal-enrichment": settings}
+        "iter_codex.settings._get_section", return_value={"signal-enrichment": settings}
     ):
         options = get_enrichment_options("local/test")
         assert options.call_kwargs() == expected
@@ -72,7 +72,7 @@ def test_invalid_seat_options_are_refused(settings):
 
 def test_another_local_model_does_not_inherit_the_configured_models_controls():
     with patch(
-        "imas_codex.settings._get_section",
+        "iter_codex.settings._get_section",
         return_value={
             "model": "local/configured",
             "signal-enrichment": {"json-mode": True},
@@ -95,7 +95,7 @@ def test_fitted_prompt_retains_task_enums_valid_wrapper_and_schema_last():
 
 @pytest.mark.asyncio
 async def test_worker_claims_the_configured_batch_size():
-    from imas_codex.discovery.signals import parallel
+    from iter_codex.discovery.signals import parallel
 
     state = parallel.DataDiscoveryState(facility="jt-60sa", scanner_types=[])
     state.facility_config = {}
@@ -107,7 +107,7 @@ async def test_worker_claims_the_configured_batch_size():
 
     with (
         patch(
-            "imas_codex.discovery.signals.enrichment.get_enrichment_options",
+            "iter_codex.discovery.signals.enrichment.get_enrichment_options",
             return_value=EnrichmentOptions(batch_size=3),
         ),
         patch.object(parallel, "prepare_signal_sources", return_value=(0, 0, 0)),
@@ -139,7 +139,7 @@ async def test_worker_renders_fitted_prompt_before_capturing_context(tmp_path):
         patch.object(bench.parallel, "fetch_signal_code_refs", return_value={}),
         patch.object(bench.parallel, "_fetch_code_chunks", return_value=[]),
         patch(
-            "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+            "iter_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
     ):
@@ -150,7 +150,7 @@ async def test_worker_renders_fitted_prompt_before_capturing_context(tmp_path):
             capture_context=True,
             enrichment_options=EnrichmentOptions(fitted_prompt=True),
         )
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     assert record["messages"][0][0]["content"] == fit_enrichment_prompt(
         render_prompt("signals/enrichment")
@@ -542,7 +542,7 @@ def test_abort_retry_delivery_is_not_counted_as_validation_reask():
 async def test_worker_fanout_obeys_only_its_local_seat_limit(
     monkeypatch, model, requested, expected
 ):
-    from imas_codex.discovery.signals import parallel
+    from iter_codex.discovery.signals import parallel
 
     observed = []
 
@@ -559,9 +559,9 @@ async def test_worker_fanout_obeys_only_its_local_seat_limit(
 
     monkeypatch.setattr(parallel.asyncio, "to_thread", preflight)
     monkeypatch.setattr(parallel, "run_discovery_engine", inspect_workers)
-    monkeypatch.setattr("imas_codex.settings.get_model", lambda seat: model)
+    monkeypatch.setattr("iter_codex.settings.get_model", lambda seat: model)
     monkeypatch.setattr(
-        "imas_codex.settings._get_section",
+        "iter_codex.settings._get_section",
         lambda seat: {"model": "local/test", "signal-enrichment": {"max-workers": 3}},
     )
     with pytest.raises(WorkersInspected):
@@ -572,7 +572,7 @@ async def test_worker_fanout_obeys_only_its_local_seat_limit(
 
 
 def test_description_seat_enables_qualified_grounded_recovery():
-    from imas_codex.settings import get_model
+    from iter_codex.settings import get_model
 
     options = get_enrichment_options(get_model("discovery-describe"))
     assert options.grounding and options.review and options.review_thinking

@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at a42c54b8d8bcf63b7b1f343bd203c44e83ec8ce9, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.audits.name_definition_agreement_check.
+# Names the tree no longer defines: iter_codex.standard_names.audits.name_definition_agreement_check.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Run the name-versus-definition review seat over every published name.
@@ -23,10 +23,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-from imas_codex.standard_names.audits import (  # noqa: E402
+from iter_codex.standard_names.audits import (  # noqa: E402
     name_definition_agreement_check,
 )
-from imas_codex.standard_names.review.name_definition_seat import (  # noqa: E402
+from iter_codex.standard_names.review.name_definition_seat import (  # noqa: E402
     judge_name_definitions,
     review_model,
 )
@@ -51,7 +51,7 @@ LIMIT 4000
 
 
 def published_names() -> list[dict]:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as client:
         rows = [dict(row) for row in client.query(PUBLISHED_QUERY)]

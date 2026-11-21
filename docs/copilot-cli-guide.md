@@ -1,7 +1,7 @@
 # GitHub Copilot CLI — Advanced User Guide
 
 > Generated 2026-03-20. For your environment: SSH remote host, zellij tabs,
-> VS Code Remote-SSH sessions, imas-codex project.
+> VS Code Remote-SSH sessions, iter-codex project.
 
 ---
 
@@ -511,7 +511,7 @@ Here's why:
 
 You can run **both** — use Copilot CLI (subscription) for GitHub-integrated
 agentic work, and Claude Code (OpenRouter) for specialized tasks that need
-custom models or the MCP tools specific to your project (like imas-codex).
+custom models or the MCP tools specific to your project (like iter-codex).
 
 ---
 

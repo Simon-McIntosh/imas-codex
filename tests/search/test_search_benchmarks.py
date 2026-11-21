@@ -28,7 +28,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.core.node_categories import (
+from iter_codex.core.node_categories import (
     EMBEDDABLE_CATEGORIES,
     SEARCHABLE_CATEGORIES,
 )
@@ -213,7 +213,7 @@ class TestScopedSearchCache:
 @pytest.fixture(scope="module")
 def graph_client():
     """Module-scoped GraphClient for benchmark tests."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     try:
         client = GraphClient()
@@ -229,23 +229,23 @@ def graph_client():
 def encoder():
     """Fresh encoder matching the graph's 256-dimensional vector index.
 
-    The session-scoped conftest forces IMAS_CODEX_EMBEDDING_LOCATION=local
+    The session-scoped conftest forces ITER_CODEX_EMBEDDING_LOCATION=local
     and uses all-MiniLM-L6-v2 (384-dim) for fast unit tests.  Benchmark
     tests temporarily restore the benchmark location and model. The benchmark
     workflow loads the model locally; SDCC uses the configured embed service.
     """
     import os
 
-    from imas_codex.settings import _get_section
+    from iter_codex.settings import _get_section
 
     # Read the real config from pyproject.toml (not the conftest overrides)
     embed_config = _get_section("embedding")
     real_location = os.environ.get(
-        "IMAS_CODEX_BENCHMARK_EMBEDDING_LOCATION",
+        "ITER_CODEX_BENCHMARK_EMBEDDING_LOCATION",
         embed_config.get("location", ""),
     )
     real_model = os.environ.get(
-        "IMAS_CODEX_BENCHMARK_EMBEDDING_MODEL",
+        "ITER_CODEX_BENCHMARK_EMBEDDING_MODEL",
         embed_config.get("model", ""),
     )
 
@@ -253,14 +253,14 @@ def encoder():
         pytest.skip("No benchmark embedding location configured")
 
     # Temporarily restore production env vars
-    old_location = os.environ.get("IMAS_CODEX_EMBEDDING_LOCATION")
-    old_model = os.environ.get("IMAS_CODEX_EMBEDDING_MODEL")
+    old_location = os.environ.get("ITER_CODEX_EMBEDDING_LOCATION")
+    old_model = os.environ.get("ITER_CODEX_EMBEDDING_MODEL")
     try:
-        os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = real_location
+        os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = real_location
         if real_model:
-            os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = real_model
-        elif "IMAS_CODEX_EMBEDDING_MODEL" in os.environ:
-            del os.environ["IMAS_CODEX_EMBEDDING_MODEL"]
+            os.environ["ITER_CODEX_EMBEDDING_MODEL"] = real_model
+        elif "ITER_CODEX_EMBEDDING_MODEL" in os.environ:
+            del os.environ["ITER_CODEX_EMBEDDING_MODEL"]
 
         enc = load_benchmark_encoder()
         config = enc.config
@@ -281,9 +281,9 @@ def encoder():
     finally:
         # Restore conftest env vars so other tests aren't affected
         if old_location is not None:
-            os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = old_location
+            os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = old_location
         if old_model is not None:
-            os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = old_model
+            os.environ["ITER_CODEX_EMBEDDING_MODEL"] = old_model
 
 
 @pytest.fixture(scope="module")
@@ -295,8 +295,8 @@ def embed_available(encoder) -> bool:
 @pytest.fixture(scope="module")
 def search_tool(graph_client, encoder):
     """GraphSearchTool backed by the live graph."""
-    from imas_codex.tools import graph_search
-    from imas_codex.tools.graph_search import GraphSearchTool
+    from iter_codex.tools import graph_search
+    from iter_codex.tools.graph_search import GraphSearchTool
 
     prior_encoder = graph_search._encoder
     graph_search._encoder = encoder
@@ -345,7 +345,7 @@ def _extract_paths_from_vector(
     search_evaluation_cache,
 ) -> list[str]:
     """Run vector-only search and return path IDs in ranked order."""
-    from imas_codex.tools.query_analysis import QueryAnalyzer
+    from iter_codex.tools.query_analysis import QueryAnalyzer
 
     analyzer = QueryAnalyzer()
     intent = analyzer.analyze(query)
@@ -403,7 +403,7 @@ def _extract_paths_from_text(
     graph_client, query: str, limit: int, search_evaluation_cache
 ) -> list[str]:
     """Run text-only search (BM25 + CONTAINS) and return path IDs."""
-    from imas_codex.tools.graph_search import _text_search_dd_paths
+    from iter_codex.tools.graph_search import _text_search_dd_paths
 
     retrieval_limit = max(limit, 50)
 

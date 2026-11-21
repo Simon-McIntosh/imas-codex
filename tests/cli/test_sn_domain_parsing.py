@@ -1,4 +1,4 @@
-"""Unit tests for the ``--domain`` CLI flag on ``imas-codex sn run``.
+"""Unit tests for the ``--domain`` CLI flag on ``iter-codex sn run``.
 
 The flag must support three formats:
 1. Repeated:        ``--domain equilibrium --domain core_profiles``
@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import _split_whitespace, sn
+from iter_codex.cli.sn import _split_whitespace, sn
 
 # ---------------------------------------------------------------------------
 # Pure unit tests for the _split_whitespace callback
@@ -85,7 +85,7 @@ def _invoke_run(runner: CliRunner, extra_args: list[str]) -> tuple[int, list[str
     def fake_run_loop(**kwargs):
         captured.append(list(kwargs.get("domains", ())))
 
-    with patch("imas_codex.cli.sn._run_sn_cmd", side_effect=fake_run_loop):
+    with patch("iter_codex.cli.sn._run_sn_cmd", side_effect=fake_run_loop):
         result = runner.invoke(
             sn, ["run", "--dry-run"] + extra_args, catch_exceptions=False
         )

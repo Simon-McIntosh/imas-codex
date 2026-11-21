@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.mappings import (
+from iter_codex.mappings import (
     PathMap,
     PathMapping,
     RenameHistoryEntry,

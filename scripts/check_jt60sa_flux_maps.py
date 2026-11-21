@@ -1,7 +1,7 @@
 """Inventory and verify readable JT-60SA equilibrium grids on nakasvr26.
 
 Run this script on the analysis host with read_equilibrium_file.py beside it,
-or from a checkout with imas_codex importable. Collection walks only readable
+or from a checkout with iter_codex importable. Collection walks only readable
 entries under /home and /analysis_DB, and never follows directory symlinks.
 """
 
@@ -14,7 +14,7 @@ import struct
 from collections import Counter
 
 try:
-    from imas_codex.remote.scripts.read_equilibrium_file import (
+    from iter_codex.remote.scripts.read_equilibrium_file import (
         read_grid as read_equilibrium_grid,
     )
 except ModuleNotFoundError:

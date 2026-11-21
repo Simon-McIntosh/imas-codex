@@ -16,8 +16,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from imas_codex.standard_names.benchmark import BenchmarkConfig, _run_model
-from imas_codex.standard_names.models import StandardNameComposeBatch
+from iter_codex.standard_names.benchmark import BenchmarkConfig, _run_model
+from iter_codex.standard_names.models import StandardNameComposeBatch
 
 # A minimal compose context: the render is lenient, so undefined schema
 # variables collapse to empty. The test is about what the harness supplies,
@@ -63,7 +63,7 @@ async def _capture_prompt(config: BenchmarkConfig) -> str:
         return StandardNameComposeBatch(candidates=[], skipped=[]), 0.0, 0
 
     with patch(
-        "imas_codex.discovery.base.llm.acall_llm_structured",
+        "iter_codex.discovery.base.llm.acall_llm_structured",
         side_effect=_mock_llm,
     ):
         await _run_model(
@@ -83,7 +83,7 @@ async def test_block_on_prompt_carries_the_neighbour() -> None:
     config = BenchmarkConfig(models=["test"], comparator_block=True)
 
     with patch(
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
         return_value=list(_NEIGHBOURS),
     ):
         prompt = await _capture_prompt(config)
@@ -106,11 +106,11 @@ async def test_rerank_switch_reorders_the_carried_block() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
             return_value=list(_NEIGHBOURS),
         ),
         patch(
-            "imas_codex.standard_names.context.comparator_rerank_enabled",
+            "iter_codex.standard_names.context.comparator_rerank_enabled",
             return_value=False,
         ),
     ):
@@ -118,15 +118,15 @@ async def test_rerank_switch_reorders_the_carried_block() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
             return_value=list(_NEIGHBOURS),
         ),
         patch(
-            "imas_codex.standard_names.context.comparator_rerank_enabled",
+            "iter_codex.standard_names.context.comparator_rerank_enabled",
             return_value=True,
         ),
         patch(
-            "imas_codex.standard_names.context.rerank_name_comparators",
+            "iter_codex.standard_names.context.rerank_name_comparators",
             new=AsyncMock(return_value=(reversed_neighbours, 0.0, "")),
         ),
     ):
@@ -149,7 +149,7 @@ async def test_block_off_render_matches_the_base_revision() -> None:
     The base revision supplied no ``nearby_existing_names``; the off path must
     reproduce that render exactly so switching the field off changes nothing.
     """
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     config = BenchmarkConfig(models=["test"])
     prompt = await _capture_prompt(config)
@@ -171,8 +171,8 @@ async def test_block_off_render_matches_the_base_revision() -> None:
 
 def test_named_source_paths_drive_extraction() -> None:
     """A named source list is what extraction composes, not the reference set."""
-    from imas_codex.standard_names.benchmark import _extract_candidates
-    from imas_codex.standard_names.sources.base import ExtractionBatch
+    from iter_codex.standard_names.benchmark import _extract_candidates
+    from iter_codex.standard_names.sources.base import ExtractionBatch
 
     named_paths = ["equilibrium/time_slice/profiles_1d/psi", "magnetics/b_field"]
     fake_batch = ExtractionBatch(
@@ -191,7 +191,7 @@ def test_named_source_paths_drive_extraction() -> None:
     config = BenchmarkConfig(models=["test"], source_paths=named_paths)
 
     with patch(
-        "imas_codex.standard_names.sources.dd.extract_dd_candidates",
+        "iter_codex.standard_names.sources.dd.extract_dd_candidates",
         side_effect=_fake_extract,
     ):
         batches = _extract_candidates(config)

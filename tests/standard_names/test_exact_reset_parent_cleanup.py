@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog_reset as _owning_graph_catalog_reset,
     graph_foundation as _owning_graph_foundation,
 )
@@ -53,7 +53,7 @@ def _graph(
 
 
 def _clear(graph: MagicMock, **kwargs) -> int:
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     with patch.object(_owning_graph_foundation, "GraphClient", return_value=graph):
         return _owning_graph_catalog_reset.clear_standard_names(**kwargs)
@@ -262,10 +262,10 @@ def test_shared_parent_and_multi_edge_cardinality_is_distinct() -> None:
 
 def test_reset_only_dry_run_reports_exact_cleanup_count() -> None:
     """The CLI executes the read-only preview instead of skipping reset logic."""
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_catalog_reset.clear_standard_names",
+        "iter_codex.standard_names.graph_store.graph_catalog_reset.clear_standard_names",
         return_value=2,
     ) as clear:
         result = CliRunner().invoke(

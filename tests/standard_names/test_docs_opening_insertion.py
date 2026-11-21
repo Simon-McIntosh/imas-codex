@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names import workers
-from imas_codex.standard_names.models import GeneratedDocs, RefinedDocs
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names import workers
+from iter_codex.standard_names.models import GeneratedDocs, RefinedDocs
+from iter_codex.standard_names.worker_tasks import (
     worker_generate_docs as _owning_worker_generate_docs,
     worker_refine_docs as _owning_worker_refine_docs,
 )
@@ -47,22 +47,22 @@ def _persisted_documentation(name: str, documentation: str, writer: str) -> str:
     persist = MagicMock()
     with (
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             return_value=(result, 0.0, {}),
         ),
-        patch("imas_codex.graph.client.GraphClient", return_value=graph),
-        patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
-        patch("imas_codex.settings.get_model", return_value="test/model"),
+        patch("iter_codex.graph.client.GraphClient", return_value=graph),
+        patch("iter_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
+        patch("iter_codex.settings.get_model", return_value="test/model"),
         patch(
-            "imas_codex.standard_names.example_loader.load_compose_examples",
+            "iter_codex.standard_names.example_loader.load_compose_examples",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence.persist_generated_docs",
+            "iter_codex.standard_names.graph_store.graph_docs_persistence.persist_generated_docs",
             persist,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence.persist_refined_docs",
+            "iter_codex.standard_names.graph_store.graph_docs_persistence.persist_refined_docs",
             persist,
         ),
         patch.object(_owning_worker_generate_docs, "_enrich_for_docs_gen"),

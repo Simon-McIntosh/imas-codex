@@ -14,13 +14,13 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from imas_codex.standard_names.context import (
+from iter_codex.standard_names.context import (
     _doc_opening,
     _path_ids_prefix,
     fetch_review_neighbours,
     fetch_sibling_family,
 )
-from imas_codex.standard_names.defaults import (
+from iter_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
 from tests.standard_names.test_pattern_families import (
@@ -48,7 +48,7 @@ def test_fetch_review_neighbours_no_graph_returns_empty_lists():
     def _raise(*_a, **_kw):
         raise RuntimeError("graph unavailable")
 
-    with patch("imas_codex.graph.client.GraphClient", side_effect=_raise):
+    with patch("iter_codex.graph.client.GraphClient", side_effect=_raise):
         out = fetch_review_neighbours(
             {
                 "id": "electron_temperature",
@@ -108,7 +108,7 @@ def test_fetch_review_neighbours_dispatch_and_limits():
     ]
 
     with patch(
-        "imas_codex.standard_names.search.search_standard_names_vector",
+        "iter_codex.standard_names.search.search_standard_names_vector",
         return_value=fake_vector,
     ):
         out = fetch_review_neighbours(
@@ -144,7 +144,7 @@ def test_fetch_review_neighbours_skips_lookups_for_missing_fields():
     """Missing physical_base / source_paths skip the corresponding queries."""
     gc = _FakeGC(base_rows=[], path_rows=[])
     with patch(
-        "imas_codex.standard_names.search.search_standard_names_vector",
+        "iter_codex.standard_names.search.search_standard_names_vector",
         return_value=[],
     ):
         out = fetch_review_neighbours(
@@ -164,7 +164,7 @@ def test_fetch_review_neighbours_grammar_segments_fallback():
     """``physical_base`` from grammar_segments is honoured when top-level is absent."""
     gc = _FakeGC(base_rows=[], path_rows=[])
     with patch(
-        "imas_codex.standard_names.search.search_standard_names_vector",
+        "iter_codex.standard_names.search.search_standard_names_vector",
         return_value=[],
     ):
         fetch_review_neighbours(
@@ -223,12 +223,12 @@ def test_sibling_family_and_select_anchor_agree_on_a_score_tie():
     """Both readers break a score tie by id, never by description length.
 
     ``fetch_sibling_family`` and
-    :func:`~imas_codex.standard_names.families.select_anchor` are one anchor
+    :func:`~iter_codex.standard_names.families.select_anchor` are one anchor
     rule, so they name the same member for the same family. The retired
     length tie-break preferred the longer description and disagreed with the
     harmonize command's anchor.
     """
-    from imas_codex.standard_names.families import select_anchor
+    from iter_codex.standard_names.families import select_anchor
 
     gc = _flux_fixture()
     # The parent is not accepted, so the anchor is chosen among the siblings.
@@ -310,7 +310,7 @@ class _LocusGC:
 
 
 def test_locus_neighbours_rank_by_shared_path_depth_and_normalise_prefix():
-    from imas_codex.standard_names.context import fetch_locus_neighbours
+    from iter_codex.standard_names.context import fetch_locus_neighbours
 
     rows = [
         {"id": "volume_of_flux_surface", "shared_depth": 3},
@@ -340,6 +340,6 @@ def test_locus_neighbours_rank_by_shared_path_depth_and_normalise_prefix():
 
 
 def test_locus_neighbours_returns_nothing_without_a_source_path():
-    from imas_codex.standard_names.context import fetch_locus_neighbours
+    from iter_codex.standard_names.context import fetch_locus_neighbours
 
     assert fetch_locus_neighbours([]) == []

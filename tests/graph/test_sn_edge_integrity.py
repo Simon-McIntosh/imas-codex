@@ -29,7 +29,7 @@ _TERMINAL_STAGES = ["superseded", "exhausted", "contested"]
 
 def _connect_and_count_accepted():
     """Return (GraphClient, accepted_count) or raise on connection failure."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = GraphClient()
     rows = gc.query(
@@ -118,7 +118,7 @@ class TestStandardNameEdgeIntegrity:
 
         ``source_paths`` stores canonical URI entries (``dd:<path>`` for DD
         paths, ``<facility>:<id>`` for signals — see
-        ``imas_codex/standard_names/source_paths.py``), so both edge sides are
+        ``iter_codex/standard_names/source_paths.py``), so both edge sides are
         compared in that URI form: an IMASNode id is prefixed ``dd:``, and a
         StandardNameSource contributes its ``id`` (already the URI). Structural
         ``derived:`` sources are provenance, not source entities, and are
@@ -198,7 +198,7 @@ class TestStandardNameEdgeIntegrity:
         erased. Known unit disagreements are intentionally dropped-and-triaged,
         so they are excluded by the oracle. After a run this must be empty.
         """
-        from imas_codex.graph.sn_link_guardrail import missing_projection_edges
+        from iter_codex.graph.sn_link_guardrail import missing_projection_edges
 
         missing = missing_projection_edges(gc)
         assert not missing, (
@@ -224,7 +224,7 @@ class TestStandardNameEdgeIntegrity:
         the DD build, not SN edge-integrity defects, so they are out of scope
         here. Uses ``units_agree`` so curated equivalences/bugs are honoured.
         """
-        from imas_codex.units.dd_unit_exceptions import units_agree
+        from iter_codex.units.dd_unit_exceptions import units_agree
 
         rows = gc.query(
             """

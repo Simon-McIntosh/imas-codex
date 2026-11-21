@@ -11,7 +11,7 @@ from typing import Any
 
 import numpy as np
 
-from imas_codex.plotting import save_figure as _save_figure
+from iter_codex.plotting import save_figure as _save_figure
 
 
 @dataclass(frozen=True)
@@ -111,7 +111,7 @@ def plot(signal: Signal, path: Path) -> dict:
     import matplotlib.pyplot as plt
     from matplotlib.ticker import MaxNLocator
 
-    cache = (Path.home() / ".cache" / "imas-codex-codac-uda").resolve()
+    cache = (Path.home() / ".cache" / "iter-codex-codac-uda").resolve()
     path = path.expanduser().resolve()
     if not path.is_relative_to(cache):
         raise ValueError("signal plots must stay in the internal cache directory")

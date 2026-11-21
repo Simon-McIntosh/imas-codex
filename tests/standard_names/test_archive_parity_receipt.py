@@ -13,8 +13,8 @@ from typing import Any
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names import signed_manifest
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names import signed_manifest
 from standard_names.test_archive_reconstruction import (
     _apply,
     _ArchiveGraph,

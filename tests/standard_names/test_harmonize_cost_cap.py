@@ -95,7 +95,7 @@ def _runner_kwargs() -> dict[str, Any]:
 
 def _install_graph_edges(monkeypatch: Any) -> None:
     """Replace the per-family graph edges apply_families touches with no-ops."""
-    from imas_codex.standard_names import harmonize
+    from iter_codex.standard_names import harmonize
 
     monkeypatch.setattr(harmonize, "_record_family_anchor", lambda *a, **k: None)
     monkeypatch.setattr(harmonize, "refuse_recommended_members", lambda *a, **k: {})
@@ -107,8 +107,8 @@ def _install_graph_edges(monkeypatch: Any) -> None:
 
 
 def _apply(drain: _RecordingDrain):
-    from imas_codex.standard_names.campaign import CampaignBudget
-    from imas_codex.standard_names.harmonize import apply_families
+    from iter_codex.standard_names.campaign import CampaignBudget
+    from iter_codex.standard_names.harmonize import apply_families
 
     budget = CampaignBudget(per_batch_cost_cap=_CAP, campaign_cost_ceiling=_CAP)
     return apply_families(

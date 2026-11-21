@@ -10,8 +10,8 @@ from __future__ import annotations
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.graph.data import graph_export
-from imas_codex.graph.temp_neo4j import _build_filter_script, create_facility_dump
+from iter_codex.cli.graph.data import graph_export
+from iter_codex.graph.temp_neo4j import _build_filter_script, create_facility_dump
 
 
 def test_without_dd_needs_a_facility():
@@ -32,9 +32,9 @@ def test_facility_dump_forwards_without_dd(monkeypatch):
             without_dd=without_dd,
         )
 
-    monkeypatch.setattr("imas_codex.graph.temp_neo4j._should_use_slurm", lambda: True)
+    monkeypatch.setattr("iter_codex.graph.temp_neo4j._should_use_slurm", lambda: True)
     monkeypatch.setattr(
-        "imas_codex.graph.temp_neo4j._run_filter_via_slurm", _fake_slurm
+        "iter_codex.graph.temp_neo4j._run_filter_via_slurm", _fake_slurm
     )
     create_facility_dump("in.dump", "demo", "out.dump", without_dd=True)
     assert calls["mode"] == "facility"
@@ -76,8 +76,8 @@ def test_public_registry_answer_makes_the_push_refuse(monkeypatch):
     """A registry that reports the package public stops the push."""
     import click
 
-    from imas_codex.cli.graph import registry as registry_mod
-    from imas_codex.graph import ghcr
+    from iter_codex.cli.graph import registry as registry_mod
+    from iter_codex.graph import ghcr
 
     monkeypatch.setattr(ghcr, "get_package_visibility", lambda *a, **k: "public")
     # The registry refuses the write and keeps reporting public.
@@ -86,7 +86,7 @@ def test_public_registry_answer_makes_the_push_refuse(monkeypatch):
     with pytest.raises(click.ClickException) as excinfo:
         registry_mod._report_plant_package_visibility(
             "ghcr.io/owner",
-            "imas-codex-graph-iter-without-dd",
+            "iter-codex-graph-iter-without-dd",
             None,
             facilities=("iter",),
             without_dd=True,
@@ -97,13 +97,13 @@ def test_public_registry_answer_makes_the_push_refuse(monkeypatch):
 def test_private_registry_answer_is_reported_and_the_push_continues(
     monkeypatch, capsys
 ):
-    from imas_codex.cli.graph import registry as registry_mod
-    from imas_codex.graph import ghcr
+    from iter_codex.cli.graph import registry as registry_mod
+    from iter_codex.graph import ghcr
 
     monkeypatch.setattr(ghcr, "get_package_visibility", lambda *a, **k: "private")
     registry_mod._report_plant_package_visibility(
         "ghcr.io/owner",
-        "imas-codex-graph-iter-without-dd",
+        "iter-codex-graph-iter-without-dd",
         None,
         facilities=("iter",),
         without_dd=True,
@@ -114,8 +114,8 @@ def test_private_registry_answer_is_reported_and_the_push_continues(
 def test_a_facility_export_without_the_plant_flag_skips_the_visibility_report(
     monkeypatch, capsys
 ):
-    from imas_codex.cli.graph import registry as registry_mod
-    from imas_codex.graph import ghcr
+    from iter_codex.cli.graph import registry as registry_mod
+    from iter_codex.graph import ghcr
 
     monkeypatch.setattr(
         ghcr,
@@ -124,7 +124,7 @@ def test_a_facility_export_without_the_plant_flag_skips_the_visibility_report(
     )
     registry_mod._report_plant_package_visibility(
         "ghcr.io/owner",
-        "imas-codex-graph-dd",
+        "iter-codex-graph-dd",
         None,
         facilities=(),
         without_dd=False,
@@ -142,8 +142,8 @@ def test_plant_filter_measures_its_export_and_its_package():
 def test_a_package_that_lost_a_kind_is_refused():
     import click
 
-    from imas_codex.graph.plant_scope import PlantScope
-    from imas_codex.graph.temp_neo4j import _verify_plant_package
+    from iter_codex.graph.plant_scope import PlantScope
+    from iter_codex.graph.temp_neo4j import _verify_plant_package
 
     expected = PlantScope(
         node_labels={"FacilitySignal": 36},
@@ -164,8 +164,8 @@ def test_export_refuses_to_dump_a_mismatched_package(monkeypatch, tmp_path):
     """The export path runs the comparison, so no mismatched package is dumped."""
     import click
 
-    import imas_codex.graph.temp_neo4j as temp_neo4j
-    from imas_codex.graph.plant_scope import PlantScope
+    import iter_codex.graph.temp_neo4j as temp_neo4j
+    from iter_codex.graph.plant_scope import PlantScope
 
     source = tmp_path / "in.dump"
     source.write_bytes(b"")
@@ -208,8 +208,8 @@ def test_the_verify_command_the_script_runs_refuses_a_mismatch():
     import subprocess
     import sys
 
-    from imas_codex.graph.plant_scope import PlantScope
-    from imas_codex.graph.temp_neo4j import VERIFY_SCOPE_PYTHON
+    from iter_codex.graph.plant_scope import PlantScope
+    from iter_codex.graph.temp_neo4j import VERIFY_SCOPE_PYTHON
 
     matched = PlantScope(
         node_labels={"FacilitySignal": 3},

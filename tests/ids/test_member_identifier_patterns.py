@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from imas_codex.ids.handoff import (
+from iter_codex.ids.handoff import (
     _member_identifier,
     _member_patterns,
     build_mapping_handoff,
@@ -78,7 +78,7 @@ def _mmsys_graph() -> MagicMock:
                     "ids_name": "pf_active",
                     "dd_version": "4.1.1",
                     "status": "generated",
-                    "provider": "imas-codex",
+                    "provider": "iter-codex",
                 }
             ]
         if "-[r:POPULATES]->(ip:IMASNode)" in statement:

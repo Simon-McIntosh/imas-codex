@@ -18,8 +18,8 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetExceeded, BudgetManager
-from imas_codex.standard_names.models import (
+from iter_codex.standard_names.budget import BudgetExceeded, BudgetManager
+from iter_codex.standard_names.models import (
     StandardNameQualityReview,
     StandardNameQualityReviewBatch,
     StandardNameQualityScore,
@@ -49,15 +49,15 @@ def _review_response() -> StandardNameQualityReviewBatch:
 
 
 def _run_review(budget_manager, provider):
-    from imas_codex.standard_names.review.pipeline import _review_single_batch
+    from iter_codex.standard_names.review.pipeline import _review_single_batch
 
     with (
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             return_value="mocked prompt",
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=provider,
         ),
     ):

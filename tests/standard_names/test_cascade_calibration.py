@@ -8,8 +8,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from imas_codex.discovery.base.evaluation import bootstrap_interval
-from imas_codex.standard_names.review import cascade, cascade_calibration as cc
+from iter_codex.discovery.base.evaluation import bootstrap_interval
+from iter_codex.standard_names.review import cascade, cascade_calibration as cc
 
 
 def test_matched_cutoff_and_mapped_score_cross_at_consumer_threshold():
@@ -91,9 +91,9 @@ def test_a_missing_receipt_names_the_receipt_it_could_not_read():
 
 _MODULE_PATH = (
     Path(__file__).resolve().parents[2]
-    / "imas_codex/standard_names/review/cascade_calibration.py"
+    / "iter_codex/standard_names/review/cascade_calibration.py"
 )
-_CALLER_ROOTS = ("imas_codex", "tests")
+_CALLER_ROOTS = ("iter_codex", "tests")
 
 
 def _definitions(source):

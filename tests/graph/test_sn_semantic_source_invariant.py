@@ -23,7 +23,7 @@ moved one mirror and stranded another, so the ledger no longer answers "what
 supports this name?" consistently.
 
 The check itself lives with the operations it guards
-(:func:`imas_codex.standard_names.provenance_lifecycle.find_semantic_source_invariant_violations`);
+(:func:`iter_codex.standard_names.provenance_lifecycle.find_semantic_source_invariant_violations`);
 this module is what gives it signal.
 
 If the graph has fewer than 10 accepted StandardName nodes the module is skipped
@@ -36,7 +36,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.provenance_lifecycle import (
+from iter_codex.standard_names.provenance_lifecycle import (
     find_semantic_source_invariant_violations,
 )
 

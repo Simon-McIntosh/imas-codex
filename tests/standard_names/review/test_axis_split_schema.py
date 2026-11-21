@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_store.graph_catalog import (
+from iter_codex.standard_names.graph_store.graph_catalog import (
     write_docs_review_results,
     write_name_review_results,
 )
@@ -51,7 +51,7 @@ class TestAxisIsolationNameMode:
     def test_name_mode_sets_name_axis_only(self) -> None:
         mock_gc, cm = _capture_cypher_params()
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_name_review_results([_review_entry()])
@@ -81,7 +81,7 @@ class TestAxisIsolationNameMode:
         """Shared aggregate slots have been removed — name writer must not touch them."""
         mock_gc, cm = _capture_cypher_params()
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_name_review_results([_review_entry()])
@@ -112,7 +112,7 @@ class TestAxisIsolationDocsMode:
             ]
         )
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_docs_review_results([_review_entry()])
@@ -146,7 +146,7 @@ class TestAxisIsolationDocsMode:
             ]
         )
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=cm,
         ):
             write_docs_review_results([_review_entry()])
@@ -167,7 +167,7 @@ class TestPresenceGuard:
     """Pipeline guard blocks same-axis overwrite unless --force."""
 
     def test_name_axis_blocked_by_existing_name_axis(self) -> None:
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _axis_overwrite_blocked,
         )
 
@@ -178,7 +178,7 @@ class TestPresenceGuard:
         assert _axis_overwrite_blocked(row, "name") is True
 
     def test_docs_axis_blocked_by_existing_docs_axis(self) -> None:
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _axis_overwrite_blocked,
         )
 
@@ -190,7 +190,7 @@ class TestPresenceGuard:
 
     def test_docs_axis_not_blocked_by_name_axis(self) -> None:
         """Name-axis presence must not block docs-axis write."""
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _axis_overwrite_blocked,
         )
 
@@ -202,7 +202,7 @@ class TestPresenceGuard:
 
     def test_name_axis_not_blocked_by_docs_axis(self) -> None:
         """Docs-axis presence must not block name-axis write."""
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _axis_overwrite_blocked,
         )
 
@@ -213,7 +213,7 @@ class TestPresenceGuard:
         assert _axis_overwrite_blocked(row, "name") is False
 
     def test_empty_row_never_blocks(self) -> None:
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _axis_overwrite_blocked,
         )
 

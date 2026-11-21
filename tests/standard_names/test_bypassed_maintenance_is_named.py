@@ -8,11 +8,11 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.standard_names import loop
-from imas_codex.standard_names.loop import summary_table
+from iter_codex.standard_names import loop
+from iter_codex.standard_names.loop import summary_table
 from tests.standard_names import test_scoped_global_maintenance as scoped_maintenance
 
-_LOOP_LOGGER = "imas_codex.standard_names.loop"
+_LOOP_LOGGER = "iter_codex.standard_names.loop"
 
 
 def _contains_negated_maintenance_bypass(node: ast.expr) -> bool:

@@ -36,13 +36,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
-from imas_codex.standard_names.graph_store import graph_audits as _owning_graph_audits
+from iter_codex.standard_names.attachment_audit import AttachmentAuditResult
+from iter_codex.standard_names.graph_store import graph_audits as _owning_graph_audits
 
-_GO = "imas_codex.standard_names.graph_ops"
-_AA = "imas_codex.standard_names.attachment_audit"
-_DGO = "imas_codex.graph.dd_graph_ops"
-_LOOP = "imas_codex.standard_names.loop"
+_GO = "iter_codex.standard_names.graph_ops"
+_AA = "iter_codex.standard_names.attachment_audit"
+_DGO = "iter_codex.graph.dd_graph_ops"
+_LOOP = "iter_codex.standard_names.loop"
 _PREFIX = "test_source_revival__"
 
 
@@ -53,7 +53,7 @@ _PREFIX = "test_source_revival__"
 
 @pytest.fixture()
 def _gc(disposable_neo4j_uri: str):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     client = GraphClient(
         uri=disposable_neo4j_uri,
@@ -91,7 +91,7 @@ def _clean(_gc):
 @pytest.fixture()
 def _rollback_gc(_gc):
     """Expose one transaction that always rolls back graph semantics tests."""
-    from imas_codex.standard_names.graph_store.graph_foundation import _TransactionQuery
+    from iter_codex.standard_names.graph_store.graph_foundation import _TransactionQuery
 
     with _gc.session() as session:
         tx = session.begin_transaction()
@@ -338,7 +338,7 @@ def _terminal_projection_state(gc, case: dict[str, str]) -> dict:
 @pytest.mark.graph
 def test_open_hint_source_stays_generation_eligible_with_multiple_targets(_gc, _clean):
     """An open hint keeps its source extracted despite another live target."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -371,7 +371,7 @@ def test_open_hint_source_stays_generation_eligible_with_multiple_targets(_gc, _
 @pytest.mark.graph
 def test_ordinary_live_target_still_realigns_source(_gc, _clean):
     """A live target without an open hint repairs an interrupted source."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -395,7 +395,7 @@ def test_ordinary_live_target_still_realigns_source(_gc, _clean):
 @pytest.mark.graph
 def test_terminal_reset_keeps_shared_projection_and_cache(_rollback_gc):
     """A live same-DD source keeps the shared projection and DD cache URI."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -428,7 +428,7 @@ def test_terminal_reset_keeps_shared_projection_and_cache(_rollback_gc):
 @pytest.mark.graph
 def test_projection_ghost_keeps_shared_projection_and_cache(_rollback_gc):
     """Projection-only cleanup clears scalars but keeps live shared DD state."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -457,7 +457,7 @@ def test_projection_ghost_keeps_shared_projection_and_cache(_rollback_gc):
 @pytest.mark.graph
 def test_projection_ghost_removes_only_unshared_dd_state(_rollback_gc):
     """Without live backing, cleanup removes the DD URI but not other paths."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_source_status_liveness,
     )
 
@@ -482,7 +482,7 @@ def test_projection_ghost_removes_only_unshared_dd_state(_rollback_gc):
 
 def test_revive_unit_skipped_sources_returns_counts():
     """Fast return-shape guard: no revivable candidates → zero revived."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         revive_unit_skipped_sources,
     )
 
@@ -498,7 +498,7 @@ def test_revive_unit_skipped_sources_uses_the_extractor_resolver():
     A candidate whose unit the extractor would now accept is revived; the write
     is issued with exactly that source id.
     """
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         revive_unit_skipped_sources,
     )
 
@@ -537,7 +537,7 @@ def test_revive_unit_skipped_sources_uses_the_extractor_resolver():
 
 def test_revive_unit_skipped_sources_no_write_when_nothing_resolves():
     """A candidate whose unit still fails the parse issues no write at all."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         revive_unit_skipped_sources,
     )
 
@@ -568,7 +568,7 @@ def test_revive_unit_skipped_sources_no_write_when_nothing_resolves():
 @pytest.mark.graph
 def test_stale_unit_skip_is_revived(_gc, _clean):
     """A dimensionless unit the resolver now parses returns to 'extracted'."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         revive_unit_skipped_sources,
     )
 
@@ -597,7 +597,7 @@ def test_stale_unit_skip_is_revived(_gc, _clean):
 @pytest.mark.graph
 def test_genuinely_unparseable_unit_is_not_revived(_gc, _clean):
     """A DD-corrupted unit string stays skipped."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         revive_unit_skipped_sources,
     )
 
@@ -619,7 +619,7 @@ def test_genuinely_unparseable_unit_is_not_revived(_gc, _clean):
 @pytest.mark.graph
 def test_permanent_eligibility_skip_is_untouched(_gc, _clean):
     """A non-unit eligibility skip (time coordinate) is a correct exclusion."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         revive_unit_skipped_sources,
     )
 
@@ -647,7 +647,7 @@ def test_permanent_eligibility_skip_is_untouched(_gc, _clean):
 @pytest.mark.graph
 def test_removed_dd_path_is_not_resurrected(_gc, _clean):
     """A skip whose DD node the current DD removed stays skipped."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         revive_unit_skipped_sources,
     )
 
@@ -672,7 +672,7 @@ def test_downstream_status_with_stale_skip_crumb_is_untouched(_gc, _clean):
     ``skip_reason`` survives on sources that later composed/attached — it is an
     audit crumb there, not a block, and reviving would rewind real progress.
     """
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         revive_unit_skipped_sources,
     )
 
@@ -692,7 +692,7 @@ def test_downstream_status_with_stale_skip_crumb_is_untouched(_gc, _clean):
 @pytest.mark.graph
 def test_unit_revival_is_idempotent(_gc, _clean):
     """A second pass at the same resolver revives nothing further."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         revive_unit_skipped_sources,
     )
 
@@ -719,7 +719,7 @@ def test_unit_revival_is_idempotent(_gc, _clean):
 
 def test_vocabulary_signature_is_derived_from_isn():
     """The signature is a stable digest of the live ISN vocabulary."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         isn_vocabulary_signature,
     )
 
@@ -729,7 +729,7 @@ def test_vocabulary_signature_is_derived_from_isn():
 
 def test_vocabulary_signature_tracks_token_changes():
     """Adding a token to the vocabulary changes the signature."""
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     base_ctx = {
         "vocabulary_sections": [{"segment": "physical_base", "tokens": ["pressure"]}],
@@ -762,7 +762,7 @@ def test_vocabulary_signature_tracks_token_changes():
 
 def test_retry_vocab_gap_sources_no_ops_without_isn():
     """Without a resolvable ISN vocabulary the reconcile is a no-op."""
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     mock_gc = MagicMock()
     with patch.object(
@@ -779,7 +779,7 @@ def test_retry_vocab_gap_sources_no_ops_without_isn():
 @pytest.mark.graph
 def test_parked_source_revives_once_on_vocabulary_change(_gc, _clean):
     """A source parked under an older vocabulary retries, then stays put."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         isn_vocabulary_signature,
         retry_vocab_gap_sources_on_grammar_change,
     )
@@ -808,7 +808,7 @@ def test_parked_source_revives_once_on_vocabulary_change(_gc, _clean):
 @pytest.mark.graph
 def test_unstamped_parked_source_revives_once(_gc, _clean):
     """A source parked before signatures existed counts as a vocabulary change."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         retry_vocab_gap_sources_on_grammar_change,
     )
 
@@ -822,7 +822,7 @@ def test_unstamped_parked_source_revives_once(_gc, _clean):
 @pytest.mark.graph
 def test_vocab_gap_retry_is_idempotent_at_a_fixed_vocabulary(_gc, _clean):
     """A second pass at the same vocabulary revives nothing."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         retry_vocab_gap_sources_on_grammar_change,
     )
 
@@ -837,7 +837,7 @@ def test_vocab_gap_retry_is_idempotent_at_a_fixed_vocabulary(_gc, _clean):
 @pytest.mark.graph
 def test_source_parked_at_the_current_vocabulary_stays_parked(_gc, _clean):
     """A source parked under the vocabulary in force is not retried."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         isn_vocabulary_signature,
         retry_vocab_gap_sources_on_grammar_change,
     )
@@ -867,47 +867,47 @@ def _startup_patches(revive_mock: MagicMock, retry_mock: MagicMock) -> list:
 
     return [
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_vocab_gaps",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_vocab_gaps",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.revive_unit_skipped_sources",
+            "iter_codex.standard_names.graph_store.graph_audits.revive_unit_skipped_sources",
             new=revive_mock,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.retry_vocab_gap_sources_on_grammar_change",
+            "iter_codex.standard_names.graph_store.graph_audits.retry_vocab_gap_sources_on_grammar_change",
             new=retry_mock,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_provenance",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_provenance",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_source_status_liveness",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_source_status_liveness",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.retire_unreachable_hint_edits",
+            "iter_codex.standard_names.graph_store.graph_audits.retire_unreachable_hint_edits",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_grammar_segments",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_grammar_segments",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_catalog_status",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_catalog_status",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_cocos_links",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_cocos_links",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_unit_edges",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_unit_edges",
             return_value={"names_realigned": 0, "edges_dropped": 0, "edges_created": 0},
         ),
         patch(
@@ -920,87 +920,87 @@ def _startup_patches(revive_mock: MagicMock, retry_mock: MagicMock) -> list:
             return_value={"checked": 0, "corrected": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_dd_edges",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_dd_edges",
             return_value={"edges_created": 0, "pairs_dropped": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_source_paths",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_source_paths",
             return_value={"names_reconciled": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_reviewable_name_stage",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_reviewable_name_stage",
             return_value={"names_advanced": 0},
         ),
-        patch("imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"),
-        patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.create_sn_run_open"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.release_all_orphan_claims",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.release_all_orphan_claims",
             return_value={"sn": 0, "sns": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
+            "iter_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
+            "iter_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
+            "iter_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.structural_accept_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.structural_accept_derived_parents",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.reconcile_orphan_parent_sources",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.reconcile_orphan_parent_sources",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_doc_links.resolve_doc_links",
+            "iter_codex.standard_names.graph_store.graph_doc_links.resolve_doc_links",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.promote_stranded_reviewed",
+            "iter_codex.standard_names.graph_store.graph_audits.promote_stranded_reviewed",
             return_value={"name": 0, "docs": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.mark_orphaned_standard_name_runs_stale",
+            "iter_codex.standard_names.graph_store.graph_audits.mark_orphaned_standard_name_runs_stale",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+            "iter_codex.standard_names.source_refresh.refresh_drifted_sources",
             return_value={},
         ),
         patch(f"{_LOOP}._seed_all_domains", new=AsyncMock(return_value=0)),
         patch(
-            "imas_codex.standard_names.pools.run_pools",
+            "iter_codex.standard_names.pools.run_pools",
             new_callable=AsyncMock,
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.budget.BudgetManager.start",
+            "iter_codex.standard_names.budget.BudgetManager.start",
             new_callable=AsyncMock,
         ),
         patch(
-            "imas_codex.standard_names.budget.BudgetManager.drain_pending",
+            "iter_codex.standard_names.budget.BudgetManager.drain_pending",
             new_callable=AsyncMock,
             return_value=True,
         ),
         patch(
-            "imas_codex.standard_names.budget.BudgetManager.get_total_spent",
+            "iter_codex.standard_names.budget.BudgetManager.get_total_spent",
             new_callable=AsyncMock,
             return_value=0.0,
         ),
-        patch("imas_codex.graph.client.GraphClient", return_value=mock_gc_ctx),
+        patch("iter_codex.graph.client.GraphClient", return_value=mock_gc_ctx),
     ]
 
 
 @pytest.mark.asyncio
 async def test_run_sn_pools_runs_both_revival_reconciles() -> None:
     """Both revivals run in the startup reconcile every ``sn run`` executes."""
-    from imas_codex.standard_names.loop import run_sn_pools
+    from iter_codex.standard_names.loop import run_sn_pools
 
     revive_mock = MagicMock(return_value={"checked": 3, "revived": 2})
     retry_mock = MagicMock(return_value={"checked": 5, "revived": 4})

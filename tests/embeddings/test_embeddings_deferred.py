@@ -2,8 +2,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.embeddings.embeddings import Embeddings
-from imas_codex.search.document_store import DocumentStore
+from iter_codex.embeddings.embeddings import Embeddings
+from iter_codex.search.document_store import DocumentStore
 
 
 def _mock_encoder(model_name: str = "all-MiniLM-L6-v2"):
@@ -22,10 +22,10 @@ def _mock_encoder(model_name: str = "all-MiniLM-L6-v2"):
 
 
 def test_embeddings_encoder_config_exposed(monkeypatch):
-    monkeypatch.setenv("IMAS_CODEX_EMBEDDING_LOCATION", "local")
+    monkeypatch.setenv("ITER_CODEX_EMBEDDING_LOCATION", "local")
     ds = DocumentStore()
     with patch(
-        "imas_codex.embeddings.embeddings.Encoder", return_value=_mock_encoder()
+        "iter_codex.embeddings.embeddings.Encoder", return_value=_mock_encoder()
     ):
         emb = Embeddings(document_store=ds, load_embeddings=False)
     cfg = emb.encoder_config
@@ -33,11 +33,11 @@ def test_embeddings_encoder_config_exposed(monkeypatch):
 
 
 def test_embeddings_lazy_build(monkeypatch):
-    monkeypatch.setenv("IMAS_CODEX_EMBEDDING_LOCATION", "local")
+    monkeypatch.setenv("ITER_CODEX_EMBEDDING_LOCATION", "local")
 
     ds = DocumentStore()
     with patch(
-        "imas_codex.embeddings.embeddings.Encoder",
+        "iter_codex.embeddings.embeddings.Encoder",
         return_value=_mock_encoder(),
     ):
         emb = Embeddings(document_store=ds, load_embeddings=False)

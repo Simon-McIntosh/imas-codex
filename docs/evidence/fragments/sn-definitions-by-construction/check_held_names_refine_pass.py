@@ -28,8 +28,8 @@ import importlib.util
 import json
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.source_reads import count_live_names_without_source
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.source_reads import count_live_names_without_source
 
 HERE = Path(__file__).resolve().parent
 EVIDENCE = HERE / "held-names-refine-pass.json"

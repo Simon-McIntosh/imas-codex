@@ -8,8 +8,8 @@ It also reports the deterministic self-link baseline (its score is
 ``1 - is_self_link``) and the paired difference ``AUC(Jev) - AUC(baseline)``,
 and a shuffled-label negative control whose interval should contain 0.5.
 
-The metrics are :func:`imas_codex.discovery.base.evaluation.roc_auc` and
-:func:`imas_codex.discovery.base.evaluation.bootstrap_interval`; this driver
+The metrics are :func:`iter_codex.discovery.base.evaluation.roc_auc` and
+:func:`iter_codex.discovery.base.evaluation.bootstrap_interval`; this driver
 owns the population split, the label contract and the report, not the AUC.
 
 Usage::
@@ -26,7 +26,7 @@ from typing import Any
 
 import numpy as np
 
-from imas_codex.discovery.base.evaluation import bootstrap_interval, roc_auc
+from iter_codex.discovery.base.evaluation import bootstrap_interval, roc_auc
 
 SHEET = Path(__file__).with_name("ssog-link-label-sheet.json")
 LABELS_COMMIT = "9867930cd"

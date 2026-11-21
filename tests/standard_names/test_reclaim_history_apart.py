@@ -16,9 +16,9 @@ import json
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import edit
-from imas_codex.standard_names.edit import apply_edit
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import edit
+from iter_codex.standard_names.edit import apply_edit
 
 pytestmark = pytest.mark.graph
 

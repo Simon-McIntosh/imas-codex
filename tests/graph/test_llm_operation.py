@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from imas_codex.graph.llm_operation import LLMUsage, apply_llm_operation
+from iter_codex.graph.llm_operation import LLMUsage, apply_llm_operation
 
 
 class TestLLMUsage:

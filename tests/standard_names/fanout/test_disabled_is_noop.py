@@ -6,10 +6,10 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.fanout.config import FanoutSettings
-from imas_codex.standard_names.fanout.dispatcher import run_fanout
-from imas_codex.standard_names.fanout.schemas import CandidateContext, FanoutScope
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.fanout.config import FanoutSettings
+from iter_codex.standard_names.fanout.dispatcher import run_fanout
+from iter_codex.standard_names.fanout.schemas import CandidateContext, FanoutScope
 
 
 class _MockGraphClient:
@@ -43,7 +43,7 @@ class TestDisabledIsNoop:
             raise AssertionError("LLM must not be called when disabled")
 
         monkeypatch.setattr(
-            "imas_codex.discovery.base.llm.acall_llm_structured", _explode
+            "iter_codex.discovery.base.llm.acall_llm_structured", _explode
         )
         gc = _MockGraphClient()
         evidence = await run_fanout(
@@ -64,7 +64,7 @@ class TestDisabledIsNoop:
             raise AssertionError("LLM must not be called when site disabled")
 
         monkeypatch.setattr(
-            "imas_codex.discovery.base.llm.acall_llm_structured", _explode
+            "iter_codex.discovery.base.llm.acall_llm_structured", _explode
         )
         gc = _MockGraphClient()
         evidence = await run_fanout(
@@ -85,7 +85,7 @@ class TestDisabledIsNoop:
             raise AssertionError("LLM must not be called for unknown site")
 
         monkeypatch.setattr(
-            "imas_codex.discovery.base.llm.acall_llm_structured", _explode
+            "iter_codex.discovery.base.llm.acall_llm_structured", _explode
         )
         gc = _MockGraphClient()
         evidence = await run_fanout(

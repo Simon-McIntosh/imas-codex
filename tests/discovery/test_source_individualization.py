@@ -23,8 +23,8 @@ from __future__ import annotations
 
 import asyncio
 
-from imas_codex.discovery.signals import parallel
-from imas_codex.discovery.signals.models import (
+from iter_codex.discovery.signals import parallel
+from iter_codex.discovery.signals.models import (
     SignalSourceCodeUnwind,
     SignalSourceCodeUnwindBatch,
 )
@@ -174,7 +174,7 @@ def _wire(monkeypatch, graph):
         )
         return batch, 0.0, 0
 
-    import imas_codex.discovery.base.llm as llm
+    import iter_codex.discovery.base.llm as llm
 
     monkeypatch.setattr(llm, "acall_llm_structured", _llm)
 

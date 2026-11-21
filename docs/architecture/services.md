@@ -1,6 +1,6 @@
 # Service Management
 
-IMAS Codex manages two independent services that can be started, stopped, and
+ITER Codex manages two independent services that can be started, stopped, and
 scaled independently. Each service has its own CLI group with a unified
 `start` command that auto-detects the deployment mode.
 
@@ -8,23 +8,23 @@ scaled independently. Each service has its own CLI group with a unified
 
 | Service | CLI | Scheduler | Resources | Purpose |
 |---------|-----|-----------|-----------|---------|
-| **Neo4j** | `imas-codex graph` | SLURM (compute) | 4 CPUs, 32 GB, no GPU | Knowledge graph database |
-| **Embed** | `imas-codex embed` | SLURM (compute) | 2 CPUs, 16 GB, N GPUs | GPU-accelerated embedding |
+| **Neo4j** | `iter-codex graph` | SLURM (compute) | 4 CPUs, 32 GB, no GPU | Knowledge graph database |
+| **Embed** | `iter-codex embed` | SLURM (compute) | 2 CPUs, 16 GB, N GPUs | GPU-accelerated embedding |
 
 ## Quick Start
 
 ```bash
 # Start all services
-imas-codex graph start           # Neo4j on SLURM
-imas-codex embed start           # Embed server on SLURM (4 GPUs default)
+iter-codex graph start           # Neo4j on SLURM
+iter-codex embed start           # Embed server on SLURM (4 GPUs default)
 
 # Check status
-imas-codex graph status          # Neo4j health + SLURM resource usage
-imas-codex embed status          # Embed health + GPU info
+iter-codex graph status          # Neo4j health + SLURM resource usage
+iter-codex embed status          # Embed health + GPU info
 
 # Stop all
-imas-codex embed stop
-imas-codex graph stop
+iter-codex embed stop
+iter-codex graph stop
 ```
 
 ## Deployment Architecture
@@ -48,21 +48,21 @@ The command owns deployment — there is no separate submission step to
 perform by hand:
 
 ```
-Usage: imas-codex embed start [OPTIONS]
-Usage: imas-codex graph start [OPTIONS]
+Usage: iter-codex embed start [OPTIONS]
+Usage: iter-codex graph start [OPTIONS]
 ```
 
 The first line is the embedding server; the second is Neo4j. Both usage
-lines are quoted from `imas-codex embed start --help` and `imas-codex graph
+lines are quoted from `iter-codex embed start --help` and `iter-codex graph
 start --help`.
 
 ```
-User: imas-codex embed start
+User: iter-codex embed start
   → _is_compute_target() → True (scheduler=slurm)
   → _submit_service_job("codex-embed", ...)
     → generates the sbatch script
-    → writes it to ~/.local/share/imas-codex/services/codex-embed.sh
-    → sbatch ~/.local/share/imas-codex/services/codex-embed.sh
+    → writes it to ~/.local/share/iter-codex/services/codex-embed.sh
+    → sbatch ~/.local/share/iter-codex/services/codex-embed.sh
   → _wait_for_job("codex-embed")  ← rich spinner + countdown
     → polls squeue until RUNNING
     → health check: curl /health
@@ -72,9 +72,9 @@ User: imas-codex embed start
 The generated script is written beside the service's log rather than to a
 temporary path, so it survives the submission. Read it to see exactly what
 was submitted, and re-submit it verbatim (`sbatch
-~/.local/share/imas-codex/services/codex-embed.sh`) to reproduce a launch
+~/.local/share/iter-codex/services/codex-embed.sh`) to reproduce a launch
 without going through `start` again. Re-running `start` overwrites it under
-the same job name. `imas-codex graph start` works the same way, writing
+the same job name. `iter-codex graph start` works the same way, writing
 `codex-neo4j.sh` beside `codex-neo4j.log`.
 
 Inside the SLURM batch script, the process is the last command (`exec`),
@@ -102,8 +102,8 @@ Use `--foreground` / `-f` to run a service directly in the terminal
 (for debugging or when running inside a SLURM allocation):
 
 ```bash
-imas-codex embed start -f                    # Run embed server directly
-imas-codex embed start -f --gpu 1            # On specific GPU
+iter-codex embed start -f                    # Run embed server directly
+iter-codex embed start -f --gpu 1            # On specific GPU
 ```
 
 When `SLURM_JOB_ID` is set (i.e., already inside a batch script), the
@@ -116,12 +116,12 @@ interaction. Reallocation cycle time is ~18 seconds.
 
 ```bash
 # Start with specific GPU count
-imas-codex embed start -g 2      # 2 GPUs
+iter-codex embed start -g 2      # 2 GPUs
 
 # Reallocate GPUs (stop + restart)
-imas-codex embed restart -g 8    # Scale to 8 GPUs (~18s)
-imas-codex embed restart -g 2    # Scale back to 2 GPUs (~18s)
-imas-codex embed restart         # Reset to default (4 GPUs)
+iter-codex embed restart -g 8    # Scale to 8 GPUs (~18s)
+iter-codex embed restart -g 2    # Scale back to 2 GPUs (~18s)
+iter-codex embed restart         # Reset to default (4 GPUs)
 ```
 
 ### Resource Budget (Titan Partition)
@@ -139,7 +139,7 @@ Single node: 20 CPUs, 250 GB RAM, 8× Tesla P100-16GB
 ### Graph Status
 
 ```bash
-$ imas-codex graph status
+$ iter-codex graph status
 SLURM:
   neo4j: job 1017391 RUNNING on 98dci4-gpu-0002
     Allocated: CPUs: 4/20, Time: 44:09
@@ -155,7 +155,7 @@ Neo4j: running
 ### Embed Status
 
 ```bash
-$ imas-codex embed status
+$ iter-codex embed status
   embed: job 1017494 RUNNING on 98dci4-gpu-0002
     Allocated: CPUs: 2/20, GPUs: 4/8, Time: 0:29
 Server (http://98dci4-gpu-0002.iter.org:18765):
@@ -170,9 +170,9 @@ Server (http://98dci4-gpu-0002.iter.org:18765):
 ### Logs
 
 ```bash
-imas-codex embed logs            # Last 50 lines
-imas-codex embed logs -f         # Follow live
-imas-codex embed logs -n 100     # Last 100 lines
+iter-codex embed logs            # Last 50 lines
+iter-codex embed logs -f         # Follow live
+iter-codex embed logs -n 100     # Last 100 lines
 ```
 
 ## Systemd Service Management
@@ -181,9 +181,9 @@ For persistent services that survive user logout:
 
 ```bash
 # Embed (login node fallback)
-imas-codex embed service install
-imas-codex embed service start
-imas-codex embed service status
+iter-codex embed service install
+iter-codex embed service start
+iter-codex embed service status
 
 ```
 
@@ -193,7 +193,7 @@ imas-codex embed service status
 
 1. **SLURM resources**: Check `squeue -u $USER` — are other jobs consuming GPUs?
 2. **stale jobs**: `scancel <job_id>` any stuck jobs
-3. **Script errors**: `cat ~/.local/share/imas-codex/services/codex-embed.log`
+3. **Script errors**: `cat ~/.local/share/iter-codex/services/codex-embed.log`
 4. **Health check**: `curl http://<compute-node>:18765/health`
 
 ### Model endpoint is unavailable
@@ -201,7 +201,7 @@ imas-codex embed service status
 1. Resolve the seat with `get_model_config()` to identify its serving endpoint.
 2. For a local seat, check the hosting router and the key named by `api-key-env`.
 3. For an OpenRouter seat, check its service-specific `OPENROUTER_API_KEY_<SERVICE>`
-   or the fallback `OPENROUTER_API_KEY_IMAS_CODEX` credential.
+   or the fallback `OPENROUTER_API_KEY_ITER_CODEX` credential.
 4. Use the opt-in live seat tests for completion-level verification; they can
    incur provider charges.
 
@@ -209,7 +209,7 @@ imas-codex embed service status
 
 1. **Lock files**: Check `graph status` for lock warnings
 2. **Memory**: JVM heap defaults to 8-16 GB, check `neo4j.conf`
-3. **Logs**: `cat ~/.local/share/imas-codex/services/codex-neo4j.log`
+3. **Logs**: `cat ~/.local/share/iter-codex/services/codex-neo4j.log`
 
 ### Port conflicts
 
@@ -225,4 +225,4 @@ facility with a non-zero index in `locations` is offset by that index.
 ### Rich output disabled
 
 The spinner/countdown requires a TTY. In pipes, CI, or redirected
-output it falls back to plain text. Force rich with `IMAS_CODEX_RICH=1`.
+output it falls back to plain text. Force rich with `ITER_CODEX_RICH=1`.

@@ -20,7 +20,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
 
 _EVENT = LLMCostEvent(model="test", tokens_in=10, tokens_out=5, phase="test")
 
@@ -45,10 +45,10 @@ async def test_drain_timeout_proceeds():
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
+            "iter_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
             side_effect=_wedged_record,
         ),
-        patch("imas_codex.standard_names.budget._WRITER_CALL_TIMEOUT", 60.0),
+        patch("iter_codex.standard_names.budget._WRITER_CALL_TIMEOUT", 60.0),
     ):
         # Enqueue a write that will wedge
         lease = mgr.reserve(1.0, phase="test")
@@ -113,7 +113,7 @@ async def test_finalize_timeout_no_crash(caplog):
 
 def _capture_signal_handlers(*, display=None):
     """Install handlers on a fake loop and return its captured callbacks."""
-    from imas_codex.cli.shutdown import install_shutdown_handlers
+    from iter_codex.cli.shutdown import install_shutdown_handlers
 
     loop = MagicMock(spec=asyncio.AbstractEventLoop)
     loop.time.return_value = 0.0
@@ -124,7 +124,7 @@ def _capture_signal_handlers(*, display=None):
         callbacks[signal_kind] = callback
 
     loop.add_signal_handler.side_effect = _capture
-    with patch("imas_codex.cli.shutdown.asyncio.get_running_loop", return_value=loop):
+    with patch("iter_codex.cli.shutdown.asyncio.get_running_loop", return_value=loop):
         install_shutdown_handlers(stop_event=stop_event, display=display)
 
     return loop, stop_event, callbacks
@@ -141,7 +141,7 @@ def test_signal_registration_preserves_identity():
 
 def test_signal_fallback_marshals_identity_and_restores_handlers():
     """Fallback callbacks reach the loop and restore process signal ownership."""
-    from imas_codex.cli.shutdown import (
+    from iter_codex.cli.shutdown import (
         _SIGNAL_DEBOUNCE_SECONDS,
         install_shutdown_handlers,
     )
@@ -163,16 +163,16 @@ def test_signal_fallback_marshals_identity_and_restores_handlers():
         return previous_handler
 
     with (
-        patch("imas_codex.cli.shutdown.asyncio.get_running_loop", return_value=loop),
-        patch("imas_codex.cli.shutdown.asyncio.current_task", return_value=owner_task),
+        patch("iter_codex.cli.shutdown.asyncio.get_running_loop", return_value=loop),
+        patch("iter_codex.cli.shutdown.asyncio.current_task", return_value=owner_task),
         patch(
-            "imas_codex.cli.shutdown.signal.signal",
+            "iter_codex.cli.shutdown.signal.signal",
             side_effect=_install_process_handler,
         ),
-        patch("imas_codex.cli.shutdown.asyncio.all_tasks", return_value=set()),
-        patch("imas_codex.cli.shutdown._start_exit_watchdog") as watchdog,
-        patch("imas_codex.cli.shutdown._force_stop_display"),
-        patch("imas_codex.cli.shutdown._force_kill_ssh_pools"),
+        patch("iter_codex.cli.shutdown.asyncio.all_tasks", return_value=set()),
+        patch("iter_codex.cli.shutdown._start_exit_watchdog") as watchdog,
+        patch("iter_codex.cli.shutdown._force_stop_display"),
+        patch("iter_codex.cli.shutdown._force_kill_ssh_pools"),
     ):
         install_shutdown_handlers(stop_event=stop_event)
 
@@ -200,7 +200,7 @@ def test_partial_asyncio_registration_is_rolled_back_before_fallback(
     registration_error,
 ):
     """A failure on the later signal cannot leave the earlier one clobbered."""
-    from imas_codex.cli.shutdown import install_shutdown_handlers
+    from iter_codex.cli.shutdown import install_shutdown_handlers
 
     loop = MagicMock(spec=asyncio.AbstractEventLoop)
     stop_event = MagicMock(spec=asyncio.Event)
@@ -231,14 +231,14 @@ def test_partial_asyncio_registration_is_rolled_back_before_fallback(
     loop.remove_signal_handler.side_effect = _remove_asyncio_handler
 
     with (
-        patch("imas_codex.cli.shutdown.asyncio.get_running_loop", return_value=loop),
-        patch("imas_codex.cli.shutdown.asyncio.current_task", return_value=owner_task),
+        patch("iter_codex.cli.shutdown.asyncio.get_running_loop", return_value=loop),
+        patch("iter_codex.cli.shutdown.asyncio.current_task", return_value=owner_task),
         patch(
-            "imas_codex.cli.shutdown.signal.getsignal",
+            "iter_codex.cli.shutdown.signal.getsignal",
             side_effect=lambda signal_kind: prior_handlers[signal_kind],
         ),
         patch(
-            "imas_codex.cli.shutdown.signal.signal",
+            "iter_codex.cli.shutdown.signal.signal",
             side_effect=_install_process_handler,
         ),
     ):
@@ -269,16 +269,16 @@ def test_first_signal_requests_graceful_shutdown_once(first_signal):
 
 def test_immediate_duplicate_sigint_is_coalesced_without_extending_window():
     """Immediate duplicate SIGINT callbacks count as one operator delivery."""
-    from imas_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
+    from iter_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
 
     loop, stop_event, callbacks = _capture_signal_handlers()
     task = MagicMock(spec=asyncio.Task)
 
     with (
-        patch("imas_codex.cli.shutdown.asyncio.all_tasks", return_value={task}),
-        patch("imas_codex.cli.shutdown._start_exit_watchdog") as watchdog,
-        patch("imas_codex.cli.shutdown._force_stop_display") as stop_display,
-        patch("imas_codex.cli.shutdown._force_kill_ssh_pools") as kill_pools,
+        patch("iter_codex.cli.shutdown.asyncio.all_tasks", return_value={task}),
+        patch("iter_codex.cli.shutdown._start_exit_watchdog") as watchdog,
+        patch("iter_codex.cli.shutdown._force_stop_display") as stop_display,
+        patch("iter_codex.cli.shutdown._force_kill_ssh_pools") as kill_pools,
     ):
         callbacks[signal.SIGINT]()
         loop.time.return_value = _SIGNAL_DEBOUNCE_SECONDS / 2
@@ -309,14 +309,14 @@ def test_immediate_duplicate_sigint_is_coalesced_without_extending_window():
 )
 def test_immediate_mixed_signal_pair_is_coalesced(first_signal, duplicate_signal):
     """An immediate SIGINT/SIGTERM pair is one shutdown request in either order."""
-    from imas_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
+    from iter_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
 
     loop, stop_event, callbacks = _capture_signal_handlers()
 
     with (
-        patch("imas_codex.cli.shutdown._start_exit_watchdog") as watchdog,
-        patch("imas_codex.cli.shutdown._force_stop_display") as stop_display,
-        patch("imas_codex.cli.shutdown._force_kill_ssh_pools") as kill_pools,
+        patch("iter_codex.cli.shutdown._start_exit_watchdog") as watchdog,
+        patch("iter_codex.cli.shutdown._force_stop_display") as stop_display,
+        patch("iter_codex.cli.shutdown._force_kill_ssh_pools") as kill_pools,
     ):
         callbacks[first_signal]()
         loop.time.return_value = _SIGNAL_DEBOUNCE_SECONDS / 2
@@ -330,15 +330,15 @@ def test_immediate_mixed_signal_pair_is_coalesced(first_signal, duplicate_signal
 
 def test_repeated_sigterm_remains_cooperative_at_later_times():
     """SIGTERM never advances a cooperative shutdown to forced shutdown."""
-    from imas_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
+    from iter_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
 
     loop, stop_event, callbacks = _capture_signal_handlers()
 
     with (
-        patch("imas_codex.cli.shutdown._start_exit_watchdog") as watchdog,
-        patch("imas_codex.cli.shutdown._force_stop_display") as stop_display,
-        patch("imas_codex.cli.shutdown._force_kill_ssh_pools") as kill_pools,
-        patch("imas_codex.cli.shutdown.os._exit") as hard_exit,
+        patch("iter_codex.cli.shutdown._start_exit_watchdog") as watchdog,
+        patch("iter_codex.cli.shutdown._force_stop_display") as stop_display,
+        patch("iter_codex.cli.shutdown._force_kill_ssh_pools") as kill_pools,
+        patch("iter_codex.cli.shutdown.os._exit") as hard_exit,
     ):
         callbacks[signal.SIGTERM]()
         loop.time.return_value = _SIGNAL_DEBOUNCE_SECONDS * 2
@@ -355,15 +355,15 @@ def test_repeated_sigterm_remains_cooperative_at_later_times():
 
 def test_ignored_later_sigterm_does_not_extend_debounce_window():
     """An ignored SIGTERM does not delay the next distinct SIGINT transition."""
-    from imas_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
+    from iter_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
 
     loop, _, callbacks = _capture_signal_handlers()
 
     with (
-        patch("imas_codex.cli.shutdown.asyncio.all_tasks", return_value=set()),
-        patch("imas_codex.cli.shutdown._start_exit_watchdog") as watchdog,
-        patch("imas_codex.cli.shutdown._force_stop_display"),
-        patch("imas_codex.cli.shutdown._force_kill_ssh_pools"),
+        patch("iter_codex.cli.shutdown.asyncio.all_tasks", return_value=set()),
+        patch("iter_codex.cli.shutdown._start_exit_watchdog") as watchdog,
+        patch("iter_codex.cli.shutdown._force_stop_display"),
+        patch("iter_codex.cli.shutdown._force_kill_ssh_pools"),
     ):
         callbacks[signal.SIGINT]()
         loop.time.return_value = 10.0
@@ -376,17 +376,17 @@ def test_ignored_later_sigterm_does_not_extend_debounce_window():
 
 def test_later_sigint_forces_shutdown_once():
     """A distinct later SIGINT starts the watchdog and cancels active tasks."""
-    from imas_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
+    from iter_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
 
     display = MagicMock()
     loop, stop_event, callbacks = _capture_signal_handlers(display=display)
     tasks = {MagicMock(spec=asyncio.Task), MagicMock(spec=asyncio.Task)}
 
     with (
-        patch("imas_codex.cli.shutdown.asyncio.all_tasks", return_value=tasks),
-        patch("imas_codex.cli.shutdown._start_exit_watchdog") as watchdog,
-        patch("imas_codex.cli.shutdown._force_stop_display") as stop_display,
-        patch("imas_codex.cli.shutdown._force_kill_ssh_pools") as kill_pools,
+        patch("iter_codex.cli.shutdown.asyncio.all_tasks", return_value=tasks),
+        patch("iter_codex.cli.shutdown._start_exit_watchdog") as watchdog,
+        patch("iter_codex.cli.shutdown._force_stop_display") as stop_display,
+        patch("iter_codex.cli.shutdown._force_kill_ssh_pools") as kill_pools,
     ):
         callbacks[signal.SIGTERM]()
         loop.time.return_value = _SIGNAL_DEBOUNCE_SECONDS * 2
@@ -402,16 +402,16 @@ def test_later_sigint_forces_shutdown_once():
 
 def test_another_later_sigint_hard_exits_with_interrupt_status():
     """The SIGINT following forced shutdown exits immediately with status 130."""
-    from imas_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
+    from iter_codex.cli.shutdown import _SIGNAL_DEBOUNCE_SECONDS
 
     loop, _, callbacks = _capture_signal_handlers()
 
     with (
-        patch("imas_codex.cli.shutdown.asyncio.all_tasks", return_value=set()),
-        patch("imas_codex.cli.shutdown._start_exit_watchdog"),
-        patch("imas_codex.cli.shutdown._force_stop_display"),
-        patch("imas_codex.cli.shutdown._force_kill_ssh_pools"),
-        patch("imas_codex.cli.shutdown.os._exit") as hard_exit,
+        patch("iter_codex.cli.shutdown.asyncio.all_tasks", return_value=set()),
+        patch("iter_codex.cli.shutdown._start_exit_watchdog"),
+        patch("iter_codex.cli.shutdown._force_stop_display"),
+        patch("iter_codex.cli.shutdown._force_kill_ssh_pools"),
+        patch("iter_codex.cli.shutdown.os._exit") as hard_exit,
     ):
         callbacks[signal.SIGINT]()
         loop.time.return_value = _SIGNAL_DEBOUNCE_SECONDS * 2
@@ -424,14 +424,14 @@ def test_another_later_sigint_hard_exits_with_interrupt_status():
 
 def test_normal_completion_does_not_start_watchdog():
     """Completing normally leaves the forced-shutdown watchdog inactive."""
-    from imas_codex.cli.shutdown import safe_asyncio_run
+    from iter_codex.cli.shutdown import safe_asyncio_run
 
     async def _complete():
         return "done"
 
     with (
-        patch("imas_codex.cli.shutdown._start_exit_watchdog") as watchdog,
-        patch("imas_codex.cli.shutdown._force_kill_ssh_pools"),
+        patch("iter_codex.cli.shutdown._start_exit_watchdog") as watchdog,
+        patch("iter_codex.cli.shutdown._force_kill_ssh_pools"),
     ):
         assert safe_asyncio_run(_complete()) == "done"
 

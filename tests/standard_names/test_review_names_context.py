@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 REVIEW_TEMPLATE = "sn/review_names"
 
@@ -236,7 +236,7 @@ def test_review_prompt_minimal_item_no_orphan_headers() -> None:
 
 
 def test_review_pydantic_accepts_null_suggestion() -> None:
-    from imas_codex.standard_names.models import StandardNameQualityReviewNameOnly
+    from iter_codex.standard_names.models import StandardNameQualityReviewNameOnly
 
     payload = {
         "source_id": "core_profiles/profiles_1d/electrons/temperature",
@@ -255,7 +255,7 @@ def test_review_pydantic_accepts_null_suggestion() -> None:
 
 
 def test_review_pydantic_accepts_populated_suggestion() -> None:
-    from imas_codex.standard_names.models import StandardNameQualityReviewNameOnly
+    from iter_codex.standard_names.models import StandardNameQualityReviewNameOnly
 
     payload = {
         "source_id": "core_profiles/profiles_1d/electrons/temperature",
@@ -280,7 +280,7 @@ def test_review_pydantic_accepts_populated_suggestion() -> None:
 
 def test_review_batch_parses_full_sample() -> None:
     """Reviewer-style batch JSON parses cleanly with new fields."""
-    from imas_codex.standard_names.models import (
+    from iter_codex.standard_names.models import (
         StandardNameQualityReviewNameOnlyBatch,
     )
 

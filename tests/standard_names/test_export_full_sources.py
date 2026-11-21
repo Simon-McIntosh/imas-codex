@@ -15,7 +15,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.export import _fetch_sources_for_entry
+from iter_codex.standard_names.export import _fetch_sources_for_entry
 
 
 def _gc_returning(rows: list[dict]) -> MagicMock:

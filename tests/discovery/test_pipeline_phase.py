@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 
-from imas_codex.discovery.base.supervision import PipelinePhase
+from iter_codex.discovery.base.supervision import PipelinePhase
 
 
 class TestPipelinePhase:

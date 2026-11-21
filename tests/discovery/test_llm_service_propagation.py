@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.base.llm import LLM_SERVICE
+from iter_codex.discovery.base.llm import LLM_SERVICE
 
 
 class TestServiceIsKeywordOnly:
@@ -15,7 +15,7 @@ class TestServiceIsKeywordOnly:
     def test_call_llm_structured_rejects_positional_service(self):
         import inspect
 
-        from imas_codex.discovery.base.llm import call_llm_structured
+        from iter_codex.discovery.base.llm import call_llm_structured
 
         sig = inspect.signature(call_llm_structured)
         # service should be keyword-only
@@ -26,7 +26,7 @@ class TestServiceIsKeywordOnly:
     def test_acall_llm_structured_rejects_positional_service(self):
         import inspect
 
-        from imas_codex.discovery.base.llm import acall_llm_structured
+        from iter_codex.discovery.base.llm import acall_llm_structured
 
         sig = inspect.signature(acall_llm_structured)
         param = sig.parameters.get("service")
@@ -36,7 +36,7 @@ class TestServiceIsKeywordOnly:
     def test_call_llm_rejects_positional_service(self):
         import inspect
 
-        from imas_codex.discovery.base.llm import call_llm
+        from iter_codex.discovery.base.llm import call_llm
 
         sig = inspect.signature(call_llm)
         param = sig.parameters.get("service")
@@ -46,7 +46,7 @@ class TestServiceIsKeywordOnly:
     def test_acall_llm_rejects_positional_service(self):
         import inspect
 
-        from imas_codex.discovery.base.llm import acall_llm
+        from iter_codex.discovery.base.llm import acall_llm
 
         sig = inspect.signature(acall_llm)
         param = sig.parameters.get("service")
@@ -57,14 +57,14 @@ class TestServiceIsKeywordOnly:
 class TestServicePropagation:
     """Verify service= is forwarded to _build_kwargs in all public functions."""
 
-    @patch("imas_codex.discovery.base.llm._build_kwargs")
-    @patch("imas_codex.discovery.base.llm.get_api_key", return_value="test-key")
+    @patch("iter_codex.discovery.base.llm._build_kwargs")
+    @patch("iter_codex.discovery.base.llm.get_api_key", return_value="test-key")
     def test_call_llm_structured_forwards_service(
         self, mock_key, mock_build, monkeypatch
     ):
         from pydantic import BaseModel
 
-        from imas_codex.discovery.base.llm import call_llm_structured
+        from iter_codex.discovery.base.llm import call_llm_structured
 
         class Dummy(BaseModel):
             x: int
@@ -105,50 +105,50 @@ class TestServicePropagation:
 class TestPerServiceApiKey:
     """Test get_api_key_for_service per-service key resolution."""
 
-    def test_falls_back_to_imas_codex_key(self, monkeypatch):
-        from imas_codex.discovery.base.llm import get_api_key_for_service
+    def test_falls_back_to_iter_codex_key(self, monkeypatch):
+        from iter_codex.discovery.base.llm import get_api_key_for_service
 
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-default")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-default")
         monkeypatch.delenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", raising=False)
         key = get_api_key_for_service("facility-discovery")
         assert key == "sk-default"
 
     def test_uses_per_service_key_when_set(self, monkeypatch):
-        from imas_codex.discovery.base.llm import get_api_key_for_service
+        from iter_codex.discovery.base.llm import get_api_key_for_service
 
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-default")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-default")
         monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "sk-discovery")
         key = get_api_key_for_service("facility-discovery")
         assert key == "sk-discovery"
 
     def test_untagged_skips_per_service_lookup(self, monkeypatch):
-        from imas_codex.discovery.base.llm import get_api_key_for_service
+        from iter_codex.discovery.base.llm import get_api_key_for_service
 
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-default")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-default")
         monkeypatch.setenv("OPENROUTER_API_KEY_UNTAGGED", "sk-should-not-use")
         key = get_api_key_for_service("untagged")
         assert key == "sk-default"
 
     def test_hyphenated_service_maps_to_underscore_env(self, monkeypatch):
-        from imas_codex.discovery.base.llm import get_api_key_for_service
+        from iter_codex.discovery.base.llm import get_api_key_for_service
 
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-default")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-default")
         monkeypatch.setenv("OPENROUTER_API_KEY_STANDARD_NAMES", "sk-sn")
         key = get_api_key_for_service("standard-names")
         assert key == "sk-sn"
 
     def test_data_dictionary_key(self, monkeypatch):
-        from imas_codex.discovery.base.llm import get_api_key_for_service
+        from iter_codex.discovery.base.llm import get_api_key_for_service
 
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-default")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-default")
         monkeypatch.setenv("OPENROUTER_API_KEY_DATA_DICTIONARY", "sk-dd")
         key = get_api_key_for_service("data-dictionary")
         assert key == "sk-dd"
 
     def test_imas_mapping_key(self, monkeypatch):
-        from imas_codex.discovery.base.llm import get_api_key_for_service
+        from iter_codex.discovery.base.llm import get_api_key_for_service
 
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-default")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-default")
         monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_MAPPING", "sk-mapping")
         key = get_api_key_for_service("imas-mapping")
         assert key == "sk-mapping"

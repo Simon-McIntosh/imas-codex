@@ -16,8 +16,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import promote
-from imas_codex.standard_names.protection import recommended_name_protections
+from iter_codex.standard_names import promote
+from iter_codex.standard_names.protection import recommended_name_protections
 
 _MEMBER = "flux_surface_averaged_electron_density_at_plasma_boundary"
 _PR_URL = "https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3"

@@ -9,8 +9,8 @@
 #
 # Environment variables:
 #   NEO4J_VERSION   - Neo4j version (default: 2026.01.4-community)
-#   NEO4J_PASSWORD  - Neo4j password (default: imas-codex)
-#   NEO4J_DATA_DIR  - Data directory (default: ~/.local/share/imas-codex/neo4j)
+#   NEO4J_PASSWORD  - Neo4j password (default: iter-codex)
+#   NEO4J_DATA_DIR  - Data directory (default: ~/.local/share/iter-codex/neo4j)
 #   NEO4J_SIF_DIR   - Container image directory (default: ~/apptainer)
 #
 # This script:
@@ -24,14 +24,14 @@ set -euo pipefail
 
 # Configuration
 NEO4J_VERSION="${NEO4J_VERSION:-2026.01.4-community}"
-NEO4J_PASSWORD="${NEO4J_PASSWORD:-imas-codex}"
-NEO4J_DATA_DIR="${NEO4J_DATA_DIR:-$HOME/.local/share/imas-codex/neo4j}"
+NEO4J_PASSWORD="${NEO4J_PASSWORD:-iter-codex}"
+NEO4J_DATA_DIR="${NEO4J_DATA_DIR:-$HOME/.local/share/iter-codex/neo4j}"
 NEO4J_SIF_DIR="${NEO4J_SIF_DIR:-$HOME/apptainer}"
 SERVICE_TYPE="${1:---system}"  # Default to system service (works better on WSL)
 
 # Derived paths
 NEO4J_SIF="${NEO4J_SIF_DIR}/neo4j_${NEO4J_VERSION}.sif"
-SERVICE_NAME="imas-codex-neo4j.service"
+SERVICE_NAME="iter-codex-neo4j.service"
 
 echo "=== Neo4j Apptainer Setup ==="
 echo "Neo4j Version: $NEO4J_VERSION"
@@ -62,7 +62,7 @@ fi
 # Step 3: Create neo4j.conf
 echo "Creating neo4j.conf..."
 cat > "${NEO4J_DATA_DIR}/conf/neo4j.conf" << 'EOF'
-# Neo4j configuration for IMAS Codex
+# Neo4j configuration for ITER Codex
 # Memory settings sized for shared HPC login node
 # heap (4g) + pagecache (4g) + JVM overhead fits within 12G systemd limit
 
@@ -112,7 +112,7 @@ DATA_DIR_EXPANDED=$(realpath "$NEO4J_DATA_DIR")
 SIF_EXPANDED=$(realpath "$NEO4J_SIF")
 
 SERVICE_CONTENT="[Unit]
-Description=Neo4j Graph Database (IMAS Codex)
+Description=Neo4j Graph Database (ITER Codex)
 After=network.target
 
 [Service]

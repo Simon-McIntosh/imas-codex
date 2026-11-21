@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.discovery.signals.vocabulary import (
+from iter_codex.discovery.signals.vocabulary import (
     SignalSources,
     VocabularyRules,
     assign_vocabulary,

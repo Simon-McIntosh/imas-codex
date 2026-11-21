@@ -18,7 +18,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.cli.logging import (
+from iter_codex.cli.logging import (
     StructuredFormatter,
     WorkerLogAdapter,
     _parse_since,
@@ -92,7 +92,7 @@ class TestStructuredFormatter:
         """Messages without structured extras use standard format."""
         fmt = StructuredFormatter()
         record = logging.LogRecord(
-            name="imas_codex.test",
+            name="iter_codex.test",
             level=logging.INFO,
             pathname="",
             lineno=0,
@@ -108,7 +108,7 @@ class TestStructuredFormatter:
         """Messages with worker_name extra include it in brackets."""
         fmt = StructuredFormatter()
         record = logging.LogRecord(
-            name="imas_codex.test",
+            name="iter_codex.test",
             level=logging.INFO,
             pathname="",
             lineno=0,
@@ -125,7 +125,7 @@ class TestStructuredFormatter:
         """Messages with both worker and batch extras."""
         fmt = StructuredFormatter()
         record = logging.LogRecord(
-            name="imas_codex.test",
+            name="iter_codex.test",
             level=logging.INFO,
             pathname="",
             lineno=0,
@@ -143,7 +143,7 @@ class TestStructuredFormatter:
         """Messages with signal_id extra include it."""
         fmt = StructuredFormatter()
         record = logging.LogRecord(
-            name="imas_codex.test",
+            name="iter_codex.test",
             level=logging.WARNING,
             pathname="",
             lineno=0,
@@ -160,12 +160,12 @@ class TestSupervisionReexports:
     """Verify WorkerLogAdapter and log_worker_error are importable from supervision."""
 
     def test_worker_log_adapter_from_supervision(self):
-        from imas_codex.discovery.base.supervision import WorkerLogAdapter as WLA
+        from iter_codex.discovery.base.supervision import WorkerLogAdapter as WLA
 
         assert WLA is WorkerLogAdapter
 
     def test_log_worker_error_from_supervision(self):
-        from imas_codex.discovery.base.supervision import (
+        from iter_codex.discovery.base.supervision import (
             log_worker_error as lwe,
         )
 
@@ -245,26 +245,26 @@ def temp_log_dir(tmp_path, monkeypatch):
     log_dir.mkdir()
 
     # Patch LOG_DIR and force local routing (avoid SSH to remote)
-    monkeypatch.setattr("imas_codex.cli.logging.LOG_DIR", log_dir)
-    monkeypatch.setattr("imas_codex.cli.logging._get_log_ssh_host", lambda: None)
+    monkeypatch.setattr("iter_codex.cli.logging.LOG_DIR", log_dir)
+    monkeypatch.setattr("iter_codex.cli.logging._get_log_ssh_host", lambda: None)
 
     # Create test log files
     signals_log = log_dir / "signals_jet.log"
     signals_log.write_text(
-        "2026-03-13 10:00:00 DEBUG    imas_codex.discovery: starting scan\n"
-        "2026-03-13 10:00:01 INFO     imas_codex.discovery: seeded wiki\n"
-        "2026-03-13 10:00:02 INFO     imas_codex.discovery: seeded ppf: 5204 signals\n"
-        "2026-03-13 10:00:03 WARNING  imas_codex.discovery: SSH timeout to jet\n"
-        "2026-03-13 10:00:04 ERROR    imas_codex.discovery: check_worker_2: signal failed\n"
-        "2026-03-13 10:00:05 INFO     imas_codex.discovery: enriched 20 signals\n"
-        "2026-03-13 10:00:06 WARNING  imas_codex.discovery: rate limited\n"
-        "2026-03-13 10:00:07 ERROR    imas_codex.discovery: connection refused\n"
+        "2026-03-13 10:00:00 DEBUG    iter_codex.discovery: starting scan\n"
+        "2026-03-13 10:00:01 INFO     iter_codex.discovery: seeded wiki\n"
+        "2026-03-13 10:00:02 INFO     iter_codex.discovery: seeded ppf: 5204 signals\n"
+        "2026-03-13 10:00:03 WARNING  iter_codex.discovery: SSH timeout to jet\n"
+        "2026-03-13 10:00:04 ERROR    iter_codex.discovery: check_worker_2: signal failed\n"
+        "2026-03-13 10:00:05 INFO     iter_codex.discovery: enriched 20 signals\n"
+        "2026-03-13 10:00:06 WARNING  iter_codex.discovery: rate limited\n"
+        "2026-03-13 10:00:07 ERROR    iter_codex.discovery: connection refused\n"
     )
 
     wiki_log = log_dir / "wiki_tcv.log"
     wiki_log.write_text(
-        "2026-03-13 09:00:00 INFO     imas_codex.wiki: starting wiki scan\n"
-        "2026-03-13 09:01:00 WARNING  imas_codex.wiki: page not found\n"
+        "2026-03-13 09:00:00 INFO     iter_codex.wiki: starting wiki scan\n"
+        "2026-03-13 09:01:00 WARNING  iter_codex.wiki: page not found\n"
     )
 
     return log_dir
@@ -293,8 +293,8 @@ class TestListLogFiles:
     def test_empty_dir(self, tmp_path, monkeypatch):
         empty = tmp_path / "empty_logs"
         empty.mkdir()
-        monkeypatch.setattr("imas_codex.cli.logging.LOG_DIR", empty)
-        monkeypatch.setattr("imas_codex.cli.logging._get_log_ssh_host", lambda: None)
+        monkeypatch.setattr("iter_codex.cli.logging.LOG_DIR", empty)
+        monkeypatch.setattr("iter_codex.cli.logging._get_log_ssh_host", lambda: None)
         files = list_log_files()
         assert files == []
 

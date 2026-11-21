@@ -5,7 +5,7 @@ import time
 
 import pytest
 
-from imas_codex.search.decorators.cache import (
+from iter_codex.search.decorators.cache import (
     CacheEntry,
     SimpleCache,
     build_cache_key,

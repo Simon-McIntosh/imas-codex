@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _DD_CONTEXT_QUERY,
     _enrich_batch_items,
 )
@@ -16,7 +16,7 @@ def _enrich_from_exact_facts(row: dict) -> dict:
     graph.query.side_effect = lambda query, **_params: (
         [row] if query == _DD_CONTEXT_QUERY else []
     )
-    with patch("imas_codex.graph.client.GraphClient") as graph_client:
+    with patch("iter_codex.graph.client.GraphClient") as graph_client:
         graph_client.return_value.__enter__.return_value = graph
         graph_client.return_value.__exit__.return_value = False
         _enrich_batch_items([item])

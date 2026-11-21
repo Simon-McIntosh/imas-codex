@@ -14,12 +14,12 @@ import asyncio
 
 import pytest
 
-from imas_codex.discovery.base.reset import CODE_RESET_SPECS, reset_to_status
-from imas_codex.discovery.code.workers import (
+from iter_codex.discovery.base.reset import CODE_RESET_SPECS, reset_to_status
+from iter_codex.discovery.code.workers import (
     _mark_file_skipped,
     _settle_unclaimable_files,
 )
-from imas_codex.ingestion.pipeline import ingest_files
+from iter_codex.ingestion.pipeline import ingest_files
 
 FACILITY = "jt-60sa"
 GOOD_A = "/analysis/src/eqdb_io.py"
@@ -82,16 +82,16 @@ class _FakeGraph:
 
 def _patch_pipeline(monkeypatch, graph):
     monkeypatch.setattr(
-        "imas_codex.ingestion.pipeline.GraphClient", lambda *a, **k: graph
+        "iter_codex.ingestion.pipeline.GraphClient", lambda *a, **k: graph
     )
-    monkeypatch.setattr("imas_codex.ingestion.pipeline.fetch_remote_files", _fake_fetch)
-    monkeypatch.setattr("imas_codex.graph.meta.gate_ingestion", lambda *a, **k: None)
+    monkeypatch.setattr("iter_codex.ingestion.pipeline.fetch_remote_files", _fake_fetch)
+    monkeypatch.setattr("iter_codex.graph.meta.gate_ingestion", lambda *a, **k: None)
 
 
 def test_one_bad_file_does_not_fail_the_batch(monkeypatch):
     graph = _FakeGraph(failing_path=BAD)
     _patch_pipeline(monkeypatch, graph)
-    monkeypatch.setattr("imas_codex.ingestion.pipeline._split_and_extract", _fake_split)
+    monkeypatch.setattr("iter_codex.ingestion.pipeline._split_and_extract", _fake_split)
 
     stats = asyncio.run(ingest_files(FACILITY, [GOOD_A, BAD, GOOD_B]))
 
@@ -113,7 +113,7 @@ def test_chunkless_file_is_skipped_with_a_reason(monkeypatch):
         return _fake_split(content, language, metadata)
 
     monkeypatch.setattr(
-        "imas_codex.ingestion.pipeline._split_and_extract", _some_chunks
+        "iter_codex.ingestion.pipeline._split_and_extract", _some_chunks
     )
 
     stats = asyncio.run(ingest_files(FACILITY, [GOOD_A, BAD]))
@@ -134,7 +134,7 @@ def test_extraction_failure_is_recorded_per_file(monkeypatch):
             raise ValueError("cannot parse")
         return _fake_split(content, language, metadata)
 
-    monkeypatch.setattr("imas_codex.ingestion.pipeline._split_and_extract", _boom)
+    monkeypatch.setattr("iter_codex.ingestion.pipeline._split_and_extract", _boom)
 
     stats = asyncio.run(ingest_files(FACILITY, [GOOD_A, BAD]))
 
@@ -165,7 +165,7 @@ class _CapturingGraph:
 @pytest.fixture
 def captured(monkeypatch):
     graph = _CapturingGraph()
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda *a, **k: graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda *a, **k: graph)
     return graph
 
 
@@ -194,7 +194,7 @@ def test_settle_unclaimable_files_names_the_line_ceiling(captured):
 def test_settle_unclaimable_files_matches_the_claim_set(captured, monkeypatch):
     """It settles the rows the claim would otherwise admit, not a wider set."""
     monkeypatch.setattr(
-        "imas_codex.config.discovery_config.build_facility_exclusion_filter",
+        "iter_codex.config.discovery_config.build_facility_exclusion_filter",
         lambda facility, alias: (
             f"AND none(excluded IN $excluded_prefixes WHERE {alias}.path "
             "STARTS WITH excluded)",
@@ -219,7 +219,7 @@ def test_settle_unclaimable_files_matches_the_claim_set(captured, monkeypatch):
 
 def test_claim_predicate_excludes_the_oversized_rows(captured):
     """The claim's own predicate is what leaves an oversized file unsettled."""
-    from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
+    from iter_codex.discovery.code.workers import _claim_code_files_for_ingestion
 
     # The claim reads its rows back by token; the fake returns nothing, so this
     # asserts the rendered predicate only.

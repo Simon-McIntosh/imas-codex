@@ -54,23 +54,23 @@ def _refine_patches(answer, *, terminal_stage: dict, calls: list, exhausted: Mag
 
     return (
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_answer,
         ),
-        patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
-        patch("imas_codex.settings.get_model", return_value="model-x"),
+        patch("iter_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
+        patch("iter_codex.settings.get_model", return_value="model-x"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release."
+            "iter_codex.standard_names.graph_store.graph_claim_release."
             "_mark_docs_exhausted",
             exhausted,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "iter_codex.standard_names.graph_store.graph_docs_persistence."
             "persist_refined_docs",
             MagicMock(return_value={"docs_chain_length": 1}),
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "iter_codex.standard_names.graph_store.graph_docs_persistence."
             "release_refine_docs_failed_claims",
             MagicMock(return_value=1),
         ),
@@ -92,8 +92,8 @@ async def test_contradicting_answer_reaches_terminal_state_within_the_bound():
     after the answer arrives.
     """
 
-    from imas_codex.standard_names.models import RefinedDocs
-    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+    from iter_codex.standard_names.models import RefinedDocs
+    from iter_codex.standard_names.worker_tasks.worker_refine_docs import (
         process_refine_docs_batch,
     )
 
@@ -142,8 +142,8 @@ async def test_contradicting_answer_reaches_terminal_state_within_the_bound():
 async def test_refined_description_carries_the_settled_population():
     """A refinement's one-line description states the population it counts."""
 
-    from imas_codex.standard_names.models import RefinedDocs
-    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+    from iter_codex.standard_names.models import RefinedDocs
+    from iter_codex.standard_names.worker_tasks.worker_refine_docs import (
         process_refine_docs_batch,
     )
 
@@ -174,7 +174,7 @@ async def test_refined_description_carries_the_settled_population():
         patches[2],
         patches[3],
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "iter_codex.standard_names.graph_store.graph_docs_persistence."
             "persist_refined_docs",
             persist,
         ),
@@ -193,8 +193,8 @@ async def test_refined_description_carries_the_settled_population():
 async def test_refused_first_draft_reaches_the_terminal_state():
     """A refused first draft is exhausted, not left to be re-claimed."""
 
-    from imas_codex.standard_names.models import GeneratedDocs
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.models import GeneratedDocs
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         process_generate_docs_batch,
     )
 
@@ -225,17 +225,17 @@ async def test_refused_first_draft_reaches_the_terminal_state():
 
     with (
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_respond,
         ),
-        patch("imas_codex.settings.get_model", return_value="model-x"),
+        patch("iter_codex.settings.get_model", return_value="model-x"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release."
+            "iter_codex.standard_names.graph_store.graph_claim_release."
             "_mark_docs_exhausted",
             exhausted,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "iter_codex.standard_names.graph_store.graph_docs_persistence."
             "persist_generated_docs",
             persist,
         ),

@@ -19,15 +19,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.export import _fetch_candidates
-from imas_codex.standard_names.graph_store import graph_catalog as _owning_graph_catalog
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.export import _fetch_candidates
+from iter_codex.standard_names.graph_store import graph_catalog as _owning_graph_catalog
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
-_GC_PATH = "imas_codex.graph.client.GraphClient"
+_GC_PATH = "iter_codex.graph.client.GraphClient"
 
 
 def _make_node(

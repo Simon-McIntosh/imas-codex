@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     _fetch_candidates,
     _fetch_export_population,
     _tombstone_exclusion_clause,
@@ -45,7 +45,7 @@ def _capture(query_builder):
             return client
 
     with patch(
-        "imas_codex.graph.client.GraphClient",
+        "iter_codex.graph.client.GraphClient",
         _EnteringGraphClient,
     ):
         query_builder()

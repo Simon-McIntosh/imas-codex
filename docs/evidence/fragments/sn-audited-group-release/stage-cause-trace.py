@@ -57,9 +57,9 @@ STAGE_OF_CAUSE = {
     "consumer_context_used_as_quantity_domain": "domain_assignment",
 }
 
-NAMES_PROMPT = REPO / "imas_codex/llm/prompts/sn/generate_name_dd_names.md"
-FULL_PROMPT = REPO / "imas_codex/llm/prompts/sn/generate_name_dd.md"
-NAME_SYSTEM = REPO / "imas_codex/llm/prompts/sn/generate_name_system.md"
+NAMES_PROMPT = REPO / "iter_codex/llm/prompts/sn/generate_name_dd_names.md"
+FULL_PROMPT = REPO / "iter_codex/llm/prompts/sn/generate_name_dd.md"
+NAME_SYSTEM = REPO / "iter_codex/llm/prompts/sn/generate_name_system.md"
 
 
 def decode_record(path: Path = RECORD) -> dict:

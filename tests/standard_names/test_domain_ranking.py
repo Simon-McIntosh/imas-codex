@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.standard_names import domain_ranking as dr
+from iter_codex.standard_names import domain_ranking as dr
 
 
 class TestDeclaredOrder:

@@ -35,8 +35,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
-from imas_codex.standard_names.pools import (
+from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from iter_codex.standard_names.pools import (
     POOL_NAMES,
     POOL_WEIGHTS,
     PoolSpec,
@@ -634,7 +634,7 @@ class TestFreePoolBypassesSpendFairness:
         * review pools route to the OpenRouter RD-quorum chain (paid) in the
           default profile, so they are never free.
         """
-        from imas_codex.standard_names.pools import (
+        from iter_codex.standard_names.pools import (
             POOL_NAMES,
             _pool_is_free,
             free_pools,

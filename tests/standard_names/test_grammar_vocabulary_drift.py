@@ -22,8 +22,8 @@ import re
 
 import pytest
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
-from imas_codex.standard_names.context import build_compose_context
+from iter_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
+from iter_codex.standard_names.context import build_compose_context
 
 #: Template that carries the grammar vocabulary. A seat embedding it is asserting
 #: that its model can see the whole grammar.

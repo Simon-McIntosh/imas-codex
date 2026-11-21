@@ -15,10 +15,10 @@ import asyncio
 import logging
 from unittest.mock import MagicMock
 
-import imas_codex.cli.map as map_cli
-import imas_codex.graph.client as gclient
-import imas_codex.ids.graph_ops as graph_ops
-import imas_codex.ids.workers as workers
+import iter_codex.cli.map as map_cli
+import iter_codex.graph.client as gclient
+import iter_codex.ids.graph_ops as graph_ops
+import iter_codex.ids.workers as workers
 
 ZERO = {"mappings": 0, "bindings": 0, "evidence": 0}
 
@@ -141,7 +141,7 @@ def test_engine_logs_zero_counts_unconditionally(monkeypatch, caplog):
     monkeypatch.setattr(workers, "reset_mapping_state", lambda *a, **k: 0)
     monkeypatch.setattr(workers, "run_discovery_engine", fake_run_discovery_engine)
 
-    with caplog.at_level(logging.INFO, logger="imas_codex.ids.workers"):
+    with caplog.at_level(logging.INFO, logger="iter_codex.ids.workers"):
         asyncio.run(workers.run_mapping_engine(_state()))
 
     messages = [r.getMessage() for r in caplog.records]

@@ -28,15 +28,15 @@ from __future__ import annotations
 
 from typing import Any
 
-from imas_codex.standard_names.fanout.dispatcher import _build_proposer_user_prompt
-from imas_codex.standard_names.fanout.schemas import CandidateContext, FanoutScope
-from imas_codex.standard_names.fanout.trigger import (
+from iter_codex.standard_names.fanout.dispatcher import _build_proposer_user_prompt
+from iter_codex.standard_names.fanout.schemas import CandidateContext, FanoutScope
+from iter_codex.standard_names.fanout.trigger import (
     _EXCERPT_MAX_CHARS,
     _EXCERPT_MAX_CHECKS,
     check_results_from_failed_checks,
     should_trigger_fanout,
 )
-from imas_codex.standard_names.review.checks import JevQuestion, ReviewCheck
+from iter_codex.standard_names.review.checks import JevQuestion, ReviewCheck
 
 THRESHOLD = 0.5
 

@@ -36,7 +36,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from imas_codex.standard_names.pools import PoolSpec, run_pools
+from iter_codex.standard_names.pools import PoolSpec, run_pools
 
 # ---------------------------------------------------------------------------
 # Constants

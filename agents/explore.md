@@ -52,7 +52,7 @@ repl("result = setup_tools('tcv'); print(result.summary)")
 repl("print(quick_setup('tcv', required_only=True))")
 ```
 
-Tool definitions are in [`imas_codex/config/remote_tools.yaml`](../imas_codex/config/remote_tools.yaml).
+Tool definitions are in [`iter_codex/config/remote_tools.yaml`](../iter_codex/config/remote_tools.yaml).
 
 ## Execution Patterns
 
@@ -113,7 +113,7 @@ add_to_graph("FacilityPath", [
 
 ## Fast CLI Tools
 
-Tools are defined in [`imas_codex/config/remote_tools.yaml`](../imas_codex/config/remote_tools.yaml).
+Tools are defined in [`iter_codex/config/remote_tools.yaml`](../iter_codex/config/remote_tools.yaml).
 
 | Tool | Purpose | Fallback |
 |------|---------|----------|
@@ -260,4 +260,4 @@ repl("print(run('curl -skL \"https://spcwiki.epfl.ch/wiki/PageName\"', facility=
 After discovering files, hand off to the `ingest` agent:
 1. Queue files: `add_to_graph("SourceFile", [...])`
 2. Use handoff button → "Queue for Ingestion"
-3. Ingest agent runs: `uv run imas-codex ingest run tcv`
+3. Ingest agent runs: `uv run iter-codex ingest run tcv`

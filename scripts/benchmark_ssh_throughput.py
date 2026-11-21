@@ -1,7 +1,7 @@
 """Benchmark: SSH pipe throughput between facilities.
 
 Measures raw data transfer rates through SSH connections, simulating
-what the current imas-codex data pipeline achieves and what a GPU
+what the current iter-codex data pipeline achieves and what a GPU
 training pipeline would need.
 
 Tests:
@@ -37,9 +37,9 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
-# PATH prefix matching imas_codex/remote/executor.py — ensures the
-# imas-codex venv Python (3.12+) is found first on remote hosts.
-_REMOTE_PATH_PREFIX = 'export PATH="$HOME/.local/share/imas-codex/venv/bin:$HOME/bin:$HOME/.local/bin:$PATH"'
+# PATH prefix matching iter_codex/remote/executor.py — ensures the
+# iter-codex venv Python (3.12+) is found first on remote hosts.
+_REMOTE_PATH_PREFIX = 'export PATH="$HOME/.local/share/iter-codex/venv/bin:$HOME/bin:$HOME/.local/bin:$PATH"'
 
 
 def _make_remote_cmd(script_hex: str) -> str:

@@ -7,7 +7,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from imas_codex.discovery.wiki import auth
+from iter_codex.discovery.wiki import auth
 
 
 @pytest.fixture

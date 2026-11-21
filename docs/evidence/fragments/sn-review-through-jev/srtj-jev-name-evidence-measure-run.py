@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 5e242d2bfc914852bb6263361fa6db642504ac28, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.review.cascade, imas_codex.standard_names.review.cascade_calibration, imas_codex.standard_names.workers._DD_CONTEXT_QUERY, imas_codex.standard_names.workers._DOCS_GEN_PARENT_CHILDREN_QUERY.
+# Names the tree no longer defines: iter_codex.standard_names.review.cascade, iter_codex.standard_names.review.cascade_calibration, iter_codex.standard_names.workers._DD_CONTEXT_QUERY, iter_codex.standard_names.workers._DOCS_GEN_PARENT_CHILDREN_QUERY.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Measure name discrimination with live source and family evidence."""
@@ -25,17 +25,17 @@ from unittest.mock import patch
 
 from neo4j import READ_ACCESS, unit_of_work
 
-from imas_codex.discovery.base import evaluation, judgment
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_model
-from imas_codex.standard_names.context import fetch_sibling_family
-from imas_codex.standard_names.dd_resolutions import resolve_dd_row
-from imas_codex.standard_names.review import (
+from iter_codex.discovery.base import evaluation, judgment
+from iter_codex.graph.client import GraphClient
+from iter_codex.settings import get_model
+from iter_codex.standard_names.context import fetch_sibling_family
+from iter_codex.standard_names.dd_resolutions import resolve_dd_row
+from iter_codex.standard_names.review import (
     cascade,
     cascade_calibration as calibration,
     jev_review as jev,
 )
-from imas_codex.standard_names.workers import (
+from iter_codex.standard_names.workers import (
     _DD_CONTEXT_QUERY,
     _DOCS_GEN_PARENT_CHILDREN_QUERY,
 )

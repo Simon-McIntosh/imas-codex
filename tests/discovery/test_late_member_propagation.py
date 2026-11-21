@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.discovery.signals import parallel
+from iter_codex.discovery.signals import parallel
 
 
 class SourceGraph:

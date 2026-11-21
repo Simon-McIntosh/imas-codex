@@ -29,8 +29,8 @@ from pygments import lex
 from pygments.lexers import JsonLexer
 from pygments.styles import get_style_by_name
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.plotting.style import CANVAS, save_figure, use_style
+from iter_codex.graph.client import GraphClient
+from iter_codex.plotting.style import CANVAS, save_figure, use_style
 
 ROOT = Path(__file__).resolve().parents[1]
 LIVE_HANDOFF = Path(
@@ -88,7 +88,7 @@ def check_schema() -> dict[str, Any]:
     classes: dict[str, Any] = {}
     receipts = {}
     for name in SCHEMA_FILES:
-        path = ROOT / "imas_codex/schemas" / name
+        path = ROOT / "iter_codex/schemas" / name
         raw = path.read_bytes()
         classes.update(yaml.safe_load(raw).get("classes", {}))
         receipts[name] = hashlib.sha256(raw).hexdigest()
@@ -301,7 +301,7 @@ def load_handoff(path: Path | None) -> tuple[Path, dict[str, Any], str]:
     source = path or (LIVE_HANDOFF if LIVE_HANDOFF.exists() else FIXTURE)
     document = json.loads(source.read_text())
     if (
-        document.get("format") != "imas-codex-mapping-handoff"
+        document.get("format") != "iter-codex-mapping-handoff"
         or document.get("facility") != FACILITY
     ):
         raise ValueError(f"Unexpected hand-off format/facility: {source}")
@@ -601,21 +601,21 @@ def report_html(receipt: dict[str, Any]) -> str:
         """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="docs-project" content="imas-codex">
+<meta name="docs-project" content="iter-codex">
 <meta name="reckon-type" content="research">
 <meta name="plan-slug" content="discovery-to-mapping-pipeline">
 <meta name="plan-title" content="Discovery to mapping: the JT-60SA hand-off">
-<meta name="plan-summary" content="Live discovery counts, draft mapping provenance and the hand-off boundary between imas-codex and imas-ambix.">
+<meta name="plan-summary" content="Live discovery counts, draft mapping provenance and the hand-off boundary between iter-codex and imas-ambix.">
 <meta name="plan-status" content="reference">
 <meta name="plan-tags" content="jt-60sa">
 <meta name="plan-evidence-for" content="generated-map-handoff">
 <meta name="plan-informs" content="imas-ambix:jt60sa-tokamap-from-generated-maps">
 <meta name="plan-source-quality" content="primary">
-<title>Discovery to mapping | imas-codex</title>
+<title>Discovery to mapping | iter-codex</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 </head><body><main class="plan-doc">
-<header><p class="eyebrow">JT-60SA · imas-codex chapter</p>
+<header><p class="eyebrow">JT-60SA · iter-codex chapter</p>
 <h1>Discovery to mapping</h1>
 <p class="lead">Discovery turns facility files, documentation and signal inventories into graph-backed mapping proposals. A generated mapping is a draft: imas-ambix still has to resolve machine indices, validate the rules against data and write the tokamap directory and IDS.</p></header>"""
     ]

@@ -18,7 +18,7 @@ import asyncio
 
 import pytest
 
-from imas_codex.ingestion.pipeline import ingest_files
+from iter_codex.ingestion.pipeline import ingest_files
 
 FACILITY = "jt-60sa"
 PATH = "/analysis/src/eqdb_io.py"
@@ -99,12 +99,12 @@ class _FakeGraph:
 def fake_graph(monkeypatch):
     graph = _FakeGraph()
     monkeypatch.setattr(
-        "imas_codex.ingestion.pipeline.GraphClient", lambda *a, **k: graph
+        "iter_codex.ingestion.pipeline.GraphClient", lambda *a, **k: graph
     )
     for target, value in (
-        ("imas_codex.ingestion.pipeline.fetch_remote_files", _fake_fetch),
-        ("imas_codex.ingestion.pipeline._split_and_extract", _fake_split),
-        ("imas_codex.graph.meta.gate_ingestion", lambda *a, **k: None),
+        ("iter_codex.ingestion.pipeline.fetch_remote_files", _fake_fetch),
+        ("iter_codex.ingestion.pipeline._split_and_extract", _fake_split),
+        ("iter_codex.graph.meta.gate_ingestion", lambda *a, **k: None),
     ):
         monkeypatch.setattr(target, value)
     return graph
@@ -145,7 +145,7 @@ def test_content_change_supersedes_the_stale_example(fake_graph, monkeypatch):
             yield path, changed, "python"
 
     monkeypatch.setattr(
-        "imas_codex.ingestion.pipeline.fetch_remote_files", _changed_fetch
+        "iter_codex.ingestion.pipeline.fetch_remote_files", _changed_fetch
     )
     asyncio.run(ingest_files(FACILITY, [PATH]))
 
@@ -165,7 +165,7 @@ def test_all_already_ingested_batch_records_each_outcome(fake_graph, monkeypatch
     """
     other = "/analysis/src/mdbget.py"
     monkeypatch.setattr(
-        "imas_codex.ingestion.pipeline._check_already_ingested",
+        "iter_codex.ingestion.pipeline._check_already_ingested",
         lambda gc, facility, paths: ([], list(paths)),
     )
 
@@ -183,7 +183,7 @@ def test_mixed_batch_records_outcomes_for_both_kinds(fake_graph, monkeypatch):
     """A batch of an already-ingested path and a new one reports both outcomes."""
     fresh = "/analysis/src/epics.py"
     monkeypatch.setattr(
-        "imas_codex.ingestion.pipeline._check_already_ingested",
+        "iter_codex.ingestion.pipeline._check_already_ingested",
         lambda gc, facility, paths: (
             [p for p in paths if p == fresh],
             [p for p in paths if p != fresh],

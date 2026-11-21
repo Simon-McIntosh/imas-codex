@@ -1,7 +1,7 @@
 """Guard the widened ``facility_signal_text`` index definition.
 
 The signal full-text index is defined once, as a LinkML annotation on
-``FacilitySignal`` in ``imas_codex/schemas/facility.yaml``, and materialised by
+``FacilitySignal`` in ``iter_codex/schemas/facility.yaml``, and materialised by
 the generated context that ``GraphClient`` reads. A searcher's words live in more
 than the identifier, so the index must cover the catalogue wording, alias code,
 unit and source prose beside the name and node path. The schema definition and
@@ -13,11 +13,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from imas_codex.graph.schema import GraphSchema
-from imas_codex.graph.schema_context_data import FULLTEXT_INDEXES
+from iter_codex.graph.schema import GraphSchema
+from iter_codex.graph.schema_context_data import FULLTEXT_INDEXES
 
 _SCHEMA_PATH = (
-    Path(__file__).resolve().parents[2] / "imas_codex" / "schemas" / "facility.yaml"
+    Path(__file__).resolve().parents[2] / "iter_codex" / "schemas" / "facility.yaml"
 )
 
 INDEX_NAME = "facility_signal_text"

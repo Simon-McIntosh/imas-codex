@@ -13,11 +13,11 @@ from __future__ import annotations
 from contextlib import contextmanager
 from unittest.mock import patch
 
-from imas_codex.standard_names import workers
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names import workers
+from iter_codex.standard_names.worker_tasks import (
     worker_extraction_and_enrichment as _owning_worker_extraction_and_enrichment,
 )
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _MAX_MEMBER_DOCS,
     _enrich_batch_items,
 )
@@ -51,7 +51,7 @@ def _patched_graph(member_docs: list[dict]):
     # GraphClient is imported locally inside _enrich_batch_items. The hybrid
     # batch returns one result per tuple (strict zip) — keep that contract.
     with (
-        patch("imas_codex.graph.client.GraphClient", _cm),
+        patch("iter_codex.graph.client.GraphClient", _cm),
         patch.object(
             _owning_worker_extraction_and_enrichment,
             "_hybrid_search_neighbours_batch",

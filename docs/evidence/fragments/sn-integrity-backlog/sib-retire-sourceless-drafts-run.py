@@ -20,10 +20,10 @@ import json
 import sys
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.repair_authority import build_repair_authority
-from imas_codex.standard_names.source_invariant import find_sourceless_live_names
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.repair_authority import build_repair_authority
+from iter_codex.standard_names.source_invariant import find_sourceless_live_names
+from iter_codex.standard_names.signed_manifest import (
     apply_signed_manifest,
     signed_payload_sha256,
 )

@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.remote import executor
+from iter_codex.remote import executor
 
 
 @pytest.fixture

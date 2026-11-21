@@ -21,19 +21,19 @@ import uuid
 
 import pytest
 
-from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+from iter_codex.standard_names.graph_store.graph_docs_persistence import (
     claim_generate_docs_batch,
     persist_refined_docs,
 )
-from imas_codex.standard_names.graph_store.graph_refinement import (
+from iter_codex.standard_names.graph_store.graph_refinement import (
     claim_refine_name_batch,
     persist_refined_name,
 )
-from imas_codex.standard_names.graph_store.graph_review_persistence import (
+from iter_codex.standard_names.graph_store.graph_review_persistence import (
     persist_reviewed_docs,
     persist_reviewed_name,
 )
-from imas_codex.standard_names.orphan_sweep import _orphan_sweep_tick
+from iter_codex.standard_names.orphan_sweep import _orphan_sweep_tick
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -52,7 +52,7 @@ _CAP = 3  # DEFAULT_REFINE_ROTATIONS
 def _gc():
     """Function-scoped real GraphClient; skip if Neo4j is unreachable."""
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -294,7 +294,7 @@ def _refine_name(gc, old_sn: str, new_sn: str, old_chain: int) -> None:
 
 
 def _generate_docs(gc, sn_id: str) -> None:
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         persist_generated_docs,
     )
 
@@ -509,7 +509,7 @@ def test_e2e_docs_exhausted_keeps_name_accepted(_gc, _clean):
     )
 
     # Exhausted SN must not be claimed by refine_docs (docs_stage != 'reviewed')
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_refine_docs_batch,
     )
 
@@ -520,7 +520,7 @@ def test_e2e_docs_exhausted_keeps_name_accepted(_gc, _clean):
     )
 
     # review_docs must NOT claim this SN (docs_stage='exhausted', not 'drafted')
-    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+    from iter_codex.standard_names.graph_store.graph_review_persistence import (
         claim_review_docs_batch,
     )
 

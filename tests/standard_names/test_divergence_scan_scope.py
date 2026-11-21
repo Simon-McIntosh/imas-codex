@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import detect_divergence
+from iter_codex.standard_names.export import detect_divergence
 
 
 def _make_candidate(

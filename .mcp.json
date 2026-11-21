@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "imas-cx": {
+    "iter-cx": {
       "type": "stdio",
       "command": "uv",
       "args": [
@@ -8,7 +8,7 @@
         "--no-sync",
         "--project",
         "${HOME}/Code/imas-codex",
-        "imas-codex",
+        "iter-codex",
         "serve"
       ]
     }

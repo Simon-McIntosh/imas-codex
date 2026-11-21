@@ -1,0 +1,942 @@
+# Standard-Names Agent Notes
+
+Scoped to `iter_codex/standard_names/**` and `tests/standard_names/**`. Pipeline
+architecture, lifecycle axes, pool semantics and CLI flags live in the repo root
+`AGENTS.md` and `docs/architecture/standard-names.md` — this file holds only what
+you need when *editing these files*.
+
+## Graph identity and joins
+
+`StandardName` is keyed by `id`, whose value is the snake-case standard-name
+identity; the LinkML class marks that slot as the required identifier
+(`StandardName.id`). `StandardNameSource` is keyed
+separately by its required `id`, formed as `source_type + ":" + source_id`: DD
+sources are `dd:<path>`, while facility signals are
+`signals:<facility>:<signal-id>`
+(`StandardNameSource.id`). Do not substitute a
+plausible property name for either schema-owned key.
+
+| Correct: join a `StandardName` on its identifier | Incorrect: join on an undeclared property |
+|---|---|
+| `MATCH (sn:StandardName {id: $standard_name_id})`<br>`RETURN sn.id` | `MATCH (sn:StandardName {name: $standard_name_id})`<br>`RETURN sn.id` |
+
+The incorrect query is especially dangerous because it is valid Cypher. Access
+to a missing property evaluates to `null`, and a filtering predicate that is not
+`true` removes the row, so the query returns an empty result instead of an error
+([Neo4j Cypher Manual: working with null](https://neo4j.com/docs/cypher-manual/current/values-and-types/working-with-null/)).
+Before accepting a zero-row join as a real no-overlap result, report both the
+candidate-node count and key coverage in the same query, and fail closed when
+the proposed key covers no candidates:
+
+```cypher
+MATCH (sn:StandardName)
+RETURN count(sn) AS candidates,
+       count(sn.id) AS candidates_with_id,
+       count(sn.name) AS candidates_with_name
+```
+
+The LinkML slot owns relationship direction. Read every row below as
+`(source)-[:TYPE]->(target)`; do not infer direction from the English relationship
+name, a nearby back-reference property, or whichever endpoint a query starts
+from. A zero live count does not override the declaration. For self-relationships
+such as `StandardName` to `StandardName`, an authored-direction census and the
+same traversal reversed necessarily report the same count because both endpoint
+labels are identical; the schema slot remains the only directional authority.
+
+| Schema class and slot | Authored traversal |
+|---|---|
+| `StandardName.unit` | `(StandardName)-[:HAS_UNIT]->(Unit)` |
+| `StandardName.physics_domain` | `(StandardName)-[:HAS_PHYSICS_DOMAIN]->(PhysicsDomain)` |
+| `StandardName.cocos` | `(StandardName)-[:HAS_COCOS]->(COCOS)` |
+| `StandardName.internal_changes` | `(StandardName)-[:HAS_INTERNAL_CHANGE]->(StandardNameChange)` |
+| `StandardName.grammar_tokens` | `(StandardName)-[:HAS_SEGMENT]->(GrammarToken)` |
+| `StandardName.grammar_physical_base_token` | `(StandardName)-[:HAS_PHYSICAL_BASE]->(GrammarToken)` |
+| `StandardName.grammar_subject_token` | `(StandardName)-[:HAS_SUBJECT]->(GrammarToken)` |
+| `StandardName.grammar_transformation_token` | `(StandardName)-[:HAS_TRANSFORMATION]->(GrammarToken)` |
+| `StandardName.grammar_component_token` | `(StandardName)-[:HAS_COMPONENT]->(GrammarToken)` |
+| `StandardName.grammar_coordinate_token` | `(StandardName)-[:HAS_COORDINATE]->(GrammarToken)` |
+| `StandardName.grammar_process_token` | `(StandardName)-[:HAS_PROCESS]->(GrammarToken)` |
+| `StandardName.grammar_position_token` | `(StandardName)-[:HAS_POSITION]->(GrammarToken)` |
+| `StandardName.grammar_region_token` | `(StandardName)-[:HAS_REGION]->(GrammarToken)` |
+| `StandardName.grammar_device_token` | `(StandardName)-[:HAS_DEVICE]->(GrammarToken)` |
+| `StandardName.grammar_geometric_base_token` | `(StandardName)-[:HAS_GEOMETRIC_BASE]->(GrammarToken)` |
+| `StandardName.grammar_aggregation_token` | `(StandardName)-[:HAS_AGGREGATION]->(GrammarToken)` |
+| `StandardName.grammar_orbit_token` | `(StandardName)-[:HAS_ORBIT]->(GrammarToken)` |
+| `StandardName.grammar_population_token` | `(StandardName)-[:HAS_POPULATION]->(GrammarToken)` |
+| `StandardName.references` | `(StandardName)-[:REFERENCES]->(StandardName)` |
+| `StandardName.parents` | `(StandardName)-[:HAS_PARENT]->(StandardName)` |
+| `StandardName.magnitudes` | `(StandardName)-[:MAGNITUDE_OF]->(StandardName)` |
+| `StandardName.error_siblings` | `(StandardName)-[:HAS_ERROR]->(StandardName)` |
+| `StandardName.predecessor` | `(StandardName)-[:HAS_PREDECESSOR]->(StandardName)` |
+| `StandardName.successor` | `(StandardName)-[:HAS_SUCCESSOR]->(StandardName)` |
+| `StandardName.primary_cluster_ref` | `(StandardName)-[:IN_CLUSTER]->(IMASSemanticCluster)` |
+| `StandardName.reviews` | `(StandardName)-[:HAS_REVIEW]->(StandardNameReview)` |
+| `StandardName.structural_authorities` | `(StandardName)-[:HAS_STRUCTURAL_AUTHORITY]->(StructuralNameAuthority)` |
+| `StandardName.docs_revisions` | `(StandardName)-[:DOCS_REVISION_OF]->(DocsRevision)` |
+| `StandardName.docs_review_admission` | `(StandardName)-[:HAS_DOCS_REVIEW_ADMISSION]->(DocsReviewAdmission)` |
+| `StandardName.refined_from` | `(StandardName)-[:REFINED_FROM]->(StandardName)` |
+| `StandardName.loci` | `(StandardName)-[:HAS_LOCUS]->(Locus)` |
+| `DocsReviewAdmission.created_reviews` | `(DocsReviewAdmission)-[:CREATED_REVIEW]->(StandardNameReview)` |
+| `VocabGap.evidence` | `(VocabGap)-[:HAS_EVIDENCE]->(VocabGapEvidence)` |
+| `DDResolution.evidence` | `(DDResolution)-[:EVIDENCED_BY]->(DDGap)` |
+| `DDResolution.for_dd_version` | `(DDResolution)-[:FOR_DD_VERSION]->(DDVersion)` |
+| `DDGap.observations` | `(DDGap)-[:HAS_OBSERVATION]->(DDGapObservation)` |
+| `DDGap.state_changes` | `(DDGap)-[:HAS_STATE_CHANGE]->(DDGapStateChange)` |
+| `DDGap.identity_changes` | `(DDGap)-[:HAS_IDENTITY_CHANGE]->(DDGapIdentityChange)` |
+| `StandardNameSource.retry_events` | `(StandardNameSource)-[:HAS_RETRY_EVENT]->(StandardNameSourceRetry)` |
+| `StandardNameSource.snapshot_changes` | `(StandardNameSource)-[:HAS_SNAPSHOT_CHANGE]->(StandardNameSourceSnapshotChange)` |
+| `StandardNameSource.identity_repairs` | `(StandardNameSource)-[:HAS_IDENTITY_REPAIR]->(StandardNameSourceIdentityRepair)` |
+| `StandardNameSource.snapshot_adoptions` | `(StandardNameSource)-[:HAS_SNAPSHOT_ADOPTION]->(StandardNameSourceSnapshotAdoption)` |
+| `StandardNameSource.unit_cache_corrections` | `(StandardNameSource)-[:HAS_UNIT_CACHE_CORRECTION]->(StandardNameSourceUnitCacheCorrection)` |
+| `StandardNameSource.snapshot_admissions` | `(StandardNameSource)-[:HAS_SNAPSHOT_ADMISSION]->(StandardNameSourceSnapshotAdmission)` |
+| `StandardNameSource.identity_folds` | `(StandardNameSource)-[:HAS_IDENTITY_FOLD]->(StandardNameSourceIdentityFold)` |
+| `StandardNameSource.authority_retirements` | `(StandardNameSource)-[:HAS_AUTHORITY_RETIREMENT]->(StandardNameSourceAuthorityRetirement)` |
+| `StandardNameSource.dd_path` | `(StandardNameSource)-[:FROM_DD_PATH]->(IMASNode)` |
+| `StandardNameSource.signal` | `(StandardNameSource)-[:FROM_SIGNAL]->(FacilitySignal)` |
+| `StandardNameSource.standard_name` | `(StandardNameSource)-[:PRODUCED_NAME]->(StandardName)` |
+| `StandardNameSource.vocab_gaps` | `(StandardNameSource)-[:HAS_STANDARD_NAME_VOCAB_GAP]->(VocabGap)` |
+| `LLMCost.for_run` | `(LLMCost)-[:FOR_RUN]->(SNRun)` |
+| `PromotionCandidate.evidences` | `(PromotionCandidate)-[:EVIDENCED_BY]->(StandardName)` |
+| `StructuralNameAuthority.children` | `(StructuralNameAuthority)-[:ENTAILED_FROM_CHILD]->(StandardName)` |
+
+Relationship slots are foreign-key properties too: the property value names the
+target node, while the generated graph carries the edge in the direction above.
+The table below also includes scalar mirrors and explicit back-references whose
+schema prose identifies a `StandardName`. It deliberately excludes free-form
+replacement suggestions and generic repair-envelope targets, which need not
+identify an existing `StandardName`.
+
+| Schema class | Slots that reference `StandardName` |
+|---|---|
+| `StandardName` | `StandardName.deprecates`; `StandardName.links`; `StandardName.refine_collision_name`; `StandardName.references`, `StandardName.parents`, `StandardName.magnitudes`, `StandardName.error_siblings`, `StandardName.predecessor`, `StandardName.successor`, `StandardName.refined_from` |
+| `DocsReviewAdmission` | `DocsReviewAdmission.target_id` |
+| `DocsRevision` | `DocsRevision.standard_name_id` |
+| `StandardNameChange` | `StandardNameChange.to_name` when it is the linked name rather than another changed value |
+| `StandardNameSource` | `StandardNameSource.standard_name` (relationship slot), `StandardNameSource.produced_sn_id` (scalar mirror) |
+| `StandardNameSourceAuthorityRetirement` | `StandardNameSourceAuthorityRetirement.removed_target_ids` |
+| `StandardNameSourceRetry` | `StandardNameSourceRetry.terminal_sn_id` |
+| `LLMCost` | `LLMCost.standard_name_ids` |
+| `StandardNameReview` | `StandardNameReview.standard_name_id` |
+| `PromotionCandidate` | `PromotionCandidate.evidences` |
+| `RepairRowIdentity` | `RepairRowIdentity.target_id` when `kind` selects a StandardName target |
+| `StructuralNameAuthority` | `StructuralNameAuthority.accepted_name_id`, `StructuralNameAuthority.child_ids`, `StructuralNameAuthority.children` |
+
+The generic back-reference convention is `standard_name_id` for a scalar and
+`standard_name_ids` for a multivalued property. `StandardName` itself remains
+keyed by `id`; relationship slots with more specific semantics retain the names
+declared in the table. The review axis follows the same schema-to-reader rule:
+`StandardNameReview.review_axis` uses `name` and `docs`, exactly matching the
+paired `_name` and `_docs` slot suffixes.
+
+Aggregation has the same silent-null trap as filtering. `count(property)` and
+`count(DISTINCT property)` ignore `null`, so an undeclared or misremembered
+property produces zero rather than an error. `DocsRevision` is the worked
+example: its back-reference property is `standard_name_id`, and the authored
+edge runs from `StandardName` to `DocsRevision`, not the reverse. The exact
+schema references are `StandardName.docs_revisions` and
+`DocsRevision.standard_name_id`.
+
+```cypher
+MATCH (sn:StandardName)-[:DOCS_REVISION_OF]->(rev:DocsRevision)
+RETURN count(rev) AS revisions,
+       count(DISTINCT rev.standard_name_id) AS revisions_with_the_schema_key,
+       count(DISTINCT rev.name) AS silently_zero_wrong_key
+```
+
+Before trusting any traversal or foreign-key aggregate, confirm both the slot
+name and the authored direction in LinkML, then report the authored and reversed
+counts together. The live verification census must cover every row in the
+relationship table, including zero-count declarations; omitting empty rows
+turns schema drift into apparent success.
+
+## Naming-hygiene keep-list (calibration)
+
+`~/.agents/AGENTS.md` mandates a pre-stage check for plan/stage/bug labels and
+changelog prose in filenames, symbols and comments. Its letter class is
+deliberately generic (`\b[A-Z][0-9]+[A-Za-z]?\b`), so it is noisy here. These
+matches are **legitimate and must be kept** — verified, with the reason:
+
+| Match | Why it stays |
+|---|---|
+| `S0`–`S11` (`sources/dd_qualifier.py`) | A local numbered rule catalogue, each item with its own description. `tests/standard_names/test_dd_qualifier.py` cross-references them **by id** in ~24 docstrings. |
+| `Rule 1`–`Rule 6` (`error_siblings.py`) | Same shape; `test_error_siblings{,_gate}.py` assert on them. |
+| `R1`–`R5` (`vocab_token_filter.py`) | Emitted **into** `TokenVerdict.reason` at runtime (`"R4: token contains digits"`); tests assert the substring. Removing them breaks assertions. |
+| `D{n}` (compose prompt gallery) | Rendered prompt CONTENT — `test_prompt_completeness` counts `f"D{n} —"` in the rendered system prompt. |
+| `rotation_cap` (~40 sites) | A real claim-query kwarg and function parameter. |
+| ISN `rc14`/`rc21`/`rc22`/`rc34`/`rc39`/`rc41` | Dependency version contracts recording when a token became valid or a segment opened. |
+| `--only <phase>`, `phase_caps`, `LLMCost.phase`, `_PHASE_TO_POOL` | `phase` is a real CLI flag and a real budget/cost dimension here. |
+| `W74+`, `W$^{1+}$` | Tungsten charge states in LaTeX descriptions. |
+| `T^2`, `m^-2`, `Wb`, `eV`, `A.m^-2` | Physical units. |
+| `COCOS 17`, `DDv3`/`DDv4` | Real conventions and DD major versions. |
+| `E2E` | "end-to-end". Note the contrast: `E1.`/`E2.` section ids in the *same* file are labels and come out. |
+| `noqa` ids (`E402`, `F841`, `S608`, `D401`) | Lint rule codes. |
+| `T0 = datetime(...)`, `s1`/`s2`, `m0`/`m1`, `h1`/`h2` | Ordinary locals and constants. |
+| `Wave 2D …` in `definitions/clusters/labels.json` | **Physics** — a plasma wave, in two dimensions. Generated cluster labels; a naive `Wave [0-9]` rule corrupts the vocabulary. |
+
+The discriminator that resolved most of the hard cases: **numbering that another
+component references by number is load-bearing**; a plan-wide taxonomy id with no
+adjacent prose is not. Contrast `S0`–`S11` (local, described, asserted on) with
+`_L7_REVISION_MODEL` (a lever id meaning nothing without the taxonomy) — the
+first stays, the second gets renamed to what it does.
+
+## Attachment consistency (source → name)
+
+`workers._is_attachment_consistent` is the single guard deciding whether a DD
+path may realize a standard name. `attachment_audit.py` re-asks it of every
+stored edge and detaches what it rejects, which makes the guard retroactive
+across every writer at once.
+
+**Three of its rules were wrong because a vocabulary was hardcoded in codex and
+had drifted from ISN.** Expect that failure mode; derive from
+`get_grammar_context()` at runtime and add a drift test asserting every ISN token
+in the relevant segment is covered:
+
+- rate-ness is expressed by SUFFIX as well as prefix (`..._source_rate`,
+  `rotation_frequency`), so a name can be rate-natured without a leading
+  `change_in_`/`rate_of_`;
+- the DD uses `_dt` for **deuterium–tritium** as well as d/dt — the genuine
+  derivative form carries a leading `d` on the differentiated quantity
+  (`ddensity_dt_total`, `dphase_dt`);
+- state resolution is ISN's `state` segment (`charge_state`, `internal_state`)
+  plus the `_state`-suffixed subjects — not a fixed tuple.
+
+**Ordered sample positions never enter a name.** This includes
+`first`/`second`/`third` and `start`/`end` endpoint labels whenever the DD
+structure proves they index a point or sample. The ordering may remain in the DD
+path and source description as provenance, but generation, review, and refine
+must all exclude it from identity. Dropping it must preserve the quantity,
+carrier, geometry representation, owner, axis, mechanism, and locus. If that
+non-ordinal carrier or locus is unavailable in the public grammar, emit the
+exact vocabulary gap; never borrow `line_of_sight` or another object's token.
+Registered semantic tokens such as `first_wall`, and state/process uses of
+`start` or `end`, are not positional and must remain. Consequently
+`…/line_of_sight/{first,second,third,start,end}_point/r` shares one name, so
+`_vector_fields_conflict` must not treat ordered samples of one object as
+distinct vector fields. Genuinely distinct fields (a camera's `direction` vs
+`up`) and distinct geometry primitives (`rectangle` center vs `oblique`
+reference corner) still conflict.
+
+**A pairwise rule must be applied with compose semantics.** Compose accumulates
+only ACCEPTED siblings, so one representative of a conflicting group survives;
+passing every sibling to every row rejects the whole group. Applied
+order-independently once, that would have stripped 127 names of every source.
+
+**A whole-name wipeout is a NAME defect, not an attachment defect.** When every
+source of a name fails the same rule the sources are consistently grouped and the
+NAME is wrong — repair with `sn edit`, never by detaching, which would orphan the
+name and rewind its sources to paid recomposition.
+
+### Write paths
+
+The guard is consulted at compose time. Paths that migrate a source set onto a
+**different** name — the refine-successor migration, and the exclusive rebind /
+retarget used by the edit cascade — need it at write time too: the set is
+historical but the *pairing* is new, and a new pairing is what the guard exists
+to judge. Paths that re-establish an edge against the **same** name (the
+provenance reattach, the orphan-parent repair) must NOT be gated: gating a repair
+with a rule that never governed the creation turns silent loss into permanent
+loss, and the retroactive pass will detach a genuinely bad pair *with* an audit
+record, which is the correct order.
+
+A geometry-representation rule is still missing: a path under
+`…/geometry/{thick_line,outline,rectangle,oblique,arcs_of_circle}/…` describes a
+conductor cross-section, not an optical path, and must not realize a
+`line_of_sight`/`beam` name. Both sides are metres, so the dimensionality rule is
+silent and the guard currently accepts these.
+
+## Units are DD-authoritative
+
+The model never supplies `unit`, `cocos` or `physics_domain` — all three are
+injected post-LLM. Consequences when a unit looks wrong:
+
+- **Fix the DD side, not the name.** `units/dd_unit_exceptions.yaml` is the single
+  registry. Most entries only *suppress* a mismatch (the DD is wrong, the name is
+  right, and the axis keeps reporting it). Flag `correct_in_graph: true` only when
+  the DD contradicts **itself** on one quantity, so there is no single declaration
+  to mirror.
+- **A registry entry alone is not enough.** The correction is applied by the DD
+  build, so an entry added afterwards never reaches already-stored paths.
+  `reconcile_dd_unit_corrections` (wired into the `sn run` startup sweep) is what
+  makes the registry self-applying.
+- **A name carries exactly one unit.** `HAS_UNIT` is cardinality-one in the
+  schema, and the guard compares dimensionality — a name holding both `1` and
+  `m^-2` admits sources of either. Both writers self-heal, but a terminal-stage
+  name keeps the residue forever because nothing recomposes it.
+- **Do NOT re-derive a name's unit from its sources in bulk.** ~40 accepted names
+  correctly carry a dimensionless unit against a DD path the registry records as
+  wrong (charge numbers tagged `e`, unit vectors tagged `m`); a bulk re-derivation
+  would clobber every one of them.
+
+## Operators live outside `SEGMENT_TOKEN_MAP` — read the grammar through one accessor
+
+`SEGMENT_TOKEN_MAP` is **not** the whole grammar vocabulary. Operators
+(`square`, `inverse`, `flux_surface_averaged`, `derivative_with_respect_to`, …)
+are a separate mechanism composing through `operator_token`, so they occupy no
+segment slot. A consumer reading only that map cannot see 51 legal tokens and
+treats every one of them as an unregistered proposal.
+
+**This has now generated the same bug five separate times**, each fixed at one
+site: single-operator gap classification, the state/rate attachment rules, the
+compose prompt's operator block, the decomposition classifier's multi-operator
+compounds, and the plural-dedup check. Read the grammar through
+`segments.grammar_tokens_by_segment()` (per-class tokens, operators included) or
+its reverse `grammar_token_index()`. `tests/standard_names/test_vocab_consumers_see_operators.py`
+fails on any new module importing `SEGMENT_TOKEN_MAP` that is not listed there
+with a reason.
+
+Two sets that look mergeable and are not: `reportable_segments()` is what a gap
+may be **reported against** (wider — includes the model-layer slot names
+`transformation`/`decomposition`); `known_segments()` is what the **parser** slots
+tokens into. Merging them makes the response model reject valid composer output.
+
+A compound spelled with `over` is a **division** — the binary `ratio` operator
+over two operands, not a compound base. Never "fix" it by letting the cover walk
+step over the word: that stops the token being `absent` while emitting guidance
+that folds the operators into one base and silently drops the division. An honest
+`absent` costs less than confident wrong guidance.
+
+### Open ISN-side findings (not codex's to fix, no PR — ISN's MCP surface is in flux)
+
+- **Locus tokens reachable by the parser but by no vocabulary enumeration.**
+  `active_wall_point`, `beam_path` and `primary` are in the locus registry yet in
+  no `SEGMENT_TOKEN_MAP` segment, so a consumer listing the vocabulary cannot emit
+  them and they never reach a prompt. Same shape as the `normalizing_qualifiers`
+  token `gyrocenter`, which is in no segment either. Pinned per-token in
+  `tests/standard_names/test_grammar_vocabulary_drift.py::UNREACHED`.
+- **Qualifier ordering structure is not exposed.** `load_qualifier_categories()`
+  exists but `get_grammar_context()` never returns it. Note precisely what is and
+  is not wrong here: the qualifier *tokens* all reach every prompt seat (they are
+  qualifier names), so "qualifier_categories is missing from the prompt" is false.
+  What is missing is the **category structure**, while the prompt asks for
+  *ordered* qualifier stacking — a plausible driver of ordering errors, and it
+  matters more while the qualifier class is being decomposed into ordered
+  binding-depth segments.
+
+## Work a bounded pipeline cohort by its problem
+
+Run `uv run --no-sync iter-codex sn run --help` when a capability is not listed
+here. This guide maps the situations that recur during cohort work to the small
+part of the surface that solves them; it is deliberately not an option index.
+The implementation boundary is `iter_codex/cli/sn.py` for scope construction and
+`iter_codex/standard_names/loop.py` for pool selection, claims, budget admission,
+and completion.
+
+| Situation | Command form | Use it when | Do not use it when |
+|---|---|---|---|
+| A cohort is part-way through review, refinement, documentation, or parent enrichment and needs to finish without minting more source names. | `uv run --no-sync iter-codex sn run --flush -c <usd> -t <minutes>` | The work is already queued and recovery means draining its downstream pipeline state. `--flush` suppresses auto-seeding and `generate_name`, but keeps review, refine, docs, and parent enrichment alive. | You need a previously unrepresented DD source to receive its first name: flush does not halt everything, but it cannot generate that missing name either. |
+| One pool is the question, rather than the whole pipeline. | `uv run --no-sync iter-codex sn run --only review_name --name <standard-name> --skip-global-maintenance` | An exact identity needs another name-axis review without unrelated global maintenance. Use `--only review_name` or `--only refine_name` for one name-axis action. | You mean every review-adjacent pool: `--only review` is intentionally broader, and `--only compose` also includes docs generation and parent enrichment. |
+| Only the documentation axis needs work. | `uv run --no-sync iter-codex sn run --docs-only --name <standard-name> --skip-global-maintenance` | The name identity is already accepted and its documentation needs generation, review, or refinement. | The name axis still needs composition or a name review; `--docs-only` intentionally excludes those pools. |
+| A known standard-name identity needs normal pipeline work from its current state. | `uv run --no-sync iter-codex sn run --name <standard-name> --skip-global-maintenance` | The name is mid-pipeline. Its current stage is normal state, not proof that it is stranded, so let its eligible pool claim it rather than stopping it early or resetting it. | You are addressing a DD source path; `--name` identifies `StandardName` nodes, not data-dictionary paths. |
+| A few DD sources need the full pipeline rather than the population. | `uv run --no-sync iter-codex sn run --focus <dd-path> --focus <dd-path> --skip-global-maintenance` | The unit of work is one or more exact DD paths. Focus creates an ephemeral run scope and, by default, preserves already-progressed rows; it is a gap-only mop-up. | You have a standard-name id. `--focus` is source scope, not name scope; giving it a name attempts to seed a `dd:` source that does not exist. |
+| A repeatable source cohort must retain one identity through mop-up and catalog work. | `uv run --no-sync iter-codex sn run --batch <manifest-token> --skip-global-maintenance --dry-run` | A committed source manifest defines the cohort. After the dry run verifies membership, use the same token for the live bounded run and the catalog route. | A mutable physics-domain query is being used as a release cohort; write and validate the explicit manifest instead. |
+| A run must have a bounded wall-clock or dollar exposure. | `uv run --no-sync iter-codex sn run -c <usd> -t <minutes>` | You need a stated spend ceiling and a graceful deadline. `-t` is **minutes**, not a worker-count control. | You need an exact invoice boundary: `--cost-limit` is a soft cap because an already-issued provider request can report its actual charge after the call. Lease admission and the hard-stop watchdog now prevent the historical headless overshoot, but report actual spend and any recorded overspend. |
+| Compose throughput needs tuning on the two-H200 host. | `ITER_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS=4 uv run --no-sync iter-codex sn run --focus <dd-path> --skip-global-maintenance` | Composition is the limiting pool. Pool replica counts come from `get_pool_replicas()`; four generate replicas is the measured knee on this host. | You are trying to set concurrency with `-t`, or raising generate replicas toward 32 by default. That setting produced 69 API timeouts in one run and only adds claim traffic after the knee. |
+| A focused cohort already has useful lifecycle state and needs another pass. | `uv run --no-sync iter-codex sn run --focus <dd-path> --skip-global-maintenance` | The default focused route keeps existing source and name state, allowing drafted, reviewed, and documentation work to continue through their eligible pools. | You want a full re-composition. `--reseed` deliberately returns focused paths to the pending queue; use it only after deciding that prior state is no longer the state to preserve. |
+
+`--skip-global-maintenance` is required above whenever a normal run carries an
+explicit scope. It keeps a focused recovery from also starting startup,
+background, or post-drain global maintenance. It is not valid for reset,
+reseed, revalidation, or maintenance-only modes; those are deliberate wider
+operations and must be planned as such.
+
+## Release recipe
+
+Use one committed batch manifest from graph drain through approval. Every numbered item below has a command, an
+observable gate, and a stop condition. Immediately before any live effect, re-run these help citations from the
+current checkout; all four must exit 0:
+
+```bash
+uv run --no-sync iter-codex sn run --help
+uv run --no-sync iter-codex sn release --help
+uv run --no-sync iter-codex sn approve --help
+uv run --no-sync iter-codex sn resolve --help
+```
+
+If help and this recipe disagree, stop and update the recipe before operating. Keep `BATCH`, `ISNC`, `PR`,
+`PR_NUMBER`, `PR_REPO`, `RC`, `BODY`, `PREVIEW`, `RESTORE`, and `ARTIFACT` bound to one release identity.
+
+### A group cut refuses unless the ruled bar exists
+
+`sn release --export-only --domain <group>` runs the group bar gate beside the
+other gates. It reads the ruled release bar from `release_bar.json` beside this
+package, which carries the lead's ruling as recorded on the plan: zero known
+defects, so `max_defect_rate` is 0 for the group and for every defect class.
+`ITER_CODEX_SN_GROUP_RELEASE_BAR` (or `[tool.iter-codex.sn].group-release-bar`)
+overrides the path for a ruling being tried before it lands; an unreadable or
+absent document refuses with `release_bar_not_ruled` rather than guessing a
+threshold. The audit record is read from `ITER_CODEX_SN_GROUP_AUDIT_DIR` /
+`[tool.iter-codex.sn].group-audit-dir`, at `<dir>/<group>.json`, one row per
+member carrying the verdict (`sound`, `defective` with at least one class, or
+`undecided`) and the digest of the text the audit read; with no record the cut
+refuses with `group_audit_never_measured`. The rate the bar reads is the
+adjudicated defective share over every member, uncorrected, with `undecided`
+members counted defective and reported as their own share; a member the ruling
+names in `defect_exceptions` is the one way past that. Other causes: a member
+not accepted on name or documentation, a member with no producing source and no
+ruled exception, a family of the group with a member in another group and no
+ruling, a written definition that is not its stored shared sentence, and a rate
+above the bar or above a class maximum (a class with no maximum of its own is
+governed by `max_defect_rate`), incomplete over the members, or stale against
+their stored text. A full (unscoped) export runs none of these: the group is the
+cut, so the bar applies to the cut that selects one.
+
+### The segment sweep is a scheduled operation, not a rotation side effect
+
+`reconcile_grammar_segments` is a startup maintenance step of an unscoped
+`sn run`, but its own selection is live-only. The source of that predicate is
+`iter_codex/standard_names/ledger.py:29`:
+
+```python
+LIVE_NAME = "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']"
+```
+
+The sweep applies that predicate on the read which supplies the write, at
+`iter_codex/standard_names/graph_ops.py:14346`:
+
+```python
+f"MATCH (sn:StandardName) WHERE {LIVE_NAME} RETURN sn.id AS id, {select}"
+```
+
+This is a real protection, not a remembered option: superseded and exhausted
+identities cannot enter the segment-realignment batch. `LIVE_NAME` does not
+exclude `contested`, so a contested identity would be considered live by this
+particular predicate; the current census has zero contested identities, which
+means the present terminal population is fully excluded. The separate
+`realign_grammar_segments_for_name` route remains the deliberate operator-named
+way to repair one terminal identity.
+
+The current bounded census, using the command below and the same strict parser
+as the sweep, is **2,456 terminal identities**: 2,160 superseded, 296
+exhausted, and 0 contested. **51** of those rows have parseable ids whose
+stored segment columns drift from the canonical parse. The former `706 of
+2239` figure is historical and must not be used as today's baseline. Before
+and after an ordinary scoped run, expect the current drift count to remain
+unchanged because terminal identities are excluded from this sweep's
+selection, not because an operator remembered a flag.
+
+Until it has been scheduled, an `sn run` dispatched for a single name is
+
+```bash
+uv run --no-sync iter-codex sn run --name <standard-name> --only review --skip-global-maintenance
+```
+
+`--skip-global-maintenance` remains required for an explicitly scoped run, but
+for a broader reason than this sweep. In `loop.py`, the shared
+`_global_maintenance_call` returns its default without invoking the function
+when the flag is set, while separate `if not skip_global_maintenance` guards
+cover the orphaned-run sweep and post-drain fixups. The flag therefore keeps a
+scoped operation from running unrelated startup, background, or post-drain
+maintenance. It does **not** provide the segment sweep's protection: the
+sweep's own `LIVE_NAME` predicate does that whether or not the flag is
+remembered. Require the flag on every scoped single-name run to suppress the
+other global writes, not to fence tombstoned segment rows.
+
+The startup maintenance inventory below records the actual selector for every
+maintenance function reached before the worker pools. It distinguishes
+functions that can write terminal-stage `StandardName` properties from
+source-only, DD-only, or read-only checks:
+
+| Startup function | Selection predicate / scope | Can write a terminal `StandardName`? |
+| --- | --- | --- |
+| `mark_orphaned_standard_name_runs_stale` | `SNRun.status IN ['started', 'running']`, old heartbeat, and not the current run | No; writes `SNRun` rows |
+| `reconcile_standard_name_sources` | DD sources whose upstream path is absent/removed or stale; relinks/revives `StandardNameSource` rows | No |
+| `reconcile_vocab_gaps` | `MATCH (vg:VocabGap)`; reclassifies or removes gap rows | No; writes `VocabGap` rows |
+| `revive_unit_skipped_sources` | `sns.status='skipped' AND sns.skip_reason STARTS WITH 'dd_unit_'` with a live DD node | No |
+| `retry_vocab_gap_sources_on_grammar_change` | `sns.status='vocab_gap'` with a vocabulary signature different from the current one | No |
+| `reconcile_provenance` / `reattach_produced_name_edges` | Source scalar/edge desyncs; reattachment uses `LIVE_NAME` for the target | No; source edges/scalars only |
+| `reconcile_source_status_liveness` | Live-source pass uses a non-terminal target; cleanup pass selects sources with no live target and `terminal.name_stage IN $terminal_stages` | **Yes:** removes terminal source projections and resets source metadata; it can set terminal `source_paths` |
+| `retire_unreachable_hint_edits` | `sn.edit_status='open' AND sn.name_hint IS NOT NULL AND sn.name_stage IN ['accepted', 'exhausted']` | **Yes:** rejects exhausted name hints |
+| `reconcile_grammar_segments` | `WHERE LIVE_NAME` at `graph_ops.py:14346` | No for superseded/exhausted; contested would pass the predicate |
+| `reconcile_standard_name_kinds` | `WHERE LIVE_NAME` at `graph_ops.py:14516` | No for superseded/exhausted; contested would pass the predicate |
+| `reconcile_catalog_status` | `sn.name_stage='superseded' AND (status IS NULL OR status='draft')`; then `sn.name_stage='exhausted' AND coalesce(status,'') <> 'draft'`; then `sn.status IS NULL` | **Yes:** writes status on superseded/exhausted names |
+| `reconcile_reviewable_name_stage` (including its descriptionless/source-less helpers) | Main selector requires `name_stage IN ['', 'pending']`, valid status, a non-derived producer, and substantive description; helpers select only null/pending/drafted live pipeline rows | No terminal rows |
+| `reconcile_standard_name_cocos_links` | `cocos_transformation_type IS NOT NULL` and missing scalar/edge; no lifecycle filter | **Yes:** all lifecycle states, including terminal, are eligible |
+| `reconcile_dd_unit_corrections` | Stored DD nodes selected by the unit-exception registry | No; DD nodes only |
+| `reconcile_standard_name_unit_edges` | Names with a unit edge and `sn.unit IS NOT NULL` whose edge set is not exactly the scalar; no lifecycle filter | **Yes:** all lifecycle states, including terminal |
+| `reconcile_attachment_consistency` | All `StandardNameSource-[:PRODUCED_NAME]->StandardName` attachments; action skips historical superseded names and protected accepted names by default | **Yes:** exhausted/contested attachments can be detached and their terminal `source_paths` changed |
+| `reconcile_standard_name_dd_edges` | `NOT (sn.name_stage IN $terminal)` before materializing DD projections | No terminal rows |
+| `reconcile_standard_name_source_paths` | `WHERE NOT (sn.name_stage IN $terminal)` before rebuilding the scalar | No terminal rows |
+| `find_provenance_orphans`, `find_flux_surface_reduction_violations`, `find_removed_dd_sources` | Diagnostic queries over live names; the orphan ledger uses `LIVE_NAME` | No; read-only |
+| `refresh_drifted_sources` | `detect_source_drift` selects `sn.name_stage <> 'superseded'` when `include_accepted=True` | **Yes:** exhausted/contested rows are not excluded from source snapshot or docs-steering work |
+| `promote_stranded_reviewed` | Name/docs rows at `reviewed` with score at or above the active threshold and no open documentation hold; docs also requires accepted name and a winning docs review | No terminal rows |
+| `rederive_structural_edges` | Initial name read requires non-null stage and `NOT (name_stage IN ['superseded', 'exhausted', 'contested'])`; cleanup only removes dead structural edges | No terminal properties |
+| `seed_parent_sources` | `parent.name_stage IS NULL` with seedable structural children | No terminal rows |
+| `normalize_derived_parent_lifecycle` | Null/pending parents, or accepted parents with missing documentation/unit data | No terminal rows |
+| `structural_accept_derived_parents` | Derived/source-free parents with substantive descriptions and `name_stage IN ['drafted', 'reviewed', 'exhausted', 'refining']` | **Yes:** an exhausted derived parent can be promoted to accepted |
+| `reconcile_orphan_parent_sources` | Parent write requires `NOT coalesce(parent.name_stage, '') IN ['superseded', 'exhausted', 'contested']` | No terminal rows |
+
+**Every documentation hold kind is owned by the check that raises it, and that
+check reconciles it on every pass.** The lint cap raises `docs_lint_error` when
+an error-severity finding stands against a name and clears it on a later pass
+over the same names that finds none; a deciding cascade route raises
+`cascade_contradiction` when the contradiction veto fires and clears it when a
+later route reports no contradiction. A kind that is raised but never re-checked
+holds the document for the check's own reasons but for the life of the name: the
+refine pool re-claims a passing row with an open documentation hold, holds it
+again, and walks `docs_chain_length` to the rotation cap, ending `exhausted`.
+So a new hold kind ships with the pass that clears it — either by adding it to
+the kinds that pass re-checks, or by the check reconciling its own kinds as both
+of these do. `clear_holds_not_raised` run by an unrelated re-check does not touch
+them, because it clears only the kinds it was told that check covers.
+
+**A check that did not run reports no verdict, never a clean one.** The enrich
+pass builds each batch's error-lint mapping from the audit report, and a batch
+whose audit did not run carries no mapping at all — distinct from an empty
+mapping, which means the audit ran and found nothing, which is what clears the
+hold. Recording a skipped audit as empty would clear every lint hold on the
+names in that batch, so a document with an unresolved error finding would be
+released by a pass that never looked for one. The distinction is produced by
+the pass, not only honoured by the consumer.
+
+The post-drain path is covered by the same flag as well: it suppresses
+`release_all_orphan_claims`, the repeated structural parent fixups,
+`resolve_doc_links`, and `restamp_harmonized_families` when they are invoked
+through the guarded maintenance path. Those protections are independent of
+the segment sweep and are why the flag remains part of the scoped-run recipe.
+
+`--name` is the flag that scopes by standard name, and it is the only one that does. `--focus` reads
+name-scoped and is not: it selects **data-dictionary paths**, so a standard-name id handed to it is prefixed
+`dd:` and refused at source seeding with `ValueError: cannot capture exact DD snapshot for source(s):
+dd:<standard-name>` (`graph_ops.py`, the exact-snapshot capture). Measured 2026-09-03: the route failed in 9
+seconds, which is cheap, but the diagnosis was not — the same class of mistake as `sn review --ids`, which
+scopes to *IDS* names rather than standard-name ids and matched nothing for 380 seconds. `--focus` stays
+correct for the DD-path work it is built for; it is wrong for a name.
+
+Keep the terminal-stage drift census as corroboration, not as the gate. Take it immediately before and
+immediately after the run and expect the **current** `drifting: 51` unchanged across the pair. Read the drift
+count alongside the terminal population when interpreting a new measurement: the terminal population is now
+2456 and grows whenever an identity is superseded or exhausted, while the drift count changes only when a
+deliberate realignment or a sweep reaches a selected row. A moved terminal figure is ordinary; a moved drift
+figure requires identifying which maintenance writer reached the changed rows.
+
+```bash
+uv run --no-sync python -c '
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_ops import _GRAMMAR_SEGMENT_COLUMNS as cols, _parse_grammar
+select = ", ".join(f"sn.{c} AS {c}" for c in cols)
+with GraphClient() as gc:
+    rows = gc.query(
+        f"MATCH (sn:StandardName) WHERE sn.name_stage IN $terminal RETURN sn.id AS id, {select}",
+        terminal=["superseded", "exhausted", "contested"],
+    )
+drift = [
+    r for r in rows
+    if (p := _parse_grammar(r["id"])).get("physical_base")
+    and any(p.get(c) != r.get(c) for c in cols)
+]
+print({"terminal": len(rows), "drifting": len(drift)})'
+```
+
+A moved figure means the scoped run wrote through the sweep despite its own `LIVE_NAME` guard: stop and report
+rather than continuing, because the sweep reached a row it should not have selected or another maintenance
+writer changed the census. To realign one identity without touching the other terminal rows, use the name-scoped
+repair `iter-codex sn realign-segments NAME [--dry-run]` —
+that route and the whole-graph sweep share one ledger operation label, so a deliberate single repair stays
+queryable beside the scheduled sweep, and neither is ever a hand-written segment update.
+
+### Detached-worktree setup
+
+A detached iter-codex worktree cannot discover the separate catalog checkout through the sibling fallback.
+Approval and undo therefore require an explicit binding:
+
+```bash
+export ITER_CODEX_SN_ISNC=/home/ITER/mcintos/Code/imas-standard-names-catalog
+export UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
+export PYTHONPATH="$PWD"
+export ISNC="$ITER_CODEX_SN_ISNC"
+```
+
+Use the real checkout path on the current host. Pull its merged `main` before approval, keep it clean, and pass
+`--isnc "$ISNC"` when clearer. A missing catalog path is a setup failure, not a credential failure.
+
+### Additive baseline
+
+Catalog `main` starts blank and accumulates approved entries only. The first review PR is a pure addition over
+nothing; every later PR is a pure addition over previously approved entries. Approved baseline bytes must remain
+identical and disappear from the diff. Never restore the legacy dump. The merge first parent is the additive
+baseline; reviewer-edit detection separately compares merged content with the cut-time RC tag.
+
+### Readable review prose belongs to the package writer
+
+A physicist reads the published YAML, so folded descriptions, one blank line between entries, literal Unicode and
+column wrapping are release requirements — and every one of them is produced by
+`imas_standard_names.yaml_store.dump_catalog_yaml`, which `_write_domain_yaml` hands the whole entry list. The
+exporter owns which fields are emitted, their order, the domain header comment, and re-validating the serialized
+bytes through the installed entry model. It must never format prose itself, and the `reformatted=0` gate below is
+what holds that line.
+
+So when the review surface reads badly, the defect is in the installed package and the repair is a package release
+plus a pin bump at both `pyproject.toml` occurrences, never a formatter in `export.py`. That took three pins to
+learn: the first writer separated entries correctly but still emitted quoted, escaped scalars, and readable folded
+prose arrived only with a later release. Equations, fences and the blank lines inside a documentation block are
+deliberately left untouched, so an over-long line is not by itself a defect — check the invariants the writer
+actually owns (no `\uXXXX` escapes, no backslash continuations, byte-identity with a re-dump) rather than a column
+count.
+
+### Cut-target identity and evidence are fail-closed
+
+**Keep the target out of a dispatch brief.** A release brief may name the batch, the command, and the evidence
+required. It must not name or restate the checkout, repository, remote, or path that receives the cut; target
+resolution belongs to this runbook and the release tool. When target identity matters, the brief requires the
+tool to print its resolution with `iter-codex sn release status`. **Gate:** the brief contains the batch, command,
+and evidence contract but no target value, and requires the status fields below immediately before the cut.
+**Stop:** a brief names a cut target or asks the command to follow a path or remote stated in the brief.
+
+**Make the release tool name its target before any write.** Run `iter-codex sn release status` immediately before
+the cut and read every identity field. **Gate:** it prints the catalog path
+`/home/ITER/mcintos/Code/imas-standard-names-catalog` under `Path`, plus `State`, `Latest tag`, `Batch RC`, and
+both `Remote` values;
+the remotes are `git@github.com:Simon-McIntosh/imas-standard-names-catalog.git` for `origin` and
+`git@github.com:iterorganization/imas-standard-names-catalog.git` for `upstream`. **Stop:** any other path,
+missing field, or remote mismatch. A wrong resolution is never corrected for the current cut with `--isnc` or an
+ad hoc `ITER_CODEX_SN_ISNC` export: stop, fix the configuration that produced it, start from a clean shell, and
+repeat status so the defect remains visible until it is repaired.
+
+**Use the catalog version series as a target canary.** The catalog and grammar repositories have unrelated
+version lines. A catalog at `v0.4.0rc4` followed by a computed `v0.10.0rc1` is a target error, not a numbering
+surprise. **Gate:** the candidate continues the catalog's own `Latest tag` series. When `State: rc`, the
+`Available commands` printed by status are authoritative and continue that series without `--bump`. **Stop:** a
+candidate from another series, or any bump flag not offered for the printed state.
+
+**Prove both the positive and the negative from the owning repositories.** Read the candidate branch and tag
+from the catalog remote, read the same refs from the grammar remote, and read pull-request state from each
+repository's own listing, including both organisation repositories. **Gate:** the catalog remote alone has the
+expected `review/$RC` branch and annotated `$RC` tag; the grammar remote has neither; the catalog fork listing has
+only the separately authorised fork review pull request, if one was opened; and the organisation listings for
+`iterorganization/imas-standard-names-catalog` and `iterorganization/IMAS-Standard-Names` show no pull request for
+the cut. **Stop:** any candidate ref in the grammar repository, any unexpected pull request, or evidence inferred
+only from the absence of a message in local command output.
+
+**Commit the frozen roster before the worktree can be reclaimed.** The release writes the reproducible batch
+identity under `iter_codex/standard_names/manifests/reviews/`, beside tracked roster artifacts, rather than to a
+declared report path. Bind `ARTIFACT=iter_codex/standard_names/manifests/reviews/$RC.sn_names.yaml`, stage and
+commit that explicit path, then report its byte size and SHA-256. **Gate:** `stat --format='%s %n' "$ARTIFACT"`,
+`sha256sum "$ARTIFACT"`, and `git ls-files --error-unmatch "$ARTIFACT"` all succeed at the committed revision.
+**Stop:** a missing, empty, untracked, uncommitted, or hash-disagreeing artifact; never leave its preservation to
+worktree retention.
+
+**Name the two pull-request targets distinctly.** An `upstream release PR` is the pull request that `--final`
+directs into the organisation repository. A `fork review PR` is a distinct review operation against the fork,
+even when `sn release` opens it after cutting the fork RC. `No pull request` and `no upstream release PR` are
+different states. **Gate:** every authorization and report uses one of those complete names and checks that
+repository's own listing. **Stop:** the bare phrases `PR`, `no PR`, or `no upstream PR`, because they do not
+establish the state of the other target.
+
+**Resolve every address in a composed body.** A body uses descriptive Markdown links rather than bare addresses,
+and every destination is checked against the repository and path it names. **Gate:** each destination returns
+HTTP `200` from the named repository and branch, and the body read back from the pull request contains the same
+Markdown destination. **Stop:** a bare address, a non-`200` response, a well-formed link into the wrong repository
+or branch, or any destination not checked from the posted body.
+
+### Numbered operator runbook
+
+1. **Choose or define the batch manifest.** Reuse a committed token under
+   `iter_codex/standard_names/manifests/`, or add a `kind: sn_sources`, `schema_version: 1` YAML file there.
+   Group explicit IDS-relative DD paths under `sources.<ids>`. Express a physics-domain batch as the explicit
+   source set from that domain, with the domain and derivation under `provenance`; do not defer membership to a
+   mutable release-time `--domain` filter. `sn run --batch` and `sn release --batch` consume the same token.
+
+   ```bash
+   export BATCH=<manifest-token>
+   uv run --no-sync python -c 'import os; from iter_codex.graph.client import GraphClient; from iter_codex.standard_names.sources_manifest import load_sources_file, resolve_batch_token; p=resolve_batch_token(os.environ["BATCH"]); assert p; paths=load_sources_file(p); gc=GraphClient(); q=list(gc.query("MATCH (n:IMASNode) WHERE n.id IN $paths RETURN count(n) AS matched, count(n.physics_domain) AS with_domain, collect(DISTINCT n.physics_domain) AS domains", paths=paths)); gc.close(); print({"manifest":str(p),"sources":len(paths),"unique":len(set(paths)),"graph":q})'
+   uv run --no-sync iter-codex sn run --batch "$BATCH" --dry-run
+   ```
+
+   **Gate:** `sources=N unique=N`, `matched=N`, `with_domain=N`, and `domains` is the intended set; dry-run
+   prints `Extraction candidates: N` and `Graph writes: 0; claims: 0; LLM calls: 0`. **Stop:** missing, malformed,
+   duplicate, zero, unmatched, or out-of-domain sources; count mismatch; or any dry-run write.
+
+2. **Create a restore point and prove the release state.**
+
+   ```bash
+   export RESTORE=<absolute-archive-path>
+   uv run --no-sync iter-codex graph export --output "$RESTORE"
+   test -s "$RESTORE"
+   sha256sum "$RESTORE"
+   uv run --no-sync iter-codex sn release status
+   git -C "$ISNC" status --porcelain
+   BUMP_ARGS=(--bump minor)  # stable state; use BUMP_ARGS=() for the intended existing RC series
+   ```
+
+   **Gate:** export exits 0; the archive is non-empty with a recorded SHA-256; status prints the expected `State`,
+   `Latest tag`, remotes, and next command; catalog status is empty. Stable state requires `--bump`; RC state
+   must name the intended series before `--bump` is omitted. **Stop:** any mismatch or uncertainty about fork
+   rehearsal versus upstream review.
+
+3. **Move the standard-names pin before the kind reconcile fires.** Structural `kind` is derived from the
+   canonical identity by `derive_kind`, and its answer depends on the base declarations inside the installed
+   `imas-standard-names`. `reconcile_standard_name_kinds` runs in the `sn run` startup maintenance sweep (reached
+   through `reconcile_grammar_segments`) and rewrites every stored kind that disagrees with the derivation as a
+   ledgered `StandardNameChange`. The pin therefore decides what the graph is reconciled *to*, and a sweep under a
+   pin whose bases are wrong overwrites correct values graph-wide: measured on 2026-09-02, a sweep touched 181 live
+   names and flipped 45 correct vectors (`momentum`, `torque`, `torque_density`) to scalar because those three
+   bases were still registered scalar in the pinned release. The corrected release had to be pinned first, and the
+   repair cost a second unscoped drain. Bump both `pyproject.toml` occurrences with `uv.lock` resolved to match,
+   then census the live set through the same predicate the reconcile uses.
+
+   ```bash
+   grep -n 'imas-standard-names==' pyproject.toml
+   uv run --no-sync python -c '
+   from imas_standard_names import __version__ as isn
+   from iter_codex.graph.client import GraphClient
+   from iter_codex.standard_names.kind_derivation import derive_kind
+   from iter_codex.standard_names.ledger import LIVE_NAME
+
+   with GraphClient() as gc:
+       rows = list(gc.query(f"MATCH (sn:StandardName) WHERE {LIVE_NAME} RETURN sn.id AS id, sn.kind AS stored"))
+   controls = {base: derive_kind(base) for base in ("momentum", "torque", "torque_density", "electron_temperature")}
+   disagree = [row for row in rows if row["stored"] != derive_kind(str(row["id"]))]
+   print({"isn": isn, "live": len(rows), "with_kind": sum(1 for row in rows if row["stored"]),
+          "disagreements": len(disagree), "controls": controls})
+   '
+   ```
+
+   Run it before and after the first unscoped `sn run` of the batch. The startup lines `Grammar synced to ISN
+   <version>` and `reconcile_standard_name_kinds: refreshed N stored kind(s)` must account for the difference.
+   **Gate:** the installed `isn` equals both pinned occurrences; `live` equals `with_kind`, so a zero is not a
+   missing-property artifact; each vector-base control derives `vector` and the scalar control derives `scalar`;
+   and `disagreements` is `0` once the drain has run. **Stop:** a pin mismatch, a control deriving the wrong kind,
+   a `live`/`with_kind` gap, or any remaining disagreement. Cut no candidate on a graph whose kinds disagree with
+   their identities, and never reach for a scoped drain or `--skip-global-maintenance` to get past this: those
+   bypass the whole sweep, so the disagreement survives and is published.
+
+4. **Preflight the additive cut and author the PR text.** The submitting agent authors a short title and a
+   two-to-five-sentence body naming the facility, manifest, published count, deliberate exclusions, review
+   instruction, catalog `REVIEWING.md`, and preview shape. Never enumerate entries or narrate unresolved defects.
+
+   ```bash
+   export BODY=<decisions-only-body.md>
+   rg -n 'REVIEWING\.md' "$BODY"
+   uv run --no-sync iter-codex sn release --batch "$BATCH" --dry-run \
+     "${BUMP_ARGS[@]}" -m "<batch in words>" \
+     --pr-title "<short batch title>" --pr-body-file "$BODY"
+   ```
+
+   **Gate:** exactly one live review-contract link; dry-run exits 0 and reports `Review batch <RC>`,
+   `Batch size: M name(s)`, a frozen artifact, no errors, no approved-baseline failure, and source accounting with
+   zero unexplained paths. **Stop:** any unresolved source, validation, semantic, byte-identity, prose, or accounting
+   finding. Never use `--skip-gate` to cross a failed gate.
+
+5. **Cut the candidate.** `--target auto` sends an RC batch to a fork PR; add `--final` for the upstream review.
+   In both cases the branch pushes to the fork. `--no-pr` is only for a deliberately tagged in-work build.
+
+   ```bash
+   uv run --no-sync iter-codex sn release --batch "$BATCH" --target auto \
+     "${BUMP_ARGS[@]}" -m "<batch in words>" \
+     --pr-title "<short batch title>" --pr-body-file "$BODY"
+   git -C "$ISNC" ls-remote origin "refs/heads/review/$RC" "refs/tags/$RC"
+   ```
+
+   **Gate:** release prints the same RC, `M`, artifact, fork branch, cut-time tag, and PR URL; `ls-remote` returns
+   one branch and one tag; upstream `main` remains at its recorded SHA. **Stop:** wrong target/ref, upstream-main
+   change, identity mismatch, or published prose differing from `$BODY`.
+
+6. **Gate the cut before calling it a review candidate.** Two per-entry properties are invisible in the release
+   summary and both break the reviewer's surface silently: an entry whose `physics_domain` is not a `PhysicsDomain`
+   member is rejected by validation and withheld, and an entry whose `kind` disagrees with `derive_kind` publishes a
+   structural claim the identity contradicts. Read them out of the tag the cut just pushed — local in `$ISNC`
+   because the release ran there, so fetch `refs/tags/$RC` first only when reading from another checkout —
+   together with the readability invariants the writer owns, so the candidate is judged on its published bytes.
+
+   ```bash
+   uv run --no-sync python -c '
+   import itertools, os, re, subprocess, yaml
+   from imas_standard_names.grammar import PhysicsDomain
+   from imas_standard_names.yaml_store import dump_catalog_yaml
+   from iter_codex.standard_names.kind_derivation import derive_kind
+
+   isnc, rc = os.environ["ISNC"], os.environ["RC"]
+   show = lambda *a: subprocess.run(["git", "-C", isnc, *a], capture_output=True, text=True, check=True).stdout
+   files = [f for f in show("ls-tree", "-r", "--name-only", rc).split() if f.startswith("standard_names/")]
+   domains = {d.value for d in PhysicsDomain}
+   fields = ("entries", "domain_invalid", "kind_disagreement", "escapes", "continuations", "reformatted")
+   counts = dict.fromkeys(fields, 0)
+   for f in files:
+       text = show("show", f"{rc}:{f}")
+       counts["escapes"] += len(re.findall(r"\\u[0-9A-Fa-f]{4}", text))
+       counts["continuations"] += sum(1 for line in text.splitlines() if line.endswith("\\"))
+       body = "".join(itertools.dropwhile(lambda line: line.startswith("#"), text.splitlines(keepends=True)))
+       entries = yaml.safe_load(body) or []
+       counts["reformatted"] += dump_catalog_yaml(entries) != body
+       for entry in entries:
+           counts["entries"] += 1
+           counts["domain_invalid"] += entry.get("physics_domain") not in domains
+           counts["kind_disagreement"] += entry.get("kind") != derive_kind(entry["name"])
+   print({"files": len(files), **counts})
+   '
+   ```
+
+   **Gate:** `entries` equals the published count the release reported, `domain_invalid=0`, `kind_disagreement=0`,
+   `escapes=0`, `continuations=0`, and `reformatted=0`. **Stop:** any non-zero. A domain outside the enum is a
+   classification defect fixed with `sn reclassify`, never by widening the emitted value; a kind disagreement means
+   the pin-before-reconcile gate has not been satisfied on the live graph, so go back rather than publish it; and a
+   non-zero `reformatted` means prose is being formatted between the writer and the file, which is the one thing
+   the exporter must never do.
+
+7. **Hand off review without weakening machine ownership.** Reviewers may edit only the standard name and its
+   description/documentation. Unit, kind, status, source binding kind/ref/version, identity roles, structure,
+   ordering, and formatting are machine-owned. To hold an entry, request changes and keep the PR unmerged; do not
+   delete it or alter machine fields. After merge, a failed reviewer edit is held as `contested`.
+
+   ```bash
+   gh pr checks "$PR"
+   gh api "repos/$PR_REPO/pulls/$PR_NUMBER" --jq '.body | contains("REVIEWING.md")'
+   gh api "repos/$PR_REPO/pulls/$PR_NUMBER" --jq ".body | contains(\"https://${PR_REPO%%/*}.github.io/${PR_REPO#*/}/pr-$PR_NUMBER/\")"
+   gh api "repos/$PR_REPO/pulls/$PR_NUMBER/files" --paginate --jq '[.[].status] | unique | join(",")'
+   curl -sS -o /dev/null -w '%{http_code}\n' "$PREVIEW"
+   ```
+
+   **Gate:** required checks pass; both body queries print `true`, file statuses print only `added`, and `$PREVIEW`
+   returns `200` with PR-identical content. `sn release` writes and reads back the derived Pages address; catalog CI
+   enforces it. Same-repository PRs have no bot comment; only external forks retain the artifact comment. **Stop:** CI, ownership, additivity, link,
+   preview, or hold failure. Rebuild with `gh workflow run catalog.yml --repo "$PR_REPO" -f
+   pull-request-number="$PR_NUMBER"` or `gh run rerun <run-id>`; require `success`. Never close/reopen the PR.
+
+8. **Merge and run the fail-closed approval preflight.**
+
+   ```bash
+   gh pr view "$PR" --json state,mergeCommit --jq '.state + " " + .mergeCommit.oid'
+   git -C "$ISNC" pull --no-rebase origin main
+   git -C "$ISNC" status --porcelain
+   uv run --no-sync iter-codex sn approve --pr "$PR" --dry-run
+   ```
+
+   **Gate:** `MERGED <sha>`; clean catalog `main`; dry-run prints `Batch: M name(s)`, `Mode: dry run`, the
+   expected edit count, `blocked=0`, and `unmatched=0`. **Stop:** any refusal. It proves wrong lifecycle,
+   unmatched identity, or prior provenance/approval before any write; fix the cause and repeat, never bypass or
+   hand-edit graph state.
+
+9. **Fold the merged review into the graph.**
+
+   ```bash
+   uv run --no-sync iter-codex sn approve --pr "$PR"
+   uv run --no-sync python -c 'import os; from iter_codex.graph.client import GraphClient; gc=GraphClient(); q=list(gc.query("MATCH (sn:StandardName) WHERE sn.catalog_pr_number = $pr AND sn.name_stage IN [\x27approved\x27,\x27contested\x27] RETURN count(sn) AS folded, sum(CASE WHEN sn.catalog_pr_url IS NOT NULL AND sn.catalog_merge_commit_sha IS NOT NULL AND sn.catalog_reviewer_actor IS NOT NULL THEN 1 ELSE 0 END) AS complete_provenance", pr=int(os.environ["PR_NUMBER"]))); gc.close(); print(q)'
+   git -C "$ISNC" tag -l "$RC" --format='%(contents:subject)'
+   uv run --no-sync iter-codex sn approve --pr "$PR"
+   ```
+
+   **Gate:** first approval ends `Approval complete`; `M = auto-approved + accepted + contested + staged for
+   review`; blocked, unmatched, and quarantined are zero; provenance prints `folded=complete_provenance`; tag
+   subject starts `graph-merged:` and its annotation names PR, batch, outcomes, and prior tag; repeat approval
+   exits nonzero with `already carries the fold-back contract tag`. **Stop:** any count/provenance/receipt mismatch,
+   catalog push without receipt, or non-refusing repeat.
+
+10. **Adjudicate contested proposals explicitly.**
+
+    ```bash
+    uv run --no-sync iter-codex sn status --contested
+    uv run --no-sync iter-codex sn resolve <name> --override --reason "<substantive expert justification>"
+    ```
+
+    **Gate:** a held entry remains listed `contested` without mutation; override prints `proposal applied →
+    approved`, materializes the exact reviewed proposal, sets `docs_stage='accepted'`, stores the exact reason in
+    `contested_resolution`, and preserves provenance. **Stop:** non-contested target, empty/procedural reason,
+    wrong materialized bytes, or provenance change.
+
+11. **Prove approved and contested rows are frozen.** Capture ID-ordered `properties(sn)` JSON before and after
+    ordinary unscoped work.
+
+    ```bash
+    export SNAPSHOT=<frozen-before.json>
+    uv run --no-sync python -c 'import json; from iter_codex.graph.client import GraphClient; gc=GraphClient(); q=list(gc.query("MATCH (sn:StandardName) WHERE sn.name_stage IN [\x27approved\x27,\x27contested\x27] RETURN sn.id AS id, properties(sn) AS properties ORDER BY id")); gc.close(); print(json.dumps(q, sort_keys=True, default=str))' > "$SNAPSHOT"
+    sha256sum "$SNAPSHOT"
+    uv run --no-sync iter-codex sn run --flush --cost-limit <conservative-cap>
+    ```
+
+    Repeat the snapshot command to a different file and hash it. **Gate:** row counts and SHA-256 match while the
+    pipeline processes at least one non-frozen item as a positive control. **Stop:** frozen delta, frozen claim/write,
+    provider/parameter failure, or zero positive-control work; equality without a firing control is absent evidence.
+
+12. **Undo only a rehearsal.** Before approval record the graph census, merged-PR tree, artifact hash,
+    upstream-main SHA, and exact cut-time annotated tag object. A real accepted release stops here and is never
+    unwound.
+
+    ```bash
+    uv run --no-sync iter-codex sn approve --undo --pr "$PR"
+    ```
+
+    **Gate:** demotions equal the approved/contested cohort; graph counts return to baseline; repeat the provenance
+    query and get `folded=0`; all frozen-batch `catalog_*` fields are null; receipt absent; exact cut-time RC tag
+    restored (or stable receipt deleted); catalog tree equals the merged-PR tree; artifact hash and upstream `main`
+    unchanged. Reviewer wording and its internal change remain graph history. **Stop:** any mismatch. Never improvise
+    Cypher/tag repair or infer an inverse for a receipt-less catalog mutation; that needs separate authorization.
+
+The failures, repairs, measurements, and report inventory live only in the cumulative
+[rehearsal evidence record](../../docs/evidence/archive/sn-west-review-rehearsal-landed.html#fold-back-rehearsal).
+
+## The catalog is not the source of truth
+
+The graph plus the review pipeline is. Catalog-origin names
+(`origin='catalog_edit'`, `source_types=['catalog']`) came from one bulk import of
+this pipeline's own earlier output and sit at `status='draft'`; they are an old
+method to be resolved through review, not authoritative content to protect.
+
+This makes the `origin='catalog_edit'` exemption in
+`supersede_prior_source_names` a defect rather than a safeguard: it stops the
+one-live-name-per-source dedup from folding an imported name, which is why one
+coordinate axis resolved to a single name while another stayed split across two.
+
+## The refinement budget is charged per ATTEMPT
+
+`chain_length` is lineage depth: it counts successors that PERSISTED. A refine
+attempt can fail before any write — the proposed identity is already taken
+(`find_name_key_duplicate`), the persistence fence refuses the successor, the
+candidate fails grammar validation — and every one of those leaves lineage
+depth untouched. Gating claim eligibility, escalation, or exhaustion on it
+therefore re-selects the same name on every poll and re-bills it: one measured
+run spent 822 model calls and $54.7 on 14 names and produced one accepted name.
+
+`refine_attempts` is the budget. It is charged on each verified claim, before
+the model call, and a successor inherits it so the cap bounds the lineage. Read
+it through `REFINE_NAME_ATTEMPTS_SPENT`, never `chain_length`.
+
+Two consequences worth keeping straight:
+
+- **A collision is decided, not transient.** The refiner proposes the same
+  successor identity every cycle — measured across two model vendors — and
+  refinement may not take an occupied identity, because merging carries
+  source-migration semantics that belong to `sn edit`. `stop_refine_name_attempt`
+  parks such a name immediately with `refine_collision_name` recorded. A model
+  or provider error is the opposite case and keeps the rotations that remain.
+- **Recovery differs by whether new information arrived.** `sn rescore` buys a
+  fresh quorum draw on the SAME name and deliberately does NOT refund rotations
+  (refunding re-opens the paid loop for a name that scores low again); a
+  name-steering `sn edit --hint` is new information and refunds them.
+
+The docs axis has no such defect and needs no counter: `persist_refined_docs`
+rewrites in place, so every attempt lands and `docs_chain_length` always
+advances. Do not "harmonise" the two axes by giving docs an attempt counter.
+
+## Acceptance
+
+Never hand-accept, and never edit graph text with Cypher. Acceptance is earned
+only through the RD-quorum review pool; corrections go through `sn edit`
+(`--hint` to steer regeneration, `--rename`/`--docs` to replace and go straight
+to review). `--stage-only` stages many for one batch review — the budget-efficient
+path for a bulk repair, since compose is free and review is the only paid stage.
+
+The single sanctioned structural accept is `ENRICH_PARENTS` for placeholder
+derived parents, which the quorum systematically penalises for being abstractions.
+
+## Exact-source compose steering
+
+Use `sn source-hint <exact-dd-path> --hint ... --reason ...` only before an
+eligible DD source without a live name binding composes. It is not a source
+mutation: DD snapshot, unit, COCOS, domain, identity, and grammar validation
+remain authoritative. Preview with `--dry-run`; replacing an open hint requires
+`--replace`.
+
+The write is claim-fenced compare-and-set. A missing or non-DD source, active
+claim, non-`extracted` state, attempt cap, live binding, or unacknowledged open
+hint is a refusal, not a reason to bypass the CLI with Cypher. An open hint rides
+pooled compose and is consumed atomically only when that exact source binds a
+name. Retry, failure, interruption, claim expiry, validation rejection, and
+collision preserve it. Use `sn run --focus <same-exact-path>` to fence the
+subsequent work; model choice comes from the configured compose seat unless the
+run explicitly overrides it.
+
+Do not confuse the three operator surfaces: `sn retry --reason` audits why a
+blocked source may attempt again, `sn source-hint` steers the next successful
+binding of one exact source, and `sn edit <name> --hint` steers an existing name
+through review. `rejected` is reserved in the hint-status schema; no current CLI
+transition sets it.

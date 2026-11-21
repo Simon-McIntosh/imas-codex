@@ -16,8 +16,8 @@ the system prompt the composer is given and hold the rule in it.
 
 from __future__ import annotations
 
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names.context import build_compose_context
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.standard_names.context import build_compose_context
 
 
 def _system_prompt() -> str:
@@ -58,7 +58,7 @@ def test_the_gap_names_a_class_the_grammar_reports() -> None:
     and ``_normalise_gap_segments`` drops an unknown one before it can be reconciled,
     so the gap class must be legal or the refusal disappears.
     """
-    from imas_codex.standard_names.segments import reportable_segments
+    from iter_codex.standard_names.segments import reportable_segments
 
     rule = _boundary_rule(_system_prompt())
     assert 'segment: "geometry"' in rule

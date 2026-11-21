@@ -34,7 +34,7 @@ from neo4j.exceptions import (
     TransientError,
 )
 
-from imas_codex.standard_names import loop
+from iter_codex.standard_names import loop
 from tests.standard_names import test_scoped_global_maintenance as scoped_maintenance
 
 
@@ -151,7 +151,7 @@ def test_scope_selector_reads_both_ways_a_run_binds_its_names() -> None:
         def __exit__(self, *exc: object) -> bool:
             return False
 
-    with patch("imas_codex.graph.client.GraphClient", _Client):
+    with patch("iter_codex.graph.client.GraphClient", _Client):
         ids = loop._scope_name_ids("scope-1")
 
     assert ids == ["from-run", "from-source"]

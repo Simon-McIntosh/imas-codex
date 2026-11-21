@@ -41,7 +41,7 @@ COHORT = HERE / "srtj-cohort"
 ROOT = HERE.parents[3]
 HELPER = HERE / "srtj-jev-vs-panel-operating-point-run.py"
 THRESHOLDS = (
-    ROOT / "imas_codex" / "standard_names" / "review" / "cascade_thresholds.json"
+    ROOT / "iter_codex" / "standard_names" / "review" / "cascade_thresholds.json"
 )
 FIGDIR = ROOT / "docs" / "figures" / "sn-review-through-jev" / STEM
 DRY_SET = ("name", "docs")
@@ -174,7 +174,7 @@ def q1(rows: list[dict], dry_axes: dict) -> dict:
             "owner": "deciding path",
             "count": len(deciding),
             "where": (
-                "imas_codex/standard_names/review/cascade.py -- _docs_judgment raises "
+                "iter_codex/standard_names/review/cascade.py -- _docs_judgment raises "
                 "ValueError('no usable judgment for documentation review'), which "
                 "adjudicate_review catches and records as the fallback's reason"
             ),

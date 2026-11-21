@@ -42,7 +42,7 @@ def valid_domain_names(sample_standard_names: list[dict]) -> list[dict]:
 def _no_approved_names():
     """Make the approval-backed protection lookup explicit for this suite."""
     with patch(
-        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        "iter_codex.standard_names.protection._fetch_catalog_edit_names",
         return_value=set(),
     ):
         yield
@@ -57,7 +57,7 @@ def _load_schema() -> dict:
     """Load the standard_name LinkML schema YAML."""
     schema_path = (
         Path(__file__).resolve().parents[2]
-        / "imas_codex"
+        / "iter_codex"
         / "schemas"
         / "standard_name.yaml"
     )
@@ -70,11 +70,11 @@ def _get_write_cypher(sample_names: list[dict]) -> list[str]:
     mock_gc.query = MagicMock(return_value=[])
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -184,7 +184,7 @@ class TestWriteCypherInvariants:
 
     def test_the_one_writer_sets_domain_sources_and_edges(self) -> None:
         """The writer this path defers to sets all three, not a subset."""
-        from imas_codex.standard_names.domain_decision import (
+        from iter_codex.standard_names.domain_decision import (
             DomainDecision,
             write_name_domain,
         )
@@ -255,14 +255,14 @@ class TestWriteCypherInvariants:
         import logging
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
             with patch(
-                "imas_codex.standard_names.graph_store.graph_foundation.logger"
+                "iter_codex.standard_names.graph_store.graph_foundation.logger"
             ) as mock_logger:
-                from imas_codex.standard_names.graph_store.graph_catalog import (
+                from iter_codex.standard_names.graph_store.graph_catalog import (
                     write_standard_names,
                 )
 
@@ -284,11 +284,11 @@ class TestWriteCypherInvariants:
         mock_gc.query = MagicMock(return_value=[])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 write_standard_names,
             )
 
@@ -326,10 +326,10 @@ class TestGrammarParsing:
 
     def test_parse_grammar_keys(self) -> None:
         """_parse_grammar returns the two metadata fields plus every bare segment column."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _GRAMMAR_SEGMENT_COLUMNS,
         )
-        from imas_codex.standard_names.graph_store.graph_foundation import (
+        from iter_codex.standard_names.graph_store.graph_foundation import (
             _parse_grammar,
         )
 
@@ -349,7 +349,7 @@ class TestGrammarParsing:
         """When imas_standard_names is unavailable, metadata fields are None."""
         import unittest.mock
 
-        from imas_codex.standard_names.graph_store.graph_foundation import (
+        from iter_codex.standard_names.graph_store.graph_foundation import (
             _parse_grammar,
         )
 
@@ -401,28 +401,28 @@ class TestPhysicsDomainEnum:
     """Verify physics_domain enum is available and comprehensive."""
 
     def test_physics_domain_importable(self) -> None:
-        """PhysicsDomain must be importable from imas_codex.core.physics_domain."""
-        from imas_codex.core.physics_domain import PhysicsDomain
+        """PhysicsDomain must be importable from iter_codex.core.physics_domain."""
+        from iter_codex.core.physics_domain import PhysicsDomain
 
         assert hasattr(PhysicsDomain, "__members__")
 
     def test_physics_domain_has_general(self) -> None:
         """PhysicsDomain must include 'general' as fallback."""
-        from imas_codex.core.physics_domain import PhysicsDomain
+        from iter_codex.core.physics_domain import PhysicsDomain
 
         values = {pd.value for pd in PhysicsDomain}
         assert "general" in values
 
     def test_physics_domain_has_equilibrium(self) -> None:
         """PhysicsDomain must include 'equilibrium'."""
-        from imas_codex.core.physics_domain import PhysicsDomain
+        from iter_codex.core.physics_domain import PhysicsDomain
 
         values = {pd.value for pd in PhysicsDomain}
         assert "equilibrium" in values
 
     def test_physics_domain_no_mhd_alias(self) -> None:
         """PhysicsDomain must use 'magnetohydrodynamics', not 'mhd'."""
-        from imas_codex.core.physics_domain import PhysicsDomain
+        from iter_codex.core.physics_domain import PhysicsDomain
 
         values = {pd.value for pd in PhysicsDomain}
         assert "mhd" not in values, "Use 'magnetohydrodynamics', not 'mhd'"
@@ -451,7 +451,7 @@ class TestStandardNameKindEnum:
         """
         from imas_standard_names.models import Kind
 
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         allowed = {k.value for k in Kind}
         with GraphClient() as gc:
@@ -490,11 +490,11 @@ class TestNormalizeStoredKinds:
         )
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 normalize_stored_standard_name_kinds,
             )
 
@@ -518,11 +518,11 @@ class TestNormalizeStoredKinds:
         mock_gc.query = MagicMock(return_value=[])  # read returns nothing
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 normalize_stored_standard_name_kinds,
             )
 
@@ -612,11 +612,11 @@ class TestWritePathRelationships:
         mock_gc.query = MagicMock(return_value=[])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 write_standard_names,
             )
 
@@ -646,7 +646,7 @@ class TestUnitOverrideEngine:
 
     def test_override_engine_importable(self) -> None:
         """unit_overrides module must be importable."""
-        from imas_codex.standard_names.unit_overrides import resolve_unit
+        from iter_codex.standard_names.unit_overrides import resolve_unit
 
         assert callable(resolve_unit)
 
@@ -654,7 +654,7 @@ class TestUnitOverrideEngine:
         """unit_overrides.yaml config must exist."""
         config = (
             Path(__file__).resolve().parents[2]
-            / "imas_codex"
+            / "iter_codex"
             / "standard_names"
             / "config"
             / "unit_overrides.yaml"

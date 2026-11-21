@@ -1,0 +1,1468 @@
+"""Remote-aware graph directory and service operations.
+
+Extends the local operations in :mod:`dirs` to work on remote hosts
+via SSH/SCP.  Every function accepts an ``ssh_host`` parameter — the
+SSH alias for the machine where Neo4j runs (e.g. ``"iter"``).
+
+Uses :func:`run_command` and :func:`run_script_via_stdin` from
+:mod:`iter_codex.remote.executor` for all remote execution, and
+``scp`` for file transfers.
+
+Path conventions are hardcoded to match :mod:`dirs`::
+
+    ~/.local/share/iter-codex/.neo4j/<name>/   graph store
+    ~/.local/share/iter-codex/neo4j            active symlink
+"""
+
+from __future__ import annotations
+
+import logging
+import subprocess
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+# Remote path fragments (must match dirs.py constants).
+# Use $HOME instead of ~ because tilde is NOT expanded inside double quotes.
+REMOTE_BASE = "$HOME/.local/share/iter-codex"
+REMOTE_STORE = f"{REMOTE_BASE}/.neo4j"
+REMOTE_LINK = f"{REMOTE_BASE}/neo4j"
+REMOTE_EXPORTS = f"{REMOTE_BASE}/exports"
+
+# SLURM job name for Neo4j (must match cli/services.py:_NEO4J_JOB)
+_SLURM_NEO4J_JOB = "codex-neo4j"
+
+
+def _neo4j_lifecycle_bash(
+    service_var: str = "$SERVICE",
+    scheduler: str = "none",
+) -> str:
+    """Generate bash stop_neo4j/start_neo4j functions.
+
+    When ``scheduler="slurm"``, uses ``scancel``/``squeue`` to manage the
+    SLURM job.  Falls back to ``systemctl --user`` for systemd-managed
+    hosts.  Both paths wait for the service to fully stop before returning.
+    """
+    if scheduler == "slurm":
+        return f"""\
+_SLURM_JOB="{_SLURM_NEO4J_JOB}"
+
+stop_neo4j() {{
+    # Cancel SLURM job
+    JOB_ID=$(squeue -n "$_SLURM_JOB" -u "$USER" -h -o "%i" 2>/dev/null | head -1)
+    if [ -n "$JOB_ID" ]; then
+        scancel "$JOB_ID" 2>/dev/null || true
+    fi
+    # Also kill any orphaned neo4j processes on this node
+    pkill -u "$USER" -f "neo4j.*{service_var}" 2>/dev/null || true
+    pkill -u "$USER" -f "java.*neo4j" 2>/dev/null || true
+    # Wait for SLURM job to exit
+    for i in $(seq 1 36); do
+        JOB_ID=$(squeue -n "$_SLURM_JOB" -u "$USER" -h -o "%i" 2>/dev/null | head -1)
+        [ -z "$JOB_ID" ] && break
+        sleep 5
+    done
+    # GPFS lock reclaim: when Neo4j dies on the compute node, GPFS
+    # must reclaim the POSIX lock from the dead process.  This can
+    # take up to 30s on shared filesystems.  Without this wait, the
+    # subsequent neo4j-admin dump fails with "database is in use".
+    DB_LOCK="{REMOTE_LINK}/data/databases/neo4j/database_lock"
+    if [ -f "$DB_LOCK" ]; then
+        echo "Waiting 30s for GPFS lock reclaim..."
+        sleep 30
+    fi
+}}
+
+start_neo4j() {{
+    # Delegate to iter-codex graph start which handles SLURM submission.
+    # Redirect stdin from /dev/null to prevent uv/python from consuming
+    # the parent script's stdin when run inside bash -s or piped scripts.
+    cd "$HOME/Code/imas-codex" 2>/dev/null && uv run iter-codex graph start </dev/null 2>&1 || true
+}}
+"""
+    # Default: systemd
+    return f"""\
+stop_neo4j() {{
+    systemctl --user stop {service_var} 2>/dev/null || true
+    for i in $(seq 1 18); do
+        state=$(systemctl --user is-active {service_var} 2>/dev/null || echo inactive)
+        [ "$state" = "inactive" ] || [ "$state" = "failed" ] && break
+        sleep 5
+    done
+}}
+
+start_neo4j() {{
+    systemctl --user start {service_var} 2>/dev/null || true
+}}
+"""
+
+
+def _neo4j_image_shell() -> str:
+    """Shell-expandable Neo4j SIF path (uses ``$HOME``)."""
+    from iter_codex.settings import get_neo4j_version
+
+    return f"$HOME/apptainer/neo4j_{get_neo4j_version()}.sif"
+
+
+# ── Directory operations ────────────────────────────────────────────────────
+
+
+def remote_create_graph_dir(
+    name: str,
+    ssh_host: str,
+    *,
+    force: bool = False,
+    bolt_port: int = 7687,
+    http_port: int = 7474,
+) -> None:
+    """Create a graph directory on a remote host.
+
+    Creates ``.neo4j/<name>/`` with standard Neo4j subdirectories
+    and a default ``neo4j.conf``.
+
+    Args:
+        name: Graph name (directory name).
+        ssh_host: SSH host alias.
+        force: Allow reuse of existing directory.
+        bolt_port: Bolt protocol port for neo4j.conf.
+        http_port: HTTP port for neo4j.conf.
+
+    Raises:
+        subprocess.CalledProcessError: On failure.
+    """
+    from iter_codex.remote.executor import run_script_via_stdin
+
+    force_flag = "true" if force else "false"
+    script = f"""\
+set -e
+STORE="{REMOTE_STORE}"
+DIR="$STORE/{name}"
+
+# Ensure store exists with secure permissions
+mkdir -p "$STORE"
+chmod 700 "$STORE"
+
+if [ -d "$DIR" ] && [ "{force_flag}" != "true" ]; then
+    echo "ERROR: Graph directory already exists: $DIR" >&2
+    echo "Use --force to overwrite." >&2
+    exit 1
+fi
+
+for sub in data logs conf import; do
+    mkdir -p "$DIR/$sub"
+done
+chmod 700 "$DIR"
+
+# Generate default neo4j.conf if missing or force
+CONF="$DIR/conf/neo4j.conf"
+if [ ! -f "$CONF" ] || [ "{force_flag}" = "true" ]; then
+    cat > "$CONF" << 'CONFEOF'
+# Neo4j configuration (auto-generated by iter-codex graph init)
+# Memory settings sized for shared HPC login node
+
+server.memory.heap.initial_size=1g
+server.memory.heap.max_size=4g
+server.memory.pagecache.size=4g
+
+# Security: bind to localhost only — access via SSH tunnel
+server.default_listen_address=127.0.0.1
+server.bolt.listen_address=:{bolt_port}
+server.http.listen_address=:{http_port}
+
+# Standard directories (bound from host via Apptainer)
+server.directories.data=/data
+server.directories.logs=/logs
+server.directories.import=/import
+
+db.recovery.fail_on_missing_files=false
+CONFEOF
+    chmod 600 "$CONF"
+fi
+
+echo "Created graph dir: {name}"
+"""
+    run_script_via_stdin(script, ssh_host=ssh_host, check=True)
+    logger.info("Created remote graph dir %s on %s", name, ssh_host)
+
+
+def remote_switch_active_graph(name: str, ssh_host: str) -> None:
+    """Repoint the ``neo4j/`` symlink on a remote host.
+
+    Args:
+        name: Target graph name.
+        ssh_host: SSH host alias.
+
+    Raises:
+        subprocess.CalledProcessError: On failure.
+    """
+    from iter_codex.remote.executor import run_script_via_stdin
+
+    script = f"""\
+set -e
+STORE="{REMOTE_STORE}"
+LINK="{REMOTE_LINK}"
+TARGET="$STORE/{name}"
+
+if [ ! -d "$TARGET" ]; then
+    echo "ERROR: No graph directory: $TARGET" >&2
+    exit 1
+fi
+
+if [ -L "$LINK" ]; then
+    rm "$LINK"
+elif [ -d "$LINK" ]; then
+    echo "ERROR: $LINK is a real directory. Manual migration needed." >&2
+    exit 1
+fi
+
+ln -s ".neo4j/{name}" "$LINK"
+echo "Switched to: {name}"
+"""
+    run_script_via_stdin(script, ssh_host=ssh_host, check=True)
+    logger.info("Switched remote active graph to %s on %s", name, ssh_host)
+
+
+def remote_list_graphs(ssh_host: str) -> str:
+    """List graph directories on a remote host.
+
+    Returns:
+        Human-readable listing with active marker.
+    """
+    from iter_codex.remote.executor import run_script_via_stdin
+
+    script = f"""\
+set -e
+STORE="{REMOTE_STORE}"
+LINK="{REMOTE_LINK}"
+
+if [ ! -d "$STORE" ]; then
+    echo "NO_STORE"
+    exit 0
+fi
+
+ACTIVE=""
+if [ -L "$LINK" ]; then
+    ACTIVE=$(readlink "$LINK" | sed 's|.neo4j/||')
+fi
+
+for d in "$STORE"/*/; do
+    [ -d "$d" ] || continue
+    name=$(basename "$d")
+    if [ "$name" = "$ACTIVE" ]; then
+        echo "ACTIVE:$name"
+    else
+        echo "GRAPH:$name"
+    fi
+done
+"""
+    return run_script_via_stdin(script, ssh_host=ssh_host)
+
+
+# ── Service operations ──────────────────────────────────────────────────────
+
+
+def resolve_remote_service_name(graph_name: str, ssh_host: str) -> str:
+    """Resolve the Neo4j systemd service name on a remote host.
+
+    Since all services bind the ``neo4j/`` symlink, any installed
+    service can run any active graph.
+
+    Resolution priority:
+    1. ``iter-codex-neo4j-<name>`` (exact match for requested graph)
+    2. Any ``iter-codex-neo4j-*`` service that exists
+
+    Args:
+        graph_name: Active graph name (e.g. ``"codex"``).
+        ssh_host: SSH host alias.
+
+    Returns:
+        Service unit name.
+
+    Raises:
+        RuntimeError: No service found.
+    """
+    from iter_codex.remote.executor import run_command
+
+    # 1. Try exact match
+    exact = f"iter-codex-neo4j-{graph_name}"
+    try:
+        out = run_command(
+            f"systemctl --user cat {exact} >/dev/null 2>&1 "
+            f"&& echo FOUND || echo MISSING",
+            ssh_host=ssh_host,
+            timeout=10,
+        )
+        if "FOUND" in out:
+            return exact
+    except Exception:
+        pass
+
+    # 2. Try any installed iter-codex-neo4j-* service
+    try:
+        out = run_command(
+            "ls ~/.config/systemd/user/iter-codex-neo4j-*.service 2>/dev/null "
+            "| head -1 | xargs -r basename | sed 's/.service$//'",
+            ssh_host=ssh_host,
+            timeout=10,
+        )
+        candidate = out.strip().splitlines()[0].strip() if out.strip() else ""
+        if candidate.startswith("iter-codex-neo4j-"):
+            return candidate
+    except Exception:
+        pass
+
+    raise RuntimeError(
+        f"No iter-codex-neo4j-* service found on {ssh_host}.\n"
+        f"Start Neo4j with: iter-codex graph start"
+    )
+
+
+def remote_service_action(
+    action: str,
+    service_name: str,
+    ssh_host: str,
+    *,
+    timeout: int = 30,
+) -> str:
+    """Run a systemctl --user action on a remote host.
+
+    Args:
+        action: systemctl verb (start, stop, status, restart, etc.)
+        service_name: Unit name (e.g. ``"iter-codex-neo4j-codex"``).
+        ssh_host: SSH host alias.
+        timeout: Command timeout in seconds.
+
+    Returns:
+        Command output.
+    """
+    from iter_codex.remote.executor import run_command
+
+    return run_command(
+        f"systemctl --user {action} {service_name}",
+        ssh_host=ssh_host,
+        timeout=timeout,
+    )
+
+
+def remote_is_neo4j_running(http_port: int, ssh_host: str) -> bool:
+    """Check if Neo4j is running on a remote host via HTTP health check."""
+    from iter_codex.remote.executor import run_command
+
+    try:
+        result = run_command(
+            f"curl -sf http://localhost:{http_port}/ >/dev/null 2>&1 "
+            f"&& echo RUNNING || echo STOPPED",
+            ssh_host=ssh_host,
+            timeout=10,
+        )
+        return "RUNNING" in result
+    except Exception:
+        return False
+
+
+def remote_set_initial_password(
+    ssh_host: str,
+    password: str | None = None,
+    *,
+    clear_auth: bool = False,
+) -> None:
+    """Set the Neo4j initial password on a remote host.
+
+    Must be called while Neo4j is stopped and before the first start
+    of a new graph instance.
+
+    If no password is provided, reads from ``get_graph_password()``
+    (which loads from ``.env`` → ``NEO4J_PASSWORD`` env var →
+    pyproject.toml default).
+
+    Args:
+        ssh_host: SSH host alias.
+        password: Password to set.  Defaults to the configured password.
+        clear_auth: If True, delete the existing auth file first so
+            ``set-initial-password`` works on an already-initialized
+            database.  Required for password rotation.
+    """
+    if password is None:
+        from iter_codex.settings import get_graph_password
+
+        password = get_graph_password()
+
+    from iter_codex.remote.executor import run_command
+
+    if clear_auth:
+        run_command(
+            f"rm -f {REMOTE_LINK}/data/dbms/auth.ini",
+            ssh_host=ssh_host,
+            timeout=30,
+        )
+
+    cmd = (
+        f"apptainer exec --bind {REMOTE_LINK}/data:/data --writable-tmpfs "
+        f"{_neo4j_image_shell()} "
+        f"neo4j-admin dbms set-initial-password {password}"
+    )
+    run_command(cmd, ssh_host=ssh_host, timeout=60)
+    logger.info("Set initial password on %s", ssh_host)
+
+
+# ── File transfer ───────────────────────────────────────────────────────────
+
+
+def scp_to_remote(
+    local_path: Path,
+    remote_path: str,
+    ssh_host: str,
+    *,
+    timeout: int = 600,
+    progress: bool = True,
+) -> None:
+    """SCP a file to a remote host.
+
+    Args:
+        local_path: Local file path.
+        remote_path: Remote destination (e.g. ``"/tmp/graph.tar.gz"``).
+        ssh_host: SSH host alias.
+        timeout: Transfer timeout in seconds.
+        progress: If True, show transfer progress (no capture).
+
+    Raises:
+        RuntimeError: If SCP fails.
+    """
+    if progress:
+        # Let scp display progress to the terminal
+        result = subprocess.run(
+            ["scp", str(local_path), f"{ssh_host}:{remote_path}"],
+            timeout=timeout,
+        )
+    else:
+        result = subprocess.run(
+            ["scp", "-q", str(local_path), f"{ssh_host}:{remote_path}"],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    if result.returncode != 0:
+        stderr = getattr(result, "stderr", "") or ""
+        raise RuntimeError(f"SCP to {ssh_host}:{remote_path} failed: {stderr}")
+    logger.info("SCP %s → %s:%s", local_path, ssh_host, remote_path)
+
+
+def scp_from_remote(
+    remote_path: str,
+    local_path: Path,
+    ssh_host: str,
+    *,
+    timeout: int = 600,
+    progress: bool = True,
+) -> None:
+    """SCP a file from a remote host.
+
+    Args:
+        remote_path: Remote file path.
+        local_path: Local destination path.
+        ssh_host: SSH host alias.
+        timeout: Transfer timeout in seconds.
+        progress: If True, show transfer progress (no capture).
+
+    Raises:
+        RuntimeError: If SCP fails.
+    """
+    if progress:
+        result = subprocess.run(
+            ["scp", f"{ssh_host}:{remote_path}", str(local_path)],
+            timeout=timeout,
+        )
+    else:
+        result = subprocess.run(
+            ["scp", "-q", f"{ssh_host}:{remote_path}", str(local_path)],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    if result.returncode != 0:
+        stderr = getattr(result, "stderr", "") or ""
+        raise RuntimeError(f"SCP from {ssh_host}:{remote_path} failed: {stderr}")
+    logger.info("SCP %s:%s → %s", ssh_host, remote_path, local_path)
+
+
+# ── Compound operations ────────────────────────────────────────────────────
+
+
+def remote_load_archive(
+    archive_remote_path: str,
+    graph_name: str,
+    ssh_host: str,
+    *,
+    password: str | None = None,
+    scheduler: str = "none",
+) -> str:
+    """Load a graph archive on a remote host.
+
+    Assumes the archive has already been SCP'd to ``archive_remote_path``.
+    Stops Neo4j, loads the dump, resets password, restarts.
+
+    If no password is provided, reads from ``get_graph_password()``.
+
+    Args:
+        archive_remote_path: Path to archive on the remote host.
+        graph_name: Active graph name (for service naming).
+        ssh_host: SSH host alias.
+        password: Neo4j password to set after load.  Defaults to
+            the configured password from ``.env``.
+        scheduler: ``"slurm"`` or ``"none"`` (systemd).
+
+    Returns:
+        Command output.
+    """
+    if password is None:
+        from iter_codex.settings import get_graph_password
+
+        password = get_graph_password()
+
+    from iter_codex.remote.executor import run_script_via_stdin
+
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
+    script = f"""\
+set -e
+ARCHIVE="{archive_remote_path}"
+DATA_DIR="{REMOTE_LINK}"
+SERVICE="iter-codex-neo4j-{graph_name}"
+IMAGE="{_neo4j_image_shell()}"
+
+{lifecycle}
+stop_neo4j
+
+# Extract archive
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+tar xzf "$ARCHIVE" -C "$TMPDIR"
+ARCHIVE_DIR=$(ls "$TMPDIR" | head -1)
+
+# Load dump if present
+DUMP="$TMPDIR/$ARCHIVE_DIR/graph.dump"
+if [ -f "$DUMP" ]; then
+    mkdir -p "$DATA_DIR/dumps"
+    cp "$DUMP" "$DATA_DIR/dumps/neo4j.dump"
+
+    apptainer exec \
+        --bind "$DATA_DIR/data:/data" \
+        --bind "$DATA_DIR/dumps:/dumps" \
+        --writable-tmpfs \
+        "$IMAGE" \
+        neo4j-admin database load neo4j \
+            --from-path=/dumps \
+            --overwrite-destination=true
+
+    echo "DUMP_LOADED"
+else
+    echo "NO_DUMP_IN_ARCHIVE" >&2
+    exit 1
+fi
+
+# Reset password (clear auth file first so set-initial-password works)
+rm -f "$DATA_DIR/data/dbms/auth.ini"
+apptainer exec \
+    --bind "$DATA_DIR/data:/data" \
+    --writable-tmpfs \
+    "$IMAGE" \
+    neo4j-admin dbms set-initial-password "{password}" 2>/dev/null || true
+
+# Restart Neo4j
+start_neo4j
+
+echo "LOAD_COMPLETE"
+"""
+    return run_script_via_stdin(script, ssh_host=ssh_host, timeout=600, check=True)
+
+
+def remote_backup(
+    label: str,
+    ssh_host: str,
+) -> str:
+    """Create a backup of the active graph data on a remote host.
+
+    Args:
+        label: Backup label (e.g. ``"pre-load"``).
+        ssh_host: SSH host alias.
+
+    Returns:
+        Remote path to the backup directory.
+    """
+    from iter_codex.remote.executor import run_script_via_stdin
+
+    script = f"""\
+set -e
+DATA_DIR="{REMOTE_LINK}"
+BACKUPS="{REMOTE_BASE}/backups"
+STAMP=$(date +%Y%m%d-%H%M%S)
+DEST="$BACKUPS/{label}-$STAMP"
+
+if [ ! -d "$DATA_DIR/data/databases/neo4j" ]; then
+    echo "NO_DATA"
+    exit 0
+fi
+
+mkdir -p "$DEST"
+cp -r "$DATA_DIR/data" "$DEST/"
+echo "$DEST"
+"""
+    return run_script_via_stdin(script, ssh_host=ssh_host, timeout=300)
+
+
+def remote_cleanup_archive(remote_path: str, ssh_host: str) -> None:
+    """Remove a temporary archive from a remote host."""
+    from iter_codex.remote.executor import run_command
+
+    run_command(f'rm -f "{remote_path}"', ssh_host=ssh_host, timeout=10)
+
+
+# ── Locality helper ─────────────────────────────────────────────────────────
+
+
+def is_remote_location(host: str | None) -> bool:
+    """Check if a Neo4j profile host refers to a remote machine.
+
+    Convenience wrapper: True when operations need SSH dispatch.
+    """
+    from iter_codex.remote.executor import is_local_host
+
+    return not is_local_host(host)
+
+
+# ── Remote exports dir ──────────────────────────────────────────────────────
+
+
+def remote_ensure_exports_dir(ssh_host: str) -> str:
+    """Create a hardened ``exports/`` directory on the remote host.
+
+    Returns the remote path to the exports directory.
+    """
+    from iter_codex.remote.executor import run_command
+
+    run_command(
+        f'mkdir -p "{REMOTE_EXPORTS}" && chmod 700 "{REMOTE_EXPORTS}"',
+        ssh_host=ssh_host,
+        timeout=10,
+    )
+    return REMOTE_EXPORTS
+
+
+# ── Remote GHCR operations ──────────────────────────────────────────────────
+
+
+def remote_check_oras(ssh_host: str) -> bool:
+    """Check if ``oras`` is available on the remote host."""
+    from iter_codex.remote.executor import run_command
+
+    try:
+        run_command("command -v oras", ssh_host=ssh_host, timeout=10)
+        return True
+    except Exception:
+        return False
+
+
+def remote_check_iter_codex(ssh_host: str) -> str | None:
+    """Check if ``iter-codex`` CLI is available on the remote host.
+
+    Searches PATH first, then common uv-managed project locations.
+    Returns the absolute path to the binary, or ``None`` if not found.
+    """
+    from iter_codex.remote.executor import run_command
+
+    # Check PATH, then common venv locations
+    check_script = (
+        "command -v iter-codex 2>/dev/null || "
+        'for d in "$HOME/Code/imas-codex" "$HOME/iter-codex"; do '
+        '  if [ -x "$d/.venv/bin/iter-codex" ]; then '
+        '    echo "$d/.venv/bin/iter-codex"; exit 0; '
+        "  fi; "
+        "done; "
+        "exit 1"
+    )
+    try:
+        output = run_command(check_script, ssh_host=ssh_host, timeout=15, check=True)
+        # run_command returns a string; extract the path (first line)
+        path = output.strip().splitlines()[0].strip()
+        return path if path.startswith("/") else None
+    except Exception:
+        return None
+
+
+def remote_fetch_from_ghcr(
+    artifact_ref: str,
+    ssh_host: str,
+    *,
+    token: str | None = None,
+    output_name: str | None = None,
+) -> str:
+    """Fetch an OCI artifact from GHCR directly on the remote host.
+
+    Runs ``oras pull`` on the remote machine, keeping the archive on the
+    same filesystem as the graph — no SCP transfer needed.
+
+    Args:
+        artifact_ref: Full GHCR reference (e.g.
+            ``"ghcr.io/iterorganization/iter-codex-graph:latest"``).
+        ssh_host: SSH host alias.
+        token: GHCR token.  If provided, ``oras login`` is run first.
+        output_name: Archive filename (placed in remote exports dir).
+            Defaults to the artifact name + tag.
+
+    Returns:
+        Remote path to the downloaded archive.
+
+    Raises:
+        RuntimeError: If ``oras`` is not available or the pull fails.
+    """
+    from iter_codex.remote.executor import run_script_via_stdin
+
+    if not output_name:
+        # Extract a filename from the ref: ghcr.io/org/pkg:tag → pkg-tag.tar.gz
+        ref_parts = artifact_ref.rsplit("/", 1)[-1]  # pkg:tag
+        output_name = ref_parts.replace(":", "-") + ".tar.gz"
+
+    login_cmd = ""
+    if token:
+        login_cmd = f'echo "{token}" | oras login ghcr.io -u token --password-stdin'
+
+    script = f"""\
+set -e
+EXPORTS="{REMOTE_EXPORTS}"
+mkdir -p "$EXPORTS"
+chmod 700 "$EXPORTS"
+
+# Login if token provided
+{login_cmd}
+
+# Pull to temp dir then find archive
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+oras pull "{artifact_ref}" -o "$TMPDIR" --allow-path-traversal
+
+# Move archive to exports dir
+ARCHIVE=$(find "$TMPDIR" -name '*.tar.gz' | head -1)
+if [ -z "$ARCHIVE" ]; then
+    echo "ERROR: No archive found in artifact" >&2
+    exit 1
+fi
+
+DEST="$EXPORTS/{output_name}"
+mv "$ARCHIVE" "$DEST"
+rm -rf "$TMPDIR"
+echo "ARCHIVE_PATH=$DEST"
+"""
+    output = run_script_via_stdin(script, ssh_host=ssh_host, timeout=300, check=True)
+    for line in output.strip().splitlines():
+        if line.startswith("ARCHIVE_PATH="):
+            return line.split("=", 1)[1].strip()
+    raise RuntimeError(f"Could not find archive path in output:\n{output}")
+
+
+# ── Streaming script builders ───────────────────────────────────────────────
+#
+# These return the *script text* with embedded ``PROGRESS:`` markers.
+# The CLI layer runs them via ``remote_operation_streaming()`` to
+# display real-time phase updates.
+
+
+def build_remote_fetch_script(
+    artifact_ref: str,
+    output_name: str,
+    *,
+    token: str | None = None,
+) -> str:
+    """Build a bash script for streaming remote ORAS fetch.
+
+    Emits ``PROGRESS:`` markers that
+    :func:`~iter_codex.cli.graph_progress.remote_operation_streaming`
+    can map to Rich spinner updates.
+    """
+    login_cmd = ""
+    if token:
+        login_cmd = f'echo "{token}" | oras login ghcr.io -u token --password-stdin'
+
+    return f"""\
+set -e
+EXPORTS="{REMOTE_EXPORTS}"
+mkdir -p "$EXPORTS"
+chmod 700 "$EXPORTS"
+
+echo "PROGRESS:LOGIN"
+{login_cmd}
+
+echo "PROGRESS:PULLING"
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+oras pull "{artifact_ref}" -o "$TMPDIR" --allow-path-traversal 2>&1
+
+echo "PROGRESS:MOVING"
+ARCHIVE=$(find "$TMPDIR" -name '*.tar.gz' | head -1)
+if [ -z "$ARCHIVE" ]; then
+    echo "ERROR: No archive found in artifact" >&2
+    exit 1
+fi
+
+DEST="$EXPORTS/{output_name}"
+mv "$ARCHIVE" "$DEST"
+rm -rf "$TMPDIR"
+SIZE=$(du -h "$DEST" | cut -f1)
+echo "PROGRESS:DONE"
+echo "SIZE=$SIZE"
+echo "ARCHIVE_PATH=$DEST"
+"""
+
+
+def build_remote_load_script(
+    archive_remote_path: str,
+    graph_name: str,
+    password: str,
+    scheduler: str = "none",
+) -> str:
+    """Build a bash script for streaming remote graph load.
+
+    Emits ``PROGRESS:`` markers for phase tracking.
+    """
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
+    return f"""\
+set -e
+ARCHIVE="{archive_remote_path}"
+DATA_DIR="{REMOTE_LINK}"
+SERVICE="iter-codex-neo4j-{graph_name}"
+IMAGE="{_neo4j_image_shell()}"
+
+{lifecycle}
+echo "PROGRESS:STOPPING"
+stop_neo4j
+
+echo "PROGRESS:EXTRACTING"
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+tar xzf "$ARCHIVE" -C "$TMPDIR"
+ARCHIVE_DIR=$(ls "$TMPDIR" | head -1)
+
+DUMP="$TMPDIR/$ARCHIVE_DIR/graph.dump"
+if [ -f "$DUMP" ]; then
+    echo "PROGRESS:LOADING_DUMP"
+    mkdir -p "$DATA_DIR/dumps"
+    cp "$DUMP" "$DATA_DIR/dumps/neo4j.dump"
+
+    apptainer exec \
+        --bind "$DATA_DIR/data:/data" \
+        --bind "$DATA_DIR/dumps:/dumps" \
+        --writable-tmpfs \
+        "$IMAGE" \
+        neo4j-admin database load neo4j \
+            --from-path=/dumps \
+            --overwrite-destination=true
+
+    echo "DUMP_LOADED"
+else
+    echo "NO_DUMP_IN_ARCHIVE" >&2
+    exit 1
+fi
+
+echo "PROGRESS:PASSWORD"
+rm -f "$DATA_DIR/data/dbms/auth.ini"
+apptainer exec \
+    --bind "$DATA_DIR/data:/data" \
+    --writable-tmpfs \
+    "$IMAGE" \
+    neo4j-admin dbms set-initial-password "{password}" 2>/dev/null || true
+
+echo "PROGRESS:STARTING"
+start_neo4j
+
+rm -rf "$TMPDIR"
+echo "PROGRESS:COMPLETE"
+echo "LOAD_COMPLETE"
+"""
+
+
+def build_remote_export_script(
+    graph_name: str,
+    *,
+    archive_name: str,
+    archive_dir_name: str,
+    scheduler: str = "none",
+) -> str:
+    """Build a bash script for streaming remote graph export.
+
+    Emits ``PROGRESS:`` markers for phase tracking.
+    """
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
+    return f"""\
+set -e
+DATA_DIR="{REMOTE_LINK}"
+EXPORTS="{REMOTE_EXPORTS}"
+SERVICE="iter-codex-neo4j-{graph_name}"
+IMAGE="{_neo4j_image_shell()}"
+mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
+ARCHIVE="$EXPORTS/{archive_name}"
+
+{lifecycle}
+
+wait_neo4j_ready() {{
+    for i in $(seq 1 12); do
+        if curl -sf http://localhost:7474 >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 5
+    done
+    echo "Warning: Neo4j did not become ready within 60s" >&2
+}}
+
+do_dump() {{
+    mkdir -p "$DATA_DIR/dumps"
+    apptainer exec \
+        --bind "$DATA_DIR/data:/data" \
+        --bind "$DATA_DIR/dumps:/dumps" \
+        --writable-tmpfs \
+        "$IMAGE" \
+        neo4j-admin database dump neo4j \
+            --to-path=/dumps \
+            --overwrite-destination=true \
+            --verbose
+}}
+
+echo "PROGRESS:STOPPING"
+stop_neo4j
+
+echo "PROGRESS:DUMPING"
+if ! do_dump; then
+    echo "PROGRESS:RECOVERY"
+    start_neo4j
+    wait_neo4j_ready
+    stop_neo4j
+    do_dump
+fi
+
+echo "PROGRESS:ARCHIVING"
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+ARCHIVE_DIR="$TMPDIR/{archive_dir_name}"
+mkdir -p "$ARCHIVE_DIR"
+cp "$DATA_DIR/dumps/neo4j.dump" "$ARCHIVE_DIR/graph.dump"
+
+DATE=$(date -Iseconds)
+cat > "$ARCHIVE_DIR/manifest.json" << MANIFEST_EOF
+{{"version": "remote-export", "timestamp": "$DATE"}}
+MANIFEST_EOF
+
+tar czf "$ARCHIVE" -C "$TMPDIR" "{archive_dir_name}"
+rm -rf "$TMPDIR"
+SIZE=$(du -h "$ARCHIVE" | cut -f1)
+
+echo "PROGRESS:STARTING"
+start_neo4j
+
+echo "PROGRESS:COMPLETE"
+echo "SIZE=$SIZE"
+echo "ARCHIVE_PATH=$ARCHIVE"
+"""
+
+
+def _build_remote_dd_only_push_script(
+    *,
+    artifact_ref: str,
+    login_cmd: str,
+    annotation_args: str,
+    tag_latest_block: str,
+    codex_cli_path: str,
+    archive_name: str,
+    archive_dir_name: str,
+    scheduler: str = "none",
+    partition: str | None = None,
+) -> str:
+    """Build a push script that delegates to ``iter-codex graph export --dd-only``.
+
+    Instead of reimplementing temp-Neo4j filtering in bash, this calls
+    the installed ``iter-codex`` CLI on the remote host which already
+    handles the full export + filtering pipeline.
+
+    When ``scheduler="slurm"``, the export runs via ``srun`` on the
+    compute partition to avoid OOM kills on the login node.  Uses
+    ``--immediate`` to fail fast if no resources are available rather
+    than queueing indefinitely.
+    """
+    # The export command spins up a temp Neo4j instance (~5 GB RAM).
+    # On SLURM hosts, dispatch to a compute node via srun.
+    # --immediate: fail instantly if resources unavailable (never queue)
+    # --overlap: allow co-scheduling with existing jobs on the node
+    if scheduler == "slurm" and partition:
+        srun_flags = (
+            f"srun --immediate --overlap --partition={partition} "
+            f"--time=00:30:00 --mem=32G --cpus-per-task=4 "
+            f"--job-name=codex-export"
+        )
+        # $ARCHIVE is expanded by the outer bash before srun sees it.
+        # Paths are on shared GPFS so the compute node can access them.
+        export_block = f"""\
+if {srun_flags} {codex_cli_path} graph export --dd-only -o "$ARCHIVE" \\
+    --archive-dir-name "{archive_dir_name}"; then
+    echo "  Export completed on compute node"
+else
+    RC=$?
+    if [ $RC -eq 1 ]; then
+        echo "ERROR: No SLURM resources available for DD-only export." >&2
+        echo "  The compute partition '{partition}' may be fully allocated." >&2
+        echo "  Free resources by stopping services or try again later." >&2
+    fi
+    exit $RC
+fi"""
+    else:
+        export_block = (
+            f'"{codex_cli_path}" graph export --dd-only -o "$ARCHIVE" '
+            f'--archive-dir-name "{archive_dir_name}"'
+        )
+
+    return f"""\
+set -e
+EXPORTS="{REMOTE_EXPORTS}"
+mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
+ARCHIVE="$EXPORTS/{archive_name}"
+
+cleanup() {{
+    rm -f "$ARCHIVE"
+}}
+trap cleanup EXIT
+
+echo "PROGRESS:EXPORTING"
+{export_block}
+
+SIZE=$(du -h "$ARCHIVE" | cut -f1)
+
+echo "PROGRESS:LOGIN"
+{login_cmd}
+
+echo "PROGRESS:PUSHING"
+ARCHIVE_NAME=$(basename "$ARCHIVE")
+cd "$(dirname "$ARCHIVE")"
+oras push "{artifact_ref}" \\
+    "$ARCHIVE_NAME:application/gzip" \\
+    {annotation_args} \\
+    2>&1
+{tag_latest_block}
+echo "PROGRESS:COMPLETE"
+echo "SIZE=$SIZE"
+echo "PUSH_COMPLETE"
+"""
+
+
+def build_remote_push_script(
+    graph_name: str,
+    artifact_ref: str,
+    *,
+    version_tag: str,
+    git_commit: str,
+    message: str | None = None,
+    token: str | None = None,
+    is_dev: bool = False,
+    dd_only: bool = False,
+    codex_cli_path: str | None = None,
+    archive_name: str,
+    archive_dir_name: str,
+    scheduler: str = "none",
+    partition: str | None = None,
+) -> str:
+    """Build a bash script for remote graph export + ORAS push.
+
+    Performs the full dump → archive → oras push cycle on the remote
+    host, avoiding any SCP transfer back to the local machine.  The
+    archive is cleaned up automatically after a successful push.
+
+    When ``dd_only`` is True, delegates to the ``iter-codex`` CLI
+    on the remote host (``iter-codex graph export --dd-only``) which
+    handles filtering via a temp Neo4j instance.
+
+    Emits ``PROGRESS:`` markers for phase tracking.
+    """
+    login_cmd = ""
+    if token:
+        login_cmd = f'echo "{token}" | oras login ghcr.io -u token --password-stdin'
+
+    annotations = [
+        f'--annotation "org.opencontainers.image.version={version_tag}"',
+        f'--annotation "io.iter-codex.git-commit={git_commit}"',
+    ]
+    if message:
+        annotations.append(
+            f'--annotation "org.opencontainers.image.description={message}"'
+        )
+    annotation_args = " \\\n    ".join(annotations)
+
+    tag_latest_block = ""
+    if not is_dev:
+        tag_latest_block = f"""
+echo "PROGRESS:TAGGING"
+oras tag "{artifact_ref}" latest 2>&1
+"""
+
+    # When dd_only, delegate to `iter-codex graph export --dd-only`
+    # on the remote host instead of reimplementing filtering in bash.
+    if dd_only:
+        return _build_remote_dd_only_push_script(
+            artifact_ref=artifact_ref,
+            login_cmd=login_cmd,
+            annotation_args=annotation_args,
+            tag_latest_block=tag_latest_block,
+            codex_cli_path=codex_cli_path or "iter-codex",
+            archive_name=archive_name,
+            archive_dir_name=archive_dir_name,
+            scheduler=scheduler,
+            partition=partition,
+        )
+
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
+
+    return f"""\
+set -e
+DATA_DIR="{REMOTE_LINK}"
+EXPORTS="{REMOTE_EXPORTS}"
+SERVICE="iter-codex-neo4j-{graph_name}"
+IMAGE="{_neo4j_image_shell()}"
+mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
+ARCHIVE="$EXPORTS/{archive_name}"
+
+{lifecycle}
+
+wait_neo4j_ready() {{
+    for i in $(seq 1 12); do
+        if curl -sf http://localhost:7474 >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 5
+    done
+    echo "Warning: Neo4j did not become ready within 60s" >&2
+}}
+
+do_dump() {{
+    mkdir -p "$DATA_DIR/dumps"
+    apptainer exec \
+        --bind "$DATA_DIR/data:/data" \
+        --bind "$DATA_DIR/dumps:/dumps" \
+        --writable-tmpfs \
+        "$IMAGE" \
+        neo4j-admin database dump neo4j \
+            --to-path=/dumps \
+            --overwrite-destination=true \
+            --verbose
+}}
+
+cleanup() {{
+    rm -f "$ARCHIVE"
+    [ -n "$TMPDIR" ] && rm -rf "$TMPDIR"
+    # Always restart Neo4j — it was stopped for dump and must come back
+    start_neo4j || true
+}}
+trap cleanup EXIT
+
+echo "PROGRESS:STOPPING"
+stop_neo4j
+
+echo "PROGRESS:DUMPING"
+if ! do_dump; then
+    echo "PROGRESS:RECOVERY"
+    start_neo4j
+    wait_neo4j_ready
+    stop_neo4j
+    do_dump
+fi
+
+echo "PROGRESS:ARCHIVING"
+TMPDIR=$(mktemp -d)
+ARCHIVE_DIR="$TMPDIR/{archive_dir_name}"
+mkdir -p "$ARCHIVE_DIR"
+cp "$DATA_DIR/dumps/neo4j.dump" "$ARCHIVE_DIR/graph.dump"
+
+DATE=$(date -Iseconds)
+cat > "$ARCHIVE_DIR/manifest.json" << MANIFEST_EOF
+{{"version": "remote-push", "timestamp": "$DATE"}}
+MANIFEST_EOF
+
+tar czf "$ARCHIVE" -C "$TMPDIR" "{archive_dir_name}"
+rm -rf "$TMPDIR"
+SIZE=$(du -h "$ARCHIVE" | cut -f1)
+
+echo "PROGRESS:STARTING"
+start_neo4j
+
+echo "PROGRESS:LOGIN"
+{login_cmd}
+
+echo "PROGRESS:PUSHING"
+ARCHIVE_NAME=$(basename "$ARCHIVE")
+cd "$(dirname "$ARCHIVE")"
+oras push "{artifact_ref}" \
+    "$ARCHIVE_NAME:application/gzip" \
+    {annotation_args} \
+    2>&1
+{tag_latest_block}
+echo "PROGRESS:COMPLETE"
+echo "SIZE=$SIZE"
+echo "PUSH_COMPLETE"
+"""
+
+
+def build_remote_release_push_script(
+    graph_name: str,
+    full_artifact_ref: str,
+    *,
+    dd_artifact_ref: str | None = None,
+    facility_artifact_refs: dict[str, str] | None = None,
+    version_tag: str,
+    git_commit: str,
+    archive_name: str,
+    archive_dir_name: str,
+    dd_archive_name: str | None = None,
+    dd_archive_dir_name: str | None = None,
+    facility_archive_names: dict[str, str] | None = None,
+    facility_archive_dir_names: dict[str, str] | None = None,
+    message: str | None = None,
+    token: str | None = None,
+    is_dev: bool = False,
+    codex_cli_path: str | None = None,
+    scheduler: str = "none",
+) -> str:
+    """Build a unified bash script for releasing all graph variants.
+
+    Generates a SINGLE script that stops Neo4j once, dumps once, and
+    derives all variant archives (full, DD-only, per-facility) from the
+    shared dump.  This eliminates redundant Neo4j stop/start cycles and
+    fixes OOM kills during DD-only export on constrained hosts.
+
+    Emits ``PROGRESS:`` markers for phase tracking.
+    """
+    codex_cli = codex_cli_path or "iter-codex"
+    if dd_artifact_ref and (not dd_archive_name or not dd_archive_dir_name):
+        raise ValueError("DD release requires caller-supplied archive names")
+    if facility_artifact_refs:
+        if not facility_archive_names or not facility_archive_dir_names:
+            raise ValueError("Facility release requires caller-supplied archive names")
+        missing_names = set(facility_artifact_refs) - set(facility_archive_names)
+        missing_directories = set(facility_artifact_refs) - set(
+            facility_archive_dir_names
+        )
+        if missing_names or missing_directories:
+            missing = sorted(missing_names | missing_directories)
+            raise ValueError(f"Missing archive names for facilities: {missing}")
+
+    # Token is passed into the script via _do_ghcr_login argument
+    token_arg = f'"{token}"' if token else ""
+
+    annotations = [
+        f'--annotation "org.opencontainers.image.version={version_tag}"',
+        f'--annotation "io.iter-codex.git-commit={git_commit}"',
+    ]
+    if message:
+        safe_msg = message.replace('"', '\\"')
+        annotations.append(
+            f'--annotation "org.opencontainers.image.description={safe_msg}"'
+        )
+    annotation_args = " \\\n    ".join(annotations)
+
+    tag_latest_cmds: list[str] = []
+    if not is_dev:
+        tag_latest_cmds.append(f'oras tag "{full_artifact_ref}" latest 2>&1')
+        if dd_artifact_ref:
+            tag_latest_cmds.append(f'oras tag "{dd_artifact_ref}" latest 2>&1')
+        if facility_artifact_refs:
+            for _fac, fac_ref in sorted(facility_artifact_refs.items()):
+                tag_latest_cmds.append(f'oras tag "{fac_ref}" latest 2>&1')
+    tag_latest_block = "\n".join(tag_latest_cmds)
+
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
+
+    # DD-only export + push block
+    dd_block = ""
+    if dd_artifact_ref:
+        dd_block = f"""
+echo "PROGRESS:FILTERING_DD"
+# Run DD-only export with periodic keepalive to prevent SSH timeout
+"$CODEX_CLI" graph export --dd-only --source-dump "$DATA_DIR/dumps/neo4j.dump" \\
+    -o "$DD_ARCHIVE" --archive-dir-name "{dd_archive_dir_name}" </dev/null 2>&1 &
+EXPORT_PID=$!
+while kill -0 "$EXPORT_PID" 2>/dev/null; do
+    echo "PROGRESS:FILTERING_DD"
+    sleep 30
+done
+wait "$EXPORT_PID"
+EXPORT_RC=$?
+if [ "$EXPORT_RC" -ne 0 ]; then
+    echo "DD-only export failed with exit code $EXPORT_RC" >&2
+    exit 1
+fi
+
+SIZE_DD=$(du -h "$DD_ARCHIVE" | cut -f1)
+
+echo "PROGRESS:PUSHING_DD"
+# Re-authenticate — GHCR bearer tokens expire during long DD filtering
+_do_ghcr_login {token_arg}
+DD_ARCHIVE_NAME=$(basename "$DD_ARCHIVE")
+cd "$(dirname "$DD_ARCHIVE")"
+oras push "{dd_artifact_ref}" \\
+    "$DD_ARCHIVE_NAME:application/gzip" \\
+    {annotation_args} \\
+    2>&1
+echo "SIZE_DD=$SIZE_DD"
+"""
+
+    # Per-facility export + push blocks
+    facility_block = ""
+    if facility_artifact_refs:
+        for fac, fac_ref in sorted(facility_artifact_refs.items()):
+            fac_upper = fac.upper()
+            fac_archive_name = facility_archive_names[fac]
+            fac_archive_dir_name = facility_archive_dir_names[fac]
+            facility_block += f"""
+echo "PROGRESS:FILTERING_FAC_{fac_upper}"
+FAC_ARCHIVE_{fac_upper}="$EXPORTS/{fac_archive_name}"
+"$CODEX_CLI" graph export --facility {fac} \\
+    --source-dump "$DATA_DIR/dumps/neo4j.dump" \\
+    -o "$FAC_ARCHIVE_{fac_upper}" \\
+    --archive-dir-name "{fac_archive_dir_name}" </dev/null 2>&1
+
+echo "PROGRESS:PUSHING_FAC_{fac_upper}"
+_do_ghcr_login {token_arg}
+FAC_NAME=$(basename "$FAC_ARCHIVE_{fac_upper}")
+cd "$(dirname "$FAC_ARCHIVE_{fac_upper}")"
+oras push "{fac_ref}" \\
+    "$FAC_NAME:application/gzip" \\
+    {annotation_args} \\
+    2>&1
+rm -f "$FAC_ARCHIVE_{fac_upper}"
+"""
+
+    dd_archive_init = ""
+    if dd_artifact_ref:
+        dd_archive_init = f'DD_ARCHIVE="$EXPORTS/{dd_archive_name}"'
+
+    return f"""\
+set -e
+DATA_DIR="{REMOTE_LINK}"
+EXPORTS="{REMOTE_EXPORTS}"
+SERVICE="iter-codex-neo4j-{graph_name}"
+IMAGE="{_neo4j_image_shell()}"
+CODEX_CLI="{codex_cli}"
+mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
+FULL_ARCHIVE="$EXPORTS/{archive_name}"
+{dd_archive_init}
+
+# Authenticate with GHCR — use provided token or load from remote .env
+_do_ghcr_login() {{
+    local token="${{1:-}}"
+    if [ -z "$token" ]; then
+        local env_file="$HOME/Code/imas-codex/.env"
+        [ -f "$env_file" ] && token=$(grep "^GHCR_TOKEN=" "$env_file" | cut -d= -f2-)
+    fi
+    if [ -n "$token" ]; then
+        echo "$token" | oras login ghcr.io -u token --password-stdin 2>&1
+    else
+        echo "Warning: no GHCR token found, oras push may fail" >&2
+    fi
+}}
+_do_ghcr_login {token_arg}
+
+{lifecycle}
+
+wait_neo4j_ready() {{
+    for i in $(seq 1 12); do
+        if curl -sf http://localhost:7474 >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 5
+    done
+    echo "Warning: Neo4j did not become ready within 60s" >&2
+}}
+
+do_dump() {{
+    mkdir -p "$DATA_DIR/dumps"
+    apptainer exec \\
+        --bind "$DATA_DIR/data:/data" \\
+        --bind "$DATA_DIR/dumps:/dumps" \\
+        --writable-tmpfs \\
+        "$IMAGE" \\
+        neo4j-admin database dump neo4j \\
+            --to-path=/dumps \\
+            --overwrite-destination=true \\
+            --verbose
+}}
+
+cleanup() {{
+    rm -f "$FULL_ARCHIVE" 2>/dev/null || true
+    rm -f "${{DD_ARCHIVE:-}}" 2>/dev/null || true
+    [ -n "${{TMPDIR:-}}" ] && rm -rf "$TMPDIR" 2>/dev/null || true
+    # Always restart Neo4j — it was stopped for dump and must come back
+    start_neo4j || true
+}}
+trap cleanup EXIT
+
+echo "PROGRESS:STOPPING"
+stop_neo4j
+
+echo "PROGRESS:DUMPING"
+if ! do_dump; then
+    echo "PROGRESS:RECOVERY"
+    start_neo4j
+    wait_neo4j_ready
+    stop_neo4j
+    do_dump
+fi
+
+echo "PROGRESS:ARCHIVING_FULL"
+TMPDIR=$(mktemp -d)
+ARCHIVE_DIR="$TMPDIR/{archive_dir_name}"
+mkdir -p "$ARCHIVE_DIR"
+cp "$DATA_DIR/dumps/neo4j.dump" "$ARCHIVE_DIR/graph.dump"
+
+DATE=$(date -Iseconds)
+cat > "$ARCHIVE_DIR/manifest.json" << MANIFEST_EOF
+{{"version": "remote-push", "timestamp": "$DATE"}}
+MANIFEST_EOF
+
+tar czf "$FULL_ARCHIVE" -C "$TMPDIR" "{archive_dir_name}"
+rm -rf "$TMPDIR"
+TMPDIR=""
+SIZE_FULL=$(du -h "$FULL_ARCHIVE" | cut -f1)
+
+echo "PROGRESS:PUSHING_FULL"
+FULL_ARCHIVE_NAME=$(basename "$FULL_ARCHIVE")
+cd "$(dirname "$FULL_ARCHIVE")"
+oras push "{full_artifact_ref}" \\
+    "$FULL_ARCHIVE_NAME:application/gzip" \\
+    {annotation_args} \\
+    2>&1
+echo "SIZE_FULL=$SIZE_FULL"
+{dd_block}{facility_block}
+echo "PROGRESS:STARTING"
+start_neo4j
+
+echo "PROGRESS:TAGGING"
+{tag_latest_block}
+
+echo "PROGRESS:COMPLETE"
+echo "PUSH_COMPLETE"
+"""
+
+
+__all__ = [
+    "build_remote_export_script",
+    "build_remote_fetch_script",
+    "build_remote_load_script",
+    "build_remote_push_script",
+    "build_remote_release_push_script",
+    "is_remote_location",
+    "remote_backup",
+    "remote_check_oras",
+    "remote_cleanup_archive",
+    "remote_create_graph_dir",
+    "remote_ensure_exports_dir",
+    "remote_fetch_from_ghcr",
+    "remote_is_neo4j_running",
+    "remote_list_graphs",
+    "remote_load_archive",
+    "remote_service_action",
+    "remote_switch_active_graph",
+    "resolve_remote_service_name",
+    "scp_from_remote",
+    "scp_to_remote",
+]

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from imas_codex.models.constants import SearchMode
-from imas_codex.search.search_strategy import SearchHit
+from iter_codex.models.constants import SearchMode
+from iter_codex.search.search_strategy import SearchHit
 
 
 class TestSearchHitClusterLabels:
@@ -60,8 +60,8 @@ class TestClusterLabelFormatting:
     """Verify cluster labels appear in formatted output."""
 
     def test_cluster_labels_in_report(self):
-        from imas_codex.llm.search_formatters import format_search_dd_report
-        from imas_codex.models.result_models import SearchPathsResult
+        from iter_codex.llm.search_formatters import format_search_dd_report
+        from iter_codex.models.result_models import SearchPathsResult
 
         hit = SearchHit(
             path="core_profiles/profiles_1d/electrons/temperature",
@@ -89,8 +89,8 @@ class TestClusterLabelFormatting:
         assert "electron temperature" in report
 
     def test_see_also_in_report(self):
-        from imas_codex.llm.search_formatters import format_search_dd_report
-        from imas_codex.models.result_models import SearchPathsResult
+        from iter_codex.llm.search_formatters import format_search_dd_report
+        from iter_codex.models.result_models import SearchPathsResult
 
         hit = SearchHit(
             path="core_profiles/profiles_1d/electrons/temperature",
@@ -123,8 +123,8 @@ class TestClusterLabelFormatting:
         assert "+1 more" in report
 
     def test_no_cluster_labels_no_output(self):
-        from imas_codex.llm.search_formatters import format_search_dd_report
-        from imas_codex.models.result_models import SearchPathsResult
+        from iter_codex.llm.search_formatters import format_search_dd_report
+        from iter_codex.models.result_models import SearchPathsResult
 
         hit = SearchHit(
             path="core_profiles/profiles_1d/electrons/temperature",

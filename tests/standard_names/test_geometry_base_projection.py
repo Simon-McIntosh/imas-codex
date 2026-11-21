@@ -3,7 +3,7 @@
 import pytest
 from imas_standard_names import compose, parse
 
-from imas_codex.standard_names.graph_store.graph_foundation import _segments_from_ir
+from iter_codex.standard_names.graph_store.graph_foundation import _segments_from_ir
 
 
 @pytest.mark.parametrize(

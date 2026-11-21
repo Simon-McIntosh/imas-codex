@@ -10,11 +10,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.signals.scanners.mdsplus import MDSplusScanner
+from iter_codex.discovery.signals.scanners.mdsplus import MDSplusScanner
 
 # Patch targets — imports are inside scan() method body
-_RTD = "imas_codex.discovery.mdsplus.pipeline.run_tree_discovery"
-_TDI = "imas_codex.discovery.mdsplus.tdi_linkage.link_tdi_to_data_nodes"
+_RTD = "iter_codex.discovery.mdsplus.pipeline.run_tree_discovery"
+_TDI = "iter_codex.discovery.mdsplus.tdi_linkage.link_tdi_to_data_nodes"
 
 
 @pytest.fixture
@@ -415,7 +415,7 @@ async def test_scan_reference_shot_override(scanner, static_config):
 @pytest.mark.asyncio
 async def test_check_no_reference_shot(scanner):
     """check() returns invalid when no reference_shot."""
-    from imas_codex.graph.models import FacilitySignal, FacilitySignalStatus
+    from iter_codex.graph.models import FacilitySignal, FacilitySignalStatus
 
     signals = [
         FacilitySignal(
@@ -436,7 +436,7 @@ async def test_check_no_reference_shot(scanner):
 @pytest.mark.asyncio
 async def test_check_delegates_to_remote(scanner):
     """check() calls check_signals_batch.py via SSH."""
-    from imas_codex.graph.models import FacilitySignal, FacilitySignalStatus
+    from iter_codex.graph.models import FacilitySignal, FacilitySignalStatus
 
     signals = [
         FacilitySignal(
@@ -453,7 +453,7 @@ async def test_check_delegates_to_remote(scanner):
 
     mock_output = '{"results": [{"id": "tcv:results/top/ip", "success": true, "shape": [100], "dtype": "float64"}]}'
     with patch(
-        "imas_codex.remote.executor.run_python_script",
+        "iter_codex.remote.executor.run_python_script",
         return_value=mock_output,
     ) as mock_rps:
         results = await scanner.check("tcv", "tcv-ssh", signals, config)
@@ -468,7 +468,7 @@ async def test_check_delegates_to_remote(scanner):
 @pytest.mark.asyncio
 async def test_check_handles_remote_error(scanner):
     """check() handles SSH failures gracefully."""
-    from imas_codex.graph.models import FacilitySignal, FacilitySignalStatus
+    from iter_codex.graph.models import FacilitySignal, FacilitySignalStatus
 
     signals = [
         FacilitySignal(
@@ -483,7 +483,7 @@ async def test_check_handles_remote_error(scanner):
     config = {"reference_shot": 85000}
 
     with patch(
-        "imas_codex.remote.executor.run_python_script",
+        "iter_codex.remote.executor.run_python_script",
         side_effect=RuntimeError("SSH failed"),
     ):
         results = await scanner.check("tcv", "tcv-ssh", signals, config)
@@ -502,6 +502,6 @@ def test_scanner_type():
 
 def test_scanner_registered():
     """MDSplusScanner is auto-registered."""
-    from imas_codex.discovery.signals.scanners.base import _registry
+    from iter_codex.discovery.signals.scanners.base import _registry
 
     assert "mdsplus" in _registry

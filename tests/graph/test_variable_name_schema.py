@@ -1,7 +1,7 @@
 """Control hierarchy and component identity remain separate schema entities."""
 
-from imas_codex.graph.models import ControlNode, FacilitySignal, PlantComponent
-from imas_codex.graph.schema import GraphSchema
+from iter_codex.graph.models import ControlNode, FacilitySignal, PlantComponent
+from iter_codex.graph.schema import GraphSchema
 
 
 def test_control_and_component_relationships_and_roundtrip():

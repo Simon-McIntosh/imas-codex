@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_foundation as _owning_graph_foundation,
 )

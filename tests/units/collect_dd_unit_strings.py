@@ -8,7 +8,7 @@ live graph; each query is a bounded DISTINCT read over unit strings, not a scan.
 
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 OUT = Path(__file__).with_name("dd_unit_strings.txt")
 

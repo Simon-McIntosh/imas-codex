@@ -17,8 +17,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.cli.sn import _suppress_review_graph_writes
-from imas_codex.graph.client import GraphClient
+from iter_codex.cli.sn import _suppress_review_graph_writes
+from iter_codex.graph.client import GraphClient
 
 #: The one route from the client to a Neo4j session. Every method that can
 #: deliver a statement to the graph passes through it, so it is the boundary

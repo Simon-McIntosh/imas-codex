@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from imas_codex.standard_names.fanout.schemas import (
+from iter_codex.standard_names.fanout.schemas import (
     MAX_FAN_DEGREE,
     FanoutPlan,
     _FindRelatedDDPaths,

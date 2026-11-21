@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 1d667cc62507383e6d8295a0cdeadcdb3f359365, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.review.cascade, imas_codex.standard_names.workers._canonical_docs_review_item, imas_codex.standard_names.workers._enrich_docs_review_dd_context, imas_codex.standard_names.workers._load_docs_review_source_item, imas_codex.standard_names.workers._related_path_neighbours, imas_codex.standard_names.workers._set_docs_review_dd_source_paths.
+# Names the tree no longer defines: iter_codex.standard_names.review.cascade, iter_codex.standard_names.workers._canonical_docs_review_item, iter_codex.standard_names.workers._enrich_docs_review_dd_context, iter_codex.standard_names.workers._load_docs_review_source_item, iter_codex.standard_names.workers._related_path_neighbours, iter_codex.standard_names.workers._set_docs_review_dd_source_paths.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Measure the decision the documentation change would make over the 77 labelled rows.
@@ -31,11 +31,11 @@ from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
-from imas_codex.settings import get_model
-from imas_codex.standard_names.review import cascade as cascade_mod
-from imas_codex.standard_names.review.audits import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
+from iter_codex.settings import get_model
+from iter_codex.standard_names.review import cascade as cascade_mod
+from iter_codex.standard_names.review.audits import (
     run_lint_checks,
 )
 
@@ -45,7 +45,7 @@ KEY = HERE / "srtj-docs-disagreement-key.json"
 LABELS = HERE / "srtj-docs-disagreement-labels.json"
 ARCHIVE = (
     Path.home()
-    / ".local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
+    / ".local/share/iter-codex/exports/iter-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
 )
 DEFAULT_OUT = HERE / "srtj-docs-switch-measure.json"
 OUT = DEFAULT_OUT
@@ -125,7 +125,7 @@ def build_item(item_id, sheet, export):
 
 
 def fetch_export_rows(ids):
-    from imas_codex.standard_names.workers import (
+    from iter_codex.standard_names.workers import (
         _canonical_docs_review_item,
         _enrich_docs_review_dd_context,
         _load_docs_review_source_item,

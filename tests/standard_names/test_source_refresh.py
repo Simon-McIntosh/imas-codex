@@ -11,9 +11,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.schema import GraphSchema
-from imas_codex.standard_names import source_refresh as sr
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.schema import GraphSchema
+from iter_codex.standard_names import source_refresh as sr
 
 
 class _FakeGC:
@@ -264,7 +264,7 @@ def test_scoped_refresh_never_steers_a_name_outside_its_scope(monkeypatch):
     graph = _ScopeGraph(in_scope=["in_scope_name"])
     steered: list[str] = []
     monkeypatch.setattr(
-        "imas_codex.standard_names.edit.apply_edit",
+        "iter_codex.standard_names.edit.apply_edit",
         lambda **kw: steered.append(kw["target"]),
     )
 
@@ -287,7 +287,7 @@ def test_unscoped_refresh_still_steers_every_drifted_name(monkeypatch):
     graph = _ScopeGraph(in_scope=None)
     steered: list[str] = []
     monkeypatch.setattr(
-        "imas_codex.standard_names.edit.apply_edit",
+        "iter_codex.standard_names.edit.apply_edit",
         lambda **kw: steered.append(kw["target"]),
     )
 
@@ -343,7 +343,7 @@ def test_stamped_source_provenance_is_declared_on_standard_name():
     write = gc.calls[1][0]
     stamped_properties = set(re.findall(r"sn\.(source_[a-z_]+) =", write))
     declared = set(
-        GraphSchema("imas_codex/schemas/standard_name.yaml")
+        GraphSchema("iter_codex/schemas/standard_name.yaml")
         .get_all_slots("StandardName")
         .keys()
     )
@@ -420,7 +420,7 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
         side_effect=AssertionError("provenance drift must not steer")
     )
     monkeypatch.setattr(sr, "_resolved_source_context", lambda *_args: current_context)
-    monkeypatch.setattr("imas_codex.standard_names.edit.apply_edit", apply_edit)
+    monkeypatch.setattr("iter_codex.standard_names.edit.apply_edit", apply_edit)
 
     summary = sr.refresh_drifted_sources(gc=gc)
 
@@ -444,7 +444,7 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
 
 def _project_bolt_port() -> int:
     """The port this checkout's profile gives the project graph."""
-    from imas_codex.graph.profiles import _convention_bolt_port, get_graph_location
+    from iter_codex.graph.profiles import _convention_bolt_port, get_graph_location
 
     return _convention_bolt_port(get_graph_location())
 
@@ -463,8 +463,8 @@ def _assert_refused(monkeypatch, address: str) -> None:
     print(f"refused {address}: {refused.value}")
 
     body = getattr(disposable_neo4j_uri, "__wrapped__", disposable_neo4j_uri)
-    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", address)
-    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_EPHEMERAL", "1")
+    monkeypatch.setenv("ITER_CODEX_TEST_NEO4J_URI", address)
+    monkeypatch.setenv("ITER_CODEX_TEST_NEO4J_EPHEMERAL", "1")
     with pytest.raises(pytest.fail.Exception, match="refusing to run against"):
         next(iter(body()))
 
@@ -528,7 +528,7 @@ def test_a_failed_start_leaves_no_process_behind(monkeypatch, tmp_path):
     so the arm costs nothing, but the process and its group are the real ones:
     the owner starts it in its own session and is the only thing that stops it.
     """
-    from imas_codex.graph import temp_neo4j
+    from iter_codex.graph import temp_neo4j
 
     started = []
     real_popen = subprocess.Popen
@@ -554,7 +554,7 @@ def test_a_failed_start_leaves_no_process_behind(monkeypatch, tmp_path):
 
 def test_disposable_startup_has_an_independent_deadline(monkeypatch, tmp_path):
     """A stalled launch fails at its own bound and removes its scratch tree."""
-    from imas_codex.graph import temp_neo4j
+    from iter_codex.graph import temp_neo4j
     from tests.standard_names import conftest
 
     monkeypatch.setenv("TMPDIR", str(tmp_path))
@@ -571,7 +571,7 @@ def test_disposable_startup_has_an_independent_deadline(monkeypatch, tmp_path):
 @pytest.mark.graph
 def test_disposable_session_setup_preserves_other_test_endpoint(request):
     """Starting the shared instance must not redirect unrelated tests."""
-    keys = ("NEO4J_URI", "NEO4J_PASSWORD", "IMAS_CODEX_TEST_NEO4J_URI")
+    keys = ("NEO4J_URI", "NEO4J_PASSWORD", "ITER_CODEX_TEST_NEO4J_URI")
     before = {key: os.environ.get(key) for key in keys}
 
     request.getfixturevalue("disposable_neo4j_uri")
@@ -598,7 +598,7 @@ def graph(disposable_neo4j_uri: str, monkeypatch) -> Iterator[GraphClient]:
     # tests prove, so the authority comes from the package's synthetic rows —
     # the same boundary the mock tier uses — while every query still runs on
     # the disposable graph.
-    from imas_codex.standard_names import dd_resolutions
+    from iter_codex.standard_names import dd_resolutions
     from tests.standard_names.conftest import (
         SyntheticDDResolutionReader,
         neo4j_test_password,
@@ -797,7 +797,7 @@ def test_scoped_refresh_leaves_an_out_of_scope_name_unsteered(
     )
     steered: list[str] = []
     monkeypatch.setattr(
-        "imas_codex.standard_names.edit.apply_edit",
+        "iter_codex.standard_names.edit.apply_edit",
         lambda **kw: steered.append(kw["target"]),
     )
 

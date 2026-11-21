@@ -15,8 +15,8 @@ import pytest
 import yaml
 from imas_standard_names.models import CATALOG_EDGE_MODEL_VERSION as ISN_STAMP
 
-import imas_codex.standard_names.export as export_module
-import imas_codex.standard_names.publish as publish_module
+import iter_codex.standard_names.export as export_module
+import iter_codex.standard_names.publish as publish_module
 
 
 def test_exporter_stamps_the_installed_package_value() -> None:

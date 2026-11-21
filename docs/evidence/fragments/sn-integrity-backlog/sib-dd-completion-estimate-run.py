@@ -33,8 +33,8 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
-from imas_codex.graph.client import GraphClient
+from iter_codex.core.node_categories import SN_SOURCE_CATEGORIES
+from iter_codex.graph.client import GraphClient
 
 PHASES = {
     "compose": ("generate_name",),
@@ -276,7 +276,7 @@ def throughput(gc: GraphClient, days: int) -> dict[str, Any]:
 
 
 def seats_from_config(config: dict[str, Any]) -> dict[str, list[str]]:
-    root = config["tool"]["imas-codex"]
+    root = config["tool"]["iter-codex"]
     seats: dict[str, list[str]] = {}
     for phase, keys in SEAT_KEYS.items():
         section: Any = root
@@ -415,7 +415,7 @@ def main() -> None:
     yield_high = float(created90) / float(composed90) if composed90 else yield_low
     config = tomllib.loads(Path(args.config).read_text())
     seats = seats_from_config(config)
-    batch = int(config["tool"]["imas-codex"]["sn-compose"].get("batch-size", 25))
+    batch = int(config["tool"]["iter-codex"]["sn-compose"].get("batch-size", 25))
     remaining = (
         dry["extraction_candidates"]
         if dry and dry.get("extraction_candidates")

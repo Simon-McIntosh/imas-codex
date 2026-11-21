@@ -1,6 +1,6 @@
 # IMAS Data Dictionary Architecture
 
-> **Schema**: `imas_codex/schemas/imas_dd.yaml`
+> **Schema**: `iter_codex/schemas/imas_dd.yaml`
 
 ## Overview
 

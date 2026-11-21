@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from imas_codex.standard_names import audits
+from iter_codex.standard_names import audits
 
 _DECIBEL_RATIO_NAME = "spectral_signal_to_noise_ratio_logarithm_of_spectrometer_channel"
 
@@ -47,8 +47,8 @@ def test_logarithm_prefix_tokens_follow_isn_grammar(monkeypatch) -> None:
 
 
 def test_logarithmic_units_follow_pint_converter_metadata() -> None:
-    from imas_codex.units import unit_registry
-    from imas_codex.units.dd_unit_exceptions import canonical_or_none
+    from iter_codex.units import unit_registry
+    from iter_codex.units.dd_unit_exceptions import canonical_or_none
 
     expected = {
         canonical

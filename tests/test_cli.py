@@ -13,68 +13,68 @@ class TestCLIImports:
 
     def test_import_main(self):
         """Main CLI entry point can be imported."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         assert main is not None
         assert hasattr(main, "commands")
 
     def test_import_serve(self):
         """Serve module imports."""
-        from imas_codex.cli.serve import serve
+        from iter_codex.cli.serve import serve
 
         assert serve is not None
 
     def test_import_facilities(self):
         """Facilities module imports."""
-        from imas_codex.cli.facilities import facilities
+        from iter_codex.cli.facilities import facilities
 
         assert facilities is not None
 
     def test_import_tools(self):
         """Tools module imports."""
-        from imas_codex.cli.tools import tools
+        from iter_codex.cli.tools import tools
 
         assert tools is not None
 
     def test_import_host(self):
         """Host module imports."""
-        from imas_codex.cli.host import host
+        from iter_codex.cli.host import host
 
         assert host is not None
 
     def test_import_graph_cli(self):
         """Graph CLI module imports."""
-        from imas_codex.cli.graph import graph
+        from iter_codex.cli.graph import graph
 
         assert graph is not None
 
     def test_import_config_cli(self):
         """Config CLI module imports."""
-        from imas_codex.cli.config_cli import config
+        from iter_codex.cli.config_cli import config
 
         assert config is not None
 
     def test_import_release(self):
         """Release module imports."""
-        from imas_codex.cli.release import release
+        from iter_codex.cli.release import release
 
         assert release is not None
 
     def test_import_imas_dd(self):
         """IMAS DD module imports."""
-        from imas_codex.cli.imas_dd import imas
+        from iter_codex.cli.imas_dd import imas
 
         assert imas is not None
 
     def test_import_discover(self):
         """Discover module imports."""
-        from imas_codex.cli.discover import discover
+        from iter_codex.cli.discover import discover
 
         assert discover is not None
 
     def test_import_utils(self):
         """Utils module imports with expected symbols."""
-        from imas_codex.cli.utils import (
+        from iter_codex.cli.utils import (
             ProgressReporter,
             console,
             format_duration,
@@ -99,16 +99,16 @@ class TestCLICommands:
 
     def test_main_help(self, runner):
         """Main CLI shows help."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["--help"])
         assert result.exit_code == 0
-        assert "IMAS Codex" in result.output
+        assert "ITER Codex" in result.output
         assert "Commands:" in result.output
 
     def test_main_version(self, runner):
         """--version flag works."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["--version"])
         assert result.exit_code == 0
@@ -117,7 +117,7 @@ class TestCLICommands:
 
     def test_serve_help(self, runner):
         """serve command has help."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["serve", "--help"])
         assert result.exit_code == 0
@@ -125,7 +125,7 @@ class TestCLICommands:
 
     def test_facilities_help(self, runner):
         """facilities group has help."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["facilities", "--help"])
         assert result.exit_code == 0
@@ -133,7 +133,7 @@ class TestCLICommands:
 
     def test_discover_help(self, runner):
         """discover group has help."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["discover", "--help"])
         assert result.exit_code == 0
@@ -141,7 +141,7 @@ class TestCLICommands:
 
     def test_imas_help(self, runner):
         """imas group has help."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["imas", "--help"])
         assert result.exit_code == 0
@@ -149,7 +149,7 @@ class TestCLICommands:
 
     def test_tools_help(self, runner):
         """tools group has help."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["tools", "--help"])
         assert result.exit_code == 0
@@ -157,7 +157,7 @@ class TestCLICommands:
 
     def test_host_help(self, runner):
         """host group has help."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["host", "--help"])
         assert result.exit_code == 0
@@ -165,7 +165,7 @@ class TestCLICommands:
 
     def test_host_status_help(self, runner):
         """host status command has help."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["host", "status", "--help"])
         assert result.exit_code == 0
@@ -173,7 +173,7 @@ class TestCLICommands:
 
     def test_release_help(self, runner):
         """release command has help."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["release", "--help"])
         assert result.exit_code == 0
@@ -189,7 +189,7 @@ class TestCLISubcommands:
 
     def test_discover_paths_help(self, runner):
         """The bare command exposes path selection."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["discover", "tcv", "--only", "paths", "--help"])
         assert result.exit_code == 0
@@ -202,23 +202,23 @@ class TestCLISubcommands:
     def test_retired_discover_domain_is_refused_with_bare_command(
         self, runner, domain, selected
     ):
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["discover", domain, "jt-60sa"])
         assert result.exit_code != 0
-        assert f"imas-codex discover jt-60sa --only {selected}" in result.output
+        assert f"iter-codex discover jt-60sa --only {selected}" in result.output
         assert "Got unexpected extra argument" not in result.output
 
     def test_imas_dd_build_help(self, runner):
         """imas dd build subcommand exists."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["imas", "dd", "build", "--help"])
         assert result.exit_code == 0
 
     def test_imas_map_help(self, runner):
         """imas map subcommand exists."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["imas", "map", "--help"])
         assert result.exit_code == 0
@@ -226,7 +226,7 @@ class TestCLISubcommands:
 
     def test_imas_list_help(self, runner):
         """imas list subcommand exists."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["imas", "list", "--help"])
         assert result.exit_code == 0
@@ -234,35 +234,35 @@ class TestCLISubcommands:
 
     def test_imas_export_help(self, runner):
         """imas export subcommand exists."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["imas", "export", "--help"])
         assert result.exit_code == 0
 
     def test_imas_epochs_help(self, runner):
         """imas epochs subcommand exists."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["imas", "epochs", "--help"])
         assert result.exit_code == 0
 
     def test_facilities_list_help(self, runner):
         """facilities list subcommand exists."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["facilities", "list", "--help"])
         assert result.exit_code == 0
 
     def test_no_top_level_ids(self, runner):
         """ids is no longer a top-level command."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["ids", "--help"])
         assert result.exit_code != 0
 
     def test_no_top_level_map(self, runner):
         """map is no longer a top-level command."""
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         result = runner.invoke(main, ["map", "--help"])
         assert result.exit_code != 0
@@ -273,7 +273,7 @@ class TestHostCommand:
 
     def test_get_load_info(self):
         """_get_load_info returns valid system info."""
-        from imas_codex.cli.host import _get_load_info
+        from iter_codex.cli.host import _get_load_info
 
         info = _get_load_info()
         assert "hostname" in info
@@ -284,14 +284,14 @@ class TestHostCommand:
 
     def test_colored_bar(self):
         """_colored_bar renders a bar string."""
-        from imas_codex.cli.host import _colored_bar
+        from iter_codex.cli.host import _colored_bar
 
         bar = _colored_bar(5, 10)
         assert "%" in bar
 
     def test_format_load_row(self):
         """_format_load_row produces 4-element list."""
-        from imas_codex.cli.host import _format_load_row
+        from iter_codex.cli.host import _format_load_row
 
         info = {
             "hostname": "test-node",
@@ -310,12 +310,12 @@ class TestHostCommand:
 
     def test_parse_ps_output(self):
         """_parse_ps_output filters codex-related processes."""
-        from imas_codex.cli.host import _parse_ps_output
+        from iter_codex.cli.host import _parse_ps_output
 
         # ps -eo user,pid,%cpu,%mem,vsz,rss,etimes,args
         ps_text = (
             "USER       PID %CPU %MEM    VSZ   RSS ELAPSED COMMAND\n"
-            "user     12345  5.2  3.1 512000 32000    3600 python -m imas_codex serve\n"
+            "user     12345  5.2  3.1 512000 32000    3600 python -m iter_codex serve\n"
             "user     12346  0.0  0.1  10000  1000     120 bash\n"
             "user     12347 80.0 15.0 800000 150000  172800 neo4j server\n"
         )
@@ -328,7 +328,7 @@ class TestHostCommand:
 
     def test_format_age(self):
         """_format_age renders human-readable durations."""
-        from imas_codex.cli.host import _format_age
+        from iter_codex.cli.host import _format_age
 
         assert _format_age(30) == "30s"
         assert _format_age(90) == "1m"
@@ -339,7 +339,7 @@ class TestHostCommand:
 
     def test_parse_duration(self):
         """_parse_duration converts duration strings to seconds."""
-        from imas_codex.cli.host import _parse_duration
+        from iter_codex.cli.host import _parse_duration
 
         assert _parse_duration("30s") == 30
         assert _parse_duration("5m") == 300
@@ -351,7 +351,7 @@ class TestHostCommand:
         """host command (no args) runs successfully."""
         from click.testing import CliRunner
 
-        from imas_codex.cli import main
+        from iter_codex.cli import main
 
         runner = CliRunner()
         result = runner.invoke(main, ["host"])
@@ -363,7 +363,7 @@ class TestHostCommand:
         """_set_ssh_hostname correctly modifies SSH config."""
         from unittest.mock import patch
 
-        from imas_codex.cli.host import _get_ssh_hostname, _set_ssh_hostname
+        from iter_codex.cli.host import _get_ssh_hostname, _set_ssh_hostname
 
         config_text = (
             "Host iter sdcc\n"
@@ -381,7 +381,7 @@ class TestHostCommand:
         config_file = fake_ssh / "config"
         config_file.write_text(config_text)
 
-        with patch("imas_codex.cli.host.Path.home", return_value=tmp_path):
+        with patch("iter_codex.cli.host.Path.home", return_value=tmp_path):
             assert _get_ssh_hostname("iter") == "98dci4-srv-1002.iter.org"
 
             ok = _set_ssh_hostname("iter", "98dci4-srv-1005.iter.org")
@@ -395,7 +395,7 @@ class TestHostCommand:
         """Unknown subcommands are routed to the hidden survey command."""
         from click.testing import CliRunner
 
-        from imas_codex.cli.host import host
+        from iter_codex.cli.host import host
 
         runner = CliRunner()
         # "fakefacility" isn't a real facility, but the routing should
@@ -409,7 +409,7 @@ class TestHostCommand:
         """'status' is dispatched as a subcommand, not a facility."""
         from click.testing import CliRunner
 
-        from imas_codex.cli.host import host
+        from iter_codex.cli.host import host
 
         runner = CliRunner()
         result = runner.invoke(host, ["status", "--help"])
@@ -418,7 +418,7 @@ class TestHostCommand:
 
     def test_build_process_table_single_node(self):
         """_build_process_table renders single-node without Node column."""
-        from imas_codex.cli.host import _build_process_table
+        from iter_codex.cli.host import _build_process_table
 
         procs = {
             "test-node": [
@@ -439,7 +439,7 @@ class TestHostCommand:
 
     def test_build_process_table_multi_node(self):
         """_build_process_table adds Node column for multiple nodes."""
-        from imas_codex.cli.host import _build_process_table
+        from iter_codex.cli.host import _build_process_table
 
         procs = {
             "node-a": [
@@ -470,7 +470,7 @@ class TestHostCommand:
 
     def test_build_process_table_empty(self):
         """_build_process_table returns None when no processes."""
-        from imas_codex.cli.host import _build_process_table
+        from iter_codex.cli.host import _build_process_table
 
         assert _build_process_table({}) is None
         assert _build_process_table({"node": []}) is None
@@ -479,7 +479,7 @@ class TestHostCommand:
         """kill subcommand shows help."""
         from click.testing import CliRunner
 
-        from imas_codex.cli.host import host
+        from iter_codex.cli.host import host
 
         runner = CliRunner()
         result = runner.invoke(host, ["kill", "--help"])
@@ -491,7 +491,7 @@ class TestHostCommand:
 
     def test_build_survey_table(self):
         """_build_survey_table builds table and finds best node."""
-        from imas_codex.cli.host import _build_survey_table
+        from iter_codex.cli.host import _build_survey_table
 
         results = {
             "node-a": {

@@ -11,9 +11,9 @@ import pytest
 from neo4j import GraphDatabase
 from neo4j.exceptions import ConstraintError
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.schema import get_schema
-from imas_codex.standard_names.dd_gaps import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.schema import get_schema
+from iter_codex.standard_names.dd_gaps import (
     _RECLASSIFY_REGISTRY_FACT_QUERY,
     _REGISTRY_FACTS_QUERY,
     _SYNC_REGISTRY_QUERY,
@@ -73,7 +73,7 @@ def test_production_preflight_requires_all_schema_constraints(
     ephemeral_driver,
 ) -> None:
     _install_constraints(ephemeral_driver, ("DDGap",))
-    uri = os.environ["IMAS_CODEX_TEST_NEO4J_URI"]
+    uri = os.environ["ITER_CODEX_TEST_NEO4J_URI"]
     with GraphClient(
         uri=uri,
         username="neo4j",

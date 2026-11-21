@@ -14,9 +14,9 @@ from pydantic import BaseModel
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MODEL_TARGETS = (
-    ("imas_codex/schemas/facility.yaml", "imas_codex.graph.models"),
-    ("imas_codex/schemas/imas_dd.yaml", "imas_codex.graph.dd_models"),
-    ("imas_codex/schemas/facility_config.yaml", "imas_codex.config.models"),
+    ("iter_codex/schemas/facility.yaml", "iter_codex.graph.models"),
+    ("iter_codex/schemas/imas_dd.yaml", "iter_codex.graph.dd_models"),
+    ("iter_codex/schemas/facility_config.yaml", "iter_codex.config.models"),
 )
 
 FieldOverride = Mapping[tuple[str, str], set[str]]
@@ -97,7 +97,7 @@ def test_generated_models_match_linkml_schemas() -> None:
 
 
 def test_stale_generated_model_reports_actionable_mismatch() -> None:
-    module_name = "imas_codex.graph.models"
+    module_name = "iter_codex.graph.models"
     model_name = "RepairAuthorityRow"
     model = getattr(importlib.import_module(module_name), model_name)
     stale_fields = set(model.model_fields) - {"signatures"}
@@ -107,7 +107,7 @@ def test_stale_generated_model_reports_actionable_mismatch() -> None:
 
     message = str(raised.value)
     assert (
-        "imas_codex.graph.models.RepairAuthorityRow missing attributes: signatures"
+        "iter_codex.graph.models.RepairAuthorityRow missing attributes: signatures"
         in message
     )
     assert "detached worktree" in message

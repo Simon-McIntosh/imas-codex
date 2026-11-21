@@ -26,16 +26,16 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.attachment_audit import (
+from iter_codex.standard_names.attachment_audit import (
     AttachmentPairingGuardResult,
     AttachmentVerdict,
 )
-from imas_codex.standard_names.graph_store.graph_supersession import (
+from iter_codex.standard_names.graph_store.graph_supersession import (
     supersede_prior_source_names,
 )
 
 # graph_ops binds GraphClient at module import time, so patch that namespace.
-_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_GC_PATH = "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 _TRIGGER = "dd:spectrometer_x_ray_crystal/channel/lines_of_sight_second_point/r"
 _TRIGGER_PATH = "spectrometer_x_ray_crystal/channel/lines_of_sight_second_point/r"
@@ -124,11 +124,11 @@ def _drive(
     with (
         patch(_GC_PATH, return_value=recorder),
         patch(
-            "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+            "iter_codex.standard_names.attachment_audit.guard_source_pairings",
             return_value=guard_result,
         ) as guard,
         patch(
-            "imas_codex.standard_names.provenance_lifecycle."
+            "iter_codex.standard_names.provenance_lifecycle."
             "retarget_standard_name_sources",
             side_effect=lambda *a, **kw: (
                 moved if moved is not None else len(kw["source_ids"])
@@ -295,11 +295,11 @@ class TestFailClosed:
         with (
             patch(_GC_PATH, return_value=recorder),
             patch(
-                "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+                "iter_codex.standard_names.attachment_audit.guard_source_pairings",
                 return_value=AttachmentPairingGuardResult((), (rejected,)),
             ),
             patch(
-                "imas_codex.standard_names.provenance_lifecycle."
+                "iter_codex.standard_names.provenance_lifecycle."
                 "retarget_standard_name_sources"
             ) as retarget,
             pytest.raises(ValueError, match="supersession rolled back"),

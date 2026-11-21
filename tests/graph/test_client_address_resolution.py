@@ -2,7 +2,7 @@
 
 The bolt address a default :class:`GraphClient` connects to is resolved by the
 profile layer, which obtains SLURM service addresses from the shared owner in
-:mod:`imas_codex.remote.locations` (``resolve_service_url`` /
+:mod:`iter_codex.remote.locations` (``resolve_service_url`` /
 ``_service_url_for_slurm``). The client holds no discovery of its own.
 
 Locality in the profile layer is decided from the facility's login-node
@@ -20,9 +20,9 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.graph import client as client_module, profiles as profiles_module
-from imas_codex.remote import locations as loc
-from imas_codex.remote.locations import LocationInfo
+from iter_codex.graph import client as client_module, profiles as profiles_module
+from iter_codex.remote import locations as loc
+from iter_codex.remote.locations import LocationInfo
 
 DIRECT_URI = "bolt://98dci4-gpu-0002:7687"
 GPU_NODE = "98dci4-gpu-0002"
@@ -69,7 +69,7 @@ def _pin_slurm(monkeypatch) -> None:
     """Send the profile layer down its SLURM-scheduled branch for a compute node."""
     monkeypatch.setattr(profiles_module, "get_graph_location", lambda: "titan")
     monkeypatch.setattr(loc, "resolve_location", lambda _l: _slurm_location())
-    monkeypatch.setattr("imas_codex.remote.executor.is_local_host", lambda _h: False)
+    monkeypatch.setattr("iter_codex.remote.executor.is_local_host", lambda _h: False)
 
 
 def test_client_address_is_the_shared_owners_answer_inside_a_slurm_step(monkeypatch):
@@ -208,7 +208,7 @@ def test_a_compute_step_reaches_the_discovered_service_node(monkeypatch):
     monkeypatch.setattr(loc, "_resolve_compute_host", lambda *a, **k: None)
     monkeypatch.setattr(loc.socket, "gethostname", lambda: COMPUTE_CALLER)
     monkeypatch.setattr(
-        "imas_codex.remote.tunnel.discover_compute_node_local", lambda **_: GPU_NODE
+        "iter_codex.remote.tunnel.discover_compute_node_local", lambda **_: GPU_NODE
     )
 
     expected = f"bolt://{GPU_NODE}:{profiles_module._convention_bolt_port('titan')}"
@@ -219,7 +219,7 @@ def test_non_slurm_location_uses_the_direct_loopback(monkeypatch):
     """A local, non-scheduled location never consults the SLURM owner."""
     monkeypatch.setattr(profiles_module, "get_graph_location", lambda: "iter")
     monkeypatch.setattr(loc, "resolve_location", lambda _l: _plain_location())
-    monkeypatch.setattr("imas_codex.remote.executor.is_local_host", lambda _h: True)
+    monkeypatch.setattr("iter_codex.remote.executor.is_local_host", lambda _h: True)
 
     with patch.object(loc, "_service_url_for_slurm") as owner:
         uri = client_module._resolve_graph_uri()

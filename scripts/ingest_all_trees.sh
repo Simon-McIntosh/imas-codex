@@ -1,13 +1,13 @@
 #!/bin/bash
 # MDSplus Tree Ingestion Script for TCV
-# Run from imas-codex project directory with Neo4j running
+# Run from iter-codex project directory with Neo4j running
 #
 # This script ingests all MDSplus trees using discover-mdsplus,
 # which performs epoch discovery (finding when tree structure changed)
 # and builds the "super tree" with shot-range applicability.
 #
 # Usage: 
-#   cd /path/to/imas-codex
+#   cd /path/to/iter-codex
 #   # Neo4j runs as systemd service (auto-starts on login)
 #   ./scripts/ingest_all_trees.sh 2>&1 | tee ingest_trees.log
 #
@@ -53,8 +53,8 @@ echo "Log directory: $LOGDIR"
 echo ""
 
 # Check Neo4j is running
-if ! uv run python -c "from imas_codex.graph import GraphClient; GraphClient().query('RETURN 1')" 2>/dev/null; then
-    echo "ERROR: Neo4j is not running. Check: systemctl --user status imas-codex-neo4j"
+if ! uv run python -c "from iter_codex.graph import GraphClient; GraphClient().query('RETURN 1')" 2>/dev/null; then
+    echo "ERROR: Neo4j is not running. Check: systemctl --user status iter-codex-neo4j"
     exit 1
 fi
 echo "✓ Neo4j connection verified"
@@ -104,7 +104,7 @@ fi
 echo ""
 echo "=== Ingestion Summary ==="
 uv run python -c "
-from imas_codex.graph import GraphClient
+from iter_codex.graph import GraphClient
 with GraphClient() as client:
     result = client.query('''
         MATCH (t:TreeNode)

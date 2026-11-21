@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from imas_codex.discovery.base.supervision import (
+from iter_codex.discovery.base.supervision import (
     OrphanRecoverySpec,
     SupervisedWorkerGroup,
     WorkerState,
@@ -264,12 +264,12 @@ class TestMakeOrphanRecoveryTick:
             return 0
 
         monkeypatch.setattr(
-            "imas_codex.discovery.base.supervision.reset_stale_claims",
+            "iter_codex.discovery.base.supervision.reset_stale_claims",
             mock_reset,
             raising=False,
         )
         # Use lazy import path
-        import imas_codex.discovery.base.claims as claims_mod
+        import iter_codex.discovery.base.claims as claims_mod
 
         monkeypatch.setattr(claims_mod, "reset_stale_claims", mock_reset)
 
@@ -294,7 +294,7 @@ class TestMakeOrphanRecoveryTick:
             return 0
 
         monkeypatch.setattr(
-            "imas_codex.discovery.base.claims.reset_stale_claims",
+            "iter_codex.discovery.base.claims.reset_stale_claims",
             mock_reset,
         )
 
@@ -317,7 +317,7 @@ class TestMakeOrphanRecoveryTick:
             return 0
 
         monkeypatch.setattr(
-            "imas_codex.discovery.base.claims.reset_stale_claims",
+            "iter_codex.discovery.base.claims.reset_stale_claims",
             mock_reset,
         )
 
@@ -342,7 +342,7 @@ class TestMakeOrphanRecoveryTick:
             raise RuntimeError("Neo4j down")
 
         monkeypatch.setattr(
-            "imas_codex.discovery.base.claims.reset_stale_claims",
+            "iter_codex.discovery.base.claims.reset_stale_claims",
             mock_reset,
         )
 
@@ -365,7 +365,7 @@ class TestMakeOrphanRecoveryTick:
             return 0
 
         monkeypatch.setattr(
-            "imas_codex.discovery.base.claims.reset_stale_claims",
+            "iter_codex.discovery.base.claims.reset_stale_claims",
             mock_reset,
         )
 

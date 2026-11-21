@@ -7,13 +7,13 @@ from uuid import uuid4
 
 import pytest
 
-from imas_codex.standard_names.provenance_lifecycle import (
+from iter_codex.standard_names.provenance_lifecycle import (
     repair_semantic_source_invariants,
 )
 
 
 def test_dd_projection_reconcile_uses_full_attachment_guard() -> None:
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_standard_name_dd_edges,
     )
 

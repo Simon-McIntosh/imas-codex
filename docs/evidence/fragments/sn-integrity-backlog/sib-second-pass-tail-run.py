@@ -40,14 +40,14 @@ def load(name):
 
 
 def export_state(gc):
-    from imas_codex.standard_names.export import (
+    from iter_codex.standard_names.export import (
         _RELEASE_IDENTITY_HOLDS,
         _SHIPPING_NAME_STAGES,
     )
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
-    from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+    from iter_codex.standard_names.source_invariant import find_sourceless_live_names
 
     audit = classify_sourceless_standard_names(gc)
     sourceless = [
@@ -78,7 +78,7 @@ def export_state(gc):
 
 
 def snapshot(ids):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     state = previous().source_state(ids)
     assert set(state) == set(ids), "cohort read must find every named source"
@@ -105,8 +105,8 @@ def snapshot(ids):
 
 
 def census():
-    import imas_codex.graph.client as client
-    import imas_codex.graph.models as models
+    import iter_codex.graph.client as client
+    import iter_codex.graph.models as models
 
     assert hasattr(models, "StandardNameSourceClaimAttempt")
     ids = sorted(r["id"] for r in previous().cohort())
@@ -174,9 +174,9 @@ def census():
 
 
 def preflight():
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_store import graph_foundation
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.graph_store import graph_foundation
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         _pin_dd_source_snapshots,
     )
 
@@ -252,8 +252,8 @@ def prepare():
 
 
 def retry(*, dry_run):
-    from imas_codex.standard_names.graph_store import graph_foundation
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store import graph_foundation
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         retry_failed_sources,
     )
 
@@ -332,14 +332,14 @@ def verify_reset():
 
 
 def pipeline(*, dry_run):
-    import imas_codex.standard_names.loop as loop
+    import iter_codex.standard_names.loop as loop
 
     print(f"# module: {loop.__file__}", flush=True)
     command = [
         "uv",
         "run",
         "--no-sync",
-        "imas-codex",
+        "iter-codex",
         "sn",
         "run",
         "--focus",
@@ -368,7 +368,7 @@ def pipeline(*, dry_run):
 
 
 def readback():
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     before = load("before-reset")
     after = snapshot(sorted(before["sources"]))

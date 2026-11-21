@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 pytestmark = pytest.mark.graph
 
@@ -85,7 +85,7 @@ def _assert_lineage_provenance(writer: str) -> None:
 def _stale_writer() -> int:
     from types import SimpleNamespace
 
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         mark_sources_stale,
     )
 
@@ -125,13 +125,13 @@ def test_last_source_writers(
 
     from neo4j.exceptions import ClientError
 
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         mark_sources_composed,
     )
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         retarget_standard_name_sources,
     )
-    from imas_codex.standard_names.source_invariant import (
+    from iter_codex.standard_names.source_invariant import (
         supersede_names_losing_last_source,
     )
     from tests.standard_names.test_last_source_supersede import NEW, OLD, _seed
@@ -205,11 +205,11 @@ def test_identity_writers(
     writer: str,
     closes_cycle: bool,
 ) -> None:
-    from imas_codex.standard_names import edit
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names import edit
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         RefinedNamePersistenceRefusal,
     )
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         tombstone_supersede_into,
     )
     from tests.standard_names.test_lineage_cycle_writers import (
@@ -266,7 +266,7 @@ def test_identity_writers(
 
 @pytest.mark.parametrize("closes_cycle", [False, True], ids=["acyclic", "cycle"])
 def test_regeneration_writer(disposable_neo4j_empty: str, closes_cycle: bool) -> None:
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         supersede_prior_source_names,
     )
     from tests.standard_names.test_compose_adopts_pending_stub import (
@@ -317,7 +317,7 @@ def test_reclaim_mutation_boundary(
     """The mutation rechecks lineage even after a caller has preflighted it."""
     from neo4j.exceptions import ClientError
 
-    from imas_codex.standard_names.edit import _RECLAIM_MUTATION_QUERY
+    from iter_codex.standard_names.edit import _RECLAIM_MUTATION_QUERY
 
     with GraphClient() as gc:
         gc.query("""
@@ -370,7 +370,7 @@ def test_reclaim_mutation_boundary(
 def test_shared_guard_refuses_self_loop(disposable_neo4j_empty: str) -> None:
     from neo4j.exceptions import ClientError
 
-    from imas_codex.standard_names.graph_store.graph_foundation import (
+    from iter_codex.standard_names.graph_store.graph_foundation import (
         refined_from_cycle_guard_cypher,
     )
 
@@ -396,7 +396,7 @@ def test_concurrent_disjoint_edges_cannot_close_a_cycle(
 
     from neo4j.exceptions import ClientError
 
-    from imas_codex.standard_names.graph_store.graph_foundation import (
+    from iter_codex.standard_names.graph_store.graph_foundation import (
         refined_from_cycle_guard_cypher,
     )
 
@@ -449,7 +449,7 @@ def test_batch_source_retirements_cannot_cycle_each_other(
     """Edges proposed together must see earlier edges in the same statement."""
     from neo4j.exceptions import ClientError
 
-    from imas_codex.standard_names.source_invariant import (
+    from iter_codex.standard_names.source_invariant import (
         supersede_names_losing_last_source,
     )
 
@@ -482,7 +482,7 @@ def _writer_insertion_clause(writer: str) -> tuple[str, str]:
     import ast
     from pathlib import Path
 
-    from imas_codex.standard_names.graph_store.graph_foundation import (
+    from iter_codex.standard_names.graph_store.graph_foundation import (
         refined_from_cycle_guard_cypher,
     )
 
@@ -500,7 +500,7 @@ def _writer_insertion_clause(writer: str) -> tuple[str, str]:
             "tombstone_supersede_into",
         ),
     }[writer]
-    path = Path(__file__).parents[2] / "imas_codex/standard_names" / module
+    path = Path(__file__).parents[2] / "iter_codex/standard_names" / module
     provenance = f"{path.stem}.{operation}"
     expressions = [
         node

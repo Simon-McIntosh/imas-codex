@@ -17,7 +17,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import domain_decision as dd
+from iter_codex.standard_names import domain_decision as dd
 
 #: A concept in the heating band whose only Data Dictionary source sits in
 #: transport: the family's sources cannot reach the domain the concept needs.
@@ -377,11 +377,11 @@ def test_the_fallback_set_still_takes_a_single_option_without_a_judgment(
 def test_the_declared_domain_order_is_read_from_its_one_owner() -> None:
     """The module holds no second copy of the declared domain precedence.
 
-    ``imas_codex.definitions.physics.load_domain_precedence`` owns that order
+    ``iter_codex.definitions.physics.load_domain_precedence`` owns that order
     and validates it against the ISN vocabulary; a flattening kept beside it
     drifts the moment the loader's validation changes.
     """
-    from imas_codex.definitions.physics import load_domain_precedence
+    from iter_codex.definitions.physics import load_domain_precedence
 
     shared = tuple(load_domain_precedence())
     assert not hasattr(dd, "all_domains"), (

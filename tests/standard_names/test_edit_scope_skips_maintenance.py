@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 _EDIT_RUN_ID = "sn-edit-scope-probe"
 
@@ -40,26 +40,26 @@ def test_edits_scoped_run_skips_global_maintenance() -> None:
     pools = AsyncMock(return_value=MagicMock(stop_reason="completed"))
 
     with (
-        patch("imas_codex.cli.sn._require_embed_ready"),
-        patch("imas_codex.cli.sn._require_terminal_drain"),
+        patch("iter_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.cli.sn._require_terminal_drain"),
         patch(
-            "imas_codex.cli.sn._configured_local_compose_required",
+            "iter_codex.cli.sn._configured_local_compose_required",
             return_value=False,
         ),
-        patch("imas_codex.cli.sn._auto_sync_grammar") as grammar_sync,
-        patch("imas_codex.cli.sn._note_pipeline_version_drift") as drift_note,
+        patch("iter_codex.cli.sn._auto_sync_grammar") as grammar_sync,
+        patch("iter_codex.cli.sn._note_pipeline_version_drift") as drift_note,
         patch(
-            "imas_codex.cli.discover.common.use_rich_output",
+            "iter_codex.cli.discover.common.use_rich_output",
             return_value=False,
         ),
-        patch("imas_codex.cli.discover.common.setup_logging"),
+        patch("iter_codex.cli.discover.common.setup_logging"),
         patch(
-            "imas_codex.cli.discover.common.run_discovery",
+            "iter_codex.cli.discover.common.run_discovery",
             side_effect=_run_discovery,
         ),
-        patch("imas_codex.standard_names.loop.run_sn_pools", new=pools),
+        patch("iter_codex.standard_names.loop.run_sn_pools", new=pools),
         patch(
-            "imas_codex.standard_names.loop.summary_table",
+            "iter_codex.standard_names.loop.summary_table",
             return_value={"stop_reason": "completed"},
         ),
     ):

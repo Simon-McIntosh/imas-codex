@@ -48,7 +48,7 @@ def pinned_export_provenance(monkeypatch):
 @pytest.fixture
 def seed_dd_resolutions(disposable_neo4j_uri):
     """Install exact DD bridges for one test, then remove every seeded node."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     token = uuid.uuid4().hex
 
@@ -190,10 +190,10 @@ def _bound_synthetic_model_exposure(monkeypatch):
     scripted responses carry nonzero synthetic cost and must charge against
     something.
     """
-    from imas_codex.discovery.base.llm import _is_local_model
-    from imas_codex.standard_names import budget, workers
-    from imas_codex.standard_names.fanout import dispatcher
-    from imas_codex.standard_names.review import pipeline
+    from iter_codex.discovery.base.llm import _is_local_model
+    from iter_codex.standard_names import budget, workers
+    from iter_codex.standard_names.fanout import dispatcher
+    from iter_codex.standard_names.review import pipeline
 
     original = budget.model_provider_exposure
 
@@ -253,8 +253,8 @@ def _block_live_graph(request, monkeypatch, _synthetic_dd_resolution_rows):
         yield
         return
 
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import dd_resolutions
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import dd_resolutions
 
     monkeypatch.setattr(
         dd_resolutions,
@@ -377,7 +377,7 @@ def graph_client():
 
     Used by graph-marked integration tests (e.g. test_physics_domain_multi).
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     try:
         client = GraphClient()
@@ -396,7 +396,7 @@ def graph_client():
 # A test that exercises real Cypher needs a graph of its own, and every such
 # test in this package gets it the same way: one empty instance, named by both
 # ``NEO4J_URI`` (the profile every ``GraphClient()`` resolves through) and
-# ``IMAS_CODEX_TEST_NEO4J_URI`` (what the disposable-graph tests advertise), and
+# ``ITER_CODEX_TEST_NEO4J_URI`` (what the disposable-graph tests advertise), and
 # a loud refusal when an endpoint names the project graph.
 #
 # The refusal resolves the project graph's address with ``NEO4J_URI`` withheld.
@@ -408,9 +408,9 @@ def graph_client():
 _DISPOSABLE_ENV = (
     "NEO4J_URI",
     "NEO4J_PASSWORD",
-    "IMAS_CODEX_TEST_NEO4J_URI",
-    "IMAS_CODEX_TEST_NEO4J_EPHEMERAL",
-    "IMAS_CODEX_TEST_NEO4J_LOG",
+    "ITER_CODEX_TEST_NEO4J_URI",
+    "ITER_CODEX_TEST_NEO4J_EPHEMERAL",
+    "ITER_CODEX_TEST_NEO4J_LOG",
 )
 
 
@@ -428,8 +428,8 @@ def project_graph_uris() -> set[str]:
     Neither is resolved by opening a tunnel: discovery answers from the
     scheduler, so reading an address stays a read.
     """
-    from imas_codex.graph.profiles import resolve_neo4j
-    from imas_codex.remote.locations import resolve_service_url
+    from iter_codex.graph.profiles import resolve_neo4j
+    from iter_codex.remote.locations import resolve_service_url
 
     withheld = os.environ.pop("NEO4J_URI", None)
     try:
@@ -489,7 +489,7 @@ def _start_empty_neo4j():
     directory is removed if the start fails: a failure here must leave
     neither a running instance nor a tree behind.
     """
-    from imas_codex.graph import temp_neo4j
+    from iter_codex.graph import temp_neo4j
 
     scratch = os.environ.get("TMPDIR") or None
     directory = tempfile.TemporaryDirectory(prefix="disposable-neo4j-", dir=scratch)
@@ -521,7 +521,7 @@ def _start_empty_neo4j():
 
 def neo4j_test_password() -> str:
     """The password of the disposable graph, empty for an auth-free instance."""
-    return os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+    return os.environ.get("ITER_CODEX_TEST_NEO4J_PASSWORD", "")
 
 
 def _auth() -> tuple[str, str] | None:
@@ -613,8 +613,8 @@ def _detach_store_removal(directory: tempfile.TemporaryDirectory) -> str:
 def disposable_neo4j_uri() -> Iterator[str]:
     """The one empty graph this package's real-Cypher tests share.
 
-    Attaches to ``IMAS_CODEX_TEST_NEO4J_URI`` when a run supplies one (which
-    must carry ``IMAS_CODEX_TEST_NEO4J_EPHEMERAL=1``), and otherwise starts an
+    Attaches to ``ITER_CODEX_TEST_NEO4J_URI`` when a run supplies one (which
+    must carry ``ITER_CODEX_TEST_NEO4J_EPHEMERAL=1``), and otherwise starts an
     empty instance of its own.  Either way the endpoint is compared against the
     project graph's resolved address and the run fails if they are the same, so
     no test here can write to the shared live graph.
@@ -622,13 +622,13 @@ def disposable_neo4j_uri() -> Iterator[str]:
     Autouse fixtures below point graph clients at this endpoint for graph-marked
     tests and explicit users. Other tests in the worker retain their own URI.
     """
-    configured = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    configured = os.environ.get("ITER_CODEX_TEST_NEO4J_URI")
     directory = process = log = None
     if configured:
-        if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        if os.environ.get("ITER_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
             pytest.fail(
-                "a disposable graph is required, but IMAS_CODEX_TEST_NEO4J_URI "
-                "is set without IMAS_CODEX_TEST_NEO4J_EPHEMERAL=1"
+                "a disposable graph is required, but ITER_CODEX_TEST_NEO4J_URI "
+                "is set without ITER_CODEX_TEST_NEO4J_EPHEMERAL=1"
             )
         uri = configured
     else:
@@ -643,13 +643,13 @@ def disposable_neo4j_uri() -> Iterator[str]:
         {
             "NEO4J_URI": uri,
             "NEO4J_PASSWORD": "",
-            "IMAS_CODEX_TEST_NEO4J_URI": uri,
-            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+            "ITER_CODEX_TEST_NEO4J_URI": uri,
+            "ITER_CODEX_TEST_NEO4J_EPHEMERAL": "1",
         }
     )
     try:
         refuse_project_graph(uri)
-        from imas_codex.graph.profiles import resolve_neo4j
+        from iter_codex.graph.profiles import resolve_neo4j
 
         # The profile obeys NEO4J_URI, so this compares the override with
         # itself and is no evidence about the project graph -- the refusal
@@ -677,9 +677,9 @@ def disposable_neo4j_uri() -> Iterator[str]:
             else:
                 os.environ[key] = value
         if process is not None:
-            from imas_codex.graph import temp_neo4j
+            from iter_codex.graph import temp_neo4j
 
-            destination = previous.get("IMAS_CODEX_TEST_NEO4J_LOG")
+            destination = previous.get("ITER_CODEX_TEST_NEO4J_LOG")
             if destination and log is not None:
                 import shutil
 
@@ -719,8 +719,8 @@ def _module_disposable_graph_environment(
         {
             "NEO4J_URI": uri,
             "NEO4J_PASSWORD": "",
-            "IMAS_CODEX_TEST_NEO4J_URI": uri,
-            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+            "ITER_CODEX_TEST_NEO4J_URI": uri,
+            "ITER_CODEX_TEST_NEO4J_EPHEMERAL": "1",
         }
     )
     try:
@@ -749,8 +749,8 @@ def _disposable_graph_environment(request: pytest.FixtureRequest) -> Iterator[No
         {
             "NEO4J_URI": uri,
             "NEO4J_PASSWORD": "",
-            "IMAS_CODEX_TEST_NEO4J_URI": uri,
-            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+            "ITER_CODEX_TEST_NEO4J_URI": uri,
+            "ITER_CODEX_TEST_NEO4J_EPHEMERAL": "1",
         }
     )
     try:
@@ -1026,7 +1026,7 @@ def passing_name_definition_seat():
     model: a real call spends money and its verdict would decide the outcome
     the test is not measuring.
     """
-    from imas_codex.standard_names.review import name_definition_seat
+    from iter_codex.standard_names.review import name_definition_seat
 
     async def judge(items, **_kwargs):
         return (
@@ -1052,22 +1052,22 @@ def mock_llm():
     """Patch ``acall_llm_structured`` globally and yield a :class:`MockLLM`.
 
     All SN workers import ``acall_llm_structured`` lazily (function-local
-    ``from imas_codex.discovery.base.llm import acall_llm_structured``), so
+    ``from iter_codex.discovery.base.llm import acall_llm_structured``), so
     patching the canonical module attribute is sufficient to intercept every
     call.
     """
     mock = MockLLM()
 
     # Patch at every known import site.  Function-local imports all resolve
-    # to the same object in imas_codex.discovery.base.llm, so one target
+    # to the same object in iter_codex.discovery.base.llm, so one target
     # covers the standard_names workers.  Additional sites (discovery, graph)
     # are included so the fixture is safe to use in cross-module tests.
     targets = [
         # Canonical definition — covers all function-local SN imports:
         #   workers.py, enrich_workers.py, benchmark.py, review/pipeline.py
-        "imas_codex.discovery.base.llm.acall_llm_structured",
+        "iter_codex.discovery.base.llm.acall_llm_structured",
         # Re-export in discovery.base.__init__ (used by some discovery tests)
-        "imas_codex.discovery.base.acall_llm_structured",
+        "iter_codex.discovery.base.acall_llm_structured",
     ]
 
     patches = []

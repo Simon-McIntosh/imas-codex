@@ -14,8 +14,8 @@ import asyncio
 
 import pytest
 
-import imas_codex.graph.dd_domain_classifier as ddc
-from imas_codex.standard_names.benchmark_roles import run_classifier_bench
+import iter_codex.graph.dd_domain_classifier as ddc
+from iter_codex.standard_names.benchmark_roles import run_classifier_bench
 
 GOLD = [
     {

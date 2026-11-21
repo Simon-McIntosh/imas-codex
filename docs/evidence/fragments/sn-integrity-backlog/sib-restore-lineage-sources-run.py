@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 282623af6d33f334b4c3b3dc45afe62b713d3a33, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.classify_sourceless_standard_names.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Restore a dropped-edge name's DD source from a relative's recorded path.
@@ -39,11 +39,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from imas_codex.discovery.base.judgment import decide_batch
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_model
-from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
-from imas_codex.standard_names.provenance_rebuild import (
+from iter_codex.discovery.base.judgment import decide_batch
+from iter_codex.graph.client import GraphClient
+from iter_codex.settings import get_model
+from iter_codex.standard_names.graph_ops import classify_sourceless_standard_names
+from iter_codex.standard_names.provenance_rebuild import (
     _BIND_SOURCES,
     bind_recovery_sources,
 )

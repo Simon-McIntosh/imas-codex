@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from imas_codex.standard_names.export import _fetch_ordering_edges_for_domain
+from iter_codex.standard_names.export import _fetch_ordering_edges_for_domain
 
 
 def _capturing_gc(rows_by_call: list[list[dict]]) -> tuple[MagicMock, list[str]]:

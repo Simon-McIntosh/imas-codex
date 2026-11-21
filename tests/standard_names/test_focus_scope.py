@@ -21,7 +21,7 @@ _SOURCE_PREFIX = f"dd:{_PREFIX}"
 @pytest.fixture()
 def _gc():
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -106,7 +106,7 @@ def test_cleanup_removes_fixture_names_and_sources(_gc):
 @pytest.mark.graph
 def test_no_reset_binds_run_id_and_preserves_stage(_gc, _clean):
     """Default scoping stamps run_id but leaves stage and score intact."""
-    from imas_codex.standard_names.graph_store.graph_claim_scope import (
+    from iter_codex.standard_names.graph_store.graph_claim_scope import (
         scope_focus_names,
     )
 
@@ -124,7 +124,7 @@ def test_no_reset_binds_run_id_and_preserves_stage(_gc, _clean):
 @pytest.mark.graph
 def test_reset_restages_to_pending_and_clears_score(_gc, _clean):
     """The reset mode (opt-in) re-stages to pending and clears the score."""
-    from imas_codex.standard_names.graph_store.graph_claim_scope import (
+    from iter_codex.standard_names.graph_store.graph_claim_scope import (
         scope_focus_names,
     )
 

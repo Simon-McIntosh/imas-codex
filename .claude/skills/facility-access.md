@@ -19,7 +19,7 @@ Always prefer these over standard Unix commands:
 - `eza` over `ls -la` / `tree` (directory listing)
 - `tokei` over `wc -l` (LOC by language)
 
-Install on facility: `imas-codex tools install <facility>`
+Install on facility: `iter-codex tools install <facility>`
 
 ## TCV
 

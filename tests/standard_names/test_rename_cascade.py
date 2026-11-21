@@ -19,14 +19,14 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.cascade import (
+from iter_codex.standard_names.cascade import (
     CascadeResult,
     _cascade_target_name,
     _isn_round_trip_ok,
     cascade_descendants_of,
     rename_cascade,
 )
-from imas_codex.standard_names.graph_ops import (
+from iter_codex.standard_names.graph_ops import (
     reconcile_structural_edges_for_standard_names,
 )
 
@@ -916,7 +916,7 @@ class TestDescendantCascadeRecordsProvenance:
             operator_kind="qualifier",
         )
 
-        _PL = "imas_codex.standard_names.provenance_lifecycle"
+        _PL = "iter_codex.standard_names.provenance_lifecycle"
         with (
             patch(f"{_PL}.record_standard_name_change") as rec,
             patch(f"{_PL}.refresh_renamed_source_mirrors") as refresh,
@@ -953,7 +953,7 @@ class TestDescendantCascadeRecordsProvenance:
             "ion_temperature", new_root, operator="ion", operator_kind="qualifier"
         )
 
-        _PL = "imas_codex.standard_names.provenance_lifecycle"
+        _PL = "iter_codex.standard_names.provenance_lifecycle"
         with (
             patch(f"{_PL}.record_standard_name_change") as rec,
             patch(f"{_PL}.refresh_renamed_source_mirrors") as refresh,
@@ -1125,7 +1125,7 @@ class TestOldRootCascadeRecovery:
         from unittest.mock import patch
 
         gc = self._fallback_graph()
-        provenance_module = "imas_codex.standard_names.provenance_lifecycle"
+        provenance_module = "iter_codex.standard_names.provenance_lifecycle"
         with (
             patch(f"{provenance_module}.record_standard_name_change"),
             patch(f"{provenance_module}.refresh_renamed_source_mirrors"),
@@ -1181,7 +1181,7 @@ class TestOldRootCascadeRecovery:
         from unittest.mock import patch
 
         gc = self._fallback_graph()
-        provenance_module = "imas_codex.standard_names.provenance_lifecycle"
+        provenance_module = "iter_codex.standard_names.provenance_lifecycle"
         with (
             patch(
                 f"{provenance_module}.record_standard_name_change",
@@ -1232,7 +1232,7 @@ class TestExactStructuralReconciliation:
             {"id": "beta", "exists": True},
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._write_standard_name_edges"
+            "iter_codex.standard_names.graph_store.graph_lineage._write_standard_name_edges"
         ) as writer:
             count = reconcile_structural_edges_for_standard_names(
                 gc, ["alpha", "beta", "alpha"]
@@ -1251,7 +1251,7 @@ class TestExactStructuralReconciliation:
         gc = Mock()
         gc.query.return_value = [{"id": "present", "exists": True}]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._write_standard_name_edges"
+            "iter_codex.standard_names.graph_store.graph_lineage._write_standard_name_edges"
         ) as writer:
             with pytest.raises(ValueError, match="missing StandardName ids"):
                 reconcile_structural_edges_for_standard_names(
@@ -1406,7 +1406,7 @@ class TestDeferredCascadeIsReportedAsDeferred:
 
     @staticmethod
     def _rename_plan() -> Any:
-        from imas_codex.standard_names.edit import EditPlan
+        from iter_codex.standard_names.edit import EditPlan
 
         return EditPlan(
             target="emissivity_due_to_fusion",
@@ -1432,7 +1432,7 @@ class TestDeferredCascadeIsReportedAsDeferred:
     def _render(self) -> str:
         from rich.console import Console
 
-        from imas_codex.cli import sn as sn_cli
+        from iter_codex.cli import sn as sn_cli
 
         recorder = Console(record=True, width=200)
         original = sn_cli.console
@@ -1461,7 +1461,7 @@ class TestDeferredCascadeIsReportedAsDeferred:
         assert "renamed 2 descendant" not in output
 
     def test_applied_plan_actions_state_the_descendants_are_unchanged(self) -> None:
-        from imas_codex.standard_names import edit as edit_module
+        from iter_codex.standard_names import edit as edit_module
 
         doc = edit_module.EditPlan.__doc__ or ""
         assert "deferred" in doc

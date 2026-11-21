@@ -15,7 +15,7 @@ import logging
 import pytest
 from pydantic import ValidationError
 
-from imas_codex.standard_names.models import (
+from iter_codex.standard_names.models import (
     DDGapEvidence,
     StandardNameQualityReview,
     StandardNameQualityReviewNameOnly,
@@ -127,7 +127,7 @@ def test_unparseable_suggested_name_cleared_and_recorded(
         "suggestion_justification": "Cluster siblings use a different qualifier order.",
     }
 
-    with caplog.at_level(logging.WARNING, logger="imas_codex.standard_names.models"):
+    with caplog.at_level(logging.WARNING, logger="iter_codex.standard_names.models"):
         review = model_cls.model_validate(payload)
 
     assert review.suggested_name is None
@@ -164,7 +164,7 @@ def test_parseable_suggested_name_is_kept_unchanged(model_cls, scores) -> None:
 def test_suggestion_identity_helper_distinguishes_collapse_parse_and_emittable() -> (
     None
 ):
-    from imas_codex.standard_names.models import suggestion_is_semantically_distinct
+    from iter_codex.standard_names.models import suggestion_is_semantically_distinct
 
     # a different spelling of the same reviewed identity: no objection to record
     assert (

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names import loop as loop_mod
+from iter_codex.standard_names import loop as loop_mod
 
 
 class _Batch:
@@ -39,11 +39,11 @@ def seed_capture(monkeypatch):
         return len(sources)
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+        "iter_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
         _merge,
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_store.graph_claim_scope.get_existing_standard_names",
+        "iter_codex.standard_names.graph_store.graph_claim_scope.get_existing_standard_names",
         lambda *a, **k: set(),
     )
     return calls
@@ -51,7 +51,7 @@ def seed_capture(monkeypatch):
 
 def _stub_extract(monkeypatch, batches):
     monkeypatch.setattr(
-        "imas_codex.standard_names.sources.dd.extract_dd_candidates",
+        "iter_codex.standard_names.sources.dd.extract_dd_candidates",
         lambda **kwargs: batches,
     )
 

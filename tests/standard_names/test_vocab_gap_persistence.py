@@ -12,7 +12,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog_reset as _owning_graph_catalog_reset,
     graph_foundation as _owning_graph_foundation,
 )
@@ -82,7 +82,7 @@ def _single_batch(
     target: str | None = "heat_flux",
     token: str = "heat_flux",
 ):
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         VocabGapAdjudicationFile,
     )
 
@@ -126,7 +126,7 @@ def _existing_row(**overrides) -> dict:
 
 
 def _resolution_batch():
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         VocabGapAdjudicationFile,
     )
 
@@ -202,7 +202,7 @@ def _resolution_context(
 
 
 def test_schema_separates_editorial_state_from_observation_state() -> None:
-    schema_path = Path(__file__).parents[2] / "imas_codex/schemas/standard_name.yaml"
+    schema_path = Path(__file__).parents[2] / "iter_codex/schemas/standard_name.yaml"
     schema = yaml.safe_load(schema_path.read_text())
     gap = schema["classes"]["VocabGap"]["attributes"]
     evidence = schema["classes"]["VocabGapEvidence"]["attributes"]
@@ -217,7 +217,7 @@ def test_schema_separates_editorial_state_from_observation_state() -> None:
 
 
 def test_reviewed_artifact_validates_all_rows_and_counts() -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         load_vocab_gap_adjudications,
     )
 
@@ -236,7 +236,7 @@ def test_reviewed_artifact_validates_all_rows_and_counts() -> None:
     ],
 )
 def test_invalid_editorial_rows_are_rejected(field: str, value, message: str) -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         VocabGapAdjudicationFile,
     )
 
@@ -253,7 +253,7 @@ def test_invalid_editorial_rows_are_rejected(field: str, value, message: str) ->
 
 
 def test_duplicate_gap_identity_is_rejected() -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         VocabGapAdjudicationFile,
     )
 
@@ -269,7 +269,7 @@ def test_duplicate_gap_identity_is_rejected() -> None:
 
 
 def test_missing_graph_node_aborts_before_any_write() -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         apply_vocab_gap_adjudications,
     )
 
@@ -297,7 +297,7 @@ def test_missing_graph_node_aborts_before_any_write() -> None:
 
 
 def test_apply_uses_one_transaction_and_dry_run_never_writes() -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         apply_vocab_gap_adjudications,
     )
 
@@ -332,7 +332,7 @@ def test_apply_uses_one_transaction_and_dry_run_never_writes() -> None:
 
 
 def test_apply_aborts_when_an_extant_node_is_not_written() -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         apply_vocab_gap_adjudications,
     )
 
@@ -351,7 +351,7 @@ def test_apply_aborts_when_an_extant_node_is_not_written() -> None:
 
 
 def test_second_apply_is_idempotent() -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         apply_vocab_gap_adjudications,
     )
 
@@ -386,7 +386,7 @@ def test_second_apply_is_idempotent() -> None:
 def test_resolved_history_classifies_complete_batch_and_writes_receipt(
     tmp_path: Path,
 ) -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         apply_vocab_gap_adjudications,
     )
 
@@ -448,7 +448,7 @@ def test_resolved_history_classifies_complete_batch_and_writes_receipt(
 
 
 def test_resolved_history_requires_an_explicit_receipt_path() -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         apply_vocab_gap_adjudications,
     )
 
@@ -532,7 +532,7 @@ def test_resolved_history_fails_closed_on_grammar_or_graph_mismatch(
     message: str,
     tmp_path: Path,
 ) -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         apply_vocab_gap_adjudications,
     )
 
@@ -560,7 +560,7 @@ def test_resolved_history_fails_closed_on_grammar_or_graph_mismatch(
 def test_missing_fold_is_satisfied_only_by_matching_segment_alias(
     tmp_path: Path,
 ) -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         apply_vocab_gap_adjudications,
     )
 
@@ -610,7 +610,7 @@ def test_missing_reject_ignores_grammar_vocabulary_metadata_keys(
     token: str,
     tmp_path: Path,
 ) -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         apply_vocab_gap_adjudications,
     )
 
@@ -642,7 +642,7 @@ def test_missing_reject_ignores_grammar_vocabulary_metadata_keys(
 
 
 def test_observation_write_preserves_editorial_and_dedup_state() -> None:
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     gc = MagicMock()
     gc.__enter__.return_value = gc
@@ -659,11 +659,11 @@ def test_observation_write_preserves_editorial_and_dedup_state() -> None:
     with (
         patch.object(_owning_graph_foundation, "GraphClient", return_value=gc),
         patch(
-            "imas_codex.standard_names.segments.is_valid_segment",
+            "iter_codex.standard_names.segments.is_valid_segment",
             return_value=True,
         ),
         patch(
-            "imas_codex.standard_names.segments.classify_gap",
+            "iter_codex.standard_names.segments.classify_gap",
             return_value=("absent", []),
         ),
     ):
@@ -688,7 +688,7 @@ def test_observation_write_preserves_editorial_and_dedup_state() -> None:
 
 
 def test_compose_stamp_never_erases_a_settled_decision() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _stamp_dedup_decision,
     )
 
@@ -704,7 +704,7 @@ def test_compose_stamp_never_erases_a_settled_decision() -> None:
 
 
 def test_batch_observations_cannot_downgrade_mechanical_reuse() -> None:
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     gc = MagicMock()
     gc.__enter__.return_value = gc
@@ -728,11 +728,11 @@ def test_batch_observations_cannot_downgrade_mechanical_reuse() -> None:
     with (
         patch.object(_owning_graph_foundation, "GraphClient", return_value=gc),
         patch(
-            "imas_codex.standard_names.segments.is_valid_segment",
+            "iter_codex.standard_names.segments.is_valid_segment",
             return_value=True,
         ),
         patch(
-            "imas_codex.standard_names.segments.classify_gap",
+            "iter_codex.standard_names.segments.classify_gap",
             return_value=("absent", []),
         ),
     ):
@@ -745,7 +745,7 @@ def test_batch_observations_cannot_downgrade_mechanical_reuse() -> None:
 
 
 def test_editorial_lookup_includes_an_observed_empty_token() -> None:
-    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+    from iter_codex.standard_names.graph_store.graph_catalog_reset import (
         fetch_vocab_gap_adjudications,
     )
 
@@ -759,7 +759,7 @@ def test_editorial_lookup_includes_an_observed_empty_token() -> None:
 
 
 def test_editorial_guidance_routes_fold_reject_and_add_honestly() -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         editorial_retry_guidance,
     )
 
@@ -796,7 +796,7 @@ def test_editorial_guidance_routes_fold_reject_and_add_honestly() -> None:
 
 
 def test_explicit_signature_reset_deactivates_without_erasing_decision() -> None:
-    from imas_codex.standard_names.vocab_adjudication import (
+    from iter_codex.standard_names.vocab_adjudication import (
         reset_vocab_gap_adjudications,
     )
 
@@ -819,7 +819,7 @@ def test_explicit_signature_reset_deactivates_without_erasing_decision() -> None
 
 
 def test_active_editorial_decisions_project_into_triage() -> None:
-    from imas_codex.standard_names.graph_store.graph_audits import triage_vocab_gaps
+    from iter_codex.standard_names.graph_store.graph_audits import triage_vocab_gaps
 
     gc = MagicMock()
     gc.query.return_value = [
@@ -842,7 +842,7 @@ def test_active_editorial_decisions_project_into_triage() -> None:
 def test_artifact_has_no_implicit_production_path() -> None:
     """The reviewed JSON is operator input, never a module-level data dependency."""
     module_path = (
-        Path(__file__).parents[2] / "imas_codex/standard_names/vocab_adjudication.py"
+        Path(__file__).parents[2] / "iter_codex/standard_names/vocab_adjudication.py"
     )
     source = module_path.read_text()
     assert "docs/evidence" not in source

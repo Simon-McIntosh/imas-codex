@@ -8,8 +8,8 @@ from typing import Any
 
 def test_registered_local_endpoint_uses_bare_served_model(monkeypatch):
     """A configured local endpoint keeps its served model identifier intact."""
-    from imas_codex import settings
-    from imas_codex.discovery.base import llm
+    from iter_codex import settings
+    from iter_codex.discovery.base import llm
 
     model = "local/deepseek-v4-flash"
     served_model = "deepseek-v4-flash"
@@ -68,11 +68,11 @@ def test_registered_local_endpoint_uses_bare_served_model(monkeypatch):
 
 def test_unregistered_openrouter_model_routes_directly(monkeypatch):
     """Provider routing does not depend on a custom endpoint registration."""
-    from imas_codex import settings
-    from imas_codex.discovery.base import llm
+    from iter_codex import settings
+    from iter_codex.discovery.base import llm
 
     monkeypatch.setattr(settings, "_MODEL_ENDPOINTS", {})
-    monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEY_ITER_CODEX", raising=False)
     request = llm._build_kwargs(
         model="anthropic/claude-sonnet-4.6",
         api_key="explicit-key",

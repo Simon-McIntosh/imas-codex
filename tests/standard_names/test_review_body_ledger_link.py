@@ -16,9 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.standard_names.catalog_release import body_with_exclusion_ledger_link
+from iter_codex.standard_names.catalog_release import body_with_exclusion_ledger_link
 
-_RELATIVE = "imas_codex/standard_names/manifests/batch_dd_paths.exclusions.json"
+_RELATIVE = "iter_codex/standard_names/manifests/batch_dd_paths.exclusions.json"
 
 
 def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -31,7 +31,7 @@ def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
 def manifest_checkout(tmp_path: Path) -> tuple[Path, Path]:
     """A committed manifest plus its exclusion ledger, with a github origin."""
     root = tmp_path / "codex"
-    manifests = root / "imas_codex" / "standard_names" / "manifests"
+    manifests = root / "iter_codex" / "standard_names" / "manifests"
     manifests.mkdir(parents=True)
     _git("init", "-q", "-b", "main", cwd=root)
     _git("config", "user.email", "release@example.invalid", cwd=root)
@@ -40,7 +40,7 @@ def manifest_checkout(tmp_path: Path) -> tuple[Path, Path]:
         "remote",
         "add",
         "origin",
-        "git@github.com:test-owner/imas-codex.git",
+        "git@github.com:test-owner/iter-codex.git",
         cwd=root,
     )
     manifest = manifests / "batch_dd_paths.yaml"
@@ -62,7 +62,7 @@ def manifest_checkout(tmp_path: Path) -> tuple[Path, Path]:
     )
     _git(
         "add",
-        "imas_codex/standard_names/manifests/batch_dd_paths.yaml",
+        "iter_codex/standard_names/manifests/batch_dd_paths.yaml",
         _RELATIVE,
         cwd=root,
     )
@@ -89,7 +89,7 @@ def test_body_lacking_the_ledger_gains_exactly_one_markdown_link(
 ) -> None:
     root, manifest = manifest_checkout
     sha = _git("log", "-1", "--format=%H", "--", _RELATIVE, cwd=root).stdout.strip()
-    expected_url = f"https://github.com/test-owner/imas-codex/blob/{sha}/{_RELATIVE}"
+    expected_url = f"https://github.com/test-owner/iter-codex/blob/{sha}/{_RELATIVE}"
     expected_link = (
         "[ledger of excluded source paths and their withholding data dictionary "
         f"node categories]({expected_url})"

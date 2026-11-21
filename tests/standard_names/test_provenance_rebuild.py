@@ -46,7 +46,7 @@ def test_recovery_map_extracts_dd_sources_keyed_by_name():
     key by the entry ``name`` and normalise each source to the fields the
     rebuild needs to reconstruct a StandardNameSource.
     """
-    from imas_codex.standard_names.provenance_rebuild import (
+    from iter_codex.standard_names.provenance_rebuild import (
         recovery_sources_from_entries,
     )
 
@@ -90,7 +90,7 @@ def test_bind_recovery_sources_merges_source_edge_and_dd_path():
     """Binding a dd source MERGEs the source, links PRODUCED_NAME, mirrors
     ``produced_sn_id``, and links FROM_DD_PATH — all gated on the name existing.
     """
-    from imas_codex.standard_names.provenance_rebuild import bind_recovery_sources
+    from iter_codex.standard_names.provenance_rebuild import bind_recovery_sources
 
     specs = [
         {
@@ -147,7 +147,7 @@ def test_load_recovery_map_reads_sources_from_a_git_ref(tmp_path):
     """load_recovery_map extracts the ``sources:`` map from the YAML tree at a
     specific commit (not the working tree), keyed by name.
     """
-    from imas_codex.standard_names.provenance_rebuild import load_recovery_map
+    from iter_codex.standard_names.provenance_rebuild import load_recovery_map
 
     domain = (
         "- name: elongation_of_plasma_boundary\n"
@@ -181,7 +181,7 @@ def test_load_recovery_map_reads_sources_from_a_git_ref(tmp_path):
 
 def test_load_recovery_map_missing_ref_returns_empty(tmp_path):
     """A non-existent ref yields an empty map rather than raising."""
-    from imas_codex.standard_names.provenance_rebuild import load_recovery_map
+    from iter_codex.standard_names.provenance_rebuild import load_recovery_map
 
     _init_isnc_repo(tmp_path, "- name: x\n  kind: scalar\n  unit: '1'\n")
     assert load_recovery_map(tmp_path, ref="deadbeef") == {}
@@ -189,7 +189,7 @@ def test_load_recovery_map_missing_ref_returns_empty(tmp_path):
 
 def test_change_history_recovery_uses_existing_composed_sources():
     """Historical recovery selects real sources from the latest predecessor."""
-    from imas_codex.standard_names.provenance_rebuild import (
+    from iter_codex.standard_names.provenance_rebuild import (
         _fetch_change_history_sources,
     )
 
@@ -247,7 +247,7 @@ def test_rebuild_routes_orphans_by_anchor_authority():
     Childful parents use the structural reconciler; unsupported residue stays
     unresolved. No provenance source is fabricated.
     """
-    import imas_codex.standard_names.provenance_rebuild as pr
+    import iter_codex.standard_names.provenance_rebuild as pr
 
     recovery_map = {
         "in_map_name": [
@@ -344,8 +344,8 @@ def test_rebuild_routes_orphans_by_anchor_authority():
 
 def test_rejected_derived_parent_remains_in_unresolved_classification():
     """Admission rejection must not hide a derived orphan from fallback."""
-    import imas_codex.standard_names.provenance_rebuild as pr
-    from imas_codex.standard_names.parents import AdmissionResult
+    import iter_codex.standard_names.provenance_rebuild as pr
+    from iter_codex.standard_names.parents import AdmissionResult
 
     parent_id = "line_integrated_impurity_ion_velocity"
     orphans = [
@@ -375,7 +375,7 @@ def test_rejected_derived_parent_remains_in_unresolved_classification():
             ],
         ),
         patch(
-            "imas_codex.standard_names.parents.is_admissible_parent_name",
+            "iter_codex.standard_names.parents.is_admissible_parent_name",
             return_value=AdmissionResult(
                 admit=False,
                 reason="suppressed: single-child shadow",
@@ -395,17 +395,17 @@ def test_rejected_derived_parent_remains_in_unresolved_classification():
 
 def test_non_derived_parent_bypasses_structural_admission_gate() -> None:
     """Pipeline refinement parents retain structural provenance recovery."""
-    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+    from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
         reconcile_orphan_parent_sources,
     )
-    from imas_codex.standard_names.parents import AdmissionResult
+    from iter_codex.standard_names.parents import AdmissionResult
 
     parent_id = "line_integrated_impurity_ion_velocity"
     gc = MagicMock()
     gc.query.return_value = []
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.find_orphan_parent_source_candidates",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.find_orphan_parent_source_candidates",
             return_value=[
                 {
                     "parent_id": parent_id,
@@ -415,7 +415,7 @@ def test_non_derived_parent_bypasses_structural_admission_gate() -> None:
             ],
         ),
         patch(
-            "imas_codex.standard_names.parents.is_admissible_parent_name",
+            "iter_codex.standard_names.parents.is_admissible_parent_name",
             return_value=AdmissionResult(
                 admit=False,
                 reason="would be rejected if structural admission applied",
@@ -437,10 +437,10 @@ def test_non_derived_parent_bypasses_structural_admission_gate() -> None:
 
 def test_parent_source_reconcile_keeps_dd_identity_with_the_child() -> None:
     """Structural sources stay distinct even when every parent shares one leaf."""
-    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+    from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
         reconcile_orphan_parent_sources,
     )
-    from imas_codex.standard_names.parents import AdmissionResult
+    from iter_codex.standard_names.parents import AdmissionResult
 
     leaf = "spectrometer_visible/channel/processed_line/radiance"
     parent_ids = ["photon_radiance", "radiance"]
@@ -457,7 +457,7 @@ def test_parent_source_reconcile_keeps_dd_identity_with_the_child() -> None:
     ]
 
     with patch(
-        "imas_codex.standard_names.parents.is_admissible_parent_name",
+        "iter_codex.standard_names.parents.is_admissible_parent_name",
         return_value=AdmissionResult(admit=True, reason="valid", clause=None),
     ):
         assert reconcile_orphan_parent_sources(gc=gc) == 2
@@ -487,7 +487,7 @@ def test_parent_source_reconcile_keeps_dd_identity_with_the_child() -> None:
 
 def test_rebuild_dry_run_binds_nothing():
     """A dry run classifies but performs no writes and no fixpoints."""
-    import imas_codex.standard_names.provenance_rebuild as pr
+    import iter_codex.standard_names.provenance_rebuild as pr
 
     orphans = [{"sn_id": "x", "name_stage": "accepted", "origin": "catalog_edit"}]
     gc = MagicMock()
@@ -541,7 +541,7 @@ def test_rebuild_excludes_reattachable_desyncs_from_fallback_binding():
     produced_sn_id) is reattached to its TRUE source, never bound to a fresh
     unsupported fallback.
     """
-    import imas_codex.standard_names.provenance_rebuild as pr
+    import iter_codex.standard_names.provenance_rebuild as pr
 
     orphans = [
         {"sn_id": "desync_name", "name_stage": "accepted", "origin": "pipeline"},
@@ -582,7 +582,7 @@ def test_rebuild_excludes_pending_source_names_from_fallback():
     fallback that would pin fabricated provenance over the real source about
     to be composed.
     """
-    import imas_codex.standard_names.provenance_rebuild as pr
+    import iter_codex.standard_names.provenance_rebuild as pr
 
     orphans = [
         {"sn_id": "pending_name", "name_stage": "accepted", "origin": "catalog_edit"},
@@ -618,7 +618,7 @@ def test_rebuild_excludes_pending_source_names_from_fallback():
 
 
 def test_rebuild_can_retire_explicit_unrecoverable_residue() -> None:
-    import imas_codex.standard_names.provenance_rebuild as pr
+    import iter_codex.standard_names.provenance_rebuild as pr
 
     orphans = [{"sn_id": "lost_name", "name_stage": "accepted", "origin": "pipeline"}]
     gc = MagicMock()
@@ -659,7 +659,7 @@ def test_rebuild_can_retire_explicit_unrecoverable_residue() -> None:
 
 def test_rebuild_replays_all_bindings_before_consistency_reconciliation() -> None:
     """Raw recovery replay finishes before attachment and semantic checks."""
-    import imas_codex.standard_names.provenance_rebuild as pr
+    import iter_codex.standard_names.provenance_rebuild as pr
 
     orphan = {
         "sn_id": "restored_quantity",
@@ -728,8 +728,8 @@ def test_rebuild_replays_all_bindings_before_consistency_reconciliation() -> Non
 
 def test_rebuild_reports_exact_consistency_rows_and_refuses_completion() -> None:
     """Committed replay stays visible when postchecks find unadjudicated rows."""
-    import imas_codex.standard_names.provenance_rebuild as pr
-    from imas_codex.standard_names.attachment_audit import (
+    import iter_codex.standard_names.provenance_rebuild as pr
+    from iter_codex.standard_names.attachment_audit import (
         AttachmentAuditResult,
         AttachmentVerdict,
     )
@@ -810,8 +810,8 @@ def test_rebuild_reports_exact_consistency_rows_and_refuses_completion() -> None
 
 def test_exact_adjudication_manifest_is_required_for_remaining_findings() -> None:
     """Only full current rows authorize a qualified consistency completion."""
-    import imas_codex.standard_names.provenance_rebuild as pr
-    from imas_codex.standard_names.attachment_audit import (
+    import iter_codex.standard_names.provenance_rebuild as pr
+    from iter_codex.standard_names.attachment_audit import (
         AttachmentAuditResult,
         AttachmentVerdict,
     )

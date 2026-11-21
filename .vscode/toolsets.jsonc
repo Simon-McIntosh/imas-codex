@@ -1,5 +1,5 @@
 {
-  // Custom tool sets for imas-codex agents
+  // Custom tool sets for iter-codex agents
   // Reference in .agent.md files or prompts with #toolset-name
   // Built-in sets: #edit, #search, #runCommands, #runTasks, #runNotebooks
 

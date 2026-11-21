@@ -545,7 +545,7 @@ listed as they stand. Neither reader's class is preferred and none is resolved h
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="docs-project" content="imas-codex">
+<meta name="docs-project" content="iter-codex">
 <meta name="reckon-type" content="evidence-fragment">
 <meta name="plan-slug" content="sn-definitions-by-construction">
 <meta name="node-id" content="sdbc-name-definition-count">

@@ -19,7 +19,7 @@ class GraphQueryBenchmarks:
         self.gc = _fixture.graph_client
 
         # Pre-compute an embedding for vector search benchmarks
-        from imas_codex.embeddings.encoder import Encoder
+        from iter_codex.embeddings.encoder import Encoder
 
         self._encoder = Encoder()
         self._embedding = self._encoder.embed_texts([SEARCH_QUERIES["simple"]])[

@@ -7,14 +7,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
-from imas_codex.discovery.base.facility import get_facility
-from imas_codex.discovery.wiki.entity_extraction import extract_facility_tool_mentions
-from imas_codex.discovery.wiki.scoring import (
+from iter_codex.discovery.base.facility import get_facility
+from iter_codex.discovery.wiki.entity_extraction import extract_facility_tool_mentions
+from iter_codex.discovery.wiki.scoring import (
     build_content_judgment_questions,
     build_content_judgment_state,
 )
 
-_CONFIG_DIR = Path(__file__).resolve().parents[2] / "imas_codex/config/facilities"
+_CONFIG_DIR = Path(__file__).resolve().parents[2] / "iter_codex/config/facilities"
 _FACILITIES = [
     path.stem
     for path in sorted(_CONFIG_DIR.glob("*.yaml"))
@@ -23,7 +23,7 @@ _FACILITIES = [
 
 
 def test_judgment_question_set_and_storage_slots():
-    from imas_codex.graph.schema import get_schema
+    from iter_codex.graph.schema import get_schema
 
     questions = build_content_judgment_questions()
     assert set(questions) == {
@@ -85,7 +85,7 @@ def test_state_carries_only_matches_in_own_text(facility: str, kind: str):
     [("claim_pages_for_ingesting", "wp"), ("claim_documents_for_ingesting", "wa")],
 )
 def test_ingest_claim_reads_jev_judgment(function_name: str, node_alias: str):
-    from imas_codex.discovery.wiki import graph_ops
+    from iter_codex.discovery.wiki import graph_ops
 
     client = MagicMock()
     client.query.return_value = []
@@ -101,7 +101,7 @@ def test_ingest_claim_reads_jev_judgment(function_name: str, node_alias: str):
     "function_name", ["claim_pages_for_scoring", "claim_documents_for_scoring"]
 )
 def test_judgment_claim_includes_stale_model(function_name: str):
-    from imas_codex.discovery.wiki import graph_ops
+    from iter_codex.discovery.wiki import graph_ops
 
     client = MagicMock()
     client.query.side_effect = [[], [{"id": "tcv:stored"}]]
@@ -116,7 +116,7 @@ def test_judgment_claim_includes_stale_model(function_name: str):
 
 
 def test_low_jev_judgment_refuses_high_legacy_score():
-    from imas_codex.discovery.wiki import graph_ops
+    from iter_codex.discovery.wiki import graph_ops
 
     client = MagicMock()
     client.__enter__.return_value = client
@@ -136,7 +136,7 @@ def test_low_jev_judgment_refuses_high_legacy_score():
 
 
 def test_calibrated_gate_admits_relevant_page_below_legacy_cutoff():
-    from imas_codex.discovery.wiki import graph_ops
+    from iter_codex.discovery.wiki import graph_ops
 
     client = MagicMock()
     client.__enter__.return_value = client
@@ -155,7 +155,7 @@ def test_calibrated_gate_admits_relevant_page_below_legacy_cutoff():
 
 
 def test_language_model_response_models_contain_text_only():
-    from imas_codex.discovery.wiki.models import (
+    from iter_codex.discovery.wiki.models import (
         DocumentScoreResult,
         ImageCaptionResult,
         WikiScoreResult,
@@ -172,7 +172,7 @@ def test_language_model_response_models_contain_text_only():
 
 
 def test_document_preview_keeps_judged_span_for_rejudgment():
-    from imas_codex.discovery.wiki import graph_ops
+    from iter_codex.discovery.wiki import graph_ops
 
     client = MagicMock()
     client.__enter__.return_value = client
@@ -186,8 +186,8 @@ def test_document_preview_keeps_judged_span_for_rejudgment():
 
 
 def test_page_description_is_followed_by_jev_judgment():
-    from imas_codex.discovery.wiki import scoring
-    from imas_codex.discovery.wiki.models import WikiScoreBatch, WikiScoreResult
+    from iter_codex.discovery.wiki import scoring
+    from iter_codex.discovery.wiki.models import WikiScoreBatch, WikiScoreResult
 
     async def describe(**kwargs):
         assert kwargs["response_model"] is WikiScoreBatch
@@ -205,7 +205,7 @@ def test_page_description_is_followed_by_jev_judgment():
         return [{**items[0], "ingest_relevance": 0.2, "score_cost": 0.001}], 0.001
 
     with (
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", describe),
+        patch("iter_codex.discovery.base.llm.acall_llm_structured", describe),
         patch.object(scoring, "judge_content_items", judge),
     ):
         results, cost = asyncio.run(
@@ -221,8 +221,8 @@ def test_page_description_is_followed_by_jev_judgment():
 
 
 def test_image_vision_returns_text_before_jev_judgment():
-    from imas_codex.discovery.wiki import scoring
-    from imas_codex.discovery.wiki.models import ImageCaptionBatch, ImageCaptionResult
+    from iter_codex.discovery.wiki import scoring
+    from iter_codex.discovery.wiki.models import ImageCaptionBatch, ImageCaptionResult
 
     tool = get_facility("tcv")["data_access_patterns"]["key_tools"][0]
 
@@ -253,7 +253,7 @@ def test_image_vision_returns_text_before_jev_judgment():
         return [{**items[0], "ingest_relevance": 0.3, "score_cost": 0.001}], 0.001
 
     with (
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", caption),
+        patch("iter_codex.discovery.base.llm.acall_llm_structured", caption),
         patch.object(scoring, "judge_content_items", judge),
     ):
         results, cost = asyncio.run(

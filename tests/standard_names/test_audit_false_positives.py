@@ -6,13 +6,13 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.audits import (
+from iter_codex.standard_names.audits import (
     implicit_field_check,
     multi_subject_check,
     name_description_consistency_check,
     name_unit_consistency_check,
 )
-from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
     validate_name_candidate,
 )
 
@@ -94,7 +94,7 @@ def test_locus_owner_is_not_a_second_subject() -> None:
 
 def _admission_status(candidate: dict[str, str]) -> tuple[str, list[str]]:
     with patch(
-        "imas_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
+        "iter_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
         return_value=([], {"pydantic": {"passed": True}}),
     ):
         issues, _summary, status = validate_name_candidate(candidate)

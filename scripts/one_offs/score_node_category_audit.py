@@ -30,8 +30,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from imas_codex.discovery.base.llm import call_llm_structured
-from imas_codex.settings import get_sn_benchmark_reviewer_model
+from iter_codex.discovery.base.llm import call_llm_structured
+from iter_codex.settings import get_sn_benchmark_reviewer_model
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.provenance_lifecycle import cancel_staged_rename
+from iter_codex.standard_names.provenance_lifecycle import cancel_staged_rename
 
 
 class _Graph:

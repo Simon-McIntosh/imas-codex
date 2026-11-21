@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from imas_codex.standard_names.models import (
+from iter_codex.standard_names.models import (
     StandardNameReviewBatch,
     StandardNameReviewItem,
 )
@@ -90,7 +90,7 @@ class TestSNQualityReviewModels:
 
     def test_quality_score_total(self):
         """Total is the sum of all six dimensions."""
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         score = StandardNameQualityScore(
             grammar=18,
@@ -104,7 +104,7 @@ class TestSNQualityReviewModels:
 
     def test_quality_score_tier_outstanding(self):
         """Score >= 102 is outstanding."""
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         score = StandardNameQualityScore(
             grammar=20,
@@ -119,7 +119,7 @@ class TestSNQualityReviewModels:
 
     def test_quality_score_tier_good(self):
         """Score 78-101 is good."""
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         score = StandardNameQualityScore(
             grammar=15,
@@ -134,7 +134,7 @@ class TestSNQualityReviewModels:
 
     def test_quality_score_tier_adequate(self):
         """Score 48-77 is inadequate."""
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         score = StandardNameQualityScore(
             grammar=10,
@@ -149,7 +149,7 @@ class TestSNQualityReviewModels:
 
     def test_quality_score_tier_poor(self):
         """Score < 48 is poor."""
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         score = StandardNameQualityScore(
             grammar=5,
@@ -164,7 +164,7 @@ class TestSNQualityReviewModels:
 
     def test_quality_score_max_120(self):
         """Max possible total is 120."""
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         score = StandardNameQualityScore(
             grammar=20,
@@ -179,7 +179,7 @@ class TestSNQualityReviewModels:
 
     def test_quality_score_model_dump(self):
         """model_dump() includes all dimension fields."""
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         score = StandardNameQualityScore(
             grammar=18,
@@ -201,7 +201,7 @@ class TestSNQualityReviewModels:
 
     def test_quality_review_full(self):
         """StandardNameQualityReview with all fields populated."""
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.models import (
             StandardNameQualityReview,
             StandardNameQualityScore,
         )
@@ -224,7 +224,7 @@ class TestSNQualityReviewModels:
 
     def test_quality_review_batch(self):
         """StandardNameQualityReviewBatch wraps quality reviews."""
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.models import (
             StandardNameQualityReview,
             StandardNameQualityReviewBatch,
             StandardNameQualityScore,
@@ -254,7 +254,7 @@ class TestSNQualityReviewModels:
         """Scores must be in 0-20 range."""
         from pydantic import ValidationError
 
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         with pytest.raises(ValidationError):
             StandardNameQualityScore(
@@ -291,14 +291,14 @@ class TestSNBuildStateReview:
 
     def test_state_has_compose_model(self):
         """StandardNameBuildState includes compose model configuration."""
-        from imas_codex.standard_names.state import StandardNameBuildState
+        from iter_codex.standard_names.state import StandardNameBuildState
 
         state = StandardNameBuildState(facility="dd")
         assert state.compose_model is None
 
     def test_total_cost_is_compose_only(self):
         """total_cost only includes compose cost (no review)."""
-        from imas_codex.standard_names.state import StandardNameBuildState
+        from iter_codex.standard_names.state import StandardNameBuildState
 
         state = StandardNameBuildState(facility="dd")
         state.compose_stats.cost = 0.5
@@ -306,7 +306,7 @@ class TestSNBuildStateReview:
 
     def test_model_override_configuration(self):
         """compose_model can be set at construction."""
-        from imas_codex.standard_names.state import StandardNameBuildState
+        from iter_codex.standard_names.state import StandardNameBuildState
 
         state = StandardNameBuildState(
             facility="dd",
@@ -329,7 +329,7 @@ class TestPipelineWiring:
 
     def test_validate_depends_on_compose_phase(self):
         """Validate worker should depend on compose_phase (review removed)."""
-        from imas_codex.standard_names.state import StandardNameBuildState
+        from iter_codex.standard_names.state import StandardNameBuildState
 
         state = StandardNameBuildState(facility="dd")
 
@@ -338,14 +338,14 @@ class TestPipelineWiring:
 
     def test_validate_reads_composed_buffer(self):
         """Validate worker reads from state.composed directly."""
-        from imas_codex.standard_names.state import StandardNameBuildState
+        from iter_codex.standard_names.state import StandardNameBuildState
 
         state = StandardNameBuildState(facility="dd", dry_run=True)
         state.composed = [
             {"id": "electron_temperature", "source_id": "a"},
         ]
 
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             validate_worker,
         )
 
@@ -356,7 +356,7 @@ class TestPipelineWiring:
         """Pool adapter should not include a review worker."""
         import importlib
 
-        mod = importlib.import_module("imas_codex.standard_names.pool_adapter")
+        mod = importlib.import_module("iter_codex.standard_names.pool_adapter")
         source = importlib.util.find_spec(mod.__name__).origin
         with open(source) as f:
             content = f.read()

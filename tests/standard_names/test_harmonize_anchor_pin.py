@@ -24,8 +24,8 @@ from __future__ import annotations
 import importlib
 from typing import Any
 
-from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from iter_codex.standard_names.graph_store import (
     graph_claim_scope as _owning_graph_claim_scope,
     graph_docs_persistence as _owning_graph_docs_persistence,
 )
@@ -36,7 +36,7 @@ _OWNED_NAME_QUERY = "MATCH (sn:StandardName) RETURN sn.id AS id"
 
 
 def _harmonize() -> Any:
-    return importlib.import_module("imas_codex.standard_names.harmonize")
+    return importlib.import_module("iter_codex.standard_names.harmonize")
 
 
 def _node(
@@ -113,7 +113,7 @@ def test_stamped_family_releases_the_anchor_and_selects_normally(
     monkeypatch: Any,
 ) -> None:
     """A converged family releases its anchor, so the next plan reranks."""
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     monkeypatch.setattr(
         _owning_graph_docs_persistence,
@@ -190,7 +190,7 @@ def test_the_report_names_the_anchor_the_apply_would_use(
     The report is read through the same pin the planning reads, so the anchor
     it prints is the one an apply would start on rather than the live ranking.
     """
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     harmonize = _harmonize()
     nodes = [
@@ -216,7 +216,7 @@ def test_report_without_a_client_counts_an_out_of_scope_link_live(
     monkeypatch: Any,
 ) -> None:
     """With no client the report still resolves a link against the graph."""
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     harmonize = _harmonize()
     target = "gamma_quantity_outside_scope"
@@ -252,7 +252,7 @@ def test_the_report_reads_the_all_name_set_through_the_owner(
     monkeypatch: Any,
 ) -> None:
     """A client in hand reaches the owner, rather than being forked from."""
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     harmonize = _harmonize()
     seen: list[Any] = []

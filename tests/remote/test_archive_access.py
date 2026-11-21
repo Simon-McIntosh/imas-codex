@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from imas_codex.remote.archive_access import (
+from iter_codex.remote.archive_access import (
     find_categories,
     find_signals,
     list_pulses,

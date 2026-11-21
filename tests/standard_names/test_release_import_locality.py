@@ -40,7 +40,7 @@ def test_catalog_release_no_module_level_release_notes_imports() -> None:
     """
     catalog_release_path = (
         Path(__file__).parent.parent.parent
-        / "imas_codex"
+        / "iter_codex"
         / "standard_names"
         / "catalog_release.py"
     )
@@ -51,12 +51,12 @@ def test_catalog_release_no_module_level_release_notes_imports() -> None:
     "module_order",
     (
         (
-            "imas_codex.standard_names.catalog_release",
-            "imas_codex.standard_names.release_notes",
+            "iter_codex.standard_names.catalog_release",
+            "iter_codex.standard_names.release_notes",
         ),
         (
-            "imas_codex.standard_names.release_notes",
-            "imas_codex.standard_names.catalog_release",
+            "iter_codex.standard_names.release_notes",
+            "iter_codex.standard_names.catalog_release",
         ),
     ),
 )
@@ -72,8 +72,8 @@ import importlib
 
 first = importlib.import_module({first_module!r})
 second = importlib.import_module({second_module!r})
-catalog_release = importlib.import_module("imas_codex.standard_names.catalog_release")
-release_notes = importlib.import_module("imas_codex.standard_names.release_notes")
+catalog_release = importlib.import_module("iter_codex.standard_names.catalog_release")
+release_notes = importlib.import_module("iter_codex.standard_names.release_notes")
 
 assert first is not None
 assert second is not None

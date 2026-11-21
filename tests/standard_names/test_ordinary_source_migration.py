@@ -10,9 +10,9 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import signed_manifest as operator
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import signed_manifest as operator
+from iter_codex.standard_names.signed_manifest import (
     apply_signed_manifest,
     signed_payload_sha256,
 )
@@ -385,7 +385,7 @@ def test_claim_and_projection_closure_refusals(
 def test_attachment_guard_refusal_is_verbatim(
     client: GraphClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         AttachmentPairingGuardResult,
         AttachmentVerdict,
     )
@@ -401,7 +401,7 @@ def test_attachment_guard_refusal_is_verbatim(
         reason="semantic mismatch",
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+        "iter_codex.standard_names.attachment_audit.guard_source_pairings",
         lambda *_args, **_kwargs: AttachmentPairingGuardResult((), (rejection,)),
     )
     authority = tmp_path / "authority.json"

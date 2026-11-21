@@ -14,21 +14,21 @@ import sys
 import tarfile
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
-from imas_codex.standard_names import harmonize
-from imas_codex.standard_names.campaign import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
+from iter_codex.standard_names import harmonize
+from iter_codex.standard_names.campaign import (
     BatchOutcome,
     ConvergenceThresholds,
     evaluate_convergence,
 )
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.families import fetch_pattern_families
-from imas_codex.standard_names.harmonize import (
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.families import fetch_pattern_families
+from iter_codex.standard_names.harmonize import (
     _record_family_anchor,
     plan_family_applies,
 )
-from imas_codex.standard_names.review.pipeline import _cap_docs_scores_for_lint_errors
+from iter_codex.standard_names.review.pipeline import _cap_docs_scores_for_lint_errors
 
 ROOT = Path(__file__).resolve().parents[4]
 FRAGMENT = Path(__file__).resolve().parent

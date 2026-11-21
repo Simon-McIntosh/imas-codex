@@ -17,7 +17,7 @@ import pytest
 
 from tests.standard_names.conftest import answer_domain_state as _answer_domain_state
 
-_GO = "imas_codex.standard_names.graph_ops"
+_GO = "iter_codex.standard_names.graph_ops"
 
 
 def _mock_graph():
@@ -72,7 +72,7 @@ def _assigned(cypher: str, target: str, value: str) -> bool:
 
 def test_binding_reservation_mints_target_with_status_draft() -> None:
     """A first-generation mint through the binding reservation sets status."""
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         _lock_claimed_name_bindings,
     )
 
@@ -101,14 +101,14 @@ def test_binding_reservation_mints_target_with_status_draft() -> None:
 
 def test_refine_successor_minted_with_status_draft() -> None:
     """A refine-successor creation through persist_refined_name sets status."""
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
 
     mock_gc, _session, mock_tx = _mock_graph()
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     ):
         persist_refined_name(
@@ -129,7 +129,7 @@ def test_derived_parent_materialization_sets_status_draft() -> None:
     ``status`` unset reproduces the null the export gate refuses, so the
     materializer's SET clause fills it the same way every other write does.
     """
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         _materialize_derived_parent_rows,
     )
 
@@ -163,7 +163,7 @@ def test_ordinary_write_heals_null_status_and_sets_draft_on_create() -> None:
     a governed write over a row whose status is already null repairs it — the
     sanctioned backfill — while a non-null status survives untouched.
     """
-    from imas_codex.standard_names.graph_store.graph_catalog import write_standard_names
+    from iter_codex.standard_names.graph_store.graph_catalog import write_standard_names
 
     gc, _session, _tx = _mock_graph()
     names = [
@@ -178,11 +178,11 @@ def test_ordinary_write_heals_null_status_and_sets_draft_on_create() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=gc,
         ),
         patch(
-            "imas_codex.standard_names.protection.filter_protected",
+            "iter_codex.standard_names.protection.filter_protected",
             side_effect=lambda names, **kwargs: (names, []),
         ),
     ):

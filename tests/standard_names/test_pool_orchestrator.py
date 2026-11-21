@@ -16,8 +16,8 @@ import asyncio
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.pools import (
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.pools import (
     POOL_WEIGHTS,
     PoolHealth,
     PoolSpec,
@@ -217,7 +217,7 @@ class TestPoolLoop:
         - exit the pool loop (no spinning on an exhausted account)
         - NOT increment ``error_count`` (this is a stop signal, not a defect)
         """
-        from imas_codex.discovery.base.llm import ProviderBudgetExhausted
+        from iter_codex.discovery.base.llm import ProviderBudgetExhausted
 
         mgr = BudgetManager(total_budget=5.0)
         stop = asyncio.Event()

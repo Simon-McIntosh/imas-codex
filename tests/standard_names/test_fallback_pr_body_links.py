@@ -22,8 +22,8 @@ import subprocess
 
 import pytest
 
-from imas_codex.standard_names import release_notes
-from imas_codex.standard_names.release_notes import (
+from iter_codex.standard_names import release_notes
+from iter_codex.standard_names.release_notes import (
     ReviewingGuideLinkError,
     reviewing_guide_url,
     static_pr_notes,
@@ -123,14 +123,14 @@ def test_reviewing_guide_url_raises_when_the_catalog_remote_cannot_be_resolved(
 
 
 def test_reviewing_guide_url_raises_when_no_catalog_checkout_is_resolved(monkeypatch):
-    monkeypatch.setattr("imas_codex.settings.get_sn_isnc_dir", lambda: None)
+    monkeypatch.setattr("iter_codex.settings.get_sn_isnc_dir", lambda: None)
     with pytest.raises(ReviewingGuideLinkError):
         reviewing_guide_url()
 
 
 def test_static_body_links_the_catalog_reviewing_guide(monkeypatch, catalog_checkout):
     monkeypatch.setattr(
-        "imas_codex.settings.get_sn_isnc_dir", lambda: catalog_checkout
+        "iter_codex.settings.get_sn_isnc_dir", lambda: catalog_checkout
     )
     body = _fallback_body()
 
@@ -149,7 +149,7 @@ def test_static_body_derived_url_is_the_catalog_checkouts_own(
     monkeypatch, catalog_checkout
 ):
     monkeypatch.setattr(
-        "imas_codex.settings.get_sn_isnc_dir", lambda: catalog_checkout
+        "iter_codex.settings.get_sn_isnc_dir", lambda: catalog_checkout
     )
     body = _fallback_body()
 

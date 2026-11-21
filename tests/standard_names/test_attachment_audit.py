@@ -33,13 +33,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.attachment_audit import (
+from iter_codex.standard_names.attachment_audit import (
     AttachmentAuditResult,
     AttachmentVerdict,
     audit_attachments,
     reconcile_attachment_consistency,
 )
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_refinement as _owning_graph_refinement,
 )
 
@@ -84,7 +84,7 @@ def _row(
 
 def _client(rows: list[dict]) -> MagicMock:
     """A client that answers the audit read with *rows* and writes with a count."""
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     def _query(q: str, **params):
         # Matched on a distinctive projection rather than by identity: the read is
@@ -445,8 +445,8 @@ def test_as_dict_reports_name_level_defects() -> None:
 
 @pytest.fixture()
 def _gc(disposable_neo4j_uri: str, monkeypatch):
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import dd_resolutions
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import dd_resolutions
     from tests.standard_names.conftest import SyntheticDDResolutionReader
     from tests.standard_names.dd_resolution_test_data import (
         SYNTHETIC_GRAPH_RESOLUTION_ROWS,
@@ -709,7 +709,7 @@ def test_graph_scope_cleans_partial_setup_without_hiding_failure(_gc):
 
 def _scoped(gc, prefix: str, **params):
     """Audit only the fixture's own attachments (the graph is shared)."""
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     rows = gc.query(
         mod._ATTACHMENTS_QUERY.format(scope="WHERE sn.id STARTS WITH $prefix"),
@@ -727,7 +727,7 @@ class _ScopedClient:
         self._prefix = prefix
 
     def query(self, q: str, **params):
-        from imas_codex.standard_names import attachment_audit as mod
+        from iter_codex.standard_names import attachment_audit as mod
 
         if q == mod._ATTACHMENTS_QUERY.format(scope=""):
             return _scoped(self._gc, self._prefix, **params)
@@ -964,7 +964,7 @@ def test_audit_covers_every_attachment_writer() -> None:
     alone, which is the shape every one of those writers produces; this asserts
     the selector has not been narrowed to something a writer can slip past.
     """
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     q = mod._ATTACHMENTS_QUERY
     assert "MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)" in q
@@ -986,7 +986,7 @@ def test_audit_covers_every_attachment_writer() -> None:
 
 def test_attachment_read_aggregates_each_relationship_before_projection() -> None:
     """Unit and peer-name fan-out must not change attachment cardinality."""
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     q = mod._ATTACHMENTS_QUERY
     assert "collect(DISTINCT du.id) AS dd_relationship_units" in q
@@ -1004,7 +1004,7 @@ def test_attachment_read_aggregates_each_relationship_before_projection() -> Non
 @pytest.mark.graph
 def test_attachment_read_has_one_row_and_deterministic_unit_ambiguity(_gc, _clean):
     """Zero, one, or many unit edges each yield exactly one attachment row."""
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     scalar_unit = _clean.path("scalar_unit")
     edge_unit = _clean.path("edge_unit")
@@ -1071,7 +1071,7 @@ def test_refine_successor_migration_is_gated() -> None:
     """
     import inspect
 
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     src = inspect.getsource(_owning_graph_refinement.persist_refined_name)
     assert "REFINE_ATOMIC_PREFLIGHT" in src
@@ -1085,7 +1085,7 @@ def test_refine_successor_migration_is_gated() -> None:
 
 def test_gate_validates_only_the_successor() -> None:
     """The gate reads one name, not the corpus — it runs on every refine."""
-    from imas_codex.standard_names.attachment_audit import gate_migrated_attachments
+    from iter_codex.standard_names.attachment_audit import gate_migrated_attachments
 
     other = "electron_density"
     gc = _client(
@@ -1109,7 +1109,7 @@ def test_gate_validates_only_the_successor() -> None:
 
 def test_gate_detaches_a_laundered_migration() -> None:
     """A migrated edge the guard refuses is detached, not left on the successor."""
-    from imas_codex.standard_names.attachment_audit import gate_migrated_attachments
+    from iter_codex.standard_names.attachment_audit import gate_migrated_attachments
 
     sn_id = "z_image_up_unit_vector_of_camera"
     gc = _client([_row("summary/boundary/strike_point_inner_z/value", sn_id)])
@@ -1160,7 +1160,7 @@ def _terminal_recovery_client(*, eligible: bool = True) -> tuple[MagicMock, Magi
 
 
 def test_terminal_recovery_is_one_exact_transaction() -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         recover_terminal_attachment,
     )
 
@@ -1207,7 +1207,7 @@ def test_terminal_recovery_is_one_exact_transaction() -> None:
 
 
 def test_terminal_recovery_dry_run_has_no_write_transaction() -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         recover_terminal_attachment,
     )
 
@@ -1229,7 +1229,7 @@ def test_terminal_recovery_dry_run_has_no_write_transaction() -> None:
 
 
 def test_terminal_recovery_fails_closed_without_partial_events() -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         recover_terminal_attachment,
     )
 
@@ -1249,9 +1249,9 @@ def test_terminal_recovery_fails_closed_without_partial_events() -> None:
 
 
 def test_terminal_recovery_retry_metadata_is_declared() -> None:
-    from imas_codex.graph.schema import GraphSchema
+    from iter_codex.graph.schema import GraphSchema
 
-    schema = GraphSchema(schema_path="imas_codex/schemas/standard_name.yaml")
+    schema = GraphSchema(schema_path="iter_codex/schemas/standard_name.yaml")
     slots = schema.get_all_slots("StandardNameSourceRetry")
 
     assert _TERMINAL_RETRY_METADATA <= slots.keys()
@@ -1297,7 +1297,7 @@ class _OrdinaryRetryPersistenceClient:
 
 
 def test_ordinary_retry_omits_terminal_recovery_metadata() -> None:
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         retry_failed_sources,
     )
 
@@ -1324,7 +1324,7 @@ def test_ordinary_retry_omits_terminal_recovery_metadata() -> None:
 
 
 def test_terminal_recovery_exception_rolls_back_edges_and_events() -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         recover_terminal_attachment,
     )
 
@@ -1343,7 +1343,7 @@ def test_terminal_recovery_exception_rolls_back_edges_and_events() -> None:
 
 
 def test_detach_terminal_recovery_routes_to_exact_transaction() -> None:
-    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+    from iter_codex.standard_names.attachment_audit import detach_one_attachment
 
     gc, tx = _terminal_recovery_client()
     result = detach_one_attachment(
@@ -1615,7 +1615,7 @@ class _StatefulTerminalClient:
 
 
 def _recover_with_state(client: _StatefulTerminalClient, *, dry_run: bool = False):
-    from imas_codex.standard_names.attachment_audit import recover_terminal_attachment
+    from iter_codex.standard_names.attachment_audit import recover_terminal_attachment
 
     return recover_terminal_attachment(
         client.state["path"],
@@ -1707,7 +1707,7 @@ def test_terminal_recovery_accepts_each_exact_mirror_form(
 
 
 def test_terminal_recovery_queries_share_the_isolated_empty_mirror_guard() -> None:
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     guard = """OR (
       size(coalesce(sn.source_paths, [])) = 0
@@ -2089,7 +2089,7 @@ def _terminal_recovery_closure_row(
 
 
 def _terminal_recovery_manifest_payload(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     cohort_context: dict[str, dict[str, set[str]]] = {}
     for row in rows:
@@ -2131,7 +2131,7 @@ def _terminal_recovery_manifest_payload(rows: list[dict[str, Any]]) -> dict[str,
             }
         )
     return {
-        "schema": "imas-codex.terminal-attachment-recovery-manifest",
+        "schema": "iter-codex.terminal-attachment-recovery-manifest",
         "schema_version": 1,
         "operation": "recover_terminal_attachment",
         "rows": manifest_rows,
@@ -2376,7 +2376,7 @@ class _BatchRecoveryClient:
 
 
 def test_terminal_recovery_persists_complete_retry_authority(tmp_path: Path) -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         recover_terminal_attachments,
     )
 
@@ -2418,7 +2418,7 @@ def test_terminal_recovery_persists_complete_retry_authority(tmp_path: Path) -> 
 def test_terminal_recovery_manifest_covers_exact_fixture_cohort(
     tmp_path: Path,
 ) -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         recover_terminal_attachments,
     )
 
@@ -2454,7 +2454,7 @@ def test_terminal_recovery_manifest_covers_exact_fixture_cohort(
 
 
 def test_terminal_recovery_batch_is_atomic_and_idempotent(tmp_path: Path) -> None:
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     rows = [
         _terminal_recovery_closure_row(*fixture)
@@ -2518,7 +2518,7 @@ def test_terminal_recovery_batch_is_atomic_and_idempotent(tmp_path: Path) -> Non
 
 
 def test_terminal_recovery_stale_closure_refuses_before_writes(tmp_path: Path) -> None:
-    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+    from iter_codex.standard_names.attachment_audit import recover_terminal_attachments
 
     rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
     manifest = tmp_path / "terminal-recovery.json"
@@ -2539,7 +2539,7 @@ def test_terminal_recovery_stale_closure_refuses_before_writes(tmp_path: Path) -
 
 
 def test_terminal_recovery_apply_requires_exact_manifest_hash(tmp_path: Path) -> None:
-    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+    from iter_codex.standard_names.attachment_audit import recover_terminal_attachments
 
     rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
     manifest = tmp_path / "terminal-recovery.json"
@@ -2562,7 +2562,7 @@ def test_terminal_recovery_apply_requires_exact_manifest_hash(tmp_path: Path) ->
 def test_terminal_recovery_manifest_rejects_duplicate_and_mixed_rows(
     tmp_path: Path, defect: str
 ) -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         load_terminal_attachment_recovery_manifest,
     )
 
@@ -2582,7 +2582,7 @@ def test_terminal_recovery_manifest_rejects_duplicate_and_mixed_rows(
 def test_terminal_recovery_refuses_unsafe_current_scope(
     tmp_path: Path, defect: str
 ) -> None:
-    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+    from iter_codex.standard_names.attachment_audit import recover_terminal_attachments
 
     rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
     source = rows[0]["sources"][0]
@@ -2617,7 +2617,7 @@ def test_terminal_recovery_refuses_unsafe_current_scope(
 
 def test_terminal_recovery_admits_a_facility_batch_scope(tmp_path: Path) -> None:
     """Facility batch membership is repairable, so recovery stays in scope."""
-    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+    from iter_codex.standard_names.attachment_audit import recover_terminal_attachments
 
     rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
     rows[0]["sources"][0]["properties"]["facility_id"] = "west"
@@ -2639,7 +2639,7 @@ def test_terminal_recovery_admits_a_facility_batch_scope(tmp_path: Path) -> None
 def test_terminal_recovery_race_and_partial_apply_roll_back(
     tmp_path: Path, failure: str
 ) -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         TerminalAttachmentRecoveryConflict,
         recover_terminal_attachments,
     )
@@ -2728,7 +2728,7 @@ def _write_graph_terminal_recovery_manifest(
     path: Path,
     pairs: list[dict[str, str]],
 ) -> str:
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     with gc.session() as session:
         transaction = session.begin_transaction()
@@ -2880,7 +2880,7 @@ class _TerminalRecoveryInjectedClient:
 def test_terminal_recovery_relationship_lock_plan_is_participant_anchored(
     _gc: Any,
 ) -> None:
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     descriptor = {
         "element_id": "4:terminal-recovery-relationship:0",
@@ -2934,7 +2934,7 @@ def test_terminal_recovery_graph_shared_target_is_atomic_and_idempotent(
     tmp_path: Path,
     shared_count: int,
 ) -> None:
-    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+    from iter_codex.standard_names.attachment_audit import recover_terminal_attachments
 
     pairs = _seed_terminal_recovery_graph_cohort(_clean, [shared_count])
     manifest = tmp_path / "terminal-recovery.json"
@@ -2978,7 +2978,7 @@ def test_terminal_recovery_graph_shared_target_is_atomic_and_idempotent(
 def test_terminal_recovery_graph_mixed_unique_and_shared_targets(
     _gc: Any, _clean: _GraphFixtureScope, tmp_path: Path
 ) -> None:
-    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+    from iter_codex.standard_names.attachment_audit import recover_terminal_attachments
 
     pairs = _seed_terminal_recovery_graph_cohort(_clean, [2, 1, 1])
     manifest = tmp_path / "terminal-recovery.json"
@@ -3004,7 +3004,7 @@ def test_terminal_recovery_graph_mixed_unique_and_shared_targets(
 def test_terminal_recovery_graph_stale_sibling_refuses_before_writes(
     _gc: Any, _clean: _GraphFixtureScope, tmp_path: Path
 ) -> None:
-    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+    from iter_codex.standard_names.attachment_audit import recover_terminal_attachments
 
     pairs = _seed_terminal_recovery_graph_cohort(_clean, [2])
     manifest = tmp_path / "terminal-recovery.json"
@@ -3043,7 +3043,7 @@ def test_terminal_recovery_graph_races_roll_back_complete_cohort(
     failure: str,
     expected_exception: str,
 ) -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         TerminalAttachmentRecoveryConflict,
         recover_terminal_attachments,
     )
@@ -3083,7 +3083,7 @@ def test_terminal_recovery_graph_fixture_refuses_production_uri(
 ) -> None:
     from tests.standard_names.conftest import project_graph_uris
 
-    assert os.environ["IMAS_CODEX_TEST_NEO4J_EPHEMERAL"] == "1"
+    assert os.environ["ITER_CODEX_TEST_NEO4J_EPHEMERAL"] == "1"
     assert disposable_neo4j_uri.rstrip("/") not in project_graph_uris()
 
 
@@ -3101,7 +3101,7 @@ def _detach_client(
     structural_parent: bool = False,
 ) -> MagicMock:
     """A client answering the targeted detach's pre-flight read."""
-    from imas_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names import attachment_audit as mod
 
     def _query(q: str, **params):
         if "RETURN src.id AS source_node_id" in q:
@@ -3134,7 +3134,7 @@ def _detach_client(
 
 
 def test_detach_removes_a_semantic_mis_share() -> None:
-    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+    from iter_codex.standard_names.attachment_audit import detach_one_attachment
 
     gc = _detach_client(other_live=1)
     res = detach_one_attachment(
@@ -3148,7 +3148,7 @@ def test_detach_removes_a_semantic_mis_share() -> None:
 
 
 def test_detach_rewinds_a_source_left_with_no_live_name() -> None:
-    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+    from iter_codex.standard_names.attachment_audit import detach_one_attachment
 
     gc = _detach_client(other_live=0)
     res = detach_one_attachment("a/b", "some_name", reason="wrong", gc=gc)
@@ -3157,7 +3157,7 @@ def test_detach_rewinds_a_source_left_with_no_live_name() -> None:
 
 def test_detach_refuses_to_orphan_a_name() -> None:
     """A name every source rejects is a NAME defect, not an attachment defect."""
-    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+    from iter_codex.standard_names.attachment_audit import detach_one_attachment
 
     gc = _detach_client(name_attachments=1)
     res = detach_one_attachment("a/b", "only_here", reason="wrong", gc=gc)
@@ -3172,7 +3172,7 @@ def test_detach_releases_a_derived_parent_holding_its_childs_leaf() -> None:
     the last one returns the parent to that designed state — the would-orphan
     refusal must not fire.
     """
-    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+    from iter_codex.standard_names.attachment_audit import detach_one_attachment
 
     gc = _detach_client(name_attachments=1, other_live=2, structural_parent=True)
     res = detach_one_attachment(
@@ -3187,7 +3187,7 @@ def test_detach_releases_a_derived_parent_holding_its_childs_leaf() -> None:
 
 
 def test_detach_refuses_a_pairing_that_does_not_exist() -> None:
-    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+    from iter_codex.standard_names.attachment_audit import detach_one_attachment
 
     gc = _detach_client(exists=False)
     res = detach_one_attachment("a/b", "unrelated", reason="wrong", gc=gc)
@@ -3201,8 +3201,8 @@ def test_detach_reaches_a_projection_with_no_provenance() -> None:
     reaches the catalog — and there is no source to rewind, only the dangling
     assertion to remove.
     """
-    from imas_codex.standard_names import attachment_audit as mod
-    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+    from iter_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names.attachment_audit import detach_one_attachment
 
     gc = _detach_client(projection_only=True)
     res = detach_one_attachment("a/b", "some_name", reason="wrong sensor", gc=gc)
@@ -3215,8 +3215,8 @@ def test_detach_reaches_a_projection_with_no_provenance() -> None:
 
 
 def test_detach_dry_run_does_not_write() -> None:
-    from imas_codex.standard_names import attachment_audit as mod
-    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+    from iter_codex.standard_names import attachment_audit as mod
+    from iter_codex.standard_names.attachment_audit import detach_one_attachment
 
     gc = _detach_client()
     res = detach_one_attachment("a/b", "n", reason="wrong", gc=gc, dry_run=True)
@@ -3228,7 +3228,7 @@ def test_detach_dry_run_does_not_write() -> None:
 
 def test_gate_survives_a_graph_failure() -> None:
     """A gate that raised would turn a bad edge into a lost rename."""
-    from imas_codex.standard_names.attachment_audit import gate_migrated_attachments
+    from iter_codex.standard_names.attachment_audit import gate_migrated_attachments
 
     gc = MagicMock()
     gc.query.side_effect = RuntimeError("graph unavailable")

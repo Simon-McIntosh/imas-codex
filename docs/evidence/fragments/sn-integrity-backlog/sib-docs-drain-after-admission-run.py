@@ -260,7 +260,7 @@ def check_report_guards(before, after, fragment):
 
 
 def read_state(gc):
-    from imas_codex.standard_names import pools
+    from iter_codex.standard_names import pools
 
     groups = pools.identity_state_groups(gc=gc)
     census = pools.classify_identity_state_groups(
@@ -399,8 +399,8 @@ def main():
         print(json.dumps(result, sort_keys=True))
         return
 
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import pools
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import pools
 
     with GraphClient() as gc:
         state = read_state(gc)

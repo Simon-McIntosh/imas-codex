@@ -8,10 +8,10 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.graph.schema import GraphSchema
+from iter_codex.graph.schema import GraphSchema
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_SCHEMA_PATH = _REPO_ROOT / "imas_codex" / "schemas" / "standard_name.yaml"
+_SCHEMA_PATH = _REPO_ROOT / "iter_codex" / "schemas" / "standard_name.yaml"
 _GENERIC_STANDARD_NAME_KEY = re.compile(r"^(?:sn|standard_name)_ids?$")
 _RETIRED_UNDECLARED_SLOTS = ("docs_review_resolution_method",)
 
@@ -27,7 +27,7 @@ def _guidance_files() -> tuple[Path, ...]:
     paths = {
         _REPO_ROOT / "AGENTS.md",
         *(_REPO_ROOT / "agents").rglob("*.md"),
-        *(_REPO_ROOT / "imas_codex").rglob("AGENTS.md"),
+        *(_REPO_ROOT / "iter_codex").rglob("AGENTS.md"),
     }
     assert all(path.is_file() for path in paths)
     return tuple(sorted(paths))

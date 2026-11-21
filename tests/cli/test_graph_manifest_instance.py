@@ -6,9 +6,9 @@ from types import SimpleNamespace
 
 from click.testing import CliRunner
 
-from imas_codex.cli.graph import server
-from imas_codex.graph import ghcr
-from imas_codex.graph.neo4j_ops import save_graph_instance_manifest
+from iter_codex.cli.graph import server
+from iter_codex.graph import ghcr
+from iter_codex.graph.neo4j_ops import save_graph_instance_manifest
 
 
 def test_status_reports_load_source_only_for_loaded_instance(tmp_path, monkeypatch):
@@ -68,9 +68,9 @@ def test_status_reports_load_source_only_for_loaded_instance(tmp_path, monkeypat
         lambda *_args: SimpleNamespace(offsite_ref=None),
     )
     monkeypatch.setattr(server, "is_neo4j_running", lambda *_args: False)
-    monkeypatch.setattr("imas_codex.graph.profiles.resolve_neo4j", resolve_profile)
-    monkeypatch.setattr("imas_codex.remote.executor.is_local_host", lambda _host: True)
-    monkeypatch.setattr("imas_codex.cli.services._get_neo4j_job", lambda: None)
+    monkeypatch.setattr("iter_codex.graph.profiles.resolve_neo4j", resolve_profile)
+    monkeypatch.setattr("iter_codex.remote.executor.is_local_host", lambda _host: True)
+    monkeypatch.setattr("iter_codex.cli.services._get_neo4j_job", lambda: None)
 
     other_status = CliRunner().invoke(server.graph_status)
 

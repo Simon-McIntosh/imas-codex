@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
+from iter_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
 
 NAMES_TEMPLATE = "sn/generate_name_dd_names"
 NAMES_TEMPLATE_PATH = PROMPTS_DIR / "sn" / "generate_name_dd_names.md"
@@ -206,7 +206,7 @@ def test_locus_context_reads_isn_definition_field():
     ``definition`` field; a registry entry with a definition or a
     defining quantity must yield a non-empty context dict (a silent
     None here strips the locus cross-link from every docs prompt)."""
-    from imas_codex.standard_names.context import locus_context_for
+    from iter_codex.standard_names.context import locus_context_for
 
     out = locus_context_for("electron_temperature_at_pedestal_top")
     assert out is not None

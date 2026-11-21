@@ -8,9 +8,9 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import discover
-from imas_codex.cli.discover.map import CandidatesStageOptions, run_candidates_stage
-from imas_codex.ids.workers import (
+from iter_codex.cli.discover import discover
+from iter_codex.cli.discover.map import CandidatesStageOptions, run_candidates_stage
+from iter_codex.ids.workers import (
     _ROUTE_IS_CURRENT,
     CandidateDiscoveryState,
     has_pending_candidate_work,
@@ -23,9 +23,9 @@ SOURCES = ({"id": "source-a"}, {"id": "source-b"})
 
 @pytest.fixture
 def focus_env(monkeypatch):
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda name: {"id": name},
     )
 
@@ -43,7 +43,7 @@ def focus_env(monkeypatch):
                 {"id": item["id"]} for item in SOURCES if item["id"] in params["ids"]
             ]
 
-    monkeypatch.setattr("imas_codex.graph.GraphClient", Graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", Graph)
     claimed = []
 
     def fake_claim(label, **kwargs):
@@ -61,10 +61,10 @@ def focus_env(monkeypatch):
         claimed.extend(source["id"] for source in selected)
         return selected
 
-    monkeypatch.setattr("imas_codex.ids.workers.claim_batch", fake_claim)
+    monkeypatch.setattr("iter_codex.ids.workers.claim_batch", fake_claim)
 
     async def fake_engine(state, *, stop_event=None, on_progress=None):
-        from imas_codex.ids.workers import claim_sources_for_candidates
+        from iter_codex.ids.workers import claim_sources_for_candidates
 
         sources = claim_sources_for_candidates(
             state.facility,
@@ -73,7 +73,7 @@ def focus_env(monkeypatch):
         )
         state.sources_judged = len(sources)
 
-    monkeypatch.setattr("imas_codex.ids.workers.run_candidate_engine", fake_engine)
+    monkeypatch.setattr("iter_codex.ids.workers.run_candidate_engine", fake_engine)
     return claimed
 
 
@@ -113,8 +113,8 @@ def test_unknown_source_is_refused_by_name(focus_env):
 
 
 def test_candidate_selection_passes_focus_to_the_stage(monkeypatch, tmp_path):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import sequence
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import sequence
 
     monkeypatch.setattr(
         sequence,
@@ -125,7 +125,7 @@ def test_candidate_selection_passes_focus_to_the_stage(monkeypatch, tmp_path):
     )
     monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: {}
     )
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
     monkeypatch.setattr(
@@ -136,7 +136,7 @@ def test_candidate_selection_passes_focus_to_the_stage(monkeypatch, tmp_path):
     def fake_stage(facility, options):
         received.append((facility, options.focus))
 
-    monkeypatch.setattr("imas_codex.cli.discover.map.run_candidates_stage", fake_stage)
+    monkeypatch.setattr("iter_codex.cli.discover.map.run_candidates_stage", fake_stage)
     result = CliRunner().invoke(
         discover,
         [
@@ -168,7 +168,7 @@ def test_pending_work_ignores_unfocused_sources(monkeypatch):
             ids = unjudged
         return any(unjudged[source_id] for source_id in ids)
 
-    monkeypatch.setattr("imas_codex.ids.workers.has_pending", fake_has_pending)
+    monkeypatch.setattr("iter_codex.ids.workers.has_pending", fake_has_pending)
 
     assert has_pending_candidate_work(FACILITY, focus_ids=["source-a"])
     unjudged["source-a"] = False
@@ -197,8 +197,8 @@ def test_candidate_engine_uses_focused_pending_check(monkeypatch):
         phase.refresh_has_work()
         done.append(phase.done)
 
-    monkeypatch.setattr("imas_codex.ids.workers.has_pending", fake_has_pending)
-    monkeypatch.setattr("imas_codex.ids.workers.run_discovery_engine", fake_supervisor)
+    monkeypatch.setattr("iter_codex.ids.workers.has_pending", fake_has_pending)
+    monkeypatch.setattr("iter_codex.ids.workers.run_discovery_engine", fake_supervisor)
 
     state = CandidateDiscoveryState(facility=FACILITY, focus_ids=["source-a"])
     asyncio.run(run_candidate_engine(state))

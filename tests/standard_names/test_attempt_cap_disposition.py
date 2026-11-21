@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names import graph_ops, orphan_sweep
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops, orphan_sweep
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
     graph_source_bindings as _owning_graph_source_bindings,
 )

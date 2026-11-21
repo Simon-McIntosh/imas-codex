@@ -7,9 +7,9 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from imas_codex.clusters.config import RelationshipExtractionConfig
-from imas_codex.clusters.extractor import RelationshipExtractor
-from imas_codex.clusters.models import (
+from iter_codex.clusters.config import RelationshipExtractionConfig
+from iter_codex.clusters.extractor import RelationshipExtractor
+from iter_codex.clusters.models import (
     ClusterInfo,
     ClusteringStatistics,
     CrossIDSSummary,
@@ -17,7 +17,7 @@ from imas_codex.clusters.models import (
     RelationshipMetadata,
     RelationshipSet,
 )
-from imas_codex.embeddings.config import EncoderConfig
+from iter_codex.embeddings.config import EncoderConfig
 
 
 @pytest.fixture

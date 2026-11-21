@@ -8,7 +8,7 @@ ledger rather than silently emitted under a source-derived bucket.
 
 from __future__ import annotations
 
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     _graph_node_to_entry_dict,
     run_export,
 )
@@ -88,36 +88,36 @@ def _run_fixture_export(tmp_path, population, graph, validate) -> dict:
     with ExitStack() as stack:
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_export_population",
+                "iter_codex.standard_names.export._fetch_export_population",
                 return_value=population,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
                 return_value=graph,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._validate_entry",
+                "iter_codex.standard_names.export._validate_entry",
                 side_effect=validate,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_deprecation_stubs",
+                "iter_codex.standard_names.export._fetch_deprecation_stubs",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+                "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
                 return_value=([], set()),
             )
         )
         stack.enter_context(
-            patch("imas_codex.standard_names.export._write_domain_yaml")
+            patch("iter_codex.standard_names.export._write_domain_yaml")
         )
         return run_export(tmp_path, skip_gate=True, force=True)
 

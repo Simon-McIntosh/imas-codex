@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog_reset as _owning_graph_catalog_reset,
     graph_foundation as _owning_graph_foundation,
 )
@@ -71,7 +71,7 @@ class TestClearSnSubsystemPreservesLLMCost:
 
     def test_llmcost_not_in_returned_deletion_labels(self):
         """Dry-run result keys describe only state the clear may delete."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = _make_fake_gc({"LLMCost": 3})
 
@@ -84,7 +84,7 @@ class TestClearSnSubsystemPreservesLLMCost:
 
     def test_llmcost_count_and_spend_unchanged_in_dry_run(self):
         """Dry-run must preserve both LLMCost count and all-time spend."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = _make_fake_gc(cost_rows=[0.5, 1.25, 2.0])
         before = _ledger_snapshot(fake_gc)
@@ -98,7 +98,7 @@ class TestClearSnSubsystemPreservesLLMCost:
 
     def test_llmcost_count_and_spend_unchanged_on_wipe(self):
         """Full pipeline-state wipe must preserve the all-time cost ledger."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = _make_fake_gc(
             {
@@ -126,7 +126,7 @@ class TestClearSnSubsystemPreservesLLMCost:
 
     def test_all_six_pipeline_labels_deleted(self):
         """All six pipeline-output labels must have a DETACH DELETE query."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         expected = {
             "StandardName",
@@ -152,7 +152,7 @@ class TestClearSnSubsystemPreservesLLMCost:
 
     def test_dry_run_no_detach_delete_for_llmcost(self):
         """Dry-run must never issue a DETACH DELETE for LLMCost."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = _make_fake_gc({"LLMCost": 10})
 
@@ -199,7 +199,7 @@ class TestClearStandardNamesPreservesLLMCost:
 
     def test_llmcost_count_and_spend_unchanged_on_full_clear(self):
         """An unscoped clear must preserve LLMCost count and all-time spend."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=3)
         before = _ledger_snapshot(fake_gc)
@@ -219,7 +219,7 @@ class TestClearStandardNamesPreservesLLMCost:
         """A SCOPED clear (source_filter) must NOT wipe the global LLMCost
         ledger — it removes only a slice of names, and wiping the whole
         ledger would erase cost history for the names left intact."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=2)
 
@@ -235,7 +235,7 @@ class TestClearStandardNamesPreservesLLMCost:
 
     def test_llmcost_not_deleted_with_stage_filter(self):
         """A stage-scoped clear must also spare the global LLMCost ledger."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=2)
 
@@ -251,7 +251,7 @@ class TestClearStandardNamesPreservesLLMCost:
 
     def test_llmcost_not_deleted_in_dry_run(self):
         """Dry-run must not issue DETACH DELETE for LLMCost."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=5)
 
@@ -269,7 +269,7 @@ class TestClearStandardNamesPreservesLLMCost:
 
     def test_llmcost_not_deleted_when_no_matching_sn(self):
         """When count == 0, no deletions including LLMCost should occur."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=0)
 
@@ -312,7 +312,7 @@ class TestClearStandardNamesResetsOrphanedSources:
         return fake_gc
 
     def test_orphaned_sources_reset_on_clear(self):
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc(sn_count=3)
         with patch.object(
@@ -336,7 +336,7 @@ class TestClearStandardNamesResetsOrphanedSources:
         assert "'composed'" in reset_q[0] and "'attached'" in reset_q[0]
 
     def test_no_source_reset_in_dry_run(self):
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc(sn_count=5)
         with patch.object(
@@ -350,7 +350,7 @@ class TestClearStandardNamesResetsOrphanedSources:
         )
 
     def test_no_source_reset_when_no_matching_sn(self):
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc(sn_count=0)
         with patch.object(

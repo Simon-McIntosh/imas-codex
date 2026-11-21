@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from imas_codex.standard_names.sources.dd import _qualify_sources
+from iter_codex.standard_names.sources.dd import _qualify_sources
 
 
 def _row(path: str, **kw: object) -> dict:
@@ -84,7 +84,7 @@ class TestQualifySources:
             _row("core_instant_changes/change/density"),
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources",
             return_value=1,
         ) as mock_write:
             result = _qualify_sources(rows, write_skipped=True)

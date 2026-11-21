@@ -36,12 +36,12 @@ def _make_embed_mock(pairs: dict[str, list[float]]):
 # ── compute_desc_name_similarity ──────────────────────────────────────────────
 
 
-_EMBED_PATCH = "imas_codex.standard_names.desc_name_sim.embed_descriptions_batch"
+_EMBED_PATCH = "iter_codex.standard_names.desc_name_sim.embed_descriptions_batch"
 
 
 def test_compute_high_similarity() -> None:
     """Well-matched name and description produce similarity near 1.0."""
-    from imas_codex.standard_names.desc_name_sim import compute_desc_name_similarity
+    from iter_codex.standard_names.desc_name_sim import compute_desc_name_similarity
 
     # Identical direction → cosine = 1.0
     vec = [1.0, 0.5, 0.3, 0.8, 0.2, 0.7, 0.1, 0.9]
@@ -63,7 +63,7 @@ def test_compute_high_similarity() -> None:
 
 def test_compute_low_similarity() -> None:
     """Orthogonal embeddings produce similarity near 0.0."""
-    from imas_codex.standard_names.desc_name_sim import compute_desc_name_similarity
+    from iter_codex.standard_names.desc_name_sim import compute_desc_name_similarity
 
     vec_name = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     vec_desc = [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -85,7 +85,7 @@ def test_compute_low_similarity() -> None:
 
 def test_compute_none_on_empty_description() -> None:
     """None description → returns None without calling embed."""
-    from imas_codex.standard_names.desc_name_sim import compute_desc_name_similarity
+    from iter_codex.standard_names.desc_name_sim import compute_desc_name_similarity
 
     with patch(_EMBED_PATCH) as mock_embed:
         sim = compute_desc_name_similarity("electron_temperature", None)
@@ -96,7 +96,7 @@ def test_compute_none_on_empty_description() -> None:
 
 def test_compute_none_on_blank_description() -> None:
     """Whitespace-only description → returns None."""
-    from imas_codex.standard_names.desc_name_sim import compute_desc_name_similarity
+    from iter_codex.standard_names.desc_name_sim import compute_desc_name_similarity
 
     with patch(_EMBED_PATCH) as mock_embed:
         sim = compute_desc_name_similarity("electron_temperature", "   ")
@@ -107,7 +107,7 @@ def test_compute_none_on_blank_description() -> None:
 
 def test_compute_none_on_embed_failure() -> None:
     """Embed failure → returns None (gate not applicable)."""
-    from imas_codex.standard_names.desc_name_sim import compute_desc_name_similarity
+    from iter_codex.standard_names.desc_name_sim import compute_desc_name_similarity
 
     with patch(_EMBED_PATCH, side_effect=RuntimeError("server unreachable")):
         sim = compute_desc_name_similarity(
@@ -119,7 +119,7 @@ def test_compute_none_on_embed_failure() -> None:
 
 def test_compute_none_on_zero_norm() -> None:
     """Zero embedding vector → returns None (degenerate case)."""
-    from imas_codex.standard_names.desc_name_sim import compute_desc_name_similarity
+    from iter_codex.standard_names.desc_name_sim import compute_desc_name_similarity
 
     zero_vec = [0.0] * 8
     mock = _make_embed_mock(
@@ -152,17 +152,17 @@ def test_compute_none_on_zero_norm() -> None:
 def test_should_route_to_refine_docs(
     sim: float | None, threshold: float, expected: bool
 ) -> None:
-    from imas_codex.standard_names.desc_name_sim import should_route_to_refine_docs
+    from iter_codex.standard_names.desc_name_sim import should_route_to_refine_docs
 
     assert should_route_to_refine_docs(sim, threshold=threshold) is expected
 
 
 def test_should_route_uses_settings_default() -> None:
     """Threshold defaults to the value from settings (0.55)."""
-    from imas_codex.standard_names.desc_name_sim import should_route_to_refine_docs
+    from iter_codex.standard_names.desc_name_sim import should_route_to_refine_docs
 
     with patch(
-        "imas_codex.standard_names.desc_name_sim.get_sn_desc_name_similarity_threshold",
+        "iter_codex.standard_names.desc_name_sim.get_sn_desc_name_similarity_threshold",
         return_value=0.55,
     ) as _mock:
         assert should_route_to_refine_docs(0.40) is True
@@ -175,7 +175,7 @@ def test_should_route_uses_settings_default() -> None:
 
 def test_get_sn_desc_name_similarity_threshold_default() -> None:
     """Default threshold resolves to 0.55."""
-    from imas_codex.settings import get_sn_desc_name_similarity_threshold
+    from iter_codex.settings import get_sn_desc_name_similarity_threshold
 
     # No env override — read from config (or fall back to default).
     val = get_sn_desc_name_similarity_threshold()
@@ -184,15 +184,15 @@ def test_get_sn_desc_name_similarity_threshold_default() -> None:
 
 
 def test_get_sn_desc_name_similarity_threshold_env_override(monkeypatch) -> None:
-    """IMAS_CODEX_SN_DESC_NAME_SIM_THRESHOLD env var overrides config."""
+    """ITER_CODEX_SN_DESC_NAME_SIM_THRESHOLD env var overrides config."""
     import importlib
 
-    import imas_codex.settings as settings_mod
+    import iter_codex.settings as settings_mod
 
-    monkeypatch.setenv("IMAS_CODEX_SN_DESC_NAME_SIM_THRESHOLD", "0.70")
+    monkeypatch.setenv("ITER_CODEX_SN_DESC_NAME_SIM_THRESHOLD", "0.70")
     importlib.reload(settings_mod)  # ensure module-level state is refreshed
 
-    from imas_codex.settings import get_sn_desc_name_similarity_threshold
+    from iter_codex.settings import get_sn_desc_name_similarity_threshold
 
     val = get_sn_desc_name_similarity_threshold()
     assert val == pytest.approx(0.70)

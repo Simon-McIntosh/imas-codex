@@ -9,7 +9,7 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_explicit_paths_return_only_claim_winners_with_fences() -> None:
-    from imas_codex.standard_names.pool_adapter import _seed_explicit_paths
+    from iter_codex.standard_names.pool_adapter import _seed_explicit_paths
 
     winner = "equilibrium/time_slice/global_quantities/ip"
     loser = "equilibrium/time_slice/global_quantities/q_axis"
@@ -31,11 +31,11 @@ async def test_explicit_paths_return_only_claim_winners_with_fences() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
             return_value=2,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.claim_explicit_standard_name_sources",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.claim_explicit_standard_name_sources",
             return_value=[
                 {
                     "id": f"dd:{winner}",
@@ -48,8 +48,8 @@ async def test_explicit_paths_return_only_claim_winners_with_fences() -> None:
                 }
             ],
         ),
-        patch("imas_codex.graph.client.GraphClient", return_value=gc),
-        patch("imas_codex.settings.get_dd_version", return_value="4.0.0"),
+        patch("iter_codex.graph.client.GraphClient", return_value=gc),
+        patch("iter_codex.settings.get_dd_version", return_value="4.0.0"),
     ):
         items = await _seed_explicit_paths([winner, loser])
 
@@ -63,19 +63,19 @@ async def test_explicit_paths_return_only_claim_winners_with_fences() -> None:
 
 @pytest.mark.asyncio
 async def test_explicit_paths_without_claim_winner_skip_graph_reads() -> None:
-    from imas_codex.standard_names.pool_adapter import _seed_explicit_paths
+    from iter_codex.standard_names.pool_adapter import _seed_explicit_paths
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
             return_value=1,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.claim_explicit_standard_name_sources",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.claim_explicit_standard_name_sources",
             return_value=[],
         ),
-        patch("imas_codex.graph.client.GraphClient") as graph_client,
-        patch("imas_codex.settings.get_dd_version", return_value="4.0.0"),
+        patch("iter_codex.graph.client.GraphClient") as graph_client,
+        patch("iter_codex.settings.get_dd_version", return_value="4.0.0"),
     ):
         items = await _seed_explicit_paths(["equilibrium/time_slice/q"])
 

@@ -9,7 +9,7 @@ Reuses the ``FakeGraph`` in-memory graph double from ``test_edit_engine.py``
 
 from __future__ import annotations
 
-from imas_codex.standard_names.edit import apply_edit
+from iter_codex.standard_names.edit import apply_edit
 from tests.standard_names.test_edit_engine import FakeGraph, _patched_graph
 
 
@@ -297,7 +297,7 @@ class TestAcceptanceCascadeApplication:
         fake.add_edge("ion_temperature", "density", "ion", "qualifier")
 
     def test_acceptance_applies_descendant_renames_atomically(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -328,7 +328,7 @@ class TestAcceptanceCascadeApplication:
         acceptance time refuses the acceptance itself — the root is NOT
         accepted and NOTHING is renamed (full rollback, nothing persisted).
         """
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 

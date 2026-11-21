@@ -25,7 +25,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.edit import apply_edit
+from iter_codex.standard_names.edit import apply_edit
 from tests.standard_names.test_edit_engine import (
     FakeGraph,
     _admitting_pairing_guard,

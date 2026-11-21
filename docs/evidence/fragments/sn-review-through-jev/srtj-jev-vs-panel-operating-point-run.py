@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 49b0626ab2b8c652c36315fee8efc4466a23e296, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.review.cascade_calibration.
+# Names the tree no longer defines: iter_codex.standard_names.review.cascade_calibration.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Compare frozen reviewers at matched acceptance operating points."""
@@ -24,9 +24,9 @@ from pathlib import Path
 
 import numpy as np
 
-from imas_codex.discovery.base import evaluation
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.review import cascade_calibration as calibration
+from iter_codex.discovery.base import evaluation
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.review import cascade_calibration as calibration
 
 ROOT = Path(__file__).resolve().parents[4]
 HERE = Path(__file__).resolve().parent
@@ -235,7 +235,7 @@ def input_rows():
         "docs_receipts": calibration.DEFAULT_DOCS_RECEIPTS,
         "docs_golden": calibration.GOLDEN_DOCS,
         "docs_panel": HERE / "srtj-docs-measure-results.json",
-        "name_fit": ROOT / "imas_codex/standard_names/review/cascade_thresholds.json",
+        "name_fit": ROOT / "iter_codex/standard_names/review/cascade_thresholds.json",
         "docs_fit": HERE / "srtj-docs-score-arm-results.json",
     }
     name_context = read(sources["name_context"])["entries"]
@@ -280,7 +280,7 @@ def input_rows():
                 for key, value in fit["weights"].items()
             ), "rebuilt name score differs from landed logistic"
         else:
-            from imas_codex.standard_names.review import jev_review
+            from iter_codex.standard_names.review import jev_review
 
             fit = read(sources["docs_fit"])["fit"]
             assert jev_review.DOCS_SCORE_WEIGHTS == fit["weights"]

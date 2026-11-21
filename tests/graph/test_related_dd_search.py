@@ -1,7 +1,7 @@
 """Smoke test pinning the ``related_dd_search`` public signature.
 
 The catalog runner ``find_related_dd_paths`` imports
-``imas_codex.graph.dd_search.related_dd_search`` directly.  This test
+``iter_codex.graph.dd_search.related_dd_search`` directly.  This test
 locks down the public signature so a future rename or kwarg shuffle
 trips immediately.
 """
@@ -13,7 +13,7 @@ import inspect
 
 def test_related_dd_search_signature() -> None:
     """Signature is ``related_dd_search(gc, path, *, max_results, ...)``."""
-    from imas_codex.graph.dd_search import related_dd_search
+    from iter_codex.graph.dd_search import related_dd_search
 
     sig = inspect.signature(related_dd_search)
     params = sig.parameters
@@ -46,7 +46,7 @@ def test_related_dd_search_signature() -> None:
 
 def test_related_dd_search_is_sync() -> None:
     """The catalog requires a sync helper (runner wraps in ``asyncio.to_thread``)."""
-    from imas_codex.graph.dd_search import related_dd_search
+    from iter_codex.graph.dd_search import related_dd_search
 
     assert not inspect.iscoroutinefunction(related_dd_search), (
         "related_dd_search must remain sync; fan-out runners wrap it in "

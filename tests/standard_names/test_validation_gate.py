@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.worker_tasks.worker_common import (
+from iter_codex.standard_names.worker_tasks.worker_common import (
     is_non_nameable_coordinate,
     is_well_formed_candidate,
 )

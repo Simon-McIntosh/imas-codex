@@ -7,14 +7,14 @@ from collections.abc import Iterator
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_audits as _owning_graph_audits,
     graph_docs_persistence as _owning_graph_docs_persistence,
     graph_review_persistence as _owning_graph_review_persistence,
 )
-from imas_codex.standard_names.review import holds
+from iter_codex.standard_names.review import holds
 
 pytestmark = [pytest.mark.graph, pytest.mark.timeout(180)]
 
@@ -320,7 +320,7 @@ def test_lint_error_raises_a_hold_and_keeps_the_judged_score(
     as its own dimension; a document with an unresolved lint error cannot be
     accepted while the hold is open.
     """
-    from imas_codex.standard_names.review import pipeline
+    from iter_codex.standard_names.review import pipeline
 
     entry = {"id": planted_name, "reviewer_score": 0.9}
     wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
@@ -344,8 +344,8 @@ def test_cascade_veto_raises_a_hold_and_keeps_the_decision_score(
     The route still reads refine, but the judged decision score is the mapped
     one rather than a value driven below ``min_score``.
     """
-    from imas_codex.standard_names.review import cascade
-    from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS
+    from iter_codex.standard_names.review import cascade
+    from iter_codex.standard_names.review.checks import DOCS_DIMENSIONS
 
     thresholds = {
         "accept_threshold": 0.4,
@@ -379,8 +379,8 @@ def test_cascade_veto_raises_a_hold_and_keeps_the_decision_score(
 
 def _route_pair(monkeypatch) -> tuple[object, object]:
     """A vetoing docs route and a clean one, from the same stub calibration."""
-    from imas_codex.standard_names.review import cascade
-    from imas_codex.standard_names.review.checks import DOCS_DIMENSIONS
+    from iter_codex.standard_names.review import cascade
+    from iter_codex.standard_names.review.checks import DOCS_DIMENSIONS
 
     thresholds = {
         "accept_threshold": 0.4,
@@ -411,7 +411,7 @@ def test_resolved_cascade_veto_clears_the_hold(planted_name: str, monkeypatch) -
     finding: a hold left open would re-claim the document on each pass and walk
     it to the rotation cap.
     """
-    from imas_codex.standard_names.review import cascade
+    from iter_codex.standard_names.review import cascade
 
     vetoed, clean = _route_pair(monkeypatch)
     assert vetoed.holds
@@ -439,7 +439,7 @@ def test_a_name_axis_pass_leaves_a_documentation_contradiction_hold_open(
     contradicts its source. The reconciliation is confined to the axis it ran
     on, so the hold survives a pass on the other axis untouched.
     """
-    from imas_codex.standard_names.review import cascade
+    from iter_codex.standard_names.review import cascade
 
     _, clean_docs = _route_pair(monkeypatch)
     hold = holds.raise_hold(
@@ -468,7 +468,7 @@ def test_resolved_lint_error_clears_the_hold_and_releases_the_document(
     gave it. The refusal therefore lasts exactly as long as the finding does,
     which is what the score clamp this replaces also did.
     """
-    from imas_codex.standard_names.review import pipeline
+    from iter_codex.standard_names.review import pipeline
 
     with GraphClient() as graph:
         graph.query(
@@ -509,9 +509,9 @@ def _enrich_batch(monkeypatch, names: list[dict]) -> dict:
     import asyncio
     from types import SimpleNamespace
 
-    from imas_codex.discovery.base.progress import WorkerStats
-    from imas_codex.discovery.base.supervision import PipelinePhase
-    from imas_codex.standard_names.review import enrichment, pipeline
+    from iter_codex.discovery.base.progress import WorkerStats
+    from iter_codex.discovery.base.supervision import PipelinePhase
+    from iter_codex.standard_names.review import enrichment, pipeline
 
     monkeypatch.setattr(
         enrichment, "build_neighborhood_context", lambda *a, **k: [], raising=True
@@ -550,7 +550,7 @@ def test_a_skipped_audit_reports_no_lint_verdict_and_leaves_the_hold(
     covers the other direction, where the audit ran and found nothing and the
     hold is cleared.
     """
-    from imas_codex.standard_names.review import pipeline
+    from iter_codex.standard_names.review import pipeline
 
     hold = holds.raise_hold(
         planted_name,

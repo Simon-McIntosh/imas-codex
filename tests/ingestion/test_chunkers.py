@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.ingestion.chunkers import Chunk, chunk_code, chunk_text
+from iter_codex.ingestion.chunkers import Chunk, chunk_code, chunk_text
 
 
 class TestChunk:

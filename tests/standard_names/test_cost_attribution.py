@@ -22,7 +22,7 @@ import pytest
 def _no_approved_names():
     """Make the approval-backed protection lookup explicit for this suite."""
     with patch(
-        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        "iter_codex.standard_names.protection._fetch_catalog_edit_names",
         return_value=set(),
     ):
         yield
@@ -65,10 +65,10 @@ class TestComposeCostAccumulation:
         mock_gc.query = MagicMock(return_value=[])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=_make_gc_context(mock_gc),
         ):
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 write_standard_names,
             )
 
@@ -198,10 +198,10 @@ class TestReviewCostPropagation:
         ]
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=_make_gc_context(mock_gc),
         ):
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 write_reviews,
             )
 
@@ -246,10 +246,10 @@ class TestReviewCostPropagation:
         ]
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=_make_gc_context(mock_gc),
         ):
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 write_reviews,
             )
 
@@ -293,10 +293,10 @@ class TestClearWipesCosts:
         )
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=_make_gc_context(mock_gc),
         ):
-            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+            from iter_codex.standard_names.graph_store.graph_catalog_reset import (
                 clear_sn_subsystem,
             )
 
@@ -331,7 +331,7 @@ class TestCostSchemaFields:
 
         schema_path = (
             pathlib.Path(__file__).resolve().parents[2]
-            / "imas_codex"
+            / "iter_codex"
             / "schemas"
             / "standard_name.yaml"
         )

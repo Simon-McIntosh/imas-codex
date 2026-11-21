@@ -45,7 +45,7 @@ def _use_production_embedding_model():
     """
     # Read production settings directly from pyproject.toml, bypassing
     # env vars that the top-level conftest sets for other tests.
-    from imas_codex.settings import _MODEL_DEFAULTS, _get_section
+    from iter_codex.settings import _MODEL_DEFAULTS, _get_section
 
     section = _get_section("embedding")
     prod_model = section.get("model", _MODEL_DEFAULTS["embedding"])
@@ -53,10 +53,10 @@ def _use_production_embedding_model():
 
     saved = {
         k: os.environ.get(k)
-        for k in ("IMAS_CODEX_EMBEDDING_MODEL", "IMAS_CODEX_EMBEDDING_LOCATION")
+        for k in ("ITER_CODEX_EMBEDDING_MODEL", "ITER_CODEX_EMBEDDING_LOCATION")
     }
-    os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = prod_model
-    os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = prod_location
+    os.environ["ITER_CODEX_EMBEDDING_MODEL"] = prod_model
+    os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = prod_location
     try:
         yield prod_model
     finally:
@@ -70,7 +70,7 @@ def _use_production_embedding_model():
 @pytest.fixture(scope="module")
 def gc():
     """Module-scoped GraphClient, skipped when graph is unavailable."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     try:
         client = GraphClient()
@@ -100,8 +100,8 @@ def gc():
 @pytest.fixture(scope="module")
 def encoder():
     """Shared encoder using the production model so vectors match stored ones."""
-    from imas_codex.embeddings.config import EncoderConfig
-    from imas_codex.embeddings.encoder import Encoder
+    from iter_codex.embeddings.config import EncoderConfig
+    from iter_codex.embeddings.encoder import Encoder
 
     try:
         return Encoder(EncoderConfig())
@@ -370,7 +370,7 @@ def test_mcp_search_standard_names_returns_coherent_results(gc):
     wildly unrelated quantities (e.g. ``magnetic_shear_at_magnetic_axis``)
     for an electron-density query.
     """
-    from imas_codex.llm.sn_tools import _search_standard_names
+    from iter_codex.llm.sn_tools import _search_standard_names
 
     report = _search_standard_names("electron density profile at pedestal", k=15, gc=gc)
     assert report, "Empty search report"

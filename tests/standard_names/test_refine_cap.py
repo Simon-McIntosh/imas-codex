@@ -42,12 +42,12 @@ def _get_pool_specs_kwargs(rotation_cap: int | None = None) -> dict[str, list]:
 
     with (
         patch.dict(
-            "imas_codex.standard_names.graph_ops.__dict__",
+            "iter_codex.standard_names.graph_ops.__dict__",
             dict(patches.items()),
         ),
     ):
         # Import after patching
-        from imas_codex.standard_names.loop import _build_pool_specs
+        from iter_codex.standard_names.loop import _build_pool_specs
 
         mgr = MagicMock()
         stop_event = asyncio.Event()
@@ -80,7 +80,7 @@ class TestRefineCapForwarding:
         # We verify by inspecting the factory's source.
         import inspect
 
-        from imas_codex.standard_names.loop import _build_pool_specs
+        from iter_codex.standard_names.loop import _build_pool_specs
 
         source = inspect.getsource(_build_pool_specs)
         # rotation_cap_kwargs must be spread into the refine_name claim adapter
@@ -92,7 +92,7 @@ class TestRefineCapForwarding:
         """Bucket C query should use chain_length, not regen_count."""
         import inspect
 
-        from imas_codex.standard_names.graph_store.graph_claim_scope import (
+        from iter_codex.standard_names.graph_store.graph_claim_scope import (
             query_pipeline_buckets,
         )
 
@@ -102,7 +102,7 @@ class TestRefineCapForwarding:
 
     def test_normalize_pool_idempotent(self):
         """_normalize_pool is idempotent for canonical pool names."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             _normalize_pool,
         )
 

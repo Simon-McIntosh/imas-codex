@@ -10,9 +10,9 @@ axis is one of its values, so ``electron_temperature`` and
 ``electron_temperature_at_magnetic_axis`` share a family.
 
 The fixture graph answers the three queries the resolver issues:
-:func:`~imas_codex.standard_names.families.fetch_pattern_family` (members),
-:func:`~imas_codex.standard_names.families.fetch_family_base` (base quantity)
-and :func:`~imas_codex.standard_names.families.count_pattern_families`.
+:func:`~iter_codex.standard_names.families.fetch_pattern_family` (members),
+:func:`~iter_codex.standard_names.families.fetch_family_base` (base quantity)
+and :func:`~iter_codex.standard_names.families.count_pattern_families`.
 """
 
 from __future__ import annotations
@@ -22,8 +22,8 @@ from typing import Any
 
 from imas_standard_names.grammar.vocab_loaders import load_locus_registry
 
-from imas_codex.standard_names.context import fetch_sibling_family
-from imas_codex.standard_names.families import (
+from iter_codex.standard_names.context import fetch_sibling_family
+from iter_codex.standard_names.families import (
     PATTERN_INVARIANT_SEGMENTS,
     PATTERN_SEGMENTS,
     PATTERN_VARIATION_AXES,
@@ -307,7 +307,7 @@ def test_members_query_compares_every_invariant_segment():
     query is generated from, so a segment dropped from the generated Cypher
     fails this test instead of moving both sides of the comparison together.
     """
-    from imas_codex.standard_names.families import _PATTERN_FAMILY_MEMBERS_QUERY
+    from iter_codex.standard_names.families import _PATTERN_FAMILY_MEMBERS_QUERY
 
     assert set(_compared_columns(_PATTERN_FAMILY_MEMBERS_QUERY)) == {
         "physical_base",

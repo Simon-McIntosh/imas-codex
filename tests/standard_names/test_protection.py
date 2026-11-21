@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.protection import PROTECTED_FIELDS, filter_protected
+from iter_codex.standard_names.protection import PROTECTED_FIELDS, filter_protected
 
 # ---------------------------------------------------------------------------
 # Helpers

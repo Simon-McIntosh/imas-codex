@@ -574,7 +574,7 @@ def normalise(member: dict, raw: dict) -> dict:
 
 async def judge_once(member: dict) -> dict:
     """One structured call; the caller retries while an answer cannot stand."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     result = await acall_llm_structured(
         model=MODEL,
@@ -596,7 +596,7 @@ async def judge_once(member: dict) -> dict:
 
 async def fill_once(member: dict, decided: dict) -> dict:
     """Ask for the name and the definition points a judgment left empty."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     user = (
         member["text"]
@@ -1269,7 +1269,7 @@ def check_receipt(data: dict, prefix: str) -> str:
 def document(title: str, body: str) -> str:
     return (
         "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
-        "<meta name=\"docs-project\" content=\"imas-codex\">\n"
+        "<meta name=\"docs-project\" content=\"iter-codex\">\n"
         "<meta name=\"reckon-type\" content=\"evidence-fragment\">\n"
         "<meta name=\"plan-slug\" content=\"sn-case-file-generation\">\n"
         "<meta name=\"node-id\" content=\"scfg-reference-set\">\n"

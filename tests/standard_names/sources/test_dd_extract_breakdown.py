@@ -89,7 +89,7 @@ def _make_mock_gc(
 
     ``extract_dd_candidates`` conditionally runs ``report_extract_breakdown()``
     as a diagnostic pre-flight when ``logger.isEnabledFor(logging.INFO)`` is
-    true — a global condition set by the ambient ``imas_codex`` root logger
+    true — a global condition set by the ambient ``iter_codex`` root logger
     level, not by anything in this test module. When another test module run
     earlier in the same process has raised that level (e.g. a CLI test that
     calls ``setup_logging()``), the breakdown queries fire as three *extra*
@@ -146,8 +146,8 @@ class TestExtractAdmitsStaticGeometry:
 
         mock_gc = _make_mock_gc(main_rows=[static_geo_row])
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
             batches = extract_dd_candidates(
                 domain_filter="equilibrium",
@@ -167,7 +167,7 @@ class TestExtractAdmitsStaticGeometry:
         """The Cypher WHERE clause must use node_category, not node_type."""
         import inspect
 
-        from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
         src = inspect.getsource(extract_dd_candidates)
         assert "node_category IN $sn_categories" in src, (
@@ -197,11 +197,11 @@ class TestExtractLeafInvariant:
         # the source string contains the guard clause.
         import inspect
 
-        from imas_codex.standard_names.sources.dd import _ENRICHED_QUERY
+        from iter_codex.standard_names.sources.dd import _ENRICHED_QUERY
 
         assert "STRUCTURE" in _ENRICHED_QUERY or "STRUCTURE" in inspect.getsource(
             __import__(
-                "imas_codex.standard_names.sources.dd",
+                "iter_codex.standard_names.sources.dd",
                 fromlist=["extract_dd_candidates"],
             ).extract_dd_candidates
         ), (
@@ -213,7 +213,7 @@ class TestExtractLeafInvariant:
         """The where_parts list must include the STRUCTURE/STRUCT_ARRAY guard."""
         import inspect
 
-        from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
         src = inspect.getsource(extract_dd_candidates)
         assert "STRUCTURE" in src, (
@@ -225,7 +225,7 @@ class TestExtractLeafInvariant:
 
     def test_breakdown_queries_exclude_structure(self):
         """Breakdown queries must also enforce the leaf invariant."""
-        from imas_codex.standard_names.sources.dd import (
+        from iter_codex.standard_names.sources.dd import (
             _BREAKDOWN_QUERY,
             _BREAKDOWN_SAMPLES_QUERY,
         )
@@ -248,7 +248,7 @@ class TestCoordinateCategoryAdmitted:
 
     def test_coordinate_in_sn_source_categories(self):
         """SN_SOURCE_CATEGORIES must include 'coordinate'."""
-        from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
+        from iter_codex.core.node_categories import SN_SOURCE_CATEGORIES
 
         assert "coordinate" in SN_SOURCE_CATEGORIES, (
             "SN_SOURCE_CATEGORIES must include 'coordinate'"
@@ -269,8 +269,8 @@ class TestCoordinateCategoryAdmitted:
 
         mock_gc = _make_mock_gc(main_rows=[coord_row])
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
             batches = extract_dd_candidates(limit=10, force=True)
 
@@ -290,7 +290,7 @@ class TestExtractRejectsMetadataCategory:
 
     def test_metadata_not_in_sn_source_categories(self):
         """'metadata' must be absent from SN_SOURCE_CATEGORIES."""
-        from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
+        from iter_codex.core.node_categories import SN_SOURCE_CATEGORIES
 
         assert "metadata" not in SN_SOURCE_CATEGORIES, (
             "SN_SOURCE_CATEGORIES must not include 'metadata'"
@@ -298,7 +298,7 @@ class TestExtractRejectsMetadataCategory:
 
     def test_sn_source_categories_contains_quantity_and_geometry(self):
         """SN_SOURCE_CATEGORIES must contain 'quantity' and 'geometry'."""
-        from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
+        from iter_codex.core.node_categories import SN_SOURCE_CATEGORIES
 
         assert "quantity" in SN_SOURCE_CATEGORIES
         assert "geometry" in SN_SOURCE_CATEGORIES
@@ -312,7 +312,7 @@ class TestExtractRejectsMetadataCategory:
         """
         import inspect
 
-        from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
         src = inspect.getsource(extract_dd_candidates)
         # Parameter must be used
@@ -343,8 +343,8 @@ class TestCandidateSurfacesNodeType:
 
             mock_gc = _make_mock_gc(main_rows=[row])
 
-            with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-                from imas_codex.standard_names.sources.dd import extract_dd_candidates
+            with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+                from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
                 batches = extract_dd_candidates(limit=10, force=True)
 
@@ -355,7 +355,7 @@ class TestCandidateSurfacesNodeType:
 
     def test_node_type_returned_in_enriched_query(self):
         """_ENRICHED_QUERY must include node_type in its RETURN clause."""
-        from imas_codex.standard_names.sources.dd import _ENRICHED_QUERY
+        from iter_codex.standard_names.sources.dd import _ENRICHED_QUERY
 
         assert "n.node_type AS node_type" in _ENRICHED_QUERY, (
             "_ENRICHED_QUERY must return n.node_type AS node_type"
@@ -391,8 +391,8 @@ class TestCandidateSurfacesErrorLinks:
 
         mock_gc = _make_mock_gc(main_rows=[row])
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
             batches = extract_dd_candidates(limit=10, force=True)
 
@@ -420,8 +420,8 @@ class TestCandidateSurfacesErrorLinks:
 
         mock_gc = _make_mock_gc(main_rows=[row])
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
             batches = extract_dd_candidates(limit=10, force=True)
 
@@ -433,7 +433,7 @@ class TestCandidateSurfacesErrorLinks:
 
     def test_enriched_query_returns_error_node_ids(self):
         """_ENRICHED_QUERY must include error_node_ids in its RETURN."""
-        from imas_codex.standard_names.sources.dd import _ENRICHED_QUERY
+        from iter_codex.standard_names.sources.dd import _ENRICHED_QUERY
 
         assert "error_node_ids" in _ENRICHED_QUERY, (
             "_ENRICHED_QUERY must surface error_node_ids via COLLECT or pattern comprehension"
@@ -517,8 +517,8 @@ class TestReportBreakdownGroupsByTypeCategory:
             breakdown_error_rows=self._MOCK_ERRORS,
         )
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import report_extract_breakdown
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import report_extract_breakdown
 
             result = report_extract_breakdown()
 
@@ -538,8 +538,8 @@ class TestReportBreakdownGroupsByTypeCategory:
             breakdown_error_rows=self._MOCK_ERRORS,
         )
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import report_extract_breakdown
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import report_extract_breakdown
 
             result = report_extract_breakdown()
 
@@ -554,8 +554,8 @@ class TestReportBreakdownGroupsByTypeCategory:
             breakdown_error_rows=self._MOCK_ERRORS,
         )
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import report_extract_breakdown
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import report_extract_breakdown
 
             result = report_extract_breakdown()
 
@@ -573,8 +573,8 @@ class TestReportBreakdownGroupsByTypeCategory:
             breakdown_error_rows=self._MOCK_ERRORS,
         )
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import report_extract_breakdown
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import report_extract_breakdown
 
             result = report_extract_breakdown()
 
@@ -591,8 +591,8 @@ class TestReportBreakdownGroupsByTypeCategory:
             breakdown_error_rows=self._MOCK_ERRORS,
         )
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import report_extract_breakdown
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import report_extract_breakdown
 
             result = report_extract_breakdown()
 
@@ -613,8 +613,8 @@ class TestReportBreakdownGroupsByTypeCategory:
             breakdown_error_rows=self._MOCK_ERRORS,
         )
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import report_extract_breakdown
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import report_extract_breakdown
 
             result = report_extract_breakdown()
 
@@ -628,8 +628,8 @@ class TestReportBreakdownGroupsByTypeCategory:
             breakdown_error_rows=self._MOCK_ERRORS,
         )
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import report_extract_breakdown
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import report_extract_breakdown
 
             result = report_extract_breakdown()
 
@@ -650,8 +650,8 @@ class TestReportBreakdownGroupsByTypeCategory:
             breakdown_error_rows=self._MOCK_ERRORS,
         )
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import report_extract_breakdown
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import report_extract_breakdown
 
             result = report_extract_breakdown()
 
@@ -665,8 +665,8 @@ class TestReportBreakdownGroupsByTypeCategory:
             breakdown_error_rows=self._MOCK_ERRORS,
         )
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import report_extract_breakdown
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import report_extract_breakdown
 
             result = report_extract_breakdown()
 
@@ -680,8 +680,8 @@ class TestReportBreakdownGroupsByTypeCategory:
         """If the graph returns no rows, total must be 0."""
         mock_gc = _make_mock_gc()
 
-        with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
-            from imas_codex.standard_names.sources.dd import report_extract_breakdown
+        with patch("iter_codex.graph.client.GraphClient", return_value=mock_gc):
+            from iter_codex.standard_names.sources.dd import report_extract_breakdown
 
             result = report_extract_breakdown()
 

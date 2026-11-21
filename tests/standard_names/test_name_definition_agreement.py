@@ -18,13 +18,13 @@ from pathlib import Path
 
 import yaml
 
-PACKAGE = Path(__file__).resolve().parents[2] / "imas_codex"
+PACKAGE = Path(__file__).resolve().parents[2] / "iter_codex"
 SYSTEM_PROMPT = PACKAGE / "llm" / "prompts" / "sn" / "review_name_definition_system.md"
 CHECK_ID = "definition_qualifier_absent_from_name"
 
 
 def _classes() -> tuple[str, ...]:
-    from imas_codex.standard_names.review.name_definition_seat import QUALIFIER_KINDS
+    from iter_codex.standard_names.review.name_definition_seat import QUALIFIER_KINDS
 
     return QUALIFIER_KINDS
 
@@ -93,7 +93,7 @@ def test_the_answer_classes_are_written_once() -> None:
         f"so the copies can disagree: {sequences}"
     )
     path, _line, values = sequences[0]
-    assert path == "imas_codex/standard_names/review/name_definition_seat.py", path
+    assert path == "iter_codex/standard_names/review/name_definition_seat.py", path
     assert values == list(_classes())
     assert _class_sequences_in_yaml() == []
 
@@ -113,7 +113,7 @@ def test_the_review_question_offers_the_same_classes() -> None:
     renamed in the seat and not in the prompt reddens here as well as in
     :func:`test_the_prompt_names_the_classes_in_order`.
     """
-    from imas_codex.standard_names.review.checks import load_review_checks
+    from iter_codex.standard_names.review.checks import load_review_checks
 
     checks, _ = load_review_checks()
     [check] = [entry for entry in checks if entry.id == CHECK_ID]
@@ -134,7 +134,7 @@ def test_a_taxonomy_written_class_list_is_refused() -> None:
     """A second list of classes in the taxonomy is refused, not preferred."""
     import pytest
 
-    from imas_codex.standard_names.review.checks import _inject_name_definition_options
+    from iter_codex.standard_names.review.checks import _inject_name_definition_options
 
     with pytest.raises(ValueError, match="carries its own options"):
         _inject_name_definition_options(
@@ -178,7 +178,7 @@ def test_the_question_has_no_second_judge() -> None:
 
 
 def test_a_flagged_verdict_raises_a_hold_naming_the_class() -> None:
-    from imas_codex.standard_names.review.name_definition_seat import (
+    from iter_codex.standard_names.review.name_definition_seat import (
         name_definition_note,
     )
 
@@ -197,7 +197,7 @@ def test_a_flagged_verdict_raises_a_hold_naming_the_class() -> None:
 
 
 def test_a_passing_verdict_raises_no_hold() -> None:
-    from imas_codex.standard_names.review.name_definition_seat import (
+    from iter_codex.standard_names.review.name_definition_seat import (
         name_definition_note,
     )
 
@@ -217,7 +217,7 @@ def test_a_passing_verdict_raises_no_hold() -> None:
 def test_an_unanswered_verdict_holds_rather_than_accepting() -> None:
     """A seat call that returned nothing must not read as an acceptance."""
 
-    from imas_codex.standard_names.review.name_definition_seat import (
+    from iter_codex.standard_names.review.name_definition_seat import (
         name_definition_note,
     )
 
@@ -232,10 +232,10 @@ def test_an_unanswered_verdict_holds_rather_than_accepting() -> None:
 def test_a_flagged_verdict_is_persisted_as_a_review_hold() -> None:
     """A flagged name is not accepted by review: the hold is what stops it."""
 
-    from imas_codex.standard_names.review.name_definition_seat import (
+    from iter_codex.standard_names.review.name_definition_seat import (
         name_definition_note,
     )
-    from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_review_docs import (
         review_holds_from_checks,
     )
 
@@ -258,10 +258,10 @@ def test_a_flagged_verdict_is_persisted_as_a_review_hold() -> None:
 
 
 def test_a_document_the_seat_passes_carries_no_hold() -> None:
-    from imas_codex.standard_names.review.name_definition_seat import (
+    from iter_codex.standard_names.review.name_definition_seat import (
         name_definition_note,
     )
-    from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_review_docs import (
         review_holds_from_checks,
     )
 

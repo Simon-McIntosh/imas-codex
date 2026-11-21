@@ -67,7 +67,7 @@ ids = assembler.assemble("p68613")
 
 ### YAML Fallback
 
-When no graph recipe exists, loads a YAML recipe from `imas_codex/ids/recipes/`.
+When no graph recipe exists, loads a YAML recipe from `iter_codex/ids/recipes/`.
 Used for prototyping or facilities without graph data.
 
 ## Structure Types
@@ -187,13 +187,13 @@ with the DD unit alias registry. Common patterns:
 
 ```bash
 # Seed all mappings + recipe for an IDS
-uv run imas-codex imas seed jet pf_active --dd-version 4.1.1
+uv run iter-codex imas seed jet pf_active --dd-version 4.1.1
 
 # List available recipes (checks graph first, falls back to YAML)
-uv run imas-codex imas list
+uv run iter-codex imas list
 
 # Assemble and export
-uv run imas-codex imas export jet pf_active p68613 -o output.json
+uv run iter-codex imas export jet pf_active p68613 -o output.json
 ```
 
 ## Design Decisions
@@ -221,7 +221,7 @@ uv run imas-codex imas export jet pf_active p68613 -o output.json
 
 | Module | Purpose |
 |--------|---------|
-| `imas_codex/ids/graph_ops.py` | Graph queries, mapping specs, seed function |
-| `imas_codex/ids/assembler.py` | Dual-mode assembly engine |
-| `imas_codex/ids/transforms.py` | Transform execution, COCOS, units, `set_nested()` |
-| `imas_codex/cli/ids.py` | CLI commands (`seed`, `list`, `export`, `summary`) |
+| `iter_codex/ids/graph_ops.py` | Graph queries, mapping specs, seed function |
+| `iter_codex/ids/assembler.py` | Dual-mode assembly engine |
+| `iter_codex/ids/transforms.py` | Transform execution, COCOS, units, `set_nested()` |
+| `iter_codex/cli/ids.py` | CLI commands (`seed`, `list`, `export`, `summary`) |

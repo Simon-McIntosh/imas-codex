@@ -1,6 +1,6 @@
 """Tests for the named review check taxonomy.
 
-The taxonomy is data (``imas_codex/llm/prompts/sn/review_checks.yaml``); the
+The taxonomy is data (``iter_codex/llm/prompts/sn/review_checks.yaml``); the
 loader validates its shape. These tests hold the three invariants the taxonomy
 is accepted against: every check is decided exactly once (a Jev question or an
 audit finding class, never both or neither), every check's evidence fields are
@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.review.checks import (
+from iter_codex.standard_names.review.checks import (
     AUDIT_FINDING_CLASSES,
     DOCS_DIMENSIONS,
     NAME_DIMENSIONS,

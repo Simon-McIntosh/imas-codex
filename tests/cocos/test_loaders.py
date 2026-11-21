@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.cocos import EquilibriumData, load_from_eqdsk
+from iter_codex.cocos import EquilibriumData, load_from_eqdsk
 
 
 class TestEquilibriumData:

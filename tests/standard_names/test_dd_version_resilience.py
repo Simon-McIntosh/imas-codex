@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
-from imas_codex.standard_names.dd_resolutions import (
+from iter_codex.graph.models import DDResolutionField, DDResolutionValueKind
+from iter_codex.standard_names.dd_resolutions import (
     DDResolutionManifest,
     DDResolutionRecord,
     DDResolutionValue,

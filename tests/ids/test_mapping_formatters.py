@@ -4,14 +4,14 @@ These are pure functions that format data for prompt injection.
 No Neo4j required.
 """
 
-from imas_codex.ids.mapping import (
+from iter_codex.ids.mapping import (
     _format_coordinate_context,
     _format_cross_facility_mappings,
     _format_identifier_schemas,
     _format_section_clusters,
     _format_version_context,
 )
-from imas_codex.models.error_models import ToolError
+from iter_codex.models.error_models import ToolError
 
 
 class TestFormatSectionClusters:
@@ -77,7 +77,7 @@ class TestFormatIdentifierSchemas:
 
     def test_object_schema(self):
         """Schema as Pydantic-like object with attributes."""
-        from imas_codex.core.data_model import (
+        from iter_codex.core.data_model import (
             IdentifierOption,
             IdentifierSchema,
         )

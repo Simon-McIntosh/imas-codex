@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 import yaml
 
-from imas_codex.standard_names.dd_gaps import (
+from iter_codex.standard_names.dd_gaps import (
     DDGapTransitionConflict,
     _evidence_token,
     reconcile_dd_gaps,
@@ -19,7 +19,7 @@ _ANY_EVIDENCE_TOKEN = "dd-gap-evidence:validation-only"
 
 
 def test_schema_separates_identity_history_from_lifecycle_history() -> None:
-    schema_path = Path(__file__).parents[2] / "imas_codex/schemas/standard_name.yaml"
+    schema_path = Path(__file__).parents[2] / "iter_codex/schemas/standard_name.yaml"
     schema = yaml.safe_load(schema_path.read_text())
     identity = schema["classes"]["DDGapIdentityChange"]["attributes"]
     gap = schema["classes"]["DDGap"]["attributes"]

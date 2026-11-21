@@ -18,7 +18,7 @@ from collections.abc import Callable
 
 import pytest
 
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 _PARENT_NAME = "electron_number_density"
 _SIBLING_NAME = "electron_number_density_at_pedestal_top"

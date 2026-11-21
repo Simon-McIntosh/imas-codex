@@ -24,11 +24,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.edit import EditPlan, InlineReviewResult
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.edit import EditPlan, InlineReviewResult
 
-_RUN_SN_POOLS = "imas_codex.standard_names.loop.run_sn_pools"
-_EDIT = "imas_codex.standard_names.edit"
+_RUN_SN_POOLS = "iter_codex.standard_names.loop.run_sn_pools"
+_EDIT = "iter_codex.standard_names.edit"
 
 
 def _rename_plan() -> EditPlan:
@@ -75,7 +75,7 @@ def test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance
         patch(f"{_EDIT}.apply_edit", return_value=plan),
         patch(f"{_EDIT}._collect_inline_outcomes", return_value=_landed_successor()),
         patch(f"{_EDIT}.GraphClient", MagicMock()),
-        patch("imas_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.cli.sn._require_embed_ready"),
         patch(_RUN_SN_POOLS, pools),
     ):
         result = CliRunner().invoke(
@@ -101,7 +101,7 @@ def test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance
 
 def test_scoped_pipeline_pairs_the_bypass_with_the_scope_it_was_given():
     """The shared frame pairs the bypass with its scope, so both callers inherit it."""
-    from imas_codex.standard_names.edit import _run_scoped_pipeline
+    from iter_codex.standard_names.edit import _run_scoped_pipeline
 
     pools = AsyncMock(return_value=_summary())
     with patch(_RUN_SN_POOLS, pools):

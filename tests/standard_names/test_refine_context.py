@@ -25,9 +25,9 @@ import pytest
 # Constants
 # ---------------------------------------------------------------------------
 
-_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_GC_PATH = "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
 # claim_refine_name_batch does a local import so patch the source symbol
-_CHAIN_HIST_PATH = "imas_codex.standard_names.chain_history.name_chain_history"
+_CHAIN_HIST_PATH = "iter_codex.standard_names.chain_history.name_chain_history"
 
 # Fixture comments — chosen to be distinctive search strings
 _A_PER_DIM: dict[str, str] = {"grammar": "missing subject"}
@@ -166,7 +166,7 @@ class TestClaimRefineChainHistory:
 
     def test_chain_history_is_populated(self):
         """Returned item carries chain_history matching name_chain_history output."""
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -189,7 +189,7 @@ class TestClaimRefineChainHistory:
 
     def test_chain_history_entry_has_per_dim_comments(self):
         """Ancestor entry in chain_history exposes reviewer_comments_per_dim dict."""
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -211,7 +211,7 @@ class TestClaimRefineChainHistory:
 
     def test_chain_history_entry_has_reviewer_score(self):
         """Ancestor entry in chain_history exposes a numeric reviewer_score."""
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -241,7 +241,7 @@ class TestClaimRefineChainHistory:
         Expected: prior_reviews = [A's review, B's review] (oldest first).
         Actual:   key is absent; only chain_history (ancestors) is returned.
         """
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -278,7 +278,7 @@ class TestRefinePromptRendering:
 
     def test_prompt_contains_ancestor_per_dim_comment(self):
         """Rendered prompt includes ancestor A's per-dim comment verbatim."""
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         chain_history = [_ancestor_a_chain_entry()]
         ctx = _make_prompt_context(chain_history)
@@ -292,7 +292,7 @@ class TestRefinePromptRendering:
 
     def test_prompt_contains_ancestor_reviewer_score(self):
         """Rendered prompt includes ancestor A's numeric reviewer score."""
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         chain_history = [_ancestor_a_chain_entry()]
         ctx = _make_prompt_context(chain_history)
@@ -305,7 +305,7 @@ class TestRefinePromptRendering:
 
     def test_prompt_contains_ancestor_name(self):
         """Rendered prompt names the specific prior attempt that was rejected."""
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         chain_history = [_ancestor_a_chain_entry()]
         ctx = _make_prompt_context(chain_history)
@@ -316,7 +316,7 @@ class TestRefinePromptRendering:
 
     def test_prompt_without_chain_history_shows_fallback(self):
         """Empty chain_history renders the 'no prior history' fallback message."""
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         ctx = _make_prompt_context(chain_history=[])
 
@@ -338,7 +338,7 @@ class TestRefinePromptRendering:
         Actual:     only chain_history (A's data) is rendered; B's per-dim
                     comment is silently dropped.
         """
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         chain_history = [_ancestor_a_chain_entry()]
         ctx = _make_prompt_context(chain_history)

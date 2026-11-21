@@ -1,6 +1,6 @@
 """Tests for node_categories — centralized category constants."""
 
-from imas_codex.core.node_categories import (
+from iter_codex.core.node_categories import (
     CLUSTERABLE_CATEGORIES,
     EMBEDDABLE_CATEGORIES,
     ENRICHABLE_CATEGORIES,

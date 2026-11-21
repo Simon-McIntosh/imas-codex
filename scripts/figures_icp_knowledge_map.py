@@ -61,7 +61,7 @@ from matplotlib.path import Path as MplPath
 from matplotlib.text import Text
 from matplotlib.transforms import Bbox
 
-from imas_codex.plotting.style import CANVAS, save_figure, use_style
+from iter_codex.plotting.style import CANVAS, save_figure, use_style
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "scripts/figure_data"

@@ -9,7 +9,7 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from imas_codex.plotting import plot
+from iter_codex.plotting import plot
 
 
 def main():

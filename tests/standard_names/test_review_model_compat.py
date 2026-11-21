@@ -20,16 +20,16 @@ import pytest
 
 def _make_build_kwargs(model: str, temperature: float | None) -> dict:
     """Call _build_kwargs with minimal mocks and return the resulting kwargs."""
-    from imas_codex.discovery.base.llm import _build_kwargs
+    from iter_codex.discovery.base.llm import _build_kwargs
 
     messages = [{"role": "user", "content": "hello"}]
     with (
         patch(
-            "imas_codex.discovery.base.llm.get_api_key_for_service",
+            "iter_codex.discovery.base.llm.get_api_key_for_service",
             return_value="sk-test",
         ),
         patch(
-            "imas_codex.discovery.base.llm._supports_cache_control",
+            "iter_codex.discovery.base.llm._supports_cache_control",
             return_value=False,
         ),
     ):
@@ -100,7 +100,7 @@ _PROSE_WRAPPED_SAMPLES = [
 @pytest.mark.parametrize("raw_content", _PROSE_WRAPPED_SAMPLES)
 def test_sanitize_content_extracts_json(raw_content: str) -> None:
     """_sanitize_content must extract valid JSON regardless of prose wrapping."""
-    from imas_codex.discovery.base.llm import _sanitize_content
+    from iter_codex.discovery.base.llm import _sanitize_content
 
     sanitized = _sanitize_content(raw_content)
     parsed = json.loads(sanitized)
@@ -110,7 +110,7 @@ def test_sanitize_content_extracts_json(raw_content: str) -> None:
 
 def test_sanitize_content_large_review_batch() -> None:
     """_sanitize_content handles a full ReviewBatch-shaped JSON wrapped in prose."""
-    from imas_codex.discovery.base.llm import _sanitize_content
+    from iter_codex.discovery.base.llm import _sanitize_content
 
     batch = {
         "reviews": [
@@ -133,8 +133,8 @@ def test_sanitize_content_large_review_batch() -> None:
 
 def test_name_only_wire_schema_has_no_open_ended_revised_fields() -> None:
     """The provider-facing name-review schema stays closed and score-canonical."""
-    from imas_codex.discovery.base.llm import _to_json_schema_format
-    from imas_codex.standard_names.models import (
+    from iter_codex.discovery.base.llm import _to_json_schema_format
+    from iter_codex.standard_names.models import (
         StandardNameQualityReviewNameOnlyBatch,
     )
 
@@ -196,8 +196,8 @@ async def test_review_single_batch_no_explicit_temperature() -> None:
     'temperature' is not in the call kwargs (so GPT-5.4 gets the provider
     default rather than 0.0).
     """
-    from imas_codex.discovery.base.llm import LLMResult
-    from imas_codex.standard_names.models import (
+    from iter_codex.discovery.base.llm import LLMResult
+    from iter_codex.standard_names.models import (
         StandardNameQualityReviewNameOnly,
         StandardNameQualityReviewNameOnlyBatch,
         StandardNameQualityScoreNameOnly,
@@ -222,15 +222,15 @@ async def test_review_single_batch_no_explicit_temperature() -> None:
 
     with (
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_mock_acall,
         ),
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             return_value="mock prompt",
         ),
     ):
-        from imas_codex.standard_names.review.pipeline import _review_single_batch
+        from iter_codex.standard_names.review.pipeline import _review_single_batch
 
         fake_item = {
             "id": "plasma_current",

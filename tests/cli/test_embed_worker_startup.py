@@ -3,7 +3,7 @@
 import sys
 import types
 
-from imas_codex.cli import embed
+from iter_codex.cli import embed
 
 
 def test_multi_worker_server_waits_for_slow_model_loads(monkeypatch):
@@ -12,7 +12,7 @@ def test_multi_worker_server_waits_for_slow_model_loads(monkeypatch):
     fake.run = lambda *args, **kwargs: calls.append(kwargs)
     monkeypatch.setitem(sys.modules, "uvicorn", fake)
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
-    monkeypatch.setenv("IMAS_CODEX_GPU_POOL", "")
+    monkeypatch.setenv("ITER_CODEX_GPU_POOL", "")
 
     embed._start_foreground(
         host="127.0.0.1",

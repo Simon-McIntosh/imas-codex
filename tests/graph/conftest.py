@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.graph.schema import GraphSchema, get_schema
+from iter_codex.graph.schema import GraphSchema, get_schema
 
 # Apply graph marker to all tests in this directory
 pytestmark = pytest.mark.graph
@@ -31,7 +31,7 @@ _GRAPH_PACKAGE = Path(__file__).resolve().parent
 
 def _get_schemas_dir() -> Path:
     """Get the schemas directory."""
-    return Path(__file__).parent.parent.parent / "imas_codex" / "schemas"
+    return Path(__file__).parent.parent.parent / "iter_codex" / "schemas"
 
 
 def _get_combined_embeddable_labels() -> list[str]:
@@ -88,7 +88,7 @@ def graph_client():
     overwhelms SSH tunnels.  Tests needing constraints should use the
     ``graph_with_schema`` fixture instead.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     try:
         client = GraphClient()
@@ -108,7 +108,7 @@ def graph_with_schema(graph_client):
     does many DDL round-trips.  Only used by constraint tests.
     Verifies connectivity after the DDL burst in case the tunnel dropped.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     try:
         graph_client.initialize_schema()
@@ -193,7 +193,7 @@ def graph_indexes(graph_client) -> list[dict]:
 @pytest.fixture(scope="session")
 def embedding_dimension() -> int:
     """Configured embedding dimension from pyproject.toml."""
-    from imas_codex.settings import get_embedding_dimension
+    from iter_codex.settings import get_embedding_dimension
 
     return get_embedding_dimension()
 
@@ -221,9 +221,9 @@ _DISPOSABLE_FIXTURES = frozenset(
 _DISPOSABLE_ENV_KEYS = (
     "NEO4J_URI",
     "NEO4J_PASSWORD",
-    "IMAS_CODEX_TEST_NEO4J_URI",
-    "IMAS_CODEX_TEST_NEO4J_EPHEMERAL",
-    "IMAS_CODEX_TEST_NEO4J_PASSWORD",
+    "ITER_CODEX_TEST_NEO4J_URI",
+    "ITER_CODEX_TEST_NEO4J_EPHEMERAL",
+    "ITER_CODEX_TEST_NEO4J_PASSWORD",
 )
 
 
@@ -239,12 +239,12 @@ def _disposable_neo4j_address() -> Iterator[str]:
         _start_empty_neo4j,
     )
 
-    configured = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    configured = os.environ.get("ITER_CODEX_TEST_NEO4J_URI")
     if configured:
-        if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        if os.environ.get("ITER_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
             pytest.fail(
-                "a disposable graph is required, but IMAS_CODEX_TEST_NEO4J_URI "
-                "is set without IMAS_CODEX_TEST_NEO4J_EPHEMERAL=1"
+                "a disposable graph is required, but ITER_CODEX_TEST_NEO4J_URI "
+                "is set without ITER_CODEX_TEST_NEO4J_EPHEMERAL=1"
             )
         yield configured
         return
@@ -257,7 +257,7 @@ def _disposable_neo4j_address() -> Iterator[str]:
     try:
         yield f"bolt://127.0.0.1:{bolt_port}"
     finally:
-        from imas_codex.graph import temp_neo4j
+        from iter_codex.graph import temp_neo4j
 
         try:
             temp_neo4j.stop_temp_neo4j(process)
@@ -274,7 +274,7 @@ def disposable_graph(_disposable_neo4j_address, monkeypatch) -> Iterator[str]:
     resolves the project address with ``NEO4J_URI`` withheld, so it compares the
     disposable endpoint against production rather than against itself.
     """
-    from imas_codex.graph.profiles import resolve_neo4j
+    from iter_codex.graph.profiles import resolve_neo4j
     from tests.standard_names.conftest import _wipe, refuse_project_graph
 
     uri = _disposable_neo4j_address
@@ -282,8 +282,8 @@ def disposable_graph(_disposable_neo4j_address, monkeypatch) -> Iterator[str]:
         monkeypatch.delenv(key, raising=False)
     monkeypatch.setenv("NEO4J_URI", uri)
     monkeypatch.setenv("NEO4J_PASSWORD", "")
-    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", uri)
-    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_EPHEMERAL", "1")
+    monkeypatch.setenv("ITER_CODEX_TEST_NEO4J_URI", uri)
+    monkeypatch.setenv("ITER_CODEX_TEST_NEO4J_EPHEMERAL", "1")
 
     refuse_project_graph(uri)
 

@@ -54,7 +54,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.llm.search_tools import _ROLE_RERANK_QUESTION
+from iter_codex.llm.search_tools import _ROLE_RERANK_QUESTION
 
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "signal_search_questions.json"
 
@@ -119,8 +119,8 @@ def _use_production_embeddings(monkeypatch):
     index and every vector arm fails before it ranks anything. Deleting the two
     overrides lets ``EncoderConfig`` resolve the production backend.
     """
-    monkeypatch.delenv("IMAS_CODEX_EMBEDDING_LOCATION", raising=False)
-    monkeypatch.delenv("IMAS_CODEX_EMBEDDING_MODEL", raising=False)
+    monkeypatch.delenv("ITER_CODEX_EMBEDDING_LOCATION", raising=False)
+    monkeypatch.delenv("ITER_CODEX_EMBEDDING_MODEL", raising=False)
 
 
 @dataclass
@@ -261,20 +261,20 @@ def require_labelled_pool(arm: str, question: Question, pool_ids: list[str]) -> 
 
 
 def _embed(gc, encoder, text: str) -> list[float]:
-    from imas_codex.llm.search_tools import _embed as embed
+    from iter_codex.llm.search_tools import _embed as embed
 
     return embed(encoder, text)
 
 
 def _rrf_fuse(streams):
-    from imas_codex.standard_names.search import rrf_fuse
+    from iter_codex.standard_names.search import rrf_fuse
 
     return rrf_fuse(streams)
 
 
 def _fusion_streams(gc, embedding, question: Question):
     """The vector and full-text streams the prototype fused (100 and 50)."""
-    from imas_codex.llm.search_tools import _text_search_signals, _vector_search_signals
+    from iter_codex.llm.search_tools import _text_search_signals, _vector_search_signals
 
     facility = json_fixture["eligibility"]["facility"]
     vec_ids, _ = _vector_search_signals(
@@ -320,7 +320,7 @@ def _additive_rank(
 
 def _additive_streams(gc, embedding, question: Question, k: int):
     """The vector and full-text streams the frozen additive rule consumes."""
-    from imas_codex.llm.search_tools import _text_search_signals, _vector_search_signals
+    from iter_codex.llm.search_tools import _text_search_signals, _vector_search_signals
 
     facility = json_fixture["eligibility"]["facility"]
     vector_ids, vector_scores = _vector_search_signals(
@@ -339,7 +339,7 @@ def eligible_signal_ids(gc=None) -> set[str]:
     enriched before the cutover is dropped from the ranking before the cut, and
     never reaches the point where it would need a label.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = gc if gc is not None else GraphClient()
     rows = gc.query(
@@ -366,7 +366,7 @@ def arm_ranking(question: Question, ctx) -> list[str]:
     before the cut: a signal the fixture's predicate excludes is dropped rather
     than scored, and it makes room for the next eligible candidate.
     """
-    from imas_codex.llm.search_tools import _rank_signals
+    from iter_codex.llm.search_tools import _rank_signals
 
     facility = json_fixture["eligibility"]["facility"]
     arm = ctx.arm
@@ -418,14 +418,14 @@ def _rerank_arm(arm: str, question: Question, pool: list[str], ctx) -> list[str]
     ``_RERANK_QUESTION`` levels, so the two are measured beside each other on
     the same pool and query.
     """
-    from imas_codex.discovery.base.judgment import rerank_pool
-    from imas_codex.llm.search_tools import (
+    from iter_codex.discovery.base.judgment import rerank_pool
+    from iter_codex.llm.search_tools import (
         _RERANK_QUESTION,
         _RERANK_SERVICE,
         _run_batch,
         _signal_rerank_state,
     )
-    from imas_codex.settings import get_model
+    from iter_codex.settings import get_model
 
     candidates = _signal_candidates(ctx.gc, pool)
     if arm == "rrf_rerank_role":
@@ -614,7 +614,7 @@ def _as_utc(value: object) -> datetime | None:
 
 def _label_enrichment(ids: list[str]) -> dict[str, object]:
     """``enriched_at`` per id, or None where the signal is absent or unset."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     rows = GraphClient().query(
         "UNWIND $ids AS sid OPTIONAL MATCH (s:FacilitySignal {id: sid}) "
@@ -804,7 +804,7 @@ def test_the_cutover_admits_the_reprocessed_population_and_refuses_earlier() -> 
     the cut, so a candidate from outside the reprocessed population never
     consumes a ranked slot.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = GraphClient()
     declared = _as_utc(json_fixture["eligibility"]["enriched_at_cutover"])
@@ -839,9 +839,9 @@ def test_the_cutover_admits_the_reprocessed_population_and_refuses_earlier() -> 
 def _open_context(
     arm: str, spend_jev: bool = False, gc=None, encoder=None, eligible=None
 ) -> ArmContext:
-    from imas_codex.embeddings import Encoder
-    from imas_codex.embeddings.config import EncoderConfig
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.embeddings import Encoder
+    from iter_codex.embeddings.config import EncoderConfig
+    from iter_codex.graph.client import GraphClient
 
     if gc is None:
         gc = GraphClient()

@@ -27,7 +27,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import _write_manifest
+from iter_codex.standard_names.export import _write_manifest
 
 
 @pytest.fixture(autouse=True)
@@ -108,7 +108,7 @@ class TestOrderingUnaryPrefix:
     """Unary prefix: base first, then alpha-sorted wrappers."""
 
     def test_unary_prefix_order(self) -> None:
-        from imas_codex.standard_names.catalog_ordering import (
+        from iter_codex.standard_names.catalog_ordering import (
             order_entries_by_hierarchy,
         )
 
@@ -141,7 +141,7 @@ class TestOrderingProjection:
     """Projection: base first, then alpha-sorted components."""
 
     def test_projection_order(self) -> None:
-        from imas_codex.standard_names.catalog_ordering import (
+        from iter_codex.standard_names.catalog_ordering import (
             order_entries_by_hierarchy,
         )
 
@@ -176,7 +176,7 @@ class TestOrderingBinary:
     """Binary: both args as clean roots, ratio last."""
 
     def test_binary_order(self) -> None:
-        from imas_codex.standard_names.catalog_ordering import (
+        from iter_codex.standard_names.catalog_ordering import (
             order_entries_by_hierarchy,
         )
 
@@ -210,7 +210,7 @@ class TestOrderingUncertainty:
     """Uncertainty: base first, then alpha-sorted error siblings."""
 
     def test_uncertainty_order(self) -> None:
-        from imas_codex.standard_names.catalog_ordering import (
+        from iter_codex.standard_names.catalog_ordering import (
             order_entries_by_hierarchy,
         )
 
@@ -246,7 +246,7 @@ class TestOrderingMixed:
     """Mixed: base first, then alpha-sorted variants + components."""
 
     def test_mixed_order(self) -> None:
-        from imas_codex.standard_names.catalog_ordering import (
+        from iter_codex.standard_names.catalog_ordering import (
             order_entries_by_hierarchy,
         )
 
@@ -285,7 +285,7 @@ class TestOrderingOrphan:
     """Orphan: cross-domain wrapper lands after all clean-roots."""
 
     def test_orphan_after_clean_roots(self) -> None:
-        from imas_codex.standard_names.catalog_ordering import (
+        from iter_codex.standard_names.catalog_ordering import (
             order_entries_by_hierarchy,
         )
 
@@ -316,7 +316,7 @@ class TestStabilityClusterReassignment:
     """Ordering is stable when primary_cluster_id changes."""
 
     def test_cluster_reassignment_no_effect(self) -> None:
-        from imas_codex.standard_names.catalog_ordering import (
+        from iter_codex.standard_names.catalog_ordering import (
             order_entries_by_hierarchy,
         )
 
@@ -351,7 +351,7 @@ class TestStabilityPropertyPermutation:
     """Ordering is stable regardless of dict key order."""
 
     def test_property_permutation_no_effect(self) -> None:
-        from imas_codex.standard_names.catalog_ordering import (
+        from iter_codex.standard_names.catalog_ordering import (
             order_entries_by_hierarchy,
         )
 
@@ -387,7 +387,7 @@ class TestRoundTripByteStability:
     """Export entries, parse, re-emit → byte-identical."""
 
     def test_byte_stable_round_trip(self, tmp_path: Path) -> None:
-        from imas_codex.standard_names.export import _write_domain_yaml
+        from iter_codex.standard_names.export import _write_domain_yaml
 
         entries = [
             {
@@ -435,11 +435,11 @@ class TestRoundTripIdempotence:
     """Export → parse → re-emit yields identical entries."""
 
     def test_idempotent_re_emit(self, tmp_path: Path) -> None:
-        from imas_codex.standard_names.canonical import (
+        from iter_codex.standard_names.canonical import (
             canonicalise_entry,
             reorder_entry_dict,
         )
-        from imas_codex.standard_names.export import _write_domain_yaml
+        from iter_codex.standard_names.export import _write_domain_yaml
 
         entries = [
             {
@@ -482,7 +482,7 @@ class TestPartialExportPublishSafety:
     """Publish aborts on manifest mismatch."""
 
     def test_manifest_domain_mismatch_aborts(self, tmp_path: Path) -> None:
-        from imas_codex.standard_names.publish import run_publish
+        from iter_codex.standard_names.publish import run_publish
 
         staging = tmp_path / "staging"
         staging.mkdir()
@@ -514,7 +514,7 @@ class TestPartialExportPublishSafety:
 
     def test_domain_scoped_publish_only_touches_listed(self, tmp_path: Path) -> None:
         """Domain-subset publish only copies listed domain files."""
-        from imas_codex.standard_names.publish import run_publish
+        from iter_codex.standard_names.publish import run_publish
 
         staging = tmp_path / "staging"
         staging.mkdir()
@@ -584,10 +584,10 @@ class TestCheckCatalogListRoot:
         manifest = {"names": {"temperature": {"physics_domain": "core_plasma_physics"}}}
         (catalog_dir / "catalog.yml").write_text(yaml.safe_dump(manifest))
 
-        from imas_codex.standard_names.catalog_import import check_catalog
+        from iter_codex.standard_names.catalog_import import check_catalog
 
         # GraphClient is imported inside check_catalog — patch at source module.
-        with patch("imas_codex.graph.client.GraphClient") as mock_gc_cls:
+        with patch("iter_codex.graph.client.GraphClient") as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc.__enter__ = MagicMock(return_value=mock_gc)
             mock_gc.__exit__ = MagicMock(return_value=False)
@@ -609,7 +609,7 @@ class TestEdgeModelVersionGuard:
     """Manifest with wrong edge_model_version rejected by publish."""
 
     def test_wrong_version_rejected(self, tmp_path: Path) -> None:
-        from imas_codex.standard_names.publish import run_publish
+        from iter_codex.standard_names.publish import run_publish
 
         staging = tmp_path / "staging"
         staging.mkdir()
@@ -644,7 +644,7 @@ class TestEdgeModelVersionGuard:
         attributed to the entry files. Patching it to raise proves the order
         rather than inferring it from a message that happens to be short.
         """
-        from imas_codex.standard_names import publish as publish_module
+        from iter_codex.standard_names import publish as publish_module
 
         staging = tmp_path / "staging"
         staging.mkdir()
@@ -688,7 +688,7 @@ class TestCanonicalKeyOrder:
     """CANONICAL_KEY_ORDER and reorder_entry_dict."""
 
     def test_reorder_known_keys(self) -> None:
-        from imas_codex.standard_names.canonical import reorder_entry_dict
+        from iter_codex.standard_names.canonical import reorder_entry_dict
 
         entry = {
             "unit": "eV",
@@ -700,7 +700,7 @@ class TestCanonicalKeyOrder:
         assert list(result.keys()) == ["name", "kind", "status", "unit"]
 
     def test_unknown_key_raises(self) -> None:
-        from imas_codex.standard_names.canonical import (
+        from iter_codex.standard_names.canonical import (
             UnknownCatalogKeyError,
             reorder_entry_dict,
         )
@@ -710,7 +710,7 @@ class TestCanonicalKeyOrder:
             reorder_entry_dict(entry)
 
     def test_missing_keys_omitted(self) -> None:
-        from imas_codex.standard_names.canonical import reorder_entry_dict
+        from iter_codex.standard_names.canonical import reorder_entry_dict
 
         entry = {"name": "temperature"}
         result = reorder_entry_dict(entry)
@@ -726,7 +726,7 @@ class TestOrderingCycleDetection:
     """Cycle participants are named and withheld without losing acyclic rows."""
 
     def test_two_node_cycle_withholds_only_cycle_participants(self) -> None:
-        from imas_codex.standard_names.catalog_ordering import (
+        from iter_codex.standard_names.catalog_ordering import (
             order_entries_by_hierarchy,
         )
 
@@ -759,7 +759,7 @@ class TestOrderingCycleDetection:
         )
 
     def test_export_ledgers_cycle_and_writes_packet(self, tmp_path: Path) -> None:
-        from imas_codex.standard_names.export import run_export
+        from iter_codex.standard_names.export import run_export
 
         population = [
             {
@@ -818,25 +818,25 @@ class TestOrderingCycleDetection:
 
         with (
             patch(
-                "imas_codex.standard_names.export._fetch_export_population",
+                "iter_codex.standard_names.export._fetch_export_population",
                 return_value=population,
             ),
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
                 return_value=EmptyGraphClient(),
             ),
             patch(
-                "imas_codex.standard_names.export._validate_entry",
+                "iter_codex.standard_names.export._validate_entry",
                 side_effect=lambda entry: entry,
             ),
             patch(
-                "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+                "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
                 return_value=(
                     [("a", "b", "HAS_PARENT"), ("b", "a", "HAS_PARENT")],
                     set(),
                 ),
             ),
-            patch("imas_codex.standard_names.export._write_domain_yaml") as write_yaml,
+            patch("iter_codex.standard_names.export._write_domain_yaml") as write_yaml,
         ):
             report = run_export(
                 tmp_path,

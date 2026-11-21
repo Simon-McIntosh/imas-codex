@@ -8,7 +8,7 @@ whose count differs from the graph it was exported from.
 
 from __future__ import annotations
 
-from imas_codex.graph.plant_scope import PlantScope, compare_plant_scope
+from iter_codex.graph.plant_scope import PlantScope, compare_plant_scope
 
 
 def _shared() -> PlantScope:
@@ -103,7 +103,7 @@ def test_measure_plant_scope_counts_a_small_known_graph():
     two types, one node of another facility, and the two facility-less kinds a
     plant package keeps.
     """
-    from imas_codex.graph.plant_scope import measure_plant_scope
+    from iter_codex.graph.plant_scope import measure_plant_scope
 
     answered = []
 

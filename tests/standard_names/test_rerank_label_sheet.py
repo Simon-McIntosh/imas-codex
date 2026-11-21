@@ -95,7 +95,7 @@ def test_row_records_both_orders_and_the_union(monkeypatch):
 def test_build_sheet_writes_no_graph_state(monkeypatch):
     """Building the sheet opens no graph client — it is a read of injected parts."""
     driver = _load_driver()
-    import imas_codex.graph.client as graph_client
+    import iter_codex.graph.client as graph_client
 
     opened: list = []
 

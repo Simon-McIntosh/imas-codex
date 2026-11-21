@@ -12,8 +12,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from neo4j.exceptions import TransientError
 
-from imas_codex.discovery.base.claims import retry_on_deadlock
-from imas_codex.discovery.wiki.graph_ops import (
+from iter_codex.discovery.base.claims import retry_on_deadlock
+from iter_codex.discovery.wiki.graph_ops import (
     CLAIM_TIMEOUT_SECONDS,
     IMAGE_DOCUMENT_TYPES,
     INGESTABLE_DOCUMENT_TYPES,
@@ -303,10 +303,10 @@ class TestBulkCreateDocuments:
 class TestPendingWorkChecks:
     """Tests for has_pending_* functions with mocked GraphClient."""
 
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_has_pending_work_true(self, mock_gc_class):
         """Should return True when pending pages exist."""
-        from imas_codex.discovery.wiki.graph_ops import has_pending_work
+        from iter_codex.discovery.wiki.graph_ops import has_pending_work
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -316,10 +316,10 @@ class TestPendingWorkChecks:
         result = has_pending_work("tcv")
         assert result is True
 
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_has_pending_work_false(self, mock_gc_class):
         """Should return False when no pending pages."""
-        from imas_codex.discovery.wiki.graph_ops import has_pending_work
+        from iter_codex.discovery.wiki.graph_ops import has_pending_work
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -329,10 +329,10 @@ class TestPendingWorkChecks:
         result = has_pending_work("tcv")
         assert result is False
 
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_has_pending_document_work(self, mock_gc_class):
         """Should check document pending state."""
-        from imas_codex.discovery.wiki.graph_ops import has_pending_document_work
+        from iter_codex.discovery.wiki.graph_ops import has_pending_document_work
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -342,10 +342,10 @@ class TestPendingWorkChecks:
         result = has_pending_document_work("tcv")
         assert result is True
 
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_has_pending_scan_work(self, mock_gc_class):
         """Should check for scanned pages awaiting scoring."""
-        from imas_codex.discovery.wiki.graph_ops import has_pending_scan_work
+        from iter_codex.discovery.wiki.graph_ops import has_pending_scan_work
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -378,13 +378,13 @@ class TestClassifyDocumentDeferral:
     """classify_document_deferral maps unsupported-input errors to reasons."""
 
     def test_no_error_returns_none(self):
-        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+        from iter_codex.discovery.wiki.graph_ops import classify_document_deferral
 
         assert classify_document_deferral(None) is None
         assert classify_document_deferral("") is None
 
     def test_wmf_loader_defers_with_format(self):
-        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+        from iter_codex.discovery.wiki.graph_ops import classify_document_deferral
 
         reason = classify_document_deferral(
             "cannot find loader for this WMF file", "presentation"
@@ -392,7 +392,7 @@ class TestClassifyDocumentDeferral:
         assert reason == "unsupported image format (WMF)"
 
     def test_unidentified_image_defers(self):
-        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+        from iter_codex.discovery.wiki.graph_ops import classify_document_deferral
 
         reason = classify_document_deferral(
             "UnidentifiedImageError: cannot identify image file", "image"
@@ -400,7 +400,7 @@ class TestClassifyDocumentDeferral:
         assert reason == "unsupported image format (image)"
 
     def test_missing_resource_dead_link(self):
-        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+        from iter_codex.discovery.wiki.graph_ops import classify_document_deferral
 
         reason = classify_document_deferral(
             "Failed to fetch https://nakasvr23.iferc.org/MISSING RESOURCE Code/x",
@@ -409,7 +409,7 @@ class TestClassifyDocumentDeferral:
         assert reason == "dead link"
 
     def test_http_404_dead_link(self):
-        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+        from iter_codex.discovery.wiki.graph_ops import classify_document_deferral
 
         assert (
             classify_document_deferral("HTTP Error 404: Not Found", "pdf")
@@ -417,7 +417,7 @@ class TestClassifyDocumentDeferral:
         )
 
     def test_word_file_type_mismatch(self):
-        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+        from iter_codex.discovery.wiki.graph_ops import classify_document_deferral
 
         reason = classify_document_deferral(
             "file '<_io.BytesIO object at 0x1>' is not a Word file", "text_document"
@@ -425,7 +425,7 @@ class TestClassifyDocumentDeferral:
         assert reason == "type mismatch: text_document"
 
     def test_unknown_error_stays_failed(self):
-        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+        from iter_codex.discovery.wiki.graph_ops import classify_document_deferral
 
         assert classify_document_deferral("Connection refused", "pdf") is None
         assert classify_document_deferral("some novel parse error", "pdf") is None
@@ -441,11 +441,11 @@ class TestRecoverFailedDocuments:
         mock_gc.query.side_effect = [[{"recovered": c}] for c in counts]
         return mock_gc
 
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_environment_fault_recovers_to_discovered_without_score(
         self, mock_gc_class
     ):
-        from imas_codex.discovery.wiki.graph_ops import recover_failed_documents
+        from iter_codex.discovery.wiki.graph_ops import recover_failed_documents
 
         mock_gc = self._mock_gc(mock_gc_class, (4, 0))
         total = recover_failed_documents("jt-60sa")
@@ -455,9 +455,9 @@ class TestRecoverFailedDocuments:
         assert "No module named" in first_query
         assert "score_composite IS NULL" in first_query
 
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_environment_fault_recovers_to_scored_with_score(self, mock_gc_class):
-        from imas_codex.discovery.wiki.graph_ops import recover_failed_documents
+        from iter_codex.discovery.wiki.graph_ops import recover_failed_documents
 
         mock_gc = self._mock_gc(mock_gc_class, (0, 516))
         total = recover_failed_documents("jt-60sa")
@@ -467,9 +467,9 @@ class TestRecoverFailedDocuments:
         assert "No module named" in second_query
         assert "score_composite IS NOT NULL" in second_query
 
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_returns_zero_on_graph_error(self, mock_gc_class):
-        from imas_codex.discovery.wiki.graph_ops import recover_failed_documents
+        from iter_codex.discovery.wiki.graph_ops import recover_failed_documents
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -482,10 +482,10 @@ class TestRecoverFailedDocuments:
 class TestDeferFailedDocuments:
     """defer_failed_documents reclassifies unsupported already-failed rows."""
 
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_reclassifies_three_classes_leaves_unknown(self, mock_gc_class, mock_defer):
-        from imas_codex.discovery.wiki.graph_ops import defer_failed_documents
+        from iter_codex.discovery.wiki.graph_ops import defer_failed_documents
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -521,10 +521,10 @@ class TestDeferFailedDocuments:
         assert calls["d3"] == "type mismatch: text_document"
         assert "d4" not in calls
 
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_returns_zero_on_graph_error(self, mock_gc_class, mock_defer):
-        from imas_codex.discovery.wiki.graph_ops import defer_failed_documents
+        from iter_codex.discovery.wiki.graph_ops import defer_failed_documents
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -551,27 +551,27 @@ class TestDocumentStatusWriterFailClosed:
         mock_gc.query.side_effect = RuntimeError("Neo4j unavailable")
         return mock_gc
 
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_mark_document_deferred_raises_when_write_fails(self, mock_gc_class):
-        from imas_codex.discovery.wiki.graph_ops import mark_document_deferred
+        from iter_codex.discovery.wiki.graph_ops import mark_document_deferred
 
         self._raising_gc(mock_gc_class)
 
         with pytest.raises(RuntimeError):
             mark_document_deferred("doc:1", "dead link")
 
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_mark_document_failed_raises_when_write_fails(self, mock_gc_class):
-        from imas_codex.discovery.wiki.graph_ops import mark_document_failed
+        from iter_codex.discovery.wiki.graph_ops import mark_document_failed
 
         self._raising_gc(mock_gc_class)
 
         with pytest.raises(RuntimeError):
             mark_document_failed("doc:2", "boom")
 
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_deferred")
     def test_failed_or_deferred_propagates_deferred_write_failure(self, mock_defer):
-        from imas_codex.discovery.wiki.graph_ops import (
+        from iter_codex.discovery.wiki.graph_ops import (
             mark_document_failed_or_deferred,
         )
 
@@ -583,9 +583,9 @@ class TestDocumentStatusWriterFailClosed:
             )
         mock_defer.assert_called_once_with("doc:1", "unsupported image format (WMF)")
 
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_failed")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_failed")
     def test_failed_or_deferred_propagates_failed_write_failure(self, mock_failed):
-        from imas_codex.discovery.wiki.graph_ops import (
+        from iter_codex.discovery.wiki.graph_ops import (
             mark_document_failed_or_deferred,
         )
 
@@ -595,12 +595,12 @@ class TestDocumentStatusWriterFailClosed:
             mark_document_failed_or_deferred("doc:2", "Connection refused", "pdf")
         mock_failed.assert_called_once_with("doc:2", "Connection refused")
 
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
-    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    @patch("iter_codex.discovery.wiki.graph_ops.GraphClient")
     def test_defer_failed_documents_surfaces_write_failure(
         self, mock_gc_class, mock_defer
     ):
-        from imas_codex.discovery.wiki.graph_ops import defer_failed_documents
+        from iter_codex.discovery.wiki.graph_ops import defer_failed_documents
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)

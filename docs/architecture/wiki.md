@@ -42,15 +42,15 @@ The system uses a three-phase pipeline:
 
 ```bash
 # Full discovery pipeline: scan + score
-uv run imas-codex wiki discover tcv
+uv run iter-codex wiki discover tcv
 
 # Individual phases
-uv run imas-codex wiki scan tcv       # Link extraction only
-uv run imas-codex wiki score tcv       # Agent evaluation
-uv run imas-codex wiki ingest tcv      # Fetch, chunk, embed
+uv run iter-codex wiki scan tcv       # Link extraction only
+uv run iter-codex wiki score tcv       # Agent evaluation
+uv run iter-codex wiki ingest tcv      # Fetch, chunk, embed
 
 # Check status
-uv run imas-codex wiki status tcv
+uv run iter-codex wiki status tcv
 ```
 
 ## Graph Schema
@@ -94,8 +94,8 @@ Searchable text chunk with vector embedding.
 Wiki content is indexed in the `wiki_chunk_embedding` vector index:
 
 ```python
-from imas_codex.graph import GraphClient
-from imas_codex.wiki.pipeline import get_embed_model
+from iter_codex.graph import GraphClient
+from iter_codex.wiki.pipeline import get_embed_model
 
 # Generate query embedding
 embed_model = get_embed_model()
@@ -131,10 +131,10 @@ The system also handles wiki artifacts (PDFs, presentations):
 
 ```bash
 # Ingest only artifacts
-uv run imas-codex wiki ingest tcv --type artifacts
+uv run iter-codex wiki ingest tcv --type artifacts
 
 # Control max file size
-uv run imas-codex wiki ingest tcv --max-size-mb 10
+uv run iter-codex wiki ingest tcv --max-size-mb 10
 ```
 
 Supported artifact types:
@@ -148,7 +148,7 @@ Wiki content is accessible via the MCP `python()` REPL:
 
 ```python
 # Search wiki content
-from imas_codex.wiki.pipeline import get_embed_model
+from iter_codex.wiki.pipeline import get_embed_model
 embed_model = get_embed_model()
 embedding = embed_model.get_text_embedding("Thomson calibration")
 
@@ -159,8 +159,8 @@ hits = query("""
 """, embedding=embedding)
 
 # Ingest a specific page
-from imas_codex.wiki.scraper import fetch_wiki_page
-from imas_codex.wiki.pipeline import WikiIngestionPipeline
+from iter_codex.wiki.scraper import fetch_wiki_page
+from iter_codex.wiki.pipeline import WikiIngestionPipeline
 
 page = fetch_wiki_page("Thomson", facility="tcv")
 pipeline = WikiIngestionPipeline(facility_id="tcv")
@@ -181,7 +181,7 @@ Wiki access is configured per facility. For EPFL:
 Query current wiki ingestion state:
 
 ```bash
-uv run imas-codex wiki status tcv
+uv run iter-codex wiki status tcv
 ```
 
 Or via Cypher:

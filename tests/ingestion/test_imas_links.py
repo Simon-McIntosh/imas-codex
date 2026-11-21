@@ -2,12 +2,12 @@
 
 import pytest
 
-from imas_codex.ingestion.extractors.ids import extract_imas_path_references
-from imas_codex.ingestion.graph import (
+from iter_codex.ingestion.extractors.ids import extract_imas_path_references
+from iter_codex.ingestion.graph import (
     link_chunks_to_ids_roots,
     link_chunks_to_imas_paths,
 )
-from imas_codex.ingestion.pipeline import _split_and_extract
+from iter_codex.ingestion.pipeline import _split_and_extract
 
 
 @pytest.mark.parametrize(
@@ -108,7 +108,7 @@ def test_ingestion_keeps_both_reference_kinds(monkeypatch):
     text = 'new("equilibrium"); equilibrium.time_slice[0].profiles_2d[0].psi'
     chunk = SimpleNamespace(text=text, start_line=1, end_line=1)
     monkeypatch.setattr(
-        "imas_codex.ingestion.pipeline.chunk_code", lambda *a, **k: [chunk]
+        "iter_codex.ingestion.pipeline.chunk_code", lambda *a, **k: [chunk]
     )
     result = _split_and_extract(text, "python", {"facility_id": "jt-60sa"})
     assert result[0]["related_ids"] == ["equilibrium"]

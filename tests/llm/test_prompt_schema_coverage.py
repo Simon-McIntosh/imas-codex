@@ -3,7 +3,7 @@
 A local endpoint is served a request that no longer carries ``response_format``
 (see ``base/llm.py``), so the schema a structured call needs must reach the
 engine inside the prompt itself. This test derives the prompt↔response-model
-pairs by walking the AST of ``imas_codex.discovery`` — no table of pairs is
+pairs by walking the AST of ``iter_codex.discovery`` — no table of pairs is
 maintained here — and asserts the exact example ``get_pydantic_schema_json``
 generates for each response model appears verbatim in the rendered prompt, so
 naming a field in prose cannot mask a missing, truncated or swapped generated
@@ -20,8 +20,8 @@ from pathlib import Path
 import pytest
 from jinja2.utils import htmlsafe_json_dumps
 
-import imas_codex.discovery as discovery_pkg
-from imas_codex.llm import prompt_loader
+import iter_codex.discovery as discovery_pkg
+from iter_codex.llm import prompt_loader
 
 DISCOVERY_ROOT = Path(discovery_pkg.__file__).parent
 _RENDERERS = {"render_prompt", "render_prompt_strict"}
@@ -271,7 +271,7 @@ def test_enrichment_prompt_carries_the_generated_example():
     Its call site passes ``response_model`` outside the rendering function, so
     the AST walk cannot pair it and this test carries the assertion.
     """
-    from imas_codex.discovery.signals.enrichment import SignalEnrichmentBatch
+    from iter_codex.discovery.signals.enrichment import SignalEnrichmentBatch
 
     generated = prompt_loader.get_pydantic_schema_json(SignalEnrichmentBatch)
     rendered = prompt_loader.render_prompt("signals/enrichment")
@@ -280,7 +280,7 @@ def test_enrichment_prompt_carries_the_generated_example():
 
 def test_enrichment_output_prompt_carries_the_schema_it_extends():
     """The fitted-prompt contract renders the enrichment schema its caller sets."""
-    from imas_codex.discovery.signals.enrichment import (
+    from iter_codex.discovery.signals.enrichment import (
         SignalEnrichmentBatch,
         fit_enrichment_prompt,
     )

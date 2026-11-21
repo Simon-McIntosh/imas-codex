@@ -6,7 +6,7 @@ consolidation, catalog-import and export paths must therefore stop selecting a
 domain themselves: none of them calls the ranking selectors
 (``select_primary_domain``, ``maybe_promote_domain``), and the path that
 writes a name's domain goes through
-:func:`imas_codex.standard_names.domain_decision.write_name_domain`.
+:func:`iter_codex.standard_names.domain_decision.write_name_domain`.
 
 The assertions read each routed module's source through its import, so
 restoring a selector call in a routed function — the declared negative control
@@ -22,25 +22,25 @@ import pytest
 
 #: Routed module -> the functions this node routed, by import path.
 ROUTED_FUNCTIONS: dict[str, tuple[str, ...]] = {
-    "imas_codex.standard_names.consolidation": (
+    "iter_codex.standard_names.consolidation": (
         "consolidate_candidates",
         "_resolve_physics_domains",
         "_merge_duplicates",
     ),
-    "imas_codex.standard_names.catalog_import": (
+    "iter_codex.standard_names.catalog_import": (
         "check_catalog",
         "record_catalog_import_provenance",
     ),
-    "imas_codex.standard_names.export": (
+    "iter_codex.standard_names.export": (
         "_graph_node_to_entry_dict",
         "_candidate_physics_domains",
     ),
-    "imas_codex.standard_names.worker_tasks.worker_compose_and_validate": (
+    "iter_codex.standard_names.worker_tasks.worker_compose_and_validate": (
         "compose_worker",
         "consolidate_worker",
     ),
-    "imas_codex.standard_names.worker_tasks.worker_compose_batches": ("compose_batch",),
-    "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment": (
+    "iter_codex.standard_names.worker_tasks.worker_compose_batches": ("compose_batch",),
+    "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment": (
         "_write_composed_name_domains",
     ),
 }
@@ -86,7 +86,7 @@ def test_routed_module_calls_no_selector(module_name: str) -> None:
 def test_compose_sets_domains_through_the_one_writer() -> None:
     """A composed name's domain is set by the one writer, not carried in."""
     helper = _function_source(
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment",
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment",
         "_write_composed_name_domains",
     )
     assert ONE_WRITER in helper, (
@@ -94,9 +94,9 @@ def test_compose_sets_domains_through_the_one_writer() -> None:
     )
     for caller in ("compose_worker", "compose_batch"):
         module = (
-            "imas_codex.standard_names.worker_tasks.worker_compose_batches"
+            "iter_codex.standard_names.worker_tasks.worker_compose_batches"
             if caller == "compose_batch"
-            else "imas_codex.standard_names.worker_tasks.worker_compose_and_validate"
+            else "iter_codex.standard_names.worker_tasks.worker_compose_and_validate"
         )
         source = _function_source(module, caller)
         assert "_write_composed_name_domains" in source, (

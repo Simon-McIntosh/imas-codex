@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR
+from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
 # =====================================================================
 # Helpers
@@ -32,8 +32,8 @@ def _load_compose_system_raw() -> str:
     ``composition_rules`` for NC rules) are substituted.  This gives the
     same content that reaches the LLM at runtime.
     """
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.context import build_compose_context
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.context import build_compose_context
 
     return render_prompt("sn/generate_name_system", build_compose_context())
 

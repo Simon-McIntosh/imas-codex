@@ -29,7 +29,7 @@ _RUN_ID = "run-telemetry-test-001"
 def _mock_gc_ctx():
     """Return a (patcher, mock_gc) that patches GraphClient as context manager."""
     patcher = patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     )
     MockGC = patcher.start()
     mock_gc = MagicMock()
@@ -50,7 +50,7 @@ class TestLLMCostPersistence:
         """record_llm_cost should CREATE an LLMCost node and MERGE a FOR_RUN edge."""
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 record_llm_cost,
             )
 
@@ -101,7 +101,7 @@ class TestLLMCostPersistence:
         """record_llm_cost should refuse model='test-model' by default."""
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 record_llm_cost,
             )
 
@@ -135,7 +135,7 @@ class TestCreateSNRunRaises:
         try:
             mock_gc.create_nodes.side_effect = RuntimeError("Connection refused")
 
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 create_sn_run_open,
             )
 
@@ -161,7 +161,7 @@ class TestCreateTelemetryFields:
         """create_sn_run_open should set cost_total=0, events_total=0."""
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 create_sn_run_open,
             )
 
@@ -190,7 +190,7 @@ class TestCreateTelemetryFields:
 
     def test_turn_number_not_in_snrun(self):
         """SNRun schema should no longer have turn_number."""
-        from imas_codex.graph.models import SNRun
+        from iter_codex.graph.models import SNRun
 
         assert "turn_number" not in SNRun.model_fields
 
@@ -214,7 +214,7 @@ class TestStoppedAtPopulation:
                 [{"id": _RUN_ID}],  # SET
             ]
 
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 finalize_sn_run,
             )
 
@@ -248,7 +248,7 @@ class TestStoppedAtPopulation:
 
     def test_run_summary_has_stopped_at(self):
         """RunSummary dataclass should have stopped_at."""
-        from imas_codex.standard_names.loop import RunSummary
+        from iter_codex.standard_names.loop import RunSummary
 
         summary = RunSummary(
             run_id="test-run",
@@ -275,7 +275,7 @@ class TestCostConsistency:
         try:
             mock_gc.query.return_value = [{"total": 3.456}]
 
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 aggregate_spend_for_run,
             )
 
@@ -301,68 +301,68 @@ class TestSchemaFields:
 
     def test_snrun_has_stopped_at(self):
         """SNRun Pydantic model should have stopped_at field."""
-        from imas_codex.graph.models import SNRun
+        from iter_codex.graph.models import SNRun
 
         fields = SNRun.model_fields
         assert "stopped_at" in fields, "SNRun model missing stopped_at field"
 
     def test_snrun_has_ended_at(self):
         """SNRun Pydantic model should have ended_at field."""
-        from imas_codex.graph.models import SNRun
+        from iter_codex.graph.models import SNRun
 
         fields = SNRun.model_fields
         assert "ended_at" in fields, "SNRun model missing ended_at field"
 
     def test_snrun_has_cost_total(self):
         """SNRun Pydantic model should have cost_total field."""
-        from imas_codex.graph.models import SNRun
+        from iter_codex.graph.models import SNRun
 
         fields = SNRun.model_fields
         assert "cost_total" in fields
 
     def test_snrun_has_events_total(self):
         """SNRun Pydantic model should have events_total field."""
-        from imas_codex.graph.models import SNRun
+        from iter_codex.graph.models import SNRun
 
         fields = SNRun.model_fields
         assert "events_total" in fields
 
     def test_snrun_has_created_at(self):
         """SNRun Pydantic model should have created_at field."""
-        from imas_codex.graph.models import SNRun
+        from iter_codex.graph.models import SNRun
 
         fields = SNRun.model_fields
         assert "created_at" in fields
 
     def test_snrun_has_last_heartbeat(self):
         """SNRun Pydantic model should have last_heartbeat field."""
-        from imas_codex.graph.models import SNRun
+        from iter_codex.graph.models import SNRun
 
         fields = SNRun.model_fields
         assert "last_heartbeat" in fields
 
     def test_snrun_no_turn_number(self):
         """SNRun Pydantic model should NOT have turn_number."""
-        from imas_codex.graph.models import SNRun
+        from iter_codex.graph.models import SNRun
 
         fields = SNRun.model_fields
         assert "turn_number" not in fields
 
     def test_snrun_has_started_at(self):
         """SNRun Pydantic model should have started_at field."""
-        from imas_codex.graph.models import SNRun
+        from iter_codex.graph.models import SNRun
 
         fields = SNRun.model_fields
         assert "started_at" in fields
 
     def test_min_viable_turn_removed(self):
         """MIN_VIABLE_TURN must no longer exist in the budget module."""
-        import imas_codex.standard_names.budget as budget_mod
+        import iter_codex.standard_names.budget as budget_mod
 
         assert not hasattr(budget_mod, "MIN_VIABLE_TURN")
 
     def test_near_exhausted_removed(self):
         """near_exhausted must no longer exist on BudgetManager."""
-        from imas_codex.standard_names.budget import BudgetManager
+        from iter_codex.standard_names.budget import BudgetManager
 
         assert not hasattr(BudgetManager, "near_exhausted")

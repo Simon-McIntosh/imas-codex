@@ -37,7 +37,7 @@ import networkx as nx  # noqa: E402
 import numpy as np  # noqa: E402
 from matplotlib.collections import LineCollection  # noqa: E402
 
-from imas_codex.plotting.style import (  # noqa: E402
+from iter_codex.plotting.style import (  # noqa: E402
     CANVAS,
     save_figure,
     title_strip,
@@ -48,7 +48,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs" / "figures" / "knowledge-graph-scale"
 STATS = FIGURES / "graph-stats.json"
 SVG = FIGURES / "knowledge-graph-scale.svg"
-CACHE = Path.home() / ".cache" / "imas-codex-knowledge-graph-scale"
+CACHE = Path.home() / ".cache" / "iter-codex-knowledge-graph-scale"
 SAMPLE = CACHE / "graph-sample.json"
 LAYOUT = CACHE / "layout.json"
 
@@ -681,7 +681,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     if args.query:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         gc = GraphClient()
         stats = query_stats(gc)

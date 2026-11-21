@@ -23,8 +23,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.standard_names import catalog_release
-from imas_codex.standard_names.catalog_release import (
+from iter_codex.standard_names import catalog_release
+from iter_codex.standard_names.catalog_release import (
     compute_next_version,
     run_review_release,
 )

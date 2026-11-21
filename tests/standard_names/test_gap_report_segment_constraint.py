@@ -19,12 +19,12 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.models import (
+from iter_codex.standard_names.models import (
     GrammarSegments,
     StandardNameComposeBatch,
     StandardNameVocabGap,
 )
-from imas_codex.standard_names.segments import OPERATOR_SEGMENT, reportable_segments
+from iter_codex.standard_names.segments import OPERATOR_SEGMENT, reportable_segments
 
 
 def _isn_available() -> bool:
@@ -240,7 +240,7 @@ class TestDedupSeesOperators:
     """The reuse check must be able to compare a proposal against operators."""
 
     def test_operator_class_is_a_comparison_segment(self):
-        from imas_codex.standard_names.vocab_semantic_dedup import (
+        from iter_codex.standard_names.vocab_semantic_dedup import (
             _existing_tokens_by_segment,
         )
 
@@ -250,7 +250,7 @@ class TestDedupSeesOperators:
         assert "flux_surface_averaged" in by_seg[OPERATOR_SEGMENT]
 
     def test_segment_vocabularies_still_present(self):
-        from imas_codex.standard_names.vocab_semantic_dedup import (
+        from iter_codex.standard_names.vocab_semantic_dedup import (
             _existing_tokens_by_segment,
         )
 

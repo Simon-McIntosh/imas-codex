@@ -4,14 +4,14 @@ from uuid import uuid4
 
 import pytest
 
-from imas_codex.discovery.signals.plant_context import PlantContextBundle
-from imas_codex.discovery.signals.plant_context_graph import (
+from iter_codex.discovery.signals.plant_context import PlantContextBundle
+from iter_codex.discovery.signals.plant_context_graph import (
     context_snapshot,
     context_statements,
     write_context,
 )
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.models import (
     PlantContextDocument,
     PlantFunctionCategory,
     PlantSignalRow,

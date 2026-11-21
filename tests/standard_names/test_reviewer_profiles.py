@@ -20,7 +20,7 @@ import pytest
 
 def _patch_profiles(monkeypatch, profiles_dict: dict) -> None:
     """Monkeypatch _get_section so sn-review.names.profiles = *profiles_dict*."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
         if name == "sn-review":
@@ -33,7 +33,7 @@ def _patch_profiles(monkeypatch, profiles_dict: dict) -> None:
 
 def _patch_toplevel(monkeypatch, names_section: dict) -> None:
     """Monkeypatch _get_section without a profiles sub-table (legacy config)."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
         if name == "sn-review":
@@ -51,25 +51,25 @@ def _patch_toplevel(monkeypatch, names_section: dict) -> None:
 
 def test_active_profile_default_when_no_env_var(monkeypatch):
     """No env var → active profile is 'default'."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
-    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
+    monkeypatch.delenv("ITER_CODEX_SN_REVIEW_PROFILE", raising=False)
     assert settings_mod.get_sn_review_active_profile() == "default"
 
 
 def test_env_var_overrides_default_profile(monkeypatch):
-    """IMAS_CODEX_SN_REVIEW_PROFILE env var is honoured."""
-    from imas_codex import settings as settings_mod
+    """ITER_CODEX_SN_REVIEW_PROFILE env var is honoured."""
+    from iter_codex import settings as settings_mod
 
-    monkeypatch.setenv("IMAS_CODEX_SN_REVIEW_PROFILE", "quality-cost-balanced")
+    monkeypatch.setenv("ITER_CODEX_SN_REVIEW_PROFILE", "quality-cost-balanced")
     assert settings_mod.get_sn_review_active_profile() == "quality-cost-balanced"
 
 
 def test_env_var_opus_only(monkeypatch):
     """Env var set to 'opus-only' is returned verbatim."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
-    monkeypatch.setenv("IMAS_CODEX_SN_REVIEW_PROFILE", "opus-only")
+    monkeypatch.setenv("ITER_CODEX_SN_REVIEW_PROFILE", "opus-only")
     assert settings_mod.get_sn_review_active_profile() == "opus-only"
 
 
@@ -91,7 +91,7 @@ _QUALITY_COST_MODELS = [
 
 def test_default_profile_loads_three_models(monkeypatch):
     """'default' profile returns 3 models when profiles section is present."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_profiles(
         monkeypatch,
@@ -111,7 +111,7 @@ def test_configured_default_profile_uses_blind_pair_and_disagreement_breaker(
     monkeypatch,
 ):
     """The live default keeps two blind reviewers and one distinct breaker."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     expected = [
         "openrouter/x-ai/grok-4.7",
@@ -125,14 +125,14 @@ def test_configured_default_profile_uses_blind_pair_and_disagreement_breaker(
     assert configured[:2] == expected[:2]
     assert configured[2] == expected[2]
 
-    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
+    monkeypatch.delenv("ITER_CODEX_SN_REVIEW_PROFILE", raising=False)
     assert settings_mod.get_sn_review_names_models() == expected
     assert settings_mod.get_sn_review_max_cycles() == 3
 
 
 def test_quality_cost_balanced_profile_loads_configured_chain(monkeypatch):
     """'quality-cost-balanced' profile is sonnet-primary + opus arbiter (no Haiku)."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_profiles(
         monkeypatch,
@@ -153,7 +153,7 @@ def test_quality_cost_balanced_profile_loads_configured_chain(monkeypatch):
 
 def test_opus_only_loads_one_model(monkeypatch):
     """'opus-only' profile returns exactly one model containing 'opus'."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_profiles(
         monkeypatch,
@@ -171,7 +171,7 @@ def test_opus_only_loads_one_model(monkeypatch):
 
 def test_unconfigured_low_tier_profile_is_rejected(monkeypatch):
     """A profile outside the configured reviewer floor is unknown."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_profiles(monkeypatch, {})
     with pytest.raises(ValueError, match="Unknown reviewer profile"):
@@ -180,7 +180,7 @@ def test_unconfigured_low_tier_profile_is_rejected(monkeypatch):
 
 def test_unknown_profile_raises_value_error(monkeypatch):
     """Requesting an unknown profile name raises ValueError."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_profiles(monkeypatch, {})
     with pytest.raises(ValueError, match="Unknown reviewer profile"):
@@ -194,7 +194,7 @@ def test_unknown_profile_raises_value_error(monkeypatch):
 
 def test_profile_threshold_default(monkeypatch):
     """Default profile threshold is 0.20."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_profiles(
         monkeypatch,
@@ -207,7 +207,7 @@ def test_profile_threshold_default(monkeypatch):
 
 def test_quality_cost_balanced_profile_threshold(monkeypatch):
     """quality-cost-balanced profile threshold is 0.20."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_profiles(
         monkeypatch,
@@ -225,7 +225,7 @@ def test_quality_cost_balanced_profile_threshold(monkeypatch):
 
 def test_profile_threshold_opus_only(monkeypatch):
     """opus-only threshold is 1.0 (never escalate)."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_profiles(
         monkeypatch,
@@ -243,7 +243,7 @@ def test_profile_threshold_opus_only(monkeypatch):
 
 def test_profile_threshold_unknown_raises(monkeypatch):
     """Unknown profile → ValueError for threshold too."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_profiles(monkeypatch, {})
     with pytest.raises(ValueError, match="Unknown reviewer profile"):
@@ -257,11 +257,11 @@ def test_profile_threshold_unknown_raises(monkeypatch):
 
 def test_legacy_accessors_still_work_no_profiles_section(monkeypatch):
     """Legacy get_sn_review_names_models() works when no profiles key is present."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     # Old-style config: only top-level models, no profiles
     _patch_toplevel(monkeypatch, {"models": ["openrouter/anthropic/claude-opus-4.6"]})
-    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
+    monkeypatch.delenv("ITER_CODEX_SN_REVIEW_PROFILE", raising=False)
 
     models = settings_mod.get_sn_review_names_models()
     assert models == ["openrouter/anthropic/claude-opus-4.6"]
@@ -269,7 +269,7 @@ def test_legacy_accessors_still_work_no_profiles_section(monkeypatch):
 
 def test_legacy_threshold_still_works_no_profiles_section(monkeypatch):
     """Legacy get_sn_review_disagreement_threshold() works without profiles section."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
         if name == "sn-review":
@@ -278,14 +278,14 @@ def test_legacy_threshold_still_works_no_profiles_section(monkeypatch):
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)
     settings_mod._load_pyproject_settings.cache_clear()
-    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
+    monkeypatch.delenv("ITER_CODEX_SN_REVIEW_PROFILE", raising=False)
 
     assert settings_mod.get_sn_review_disagreement_threshold() == pytest.approx(0.25)
 
 
 def test_legacy_accessor_respects_active_env_var_profile(monkeypatch):
     """get_sn_review_names_models() uses active profile when env var is set."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_profiles(
         monkeypatch,
@@ -296,7 +296,7 @@ def test_legacy_accessor_respects_active_env_var_profile(monkeypatch):
             }
         },
     )
-    monkeypatch.setenv("IMAS_CODEX_SN_REVIEW_PROFILE", "quality-cost-balanced")
+    monkeypatch.setenv("ITER_CODEX_SN_REVIEW_PROFILE", "quality-cost-balanced")
 
     models = settings_mod.get_sn_review_names_models()
     assert "sonnet" in models[0].lower()

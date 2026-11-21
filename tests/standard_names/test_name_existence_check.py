@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.search import (
+from iter_codex.standard_names.search import (
     SuggestionPoolExhausted,
     check_names,
 )
@@ -123,7 +123,7 @@ def test_every_identity_a_capped_scan_drops_is_reported_present():
     that slice is exactly the population an existence check has most reason to
     be asked about. Every one of them must resolve.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = GraphClient()
     try:
@@ -155,7 +155,7 @@ def test_every_identity_a_capped_scan_drops_is_reported_present():
 @pytest.mark.graph
 def test_live_verdicts_survive_a_pool_limit_far_below_the_population():
     """The counterfactual: starve the pool and the answers do not move."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = GraphClient()
     try:

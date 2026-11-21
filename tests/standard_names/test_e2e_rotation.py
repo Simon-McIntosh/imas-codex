@@ -26,12 +26,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.chain_history import (
+from iter_codex.standard_names.chain_history import (
     docs_chain_history,
     name_chain_history,
 )
-from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
-from imas_codex.standard_names.models import (
+from iter_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
+from iter_codex.standard_names.models import (
     GeneratedDocs,
     RefinedDocs,
     RefinedName,
@@ -40,19 +40,19 @@ from imas_codex.standard_names.models import (
     StandardNameQualityScoreDocs,
     StandardNameQualityScoreNameOnly,
 )
-from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
     process_generate_docs_batch,
 )
-from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+from iter_codex.standard_names.worker_tasks.worker_refine_docs import (
     process_refine_docs_batch,
 )
-from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+from iter_codex.standard_names.worker_tasks.worker_refine_names import (
     process_refine_name_batch,
 )
-from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+from iter_codex.standard_names.worker_tasks.worker_review_docs import (
     process_review_docs_batch,
 )
-from imas_codex.standard_names.worker_tasks.worker_review_names import (
+from iter_codex.standard_names.worker_tasks.worker_review_names import (
     process_review_name_batch,
 )
 
@@ -116,7 +116,7 @@ _SCORE_ACCEPT_DOCS = StandardNameQualityScoreDocs(
 def _gc():
     """Function-scoped real GraphClient; skip if Neo4j is unreachable."""
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -497,7 +497,7 @@ def _do_refine_name(
         return f"Refine this standard name (chain={chain_length})."
 
     with patch(
-        "imas_codex.llm.prompt_loader.render_prompt",
+        "iter_codex.llm.prompt_loader.render_prompt",
         side_effect=_mock_render,
     ):
         n = asyncio.run(
@@ -526,7 +526,7 @@ def _do_generate_docs(gc, mock_llm, sn_id: str) -> None:
         return f"Generate documentation for {sn_id}."
 
     with patch(
-        "imas_codex.llm.prompt_loader.render_prompt",
+        "iter_codex.llm.prompt_loader.render_prompt",
         side_effect=_mock_render,
     ):
         n = asyncio.run(
@@ -614,7 +614,7 @@ def _do_refine_docs(
         return f"Refine docs for {sn_id} (chain={docs_chain_length})."
 
     with patch(
-        "imas_codex.llm.prompt_loader.render_prompt",
+        "iter_codex.llm.prompt_loader.render_prompt",
         side_effect=_mock_render,
     ):
         n = asyncio.run(

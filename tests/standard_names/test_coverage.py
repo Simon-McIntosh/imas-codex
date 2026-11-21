@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.standard_names.coverage import (
+from iter_codex.standard_names.coverage import (
     CoverageReport,
     _bucket,
     _one,
@@ -105,7 +105,7 @@ class TestComputeCoverageEmpty:
         effects = _make_gc_side_effects()
         gc = _mock_gc(effects)
 
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
 
         assert isinstance(report, CoverageReport)
@@ -114,7 +114,7 @@ class TestComputeCoverageEmpty:
         effects = _make_gc_side_effects()
         gc = _mock_gc(effects)
 
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
 
         assert report.eligible_total == 0
@@ -127,7 +127,7 @@ class TestComputeCoverageEmpty:
         effects = _make_gc_side_effects()
         gc = _mock_gc(effects)
 
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
 
         assert report.cost_per_name is None
@@ -137,7 +137,7 @@ class TestComputeCoverageEmpty:
         effects = _make_gc_side_effects()
         gc = _mock_gc(effects)
 
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage(physics_domain="magnetics")
 
         assert report.physics_domain_filter == "magnetics"
@@ -146,7 +146,7 @@ class TestComputeCoverageEmpty:
         effects = _make_gc_side_effects()
         gc = _mock_gc(effects)
 
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
 
         assert report.physics_domain_filter is None
@@ -183,43 +183,43 @@ class TestComputeCoverageCountsEligibleLeaves:
 
     def test_eligible_total(self):
         gc = _mock_gc(self._build_effects())
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
         assert report.eligible_total == 5
 
     def test_eligible_with_errors(self):
         gc = _mock_gc(self._build_effects())
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
         assert report.eligible_with_errors == 2
 
     def test_covered_parents(self):
         gc = _mock_gc(self._build_effects())
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
         assert report.covered_parents == 1
 
     def test_to_compose(self):
         gc = _mock_gc(self._build_effects())
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
         assert report.to_compose == 4
 
     def test_to_compose_with_errors(self):
         gc = _mock_gc(self._build_effects())
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
         assert report.to_compose_with_errors == 1
 
     def test_expected_error_siblings(self):
         gc = _mock_gc(self._build_effects())
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
         assert report.expected_error_siblings == 3  # 3 × 1
 
     def test_eligible_by_category(self):
         gc = _mock_gc(self._build_effects())
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
         assert report.eligible_by_category["quantity"] == 3
         assert report.eligible_by_category["geometry"] == 1
@@ -227,7 +227,7 @@ class TestComputeCoverageCountsEligibleLeaves:
 
     def test_eligible_by_node_type(self):
         gc = _mock_gc(self._build_effects())
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
         assert report.eligible_by_node_type["dynamic"] == 4
         assert report.eligible_by_node_type["static"] == 1
@@ -240,7 +240,7 @@ class TestComputeCoveragePhysicsDomainFilter:
         effects = _make_gc_side_effects()
         gc = _mock_gc(effects)
 
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage(physics_domain="equilibrium")
 
         assert report.physics_domain_filter == "equilibrium"
@@ -257,7 +257,7 @@ class TestComputeCoveragePhysicsDomainFilter:
         )
         gc = _mock_gc(effects)
 
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage(physics_domain="equilibrium")
 
         assert report.eligible_total == 20
@@ -281,7 +281,7 @@ class TestComputeCoverageCostEstimate:
         ]
         gc = _mock_gc(effects)
 
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
 
         expected_cost_per_name = 15.0 / 150  # 0.1
@@ -297,7 +297,7 @@ class TestComputeCoverageCostEstimate:
         effects = _make_gc_side_effects()
         gc = _mock_gc(effects)
 
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             report = compute_coverage()
 
         assert report.cost_per_name is None
@@ -313,7 +313,7 @@ class TestSnCoverageCLI:
     """Test the `sn coverage` CLI command via Click's test runner."""
 
     def _invoke(self, args: list[str], side_effects: list | None = None):
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         runner = CliRunner()
 
@@ -321,7 +321,7 @@ class TestSnCoverageCLI:
             side_effects = _make_gc_side_effects()
 
         gc = _mock_gc(side_effects)
-        with patch("imas_codex.standard_names.coverage.GraphClient", return_value=gc):
+        with patch("iter_codex.standard_names.coverage.GraphClient", return_value=gc):
             result = runner.invoke(sn, ["coverage"] + args, catch_exceptions=False)
         return result
 

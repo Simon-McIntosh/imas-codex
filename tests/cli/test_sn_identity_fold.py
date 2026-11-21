@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 
 def _fold_result(*, prior_stage: str, already_superseded: bool) -> dict[str, object]:
@@ -24,7 +24,7 @@ def test_supersede_reports_actual_prior_stage_in_dry_run() -> None:
     result = _fold_result(prior_stage="reviewed", already_superseded=False)
 
     with patch(
-        "imas_codex.standard_names.edit.supersede_into", return_value=result
+        "iter_codex.standard_names.edit.supersede_into", return_value=result
     ) as supersede_into:
         invocation = CliRunner().invoke(
             sn,
@@ -46,7 +46,7 @@ def test_supersede_idempotent_replay_reports_preserved_prior_stage() -> None:
     result = _fold_result(prior_stage="exhausted", already_superseded=True)
 
     with patch(
-        "imas_codex.standard_names.edit.supersede_into", return_value=result
+        "iter_codex.standard_names.edit.supersede_into", return_value=result
     ) as supersede_into:
         invocation = CliRunner().invoke(
             sn, ["supersede", "old_identity", "--into", "canonical_identity"]

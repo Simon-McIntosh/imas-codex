@@ -20,7 +20,7 @@ import ast
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PACKAGE_ROOT = REPO_ROOT / "imas_codex"
+PACKAGE_ROOT = REPO_ROOT / "iter_codex"
 
 
 def _globals_subscripts(tree: ast.Module) -> list[ast.Subscript]:

@@ -6,17 +6,17 @@ import logging
 
 import pytest
 
-from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
-from imas_codex.standard_names.loop import (
+from iter_codex.standard_names.attachment_audit import AttachmentAuditResult
+from iter_codex.standard_names.loop import (
     _log_attachment_audit_result,
     _run_attachment_audit_for_pool_run,
 )
-from imas_codex.standard_names.provenance_rebuild import _attachment_violation_rows
+from iter_codex.standard_names.provenance_rebuild import _attachment_violation_rows
 
 
 @pytest.mark.asyncio
 async def test_skipped_and_clean_attachment_audits_remain_distinct(caplog) -> None:
-    caplog.set_level(logging.INFO, logger="imas_codex.standard_names.loop")
+    caplog.set_level(logging.INFO, logger="iter_codex.standard_names.loop")
 
     bypassed = await _run_attachment_audit_for_pool_run(
         skip_global_maintenance=True,

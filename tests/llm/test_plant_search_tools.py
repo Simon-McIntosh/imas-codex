@@ -8,9 +8,9 @@ from unittest.mock import MagicMock
 import pytest
 from fastmcp import Client
 
-from imas_codex.llm import search_tools
-from imas_codex.llm.server import AgentsServer
-from imas_codex.tools import plant_search
+from iter_codex.llm import search_tools
+from iter_codex.llm.server import AgentsServer
+from iter_codex.tools import plant_search
 
 
 @pytest.fixture(scope="module")
@@ -65,7 +65,7 @@ async def test_missing_designation_is_explicit_empty_page_through_mcp(
     graph = MagicMock()
     graph.__enter__.return_value = graph
     graph.query.return_value = [{"total": 0, "items": []}]
-    monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.client.GraphClient", lambda: graph)
     async with Client(plant_server.mcp) as client:
         response = await client.call_tool(
             "search_pulses", {"facility": "demo", "designation": "absent-coil"}

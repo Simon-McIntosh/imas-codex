@@ -8,7 +8,7 @@ import tarfile
 from pathlib import Path
 from types import SimpleNamespace
 
-from imas_codex.graph import neo4j_ops
+from iter_codex.graph import neo4j_ops
 
 
 def _file_with_mtime(path: Path, timestamp: float, content: bytes = b"data") -> Path:
@@ -31,12 +31,12 @@ def _recovery_archive_with_mtime(
 
 
 def _configure_paths(monkeypatch, backups_dir: Path, data_dir: Path) -> None:
-    monkeypatch.setattr("imas_codex.graph.profiles.BACKUPS_DIR", backups_dir)
+    monkeypatch.setattr("iter_codex.graph.profiles.BACKUPS_DIR", backups_dir)
     monkeypatch.setattr(
-        "imas_codex.graph.dirs.EXPORTS_DIR", backups_dir.parent / "exports"
+        "iter_codex.graph.dirs.EXPORTS_DIR", backups_dir.parent / "exports"
     )
     monkeypatch.setattr(
-        "imas_codex.graph.profiles.resolve_neo4j",
+        "iter_codex.graph.profiles.resolve_neo4j",
         lambda: SimpleNamespace(data_dir=data_dir),
     )
 
@@ -92,7 +92,7 @@ def test_offsite_currency_reports_newest_full_registry_copy(tmp_path, monkeypatc
     live_file = _file_with_mtime(data_dir / "data" / "store", 500.0)
     _configure_paths(monkeypatch, tmp_path / "backups", data_dir)
     monkeypatch.setattr(
-        "imas_codex.graph.ghcr.list_package_versions",
+        "iter_codex.graph.ghcr.list_package_versions",
         lambda registry, token, pkg_name: [
             {
                 "name": "sha256:older",
@@ -110,7 +110,7 @@ def test_offsite_currency_reports_newest_full_registry_copy(tmp_path, monkeypatc
     result = neo4j_ops.get_offsite_currency("ghcr.io/example")
 
     assert result.status == "stale"
-    assert result.offsite_ref == "ghcr.io/example/imas-codex-graph:v5.3.0-rc6"
+    assert result.offsite_ref == "ghcr.io/example/iter-codex-graph:v5.3.0-rc6"
     assert result.live_path == live_file
     assert result.age_seconds == 300.0
 
@@ -120,7 +120,7 @@ def test_offsite_currency_is_current_when_registry_copy_is_newer(tmp_path, monke
     _file_with_mtime(data_dir / "data" / "store", 200.0)
     _configure_paths(monkeypatch, tmp_path / "backups", data_dir)
     monkeypatch.setattr(
-        "imas_codex.graph.ghcr.list_package_versions",
+        "iter_codex.graph.ghcr.list_package_versions",
         lambda registry, token, pkg_name: [
             {
                 "name": "sha256:newer",
@@ -141,7 +141,7 @@ def test_offsite_currency_reports_no_offsite_copy(tmp_path, monkeypatch):
     live_file = _file_with_mtime(data_dir / "data" / "store", 200.0)
     _configure_paths(monkeypatch, tmp_path / "backups", data_dir)
     monkeypatch.setattr(
-        "imas_codex.graph.ghcr.list_package_versions",
+        "iter_codex.graph.ghcr.list_package_versions",
         lambda registry, token, pkg_name: [],
     )
 

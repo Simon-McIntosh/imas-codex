@@ -4,12 +4,12 @@ from unittest.mock import MagicMock
 
 from imas_standard_names import get_grammar_context
 
-from imas_codex.standard_names.grammar_query import (
+from iter_codex.standard_names.grammar_query import (
     order_grammar_versions,
     select_grammar_version,
 )
-from imas_codex.standard_names.grammar_sync import _grammar_context_token_rows
-from imas_codex.standard_names.graph_store.graph_catalog import (
+from iter_codex.standard_names.grammar_sync import _grammar_context_token_rows
+from iter_codex.standard_names.graph_store.graph_catalog import (
     _resolve_grammar_token_version,
 )
 

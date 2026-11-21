@@ -11,13 +11,13 @@ import yaml
 
 pytest.importorskip("imas_standard_names")
 
-from imas_codex.standard_names.export import (  # noqa: E402
+from iter_codex.standard_names.export import (  # noqa: E402
     _graph_node_to_entry_dict,
     run_export,
 )
 from tests.standard_names.conftest import clean_source_audit_graph
 
-_GC_PATH = "imas_codex.graph.client.GraphClient"
+_GC_PATH = "iter_codex.graph.client.GraphClient"
 
 
 def _candidate(name: str, **overrides) -> dict:
@@ -86,24 +86,24 @@ class TestExportOmitsSupersessionLineage:
 
         with (
             patch(
-                "imas_codex.standard_names.export._fetch_export_population",
+                "iter_codex.standard_names.export._fetch_export_population",
                 return_value=[live, excluded],
             ),
             patch(_GC_PATH, return_value=graph),
             patch(
-                "imas_codex.standard_names.export._validate_entry",
+                "iter_codex.standard_names.export._validate_entry",
                 side_effect=lambda entry: entry,
             ),
             patch(
-                "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+                "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
                 return_value=([], set()),
             ),
             patch(
-                "imas_codex.standard_names.export._get_codex_commit_sha",
+                "iter_codex.standard_names.export._get_codex_commit_sha",
                 return_value="a" * 40,
             ),
             patch(
-                "imas_codex.standard_names.export._manifest_iso_timestamp",
+                "iter_codex.standard_names.export._manifest_iso_timestamp",
                 return_value="2026-08-24T00:00:00Z",
             ),
         ):

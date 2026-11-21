@@ -9,8 +9,8 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.core.data_model import PhysicsDomain
-from imas_codex.core.physics_categorization import (
+from iter_codex.core.data_model import PhysicsDomain
+from iter_codex.core.physics_categorization import (
     PhysicsDomainCategorizer,
     _load_physics_mappings,
     physics_categorizer,
@@ -36,7 +36,7 @@ class TestLoadPhysicsMappings:
             json.dump(mappings_data, f)
 
         with patch(
-            "imas_codex.core.physics_categorization.IDS_DOMAINS_FILE",
+            "iter_codex.core.physics_categorization.IDS_DOMAINS_FILE",
             mapping_path,
         ):
             # Clear the cache to force reload
@@ -52,7 +52,7 @@ class TestLoadPhysicsMappings:
         nonexistent_path = tmp_path / "nonexistent" / "ids_domains.json"
 
         with patch(
-            "imas_codex.core.physics_categorization.IDS_DOMAINS_FILE",
+            "iter_codex.core.physics_categorization.IDS_DOMAINS_FILE",
             nonexistent_path,
         ):
             _load_physics_mappings.cache_clear()
@@ -67,7 +67,7 @@ class TestLoadPhysicsMappings:
             f.write("invalid json {")
 
         with patch(
-            "imas_codex.core.physics_categorization.IDS_DOMAINS_FILE",
+            "iter_codex.core.physics_categorization.IDS_DOMAINS_FILE",
             mapping_path,
         ):
             _load_physics_mappings.cache_clear()
@@ -98,7 +98,7 @@ class TestPhysicsDomainCategorizer:
         cat._mappings = None
 
         with patch(
-            "imas_codex.core.physics_categorization._load_physics_mappings",
+            "iter_codex.core.physics_categorization._load_physics_mappings",
             return_value={"test": "transport"},
         ) as mock_load:
             result = cat.mappings

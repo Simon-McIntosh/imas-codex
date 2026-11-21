@@ -35,7 +35,7 @@ from figures_knowledge_graph_scale import (  # noqa: E402
     human,
 )
 
-from imas_codex.plotting.style import (  # noqa: E402
+from iter_codex.plotting.style import (  # noqa: E402
     CANVAS,
     save_figure,
     title_strip,
@@ -255,7 +255,7 @@ def main() -> None:
     parser.add_argument("--draft", help="write a PNG here, reporting layout faults")
     args = parser.parse_args()
     if args.query:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         DATA.write_text(json.dumps(query(GraphClient())) + "\n")
     draw(json.loads(DATA.read_text()), SVG, args.draft)

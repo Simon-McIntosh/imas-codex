@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at d554595cbce239db042b7d1bd16a261adf481f81, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names, imas_codex.standard_names.graph_ops._TransactionQuery, imas_codex.standard_names.graph_ops._TransactionQuery.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.classify_sourceless_standard_names, iter_codex.standard_names.graph_ops._TransactionQuery, iter_codex.standard_names.graph_ops._TransactionQuery.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Rediscover each remaining lost DD source by DD search, confirmed by Jev.
@@ -32,12 +32,12 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
-from imas_codex.discovery.base.judgment import decide_batch
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
-from imas_codex.standard_names.provenance_rebuild import bind_recovery_sources
-from imas_codex.tools.graph_search import GraphSearchTool
-from imas_codex.units import normalize_unit_symbol, units_are_equivalent
+from iter_codex.discovery.base.judgment import decide_batch
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_ops import classify_sourceless_standard_names
+from iter_codex.standard_names.provenance_rebuild import bind_recovery_sources
+from iter_codex.tools.graph_search import GraphSearchTool
+from iter_codex.units import normalize_unit_symbol, units_are_equivalent
 
 ROOT = Path(__file__).resolve().parents[4]
 HERE = Path(__file__).parent
@@ -615,7 +615,7 @@ def stage_judge() -> int:
     for entry in worklist:
         key = "|".join(sorted(build_question(entry)["criteria"]))
         groups[key].append(entry)
-    from imas_codex.settings import get_model
+    from iter_codex.settings import get_model
 
     model = get_model("sn-judge")
 
@@ -715,7 +715,7 @@ def stage_apply(dry: bool = False) -> int:
 
         preview = {"would_bind": 0, "names": len(bindings)}
         if bindings:
-            from imas_codex.standard_names.graph_ops import _TransactionQuery
+            from iter_codex.standard_names.graph_ops import _TransactionQuery
 
             with gc.session() as session:
                 tx = session.begin_transaction()
@@ -902,7 +902,7 @@ def stage_corrected_pass() -> int:
         judged = dict(doc.get("judged") or {})
         to_judge = [e for e in worklist if e["name"] in set(no_cand_names)]
         gained = [e for e in to_judge if corrected[e["name"]]["candidates"]]
-        from imas_codex.settings import get_model
+        from iter_codex.settings import get_model
 
         model = get_model("sn-judge")
         rejudged: dict[str, dict] = {}
@@ -962,7 +962,7 @@ def stage_corrected_pass() -> int:
 
         preview = {"would_bind": 0, "names": len(new_bindings)}
         if new_bindings:
-            from imas_codex.standard_names.graph_ops import _TransactionQuery
+            from iter_codex.standard_names.graph_ops import _TransactionQuery
 
             with gc.session() as session:
                 tx = session.begin_transaction()

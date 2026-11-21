@@ -1,16 +1,16 @@
 """Direct-call tests for graph-backed IMAS DD formatters."""
 
-from imas_codex.core.data_model import IdsNode
-from imas_codex.llm.search_formatters import (
+from iter_codex.core.data_model import IdsNode
+from iter_codex.llm.search_formatters import (
     format_cluster_report,
     format_export_domain_report,
     format_fetch_paths_report,
     format_search_dd_report,
 )
-from imas_codex.models.constants import SearchMode
-from imas_codex.models.error_models import ToolError
-from imas_codex.models.result_models import FetchPathsResult, SearchPathsResult
-from imas_codex.search.search_strategy import SearchHit
+from iter_codex.models.constants import SearchMode
+from iter_codex.models.error_models import ToolError
+from iter_codex.models.result_models import FetchPathsResult, SearchPathsResult
+from iter_codex.search.search_strategy import SearchHit
 
 
 def test_format_search_dd_report_handles_tool_error():

@@ -2,13 +2,13 @@
 
 import pytest
 
-from imas_codex.discovery.signals.scanners import codac_uda as scanner
-from imas_codex.discovery.signals.variable_name_graph import (
+from iter_codex.discovery.signals.scanners import codac_uda as scanner
+from iter_codex.discovery.signals.variable_name_graph import (
     parse_archive_catalogue,
     persist_name_parses,
 )
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import ArchiveEndpoint
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.models import ArchiveEndpoint
 
 pytestmark = pytest.mark.graph
 

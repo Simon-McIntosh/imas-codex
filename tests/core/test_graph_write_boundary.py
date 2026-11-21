@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.llm import server as server_module
-from imas_codex.llm.server import AgentsServer
+from iter_codex.llm import server as server_module
+from iter_codex.llm.server import AgentsServer
 
 STANDARD_NAME_NODE_TYPES = (
     "StandardName",
@@ -82,7 +82,7 @@ def test_graph_schema_reports_class_owner(
     node_type: str,
     expected_schema_id: str,
 ) -> None:
-    from imas_codex.graph.schema import GraphSchema
+    from iter_codex.graph.schema import GraphSchema
 
     assert GraphSchema().get_class_schema_id(node_type) == expected_schema_id
 

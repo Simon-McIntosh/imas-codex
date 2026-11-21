@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from imas_codex.standard_names import edit
+from iter_codex.standard_names import edit
 from tests.standard_names.test_tombstone_supersede import (
     _Graph as _BaseGraph,
     _run,

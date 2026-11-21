@@ -8,7 +8,7 @@ import pytest
 
 
 def test_retirement_requires_accepted_opt_in() -> None:
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         retire_unrecoverable_provenance_orphans,
     )
 
@@ -22,7 +22,7 @@ def test_retirement_requires_accepted_opt_in() -> None:
 
 
 def test_retirement_is_list_scoped_and_ledgered_atomically() -> None:
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         retire_unrecoverable_provenance_orphans,
     )
 
@@ -53,15 +53,15 @@ def test_retirement_is_list_scoped_and_ledgered_atomically() -> None:
 
 def test_parent_source_reconcile_refuses_inadmissible_scaffold() -> None:
     """Provenance recovery must not legitimize an invalid structural parent."""
-    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+    from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
         reconcile_orphan_parent_sources,
     )
-    from imas_codex.standard_names.parents import AdmissionResult
+    from iter_codex.standard_names.parents import AdmissionResult
 
     gc = MagicMock()
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.find_orphan_parent_source_candidates",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.find_orphan_parent_source_candidates",
             return_value=[
                 {
                     "parent_id": "line_integrated_impurity_ion_velocity",
@@ -74,7 +74,7 @@ def test_parent_source_reconcile_refuses_inadmissible_scaffold() -> None:
             ],
         ),
         patch(
-            "imas_codex.standard_names.parents.is_admissible_parent_name",
+            "iter_codex.standard_names.parents.is_admissible_parent_name",
             return_value=AdmissionResult(
                 admit=False,
                 reason="suppressed: single-child shadow",

@@ -9,9 +9,9 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from imas_codex.embeddings.cache import EmbeddingCache
-from imas_codex.embeddings.config import EmbeddingBackend, EncoderConfig
-from imas_codex.embeddings.encoder import Encoder
+from iter_codex.embeddings.cache import EmbeddingCache
+from iter_codex.embeddings.config import EmbeddingBackend, EncoderConfig
+from iter_codex.embeddings.encoder import Encoder
 
 _has_sentence_transformers = (
     importlib.util.find_spec("sentence_transformers") is not None
@@ -438,7 +438,7 @@ class TestEncoder:
 )
 def test_encoder_embed_texts_basic(monkeypatch):
     """Integration test: embed texts with local backend."""
-    monkeypatch.setenv("IMAS_CODEX_EMBEDDING_LOCATION", "local")
+    monkeypatch.setenv("ITER_CODEX_EMBEDDING_LOCATION", "local")
     config = EncoderConfig(batch_size=8, use_rich=False)
     encoder = Encoder(config)
     texts = ["alpha", "beta", "gamma"]
@@ -456,7 +456,7 @@ def test_encoder_embed_texts_basic(monkeypatch):
 def test_encoder_build_document_embeddings_cache_integration(tmp_path, monkeypatch):
     """Integration test: build and cache embeddings with local backend."""
     monkeypatch.setattr(EncoderConfig, "cache_dir", "embeddings_test")
-    monkeypatch.setenv("IMAS_CODEX_EMBEDDING_LOCATION", "local")
+    monkeypatch.setenv("ITER_CODEX_EMBEDDING_LOCATION", "local")
     config = EncoderConfig(batch_size=16, use_rich=False, enable_cache=True)
     encoder = Encoder(config)
     texts = [f"text {i}" for i in range(10)]
@@ -553,7 +553,7 @@ class TestTruncateDim:
             ),
             patch.object(Encoder, "_resolve_model_path", return_value="test-model"),
             patch(
-                "imas_codex.embeddings.encoder.get_embedding_dimension",
+                "iter_codex.embeddings.encoder.get_embedding_dimension",
                 return_value=256,
             ),
             patch.dict("sys.modules", {"torch": mock_torch}),
@@ -570,7 +570,7 @@ class TestTruncateDim:
         raw = np.random.randn(3, 2560).astype(np.float32)
 
         with patch(
-            "imas_codex.embeddings.encoder.get_embedding_dimension", return_value=256
+            "iter_codex.embeddings.encoder.get_embedding_dimension", return_value=256
         ):
             result = encoder._truncate_embeddings(raw)
 
@@ -584,7 +584,7 @@ class TestTruncateDim:
         raw = np.random.randn(3, 256).astype(np.float32)
 
         with patch(
-            "imas_codex.embeddings.encoder.get_embedding_dimension", return_value=256
+            "iter_codex.embeddings.encoder.get_embedding_dimension", return_value=256
         ):
             result = encoder._truncate_embeddings(raw)
 

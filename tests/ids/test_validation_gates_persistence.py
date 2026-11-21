@@ -13,8 +13,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from imas_codex.ids.mapping import validate_mappings
-from imas_codex.ids.models import (
+from iter_codex.ids.mapping import validate_mappings
+from iter_codex.ids.models import (
     EscalationFlag,
     EscalationSeverity,
     SignalMappingBatch,
@@ -22,7 +22,7 @@ from imas_codex.ids.models import (
     TargetAssignment,
     TargetAssignmentBatch,
 )
-from imas_codex.ids.validation import BindingCheck
+from iter_codex.ids.validation import BindingCheck
 
 SOURCE = "jt-60sa:ec-launcher"
 SECTION = "ec_launchers/beam"
@@ -124,9 +124,9 @@ def _validate():
     gc = MagicMock()
     gc.query.side_effect = lambda statement, **params: []
     with (
-        patch("imas_codex.ids.validation.validate_mapping", return_value=_report()),
-        patch("imas_codex.ids.validation.check_coverage_threshold", return_value=[]),
-        patch("imas_codex.ids.tools.get_sign_flip_paths", return_value=set()),
+        patch("iter_codex.ids.validation.validate_mapping", return_value=_report()),
+        patch("iter_codex.ids.validation.check_coverage_threshold", return_value=[]),
+        patch("iter_codex.ids.tools.get_sign_flip_paths", return_value=set()),
     ):
         return validate_mappings(
             "jt-60sa", "ec_launchers", "4.1.1", _sections(), [_batch()], gc=gc
@@ -181,9 +181,9 @@ def test_a_binding_whose_only_failure_is_a_recorded_error_is_removed():
     gc = MagicMock()
     gc.query.side_effect = lambda statement, **params: []
     with (
-        patch("imas_codex.ids.validation.validate_mapping", return_value=report),
-        patch("imas_codex.ids.validation.check_coverage_threshold", return_value=[]),
-        patch("imas_codex.ids.tools.get_sign_flip_paths", return_value=set()),
+        patch("iter_codex.ids.validation.validate_mapping", return_value=report),
+        patch("iter_codex.ids.validation.check_coverage_threshold", return_value=[]),
+        patch("iter_codex.ids.tools.get_sign_flip_paths", return_value=set()),
     ):
         result = validate_mappings(
             "jt-60sa", "ec_launchers", "4.1.1", _sections(), [_batch()], gc=gc

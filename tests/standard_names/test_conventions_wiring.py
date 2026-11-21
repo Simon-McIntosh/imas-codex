@@ -19,8 +19,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.context import conventions_context_for
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.context import conventions_context_for
+from iter_codex.standard_names.worker_tasks import (
     worker_generate_docs as _owning_worker_generate_docs,
     worker_refine_docs as _owning_worker_refine_docs,
     worker_review_docs as _owning_worker_review_docs,
@@ -47,7 +47,7 @@ class _StubGraph:
 
 def _capture_render_prompt(monkeypatch: pytest.MonkeyPatch) -> list[tuple[str, dict]]:
     """Patch the prompt loader's render_prompt to record each call's context."""
-    from imas_codex.llm import prompt_loader
+    from iter_codex.llm import prompt_loader
 
     calls: list[tuple[str, dict]] = []
 
@@ -61,7 +61,7 @@ def _capture_render_prompt(monkeypatch: pytest.MonkeyPatch) -> list[tuple[str, d
 
 def _stub_graph(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        "imas_codex.graph.client.GraphClient", lambda *a, **k: _StubGraph()
+        "iter_codex.graph.client.GraphClient", lambda *a, **k: _StubGraph()
     )
 
 
@@ -80,7 +80,7 @@ def _context_for(calls: list[tuple[str, dict]], prompt_name: str) -> dict:
 async def test_generate_docs_batch_supplies_conventions(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     selected = conventions_context_for(NAME)
     assert selected, "precondition: the registry selects conventions for the name"
@@ -114,7 +114,7 @@ async def test_generate_docs_batch_supplies_conventions(
 async def test_prepare_docs_review_request_supplies_conventions(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     selected = conventions_context_for(NAME)
     assert selected, "precondition: the registry selects conventions for the name"
@@ -122,7 +122,7 @@ async def test_prepare_docs_review_request_supplies_conventions(
     calls = _capture_render_prompt(monkeypatch)
     _stub_graph(monkeypatch)
     monkeypatch.setattr(
-        "imas_codex.standard_names.context.fetch_review_neighbours",
+        "iter_codex.standard_names.context.fetch_review_neighbours",
         lambda item: {
             "vector_neighbours": [],
             "same_base_neighbours": [],
@@ -156,7 +156,7 @@ async def test_prepare_docs_review_request_supplies_conventions(
 async def test_refine_docs_batch_supplies_conventions(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     selected = conventions_context_for(NAME)
     assert selected, "precondition: the registry selects conventions for the name"
@@ -195,7 +195,7 @@ async def test_refine_docs_batch_supplies_conventions(
 async def test_review_single_batch_supplies_conventions(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from imas_codex.standard_names.review import pipeline as pl
+    from iter_codex.standard_names.review import pipeline as pl
 
     selected = conventions_context_for(NAME)
     assert selected, "precondition: the registry selects conventions for the name"
@@ -205,7 +205,7 @@ async def test_review_single_batch_supplies_conventions(
     async def fake_call_llm_structured(**kwargs: Any):
         return kwargs["response_model"](reviews=[]), 0.0, 0
 
-    import imas_codex.discovery.base.llm as dbllm
+    import iter_codex.discovery.base.llm as dbllm
 
     monkeypatch.setattr(dbllm, "acall_llm_structured", fake_call_llm_structured)
 

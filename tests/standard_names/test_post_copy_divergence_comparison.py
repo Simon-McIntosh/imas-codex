@@ -30,8 +30,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.catalog_import import check_catalog
-from imas_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
+from iter_codex.standard_names.catalog_import import check_catalog
+from iter_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
 
 #: Same text on both sides of the render boundary: the published entry is
 #: folded at the writer's line width, the graph stores it flat.
@@ -141,7 +141,7 @@ def _mock_graph(rows: list[dict]):
     ctx.__exit__ = MagicMock(return_value=False)
     # catalog_import imports GraphClient function-locally from its source
     # module, so the patch targets the binding the import resolves at call time.
-    return patch("imas_codex.graph.client.GraphClient", return_value=ctx)
+    return patch("iter_codex.graph.client.GraphClient", return_value=ctx)
 
 
 def test_folded_prose_passes_while_content_is_identical(tmp_path: Path) -> None:

@@ -12,7 +12,7 @@ import json
 
 import pytest
 
-from imas_codex.standard_names.run_invocation import (
+from iter_codex.standard_names.run_invocation import (
     REDACTED,
     capture_run_invocation,
     redact_argv,
@@ -44,7 +44,7 @@ class TestRedaction:
 
     def test_ordinary_arguments_survive(self) -> None:
         argv = [
-            "imas-codex",
+            "iter-codex",
             "sn",
             "run",
             "--only",
@@ -69,9 +69,9 @@ class TestCapture:
         captured = capture_run_invocation(
             flags={"cost_limit": 80.0},
             scope={},
-            argv=["imas-codex", "sn", "run", "--only", "review_name"],
+            argv=["iter-codex", "sn", "run", "--only", "review_name"],
         )
-        assert captured["invocation"] == "imas-codex sn run --only review_name"
+        assert captured["invocation"] == "iter-codex sn run --only review_name"
 
     def test_arguments_needing_quotes_stay_recoverable(self) -> None:
         captured = capture_run_invocation(

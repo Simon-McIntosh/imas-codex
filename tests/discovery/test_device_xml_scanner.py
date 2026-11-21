@@ -11,8 +11,8 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.discovery.signals.scanners.base import get_scanner
-from imas_codex.discovery.signals.scanners.device_xml import (
+from iter_codex.discovery.signals.scanners.base import get_scanner
+from iter_codex.discovery.signals.scanners.device_xml import (
     JEC2020_SYSTEM_MAP,
     PPF_GEOMETRY_CROSSREFS,
     SECTION_METADATA,
@@ -195,7 +195,7 @@ class TestScannerRegistration:
         assert scanner.scanner_type == "device_xml"
 
     def test_scanner_protocol(self):
-        from imas_codex.discovery.signals.scanners.base import DataSourceScanner
+        from iter_codex.discovery.signals.scanners.base import DataSourceScanner
 
         scanner = DeviceXMLScanner()
         assert isinstance(scanner, DataSourceScanner)
@@ -213,11 +213,11 @@ class TestScannerScan:
 
         with (
             patch(
-                "imas_codex.discovery.signals.scanners.device_xml.run_python_script",
+                "iter_codex.discovery.signals.scanners.device_xml.run_python_script",
                 return_value=mock_output,
             ),
             patch(
-                "imas_codex.discovery.signals.scanners.device_xml.GraphClient",
+                "iter_codex.discovery.signals.scanners.device_xml.GraphClient",
             ) as mock_gc_cls,
         ):
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
@@ -251,7 +251,7 @@ class TestScannerScan:
         scanner = DeviceXMLScanner()
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.run_python_script",
+            "iter_codex.discovery.signals.scanners.device_xml.run_python_script",
             side_effect=RuntimeError("SSH connection refused"),
         ):
             result = await scanner.scan(
@@ -269,7 +269,7 @@ class TestPersistGraphNodes:
     def test_persist_creates_expected_node_types(self):
         """_persist_graph_nodes creates DataSource, epochs, nodes, signals."""
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -290,7 +290,7 @@ class TestPersistGraphNodes:
     def test_signal_count_matches_expected(self):
         """Number of signals matches instances × fields."""
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -318,7 +318,7 @@ class TestPersistGraphNodes:
         created_nodes: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -356,7 +356,7 @@ class TestPersistGraphNodes:
         created_nodes: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -391,7 +391,7 @@ class TestPersistGraphNodes:
         created_nodes: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -431,7 +431,7 @@ class TestPersistGraphNodes:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.create_nodes.return_value = {"processed": 0, "relationships": {}}
@@ -462,7 +462,7 @@ class TestPersistGraphNodes:
         created_nodes: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -492,7 +492,7 @@ class TestScannerCheck:
     @pytest.mark.anyio
     async def test_check_valid_signal(self):
         """check() returns valid for signals with SignalNode data."""
-        from imas_codex.graph.models import FacilitySignal
+        from iter_codex.graph.models import FacilitySignal
 
         scanner = DeviceXMLScanner()
         signal = FacilitySignal(
@@ -505,7 +505,7 @@ class TestScannerCheck:
         )
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = [
@@ -525,7 +525,7 @@ class TestScannerCheck:
     @pytest.mark.anyio
     async def test_check_missing_data_source_node(self):
         """check() returns invalid for signals without data_source_node."""
-        from imas_codex.graph.models import FacilitySignal
+        from iter_codex.graph.models import FacilitySignal
 
         scanner = DeviceXMLScanner()
         signal = FacilitySignal(
@@ -536,7 +536,7 @@ class TestScannerCheck:
             data_access="jet:device_xml:git",
         )
 
-        with patch("imas_codex.discovery.signals.scanners.device_xml.GraphClient"):
+        with patch("iter_codex.discovery.signals.scanners.device_xml.GraphClient"):
             results = await scanner.check(
                 facility="jet",
                 ssh_host="jet",
@@ -621,7 +621,7 @@ class TestMultiVersionDedup:
         signal_calls: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -652,7 +652,7 @@ class TestParseDeviceXMLScript:
 
         spec = importlib.util.spec_from_file_location(
             "parse_device_xml",
-            "imas_codex/remote/scripts/parse_device_xml.py",
+            "iter_codex/remote/scripts/parse_device_xml.py",
         )
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -693,7 +693,7 @@ class TestParseDeviceXMLScript:
 
         spec = importlib.util.spec_from_file_location(
             "parse_device_xml",
-            "imas_codex/remote/scripts/parse_device_xml.py",
+            "iter_codex/remote/scripts/parse_device_xml.py",
         )
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -710,7 +710,7 @@ class TestParseDeviceXMLScript:
 
         spec = importlib.util.spec_from_file_location(
             "parse_device_xml",
-            "imas_codex/remote/scripts/parse_device_xml.py",
+            "iter_codex/remote/scripts/parse_device_xml.py",
         )
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -739,7 +739,7 @@ class TestParseDeviceXMLScript:
 
         spec = importlib.util.spec_from_file_location(
             "parse_device_xml",
-            "imas_codex/remote/scripts/parse_device_xml.py",
+            "iter_codex/remote/scripts/parse_device_xml.py",
         )
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -791,7 +791,7 @@ class TestChain1LimiterParsing:
 
         spec = importlib.util.spec_from_file_location(
             "parse_device_xml",
-            "imas_codex/remote/scripts/parse_device_xml.py",
+            "iter_codex/remote/scripts/parse_device_xml.py",
         )
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -851,7 +851,7 @@ class TestLimiterProvenance:
         created_nodes: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -933,7 +933,7 @@ class TestUsesLimiterRelationship:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -1020,7 +1020,7 @@ class TestUsesLimiterRelationship:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -1099,7 +1099,7 @@ class TestPreDivertorEpochs:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.create_nodes.return_value = {"processed": 0, "relationships": {}}
@@ -1158,7 +1158,7 @@ class TestPreDivertorEpochs:
         created_nodes: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -1217,7 +1217,7 @@ class TestContourSections:
         created_nodes: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -1267,7 +1267,7 @@ class TestContourSections:
         created_nodes: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -1293,7 +1293,7 @@ class TestContourSections:
 
         spec = importlib.util.spec_from_file_location(
             "parse_device_xml",
-            "imas_codex/remote/scripts/parse_device_xml.py",
+            "iter_codex/remote/scripts/parse_device_xml.py",
         )
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -1406,7 +1406,7 @@ class TestCompleteLimiterCoverage:
         created_nodes: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -1597,7 +1597,7 @@ class TestJEC2020Persist:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
 
@@ -1751,7 +1751,7 @@ class TestParseJEC2020Script:
 
         spec = importlib.util.spec_from_file_location(
             "parse_jec2020",
-            "imas_codex/remote/scripts/parse_jec2020.py",
+            "iter_codex/remote/scripts/parse_jec2020.py",
         )
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -1947,7 +1947,7 @@ class TestMCFGPersist:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
 
@@ -2116,7 +2116,7 @@ class TestParseMCFGScript:
 
         spec = importlib.util.spec_from_file_location(
             "parse_mcfg_sensors",
-            "imas_codex/remote/scripts/parse_mcfg_sensors.py",
+            "iter_codex/remote/scripts/parse_mcfg_sensors.py",
         )
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -2280,7 +2280,7 @@ class TestMCFGSensorVersions:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
 
@@ -2390,7 +2390,7 @@ class TestMCFGHandlerInput:
 
     def test_build_script_input_forwards_sensor_versions(self):
         """sensor_versions from config are forwarded to script input."""
-        from imas_codex.discovery.signals.scanners.device_xml import MCFGHandler
+        from iter_codex.discovery.signals.scanners.device_xml import MCFGHandler
 
         handler = MCFGHandler()
         result = handler.build_script_input(MOCK_MCFG_CONFIG_WITH_VERSIONS)
@@ -2401,7 +2401,7 @@ class TestMCFGHandlerInput:
 
     def test_build_script_input_no_versions(self):
         """Without sensor_versions, key is absent from script input."""
-        from imas_codex.discovery.signals.scanners.device_xml import MCFGHandler
+        from iter_codex.discovery.signals.scanners.device_xml import MCFGHandler
 
         handler = MCFGHandler()
         result = handler.build_script_input(MOCK_MCFG_CONFIG)
@@ -2461,7 +2461,7 @@ class TestPPFStaticPersist:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
 
@@ -2575,7 +2575,7 @@ class TestProbeStatusPersistence:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.create_nodes.return_value = {"processed": 0, "relationships": {}}
@@ -2624,7 +2624,7 @@ class TestProbeStatusPersistence:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.create_nodes.return_value = {"processed": 0, "relationships": {}}
@@ -2680,7 +2680,7 @@ class TestPFConfigurationPersistence:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.create_nodes.return_value = {"processed": 0, "relationships": {}}
@@ -2715,7 +2715,7 @@ class TestPFConfigurationPersistence:
         }
         query_calls: list[tuple] = []
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.create_nodes.return_value = {"processed": 0, "relationships": {}}
@@ -2740,7 +2740,7 @@ class TestDeviceXMLProvenance:
         created_nodes: list[list[dict]] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.query.return_value = []
@@ -2777,7 +2777,7 @@ class TestDeviceXMLProvenance:
         query_calls: list[tuple] = []
 
         with patch(
-            "imas_codex.discovery.signals.scanners.device_xml.GraphClient"
+            "iter_codex.discovery.signals.scanners.device_xml.GraphClient"
         ) as mock_gc_cls:
             mock_gc = mock_gc_cls.return_value.__enter__.return_value
             mock_gc.create_nodes.return_value = {"processed": 0, "relationships": {}}

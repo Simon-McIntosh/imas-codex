@@ -13,8 +13,8 @@ semantics rather than a re-implementation of the method.
 
 import re
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.schema import get_schema
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.schema import get_schema
 
 _MERGE_RE = re.compile(
     r"MERGE \(n:(\w+) \{id: item\.id\}\)\s+"

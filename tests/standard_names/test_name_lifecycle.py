@@ -33,22 +33,22 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.chain_history import name_chain_history
-from imas_codex.standard_names.defaults import (
+from iter_codex.standard_names.chain_history import name_chain_history
+from iter_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DEFAULT_REFINE_ROTATIONS,
 )
-from imas_codex.standard_names.graph_store.graph_catalog import (
+from iter_codex.standard_names.graph_store.graph_catalog import (
     _finalize_generated_name_stage,
 )
-from imas_codex.standard_names.graph_store.graph_claim_release import (
+from iter_codex.standard_names.graph_store.graph_claim_release import (
     release_review_names_failed_claims,
 )
-from imas_codex.standard_names.graph_store.graph_refinement import persist_refined_name
-from imas_codex.standard_names.graph_store.graph_review_persistence import (
+from iter_codex.standard_names.graph_store.graph_refinement import persist_refined_name
+from iter_codex.standard_names.graph_store.graph_review_persistence import (
     persist_reviewed_name,
 )
-from imas_codex.standard_names.orphan_sweep import _orphan_sweep_tick
+from iter_codex.standard_names.orphan_sweep import _orphan_sweep_tick
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -66,7 +66,7 @@ _TEST_ID_PREFIX = "lc_test__"
 def _gc():
     """Function-scoped real GraphClient; skip if Neo4j is unreachable."""
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -506,8 +506,8 @@ def test_escalation_at_final_attempt(_gc, _clean, mock_llm):
     rotation_cap=3 exhaustion) and calls process_refine_name_batch.  Asserts
     the LLM was invoked with the escalation model.
     """
-    from imas_codex.standard_names.models import GrammarSegments, RefinedName
-    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    from iter_codex.standard_names.models import GrammarSegments, RefinedName
+    from iter_codex.standard_names.worker_tasks.worker_refine_names import (
         process_refine_name_batch,
     )
 
@@ -536,7 +536,7 @@ def test_escalation_at_final_attempt(_gc, _clean, mock_llm):
     stop_event = asyncio.Event()
 
     with patch(
-        "imas_codex.llm.prompt_loader.render_prompt",
+        "iter_codex.llm.prompt_loader.render_prompt",
         return_value="Refine this name.",
     ):
         processed = asyncio.run(

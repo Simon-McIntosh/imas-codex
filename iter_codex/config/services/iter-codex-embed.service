@@ -1,0 +1,46 @@
+# ITER Codex Embedding Service (GPU)
+# Provides GPU-accelerated embedding via HTTP API
+#
+# Install: iter-codex embed service install
+# Uses systemd specifiers: %h = home directory
+#
+# Deployment locations:
+#   Login node: binds 127.0.0.1, access via SSH tunnel
+#   Titan node: binds 0.0.0.0, access via network or tunnel
+#
+# For Titan deployment, submit via SLURM instead of systemd:
+#   iter-codex embed start
+# Then install the tunnel service on the login node:
+#   see iter-codex-embed-tunnel.service
+
+[Unit]
+Description=ITER Codex Embedding Service (GPU)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h
+
+# Environment setup
+Environment="PATH=%h/.local/bin:/usr/local/bin:/usr/bin"
+Environment="CUDA_VISIBLE_DEVICES=1"
+
+# Use uv to run the embedding server with GPU extra
+# Binds to all interfaces for access from other nodes
+ExecStart=%h/.local/bin/uv run --extra gpu --project %h/Code/iter-codex iter-codex embed start --host 0.0.0.0 --port 18765 --deploy-label login
+
+# Graceful shutdown
+ExecStop=/bin/kill -15 $MAINPID
+TimeoutStopSec=30
+
+Restart=on-failure
+RestartSec=10
+
+# Resource limits - embedding models need GPU memory
+CPUQuota=400%
+MemoryMax=8G
+MemoryHigh=6G
+Nice=5
+
+[Install]
+WantedBy=default.target

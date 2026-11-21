@@ -79,15 +79,15 @@ ROSTER_PATHS = [
 
 
 def census() -> dict:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.export import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.export import (
         _RELEASE_IDENTITY_HOLDS,
         _SHIPPING_NAME_STAGES,
     )
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
-    from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+    from iter_codex.standard_names.source_invariant import find_sourceless_live_names
 
     with GraphClient() as gc:
         sources = [
@@ -193,7 +193,7 @@ def census() -> dict:
 
 
 def replay(path: Path) -> dict:
-    from imas_codex.standard_names.export import (
+    from iter_codex.standard_names.export import (
         _RELEASE_IDENTITY_HOLDS,
         _SHIPPING_NAME_STAGES,
     )
@@ -229,7 +229,7 @@ def replay(path: Path) -> dict:
 
 
 def outofroster(since: str) -> dict:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         sources = list(
@@ -314,7 +314,7 @@ def compose(reset: bool, cost_limit: float, minutes: float, log_path: Path) -> i
         "uv",
         "run",
         "--no-sync",
-        "imas-codex",
+        "iter-codex",
         "sn",
         "run",
         "--focus",

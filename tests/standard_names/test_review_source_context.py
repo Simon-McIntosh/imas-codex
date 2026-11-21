@@ -8,12 +8,12 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names.graph_store import (
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.standard_names.graph_store import (
     graph_claim_release as _owning_graph_claim_release,
     graph_cost_and_claims as _owning_graph_cost_and_claims,
 )
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_extraction_and_enrichment as _owning_worker_extraction_and_enrichment,
     worker_review_names as _owning_worker_review_names,
 )
@@ -224,7 +224,7 @@ def test_name_review_prompts_use_public_flux_area_decomposition(
 
 def test_review_claim_projects_exact_pinned_source_bindings() -> None:
     """The claim carries enough exact-source state for immutable DD grounding."""
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     with (
         patch.object(
@@ -248,7 +248,7 @@ def test_review_claim_projects_exact_pinned_source_bindings() -> None:
 
 def test_strict_review_context_preserves_recursive_isotope_ratio() -> None:
     """The lossless adapter exposes full fields and nested operator scope."""
-    from imas_codex.standard_names.graph_store.graph_foundation import (
+    from iter_codex.standard_names.graph_store.graph_foundation import (
         strict_review_grammar_context,
     )
 
@@ -270,7 +270,7 @@ def test_strict_review_context_preserves_recursive_isotope_ratio() -> None:
 
 def test_review_enrichment_keeps_pins_and_reuses_compose_context() -> None:
     """Pinned text stays authoritative while compose enrichment adds neighbors."""
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     item = _review_item()
 
@@ -307,7 +307,7 @@ def test_review_enrichment_keeps_pins_and_reuses_compose_context() -> None:
 
 def test_semantic_cluster_neighbors_never_expand_source_authority() -> None:
     """Global vector clusters are useful comparators, never must-cover sources."""
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     outline_path = "pf_passive/loop/element/geometry/outline/r"
     conductor_comparator = "pf_active/coil/geometry/outline/r"
@@ -388,7 +388,7 @@ def test_multi_source_review_prompt_renders_complete_context_deterministically()
     None
 ):
     """The rendered prompt preserves every pinned and canonical context channel."""
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     item = _review_item()
     repeated_bindings = [_repeated_source_binding(index) for index in range(11)]
@@ -534,7 +534,7 @@ def test_multi_source_review_prompt_renders_complete_context_deterministically()
 
 def test_unpinned_source_context_is_explicitly_non_authoritative() -> None:
     """Mutable source text never masquerades as an immutable DD snapshot."""
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     item = _review_item()
     item["source_bindings"][0]["dd_snapshot_pinned"] = False
@@ -569,7 +569,7 @@ def test_unpinned_source_context_is_explicitly_non_authoritative() -> None:
 @pytest.mark.asyncio
 async def test_authoritative_escalation_alone_receives_both_critiques() -> None:
     """Blind reviewers stay independent and the escalator sees both critiques."""
-    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    from iter_codex.standard_names.worker_tasks.worker_review_names import (
         _run_rd_quorum_cycles,
     )
 

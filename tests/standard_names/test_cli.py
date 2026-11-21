@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 
 def test_terminal_attachment_recovery_is_dry_run_by_default(
@@ -17,13 +17,13 @@ def test_terminal_attachment_recovery_is_dry_run_by_default(
     manifest = tmp_path / "terminal-recovery.json"
     manifest.write_text("{}", encoding="utf-8")
     receipt = {
-        "schema": "imas-codex.terminal-attachment-recovery-receipt",
+        "schema": "iter-codex.terminal-attachment-recovery-receipt",
         "mode": "dry_run",
         "counts": {"planned": 9, "applied": 0},
         "receipt_hash": "abc",
     }
     with patch(
-        "imas_codex.standard_names.attachment_audit.recover_terminal_attachments",
+        "iter_codex.standard_names.attachment_audit.recover_terminal_attachments",
         return_value=receipt,
     ) as recover:
         result = CliRunner().invoke(
@@ -48,7 +48,7 @@ def test_terminal_attachment_recovery_apply_is_hash_bound(tmp_path: Path) -> Non
     manifest.write_text("{}", encoding="utf-8")
     receipt = {"mode": "applied"}
     with patch(
-        "imas_codex.standard_names.attachment_audit.recover_terminal_attachments",
+        "iter_codex.standard_names.attachment_audit.recover_terminal_attachments",
         return_value=receipt,
     ) as recover:
         result = CliRunner().invoke(
@@ -77,7 +77,7 @@ def test_terminal_attachment_recovery_apply_requires_manifest_hash(
     manifest = tmp_path / "terminal-recovery.json"
     manifest.write_text("{}", encoding="utf-8")
     with patch(
-        "imas_codex.standard_names.attachment_audit.recover_terminal_attachments"
+        "iter_codex.standard_names.attachment_audit.recover_terminal_attachments"
     ) as recover:
         result = CliRunner().invoke(
             sn,

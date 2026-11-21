@@ -14,7 +14,7 @@ from datetime import datetime
 from html import escape
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 ROOT = Path(__file__).resolve().parents[4]
 RUN = Path(
@@ -157,8 +157,8 @@ def prepare():
 
 def execute():
     prepare()
-    from imas_codex.standard_names.graph_store import graph_foundation
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store import graph_foundation
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         retry_failed_sources,
         set_source_compose_hint,
     )
@@ -193,7 +193,7 @@ def execute():
         "uv",
         "run",
         "--no-sync",
-        "imas-codex",
+        "iter-codex",
         "sn",
         "run",
         "--focus",

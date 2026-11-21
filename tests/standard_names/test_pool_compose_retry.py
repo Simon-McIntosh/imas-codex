@@ -129,16 +129,16 @@ def _patch_compose_deps():
     patches = [
         # Context / settings
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
         patch(
-            "imas_codex.settings.get_model",
+            "iter_codex.settings.get_model",
             return_value="local/test-model",
         ),
         # Prompt rendering
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             side_effect=lambda name, *a, **k: (
                 "You are an expert standard name composer."
                 if "system" in name
@@ -147,48 +147,48 @@ def _patch_compose_deps():
         ),
         # Enrichment
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items",
             side_effect=lambda items: None,
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
             return_value=None,
         ),
         patch(
-            "imas_codex.standard_names.context.build_domain_vocabulary_preseed",
+            "iter_codex.standard_names.context.build_domain_vocabulary_preseed",
             return_value="",
         ),
         patch(
-            "imas_codex.standard_names.review.themes.extract_reviewer_themes",
+            "iter_codex.standard_names.review.themes.extract_reviewer_themes",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.example_loader.load_compose_examples",
+            "iter_codex.standard_names.example_loader.load_compose_examples",
             return_value=[],
         ),
         # Graph client
-        patch("imas_codex.graph.client.GraphClient", return_value=mock_gc),
+        patch("iter_codex.graph.client.GraphClient", return_value=mock_gc),
         # Persist
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
+            "iter_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
             return_value=1,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
+            "iter_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
             side_effect=lambda items, **_kwargs: items,
         ),
         # Audits
         patch(
-            "imas_codex.standard_names.audits.run_audits",
+            "iter_codex.standard_names.audits.run_audits",
             return_value=[],
         ),
         # Misc
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_common._auto_detect_physical_base_gaps",
+            "iter_codex.standard_names.worker_tasks.worker_common._auto_detect_physical_base_gaps",
             return_value=[],
         ),
     ]
@@ -209,7 +209,7 @@ class TestPoolComposeRetry:
     @pytest.mark.asyncio
     async def test_all_pass_no_retry(self, _patch_compose_deps) -> None:
         """When all candidates parse on first try, no retry occurs."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
             compose_batch,
         )
 
@@ -228,9 +228,9 @@ class TestPoolComposeRetry:
             return llm_out
 
         with (
-            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+            patch("iter_codex.discovery.base.llm.acall_llm_structured", mock_llm),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
                 return_value=1,
             ),
         ):
@@ -246,7 +246,7 @@ class TestPoolComposeRetry:
         self, _patch_compose_deps
     ) -> None:
         """Events and counts describe only the committed claim winner."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
             compose_batch,
         )
 
@@ -266,13 +266,13 @@ class TestPoolComposeRetry:
 
         events: list[dict[str, Any]] = []
         with (
-            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+            patch("iter_codex.discovery.base.llm.acall_llm_structured", mock_llm),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
+                "iter_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
                 return_value=[f"dd:{first_path}"],
             ),
         ):
@@ -291,7 +291,7 @@ class TestPoolComposeRetry:
         """Grammar failure on first attempt triggers re-enrich + re-LLM."""
         import sys
 
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
             compose_batch,
         )
 
@@ -344,9 +344,9 @@ class TestPoolComposeRetry:
         mock_grammar.compose_standard_name = _mock_compose
 
         with (
-            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+            patch("iter_codex.discovery.base.llm.acall_llm_structured", mock_llm),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
                 return_value=1,
             ),
             patch("asyncio.to_thread", patched_to_thread),
@@ -368,7 +368,7 @@ class TestPoolComposeRetry:
         """Exhausted batch retries fall through to the per-candidate retry."""
         import sys
 
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
             compose_batch,
         )
 
@@ -412,13 +412,13 @@ class TestPoolComposeRetry:
         mock_grammar_module.compose_standard_name = _mock_compose
 
         with (
-            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+            patch("iter_codex.discovery.base.llm.acall_llm_structured", mock_llm),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._grammar_retry",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._grammar_retry",
                 mock_grammar_retry,
             ),
             patch.dict(
@@ -440,7 +440,7 @@ class TestPoolComposeRetry:
     @pytest.mark.asyncio
     async def test_retry_disabled_when_zero(self, _patch_compose_deps) -> None:
         """retry_attempts=0 disables the retry loop entirely."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
             compose_batch,
         )
 
@@ -458,13 +458,13 @@ class TestPoolComposeRetry:
             return _FakeLLMOut(bad_result)
 
         with (
-            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+            patch("iter_codex.discovery.base.llm.acall_llm_structured", mock_llm),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
                 return_value=0,
             ),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._grammar_retry",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._grammar_retry",
                 AsyncMock(return_value=(None, 0.0, 0, 0)),
             ),
         ):
@@ -478,7 +478,7 @@ class TestPoolComposeRetry:
     @pytest.mark.asyncio
     async def test_budget_reserves_for_retries(self, _patch_compose_deps) -> None:
         """Budget reservation accounts for retry_attempts."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
             compose_batch,
         )
 
@@ -492,9 +492,9 @@ class TestPoolComposeRetry:
             return _FakeLLMOut(good_result)
 
         with (
-            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+            patch("iter_codex.discovery.base.llm.acall_llm_structured", mock_llm),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
                 return_value=2,
             ),
         ):
@@ -505,7 +505,7 @@ class TestPoolComposeRetry:
 
         # Local routes are zero-cost but retain an epsilon lease so every call
         # still passes through the same pre-launch accounting path.
-        from imas_codex.standard_names.budget import EPSILON
+        from iter_codex.standard_names.budget import EPSILON
 
         assert mgr.reserved == pytest.approx(EPSILON)
 
@@ -521,8 +521,8 @@ class TestPoolComposeRetry:
         pool's release hook and lets the saturation counter advance, so the run
         exits on the reason that actually stopped it.
         """
-        from imas_codex.standard_names.budget import BudgetExceeded
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        from iter_codex.standard_names.budget import BudgetExceeded
+        from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
             compose_batch,
         )
 
@@ -538,9 +538,9 @@ class TestPoolComposeRetry:
             return _FakeLLMOut(_FakeBatchResult([]))
 
         with (
-            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+            patch("iter_codex.discovery.base.llm.acall_llm_structured", mock_llm),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
                 return_value=1,
             ),
             pytest.raises(BudgetExceeded, match="no reservable provider exposure"),

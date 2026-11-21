@@ -6,10 +6,10 @@ import re
 from collections.abc import Callable
 from pathlib import Path
 
-from imas_codex.graph.schema import GraphSchema
+from iter_codex.graph.schema import GraphSchema
 
 _SCHEMA_PATH = (
-    Path(__file__).parents[2] / "imas_codex" / "schemas" / "standard_name.yaml"
+    Path(__file__).parents[2] / "iter_codex" / "schemas" / "standard_name.yaml"
 )
 _AXIS_SLOT_FAMILIES: dict[str, tuple[re.Pattern[str], Callable[[str], str]]] = {
     "reviewer_score": (

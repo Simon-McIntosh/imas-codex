@@ -58,10 +58,10 @@ class TestSegmentFilterRouting:
         gc = _make_gc(return_value=[_sn_row("electron_temperature")])
 
         with patch(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             return_value=[_sn_row("electron_temperature")],
         ) as mock_backing:
-            from imas_codex.llm.sn_tools import _search_standard_names
+            from iter_codex.llm.sn_tools import _search_standard_names
 
             result = _search_standard_names(
                 "temperature", physical_base="temperature", gc=gc
@@ -77,10 +77,10 @@ class TestSegmentFilterRouting:
         gc = _make_gc(return_value=[])
 
         with patch(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             return_value=[],
         ) as mock_backing:
-            from imas_codex.llm.sn_tools import _search_standard_names
+            from iter_codex.llm.sn_tools import _search_standard_names
 
             _search_standard_names("electron", subject="electron", gc=gc)
 
@@ -93,10 +93,10 @@ class TestSegmentFilterRouting:
         gc = _make_gc(return_value=[])
 
         with patch(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             return_value=[],
         ) as mock_backing:
-            from imas_codex.llm.sn_tools import _search_standard_names
+            from iter_codex.llm.sn_tools import _search_standard_names
 
             _search_standard_names("temperature", gc=gc)
 
@@ -116,7 +116,7 @@ class TestSegmentFilterCypher:
     def test_single_filter_cypher_contains_property_condition(self) -> None:
         """physical_base filter → Cypher must use sn.physical_base property match."""
         gc = _make_gc()
-        from imas_codex.standard_names.search import _segment_filter_search
+        from iter_codex.standard_names.search import _segment_filter_search
 
         _segment_filter_search(
             gc,
@@ -136,7 +136,7 @@ class TestSegmentFilterCypher:
     def test_two_filter_cypher_contains_both_property_conditions(self) -> None:
         """physical_base + subject → both property conditions in Cypher."""
         gc = _make_gc()
-        from imas_codex.standard_names.search import _segment_filter_search
+        from iter_codex.standard_names.search import _segment_filter_search
 
         _segment_filter_search(
             gc,
@@ -156,7 +156,7 @@ class TestSegmentFilterCypher:
     def test_filter_param_value_passed_to_query(self) -> None:
         """Token value must be passed as a Cypher parameter, not inlined."""
         gc = _make_gc()
-        from imas_codex.standard_names.search import _segment_filter_search
+        from iter_codex.standard_names.search import _segment_filter_search
 
         _segment_filter_search(
             gc,
@@ -176,7 +176,7 @@ class TestSegmentFilterCypher:
     def test_unknown_segment_skipped_gracefully(self) -> None:
         """An unrecognised segment key must not raise and must return empty."""
         gc = _make_gc()
-        from imas_codex.standard_names.search import _segment_filter_search
+        from iter_codex.standard_names.search import _segment_filter_search
 
         result = _segment_filter_search(
             gc,
@@ -197,7 +197,7 @@ class TestSegmentFilterCypher:
     def test_k_limit_passed_to_query(self) -> None:
         """k parameter must be forwarded as the LIMIT value."""
         gc = _make_gc()
-        from imas_codex.standard_names.search import _segment_filter_search
+        from iter_codex.standard_names.search import _segment_filter_search
 
         _segment_filter_search(
             gc,
@@ -216,7 +216,7 @@ class TestSegmentFilterCypher:
     def test_physics_domain_is_pushed_into_cypher(self) -> None:
         """physics_domain filtering belongs to the backing query, not the wrapper."""
         gc = _make_gc()
-        from imas_codex.standard_names.search import _segment_filter_search
+        from iter_codex.standard_names.search import _segment_filter_search
 
         _segment_filter_search(
             gc,
@@ -249,10 +249,10 @@ class TestSegmentFilterEndToEnd:
         gc = _make_gc()
 
         with patch(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             return_value=[matching_row],
         ):
-            from imas_codex.llm.sn_tools import _search_standard_names
+            from iter_codex.llm.sn_tools import _search_standard_names
 
             result = _search_standard_names(
                 "temperature", physical_base="temperature", gc=gc
@@ -266,10 +266,10 @@ class TestSegmentFilterEndToEnd:
         gc = _make_gc(return_value=[])
 
         with patch(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             return_value=[],
         ) as mock_backing:
-            from imas_codex.llm.sn_tools import _search_standard_names
+            from iter_codex.llm.sn_tools import _search_standard_names
 
             _search_standard_names(
                 "electron temperature",
@@ -289,10 +289,10 @@ class TestSegmentFilterEndToEnd:
         gc = _make_gc()
 
         with patch(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             return_value=[],
         ):
-            from imas_codex.llm.sn_tools import _search_standard_names
+            from iter_codex.llm.sn_tools import _search_standard_names
 
             result = _search_standard_names(
                 "nothing", physical_base="nonexistent_token", gc=gc
@@ -305,10 +305,10 @@ class TestSegmentFilterEndToEnd:
         gc = _make_gc(return_value=[])
 
         with patch(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             return_value=[],
         ):
-            from imas_codex.llm.sn_tools import _search_standard_names
+            from iter_codex.llm.sn_tools import _search_standard_names
 
             result = _search_standard_names(
                 "temperature", physical_base="temperature", gc=gc
@@ -331,7 +331,7 @@ class TestMCPServerSegmentParams:
         """search_standard_names tool must accept physical_base and other segment kwargs."""
         import inspect
 
-        from imas_codex.llm.server import AgentsServer
+        from iter_codex.llm.server import AgentsServer
 
         server = AgentsServer(dd_only=False, include_standard_names=True)
 

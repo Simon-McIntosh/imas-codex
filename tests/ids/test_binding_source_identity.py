@@ -15,9 +15,9 @@ from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 
-from imas_codex.ids import models, workers
-from imas_codex.ids.mapping import validate_mappings
-from imas_codex.ids.models import (
+from iter_codex.ids import models, workers
+from iter_codex.ids.mapping import validate_mappings
+from iter_codex.ids.models import (
     SignalMappingBatch,
     SignalMappingEntry,
     TargetAssignment,
@@ -77,11 +77,11 @@ def _passing_report() -> MagicMock:
 def _validate(sections: TargetAssignmentBatch, batches: list[SignalMappingBatch]):
     with (
         patch(
-            "imas_codex.ids.validation.validate_mapping",
+            "iter_codex.ids.validation.validate_mapping",
             return_value=_passing_report(),
         ),
-        patch("imas_codex.ids.validation.check_coverage_threshold", return_value=[]),
-        patch("imas_codex.ids.tools.get_sign_flip_paths", return_value=set()),
+        patch("iter_codex.ids.validation.check_coverage_threshold", return_value=[]),
+        patch("iter_codex.ids.tools.get_sign_flip_paths", return_value=set()),
     ):
         return validate_mappings(
             "jt-60sa", "pf_active", "4.1.1", sections, batches, gc=MagicMock()
@@ -222,7 +222,7 @@ def test_next_ids_persists_after_a_binding_failure(monkeypatch):
     written: list[str] = []
 
     def fake_write(binding, gc):
-        from imas_codex.ids.graph_ops import CandidateWriteError
+        from iter_codex.ids.graph_ops import CandidateWriteError
 
         if binding.target_id == "pf_active/coil/missing":
             raise CandidateWriteError(
@@ -233,8 +233,8 @@ def test_next_ids_persists_after_a_binding_failure(monkeypatch):
         return 1
 
     monkeypatch.setattr(workers, "GraphClient", lambda: MagicMock())
-    monkeypatch.setattr("imas_codex.ids.mapping.adiscover_assembly", no_assembly)
-    monkeypatch.setattr("imas_codex.ids.mapping.validate_mappings", fake_validate)
+    monkeypatch.setattr("iter_codex.ids.mapping.adiscover_assembly", no_assembly)
+    monkeypatch.setattr("iter_codex.ids.mapping.validate_mappings", fake_validate)
     monkeypatch.setattr(workers, "refresh_mapping_status", lambda *_args: "validated")
     monkeypatch.setattr(models, "write_mapping_binding", fake_write)
 
@@ -258,11 +258,11 @@ def test_next_ids_persists_after_a_binding_failure(monkeypatch):
 
 
 def test_run_summary_counts_persisted_and_exits_non_zero(monkeypatch):
-    import imas_codex.cli.discover.common as common
-    import imas_codex.cli.map as map_cli
-    import imas_codex.graph.client as gclient
-    import imas_codex.ids.tools as ids_tools
-    import imas_codex.settings as settings
+    import iter_codex.cli.discover.common as common
+    import iter_codex.cli.map as map_cli
+    import iter_codex.graph.client as gclient
+    import iter_codex.ids.tools as ids_tools
+    import iter_codex.settings as settings
 
     printed: list[str] = []
 

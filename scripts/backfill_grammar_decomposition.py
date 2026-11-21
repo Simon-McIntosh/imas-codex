@@ -19,8 +19,8 @@ import argparse
 import logging
 import sys
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_store.graph_catalog import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_store.graph_catalog import (
     _write_grammar_decomposition,
 )
 

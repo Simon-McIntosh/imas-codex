@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 
-from imas_codex.graph.client import EXPECTED_VECTOR_INDEXES, GraphClient
+from iter_codex.graph.client import EXPECTED_VECTOR_INDEXES, GraphClient
 
 
 class TestVectorQuantization:
@@ -34,7 +34,7 @@ class TestVectorQuantization:
         client.session.return_value = mock_sess
 
         with patch(
-            "imas_codex.graph.client.get_embedding_dimension", return_value=1024
+            "iter_codex.graph.client.get_embedding_dimension", return_value=1024
         ):
             # Call the real method with our mocked client
             GraphClient.ensure_vector_indexes(client)
@@ -69,7 +69,7 @@ class TestVectorQuantization:
         client.session.return_value = mock_sess
 
         with patch(
-            "imas_codex.graph.client.get_embedding_dimension", return_value=1024
+            "iter_codex.graph.client.get_embedding_dimension", return_value=1024
         ):
             GraphClient.ensure_vector_indexes(client)
 
@@ -149,7 +149,7 @@ class TestDimensionMismatchDetection:
         client.session.return_value = mock_sess
 
         with patch(
-            "imas_codex.graph.client.get_embedding_dimension", return_value=1024
+            "iter_codex.graph.client.get_embedding_dimension", return_value=1024
         ):
             GraphClient.ensure_vector_indexes(client)
 
@@ -181,7 +181,7 @@ class TestDimensionMismatchDetection:
         mock_sess.run.side_effect = fake_run
 
         with patch(
-            "imas_codex.graph.client.get_embedding_dimension", return_value=1024
+            "iter_codex.graph.client.get_embedding_dimension", return_value=1024
         ):
             GraphClient.ensure_vector_indexes(client)
 
@@ -224,7 +224,7 @@ class TestDimensionMismatchDetection:
         mock_sess.run.side_effect = fake_run
 
         with patch(
-            "imas_codex.graph.client.get_embedding_dimension", return_value=1024
+            "iter_codex.graph.client.get_embedding_dimension", return_value=1024
         ):
             GraphClient.ensure_vector_indexes(client)
 

@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.cli.sn import cypher_mutation_clause
-from imas_codex.standard_names import protection
+from iter_codex.cli.sn import cypher_mutation_clause
+from iter_codex.standard_names import protection
 
 #: Line of the string literal opening the automatic-deletion protection query.
 _PROTECTION_QUERY_LINE = 99

@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.fanout.config import FanoutSettings
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.fanout.config import FanoutSettings
+from iter_codex.standard_names.graph_store import (
     graph_claim_release as _owning_graph_claim_release,
     graph_refinement as _owning_graph_refinement,
 )
@@ -93,47 +93,47 @@ def _worker_dependencies(candidate_names: list[str], persist_calls: list[dict]):
         return {"old_name": kwargs["old_name"], "new_name": kwargs["new_name"]}
 
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=_GraphClient()),
+        patch("iter_codex.graph.client.GraphClient", return_value=_GraphClient()),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_call_llm,
         ),
-        patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
+        patch("iter_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.example_loader.load_compose_examples",
+            "iter_codex.standard_names.example_loader.load_compose_examples",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_generate_docs._enrich_dd_path_context",
+            "iter_codex.standard_names.worker_tasks.worker_generate_docs._enrich_dd_path_context",
             return_value=None,
         ),
         patch(
-            "imas_codex.standard_names.canonical.find_name_key_duplicate",
+            "iter_codex.standard_names.canonical.find_name_key_duplicate",
             return_value=None,
         ),
         patch(
-            "imas_codex.standard_names.fanout.load_settings",
+            "iter_codex.standard_names.fanout.load_settings",
             side_effect=_refine_fanout_settings,
         ),
-        patch("imas_codex.settings.get_model", return_value="test/refiner"),
+        patch("iter_codex.settings.get_model", return_value="test/refiner"),
         patch(
-            "imas_codex.standard_names.workers.model_provider_exposure",
+            "iter_codex.standard_names.workers.model_provider_exposure",
             return_value=1.0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
+            "iter_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
             side_effect=_persist,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"
+            "iter_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"
         ) as bump,
     ):
         yield bump
@@ -141,7 +141,7 @@ def _worker_dependencies(candidate_names: list[str], persist_calls: list[dict]):
 
 @pytest.mark.asyncio
 async def test_focused_scope_survives_multiple_refine_rotations() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    from iter_codex.standard_names.worker_tasks.worker_refine_names import (
         process_refine_name_batch,
     )
 
@@ -175,7 +175,7 @@ async def test_focused_scope_survives_multiple_refine_rotations() -> None:
 
 @pytest.mark.asyncio
 async def test_focused_refine_keeps_audit_counter_separate() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    from iter_codex.standard_names.worker_tasks.worker_refine_names import (
         process_refine_name_batch,
     )
 
@@ -197,7 +197,7 @@ async def test_focused_refine_keeps_audit_counter_separate() -> None:
 
 @pytest.mark.asyncio
 async def test_unscoped_refine_retains_audit_run_behavior() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    from iter_codex.standard_names.worker_tasks.worker_refine_names import (
         process_refine_name_batch,
     )
 
@@ -214,7 +214,7 @@ async def test_unscoped_refine_retains_audit_run_behavior() -> None:
 
 @pytest.mark.asyncio
 async def test_unscoped_refine_ignores_one_historical_scope() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    from iter_codex.standard_names.worker_tasks.worker_refine_names import (
         process_refine_name_batch,
     )
 
@@ -233,7 +233,7 @@ async def test_unscoped_refine_ignores_one_historical_scope() -> None:
 
 @pytest.mark.asyncio
 async def test_unscoped_refine_ignores_mixed_historical_scopes() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    from iter_codex.standard_names.worker_tasks.worker_refine_names import (
         process_refine_name_batch,
     )
 
@@ -260,7 +260,7 @@ async def test_unscoped_refine_ignores_mixed_historical_scopes() -> None:
 
 @pytest.mark.asyncio
 async def test_pinned_rename_restage_keeps_existing_focused_scope() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    from iter_codex.standard_names.worker_tasks.worker_refine_names import (
         process_refine_name_batch,
     )
 
@@ -271,7 +271,7 @@ async def test_pinned_rename_restage_keeps_existing_focused_scope() -> None:
     with (
         _worker_dependencies(["unused"], calls),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release.resubmit_pinned_rename_for_review",
+            "iter_codex.standard_names.graph_store.graph_claim_release.resubmit_pinned_rename_for_review",
             return_value="resubmitted",
         ) as resubmit,
     ):
@@ -301,7 +301,7 @@ async def test_pinned_rename_restage_keeps_existing_focused_scope() -> None:
 async def test_inconsistent_focused_metadata_refuses_before_persistence(
     scope_metadata: str | None,
 ) -> None:
-    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    from iter_codex.standard_names.worker_tasks.worker_refine_names import (
         RefineScopeContinuityError,
         process_refine_name_batch,
     )
@@ -323,7 +323,7 @@ async def test_inconsistent_focused_metadata_refuses_before_persistence(
 
 @pytest.mark.asyncio
 async def test_pool_adapter_passes_explicit_refine_scope() -> None:
-    from imas_codex.standard_names import loop
+    from iter_codex.standard_names import loop
 
     captured: dict = {}
 
@@ -333,10 +333,10 @@ async def test_pool_adapter_passes_explicit_refine_scope() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_refine_names.process_refine_name_batch",
+            "iter_codex.standard_names.worker_tasks.worker_refine_names.process_refine_name_batch",
             side_effect=_process,
         ),
-        patch("imas_codex.settings.get_pool_replicas", return_value=1),
+        patch("iter_codex.settings.get_pool_replicas", return_value=1),
     ):
         specs = loop._build_pool_specs(
             _manager("audit-run"),
@@ -354,7 +354,7 @@ async def test_pool_adapter_passes_explicit_refine_scope() -> None:
 
 
 def test_atomic_claim_returns_canonical_scope_identity() -> None:
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     transaction = MagicMock()
     transaction.closed = False
@@ -385,7 +385,7 @@ def test_atomic_claim_returns_canonical_scope_identity() -> None:
     graph.session = _session
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ),
         patch.object(
@@ -394,7 +394,7 @@ def test_atomic_claim_returns_canonical_scope_identity() -> None:
             side_effect=lambda items, **_kwargs: items,
         ),
         patch(
-            "imas_codex.standard_names.chain_history.name_chain_history",
+            "iter_codex.standard_names.chain_history.name_chain_history",
             return_value=[],
         ),
     ):
@@ -408,7 +408,7 @@ def test_atomic_claim_returns_canonical_scope_identity() -> None:
 
 @pytest.mark.asyncio
 async def test_focused_successor_remains_claimable_by_same_scope() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    from iter_codex.standard_names.worker_tasks.worker_refine_names import (
         process_refine_name_batch,
     )
 

@@ -17,7 +17,7 @@ class TestLatexDefCheck:
 
     def test_pass_symbols_defined(self):
         """Symbols with definitions pass."""
-        from imas_codex.standard_names.audits import latex_def_check
+        from iter_codex.standard_names.audits import latex_def_check
 
         candidate = {
             "documentation": (
@@ -32,7 +32,7 @@ class TestLatexDefCheck:
 
     def test_fail_undefined_symbol(self):
         """Symbols without definitions are flagged."""
-        from imas_codex.standard_names.audits import latex_def_check
+        from iter_codex.standard_names.audits import latex_def_check
 
         candidate = {
             "documentation": (
@@ -48,7 +48,7 @@ class TestLatexDefCheck:
     def test_fail_unit_only_is_not_a_definition(self):
         """A bare parenthetical unit does not satisfy the check — it states
         the symbol's dimension, not which quantity it denotes."""
-        from imas_codex.standard_names.audits import latex_def_check
+        from iter_codex.standard_names.audits import latex_def_check
 
         candidate = {
             "documentation": (
@@ -63,7 +63,7 @@ class TestLatexDefCheck:
     def test_pass_name_link_is_identity(self):
         """A `name:` link binds a symbol to a catalog quantity — a valid
         identity even with no definition verb present."""
-        from imas_codex.standard_names.audits import latex_def_check
+        from iter_codex.standard_names.audits import latex_def_check
 
         candidate = {
             "documentation": (
@@ -78,7 +78,7 @@ class TestLatexDefCheck:
         """A symbol defined by identity (a def word) passes. latex_def_check
         scores identity only; unit tokens have no place in documentation prose
         and are policed separately (see audit:symbol_units)."""
-        from imas_codex.standard_names.audits import latex_def_check
+        from iter_codex.standard_names.audits import latex_def_check
 
         candidate = {
             "documentation": (
@@ -93,7 +93,7 @@ class TestLatexDefCheck:
         """Universal physics constants (\\pi, \\alpha, \\mu_0, \\hbar,
         k_B) and numeric factors thereof (``2\\pi``, ``\\pi/2``) do not
         require a definition sentence."""
-        from imas_codex.standard_names.audits import latex_def_check
+        from iter_codex.standard_names.audits import latex_def_check
 
         for sym in (
             r"\pi",
@@ -114,14 +114,14 @@ class TestLatexDefCheck:
 
     def test_pass_empty_documentation(self):
         """No documentation produces no issues."""
-        from imas_codex.standard_names.audits import latex_def_check
+        from iter_codex.standard_names.audits import latex_def_check
 
         assert latex_def_check({"documentation": ""}) == []
         assert latex_def_check({}) == []
 
     def test_pass_no_latex_symbols(self):
         """Documentation without LaTeX symbols passes."""
-        from imas_codex.standard_names.audits import latex_def_check
+        from iter_codex.standard_names.audits import latex_def_check
 
         candidate = {"documentation": "A simple description without math."}
         assert latex_def_check(candidate) == []
@@ -136,7 +136,7 @@ class TestSymbolUnitsCheck:
     """Tests for symbol_units_check (advisory 'no units in prose')."""
 
     def _flag(self, doc):
-        from imas_codex.standard_names.audits import symbol_units_check
+        from iter_codex.standard_names.audits import symbol_units_check
 
         return symbol_units_check({"documentation": doc})
 
@@ -200,13 +200,13 @@ class TestSymbolUnitsCheck:
 
     def test_pass_empty(self):
         assert self._flag("") == []
-        from imas_codex.standard_names.audits import symbol_units_check
+        from iter_codex.standard_names.audits import symbol_units_check
 
         assert symbol_units_check({}) == []
 
     def test_advisory_not_critical(self):
         """The check is advisory — it must not be in CRITICAL_CHECKS."""
-        from imas_codex.standard_names.audits import CRITICAL_CHECKS
+        from iter_codex.standard_names.audits import CRITICAL_CHECKS
 
         assert "symbol_units_check" not in CRITICAL_CHECKS
 
@@ -221,7 +221,7 @@ class TestProvenanceVerbCheck:
 
     def test_pass_no_provenance_verb(self):
         """Clean name passes."""
-        from imas_codex.standard_names.audits import provenance_verb_check
+        from iter_codex.standard_names.audits import provenance_verb_check
 
         candidate = {"id": "electron_temperature"}
         issues = provenance_verb_check(candidate)
@@ -229,7 +229,7 @@ class TestProvenanceVerbCheck:
 
     def test_fail_measured_in_name(self):
         """Name with 'measured' when source lacks it is flagged."""
-        from imas_codex.standard_names.audits import provenance_verb_check
+        from iter_codex.standard_names.audits import provenance_verb_check
 
         candidate = {"id": "electron_temperature_measured"}
         issues = provenance_verb_check(
@@ -240,7 +240,7 @@ class TestProvenanceVerbCheck:
 
     def test_pass_measured_in_both(self):
         """Name with 'measured' is OK when source path also has it."""
-        from imas_codex.standard_names.audits import provenance_verb_check
+        from iter_codex.standard_names.audits import provenance_verb_check
 
         candidate = {"id": "electron_temperature_measured"}
         issues = provenance_verb_check(candidate, source_path="diagnostics/measured/te")
@@ -257,7 +257,7 @@ class TestSynonymCheck:
 
     def test_pass_no_similar(self):
         """No existing SNs means no synonym issues."""
-        from imas_codex.standard_names.audits import synonym_check
+        from iter_codex.standard_names.audits import synonym_check
 
         candidate = {
             "id": "electron_temperature",
@@ -269,7 +269,7 @@ class TestSynonymCheck:
 
     def test_fail_high_cosine(self):
         """Near-identical embedding with same unit is flagged."""
-        from imas_codex.standard_names.audits import synonym_check
+        from iter_codex.standard_names.audits import synonym_check
 
         vec = np.random.rand(384).astype(np.float32)
         # Create a very similar vector
@@ -293,7 +293,7 @@ class TestSynonymCheck:
 
     def test_pass_different_unit(self):
         """Same embedding but different unit is not flagged."""
-        from imas_codex.standard_names.audits import synonym_check
+        from iter_codex.standard_names.audits import synonym_check
 
         vec = np.random.rand(384).astype(np.float32)
 
@@ -323,14 +323,14 @@ class TestUnitDimensionCheck:
 
     def test_pass_consistent(self):
         """Description consistent with unit passes."""
-        from imas_codex.standard_names.audits import unit_dimension_check
+        from iter_codex.standard_names.audits import unit_dimension_check
 
         candidate = {"unit": "eV", "description": "Electron temperature profile"}
         assert unit_dimension_check(candidate) == []
 
     def test_fail_inconsistent(self):
         """Description inconsistent with unit is flagged."""
-        from imas_codex.standard_names.audits import unit_dimension_check
+        from iter_codex.standard_names.audits import unit_dimension_check
 
         candidate = {"unit": "A", "description": "Radial position of the boundary"}
         issues = unit_dimension_check(candidate)
@@ -339,7 +339,7 @@ class TestUnitDimensionCheck:
 
     def test_pass_dimensionless(self):
         """Dimensionless unit is not checked."""
-        from imas_codex.standard_names.audits import unit_dimension_check
+        from iter_codex.standard_names.audits import unit_dimension_check
 
         candidate = {"unit": "1", "description": "Safety factor profile"}
         assert unit_dimension_check(candidate) == []
@@ -355,7 +355,7 @@ class TestMultiSubjectCheck:
 
     def test_pass_single_subject(self):
         """Single-subject name passes."""
-        from imas_codex.standard_names.audits import multi_subject_check
+        from iter_codex.standard_names.audits import multi_subject_check
 
         candidate = {"id": "electron_temperature"}
         issues = multi_subject_check(candidate)
@@ -363,7 +363,7 @@ class TestMultiSubjectCheck:
 
     def test_fail_multiple_subjects(self):
         """Name with two different subject tokens is flagged."""
-        from imas_codex.standard_names.audits import multi_subject_check
+        from iter_codex.standard_names.audits import multi_subject_check
 
         # This will flag if two Subject enum values appear in name tokens
         candidate = {"id": "electron_ion_temperature"}
@@ -382,7 +382,7 @@ class TestCocosSpecificityCheck:
 
     def test_pass_cocos_mentioned(self):
         """Documentation mentioning COCOS with digit passes."""
-        from imas_codex.standard_names.audits import cocos_specificity_check
+        from iter_codex.standard_names.audits import cocos_specificity_check
 
         candidate = {
             "documentation": "Sign convention: Positive when COCOS 11 convention applies."
@@ -392,7 +392,7 @@ class TestCocosSpecificityCheck:
 
     def test_fail_no_cocos(self):
         """Documentation without COCOS mention when source has COCOS type is flagged."""
-        from imas_codex.standard_names.audits import cocos_specificity_check
+        from iter_codex.standard_names.audits import cocos_specificity_check
 
         candidate = {"documentation": "The poloidal magnetic flux per radian."}
         issues = cocos_specificity_check(candidate, source_cocos_type="psi_like")
@@ -401,7 +401,7 @@ class TestCocosSpecificityCheck:
 
     def test_pass_no_cocos_type(self):
         """No source COCOS type means no check."""
-        from imas_codex.standard_names.audits import cocos_specificity_check
+        from iter_codex.standard_names.audits import cocos_specificity_check
 
         candidate = {"documentation": "Simple quantity."}
         issues = cocos_specificity_check(candidate, source_cocos_type=None)
@@ -418,7 +418,7 @@ class TestRunAudits:
 
     def test_clean_candidate_passes(self):
         """A well-formed candidate passes all audits."""
-        from imas_codex.standard_names.audits import run_audits
+        from iter_codex.standard_names.audits import run_audits
 
         candidate = {
             "id": "electron_temperature",
@@ -434,7 +434,7 @@ class TestRunAudits:
 
     def test_has_critical_audit_failure(self):
         """Critical check tag detection works."""
-        from imas_codex.standard_names.audits import has_critical_audit_failure
+        from iter_codex.standard_names.audits import has_critical_audit_failure
 
         assert (
             has_critical_audit_failure(["audit:latex_def_check: missing def"]) is True
@@ -469,7 +469,7 @@ class TestPlaceholderCheck:
     """Tests for placeholder_check audit."""
 
     def test_pass_concrete_sign_convention(self):
-        from imas_codex.standard_names.audits import placeholder_check
+        from iter_codex.standard_names.audits import placeholder_check
 
         c = {
             "documentation": (
@@ -480,7 +480,7 @@ class TestPlaceholderCheck:
         assert placeholder_check(c) == []
 
     def test_fail_bracketed_condition(self):
-        from imas_codex.standard_names.audits import placeholder_check
+        from iter_codex.standard_names.audits import placeholder_check
 
         c = {"documentation": "Sign convention: Positive when [condition]."}
         issues = placeholder_check(c)
@@ -488,7 +488,7 @@ class TestPlaceholderCheck:
         assert "placeholder_check" in issues[0]
 
     def test_fail_bracketed_specific_condition(self):
-        from imas_codex.standard_names.audits import placeholder_check
+        from iter_codex.standard_names.audits import placeholder_check
 
         c = {"description": "Positive when [specific physical condition]"}
         issues = placeholder_check(c)
@@ -496,7 +496,7 @@ class TestPlaceholderCheck:
 
     def test_pass_markdown_link(self):
         """Markdown [text](url) links are not placeholders."""
-        from imas_codex.standard_names.audits import placeholder_check
+        from iter_codex.standard_names.audits import placeholder_check
 
         c = {
             "documentation": (
@@ -507,7 +507,7 @@ class TestPlaceholderCheck:
 
     def test_pass_numeric_bracket(self):
         """Numeric brackets like [1] or citation-like markers are not flagged."""
-        from imas_codex.standard_names.audits import placeholder_check
+        from iter_codex.standard_names.audits import placeholder_check
 
         c = {"documentation": "See reference [1] and range [0, 1]."}
         assert placeholder_check(c) == []
@@ -522,26 +522,26 @@ class TestUnitValidityCheck:
     """Tests for unit_validity_check audit."""
 
     def test_pass_real_unit(self):
-        from imas_codex.standard_names.audits import unit_validity_check
+        from iter_codex.standard_names.audits import unit_validity_check
 
         for unit in ("m", "T", "Wb", "eV", "m^2", "kg*m/s^2", "m.s^-1", "1"):
             assert unit_validity_check({"unit": unit}) == [], f"failed for {unit}"
 
     def test_fail_m_caret_dimension(self):
-        from imas_codex.standard_names.audits import unit_validity_check
+        from iter_codex.standard_names.audits import unit_validity_check
 
         issues = unit_validity_check({"unit": "m^dimension"})
         assert len(issues) == 1
         assert "dimension" in issues[0]
 
     def test_fail_fourier_in_unit(self):
-        from imas_codex.standard_names.audits import unit_validity_check
+        from iter_codex.standard_names.audits import unit_validity_check
 
         issues = unit_validity_check({"unit": "T*fourier"})
         assert len(issues) == 1
 
     def test_pass_empty_unit(self):
-        from imas_codex.standard_names.audits import unit_validity_check
+        from iter_codex.standard_names.audits import unit_validity_check
 
         assert unit_validity_check({"unit": ""}) == []
         assert unit_validity_check({"unit": "dimensionless"}) == []
@@ -551,29 +551,29 @@ class TestGenericNounCheck:
     """Tests for generic_noun_check audit."""
 
     def test_fail_bare_geometry(self):
-        from imas_codex.standard_names.audits import generic_noun_check
+        from iter_codex.standard_names.audits import generic_noun_check
 
         issues = generic_noun_check({"id": "geometry"})
         assert len(issues) == 1
         assert "generic_noun_check" in issues[0]
 
     def test_fail_bare_data(self):
-        from imas_codex.standard_names.audits import generic_noun_check
+        from iter_codex.standard_names.audits import generic_noun_check
 
         assert len(generic_noun_check({"id": "data"})) == 1
 
     def test_pass_qualified_geometry(self):
-        from imas_codex.standard_names.audits import generic_noun_check
+        from iter_codex.standard_names.audits import generic_noun_check
 
         assert generic_noun_check({"id": "grid_object_geometry"}) == []
 
     def test_pass_multi_token(self):
-        from imas_codex.standard_names.audits import generic_noun_check
+        from iter_codex.standard_names.audits import generic_noun_check
 
         assert generic_noun_check({"id": "electron_temperature"}) == []
 
     def test_fail_generic_qualifier_plus_generic_noun(self):
-        from imas_codex.standard_names.audits import generic_noun_check
+        from iter_codex.standard_names.audits import generic_noun_check
 
         assert len(generic_noun_check({"id": "raw_data"})) == 1
 
@@ -582,7 +582,7 @@ class TestTautologyCheck:
     """Tests for tautology_check audit."""
 
     def test_fail_position_of_position(self):
-        from imas_codex.standard_names.audits import tautology_check
+        from iter_codex.standard_names.audits import tautology_check
 
         issues = tautology_check({"id": "radial_position_of_reference_position"})
         assert len(issues) == 1
@@ -590,22 +590,22 @@ class TestTautologyCheck:
         assert "position" in issues[0]
 
     def test_fail_component_of_component(self):
-        from imas_codex.standard_names.audits import tautology_check
+        from iter_codex.standard_names.audits import tautology_check
 
         assert len(tautology_check({"id": "normal_component_of_field_component"})) == 1
 
     def test_pass_no_of(self):
-        from imas_codex.standard_names.audits import tautology_check
+        from iter_codex.standard_names.audits import tautology_check
 
         assert tautology_check({"id": "electron_temperature"}) == []
 
     def test_pass_different_heads(self):
-        from imas_codex.standard_names.audits import tautology_check
+        from iter_codex.standard_names.audits import tautology_check
 
         assert tautology_check({"id": "radial_position_of_plasma_boundary"}) == []
 
     def test_pass_of_without_tautology_head(self):
-        from imas_codex.standard_names.audits import tautology_check
+        from iter_codex.standard_names.audits import tautology_check
 
         assert tautology_check({"id": "elongation_of_plasma_boundary"}) == []
 
@@ -614,24 +614,24 @@ class TestSpectralSuffixCheck:
     """Tests for spectral_suffix_check audit."""
 
     def test_fail_fourier_coefficients(self):
-        from imas_codex.standard_names.audits import spectral_suffix_check
+        from iter_codex.standard_names.audits import spectral_suffix_check
 
         issues = spectral_suffix_check({"id": "normal_field_fourier_coefficients"})
         assert len(issues) == 1
         assert "spectral_suffix_check" in issues[0]
 
     def test_fail_harmonics(self):
-        from imas_codex.standard_names.audits import spectral_suffix_check
+        from iter_codex.standard_names.audits import spectral_suffix_check
 
         assert len(spectral_suffix_check({"id": "magnetic_field_harmonics"})) == 1
 
     def test_pass_mode_prefix(self):
-        from imas_codex.standard_names.audits import spectral_suffix_check
+        from iter_codex.standard_names.audits import spectral_suffix_check
 
         assert spectral_suffix_check({"id": "mode_amplitude_of_normal_field"}) == []
 
     def test_pass_ordinary_name(self):
-        from imas_codex.standard_names.audits import spectral_suffix_check
+        from iter_codex.standard_names.audits import spectral_suffix_check
 
         assert spectral_suffix_check({"id": "poloidal_magnetic_flux"}) == []
 
@@ -640,30 +640,30 @@ class TestAbbreviationCheck:
     """Tests for abbreviation_check audit."""
 
     def test_fail_norm_prefix(self):
-        from imas_codex.standard_names.audits import abbreviation_check
+        from iter_codex.standard_names.audits import abbreviation_check
 
         issues = abbreviation_check({"id": "norm_poloidal_magnetic_flux"})
         assert len(issues) == 1
         assert "normalized" in issues[0]
 
     def test_fail_perp_interior(self):
-        from imas_codex.standard_names.audits import abbreviation_check
+        from iter_codex.standard_names.audits import abbreviation_check
 
         assert len(abbreviation_check({"id": "velocity_perp_component"})) == 1
 
     def test_fail_temp_prefix(self):
-        from imas_codex.standard_names.audits import abbreviation_check
+        from iter_codex.standard_names.audits import abbreviation_check
 
         assert len(abbreviation_check({"id": "temp_profile"})) == 1
 
     def test_pass_full_words(self):
-        from imas_codex.standard_names.audits import abbreviation_check
+        from iter_codex.standard_names.audits import abbreviation_check
 
         assert abbreviation_check({"id": "normalized_poloidal_magnetic_flux"}) == []
         assert abbreviation_check({"id": "perpendicular_velocity_component"}) == []
 
     def test_pass_empty(self):
-        from imas_codex.standard_names.audits import abbreviation_check
+        from iter_codex.standard_names.audits import abbreviation_check
 
         assert abbreviation_check({"id": ""}) == []
 
@@ -672,7 +672,7 @@ class TestNameDescriptionConsistencyCheck:
     """Tests for name_description_consistency_check audit."""
 
     def test_fail_fourier_desc_bare_name(self):
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             name_description_consistency_check,
         )
 
@@ -685,7 +685,7 @@ class TestNameDescriptionConsistencyCheck:
         assert len(issues) == 1
 
     def test_pass_decomposition_marker(self):
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             name_description_consistency_check,
         )
 
@@ -700,7 +700,7 @@ class TestNameDescriptionConsistencyCheck:
         )
 
     def test_pass_plain_desc(self):
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             name_description_consistency_check,
         )
 
@@ -715,7 +715,7 @@ class TestNameDescriptionConsistencyCheck:
         )
 
     def test_pass_missing_fields(self):
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             name_description_consistency_check,
         )
 
@@ -726,7 +726,7 @@ class TestAmericanSpellingCheck:
     """Tests for american_spelling_check audit (NC-17)."""
 
     def test_fail_british_in_name(self):
-        from imas_codex.standard_names.audits import american_spelling_check
+        from iter_codex.standard_names.audits import american_spelling_check
 
         issues = american_spelling_check(
             {"id": "normalised_poloidal_flux", "description": "A flux."}
@@ -735,7 +735,7 @@ class TestAmericanSpellingCheck:
         assert any("field 'name'" in i for i in issues)
 
     def test_fail_british_in_description(self):
-        from imas_codex.standard_names.audits import american_spelling_check
+        from iter_codex.standard_names.audits import american_spelling_check
 
         issues = american_spelling_check(
             {
@@ -749,7 +749,7 @@ class TestAmericanSpellingCheck:
         assert "centre" in joined and "analysed" in joined
 
     def test_fail_british_in_constraints(self):
-        from imas_codex.standard_names.audits import american_spelling_check
+        from iter_codex.standard_names.audits import american_spelling_check
 
         issues = american_spelling_check(
             {
@@ -761,7 +761,7 @@ class TestAmericanSpellingCheck:
         assert any("constraints[0]" in i for i in issues)
 
     def test_pass_american_only(self):
-        from imas_codex.standard_names.audits import american_spelling_check
+        from iter_codex.standard_names.audits import american_spelling_check
 
         assert (
             american_spelling_check(
@@ -775,7 +775,7 @@ class TestAmericanSpellingCheck:
         )
 
     def test_case_insensitive(self):
-        from imas_codex.standard_names.audits import american_spelling_check
+        from iter_codex.standard_names.audits import american_spelling_check
 
         issues = american_spelling_check(
             {"id": "x", "description": "The Normalised profile."}
@@ -787,7 +787,7 @@ class TestAmericanSpellingCheck:
         """'gauge' is the standard US spelling (Merriam-Webster headword) and
         the spelling the IMAS DD uses; breame maps it to the niche variant
         'gage', so it must be allowlisted and never flagged."""
-        from imas_codex.standard_names.audits import american_spelling_check
+        from iter_codex.standard_names.audits import american_spelling_check
 
         assert (
             american_spelling_check(
@@ -809,7 +809,7 @@ class TestDescriptionVerbDriftCheck:
     """Name/description rate-marker consistency."""
 
     def test_fail_instant_change_prefix(self):
-        from imas_codex.standard_names.audits import description_verb_drift_check
+        from iter_codex.standard_names.audits import description_verb_drift_check
 
         issues = description_verb_drift_check(
             {
@@ -821,7 +821,7 @@ class TestDescriptionVerbDriftCheck:
         assert "instant_change_" in issues[0] or "begins with" in issues[0]
 
     def test_fail_rate_description_missing_marker(self):
-        from imas_codex.standard_names.audits import description_verb_drift_check
+        from iter_codex.standard_names.audits import description_verb_drift_check
 
         issues = description_verb_drift_check(
             {
@@ -833,7 +833,7 @@ class TestDescriptionVerbDriftCheck:
         assert "rate" in issues[0] or "tendency_of_" in issues[0]
 
     def test_pass_tendency_name(self):
-        from imas_codex.standard_names.audits import description_verb_drift_check
+        from iter_codex.standard_names.audits import description_verb_drift_check
 
         assert (
             description_verb_drift_check(
@@ -846,7 +846,7 @@ class TestDescriptionVerbDriftCheck:
         )
 
     def test_pass_change_in_name(self):
-        from imas_codex.standard_names.audits import description_verb_drift_check
+        from iter_codex.standard_names.audits import description_verb_drift_check
 
         assert (
             description_verb_drift_check(
@@ -859,7 +859,7 @@ class TestDescriptionVerbDriftCheck:
         )
 
     def test_pass_base_quantity_description(self):
-        from imas_codex.standard_names.audits import description_verb_drift_check
+        from iter_codex.standard_names.audits import description_verb_drift_check
 
         assert (
             description_verb_drift_check(
@@ -881,7 +881,7 @@ class TestStructuralDimTagCheck:
     """Advisory flag for DD data-type dimensionality tags in descriptions."""
 
     def test_fail_1d_in_description(self):
-        from imas_codex.standard_names.audits import structural_dim_tag_check
+        from iter_codex.standard_names.audits import structural_dim_tag_check
 
         issues = structural_dim_tag_check(
             {"description": "Electron temperature as a 1D radial profile."}
@@ -890,13 +890,13 @@ class TestStructuralDimTagCheck:
         assert "1D" in issues[0]
 
     def test_fail_2d_in_description(self):
-        from imas_codex.standard_names.audits import structural_dim_tag_check
+        from iter_codex.standard_names.audits import structural_dim_tag_check
 
         issues = structural_dim_tag_check({"description": "2D map of poloidal flux."})
         assert len(issues) == 1
 
     def test_pass_no_tag(self):
-        from imas_codex.standard_names.audits import structural_dim_tag_check
+        from iter_codex.standard_names.audits import structural_dim_tag_check
 
         assert (
             structural_dim_tag_check(
@@ -906,7 +906,7 @@ class TestStructuralDimTagCheck:
         )
 
     def test_pass_dimensionless(self):
-        from imas_codex.standard_names.audits import structural_dim_tag_check
+        from iter_codex.standard_names.audits import structural_dim_tag_check
 
         # 'dimensionless' contains 'd' but not \bNd\b
         assert (
@@ -917,7 +917,7 @@ class TestStructuralDimTagCheck:
 
 class TestDensityUnitConsistencyCheck:
     def test_fail_density_with_bare_momentum_unit(self):
-        from imas_codex.standard_names.audits import density_unit_consistency_check
+        from iter_codex.standard_names.audits import density_unit_consistency_check
 
         issues = density_unit_consistency_check(
             {"id": "toroidal_angular_momentum_density", "unit": "kg.m.s^-1"}
@@ -926,7 +926,7 @@ class TestDensityUnitConsistencyCheck:
         assert "no inverse-length factor" in issues[0]
 
     def test_pass_volumetric_density(self):
-        from imas_codex.standard_names.audits import density_unit_consistency_check
+        from iter_codex.standard_names.audits import density_unit_consistency_check
 
         assert (
             density_unit_consistency_check({"id": "electron_density", "unit": "m^-3"})
@@ -934,7 +934,7 @@ class TestDensityUnitConsistencyCheck:
         )
 
     def test_pass_areal_density(self):
-        from imas_codex.standard_names.audits import density_unit_consistency_check
+        from iter_codex.standard_names.audits import density_unit_consistency_check
 
         assert (
             density_unit_consistency_check(
@@ -944,7 +944,7 @@ class TestDensityUnitConsistencyCheck:
         )
 
     def test_pass_dimensionless_density(self):
-        from imas_codex.standard_names.audits import density_unit_consistency_check
+        from iter_codex.standard_names.audits import density_unit_consistency_check
 
         assert (
             density_unit_consistency_check({"id": "ion_fraction_density", "unit": "1"})
@@ -952,7 +952,7 @@ class TestDensityUnitConsistencyCheck:
         )
 
     def test_pass_no_density_in_name(self):
-        from imas_codex.standard_names.audits import density_unit_consistency_check
+        from iter_codex.standard_names.audits import density_unit_consistency_check
 
         assert (
             density_unit_consistency_check(
@@ -964,28 +964,28 @@ class TestDensityUnitConsistencyCheck:
 
 class TestPositionCoordinateCheck:
     def test_fail_radial_position_unconditional(self):
-        from imas_codex.standard_names.audits import position_coordinate_check
+        from iter_codex.standard_names.audits import position_coordinate_check
 
         issues = position_coordinate_check({"id": "radial_position_of_antenna_row"})
         assert len(issues) == 1
         assert "major_radius_of_<X>" in issues[0]
 
     def test_fail_toroidal_position_unconditional(self):
-        from imas_codex.standard_names.audits import position_coordinate_check
+        from iter_codex.standard_names.audits import position_coordinate_check
 
         issues = position_coordinate_check({"id": "toroidal_position_of_antenna_row"})
         assert len(issues) == 1
         assert "toroidal_angle_of_<X>" in issues[0]
 
     def test_fail_vertical_position_unconditional(self):
-        from imas_codex.standard_names.audits import position_coordinate_check
+        from iter_codex.standard_names.audits import position_coordinate_check
 
         issues = position_coordinate_check({"id": "vertical_position_of_x_point"})
         assert len(issues) == 1
         assert "vertical_coordinate_of_<X>" in issues[0]
 
     def test_pass_canonical_major_radius(self):
-        from imas_codex.standard_names.audits import position_coordinate_check
+        from iter_codex.standard_names.audits import position_coordinate_check
 
         assert (
             position_coordinate_check(
@@ -995,12 +995,12 @@ class TestPositionCoordinateCheck:
         )
 
     def test_pass_no_position_in_name(self):
-        from imas_codex.standard_names.audits import position_coordinate_check
+        from iter_codex.standard_names.audits import position_coordinate_check
 
         assert position_coordinate_check({"id": "electron_density"}) == []
 
     def test_pass_plain_position_no_directional_qualifier(self):
-        from imas_codex.standard_names.audits import position_coordinate_check
+        from iter_codex.standard_names.audits import position_coordinate_check
 
         # Plain `position_of_X` (no R/Z/phi qualifier) is acceptable for
         # unspecified 3-vector positions and must not be flagged.
@@ -1011,7 +1011,7 @@ class TestVectorFieldComponentCheck:
     """Tests for vector_field_component_check audit."""
 
     def test_flags_vertical_coordinate_of_surface_normal(self):
-        from imas_codex.standard_names.audits import vector_field_component_check
+        from iter_codex.standard_names.audits import vector_field_component_check
 
         issues = vector_field_component_check(
             {"id": "vertical_coordinate_of_surface_normal"}
@@ -1022,7 +1022,7 @@ class TestVectorFieldComponentCheck:
         assert "vertical_surface_normal" in issues[0]
 
     def test_flags_radial_coordinate_of_magnetic_field_vector(self):
-        from imas_codex.standard_names.audits import vector_field_component_check
+        from iter_codex.standard_names.audits import vector_field_component_check
 
         issues = vector_field_component_check(
             {"id": "radial_coordinate_of_magnetic_field_vector"}
@@ -1031,7 +1031,7 @@ class TestVectorFieldComponentCheck:
         assert "radial_magnetic_field_vector" in issues[0]
 
     def test_passes_vertical_coordinate_of_plasma_boundary(self):
-        from imas_codex.standard_names.audits import vector_field_component_check
+        from iter_codex.standard_names.audits import vector_field_component_check
 
         # plasma_boundary is a geometric feature (point/curve), not a vector
         # field — _coordinate_of_ is correct.
@@ -1043,42 +1043,42 @@ class TestVectorFieldComponentCheck:
         )
 
     def test_passes_vertical_surface_normal(self):
-        from imas_codex.standard_names.audits import vector_field_component_check
+        from iter_codex.standard_names.audits import vector_field_component_check
 
         # The canonical form is not flagged.
         assert vector_field_component_check({"id": "vertical_surface_normal"}) == []
 
     def test_passes_unrelated_name(self):
-        from imas_codex.standard_names.audits import vector_field_component_check
+        from iter_codex.standard_names.audits import vector_field_component_check
 
         assert vector_field_component_check({"id": "electron_temperature"}) == []
 
 
 class TestSegmentOrderCheck:
     def test_fail_trailing_toroidal(self):
-        from imas_codex.standard_names.audits import segment_order_check
+        from iter_codex.standard_names.audits import segment_order_check
 
         issues = segment_order_check({"id": "ion_rotation_frequency_toroidal"})
         assert issues and "segment_order_check" in issues[0]
 
     def test_fail_trailing_poloidal(self):
-        from imas_codex.standard_names.audits import segment_order_check
+        from iter_codex.standard_names.audits import segment_order_check
 
         issues = segment_order_check({"id": "electron_flux_poloidal"})
         assert issues and "segment_order_check" in issues[0]
 
     def test_pass_leading_component(self):
-        from imas_codex.standard_names.audits import segment_order_check
+        from iter_codex.standard_names.audits import segment_order_check
 
         assert segment_order_check({"id": "toroidal_ion_rotation_frequency"}) == []
 
     def test_pass_short_form_component_prefix(self):
-        from imas_codex.standard_names.audits import segment_order_check
+        from iter_codex.standard_names.audits import segment_order_check
 
         assert segment_order_check({"id": "toroidal_ion_rotation_frequency"}) == []
 
     def test_pass_no_component_token(self):
-        from imas_codex.standard_names.audits import segment_order_check
+        from iter_codex.standard_names.audits import segment_order_check
 
         assert segment_order_check({"id": "electron_temperature"}) == []
 
@@ -1090,7 +1090,7 @@ class TestCausalDueToCheckExtended:
         The bare `resistive` regime token was dropped in favour of the
         specific mechanism nouns (resistive_diffusion / resistive_dissipation).
         """
-        from imas_codex.standard_names.audits import causal_due_to_check
+        from iter_codex.standard_names.audits import causal_due_to_check
 
         assert (
             causal_due_to_check(
@@ -1106,7 +1106,7 @@ class TestCausalDueToCheckExtended:
         noun `non_inductive_current_drive`; the causal check accepts the
         full mechanism noun after `due_to_`.
         """
-        from imas_codex.standard_names.audits import causal_due_to_check
+        from iter_codex.standard_names.audits import causal_due_to_check
 
         assert (
             causal_due_to_check(
@@ -1121,19 +1121,19 @@ class TestCausalDueToCheckExtended:
         The bare regime token `turbulent` was lifted to `turbulent_transport`;
         the causal check accepts the full mechanism noun after `due_to_`.
         """
-        from imas_codex.standard_names.audits import causal_due_to_check
+        from iter_codex.standard_names.audits import causal_due_to_check
 
         assert causal_due_to_check({"id": "heat_flux_due_to_turbulent_transport"}) == []
 
     def test_fail_due_to_shutdown_temporal(self):
         """Temporal events not in ISN process vocab remain flagged."""
-        from imas_codex.standard_names.audits import causal_due_to_check
+        from iter_codex.standard_names.audits import causal_due_to_check
 
         issues = causal_due_to_check({"id": "heat_flux_due_to_shutdown"})
         assert issues and "shutdown" in issues[0]
 
     def test_pass_due_to_resistive_diffusion(self):
-        from imas_codex.standard_names.audits import causal_due_to_check
+        from iter_codex.standard_names.audits import causal_due_to_check
 
         assert (
             causal_due_to_check(
@@ -1145,7 +1145,7 @@ class TestCausalDueToCheckExtended:
 
 class TestPeakingFactorExemption:
     def test_pass_ion_temperature_peaking_factor(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
@@ -1159,7 +1159,7 @@ class TestPeakingFactorExemption:
         )
 
     def test_pass_electron_temperature_profile_factor(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
@@ -1173,7 +1173,7 @@ class TestPeakingFactorExemption:
         )
 
     def test_pass_fraction(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
@@ -1187,7 +1187,7 @@ class TestPeakingFactorExemption:
         )
 
     def test_fail_bare_temperature_with_dimensionless(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
             {
@@ -1208,7 +1208,7 @@ class TestOperatorUnitConsistency:
     )
 
     def test_power_balance_accepts_power_unit(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check({"id": self._POWER_BALANCE, "unit": "W"}) == []
@@ -1216,20 +1216,20 @@ class TestOperatorUnitConsistency:
 
     @pytest.mark.parametrize("unit", ["J", "A"])
     def test_power_balance_rejects_non_power_unit(self, unit: str):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check({"id": self._POWER_BALANCE, "unit": unit})
         assert issues and "operator expression" in issues[0]
 
     def test_simple_name_keeps_exact_unit_semantics(self):
         """Pint's dimensionless angle must not make bare ``1`` an angle unit."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check({"id": "toroidal_angle", "unit": "1"})
         assert issues and "dimensionless" in issues[0]
 
     def test_parse_failure_keeps_flat_audit(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
             {"id": "unregistered_energy_expression", "unit": "A"}
@@ -1247,7 +1247,7 @@ class TestOperatorUnitConsistency:
         ],
     )
     def test_decorated_bases_retain_compound_fallbacks(self, name: str):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert name_unit_consistency_check({"id": name, "unit": "1"}) == []
 
@@ -1268,7 +1268,7 @@ class TestOperatorUnitConsistency:
         """Declared dimensionless spellings pass a proven quotient result."""
         from unittest.mock import patch
 
-        from imas_codex.standard_names import audits
+        from iter_codex.standard_names import audits
 
         ir = audits._parse_audit_ir(name)
         with patch.dict(audits._NAME_TOKEN_UNIT_EXPECTATIONS, {}, clear=True):
@@ -1278,7 +1278,7 @@ class TestOperatorUnitConsistency:
 
     def test_equal_dimension_ratio_rejects_absent_unit(self):
         """An absent unit is unresolved, unlike the explicit ``none`` spelling."""
-        from imas_codex.standard_names import audits
+        from iter_codex.standard_names import audits
 
         name = (
             "ratio_of_ion_average_temperature_to_"
@@ -1289,7 +1289,7 @@ class TestOperatorUnitConsistency:
 
     @pytest.mark.parametrize("unit", ["J.K^-1", "K.J^-1"])
     def test_equal_dimension_ratios_reject_cross_family_quotients(self, unit: str):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
             {
@@ -1302,7 +1302,7 @@ class TestOperatorUnitConsistency:
         assert issues and "operator expression" in issues[0]
 
     def test_vorticity_per_major_radius_dimensions_use_quotient(self):
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             _dimensions_overlap,
             _quotient_dimensions,
             _unit_dimensions,
@@ -1321,7 +1321,7 @@ class TestOperatorUnitConsistency:
     def test_same_subject_different_physical_bases_are_not_dimensionless(self):
         from unittest.mock import patch
 
-        from imas_codex.standard_names import audits
+        from iter_codex.standard_names import audits
 
         name = "ratio_of_ion_temperature_to_ion_density"
         with patch.dict(audits._NAME_TOKEN_UNIT_EXPECTATIONS, {}, clear=True):
@@ -1332,7 +1332,7 @@ class TestOperatorUnitConsistency:
             assert audits._structured_unit_consistency_issues(name, "1") is None
 
     def test_dimensioned_live_ratio_remains_uninferred_without_unit_metadata(self):
-        from imas_codex.standard_names import audits
+        from iter_codex.standard_names import audits
 
         name = "ratio_of_vorticity_to_major_radius"
         assert audits._ir_unit_dimensions(audits._parse_audit_ir(name)) == (
@@ -1345,7 +1345,7 @@ class TestOperatorUnitConsistency:
         )
 
     def test_nested_derivative_transforms_dimensionless_ratio(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         name = (
             "time_derivative_of_ratio_of_particle_temperature_to_"
@@ -1356,7 +1356,7 @@ class TestOperatorUnitConsistency:
         assert issues and "operator expression" in issues[0]
 
     def test_ratio_with_unknown_operand_retains_flat_audit(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
             {"id": "ratio_of_safety_factor_to_particle_temperature", "unit": "1"}
@@ -1366,7 +1366,7 @@ class TestOperatorUnitConsistency:
     def test_ratio_with_missing_argument_is_unknown(self):
         from types import SimpleNamespace
 
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             _ir_unit_dimensions,
             _parse_audit_ir,
         )
@@ -1384,12 +1384,12 @@ class TestOperatorUnitConsistency:
         assert _ir_unit_dimensions(incomplete) == (None, False)
 
     def test_malformed_declared_unit_remains_unknown(self):
-        from imas_codex.standard_names.audits import _unit_dimensions
+        from iter_codex.standard_names.audits import _unit_dimensions
 
         assert _unit_dimensions({"not a pint unit"}) is None
 
     def test_nested_ratio_with_unknown_operand_does_not_partially_transform(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
@@ -1407,7 +1407,7 @@ class TestOperatorUnitConsistency:
     def test_full_admission_clears_contextual_false_positives(self):
         from unittest.mock import patch
 
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             validate_name_candidate,
         )
 
@@ -1418,7 +1418,7 @@ class TestOperatorUnitConsistency:
             "documentation": "",
         }
         with patch(
-            "imas_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
+            "iter_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
             return_value=([], {}),
         ):
             issues, _layers, status = validate_name_candidate(entry)
@@ -1429,7 +1429,7 @@ class TestOperatorUnitConsistency:
     def test_full_admission_still_quarantines_wrong_unit(self):
         from unittest.mock import patch
 
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             validate_name_candidate,
         )
 
@@ -1440,7 +1440,7 @@ class TestOperatorUnitConsistency:
             "documentation": "",
         }
         with patch(
-            "imas_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
+            "iter_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
             return_value=([], {}),
         ):
             issues, _layers, status = validate_name_candidate(entry)
@@ -1450,7 +1450,7 @@ class TestOperatorUnitConsistency:
     def test_pass_energy_flux_with_power_per_area(self):
         """``_energy_flux`` carries dimensions of power-per-area (W.m^-2),
         not pure energy. The audit must accept this without flagging."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         for name, unit in [
             ("incident_neutral_kinetic_energy_flux", "W.m^-2"),
@@ -1467,7 +1467,7 @@ class TestOperatorUnitConsistency:
     def test_pass_energy_flux_with_particle_flux_unit(self):
         """A particle flux of energy-bearing species (``m^-2.s^-1``) is also
         a legitimate use of ``_energy_flux`` per source-path semantics."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
@@ -1481,7 +1481,7 @@ class TestOperatorUnitConsistency:
         )
 
     def test_pass_mass_flux_with_compound_unit(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
@@ -1497,7 +1497,7 @@ class TestOperatorUnitConsistency:
     def test_fail_bare_energy_with_particle_flux_unit(self):
         """Without the ``flux`` qualifier, energy with a non-energy unit
         must still fail — guards against the exemption being too broad."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
             {
@@ -1511,7 +1511,7 @@ class TestOperatorUnitConsistency:
     def test_pass_energy_velocity_with_transport_velocity_unit(self):
         """``velocity`` is the head noun in convective-transport names —
         ``energy`` classifies what is transported, so m.s^-1 is correct."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         for name in [
             "energy_velocity_due_to_convection",
@@ -1527,7 +1527,7 @@ class TestOperatorUnitConsistency:
     def test_fail_bare_energy_with_velocity_unit(self):
         """Without the ``velocity`` head noun, energy with m.s^-1 must
         still fail — guards against the exemption being too broad."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
             {"id": "particle_energy", "unit": "m.s^-1", "description": ""}
@@ -1537,40 +1537,40 @@ class TestOperatorUnitConsistency:
 
 class TestAggregatorOrderCheck:
     def test_fail_trailing_volume_averaged(self):
-        from imas_codex.standard_names.audits import aggregator_order_check
+        from iter_codex.standard_names.audits import aggregator_order_check
 
         issues = aggregator_order_check({"id": "ion_temperature_volume_averaged"})
         assert issues and "aggregator_order_check" in issues[0]
         assert "volume_averaged_ion_temperature" in issues[0]
 
     def test_fail_trailing_flux_surface_averaged(self):
-        from imas_codex.standard_names.audits import aggregator_order_check
+        from iter_codex.standard_names.audits import aggregator_order_check
 
         issues = aggregator_order_check({"id": "current_density_flux_surface_averaged"})
         assert issues and "flux_surface_averaged" in issues[0]
 
     def test_fail_trailing_line_averaged(self):
-        from imas_codex.standard_names.audits import aggregator_order_check
+        from iter_codex.standard_names.audits import aggregator_order_check
 
         issues = aggregator_order_check({"id": "electron_density_line_averaged"})
         assert issues
 
     def test_pass_leading_volume_averaged(self):
-        from imas_codex.standard_names.audits import aggregator_order_check
+        from iter_codex.standard_names.audits import aggregator_order_check
 
         assert (
             aggregator_order_check({"id": "volume_averaged_electron_temperature"}) == []
         )
 
     def test_pass_no_aggregator(self):
-        from imas_codex.standard_names.audits import aggregator_order_check
+        from iter_codex.standard_names.audits import aggregator_order_check
 
         assert aggregator_order_check({"id": "electron_temperature"}) == []
 
 
 class TestDiamagneticComponentCheck:
     def test_fail_diamagnetic_component_of_electric_field(self):
-        from imas_codex.standard_names.audits import diamagnetic_component_check
+        from iter_codex.standard_names.audits import diamagnetic_component_check
 
         issues = diamagnetic_component_check(
             {"id": "diamagnetic_component_of_electric_field"}
@@ -1578,7 +1578,7 @@ class TestDiamagneticComponentCheck:
         assert issues and "drift" in issues[0].lower()
 
     def test_fail_diamagnetic_component_of_ion_velocity(self):
-        from imas_codex.standard_names.audits import diamagnetic_component_check
+        from iter_codex.standard_names.audits import diamagnetic_component_check
 
         issues = diamagnetic_component_check(
             {"id": "diamagnetic_component_of_ion_velocity"}
@@ -1586,17 +1586,17 @@ class TestDiamagneticComponentCheck:
         assert issues
 
     def test_pass_diamagnetic_drift_velocity(self):
-        from imas_codex.standard_names.audits import diamagnetic_component_check
+        from iter_codex.standard_names.audits import diamagnetic_component_check
 
         assert diamagnetic_component_check({"id": "diamagnetic_drift_velocity"}) == []
 
     def test_pass_diamagnetic_current_density(self):
-        from imas_codex.standard_names.audits import diamagnetic_component_check
+        from iter_codex.standard_names.audits import diamagnetic_component_check
 
         assert diamagnetic_component_check({"id": "diamagnetic_current_density"}) == []
 
     def test_pass_toroidal_component(self):
-        from imas_codex.standard_names.audits import diamagnetic_component_check
+        from iter_codex.standard_names.audits import diamagnetic_component_check
 
         assert diamagnetic_component_check({"id": "toroidal_electric_field"}) == []
 
@@ -1620,7 +1620,7 @@ class TestMultiSubjectCheckGreedy:
         ],
     )
     def test_compound_species_greedy(self, name, expected_passes):
-        from imas_codex.standard_names.audits import multi_subject_check
+        from iter_codex.standard_names.audits import multi_subject_check
 
         issues = multi_subject_check({"id": name})
         if expected_passes:
@@ -1629,12 +1629,12 @@ class TestMultiSubjectCheckGreedy:
             assert issues, f"Expected failure on '{name}'"
 
     def test_pass_single_compound_subject(self):
-        from imas_codex.standard_names.audits import multi_subject_check
+        from iter_codex.standard_names.audits import multi_subject_check
 
         assert multi_subject_check({"id": "deuterium_tritium_fusion_power"}) == []
 
     def test_pass_electron_equivalent_exemption_preserved(self):
-        from imas_codex.standard_names.audits import multi_subject_check
+        from iter_codex.standard_names.audits import multi_subject_check
 
         assert multi_subject_check({"id": "ion_electron_equivalent"}) == []
 
@@ -1650,14 +1650,14 @@ class TestMultiSubjectCheckGreedy:
     )
     def test_pass_all_modifier_subjects(self, name):
         """When ALL matched subjects are modifiers, no dual-subject conflict."""
-        from imas_codex.standard_names.audits import multi_subject_check
+        from iter_codex.standard_names.audits import multi_subject_check
 
         issues = multi_subject_check({"id": name})
         assert issues == [], f"False positive on '{name}': {issues}"
 
     def test_pass_runaway_modifier(self):
         """Runaway is a modifier subject, not a dual subject with electrons."""
-        from imas_codex.standard_names.audits import multi_subject_check
+        from iter_codex.standard_names.audits import multi_subject_check
 
         assert (
             multi_subject_check({"id": "critical_electric_field_for_runaway_electrons"})
@@ -1674,7 +1674,7 @@ class TestMultiSubjectCheckGreedy:
     )
     def test_pass_collisional_with_target(self, name):
         """Collision target after _with_ is exempt from multi-subject check."""
-        from imas_codex.standard_names.audits import multi_subject_check
+        from iter_codex.standard_names.audits import multi_subject_check
 
         issues = multi_subject_check({"id": name})
         assert issues == [], f"False positive on '{name}': {issues}"
@@ -1700,7 +1700,7 @@ class TestDensityConstraintMetadataExemption:
         ],
     )
     def test_pass_constraint_metadata_suffix(self, suffix):
-        from imas_codex.standard_names.audits import density_unit_consistency_check
+        from iter_codex.standard_names.audits import density_unit_consistency_check
 
         name = f"toroidal_current_density{suffix}"
         assert density_unit_consistency_check({"id": name, "unit": "s"}) == [], (
@@ -1709,7 +1709,7 @@ class TestDensityConstraintMetadataExemption:
 
     def test_fail_density_without_constraint_suffix(self):
         """Density without a constraint suffix and wrong unit still flagged."""
-        from imas_codex.standard_names.audits import density_unit_consistency_check
+        from iter_codex.standard_names.audits import density_unit_consistency_check
 
         issues = density_unit_consistency_check(
             {"id": "toroidal_current_density", "unit": "s"}
@@ -1726,24 +1726,24 @@ class TestImplicitFieldDeviceWhitelist:
     """Tests for device whitelist in implicit_field_check."""
 
     def test_pass_vacuum_toroidal_field_function(self):
-        from imas_codex.standard_names.audits import implicit_field_check
+        from iter_codex.standard_names.audits import implicit_field_check
 
         assert implicit_field_check({"id": "vacuum_toroidal_field_function"}) == []
 
     def test_pass_resistance_of_poloidal_field_coil(self):
-        from imas_codex.standard_names.audits import implicit_field_check
+        from iter_codex.standard_names.audits import implicit_field_check
 
         assert implicit_field_check({"id": "resistance_of_poloidal_field_coil"}) == []
 
     def test_pass_field_coil_substring(self):
-        from imas_codex.standard_names.audits import implicit_field_check
+        from iter_codex.standard_names.audits import implicit_field_check
 
         assert (
             implicit_field_check({"id": "current_in_poloidal_field_coil_supply"}) == []
         )
 
     def test_fail_bare_field_still_flagged(self):
-        from imas_codex.standard_names.audits import implicit_field_check
+        from iter_codex.standard_names.audits import implicit_field_check
 
         issues = implicit_field_check({"id": "vacuum_toroidal_field"})
         assert issues and "implicit_field_check" in issues[0]
@@ -1764,7 +1764,7 @@ class TestImplicitFieldUseExactExemption:
 
     def test_pass_use_exact_vacuum_toroidal_field_constraint(self):
         """use_exact_vacuum_toroidal_field_constraint must not be penalised."""
-        from imas_codex.standard_names.audits import implicit_field_check
+        from iter_codex.standard_names.audits import implicit_field_check
 
         assert (
             implicit_field_check({"id": "use_exact_vacuum_toroidal_field_constraint"})
@@ -1773,7 +1773,7 @@ class TestImplicitFieldUseExactExemption:
 
     def test_pass_use_exact_poloidal_field_probe(self):
         """use_exact_poloidal_field_probe must not be penalised."""
-        from imas_codex.standard_names.audits import implicit_field_check
+        from iter_codex.standard_names.audits import implicit_field_check
 
         assert (
             implicit_field_check(
@@ -1784,27 +1784,27 @@ class TestImplicitFieldUseExactExemption:
 
     def test_pass_use_exact_with_bare_field(self):
         """Even with bare _field, use_exact prefix exempts."""
-        from imas_codex.standard_names.audits import implicit_field_check
+        from iter_codex.standard_names.audits import implicit_field_check
 
         assert implicit_field_check({"id": "use_exact_toroidal_field"}) == []
 
     def test_fail_bare_field_non_use_exact_still_caught(self):
         """Non-use_exact names with bare _field must still be flagged."""
-        from imas_codex.standard_names.audits import implicit_field_check
+        from iter_codex.standard_names.audits import implicit_field_check
 
         issues = implicit_field_check({"id": "vacuum_toroidal_field"})
         assert issues and "implicit_field_check" in issues[0]
 
     def test_fail_bare_field_poloidal_still_caught(self):
         """Non-use_exact poloidal_field must still be flagged."""
-        from imas_codex.standard_names.audits import implicit_field_check
+        from iter_codex.standard_names.audits import implicit_field_check
 
         issues = implicit_field_check({"id": "poloidal_field_strength"})
         assert issues and "implicit_field_check" in issues[0]
 
     def test_pass_field_of_view(self):
         """``field_of_view`` is an optics term, not a physics field."""
-        from imas_codex.standard_names.audits import implicit_field_check
+        from iter_codex.standard_names.audits import implicit_field_check
 
         assert (
             implicit_field_check({"id": "solid_angle_of_detector_field_of_view"}) == []
@@ -1815,7 +1815,7 @@ class TestAngleSolidUnitExpectation:
     """Solid angles use steradians (sr), not radians."""
 
     def test_pass_solid_angle_sr(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
             {"id": "solid_angle_of_detector_field_of_view", "unit": "sr"}
@@ -1823,13 +1823,13 @@ class TestAngleSolidUnitExpectation:
         assert issues == [], f"False positive: {issues}"
 
     def test_pass_angle_rad(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check({"id": "toroidal_angle", "unit": "rad"})
         assert issues == []
 
     def test_fail_angle_wrong_unit(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check({"id": "toroidal_angle", "unit": "m"})
         assert issues and "name_unit_consistency_check" in issues[0]
@@ -1839,7 +1839,7 @@ class TestCausalDueToSuggestedFix:
     """Tests for suggested_fix in causal_due_to_check adjective map."""
 
     def test_suggested_fix_halo(self):
-        from imas_codex.standard_names.audits import causal_due_to_check
+        from iter_codex.standard_names.audits import causal_due_to_check
 
         issues = causal_due_to_check({"id": "power_due_to_halo"})
         if issues:  # only fires if halo is not in ISN process vocab
@@ -1847,7 +1847,7 @@ class TestCausalDueToSuggestedFix:
             assert "halo_currents" in issues[0]
 
     def test_suggested_fix_thermal(self):
-        from imas_codex.standard_names.audits import causal_due_to_check
+        from iter_codex.standard_names.audits import causal_due_to_check
 
         issues = causal_due_to_check({"id": "power_due_to_thermal"})
         if issues:
@@ -1855,7 +1855,7 @@ class TestCausalDueToSuggestedFix:
             assert "thermal_fusion" in issues[0]
 
     def test_suggested_fix_fast_ion(self):
-        from imas_codex.standard_names.audits import causal_due_to_check
+        from iter_codex.standard_names.audits import causal_due_to_check
 
         issues = causal_due_to_check({"id": "power_due_to_fast_ion"})
         if issues:
@@ -1872,13 +1872,13 @@ class TestPulseScheduleReferenceCheck:
     """Tests for pulse_schedule_reference_check audit."""
 
     def test_fail_reference_suffix(self):
-        from imas_codex.standard_names.audits import pulse_schedule_reference_check
+        from iter_codex.standard_names.audits import pulse_schedule_reference_check
 
         issues = pulse_schedule_reference_check({"id": "plasma_current_reference"})
         assert issues and "pulse_schedule_reference_check" in issues[0]
 
     def test_fail_reference_waveform_suffix(self):
-        from imas_codex.standard_names.audits import pulse_schedule_reference_check
+        from iter_codex.standard_names.audits import pulse_schedule_reference_check
 
         issues = pulse_schedule_reference_check(
             {"id": "plasma_current_reference_waveform"}
@@ -1891,7 +1891,7 @@ class TestPulseScheduleReferenceCheck:
         Name like ``plasma_current`` is a legitimate physics standard name
         even if a controller-reference source path is attached to it.
         """
-        from imas_codex.standard_names.audits import pulse_schedule_reference_check
+        from iter_codex.standard_names.audits import pulse_schedule_reference_check
 
         issues = pulse_schedule_reference_check(
             {"id": "plasma_current"},
@@ -1901,7 +1901,7 @@ class TestPulseScheduleReferenceCheck:
 
     def test_fail_reference_suffix_with_pulse_schedule_source(self):
         """Name with _reference_waveform suffix must fail regardless of source."""
-        from imas_codex.standard_names.audits import pulse_schedule_reference_check
+        from iter_codex.standard_names.audits import pulse_schedule_reference_check
 
         issues = pulse_schedule_reference_check(
             {"id": "plasma_current_reference_waveform"},
@@ -1910,12 +1910,12 @@ class TestPulseScheduleReferenceCheck:
         assert issues and "pulse_schedule_reference_check" in issues[0]
 
     def test_pass_no_reference(self):
-        from imas_codex.standard_names.audits import pulse_schedule_reference_check
+        from iter_codex.standard_names.audits import pulse_schedule_reference_check
 
         assert pulse_schedule_reference_check({"id": "electron_temperature"}) == []
 
     def test_pass_source_path_no_pulse_schedule(self):
-        from imas_codex.standard_names.audits import pulse_schedule_reference_check
+        from iter_codex.standard_names.audits import pulse_schedule_reference_check
 
         assert (
             pulse_schedule_reference_check(
@@ -1935,7 +1935,7 @@ class TestRatioBinaryOperatorCheck:
     """Tests for ratio_binary_operator_check audit."""
 
     def test_pass_canonical_ratio(self):
-        from imas_codex.standard_names.audits import ratio_binary_operator_check
+        from iter_codex.standard_names.audits import ratio_binary_operator_check
 
         assert (
             ratio_binary_operator_check(
@@ -1945,7 +1945,7 @@ class TestRatioBinaryOperatorCheck:
         )
 
     def test_fail_adhoc_density_ratio(self):
-        from imas_codex.standard_names.audits import ratio_binary_operator_check
+        from iter_codex.standard_names.audits import ratio_binary_operator_check
 
         issues = ratio_binary_operator_check({"id": "electron_to_ion_density_ratio"})
         assert issues and "ratio_binary_operator_check" in issues[0]
@@ -1953,13 +1953,13 @@ class TestRatioBinaryOperatorCheck:
         assert "ratio_of_electron_to_ion" in issues[0]
 
     def test_fail_adhoc_bare_ratio(self):
-        from imas_codex.standard_names.audits import ratio_binary_operator_check
+        from iter_codex.standard_names.audits import ratio_binary_operator_check
 
         issues = ratio_binary_operator_check({"id": "tritium_to_deuterium_ratio"})
         assert issues and "ratio_binary_operator_check" in issues[0]
 
     def test_pass_no_ratio(self):
-        from imas_codex.standard_names.audits import ratio_binary_operator_check
+        from iter_codex.standard_names.audits import ratio_binary_operator_check
 
         assert ratio_binary_operator_check({"id": "electron_temperature"}) == []
 
@@ -1973,21 +1973,21 @@ class TestUnitValidityCheckStrengthened:
     """Tests for strengthened unit_validity_check."""
 
     def test_fail_whitespace_prose_unit(self):
-        from imas_codex.standard_names.audits import unit_validity_check
+        from iter_codex.standard_names.audits import unit_validity_check
 
         issues = unit_validity_check({"unit": "Elementary Charge Unit"})
         assert issues and "whitespace" in issues[0]
         assert "dd_upstream" in issues[0]
 
     def test_fail_caret_dimension_placeholder(self):
-        from imas_codex.standard_names.audits import unit_validity_check
+        from iter_codex.standard_names.audits import unit_validity_check
 
         issues = unit_validity_check({"unit": "m^dimension"})
         assert issues and "^dimension" in issues[0]
         assert "dd_upstream" in issues[0]
 
     def test_pass_normal_unit(self):
-        from imas_codex.standard_names.audits import unit_validity_check
+        from iter_codex.standard_names.audits import unit_validity_check
 
         assert unit_validity_check({"unit": "m^-3"}) == []
         assert unit_validity_check({"unit": "eV"}) == []
@@ -2004,7 +2004,7 @@ class TestAdjacentDuplicateTokenCheck:
 
     def test_fail_magnetic_magnetic(self):
         """Adjacent duplicate 'magnetic_magnetic' is flagged as critical."""
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             adjacent_duplicate_token_check,
             has_critical_audit_failure,
         )
@@ -2018,7 +2018,7 @@ class TestAdjacentDuplicateTokenCheck:
         assert has_critical_audit_failure(issues)
 
     def test_fail_poloidal_magnetic_magnetic_probe(self):
-        from imas_codex.standard_names.audits import adjacent_duplicate_token_check
+        from iter_codex.standard_names.audits import adjacent_duplicate_token_check
 
         issues = adjacent_duplicate_token_check(
             {"id": "poloidal_magnetic_magnetic_field_probe_constraint_weight"}
@@ -2027,7 +2027,7 @@ class TestAdjacentDuplicateTokenCheck:
 
     def test_pass_deuterium_deuterium(self):
         """Compound-subject 'deuterium_deuterium' does not fire."""
-        from imas_codex.standard_names.audits import adjacent_duplicate_token_check
+        from iter_codex.standard_names.audits import adjacent_duplicate_token_check
 
         assert (
             adjacent_duplicate_token_check({"id": "deuterium_deuterium_reaction_rate"})
@@ -2036,7 +2036,7 @@ class TestAdjacentDuplicateTokenCheck:
 
     def test_pass_beam_beam(self):
         """beam-beam fusion reaction is a legitimate compound."""
-        from imas_codex.standard_names.audits import adjacent_duplicate_token_check
+        from iter_codex.standard_names.audits import adjacent_duplicate_token_check
 
         assert (
             adjacent_duplicate_token_check(
@@ -2047,7 +2047,7 @@ class TestAdjacentDuplicateTokenCheck:
 
     def test_pass_non_adjacent_magnetic(self):
         """magnetic_field_at_magnetic_axis has non-adjacent repetition — legit."""
-        from imas_codex.standard_names.audits import adjacent_duplicate_token_check
+        from iter_codex.standard_names.audits import adjacent_duplicate_token_check
 
         assert (
             adjacent_duplicate_token_check({"id": "magnetic_field_at_magnetic_axis"})
@@ -2056,7 +2056,7 @@ class TestAdjacentDuplicateTokenCheck:
 
     def test_pass_non_adjacent_upper(self):
         """upper_uncertainty_of_upper_triangularity — non-adjacent."""
-        from imas_codex.standard_names.audits import adjacent_duplicate_token_check
+        from iter_codex.standard_names.audits import adjacent_duplicate_token_check
 
         assert (
             adjacent_duplicate_token_check(
@@ -2066,7 +2066,7 @@ class TestAdjacentDuplicateTokenCheck:
         )
 
     def test_pass_empty(self):
-        from imas_codex.standard_names.audits import adjacent_duplicate_token_check
+        from iter_codex.standard_names.audits import adjacent_duplicate_token_check
 
         assert adjacent_duplicate_token_check({"id": ""}) == []
 
@@ -2076,7 +2076,7 @@ class TestRepeatedTokenCheck:
 
     def test_fail_magnetic_magnetic(self):
         """Duplicated content token 'magnetic' is flagged."""
-        from imas_codex.standard_names.audits import repeated_token_check
+        from iter_codex.standard_names.audits import repeated_token_check
 
         issues = repeated_token_check({"id": "magnetic_magnetic_field_strength"})
         assert len(issues) == 1
@@ -2085,7 +2085,7 @@ class TestRepeatedTokenCheck:
 
     def test_fail_temperature_temperature(self):
         """Duplicated 'temperature' across segments is flagged."""
-        from imas_codex.standard_names.audits import repeated_token_check
+        from iter_codex.standard_names.audits import repeated_token_check
 
         issues = repeated_token_check(
             {"id": "electron_temperature_of_core_temperature"}
@@ -2095,25 +2095,25 @@ class TestRepeatedTokenCheck:
 
     def test_pass_deuterium_deuterium_reaction_rate(self):
         """Compound-subject 'deuterium_deuterium' must not fire."""
-        from imas_codex.standard_names.audits import repeated_token_check
+        from iter_codex.standard_names.audits import repeated_token_check
 
         assert repeated_token_check({"id": "deuterium_deuterium_reaction_rate"}) == []
 
     def test_pass_deuterium_tritium_reaction_rate(self):
         """Compound-subject 'deuterium_tritium' must not fire."""
-        from imas_codex.standard_names.audits import repeated_token_check
+        from iter_codex.standard_names.audits import repeated_token_check
 
         assert repeated_token_check({"id": "deuterium_tritium_reaction_rate"}) == []
 
     def test_pass_normal_name(self):
         """Normal name with no repeats passes."""
-        from imas_codex.standard_names.audits import repeated_token_check
+        from iter_codex.standard_names.audits import repeated_token_check
 
         assert repeated_token_check({"id": "electron_temperature"}) == []
 
     def test_pass_connectives_repeated(self):
         """Grammar connectives (of, at, per) may repeat without firing."""
-        from imas_codex.standard_names.audits import repeated_token_check
+        from iter_codex.standard_names.audits import repeated_token_check
 
         # 'of' appears twice but is a connective — no content duplication
         assert (
@@ -2121,7 +2121,7 @@ class TestRepeatedTokenCheck:
         )
 
     def test_binary_operands_have_independent_duplicate_scopes(self):
-        from imas_codex.standard_names.audits import repeated_token_check
+        from iter_codex.standard_names.audits import repeated_token_check
 
         assert (
             repeated_token_check(
@@ -2136,7 +2136,7 @@ class TestRepeatedTokenCheck:
         )
 
     def test_duplicate_within_one_binary_operand_still_fails(self):
-        from imas_codex.standard_names.audits import repeated_token_check
+        from iter_codex.standard_names.audits import repeated_token_check
 
         issues = repeated_token_check(
             {
@@ -2149,7 +2149,7 @@ class TestRepeatedTokenCheck:
         assert issues and "'magnetic'" in issues[0]
 
     def test_outer_unary_preserves_nested_binary_scopes(self):
-        from imas_codex.standard_names.audits import repeated_token_check
+        from iter_codex.standard_names.audits import repeated_token_check
 
         assert (
             repeated_token_check(
@@ -2163,7 +2163,7 @@ class TestRepeatedTokenCheck:
         )
 
     def test_parse_failure_preserves_whole_name_fallback(self):
-        from imas_codex.standard_names.audits import repeated_token_check
+        from iter_codex.standard_names.audits import repeated_token_check
 
         issues = repeated_token_check({"id": "not_registered_energy_energy"})
         assert issues and "'energy'" in issues[0]
@@ -2179,7 +2179,7 @@ class TestInstrumentStokesBindCheck:
 
     def test_fail_stokes_vector_of_polarimeter(self):
         """Classic anti-pattern: stokes observable bound to instrument."""
-        from imas_codex.standard_names.audits import instrument_stokes_bind_check
+        from iter_codex.standard_names.audits import instrument_stokes_bind_check
 
         issues = instrument_stokes_bind_check({"id": "stokes_vector_of_polarimeter"})
         assert len(issues) == 1
@@ -2188,7 +2188,7 @@ class TestInstrumentStokesBindCheck:
 
     def test_fail_degree_of_polarization_interferometer(self):
         """degree_of_polarization + interferometer fires."""
-        from imas_codex.standard_names.audits import instrument_stokes_bind_check
+        from iter_codex.standard_names.audits import instrument_stokes_bind_check
 
         issues = instrument_stokes_bind_check(
             {"id": "degree_of_polarization_of_interferometer"}
@@ -2197,19 +2197,19 @@ class TestInstrumentStokesBindCheck:
 
     def test_pass_stokes_vector_alone(self):
         """stokes_vector without an instrument token does not fire."""
-        from imas_codex.standard_names.audits import instrument_stokes_bind_check
+        from iter_codex.standard_names.audits import instrument_stokes_bind_check
 
         assert instrument_stokes_bind_check({"id": "stokes_vector"}) == []
 
     def test_pass_polarimeter_alone(self):
         """Instrument token without a Stokes observable does not fire."""
-        from imas_codex.standard_names.audits import instrument_stokes_bind_check
+        from iter_codex.standard_names.audits import instrument_stokes_bind_check
 
         assert instrument_stokes_bind_check({"id": "wavelength_of_polarimeter"}) == []
 
     def test_pass_no_overlap(self):
         """Totally unrelated name passes."""
-        from imas_codex.standard_names.audits import instrument_stokes_bind_check
+        from iter_codex.standard_names.audits import instrument_stokes_bind_check
 
         assert instrument_stokes_bind_check({"id": "electron_temperature"}) == []
 
@@ -2224,7 +2224,7 @@ class TestProcessQualifierCheck:
 
     def test_fail_due_to_recombination_at_ion_state(self):
         """Over-qualified process ``recombination_at_ion_state`` triggers."""
-        from imas_codex.standard_names.audits import process_qualifier_check
+        from iter_codex.standard_names.audits import process_qualifier_check
 
         issues = process_qualifier_check(
             {"id": "ion_incident_energy_flux_on_wall_due_to_recombination_at_ion_state"}
@@ -2235,7 +2235,7 @@ class TestProcessQualifierCheck:
 
     def test_fail_due_to_impurity_radiation_in_halo_region(self):
         """Over-qualified process ``impurity_radiation_in_halo_region`` triggers."""
-        from imas_codex.standard_names.audits import process_qualifier_check
+        from iter_codex.standard_names.audits import process_qualifier_check
 
         issues = process_qualifier_check(
             {"id": "electron_radiated_energy_due_to_impurity_radiation_in_halo_region"}
@@ -2246,7 +2246,7 @@ class TestProcessQualifierCheck:
 
     def test_pass_bare_process(self):
         """Correct bare process token does not trigger."""
-        from imas_codex.standard_names.audits import process_qualifier_check
+        from iter_codex.standard_names.audits import process_qualifier_check
 
         assert (
             process_qualifier_check({"id": "ion_energy_flux_due_to_recombination"})
@@ -2255,13 +2255,13 @@ class TestProcessQualifierCheck:
 
     def test_pass_no_due_to(self):
         """Name without ``due_to`` does not trigger."""
-        from imas_codex.standard_names.audits import process_qualifier_check
+        from iter_codex.standard_names.audits import process_qualifier_check
 
         assert process_qualifier_check({"id": "electron_temperature"}) == []
 
     def test_fail_due_to_process_on_surface(self):
         """``_on_`` qualifier after process triggers."""
-        from imas_codex.standard_names.audits import process_qualifier_check
+        from iter_codex.standard_names.audits import process_qualifier_check
 
         issues = process_qualifier_check(
             {"id": "heat_flux_due_to_radiation_on_outer_wall"}
@@ -2275,7 +2275,7 @@ class TestNormalizedQuantityBypass:
 
     def test_pass_normalized_pressure_moment_dimensionless(self):
         """Name starting with ``normalized_`` + dimensionless unit → pass."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
@@ -2290,7 +2290,7 @@ class TestNormalizedQuantityBypass:
 
     def test_fail_bare_pressure_dimensionless(self):
         """``pressure`` without normalization marker + dimensionless → fail."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
             {
@@ -2304,7 +2304,7 @@ class TestNormalizedQuantityBypass:
 
     def test_pass_normalized_electron_temperature_pedestal(self):
         """Normalized temperature with dimensionless unit → pass."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
@@ -2319,7 +2319,7 @@ class TestNormalizedQuantityBypass:
 
     def test_pass_norm_path_even_without_name_marker(self):
         """DD path with ``_norm_`` segment → pass even if name lacks normalized."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
@@ -2336,7 +2336,7 @@ class TestNormalizedQuantityBypass:
 
     def test_pass_normalised_british_spelling(self):
         """British spelling ``normalised_`` prefix → pass."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from iter_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
@@ -2354,7 +2354,7 @@ class TestGgdImplementationLeakageCheck:
     """Tests for ggd_implementation_leakage_check."""
 
     def test_flag_on_the_ggd(self):
-        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+        from iter_codex.standard_names.audits import ggd_implementation_leakage_check
 
         issues = ggd_implementation_leakage_check(
             {"description": "Temperature on the GGD edge grid"}
@@ -2363,7 +2363,7 @@ class TestGgdImplementationLeakageCheck:
         assert "ggd_leakage" in issues[0]
 
     def test_flag_ggd_mesh(self):
-        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+        from iter_codex.standard_names.audits import ggd_implementation_leakage_check
 
         issues = ggd_implementation_leakage_check(
             {"documentation": "Defined on a GGD mesh element for edge transport"}
@@ -2372,7 +2372,7 @@ class TestGgdImplementationLeakageCheck:
         assert "ggd_leakage" in issues[0]
 
     def test_flag_unstructured_ggd(self):
-        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+        from iter_codex.standard_names.audits import ggd_implementation_leakage_check
 
         issues = ggd_implementation_leakage_check(
             {"description": "Stored on an unstructured GGD representation"}
@@ -2381,7 +2381,7 @@ class TestGgdImplementationLeakageCheck:
 
     def test_pass_bare_ggd_reference(self):
         """Bare 'GGD' without implementation pattern should pass."""
-        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+        from iter_codex.standard_names.audits import ggd_implementation_leakage_check
 
         issues = ggd_implementation_leakage_check(
             {"description": "General grid description (GGD) based quantity"}
@@ -2389,7 +2389,7 @@ class TestGgdImplementationLeakageCheck:
         assert issues == []
 
     def test_pass_no_ggd(self):
-        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+        from iter_codex.standard_names.audits import ggd_implementation_leakage_check
 
         issues = ggd_implementation_leakage_check(
             {"description": "Electron temperature on the plasma edge"}
@@ -2397,7 +2397,7 @@ class TestGgdImplementationLeakageCheck:
         assert issues == []
 
     def test_both_fields_flagged(self):
-        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+        from iter_codex.standard_names.audits import ggd_implementation_leakage_check
 
         issues = ggd_implementation_leakage_check(
             {
@@ -2420,7 +2420,7 @@ class TestSemanticSimilarityCheck:
         """A self-describing name should score above warning threshold."""
         from unittest.mock import patch
 
-        from imas_codex.standard_names.audits import semantic_similarity_check
+        from iter_codex.standard_names.audits import semantic_similarity_check
 
         # Mock embed to return controlled vectors
         # name = "electron temperature" → [1, 0, 0, ...]
@@ -2437,7 +2437,7 @@ class TestSemanticSimilarityCheck:
             return items
 
         with patch(
-            "imas_codex.embeddings.description.embed_descriptions_batch",
+            "iter_codex.embeddings.description.embed_descriptions_batch",
             side_effect=mock_embed,
         ):
             sim, issues = semantic_similarity_check(
@@ -2453,7 +2453,7 @@ class TestSemanticSimilarityCheck:
         """An ambiguous name should fail critical threshold."""
         from unittest.mock import patch
 
-        from imas_codex.standard_names.audits import semantic_similarity_check
+        from iter_codex.standard_names.audits import semantic_similarity_check
 
         # Orthogonal vectors → sim ≈ 0
         ambig_name_emb = [1.0, 0.0, 0.0, 0.0]
@@ -2468,7 +2468,7 @@ class TestSemanticSimilarityCheck:
             return items
 
         with patch(
-            "imas_codex.embeddings.description.embed_descriptions_batch",
+            "iter_codex.embeddings.description.embed_descriptions_batch",
             side_effect=mock_embed,
         ):
             sim, issues = semantic_similarity_check(
@@ -2486,7 +2486,7 @@ class TestSemanticSimilarityCheck:
         """A name in the warning zone should get advisory issue."""
         from unittest.mock import patch
 
-        from imas_codex.standard_names.audits import semantic_similarity_check
+        from iter_codex.standard_names.audits import semantic_similarity_check
 
         # Vectors with ~0.6 cosine similarity
         name_emb = [1.0, 0.0, 0.0, 0.0]
@@ -2501,7 +2501,7 @@ class TestSemanticSimilarityCheck:
             return items
 
         with patch(
-            "imas_codex.embeddings.description.embed_descriptions_batch",
+            "iter_codex.embeddings.description.embed_descriptions_batch",
             side_effect=mock_embed,
         ):
             sim, issues = semantic_similarity_check(
@@ -2517,7 +2517,7 @@ class TestSemanticSimilarityCheck:
 
     def test_empty_description_returns_none(self):
         """Empty description should return None, no issues."""
-        from imas_codex.standard_names.audits import semantic_similarity_check
+        from iter_codex.standard_names.audits import semantic_similarity_check
 
         sim, issues = semantic_similarity_check("electron_temperature", "")
         assert sim is None
@@ -2525,7 +2525,7 @@ class TestSemanticSimilarityCheck:
 
     def test_none_description_returns_none(self):
         """None description should return None, no issues."""
-        from imas_codex.standard_names.audits import semantic_similarity_check
+        from iter_codex.standard_names.audits import semantic_similarity_check
 
         sim, issues = semantic_similarity_check("electron_temperature", None)
         assert sim is None
@@ -2535,10 +2535,10 @@ class TestSemanticSimilarityCheck:
         """If embed server is down, should return None gracefully."""
         from unittest.mock import patch
 
-        from imas_codex.standard_names.audits import semantic_similarity_check
+        from iter_codex.standard_names.audits import semantic_similarity_check
 
         with patch(
-            "imas_codex.embeddings.description.embed_descriptions_batch",
+            "iter_codex.embeddings.description.embed_descriptions_batch",
             side_effect=ConnectionError("embed server down"),
         ):
             sim, issues = semantic_similarity_check(
@@ -2553,7 +2553,7 @@ class TestSemanticSimilarityCheck:
         """Custom thresholds should be respected."""
         from unittest.mock import patch
 
-        from imas_codex.standard_names.audits import semantic_similarity_check
+        from iter_codex.standard_names.audits import semantic_similarity_check
 
         # Use ~0.7 similarity (normally above warning 0.65, but set warning to 0.8)
         name_emb = [1.0, 0.0, 0.0, 0.0]
@@ -2568,7 +2568,7 @@ class TestSemanticSimilarityCheck:
             return items
 
         with patch(
-            "imas_codex.embeddings.description.embed_descriptions_batch",
+            "iter_codex.embeddings.description.embed_descriptions_batch",
             side_effect=mock_embed,
         ):
             sim, issues = semantic_similarity_check(
@@ -2585,13 +2585,13 @@ class TestSemanticSimilarityCheck:
 
     def test_critical_check_in_critical_checks(self):
         """semantic_similarity_check should be in CRITICAL_CHECKS."""
-        from imas_codex.standard_names.audits import CRITICAL_CHECKS
+        from iter_codex.standard_names.audits import CRITICAL_CHECKS
 
         assert "semantic_similarity_check" in CRITICAL_CHECKS
 
     def test_has_critical_failure_with_semantic(self):
         """has_critical_audit_failure should detect semantic issues."""
-        from imas_codex.standard_names.audits import has_critical_audit_failure
+        from iter_codex.standard_names.audits import has_critical_audit_failure
 
         issues = [
             "audit:semantic_similarity_check: sim=0.400 below critical threshold 0.55"
@@ -2600,7 +2600,7 @@ class TestSemanticSimilarityCheck:
 
     def test_warning_not_critical(self):
         """Warning issues should NOT count as critical failures."""
-        from imas_codex.standard_names.audits import has_critical_audit_failure
+        from iter_codex.standard_names.audits import has_critical_audit_failure
 
         issues = [
             "audit:semantic_similarity_check_warning: sim=0.600 below warning 0.65"
@@ -2616,7 +2616,7 @@ class TestPrepositionPhysicalBaseCheck:
         transformation=normalized, subject=particle, physical_base=temperature.
         The ``_of_`` connector is absorbed by the parser, so physical_base is
         clean — no preposition leak."""
-        from imas_codex.standard_names.audits import preposition_physical_base_check
+        from iter_codex.standard_names.audits import preposition_physical_base_check
 
         issues = preposition_physical_base_check(
             {"id": "normalized_of_particle_temperature"}
@@ -2626,20 +2626,20 @@ class TestPrepositionPhysicalBaseCheck:
     def test_normalized_of_particle_mass_not_flagged(self):
         """ISN v0.8.0rc1 correctly parses ``normalized_of_particle_mass`` —
         physical_base is 'mass', not 'of_particle_mass'."""
-        from imas_codex.standard_names.audits import preposition_physical_base_check
+        from iter_codex.standard_names.audits import preposition_physical_base_check
 
         issues = preposition_physical_base_check({"id": "normalized_of_particle_mass"})
         assert len(issues) == 0
 
     def test_clean_name_passes(self):
         """A well-formed name has no preposition prefix on physical_base."""
-        from imas_codex.standard_names.audits import preposition_physical_base_check
+        from iter_codex.standard_names.audits import preposition_physical_base_check
 
         assert preposition_physical_base_check({"id": "electron_temperature"}) == []
 
     def test_normalized_without_of_passes(self):
         """``normalized_particle_temperature`` is the correct form."""
-        from imas_codex.standard_names.audits import preposition_physical_base_check
+        from iter_codex.standard_names.audits import preposition_physical_base_check
 
         assert (
             preposition_physical_base_check({"id": "normalized_particle_temperature"})
@@ -2648,20 +2648,20 @@ class TestPrepositionPhysicalBaseCheck:
 
     def test_empty_name_passes(self):
         """Empty or missing name is a no-op."""
-        from imas_codex.standard_names.audits import preposition_physical_base_check
+        from iter_codex.standard_names.audits import preposition_physical_base_check
 
         assert preposition_physical_base_check({"id": ""}) == []
         assert preposition_physical_base_check({}) == []
 
     def test_is_critical_check(self):
         """preposition_physical_base_check must be in CRITICAL_CHECKS."""
-        from imas_codex.standard_names.audits import CRITICAL_CHECKS
+        from iter_codex.standard_names.audits import CRITICAL_CHECKS
 
         assert "preposition_physical_base_check" in CRITICAL_CHECKS
 
     def test_has_critical_failure(self):
         """has_critical_audit_failure detects preposition_physical_base_check issues."""
-        from imas_codex.standard_names.audits import has_critical_audit_failure
+        from iter_codex.standard_names.audits import has_critical_audit_failure
 
         issues = [
             "audit:preposition_physical_base_check: ISN parse of "
@@ -2703,14 +2703,14 @@ class TestCanonicalLocusCheck:
     """ISN's public registry and advisory aliases own locus authority."""
 
     def test_power_at_separatrix_has_no_canonical_issue(self):
-        from imas_codex.standard_names.audits import canonical_locus_check
+        from iter_codex.standard_names.audits import canonical_locus_check
 
         issues = canonical_locus_check({"id": "total_power_at_separatrix"})
 
         assert issues == []
 
     def test_power_at_separatrix_passes_complete_candidate_validation(self):
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             validate_name_candidate,
         )
 
@@ -2735,7 +2735,7 @@ class TestCanonicalLocusCheck:
         ],
     )
     def test_structurally_proven_field_of_position_is_flagged(self, name):
-        from imas_codex.standard_names.audits import canonical_locus_check
+        from iter_codex.standard_names.audits import canonical_locus_check
 
         issues = canonical_locus_check({"id": name})
 
@@ -2754,7 +2754,7 @@ class TestCanonicalLocusCheck:
         ],
     )
     def test_correct_intrinsic_and_field_relations_are_accepted(self, name):
-        from imas_codex.standard_names.audits import canonical_locus_check
+        from iter_codex.standard_names.audits import canonical_locus_check
 
         assert canonical_locus_check({"id": name}) == []
 
@@ -2774,13 +2774,13 @@ class TestCanonicalLocusCheck:
         projection demands ``_at_`` and quarantines the canonical spelling the
         composition rules publish for the DD ``area`` family.
         """
-        from imas_codex.standard_names.audits import canonical_locus_check
+        from iter_codex.standard_names.audits import canonical_locus_check
 
         assert canonical_locus_check({"id": name}) == []
 
     def test_sectioning_exception_is_scoped_to_the_axis_proof(self):
         """A species subject still proves field evaluation under the same relation."""
-        from imas_codex.standard_names.audits import canonical_locus_check
+        from iter_codex.standard_names.audits import canonical_locus_check
 
         issues = canonical_locus_check({"id": "electron_temperature_of_flux_surface"})
 
@@ -2789,7 +2789,7 @@ class TestCanonicalLocusCheck:
 
     def test_entity_and_position_loci_agree_on_the_sectioned_extent(self):
         """One construction cannot be clean on an entity locus and flagged on a position."""
-        from imas_codex.standard_names.audits import canonical_locus_check
+        from iter_codex.standard_names.audits import canonical_locus_check
 
         entity = canonical_locus_check(
             {"id": "poloidal_plane_cross_sectional_area_of_rogowski_coil"}
@@ -2805,7 +2805,7 @@ class TestCanonicalLocusCheck:
         _registered_locus_cases(),
     )
     def test_every_registered_locus_is_never_flagged(self, locus, relation):
-        from imas_codex.standard_names.audits import canonical_locus_check
+        from iter_codex.standard_names.audits import canonical_locus_check
 
         assert (
             canonical_locus_check({"id": f"electron_temperature_{relation}_{locus}"})
@@ -2817,8 +2817,8 @@ class TestCanonicalLocusCheck:
         _advisory_locus_alias_cases(),
     )
     def test_every_published_locus_alias_is_flagged(self, alias, canonical, relation):
-        from imas_codex.standard_names.audits import canonical_locus_check
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.audits import canonical_locus_check
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             validate_name_candidate,
         )
 
@@ -2842,7 +2842,7 @@ class TestCanonicalLocusCheck:
     def test_no_module_level_locus_vocabulary_tables(self):
         import inspect
 
-        import imas_codex.standard_names.audits as audits
+        import iter_codex.standard_names.audits as audits
 
         tree = ast.parse(inspect.getsource(audits))
         offenders: list[str] = []
@@ -2904,7 +2904,7 @@ class TestAttachmentStateResolution:
         ],
     )
     def test_state_resolution_consistency(self, source_id, sn_name, expected_ok):
-        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _is_attachment_consistent,
         )
 
@@ -2933,7 +2933,7 @@ class TestVectorFamilyConsistencyCheck:
 
     def test_clean_cartesian_family_passes(self):
         """Cartesian node (x, y, z): the z leaf is the 'z' axis token."""
-        from imas_codex.standard_names.audits import vector_family_consistency_check
+        from iter_codex.standard_names.audits import vector_family_consistency_check
 
         names = [
             self._cam("x", "x"),
@@ -2944,7 +2944,7 @@ class TestVectorFamilyConsistencyCheck:
 
     def test_clean_cylindrical_family_passes(self):
         """Cylindrical node (r, phi, z): the z leaf is the 'vertical' axis token."""
-        from imas_codex.standard_names.audits import vector_family_consistency_check
+        from iter_codex.standard_names.audits import vector_family_consistency_check
 
         names = [
             self._cam("radial", "r"),
@@ -2955,7 +2955,7 @@ class TestVectorFamilyConsistencyCheck:
 
     def test_locus_and_domain_drift_flagged(self):
         """The real camera failure: one component locus-less + off-domain."""
-        from imas_codex.standard_names.audits import vector_family_consistency_check
+        from iter_codex.standard_names.audits import vector_family_consistency_check
 
         names = [
             self._cam("x", "x", locus=None, domain="camera_visible"),
@@ -2969,7 +2969,7 @@ class TestVectorFamilyConsistencyCheck:
 
     def test_cartesian_z_leaf_must_not_be_vertical(self):
         """In a Cartesian node the z leaf is 'z' — a 'vertical' name is flagged."""
-        from imas_codex.standard_names.audits import vector_family_consistency_check
+        from iter_codex.standard_names.audits import vector_family_consistency_check
 
         names = [
             self._cam("x", "x"),
@@ -2983,7 +2983,7 @@ class TestVectorFamilyConsistencyCheck:
         assert "vertical_direction_unit_vector_of_camera" in joined
 
     def test_cylindrical_z_leaf_must_not_be_bare_z(self):
-        from imas_codex.standard_names.audits import vector_family_consistency_check
+        from iter_codex.standard_names.audits import vector_family_consistency_check
 
         names = [
             self._cam("radial", "r"),
@@ -3000,7 +3000,7 @@ class TestVectorFamilyConsistencyCheck:
         assert "z_direction_unit_vector_of_camera" in joined
 
     def test_mixed_frame_triple_flagged(self):
-        from imas_codex.standard_names.audits import vector_family_consistency_check
+        from iter_codex.standard_names.audits import vector_family_consistency_check
 
         # leaves x / phi / z -> a cylindrical node (phi present) so z -> vertical,
         # but axis tokens {x, toroidal, vertical} mix frames: subset of neither
@@ -3014,7 +3014,7 @@ class TestVectorFamilyConsistencyCheck:
         assert any("non-canonical axis triple" in i for i in issues)
 
     def test_base_carrier_disagreement_flagged(self):
-        from imas_codex.standard_names.audits import vector_family_consistency_check
+        from iter_codex.standard_names.audits import vector_family_consistency_check
 
         names = [
             self._cam("x", "x"),
@@ -3028,12 +3028,12 @@ class TestVectorFamilyConsistencyCheck:
         assert any("base carrier" in i for i in issues)
 
     def test_single_component_not_flagged(self):
-        from imas_codex.standard_names.audits import vector_family_consistency_check
+        from iter_codex.standard_names.audits import vector_family_consistency_check
 
         assert vector_family_consistency_check([self._cam("vertical", "z")]) == []
 
     def test_distinct_devices_do_not_group(self):
-        from imas_codex.standard_names.audits import vector_family_consistency_check
+        from iter_codex.standard_names.audits import vector_family_consistency_check
 
         # Different device grandparents -> different vector nodes -> no
         # cross-family comparison even though both are '/direction/z'.
@@ -3060,7 +3060,7 @@ class TestDdPathUniquenessCheck:
         return {"id": name, "source_paths": paths}
 
     def test_unique_paths_clean(self):
-        from imas_codex.standard_names.audits import dd_path_uniqueness_check
+        from iter_codex.standard_names.audits import dd_path_uniqueness_check
 
         names = [
             self._entry("electron_temperature", ["core_profiles/te"]),
@@ -3069,7 +3069,7 @@ class TestDdPathUniquenessCheck:
         assert dd_path_uniqueness_check(names) == []
 
     def test_double_attach_flagged(self):
-        from imas_codex.standard_names.audits import dd_path_uniqueness_check
+        from iter_codex.standard_names.audits import dd_path_uniqueness_check
 
         names = [
             self._entry("magnetic_shear", ["summary/local/pedestal/magnetic_shear"]),
@@ -3084,7 +3084,7 @@ class TestDdPathUniquenessCheck:
         assert "magnetic_shear_at_pedestal" in issues[0]
 
     def test_dd_scheme_prefix_stripped(self):
-        from imas_codex.standard_names.audits import dd_path_uniqueness_check
+        from iter_codex.standard_names.audits import dd_path_uniqueness_check
 
         names = [
             self._entry("a_name", ["dd:x/y/z"]),
@@ -3103,7 +3103,7 @@ class TestDerivedParentStructuralCheck:
 
     def test_consistent_peel_over_species_passes(self):
         """A species-peel parent whose tokens are a subset of a child passes."""
-        from imas_codex.standard_names.audits import derived_parent_structural_check
+        from iter_codex.standard_names.audits import derived_parent_structural_check
 
         # Parent drops the species subject its children carry.
         assert (
@@ -3119,7 +3119,7 @@ class TestDerivedParentStructuralCheck:
 
     def test_reordered_qualifier_peel_passes(self):
         """Token-SET containment tolerates qualifier reordering between peel/child."""
-        from imas_codex.standard_names.audits import derived_parent_structural_check
+        from iter_codex.standard_names.audits import derived_parent_structural_check
 
         # parent tokens {perturbed, particle, energy} ⊆ child token set.
         assert (
@@ -3132,7 +3132,7 @@ class TestDerivedParentStructuralCheck:
 
     def test_orphan_parent_quarantines(self):
         """A derived parent with no children generalises nothing — critical."""
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             derived_parent_structural_check,
             has_critical_audit_failure,
         )
@@ -3144,7 +3144,7 @@ class TestDerivedParentStructuralCheck:
 
     def test_inconsistent_peel_quarantines(self):
         """A parent whose tokens are not a subset of any child is a bad peel."""
-        from imas_codex.standard_names.audits import (
+        from iter_codex.standard_names.audits import (
             derived_parent_structural_check,
             has_critical_audit_failure,
         )
@@ -3158,14 +3158,14 @@ class TestDerivedParentStructuralCheck:
         assert has_critical_audit_failure(issues) is True
 
     def test_empty_name_quarantines(self):
-        from imas_codex.standard_names.audits import derived_parent_structural_check
+        from iter_codex.standard_names.audits import derived_parent_structural_check
 
         issues = derived_parent_structural_check("", ["some_child"])
         assert len(issues) == 1
         assert "empty parent name" in issues[0]
 
     def test_none_children_treated_as_orphan(self):
-        from imas_codex.standard_names.audits import derived_parent_structural_check
+        from iter_codex.standard_names.audits import derived_parent_structural_check
 
         issues = derived_parent_structural_check("plasma_momentum", None)
         assert len(issues) == 1

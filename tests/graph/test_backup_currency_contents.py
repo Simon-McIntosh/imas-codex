@@ -19,7 +19,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.graph import neo4j_ops
+from iter_codex.graph import neo4j_ops
 
 
 def _write_recovery_archive(path: Path, timestamp: float) -> Path:
@@ -58,10 +58,10 @@ def _configure_paths(
     exports_dir: Path,
     data_dir: Path,
 ) -> None:
-    monkeypatch.setattr("imas_codex.graph.profiles.BACKUPS_DIR", backups_dir)
-    monkeypatch.setattr("imas_codex.graph.dirs.EXPORTS_DIR", exports_dir)
+    monkeypatch.setattr("iter_codex.graph.profiles.BACKUPS_DIR", backups_dir)
+    monkeypatch.setattr("iter_codex.graph.dirs.EXPORTS_DIR", exports_dir)
     monkeypatch.setattr(
-        "imas_codex.graph.profiles.resolve_neo4j",
+        "iter_codex.graph.profiles.resolve_neo4j",
         lambda: SimpleNamespace(data_dir=data_dir),
     )
 
@@ -74,7 +74,7 @@ def test_bare_export_in_exports_dir_registers_as_backup(
     exports_dir = tmp_path / "exports"
     data_dir = tmp_path / "neo4j"
     archive = _write_recovery_archive(
-        exports_dir / "imas-codex-graph-abc1234.tar.gz", 100.0
+        exports_dir / "iter-codex-graph-abc1234.tar.gz", 100.0
     )
     _write_file(data_dir / "data" / "store", 200.0, b"live")
     _configure_paths(monkeypatch, backups_dir, exports_dir, data_dir)

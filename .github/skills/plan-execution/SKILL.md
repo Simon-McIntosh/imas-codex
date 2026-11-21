@@ -1,6 +1,6 @@
 ---
 name: plan-execution
-description: How to read and execute feature plans from the imas-codex plans/ directory. Use when implementing features from plan documents or when the fleet orchestrator dispatches work.
+description: How to read and execute feature plans from the iter-codex plans/ directory. Use when implementing features from plan documents or when the fleet orchestrator dispatches work.
 ---
 
 # Executing Feature Plans

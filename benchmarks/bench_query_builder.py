@@ -7,7 +7,7 @@ final ``gc.query()`` call so only the build path is timed.
 
 from __future__ import annotations
 
-from imas_codex.graph.query_builder import graph_search
+from iter_codex.graph.query_builder import graph_search
 
 
 class _StubGC:

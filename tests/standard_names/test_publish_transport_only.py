@@ -12,8 +12,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
-from imas_codex.standard_names.publish import (
+from iter_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
+from iter_codex.standard_names.publish import (
     PublishReport,
     _validate_staging_dir,
     run_publish,
@@ -128,7 +128,7 @@ class TestRunPublish:
     """run_publish transport operation."""
 
     @patch(
-        "imas_codex.standard_names.publish._fetch_expected_domains", return_value=None
+        "iter_codex.standard_names.publish._fetch_expected_domains", return_value=None
     )
     def test_dry_run_no_changes(
         self, _mock_domains, staging_dir: Path, isnc_repo: Path
@@ -140,7 +140,7 @@ class TestRunPublish:
         assert not report.errors
 
     @patch(
-        "imas_codex.standard_names.publish._fetch_expected_domains", return_value=None
+        "iter_codex.standard_names.publish._fetch_expected_domains", return_value=None
     )
     def test_publish_creates_commit(
         self, _mock_domains, staging_dir: Path, isnc_repo: Path
@@ -157,7 +157,7 @@ class TestRunPublish:
         assert (sn_dir / "equilibrium.yml").is_file()
 
     @patch(
-        "imas_codex.standard_names.publish._fetch_expected_domains", return_value=None
+        "iter_codex.standard_names.publish._fetch_expected_domains", return_value=None
     )
     def test_publish_commit_message(
         self, _mock_domains, staging_dir: Path, isnc_repo: Path
@@ -174,7 +174,7 @@ class TestRunPublish:
         assert msg.startswith("sn: update")
 
     @patch(
-        "imas_codex.standard_names.publish._fetch_expected_domains", return_value=None
+        "iter_codex.standard_names.publish._fetch_expected_domains", return_value=None
     )
     def test_dirty_tree_hard_errors_by_default(
         self, _mock_domains, staging_dir: Path, isnc_repo: Path
@@ -186,7 +186,7 @@ class TestRunPublish:
         assert report.commit_sha is None
 
     @patch(
-        "imas_codex.standard_names.publish._fetch_expected_domains", return_value=None
+        "iter_codex.standard_names.publish._fetch_expected_domains", return_value=None
     )
     def test_dirty_tree_allowed_for_rc(
         self, _mock_domains, staging_dir: Path, isnc_repo: Path
@@ -200,7 +200,7 @@ class TestRunPublish:
         assert report.commit_sha is not None
 
     @patch(
-        "imas_codex.standard_names.publish._fetch_expected_domains", return_value=None
+        "iter_codex.standard_names.publish._fetch_expected_domains", return_value=None
     )
     def test_publish_clears_old_tree(
         self, _mock_domains, staging_dir: Path, isnc_repo: Path

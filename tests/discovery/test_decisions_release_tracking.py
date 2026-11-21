@@ -19,8 +19,8 @@ import pathlib
 
 import pytest
 
-from imas_codex.discovery.base import judgment, llm
-from imas_codex.ids.mapping import PipelineCost
+from iter_codex.discovery.base import judgment, llm
+from iter_codex.ids.mapping import PipelineCost
 
 QUESTIONS = {
     "role": {
@@ -70,7 +70,7 @@ def _payload(release: str) -> dict:
 
 @pytest.fixture(autouse=True)
 def _api_key(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
 
 
 def test_sync_call_reports_the_dated_build(monkeypatch):
@@ -188,7 +188,7 @@ def test_a_stored_llm_cost_carries_the_release():
     import uuid
     from datetime import datetime
 
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         record_llm_cost,
     )
 
@@ -316,7 +316,7 @@ class _SinkState:
 
 
 def _sink(manager):
-    from imas_codex.standard_names.review.pipeline import _judge_cost_sink
+    from iter_codex.standard_names.review.pipeline import _judge_cost_sink
 
     return _judge_cost_sink(_SinkState(manager))
 
@@ -364,7 +364,7 @@ def test_the_review_enrich_worker_binds_the_judge_cost_sink():
     own syntax tree: the judge's tracker must be constructed with a ``charge``
     sink.
     """
-    from imas_codex.standard_names.review import pipeline
+    from iter_codex.standard_names.review import pipeline
 
     tree = ast.parse(pathlib.Path(pipeline.__file__).read_text())
     worker = _function(tree, "enrich_review_worker")
@@ -381,7 +381,7 @@ def test_the_review_enrich_worker_binds_the_judge_cost_sink():
 
 def test_the_docs_contradiction_call_stamps_the_release_it_was_served():
     """Reverting the stamp leaves the Jev charge without its build."""
-    from imas_codex.standard_names.worker_tasks import worker_review_docs
+    from iter_codex.standard_names.worker_tasks import worker_review_docs
 
     tree = ast.parse(pathlib.Path(worker_review_docs.__file__).read_text())
     note = _function(tree, "_documentation_contradiction_note")

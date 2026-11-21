@@ -5,10 +5,10 @@ from unittest.mock import Mock
 
 import pytest
 
-from imas_codex.models.constants import SearchMode
-from imas_codex.models.result_models import SearchPathsResult
-from imas_codex.search.search_strategy import SearchHit
-from imas_codex.services.response import ResponseService
+from iter_codex.models.constants import SearchMode
+from iter_codex.models.result_models import SearchPathsResult
+from iter_codex.search.search_strategy import SearchHit
+from iter_codex.services.response import ResponseService
 
 
 class TestResponseService:

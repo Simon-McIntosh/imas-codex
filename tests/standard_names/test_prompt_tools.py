@@ -1,7 +1,7 @@
 """Tests for the prompt tools that back the tool-calling compose harness.
 
 These tests exercise the **schema shape** and **dispatcher behaviour** of
-``imas_codex.standard_names.prompt_tools``. The live-graph tool
+``iter_codex.standard_names.prompt_tools``. The live-graph tool
 implementations (``fetch_cluster_siblings`` et al.) are covered by the
 harness run, not by unit tests — they wrap simple Cypher queries whose
 correctness is driven by the graph contents rather than code logic.
@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names import prompt_tools
+from iter_codex.standard_names import prompt_tools
 
 
 class TestToolSchemas:

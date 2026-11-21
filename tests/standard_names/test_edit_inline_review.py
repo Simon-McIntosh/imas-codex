@@ -38,15 +38,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.edit import (
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.edit import (
     EditPlan,
     InlineReviewOutcome,
     InlineReviewResult,
     run_inline_review,
 )
 
-_RUN_SN_POOLS = "imas_codex.standard_names.loop.run_sn_pools"
+_RUN_SN_POOLS = "iter_codex.standard_names.loop.run_sn_pools"
 
 
 def _rename_plan(**overrides) -> EditPlan:
@@ -287,14 +287,14 @@ class TestCliInlineWiring:
         runner = CliRunner()
         with (
             patch(
-                "imas_codex.standard_names.edit.apply_edit",
+                "iter_codex.standard_names.edit.apply_edit",
                 return_value=_rename_plan(),
             ),
             patch(
-                "imas_codex.standard_names.edit.run_inline_review",
+                "iter_codex.standard_names.edit.run_inline_review",
                 return_value=_accepted_outcome(),
             ) as mock_review,
-            patch("imas_codex.cli.sn._require_embed_ready"),
+            patch("iter_codex.cli.sn._require_embed_ready"),
         ):
             result = runner.invoke(
                 sn,
@@ -319,14 +319,14 @@ class TestCliInlineWiring:
         runner = CliRunner()
         with (
             patch(
-                "imas_codex.standard_names.edit.apply_edit",
+                "iter_codex.standard_names.edit.apply_edit",
                 return_value=_rename_plan(),
             ),
             patch(
-                "imas_codex.standard_names.edit.run_inline_review",
+                "iter_codex.standard_names.edit.run_inline_review",
                 return_value=_accepted_outcome(),
             ) as mock_review,
-            patch("imas_codex.cli.sn._require_embed_ready"),
+            patch("iter_codex.cli.sn._require_embed_ready"),
         ):
             result = runner.invoke(
                 sn,
@@ -348,13 +348,13 @@ class TestCliInlineWiring:
         runner = CliRunner()
         with (
             patch(
-                "imas_codex.standard_names.edit.apply_edit",
+                "iter_codex.standard_names.edit.apply_edit",
                 return_value=_rename_plan(),
             ),
             patch(
-                "imas_codex.standard_names.edit.run_inline_review",
+                "iter_codex.standard_names.edit.run_inline_review",
             ) as mock_review,
-            patch("imas_codex.cli.sn._require_embed_ready") as mock_embed,
+            patch("iter_codex.cli.sn._require_embed_ready") as mock_embed,
         ):
             result = runner.invoke(
                 sn,
@@ -378,11 +378,11 @@ class TestCliInlineWiring:
         runner = CliRunner()
         with (
             patch(
-                "imas_codex.standard_names.edit.apply_edit",
+                "iter_codex.standard_names.edit.apply_edit",
                 return_value=_rename_plan(),
             ),
-            patch("imas_codex.standard_names.edit.run_inline_review") as mock_review,
-            patch("imas_codex.cli.sn._require_embed_ready"),
+            patch("iter_codex.standard_names.edit.run_inline_review") as mock_review,
+            patch("iter_codex.cli.sn._require_embed_ready"),
         ):
             result = runner.invoke(
                 sn,
@@ -421,14 +421,14 @@ class TestCliInlineWiring:
         runner = CliRunner()
         with (
             patch(
-                "imas_codex.standard_names.edit.apply_edit",
+                "iter_codex.standard_names.edit.apply_edit",
                 return_value=_rename_plan(),
             ),
             patch(
-                "imas_codex.standard_names.edit.run_inline_review",
+                "iter_codex.standard_names.edit.run_inline_review",
                 return_value=failed,
             ),
-            patch("imas_codex.cli.sn._require_embed_ready"),
+            patch("iter_codex.cli.sn._require_embed_ready"),
         ):
             result = runner.invoke(
                 sn,
@@ -448,8 +448,8 @@ class TestCliInlineWiring:
         plan = _rename_plan(applied=False, successor=None)
         runner = CliRunner()
         with (
-            patch("imas_codex.standard_names.edit.apply_edit", return_value=plan),
-            patch("imas_codex.standard_names.edit.run_inline_review") as mock_review,
+            patch("iter_codex.standard_names.edit.apply_edit", return_value=plan),
+            patch("iter_codex.standard_names.edit.run_inline_review") as mock_review,
         ):
             result = runner.invoke(
                 sn,
@@ -470,8 +470,8 @@ class TestCliInlineWiring:
         plan = _rename_plan(blocked="target not found", applied=False, run_id=None)
         runner = CliRunner()
         with (
-            patch("imas_codex.standard_names.edit.apply_edit", return_value=plan),
-            patch("imas_codex.standard_names.edit.run_inline_review") as mock_review,
+            patch("iter_codex.standard_names.edit.apply_edit", return_value=plan),
+            patch("iter_codex.standard_names.edit.run_inline_review") as mock_review,
         ):
             result = runner.invoke(
                 sn,
@@ -505,7 +505,7 @@ _TEST_ID_PREFIX = "__inlinetest__"
 @pytest.fixture()
 def _gc():
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -588,14 +588,14 @@ def _fake_scoped_pool(_gc, mock_llm, *, accept: bool):
     on the live graph — the substance of an inline review, minus the pool
     harness the unit tests already cover.
     """
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         claim_review_name_batch,
     )
-    from imas_codex.standard_names.models import (
+    from iter_codex.standard_names.models import (
         StandardNameQualityReviewNameOnly,
         StandardNameQualityScoreNameOnly,
     )
-    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    from iter_codex.standard_names.worker_tasks.worker_review_names import (
         process_review_name_batch,
     )
 

@@ -2,7 +2,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 0c3992cb8739df6a231a7009198211e44b1f75f6, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.docs_review_eligibility_params, imas_codex.standard_names.graph_ops.docs_review_eligibility_where.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.docs_review_eligibility_params, iter_codex.standard_names.graph_ops.docs_review_eligibility_where.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Read back the documentation contradiction-veto firings and their consequences.
@@ -17,7 +17,7 @@ own each decision:
 3. Whether the refine prompt receives the veto note at all.
 
 Sources:
-  * ``~/.local/share/imas-codex/logs/sn_sn-compose*.log`` — the
+  * ``~/.local/share/iter-codex/logs/sn_sn-compose*.log`` — the
     ``review_docs: <name> held from acceptance`` line, which carries the note
     text and the hold timestamp.
   * the graph — the per-group ``StandardNameReview`` rows, which carry the
@@ -36,17 +36,17 @@ import re
 import sys
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.defaults import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
     DEFAULT_REFINE_ROTATIONS,
 )
-from imas_codex.standard_names.graph_ops import (
+from iter_codex.standard_names.graph_ops import (
     docs_review_eligibility_params,
     docs_review_eligibility_where,
 )
 
-LOG_DIR = Path.home() / ".local/share/imas-codex/logs"
+LOG_DIR = Path.home() / ".local/share/iter-codex/logs"
 HOLD_RE = re.compile(
     r"^(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})"
     r".*review_docs: (?P<name>[a-z0-9_]+) held from acceptance — (?P<note>.*)$"
@@ -243,7 +243,7 @@ def refine_predicate_readback(gc: GraphClient, name: str) -> dict:
 
 
 def family_plan(name: str) -> dict:
-    from imas_codex.standard_names.harmonize import plan_family_applies
+    from iter_codex.standard_names.harmonize import plan_family_applies
 
     plans = plan_family_applies(seeds=[name], min_size=1)
     return plans[0] if plans else {}

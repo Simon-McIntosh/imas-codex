@@ -1,9 +1,9 @@
 """No module writes a standard name's domain outside the one writer.
 
-``imas_codex.standard_names.domain_decision.write_name_domain`` sets
+``iter_codex.standard_names.domain_decision.write_name_domain`` sets
 ``physics_domain``, ``source_domains`` and the ``HAS_PHYSICS_DOMAIN`` edges in
 one transaction so the three cannot disagree. This module reads every Python
-module under ``imas_codex/standard_names/`` and its Cypher strings, and refuses
+module under ``iter_codex/standard_names/`` and its Cypher strings, and refuses
 any ``SET`` of a name's ``physics_domain`` or ``source_domains``, and any
 ``MERGE``, ``CREATE`` or ``DELETE`` of a ``HAS_PHYSICS_DOMAIN`` relationship,
 made outside the writer and the functions it calls.
@@ -26,9 +26,9 @@ from pathlib import Path
 
 import pytest
 
-import imas_codex.standard_names as standard_names
-from imas_codex.cli.sn import CYPHER_LITERAL_OR_COMMENT, cypher_mutation_clause
-from imas_codex.graph.cypher_property_check import (
+import iter_codex.standard_names as standard_names
+from iter_codex.cli.sn import CYPHER_LITERAL_OR_COMMENT, cypher_mutation_clause
+from iter_codex.graph.cypher_property_check import (
     NODE_BINDING_RE,
     cypher_set_blocks,
     python_cypher_strings,

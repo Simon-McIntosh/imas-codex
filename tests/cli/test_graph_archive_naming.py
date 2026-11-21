@@ -7,10 +7,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 
-from imas_codex.cli.graph import registry as graph_registry
-from imas_codex.cli.graph.data import graph_export
-from imas_codex.graph.neo4j_ops import backup_graph_dump
-from imas_codex.graph.remote import (
+from iter_codex.cli.graph import registry as graph_registry
+from iter_codex.cli.graph.data import graph_export
+from iter_codex.graph.neo4j_ops import backup_graph_dump
+from iter_codex.graph.remote import (
     build_remote_export_script,
     build_remote_push_script,
     build_remote_release_push_script,
@@ -43,40 +43,40 @@ def test_default_archive_names_share_revision_and_utc_timestamp(tmp_path, monkey
         "tag": None,
     }
     monkeypatch.setattr(
-        "imas_codex.graph.profiles.resolve_neo4j",
+        "iter_codex.graph.profiles.resolve_neo4j",
         lambda: profile,
     )
     monkeypatch.setattr(
-        "imas_codex.graph.dirs.ensure_exports_dir",
+        "iter_codex.graph.dirs.ensure_exports_dir",
         lambda: exports_dir,
     )
     monkeypatch.setattr(
-        "imas_codex.graph.profiles.BACKUPS_DIR",
+        "iter_codex.graph.profiles.BACKUPS_DIR",
         backups_dir,
     )
     monkeypatch.setattr(
-        "imas_codex.graph.remote.is_remote_location",
+        "iter_codex.graph.remote.is_remote_location",
         lambda _host: False,
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.data.get_git_info",
+        "iter_codex.cli.graph.data.get_git_info",
         lambda: git_info,
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.data._measure_dump_scope",
+        "iter_codex.cli.graph.data._measure_dump_scope",
         lambda _dump: {"nodes": 0, "relationships": 0, "labels": {}},
     )
     monkeypatch.setattr(
-        "imas_codex.graph.ghcr.get_git_info",
+        "iter_codex.graph.ghcr.get_git_info",
         lambda: git_info,
     )
-    monkeypatch.setattr("imas_codex.graph.neo4j_ops.datetime", _FrozenDateTime)
+    monkeypatch.setattr("iter_codex.graph.neo4j_ops.datetime", _FrozenDateTime)
 
     def create_dump(_profile, dumps_dir: Path) -> None:
         (dumps_dir / "neo4j.dump").write_bytes(b"recoverable graph dump")
 
     monkeypatch.setattr(
-        "imas_codex.graph.neo4j_ops.run_neo4j_dump",
+        "iter_codex.graph.neo4j_ops.run_neo4j_dump",
         create_dump,
     )
 
@@ -93,21 +93,21 @@ def test_default_archive_names_share_revision_and_utc_timestamp(tmp_path, monkey
     backup_path = backup_graph_dump()
 
     archive_stamp = "dev-6fc745c-20260901T125109Z"
-    export_path = exports_dir / f"imas-codex-graph-{archive_stamp}.tar.gz"
+    export_path = exports_dir / f"iter-codex-graph-{archive_stamp}.tar.gz"
     assert export_path.is_file()
     with tarfile.open(export_path, "r:gz") as archive:
-        assert archive.getnames()[0] == f"imas-codex-graph-{archive_stamp}"
+        assert archive.getnames()[0] == f"iter-codex-graph-{archive_stamp}"
     assert backup_path == backups_dir / f"codex-{archive_stamp}.dump"
 
 
 def test_remote_archive_producers_use_caller_supplied_stamped_names():
     """Remote scripts preserve one caller-resolved archive identity."""
     stamp = "dev-6fc745c-20260901T125109Z"
-    full_dir = f"imas-codex-graph-{stamp}"
+    full_dir = f"iter-codex-graph-{stamp}"
     full_archive = f"{full_dir}.tar.gz"
-    dd_dir = f"imas-codex-graph-dd-{stamp}"
+    dd_dir = f"iter-codex-graph-dd-{stamp}"
     dd_archive = f"{dd_dir}.tar.gz"
-    facility_dir = f"imas-codex-graph-tcv-{stamp}"
+    facility_dir = f"iter-codex-graph-tcv-{stamp}"
     facility_archive = f"{facility_dir}.tar.gz"
 
     export_script = build_remote_export_script(
@@ -117,7 +117,7 @@ def test_remote_archive_producers_use_caller_supplied_stamped_names():
     )
     push_script = build_remote_push_script(
         "codex",
-        "ghcr.io/example/imas-codex-graph:v1.0.0",
+        "ghcr.io/example/iter-codex-graph:v1.0.0",
         version_tag="v1.0.0",
         git_commit="6fc745cf0123456789abcdef0123456789abcdef",
         archive_name=full_archive,
@@ -125,7 +125,7 @@ def test_remote_archive_producers_use_caller_supplied_stamped_names():
     )
     dd_push_script = build_remote_push_script(
         "codex",
-        "ghcr.io/example/imas-codex-graph-dd:v1.0.0",
+        "ghcr.io/example/iter-codex-graph-dd:v1.0.0",
         version_tag="v1.0.0",
         git_commit="6fc745cf0123456789abcdef0123456789abcdef",
         dd_only=True,
@@ -134,9 +134,9 @@ def test_remote_archive_producers_use_caller_supplied_stamped_names():
     )
     release_script = build_remote_release_push_script(
         "codex",
-        "ghcr.io/example/imas-codex-graph:v1.0.0",
-        dd_artifact_ref="ghcr.io/example/imas-codex-graph-dd:v1.0.0",
-        facility_artifact_refs={"tcv": "ghcr.io/example/imas-codex-graph-tcv:v1.0.0"},
+        "ghcr.io/example/iter-codex-graph:v1.0.0",
+        dd_artifact_ref="ghcr.io/example/iter-codex-graph-dd:v1.0.0",
+        facility_artifact_refs={"tcv": "ghcr.io/example/iter-codex-graph-tcv:v1.0.0"},
         version_tag="v1.0.0",
         git_commit="6fc745cf0123456789abcdef0123456789abcdef",
         archive_name=full_archive,
@@ -186,11 +186,11 @@ def test_graph_push_temporary_archive_uses_shared_stamp(monkeypatch):
     monkeypatch.setattr(graph_registry, "_save_dev_revision", lambda *_args: None)
     monkeypatch.setattr(graph_registry, "_dispatch_graph_quality", lambda *_args: None)
     monkeypatch.setattr(
-        "imas_codex.graph.profiles.resolve_neo4j",
+        "iter_codex.graph.profiles.resolve_neo4j",
         lambda: SimpleNamespace(name="codex", host="localhost"),
     )
     monkeypatch.setattr(
-        "imas_codex.graph.remote.is_remote_location", lambda _host: False
+        "iter_codex.graph.remote.is_remote_location", lambda _host: False
     )
 
     def invoke_export(_runner, _command, args):
@@ -204,10 +204,10 @@ def test_graph_push_temporary_archive_uses_shared_stamp(monkeypatch):
 
     monkeypatch.setattr("click.testing.CliRunner.invoke", invoke_export)
     monkeypatch.setattr(
-        "imas_codex.cli.graph_progress.run_oras_with_progress", capture_push
+        "iter_codex.cli.graph_progress.run_oras_with_progress", capture_push
     )
     monkeypatch.setattr(graph_registry, "__version__", "1.0.0")
-    monkeypatch.setattr("imas_codex.graph.neo4j_ops.datetime", _FrozenDateTime)
+    monkeypatch.setattr("iter_codex.graph.neo4j_ops.datetime", _FrozenDateTime)
 
     graph_registry.graph_push.callback(
         dev=True,
@@ -223,7 +223,7 @@ def test_graph_push_temporary_archive_uses_shared_stamp(monkeypatch):
         source_dump=None,
     )
 
-    archive_name = "imas-codex-graph-dev-6fc745c-20260901T125109Z.tar.gz"
+    archive_name = "iter-codex-graph-dev-6fc745c-20260901T125109Z.tar.gz"
     export_args = captured["export_args"]
     push_command = captured["push_command"]
     assert Path(export_args[export_args.index("-o") + 1]).name == archive_name

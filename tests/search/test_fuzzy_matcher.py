@@ -5,7 +5,7 @@ Uses rapidfuzz for high-performance fuzzy matching.
 
 import pytest
 
-from imas_codex.search.fuzzy_matcher import (
+from iter_codex.search.fuzzy_matcher import (
     PathFuzzyMatcher,
     reset_fuzzy_matcher,
     suggest_correction,

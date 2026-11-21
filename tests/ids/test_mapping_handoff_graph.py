@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.ids.handoff import _nearest_cocos_labels
+from iter_codex.graph.client import GraphClient
+from iter_codex.ids.handoff import _nearest_cocos_labels
 
 FIELD_DATA = "magnetics/b_field_pol_probe/field/data"
 FLUX_LOOP_DATA = "magnetics/flux_loop/flux/data"

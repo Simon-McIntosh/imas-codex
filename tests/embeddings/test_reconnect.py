@@ -5,9 +5,9 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from imas_codex.embeddings.client import RemoteEmbeddingClient
-from imas_codex.embeddings.config import EmbeddingBackend, EncoderConfig
-from imas_codex.embeddings.encoder import Encoder
+from iter_codex.embeddings.client import RemoteEmbeddingClient
+from iter_codex.embeddings.config import EmbeddingBackend, EncoderConfig
+from iter_codex.embeddings.encoder import Encoder
 
 
 class TestRemoteClientUrlUpdate:
@@ -41,7 +41,7 @@ class TestRemoteClientUrlUpdate:
 class TestEncoderReconnect:
     """Tests for Encoder._reconnect_remote on URL change."""
 
-    @patch("imas_codex.embeddings.encoder.Encoder._load_model")
+    @patch("iter_codex.embeddings.encoder.Encoder._load_model")
     def test_reconnect_updates_url_on_change(self, _mock_load):
         config = EncoderConfig(
             remote_url="http://old-node:18765",
@@ -53,9 +53,9 @@ class TestEncoderReconnect:
         encoder._backend_validated = True
 
         with (
-            patch("imas_codex.remote.locations._service_url_cache", {}),
+            patch("iter_codex.remote.locations._service_url_cache", {}),
             patch(
-                "imas_codex.settings.get_embed_remote_url",
+                "iter_codex.settings.get_embed_remote_url",
                 return_value="http://new-node:18765",
             ),
         ):
@@ -68,7 +68,7 @@ class TestEncoderReconnect:
         )
         assert encoder._backend_validated is False
 
-    @patch("imas_codex.embeddings.encoder.Encoder._load_model")
+    @patch("iter_codex.embeddings.encoder.Encoder._load_model")
     def test_reconnect_noop_when_url_unchanged(self, _mock_load):
         config = EncoderConfig(
             remote_url="http://same-node:18765",
@@ -80,9 +80,9 @@ class TestEncoderReconnect:
         encoder._backend_validated = True
 
         with (
-            patch("imas_codex.remote.locations._service_url_cache", {}),
+            patch("iter_codex.remote.locations._service_url_cache", {}),
             patch(
-                "imas_codex.settings.get_embed_remote_url",
+                "iter_codex.settings.get_embed_remote_url",
                 return_value="http://same-node:18765",
             ),
         ):
@@ -95,7 +95,7 @@ class TestEncoderReconnect:
 class TestEncoderEmbedTextsReconnect:
     """Tests for embed_texts retry-after-reconnect on ConnectionError."""
 
-    @patch("imas_codex.embeddings.encoder.Encoder._load_model")
+    @patch("iter_codex.embeddings.encoder.Encoder._load_model")
     def test_embed_texts_retries_on_connection_error(self, _mock_load):
         config = EncoderConfig(
             remote_url="http://old-node:18765",
@@ -119,7 +119,7 @@ class TestEncoderEmbedTextsReconnect:
         assert result.shape == (1, 3)
         assert mock_client.embed.call_count == 2
 
-    @patch("imas_codex.embeddings.encoder.Encoder._load_model")
+    @patch("iter_codex.embeddings.encoder.Encoder._load_model")
     def test_embed_texts_raises_when_reconnect_fails(self, _mock_load):
         config = EncoderConfig(
             remote_url="http://old-node:18765",

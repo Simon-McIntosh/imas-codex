@@ -1,6 +1,6 @@
 """Rendering guard for grammar-slot and carrier-identity guidance."""
 
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 
 def test_slot_and_carrier_rules_render() -> None:

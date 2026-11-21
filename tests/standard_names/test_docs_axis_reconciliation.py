@@ -15,11 +15,11 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
 )
-from imas_codex.standard_names.graph_store.graph_audits import (
+from iter_codex.standard_names.graph_store.graph_audits import (
     reconcile_docs_axis_from_reviews,
 )
 

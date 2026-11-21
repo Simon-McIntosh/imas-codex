@@ -15,7 +15,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.llm.sn_tools import (
+from iter_codex.llm.sn_tools import (
     _list_grammar_vocabulary,
     _search_standard_names,
 )
@@ -56,7 +56,7 @@ class TestSearchNoGrammarArgs:
     def test_returns_all_without_filters(self, mock_gc, monkeypatch):
         rows = self._make_rows()
         monkeypatch.setattr(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             lambda *a, **kw: rows,
         )
         out = _search_standard_names("temperature", gc=mock_gc)
@@ -72,7 +72,7 @@ class TestSearchNoGrammarArgs:
             return self._make_rows()[:1]
 
         monkeypatch.setattr(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             mock_backing,
         )
         _search_standard_names("temperature", kind="vector", gc=mock_gc)

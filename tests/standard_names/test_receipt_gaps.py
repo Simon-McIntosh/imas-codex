@@ -6,13 +6,13 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog as catalog,
     graph_claim_release as release,
     graph_foundation as foundation,
     graph_source_bindings as bindings,
 )
-from imas_codex.standard_names.worker_tasks import worker_common
+from iter_codex.standard_names.worker_tasks import worker_common
 from tests.standard_names.test_claim_outcome_receipts import (
     _claim,
     _FakeGraphClient,
@@ -155,7 +155,7 @@ def test_wrong_fence_does_not_append(token, seq):
 
 
 def test_only_capped_sweep_can_append_to_unclaimed_source():
-    from imas_codex.standard_names.orphan_sweep import _capped_claim_entries
+    from iter_codex.standard_names.orphan_sweep import _capped_claim_entries
 
     graph = ReceiptGraph({"dd:parked": _claim(None, 7, attempt=5)})
     denied = foundation.claim_attempt_entry(
@@ -217,7 +217,7 @@ def test_claimed_outcome_stores_run_and_batch_metadata(status, outcome, carry_me
 @pytest.mark.parametrize("cause", ["grammar", "unit"])
 def test_persist_refusal_retains_actual_writer_reason(cause, monkeypatch):
     monkeypatch.setattr(
-        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        "iter_codex.standard_names.protection._fetch_catalog_edit_names",
         lambda *args, **kwargs: set(),
     )
 

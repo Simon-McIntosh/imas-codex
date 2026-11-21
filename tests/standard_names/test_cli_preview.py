@@ -10,10 +10,10 @@ from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.preview import PreviewHandle
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.preview import PreviewHandle
 
-MOCK_TARGET = "imas_codex.standard_names.preview.run_preview"
+MOCK_TARGET = "iter_codex.standard_names.preview.run_preview"
 
 
 def _review_catalog() -> list[dict[str, object]]:
@@ -182,17 +182,17 @@ class TestReviewPreview:
         client = _catalog_client(catalog)
 
         with (
-            patch("imas_codex.graph.client.GraphClient", return_value=client),
+            patch("iter_codex.graph.client.GraphClient", return_value=client),
             patch(
-                "imas_codex.standard_names.review.audits.run_all_audits",
+                "iter_codex.standard_names.review.audits.run_all_audits",
                 side_effect=AssertionError("catalog audit must not run"),
             ) as audit,
             patch(
-                "imas_codex.standard_names.review.enrichment.reconstruct_clusters_batch",
+                "iter_codex.standard_names.review.enrichment.reconstruct_clusters_batch",
                 return_value={},
             ),
             patch(
-                "imas_codex.standard_names.review.enrichment.group_into_review_batches",
+                "iter_codex.standard_names.review.enrichment.group_into_review_batches",
                 return_value=[
                     {
                         "names": catalog,
@@ -213,9 +213,9 @@ class TestReviewPreview:
         audit_error = RuntimeError("catalog audit reached")
 
         with (
-            patch("imas_codex.graph.client.GraphClient", return_value=client),
+            patch("iter_codex.graph.client.GraphClient", return_value=client),
             patch(
-                "imas_codex.standard_names.review.audits.run_all_audits",
+                "iter_codex.standard_names.review.audits.run_all_audits",
                 side_effect=audit_error,
             ) as audit,
         ):

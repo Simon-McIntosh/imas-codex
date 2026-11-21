@@ -94,7 +94,7 @@ def _assert_segment_in_top_n(
 @pytest.fixture(scope="module")
 def graph_client():
     """Module-scoped GraphClient for regression tests."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     try:
         client = GraphClient()
@@ -109,7 +109,7 @@ def graph_client():
 @pytest.fixture(scope="module")
 def search_tool(graph_client):
     """GraphSearchTool backed by the live graph."""
-    from imas_codex.tools.graph_search import GraphSearchTool
+    from iter_codex.tools.graph_search import GraphSearchTool
 
     return GraphSearchTool(graph_client)
 

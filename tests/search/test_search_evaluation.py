@@ -1,7 +1,7 @@
 """Search quality evaluation harness and DoE grid search.
 
 Provides a parametric evaluation framework for tuning the search score
-mixing pipeline in ``imas_codex.tools.graph_search``.  The ``MixConfig``
+mixing pipeline in ``iter_codex.tools.graph_search``.  The ``MixConfig``
 dataclass captures every tunable constant in the scoring pipeline; the
 ``evaluate_config`` function runs all 30 gold-standard benchmark queries
 with a given config and returns MRR, P@10, and IDS-Recall@10.
@@ -35,7 +35,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.core.node_categories import (
+from iter_codex.core.node_categories import (
     EMBEDDABLE_CATEGORIES,
     SEARCHABLE_CATEGORIES,
 )
@@ -59,7 +59,7 @@ class MixConfig:
     """Tunable parameters for search score mixing.
 
     Defaults match the current tuned values in
-    ``imas_codex.tools.graph_search.GraphSearchTool.search_dd_paths``.
+    ``iter_codex.tools.graph_search.GraphSearchTool.search_dd_paths``.
 
     The parameters are organized into three groups:
 
@@ -359,8 +359,8 @@ def _search_with_config(
     max_results : int
         Maximum result paths to return.
     """
-    from imas_codex.tools.graph_search import _text_search_dd_paths
-    from imas_codex.tools.query_analysis import QueryAnalyzer
+    from iter_codex.tools.graph_search import _text_search_dd_paths
+    from iter_codex.tools.query_analysis import QueryAnalyzer
 
     analyzer = QueryAnalyzer()
     intent = analyzer.analyze(query)
@@ -469,8 +469,8 @@ def precompute_search_channels(
     search_evaluation_cache: Any,
 ) -> dict[str, PrecomputedSearchChannels]:
     """Retrieve each candidate channel in one batched graph round trip."""
-    from imas_codex.tools.graph_search import _build_phrase_aware_query
-    from imas_codex.tools.query_analysis import QueryAnalyzer
+    from iter_codex.tools.graph_search import _build_phrase_aware_query
+    from iter_codex.tools.query_analysis import QueryAnalyzer
 
     if not configs:
         return {}
@@ -1516,7 +1516,7 @@ class TestDoEEvaluation:
     @pytest.fixture(scope="class")
     def graph_client(self):
         """Class-scoped GraphClient for DoE evaluation."""
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         try:
             client = GraphClient()
@@ -1534,29 +1534,29 @@ class TestDoEEvaluation:
         Temporarily restores benchmark embedding settings to bypass the
         session-scoped MiniLM unit-test configuration.
         """
-        from imas_codex.settings import _get_section
+        from iter_codex.settings import _get_section
 
         embed_config = _get_section("embedding")
         real_location = os.environ.get(
-            "IMAS_CODEX_BENCHMARK_EMBEDDING_LOCATION",
+            "ITER_CODEX_BENCHMARK_EMBEDDING_LOCATION",
             embed_config.get("location", ""),
         )
         real_model = os.environ.get(
-            "IMAS_CODEX_BENCHMARK_EMBEDDING_MODEL",
+            "ITER_CODEX_BENCHMARK_EMBEDDING_MODEL",
             embed_config.get("model", ""),
         )
 
         if not real_location:
             pytest.skip("No benchmark embedding location configured")
 
-        old_location = os.environ.get("IMAS_CODEX_EMBEDDING_LOCATION")
-        old_model = os.environ.get("IMAS_CODEX_EMBEDDING_MODEL")
+        old_location = os.environ.get("ITER_CODEX_EMBEDDING_LOCATION")
+        old_model = os.environ.get("ITER_CODEX_EMBEDDING_MODEL")
         try:
-            os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = real_location
+            os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = real_location
             if real_model:
-                os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = real_model
-            elif "IMAS_CODEX_EMBEDDING_MODEL" in os.environ:
-                del os.environ["IMAS_CODEX_EMBEDDING_MODEL"]
+                os.environ["ITER_CODEX_EMBEDDING_MODEL"] = real_model
+            elif "ITER_CODEX_EMBEDDING_MODEL" in os.environ:
+                del os.environ["ITER_CODEX_EMBEDDING_MODEL"]
 
             enc = load_benchmark_encoder()
             result = enc.embed_texts(["test"])
@@ -1572,13 +1572,13 @@ class TestDoEEvaluation:
             pytest.skip(f"Embed server not available: {e}")
         finally:
             if old_location is not None:
-                os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = old_location
-            elif "IMAS_CODEX_EMBEDDING_LOCATION" in os.environ:
-                del os.environ["IMAS_CODEX_EMBEDDING_LOCATION"]
+                os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = old_location
+            elif "ITER_CODEX_EMBEDDING_LOCATION" in os.environ:
+                del os.environ["ITER_CODEX_EMBEDDING_LOCATION"]
             if old_model is not None:
-                os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = old_model
-            elif "IMAS_CODEX_EMBEDDING_MODEL" in os.environ:
-                del os.environ["IMAS_CODEX_EMBEDDING_MODEL"]
+                os.environ["ITER_CODEX_EMBEDDING_MODEL"] = old_model
+            elif "ITER_CODEX_EMBEDDING_MODEL" in os.environ:
+                del os.environ["ITER_CODEX_EMBEDDING_MODEL"]
 
     @pytest.fixture(scope="class")
     def default_config_metrics(
@@ -1696,7 +1696,7 @@ class TestDimensionComparison:
     @pytest.fixture(scope="class")
     def graph_client(self):
         """Class-scoped GraphClient."""
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         try:
             client = GraphClient()
@@ -1763,8 +1763,8 @@ class TestDimensionComparison:
             - 'node_embeddings': dict[str, list[float]] for sample nodes
             - 'query_embeddings': dict[str, list[float]] for benchmark queries
         """
-        from imas_codex.embeddings.encoder import Encoder, EncoderConfig
-        from imas_codex.settings import _get_section
+        from iter_codex.embeddings.encoder import Encoder, EncoderConfig
+        from iter_codex.settings import _get_section
 
         embed_config = _get_section("embedding")
         real_location = embed_config.get("location", "")
@@ -1773,20 +1773,20 @@ class TestDimensionComparison:
         if not real_location or real_location == "local":
             pytest.skip("No remote embedding location configured")
 
-        old_location = os.environ.get("IMAS_CODEX_EMBEDDING_LOCATION")
-        old_model = os.environ.get("IMAS_CODEX_EMBEDDING_MODEL")
+        old_location = os.environ.get("ITER_CODEX_EMBEDDING_LOCATION")
+        old_model = os.environ.get("ITER_CODEX_EMBEDDING_MODEL")
 
         results = {}
         try:
-            os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = real_location
+            os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = real_location
             if real_model:
-                os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = real_model
+                os.environ["ITER_CODEX_EMBEDDING_MODEL"] = real_model
 
             node_texts = [f"{n['id']} {n['description']}" for n in sample_nodes]
             query_texts = [q.query_text for q in ALL_QUERIES]
 
             for dim in self.DIMENSIONS:
-                os.environ["IMAS_CODEX_EMBEDDING_DIMENSION"] = str(dim)
+                os.environ["ITER_CODEX_EMBEDDING_DIMENSION"] = str(dim)
                 config = EncoderConfig()
                 enc = Encoder(config=config)
 
@@ -1827,15 +1827,15 @@ class TestDimensionComparison:
             pytest.skip(f"Embed server not available: {e}")
         finally:
             if old_location is not None:
-                os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = old_location
-            elif "IMAS_CODEX_EMBEDDING_LOCATION" in os.environ:
-                del os.environ["IMAS_CODEX_EMBEDDING_LOCATION"]
+                os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = old_location
+            elif "ITER_CODEX_EMBEDDING_LOCATION" in os.environ:
+                del os.environ["ITER_CODEX_EMBEDDING_LOCATION"]
             if old_model is not None:
-                os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = old_model
-            elif "IMAS_CODEX_EMBEDDING_MODEL" in os.environ:
-                del os.environ["IMAS_CODEX_EMBEDDING_MODEL"]
-            if "IMAS_CODEX_EMBEDDING_DIMENSION" in os.environ:
-                del os.environ["IMAS_CODEX_EMBEDDING_DIMENSION"]
+                os.environ["ITER_CODEX_EMBEDDING_MODEL"] = old_model
+            elif "ITER_CODEX_EMBEDDING_MODEL" in os.environ:
+                del os.environ["ITER_CODEX_EMBEDDING_MODEL"]
+            if "ITER_CODEX_EMBEDDING_DIMENSION" in os.environ:
+                del os.environ["ITER_CODEX_EMBEDDING_DIMENSION"]
 
         return results
 
@@ -2181,7 +2181,7 @@ class TestMultiDomainDimensionEval:
     @pytest.fixture(scope="class")
     def graph_client(self):
         """Class-scoped GraphClient."""
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         try:
             client = GraphClient()
@@ -2306,8 +2306,8 @@ class TestMultiDomainDimensionEval:
             - 'query_embeddings': dict[query_text, list[float]]
             - 'actual_dim': int
         """
-        from imas_codex.embeddings.encoder import Encoder, EncoderConfig
-        from imas_codex.settings import _get_section
+        from iter_codex.embeddings.encoder import Encoder, EncoderConfig
+        from iter_codex.settings import _get_section
 
         embed_config = _get_section("embedding")
         real_location = embed_config.get("location", "")
@@ -2319,9 +2319,9 @@ class TestMultiDomainDimensionEval:
         old_env = {
             k: os.environ.get(k)
             for k in [
-                "IMAS_CODEX_EMBEDDING_LOCATION",
-                "IMAS_CODEX_EMBEDDING_MODEL",
-                "IMAS_CODEX_EMBEDDING_DIMENSION",
+                "ITER_CODEX_EMBEDDING_LOCATION",
+                "ITER_CODEX_EMBEDDING_MODEL",
+                "ITER_CODEX_EMBEDDING_DIMENSION",
             ]
         }
 
@@ -2340,12 +2340,12 @@ class TestMultiDomainDimensionEval:
 
         results = {}
         try:
-            os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = real_location
+            os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = real_location
             if real_model:
-                os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = real_model
+                os.environ["ITER_CODEX_EMBEDDING_MODEL"] = real_model
 
             for dim in self.DIMENSIONS:
-                os.environ["IMAS_CODEX_EMBEDDING_DIMENSION"] = str(dim)
+                os.environ["ITER_CODEX_EMBEDDING_DIMENSION"] = str(dim)
                 config = EncoderConfig()
                 enc = Encoder(config=config)
 
@@ -2700,7 +2700,7 @@ class TestEmbedTextQuality:
 
     def test_embed_text_excludes_path(self):
         """Embed text should NOT contain the IMAS path (path causes score compression)."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "equilibrium/time_slice/global_quantities/ip",
@@ -2714,8 +2714,8 @@ class TestEmbedTextQuality:
 
     def test_embed_text_at_dim_256(self, monkeypatch):
         """At dim 256, text is description only (no path prefix)."""
-        monkeypatch.setenv("IMAS_CODEX_EMBEDDING_DIMENSION", "256")
-        from imas_codex.graph.build_dd import generate_embedding_text
+        monkeypatch.setenv("ITER_CODEX_EMBEDDING_DIMENSION", "256")
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "core_profiles/profiles_1d/electrons/temperature",
@@ -2732,8 +2732,8 @@ class TestEmbedTextQuality:
 
     def test_embed_text_at_dim_512_includes_doc(self, monkeypatch):
         """At dim ≥ 512, doc excerpts are included (no path prefix)."""
-        monkeypatch.setenv("IMAS_CODEX_EMBEDDING_DIMENSION", "512")
-        from imas_codex.graph.build_dd import generate_embedding_text
+        monkeypatch.setenv("ITER_CODEX_EMBEDDING_DIMENSION", "512")
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "core_profiles/profiles_1d/electrons/temperature",
@@ -2750,8 +2750,8 @@ class TestEmbedTextQuality:
 
     def test_embed_text_at_dim_1024_includes_doc_and_keywords(self, monkeypatch):
         """At dim 1024, full doc excerpt + keywords are included (no path prefix)."""
-        monkeypatch.setenv("IMAS_CODEX_EMBEDDING_DIMENSION", "1024")
-        from imas_codex.graph.build_dd import generate_embedding_text
+        monkeypatch.setenv("ITER_CODEX_EMBEDDING_DIMENSION", "1024")
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "equilibrium/time_slice/profiles_1d/psi",
@@ -2768,8 +2768,8 @@ class TestEmbedTextQuality:
 
     def test_embed_text_no_dup_when_doc_matches_desc(self, monkeypatch):
         """At high dim, don't duplicate when doc == desc."""
-        monkeypatch.setenv("IMAS_CODEX_EMBEDDING_DIMENSION", "1024")
-        from imas_codex.graph.build_dd import generate_embedding_text
+        monkeypatch.setenv("ITER_CODEX_EMBEDDING_DIMENSION", "1024")
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "some/path",
@@ -2784,7 +2784,7 @@ class TestEmbedTextQuality:
 
     def test_embed_text_uses_description_over_documentation(self):
         """Prefer description; doc is only used as fallback."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "equilibrium/time_slice/profiles_1d/psi",
@@ -2798,7 +2798,7 @@ class TestEmbedTextQuality:
 
     def test_embed_text_empty_returns_empty(self):
         """Empty description and documentation should return empty string."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "some/path",
@@ -2808,7 +2808,7 @@ class TestEmbedTextQuality:
 
     def test_embed_text_fallback_to_documentation(self):
         """When no description, use documentation as fallback (no path prefix)."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text(
             "some/path",

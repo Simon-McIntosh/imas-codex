@@ -2,7 +2,7 @@
 """Measure the link-hygiene gate against the labelled documentation rows.
 
 The gate under test is the deterministic documentation gate vector in
-``imas_codex.standard_names.docs_gates``, whose ``link_hygiene`` gate now
+``iter_codex.standard_names.docs_gates``, whose ``link_hygiene`` gate now
 reports a bracketed prose phrase standing where a name link belongs and a
 ``name:`` link that points back at the name it documents. Nothing here writes
 to the graph and nothing calls a model.
@@ -33,7 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from imas_codex.standard_names.docs_gates import (  # noqa: E402
+from iter_codex.standard_names.docs_gates import (  # noqa: E402
     DocumentationGateOutcome,
     score_documentation,
 )
@@ -217,7 +217,7 @@ def _measure_rows() -> dict:
 def _positive_controls() -> dict:
     """Show the instrument sees a known instance of each construct before any absence."""
 
-    from imas_codex.standard_names.doc_links import find_prose_bracket_phrases
+    from iter_codex.standard_names.doc_links import find_prose_bracket_phrases
 
     prose = find_prose_bracket_phrases("differs from the [ion density at a limiter].")
     notation = find_prose_bracket_phrases("in [m^-3] over [0, 1] and $[a b]$")
@@ -263,7 +263,7 @@ def _measure_live_catalog() -> dict:
 
     started = time.monotonic()
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         with GraphClient() as gc:
             records = gc.query(
@@ -340,7 +340,7 @@ def main() -> int:
             check=False,
         )
         .stdout.strip(),
-        "gate": "imas_codex/standard_names/docs_gates.py::link_hygiene",
+        "gate": "iter_codex/standard_names/docs_gates.py::link_hygiene",
         "module_path": str(
             Path(sys.modules[score_documentation.__module__].__file__).resolve()
         ),

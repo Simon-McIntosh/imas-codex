@@ -1,0 +1,1127 @@
+"""Neo4j operational infrastructure.
+
+Provides:
+- Neo4jOperation context manager (stop/start bracketing)
+- Database dump with recovery retry
+- Lock detection (POSIX + GPFS)
+- Process diagnostics
+- Data directory security
+- Backup and existence checks
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import shutil
+import subprocess
+import tarfile
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal
+
+import click
+
+if TYPE_CHECKING:
+    from iter_codex.graph.profiles import Neo4jProfile
+
+# ============================================================================
+# Constants
+# ============================================================================
+
+SERVICES_DIR = Path("iter_codex/config/services")
+RECOVERY_DIR = Path.home() / ".local" / "share" / "iter-codex" / "recovery"
+DATA_DIR = Path.home() / ".local" / "share" / "iter-codex" / "neo4j"
+NEO4J_LOCK_FILE = Path.home() / ".config" / "iter-codex" / "neo4j-operation.lock"
+INSTANCE_MANIFESTS_KEY = "instances"
+FULL_GRAPH_ARCHIVE_PACKAGE = "iter-codex-graph"
+
+
+def get_graph_instance_manifest(instance_name: str | None) -> dict | None:
+    """Return global graph metadata overlaid with one instance's load record."""
+    from iter_codex.graph.ghcr import get_local_graph_manifest
+
+    manifest = get_local_graph_manifest()
+    if manifest is None:
+        return None
+
+    scoped = {
+        key: value
+        for key, value in manifest.items()
+        if key not in {INSTANCE_MANIFESTS_KEY, "loaded_from"}
+    }
+    records = manifest.get(INSTANCE_MANIFESTS_KEY, {})
+    if instance_name is not None and isinstance(records, dict):
+        record = records.get(instance_name)
+        if isinstance(record, dict):
+            scoped.update(record)
+    return scoped
+
+
+def save_graph_instance_manifest(instance_name: str, manifest: dict) -> None:
+    """Persist archive-load bookkeeping under the graph instance identity."""
+    from iter_codex.graph.ghcr import (
+        get_local_graph_manifest,
+        save_local_graph_manifest,
+    )
+
+    stored = get_local_graph_manifest() or {}
+    records = stored.setdefault(INSTANCE_MANIFESTS_KEY, {})
+    if not isinstance(records, dict):
+        records = {}
+        stored[INSTANCE_MANIFESTS_KEY] = records
+    records[instance_name] = {
+        **manifest,
+        "loaded_at": datetime.now(UTC).isoformat(),
+    }
+    stored.pop("loaded_from", None)
+    save_local_graph_manifest(stored)
+
+
+def graph_archive_stamp(
+    commit_short: str | None = None,
+    created_at: datetime | None = None,
+) -> str:
+    """Return the immutable revision and UTC time stamp used by graph archives."""
+    if commit_short is None:
+        from iter_codex.graph.ghcr import get_git_info
+
+        commit_short = get_git_info()["commit_short"]
+    if not commit_short:
+        raise click.ClickException("Cannot name graph archive without a git revision")
+
+    timestamp = created_at or datetime.now(UTC)
+    utc_timestamp = timestamp.astimezone(UTC).strftime("%Y%m%dT%H%M%SZ")
+    return f"dev-{commit_short}-{utc_timestamp}"
+
+
+def neo4j_image() -> Path:
+    """Resolve the Neo4j Apptainer SIF image path."""
+    from iter_codex.settings import get_neo4j_image_path
+
+    return get_neo4j_image_path()
+
+
+# ============================================================================
+# Neo4j Operation Context Manager
+# ============================================================================
+
+
+class Neo4jOperation:
+    """Context manager for Neo4j operations requiring stop/start.
+
+    Handles:
+    - Checking for concurrent operations (via lock file)
+    - Stopping Neo4j if running
+    - Performing the operation
+    - Restarting Neo4j if it was running
+    - Resetting password after database load (which clears auth)
+    """
+
+    def __init__(
+        self,
+        operation_name: str,
+        require_stopped: bool = True,
+        reset_password_on_restart: bool = False,
+        password: str | None = None,
+    ):
+        from iter_codex.graph.profiles import DEFAULT_PASSWORD, resolve_neo4j
+
+        self.profile = resolve_neo4j()
+        self.operation_name = operation_name
+        self.require_stopped = require_stopped
+        self.reset_password_on_restart = reset_password_on_restart
+        self.password = password or DEFAULT_PASSWORD
+        self.acquired = False
+        self.was_running = False
+        self._lock_file: Path = NEO4J_LOCK_FILE
+
+    def __enter__(self) -> Neo4jOperation:
+        # Check for existing lock
+        if self._lock_file.exists():
+            lock_info = json.loads(self._lock_file.read_text())
+            pid = lock_info.get("pid")
+            operation = lock_info.get("operation", "unknown")
+            started = lock_info.get("started", "unknown")
+
+            if pid and self._process_exists(pid):
+                raise click.ClickException(
+                    f"Another operation is in progress:\n"
+                    f"  Operation: {operation}\n"
+                    f"  Started: {started}\n"
+                    f"  PID: {pid}\n\n"
+                    f"If the process crashed, remove lock: rm {self._lock_file}"
+                )
+            else:
+                self._lock_file.unlink()
+
+        # Acquire lock
+        self._lock_file.parent.mkdir(parents=True, exist_ok=True)
+        lock_info = {
+            "operation": self.operation_name,
+            "pid": os.getpid(),
+            "started": datetime.now(UTC).isoformat(),
+        }
+        self._lock_file.write_text(json.dumps(lock_info))
+        self.acquired = True
+
+        # Stop Neo4j if needed
+        if self.require_stopped:
+            is_locked, is_verified, _ = check_database_lock(self.profile)
+            needs_stop = is_neo4j_running(self.profile.http_port) or (
+                is_locked and is_verified
+            )
+
+            # GPFS doesn't propagate POSIX locks across nodes, so the
+            # check above misses Neo4j running on a SLURM compute node.  A
+            # job in any state may still hold the store, and an squeue that
+            # cannot answer raises rather than reading as no job.
+            if not needs_stop:
+                from iter_codex.cli.services import (
+                    _NEO4J_JOB,
+                    _get_service_job,
+                    _is_graph_compute_target,
+                )
+
+                if _is_graph_compute_target():
+                    needs_stop = _get_service_job(_NEO4J_JOB, strict=True) is not None
+
+            if needs_stop:
+                self.was_running = True
+                click.echo(
+                    f"Stopping Neo4j [{self.profile.name}] for {self.operation_name}..."
+                )
+                self._stop_neo4j()
+
+                import time
+
+                # _stop_neo4j already waits for process exit (up to 90s
+                # for SLURM) and cleans stale POSIX locks. Just confirm
+                # the HTTP endpoint is down. Don't call
+                # check_database_lock here — fcntl.lockf hangs on GPFS
+                # stale locks, causing this loop to block indefinitely.
+                for _ in range(15):
+                    if not is_neo4j_running(self.profile.http_port):
+                        break
+                    time.sleep(1)
+                else:
+                    self._release_lock()
+                    raise click.ClickException(
+                        f"Failed to stop Neo4j [{self.profile.name}] — "
+                        "still responding on HTTP port after shutdown"
+                    )
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+        try:
+            # Always reset password after load operations, regardless of whether
+            # Neo4j was running before. The dump replaces the auth database.
+            if self.reset_password_on_restart:
+                click.echo("Resetting Neo4j password after load...")
+                self._reset_password()
+
+            if self.was_running:
+                click.echo("Restarting Neo4j...")
+                self._start_neo4j()
+        finally:
+            self._release_lock()
+        return False
+
+    def _reset_password(self) -> None:
+        """Reset Neo4j password after database load.
+
+        After loading a database dump, Neo4j's auth database may be
+        replaced.  Clear the auth file first so ``set-initial-password``
+        always succeeds regardless of prior auth state.
+        """
+        image = neo4j_image()
+        auth_file = self.profile.data_dir / "data" / "dbms" / "auth.ini"
+        if auth_file.exists():
+            auth_file.unlink()
+        cmd = [
+            "apptainer",
+            "exec",
+            "--bind",
+            f"{self.profile.data_dir}/data:/data",
+            "--writable-tmpfs",
+            str(image),
+            "neo4j-admin",
+            "dbms",
+            "set-initial-password",
+            self.password,
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            if "already set" not in result.stderr.lower():
+                click.echo(f"Warning: Password reset issue: {result.stderr.strip()}")
+        else:
+            click.echo("  Password reset successful")
+
+    def _process_exists(self, pid: int) -> bool:
+        try:
+            os.kill(pid, 0)
+            return True
+        except (OSError, ProcessLookupError):
+            return False
+
+    def _stop_neo4j(self) -> None:
+        # SLURM-hosted Neo4j: the store files are touched only after the job
+        # has left the scheduler, and a failed stop raises so nothing dumps or
+        # replaces files under a database that is still flushing.
+        from iter_codex.cli.services import (
+            _clean_neo4j_locks,
+            _is_graph_compute_target,
+            stop_neo4j_job,
+        )
+
+        if _is_graph_compute_target():
+            node = stop_neo4j_job()
+            if node:
+                _clean_neo4j_locks(node)
+
+        # Always kill local orphans — recovery cycles or manual starts
+        # can leave Neo4j processes running directly on the login node
+        service_name = f"iter-codex-neo4j-{self.profile.name}"
+        subprocess.run(
+            ["systemctl", "--user", "stop", service_name],
+            capture_output=True,
+        )
+        subprocess.run(
+            ["pkill", "-15", "-f", "neo4j_.*community.sif"],
+            capture_output=True,
+        )
+        subprocess.run(
+            ["pkill", "-15", "-f", "Neo4jCommunity"],
+            capture_output=True,
+        )
+        subprocess.run(["pkill", "-15", "-f", "neo4j.*console"], capture_output=True)
+
+    def _start_neo4j(self) -> None:
+        # Try SLURM-based start first (Neo4j on compute node)
+        try:
+            from iter_codex.cli.services import _is_graph_compute_target
+
+            if _is_graph_compute_target():
+                from iter_codex.cli.services import deploy_neo4j
+
+                job = deploy_neo4j()
+                node = job["node"]
+                click.echo(f"  Neo4j [{self.profile.name}] ready on {node}")
+                return
+        except Exception:
+            pass
+
+        # Fall back to systemd
+        service_name = f"iter-codex-neo4j-{self.profile.name}"
+        result = subprocess.run(
+            ["systemctl", "--user", "start", service_name],
+            capture_output=True,
+        )
+        if result.returncode == 0:
+            import time
+
+            for _ in range(30):
+                if is_neo4j_running(self.profile.http_port):
+                    click.echo(f"Neo4j [{self.profile.name}] ready")
+                    return
+                time.sleep(1)
+            click.echo(f"Warning: Neo4j [{self.profile.name}] may still be starting")
+            return
+
+        click.echo("Note: Restart Neo4j manually: iter-codex graph start")
+
+    def _release_lock(self) -> None:
+        if self._lock_file.exists():
+            self._lock_file.unlink()
+        self.acquired = False
+
+
+# ============================================================================
+# Neo4j process and lock helpers
+# ============================================================================
+
+
+def is_neo4j_running(http_port: int | None = None) -> bool:
+    from iter_codex.graph.profiles import HTTP_BASE_PORT
+
+    if http_port is None:
+        http_port = HTTP_BASE_PORT
+
+    # For SLURM compute locations, check the resolved service URL
+    # instead of blindly hitting localhost.
+    try:
+        from iter_codex.remote.locations import resolve_service_url
+        from iter_codex.settings import get_graph_location
+
+        location = get_graph_location()
+        url = resolve_service_url(location, http_port, protocol="http")
+        if url:
+            import urllib.request
+
+            urllib.request.urlopen(f"{url}/", timeout=2)
+            return True
+    except Exception:
+        pass
+
+    # Fallback: check localhost directly
+    try:
+        import urllib.request
+
+        urllib.request.urlopen(f"http://localhost:{http_port}/", timeout=2)
+        return True
+    except Exception:
+        return False
+
+
+def check_stale_neo4j_process(data_dir: Path) -> tuple[bool, str | None]:
+    """Check for stale Neo4j processes that may hold locks.
+
+    Returns (has_stale, message) where has_stale indicates a hung/stale
+    process was detected and message describes the issue.
+    """
+    pid_file = data_dir / "neo4j.pid"
+    if not pid_file.exists():
+        return False, None
+
+    try:
+        pid = int(pid_file.read_text().strip())
+    except (ValueError, OSError):
+        return False, None
+
+    # Check if process exists
+    try:
+        os.kill(pid, 0)  # Signal 0 just checks if process exists
+    except ProcessLookupError:
+        # Process gone, clean up stale PID file
+        try:
+            pid_file.unlink()
+        except OSError:
+            pass
+        return False, None
+    except PermissionError:
+        # Process exists but owned by another user
+        return True, f"Neo4j process (PID {pid}) exists but is owned by another user"
+
+    # Process exists - check if it's responding
+    # Read http_port from proc cmdline if possible
+    try:
+        cmdline_file = Path(f"/proc/{pid}/cmdline")
+        if cmdline_file.exists():
+            # Process is running - we confirmed it exists
+            return False, None
+    except (OSError, PermissionError):
+        pass
+
+    return False, None
+
+
+def check_database_locks(data_dir: Path) -> tuple[bool, str | None]:
+    """Check for database lock files that indicate another process.
+
+    Returns (has_lock, message).
+    """
+    lock_file = data_dir / "data" / "databases" / "store_lock"
+    if lock_file.exists():
+        mtime = datetime.fromtimestamp(lock_file.stat().st_mtime, tz=UTC)
+        age_hours = (datetime.now(tz=UTC) - mtime).total_seconds() / 3600
+        if age_hours > 24:
+            return True, (
+                f"Stale database lock file detected (age: {age_hours:.1f}h).\n"
+                f"This may indicate a previous Neo4j crash.\n"
+                f"If Neo4j won't start, try: rm {lock_file}"
+            )
+    return False, None
+
+
+def secure_data_directory(data_path: Path) -> None:
+    """Set restrictive permissions on Neo4j data directory.
+
+    Ensures only the owner can access the database files, preventing
+    accidental conflicts on shared filesystems where multiple users
+    might run their own Neo4j instances.
+
+    Sets directories to 700 (rwx------) and files to 600 (rw-------).
+    """
+    import stat
+
+    if not data_path.exists():
+        return
+
+    # Secure the root directory
+    try:
+        data_path.chmod(stat.S_IRWXU)  # 700
+    except OSError:
+        pass  # May fail if we don't own it
+
+    # Recursively secure subdirectories and files
+    for item in data_path.rglob("*"):
+        try:
+            if item.is_dir():
+                item.chmod(stat.S_IRWXU)  # 700
+            else:
+                item.chmod(stat.S_IRUSR | stat.S_IWUSR)  # 600
+        except OSError:
+            pass  # Skip files we can't chmod
+
+
+def check_graph_exists(data_dir: Path | None = None) -> bool:
+    target = data_dir or DATA_DIR
+    data_path = target / "data" / "databases" / "neo4j"
+    return data_path.exists() and any(data_path.iterdir())
+
+
+# ============================================================================
+# Backup helpers
+# ============================================================================
+
+
+@dataclass(frozen=True, slots=True)
+class BackupCurrency:
+    """Whether a verified full recovery archive exists beside live graph data.
+
+    The status is the archive's existence and verified contents, not a
+    measured age: an export that brings the service back is sealed before the
+    restart writes into the live tree, so an age comparison can never reach
+    zero and would report every real checkpoint stale. ``age_seconds`` is
+    carried for information only.
+    """
+
+    status: Literal["current", "no_backup"]
+    backup_path: Path | None
+    backup_modified_at: datetime | None
+    live_path: Path | None
+    live_modified_at: datetime | None
+    age_seconds: float | None
+    backup_size_bytes: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class OffsiteCurrency:
+    """Measured lag between the newest full registry copy and live graph data."""
+
+    status: Literal["current", "stale", "no_offsite"]
+    offsite_ref: str | None
+    offsite_modified_at: datetime | None
+    live_path: Path | None
+    live_modified_at: datetime | None
+    age_seconds: float | None
+    offsite_size_bytes: int | None = None
+
+
+def _is_full_recovery_archive(path: Path) -> bool:
+    """Return whether a gzip tar contains a non-empty graph dump member."""
+    try:
+        with tarfile.open(path, "r:gz") as archive:
+            for member in archive:
+                if (
+                    member.isfile()
+                    and member.size > 0
+                    and Path(member.name).name == "graph.dump"
+                ):
+                    return True
+    except (OSError, tarfile.TarError):
+        return False
+    return False
+
+
+def _newest_recovery_archive(
+    search_dirs: tuple[Path, ...],
+) -> tuple[Path | None, int | None, datetime | None]:
+    candidates: list[tuple[float, Path, int]] = []
+    for search_dir in search_dirs:
+        if not search_dir.exists():
+            continue
+        for path in search_dir.rglob("*"):
+            if not path.is_file() or not _is_full_recovery_archive(path):
+                continue
+            try:
+                stat = path.stat()
+            except OSError:
+                continue
+            candidates.append((stat.st_mtime, path, stat.st_size))
+
+    if not candidates:
+        return None, None, None
+
+    modified_timestamp, path, size_bytes = max(
+        candidates, key=lambda candidate: candidate[0]
+    )
+    return (
+        path,
+        size_bytes,
+        datetime.fromtimestamp(modified_timestamp, tz=UTC),
+    )
+
+
+def _offsite_archive_identity(version: dict) -> str | None:
+    tags = version.get("metadata", {}).get("container", {}).get("tags", [])
+    named_tags = [tag for tag in tags if tag != "latest"]
+    identity = (
+        named_tags[0] if named_tags else (tags[0] if tags else version.get("name"))
+    )
+    return str(identity) if identity else None
+
+
+def _offsite_archive_size(version: dict) -> int | None:
+    container = version.get("metadata", {}).get("container", {})
+    raw_size = version.get("size_in_bytes", container.get("size_in_bytes"))
+    try:
+        size_bytes = int(raw_size)
+    except (TypeError, ValueError):
+        return None
+    return size_bytes if size_bytes > 0 else None
+
+
+def _newest_live_file() -> tuple[Path | None, datetime | None]:
+    from iter_codex.graph.profiles import resolve_neo4j
+
+    live_data_dir = resolve_neo4j().data_dir / "data"
+    live_files = (
+        [path for path in live_data_dir.rglob("*") if path.is_file()]
+        if live_data_dir.exists()
+        else []
+    )
+    live_path = max(live_files, key=lambda path: path.stat().st_mtime, default=None)
+    live_modified_at = (
+        datetime.fromtimestamp(live_path.stat().st_mtime, tz=UTC)
+        if live_path is not None
+        else None
+    )
+    return live_path, live_modified_at
+
+
+def get_backup_currency() -> BackupCurrency:
+    """Report whether a verified full recovery archive exists.
+
+    A recovery archive is a gzip tar carrying a non-empty ``graph.dump``
+    member, located beneath the explicit backup directory or the directory a
+    bare ``graph export`` writes into. Scanning both means an archive taken
+    without an explicit ``-o`` still registers. The verdict is the archive's
+    existence and verified contents, not its age.
+    """
+    from iter_codex.graph.dirs import EXPORTS_DIR
+    from iter_codex.graph.profiles import BACKUPS_DIR
+
+    backup_path, backup_size_bytes, backup_modified_at = _newest_recovery_archive(
+        (BACKUPS_DIR, EXPORTS_DIR)
+    )
+    live_path, live_modified_at = _newest_live_file()
+
+    if backup_modified_at is None:
+        return BackupCurrency(
+            status="no_backup",
+            backup_path=None,
+            backup_modified_at=None,
+            live_path=live_path,
+            live_modified_at=live_modified_at,
+            age_seconds=None,
+            backup_size_bytes=None,
+        )
+
+    age_seconds = (
+        max(0.0, (live_modified_at - backup_modified_at).total_seconds())
+        if live_modified_at is not None
+        else 0.0
+    )
+    return BackupCurrency(
+        status="current",
+        backup_path=backup_path,
+        backup_modified_at=backup_modified_at,
+        live_path=live_path,
+        live_modified_at=live_modified_at,
+        age_seconds=age_seconds,
+        backup_size_bytes=backup_size_bytes,
+    )
+
+
+def get_offsite_currency(
+    registry: str,
+    token: str | None = None,
+) -> OffsiteCurrency:
+    """Measure exact full-graph package lag against the newest live database file."""
+    from iter_codex.graph.ghcr import list_package_versions
+
+    versions = list_package_versions(
+        registry,
+        token,
+        pkg_name=FULL_GRAPH_ARCHIVE_PACKAGE,
+    )
+    live_path, live_modified_at = _newest_live_file()
+
+    timestamped: list[tuple[datetime, dict, str, int | None]] = []
+    for version in versions:
+        created_at = version.get("created_at")
+        if not isinstance(created_at, str):
+            continue
+        identity = _offsite_archive_identity(version)
+        if identity is None:
+            continue
+        try:
+            timestamp = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=UTC)
+        timestamped.append(
+            (
+                timestamp.astimezone(UTC),
+                version,
+                identity,
+                _offsite_archive_size(version),
+            )
+        )
+
+    if not timestamped:
+        return OffsiteCurrency(
+            status="no_offsite",
+            offsite_ref=None,
+            offsite_modified_at=None,
+            live_path=live_path,
+            live_modified_at=live_modified_at,
+            age_seconds=None,
+        )
+
+    offsite_modified_at, _, identity, offsite_size_bytes = max(
+        timestamped, key=lambda item: item[0]
+    )
+    offsite_ref = (
+        f"{registry}/{FULL_GRAPH_ARCHIVE_PACKAGE}:{identity}"
+        if not identity.startswith("sha256:")
+        else f"{registry}/{FULL_GRAPH_ARCHIVE_PACKAGE}@{identity}"
+    )
+    age_seconds = (
+        max(0.0, (live_modified_at - offsite_modified_at).total_seconds())
+        if live_modified_at is not None
+        else 0.0
+    )
+    return OffsiteCurrency(
+        status="stale" if age_seconds > 0 else "current",
+        offsite_ref=offsite_ref,
+        offsite_modified_at=offsite_modified_at,
+        live_path=live_path,
+        live_modified_at=live_modified_at,
+        age_seconds=age_seconds,
+        offsite_size_bytes=offsite_size_bytes,
+    )
+
+
+def write_data_presence_marker(
+    reason: str, data_dir: Path | None = None
+) -> Path | None:
+    """Create a marker for pre-operation recovery (lightweight)."""
+    target = data_dir or DATA_DIR
+    timestamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
+    recovery_path = RECOVERY_DIR / f"{timestamp}-{reason}"
+
+    if target.exists():
+        recovery_path.mkdir(parents=True, exist_ok=True)
+        (recovery_path / "graph_data_existed.marker").touch()
+        return recovery_path
+
+    return None
+
+
+def backup_graph_dump(
+    output: Path | None = None,
+) -> Path:
+    """Create a real neo4j-admin dump backup of the current graph.
+
+    Args:
+        output: Output path override.  Defaults to
+            ``~/.local/share/iter-codex/backups/`` with a filename carrying
+            the graph profile, short git revision, and UTC timestamp.
+
+    Returns:
+        Path to the created dump file.
+    """
+    from iter_codex.graph.profiles import BACKUPS_DIR, resolve_neo4j
+
+    profile = resolve_neo4j()
+    BACKUPS_DIR.mkdir(parents=True, exist_ok=True)
+
+    dump_path = output or (BACKUPS_DIR / f"{profile.name}-{graph_archive_stamp()}.dump")
+
+    dumps_dir = profile.data_dir / "dumps"
+    dumps_dir.mkdir(parents=True, exist_ok=True)
+
+    run_neo4j_dump(profile, dumps_dir)
+
+    neo4j_dump = dumps_dir / "neo4j.dump"
+    if not neo4j_dump.exists():
+        raise click.ClickException("Dump file not created by neo4j-admin")
+    if neo4j_dump.stat().st_size == 0:
+        raise click.ClickException("Dump file created by neo4j-admin is empty")
+
+    shutil.move(str(neo4j_dump), str(dump_path))
+
+    return dump_path
+
+
+# ============================================================================
+# Dump error parsing
+# ============================================================================
+
+
+def parse_dump_error(stderr: str) -> tuple[str, bool]:
+    """Parse neo4j-admin dump stderr into a user-friendly message.
+
+    Returns (message, is_active_lock) where is_active_lock indicates
+    another process holds the database lock (recovery won't help).
+    """
+    lower = stderr.lower()
+
+    # Explicit lock / in-use signals
+    if "database is in use" in lower or "filelockexception" in lower:
+        return (
+            "Neo4j database is currently in use by another process.\n"
+            "Stop Neo4j first: iter-codex graph stop",
+            True,
+        )
+
+    # Non-lock errors that also produce "dump failed for databases" —
+    # check these BEFORE the generic "dump failed" catch-all.
+    if "unable to find store id" in lower:
+        return "Unable to find store id (store format issue)", False
+    if "classformaterror" in lower or "incompatible magic value" in lower:
+        return "JVM class format error (Apptainer overlay issue)", False
+
+    # "Dump failed for databases: 'neo4j'" without a specific cause
+    # usually means the database lock couldn't be acquired.
+    if "dump failed for databases" in lower:
+        return (
+            "Neo4j database dump failed (likely locked by another process).\n"
+            "Stop Neo4j first: iter-codex graph stop",
+            True,
+        )
+
+    # Generic failure — extract the first Caused-by or CommandFailedException
+    for line in stderr.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("Caused by:") or "CommandFailedException" in stripped:
+            return stripped, False
+    return stderr.splitlines()[0].strip() if stderr.strip() else "Unknown error", False
+
+
+# ============================================================================
+# Database lock detection
+# ============================================================================
+
+
+def check_database_lock(
+    profile: Neo4jProfile,
+) -> tuple[bool, bool, str | None]:
+    """Check if the Neo4j database is locked and verify the holder.
+
+    Returns (is_locked, is_verified, holder_info):
+    - is_locked: POSIX file lock or HTTP endpoint indicates active use
+    - is_verified: a running process was found that holds the lock
+    - holder_info: diagnostic string describing the lock holder
+
+    On GPFS, POSIX locks survive across nodes, so a lock may appear
+    held even after Neo4j on the compute node has exited (stale lock).
+    We verify by checking for actual running processes.
+
+    **GPFS caveat**: ``fcntl.lockf`` with ``LOCK_NB`` can hang
+    indefinitely on stale cross-node locks despite being non-blocking.
+    A 5-second timeout via ``signal.alarm`` prevents deadlock.
+    """
+    if is_neo4j_running(profile.http_port):
+        return True, True, "Neo4j responding on localhost"
+
+    # Check the database_lock file on disk (visible on GPFS).
+    # Neo4j uses Java FileChannel.lock() which creates POSIX (fcntl)
+    # locks — BSD flock() won't detect them.  We must use fcntl.lockf
+    # with O_RDWR (POSIX exclusive-lock test needs write access).
+    lock_file = profile.data_dir / "data" / "databases" / "neo4j" / "database_lock"
+    posix_locked = False
+    if lock_file.exists():
+        import fcntl
+        import signal
+
+        def _lock_timeout_handler(signum, frame):
+            raise TimeoutError("fcntl.lockf hung on GPFS stale lock")
+
+        try:
+            fd = os.open(str(lock_file), os.O_RDWR)
+            try:
+                old_handler = signal.signal(signal.SIGALRM, _lock_timeout_handler)
+                signal.alarm(5)
+                try:
+                    fcntl.lockf(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    fcntl.lockf(fd, fcntl.LOCK_UN)
+                except OSError:
+                    posix_locked = True
+                except TimeoutError:
+                    # fcntl hung — GPFS stale lock, treat as locked
+                    posix_locked = True
+                finally:
+                    signal.alarm(0)
+                    signal.signal(signal.SIGALRM, old_handler)
+            finally:
+                os.close(fd)
+        except OSError:
+            pass
+
+    if not posix_locked:
+        return False, False, None
+
+    # Lock is held — verify a process actually owns it
+    proc_info = neo4j_process_info(profile)
+    if proc_info:
+        return True, True, proc_info
+
+    # POSIX lock held but no process found — likely stale on GPFS
+    return True, False, None
+
+
+def neo4j_process_info(profile: Neo4jProfile) -> str | None:
+    """Return a diagnostic string about running Neo4j processes, or None."""
+    lines: list[str] = []
+    # Check systemd service
+    service_name = f"iter-codex-neo4j-{profile.name}"
+    result = subprocess.run(
+        ["systemctl", "--user", "is-active", service_name],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0 and result.stdout.strip() == "active":
+        lines.append(f"  systemd service: {service_name} (active)")
+
+    # Check SLURM allocation (Neo4j may be on a compute node)
+    slurm_node = None
+    try:
+        from iter_codex.cli.services import _is_graph_compute_target
+
+        if _is_graph_compute_target():
+            result = subprocess.run(
+                [
+                    "squeue",
+                    "--me",
+                    "--noheader",
+                    "--format=%j %N %T",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                for line in result.stdout.strip().splitlines():
+                    if "codex" in line.lower() or "neo4j" in line.lower():
+                        parts = line.split()
+                        if len(parts) >= 2:
+                            slurm_node = parts[1]
+                        lines.append(f"  SLURM: {line.strip()}")
+    except Exception:
+        pass
+
+    # If SLURM node found, SSH to verify Neo4j is actually running there
+    if slurm_node:
+        try:
+            result = subprocess.run(
+                [
+                    "ssh",
+                    "-o",
+                    "StrictHostKeyChecking=no",
+                    "-o",
+                    "ConnectTimeout=5",
+                    slurm_node,
+                    f"pgrep -u {os.getuid()} -af Neo4jCommunity",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                for proc_line in result.stdout.strip().splitlines():
+                    pid = proc_line.split()[0]
+                    lines.append(
+                        f"  {slurm_node} PID {pid}: "
+                        f"{proc_line[len(pid) :].strip()[:60]}"
+                    )
+        except (subprocess.TimeoutExpired, OSError):
+            pass
+
+    # Check for local neo4j processes (exclude our own Python processes)
+    result = subprocess.run(
+        ["pgrep", "-u", str(os.getuid()), "-af", "neo4j"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        for proc_line in result.stdout.strip().splitlines():
+            # Skip Python/uv processes — those are CLI tools, not Neo4j
+            if "python" in proc_line.lower() or "uv run" in proc_line:
+                continue
+            pid = proc_line.split()[0]
+            lines.append(f"  PID {pid}: {proc_line[len(pid) :].strip()[:80]}")
+
+    return "\n".join(lines) if lines else None
+
+
+# ============================================================================
+# Neo4j dump with recovery
+# ============================================================================
+
+
+def run_neo4j_dump(
+    profile: Neo4jProfile,
+    dumps_dir: Path,
+    *,
+    verbose: bool = False,
+) -> None:
+    """Run neo4j-admin dump with optional recovery retry.
+
+    If the initial dump fails due to stale locks (unclean shutdown),
+    performs a recovery cycle: start Neo4j briefly to replay transaction
+    logs and release locks, then stop cleanly and retry.
+
+    If the database is actively in use by another process, fails
+    immediately with a clear message.
+    """
+    image = neo4j_image()
+
+    # Pre-check: fail fast if Neo4j is verified running, or warn on stale lock
+    is_locked, is_verified, holder_info = check_database_lock(profile)
+    if is_locked and is_verified:
+        msg = (
+            "Cannot dump: Neo4j database is locked by another process.\n"
+            "Stop Neo4j first: iter-codex graph stop"
+        )
+        if holder_info:
+            msg += f"\n\nRunning processes:\n{holder_info}"
+        raise click.ClickException(msg)
+    if is_locked and not is_verified:
+        click.echo(
+            "  POSIX lock held but no Neo4j process found — "
+            "treating as stale lock, attempting dump..."
+        )
+
+    # Bind logs dir so neo4j-admin can write crash reports without
+    # needing --writable-tmpfs (which corrupts the FUSE overlay on GPFS).
+    logs_dir = profile.data_dir / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+
+    cmd = [
+        "apptainer",
+        "exec",
+        "--bind",
+        f"{profile.data_dir}/data:/data",
+        "--bind",
+        f"{dumps_dir}:/dumps",
+        "--bind",
+        f"{logs_dir}:/var/lib/neo4j/logs",
+        str(image),
+        "neo4j-admin",
+        "database",
+        "dump",
+        "neo4j",
+        "--to-path=/dumps",
+        "--overwrite-destination=true",
+    ]
+    # Always use --verbose internally so parse_dump_error can detect
+    # the error type; only show full output to user with verbose=True
+    cmd_verbose = [*cmd, "--verbose"]
+
+    result = subprocess.run(cmd_verbose, capture_output=True, text=True)
+    if result.returncode == 0:
+        return
+
+    # The dump may succeed but exit non-zero due to Apptainer cleanup
+    # errors (e.g. fuse-overlayfs ClassFormatError).  If the dump file
+    # exists and neo4j-admin reported completion, accept it.
+    dump_file = dumps_dir / "neo4j.dump"
+    if dump_file.exists() and "dump completed successfully" in result.stderr.lower():
+        if verbose:
+            click.echo("  Dump completed (ignoring non-zero exit from cleanup)")
+        return
+
+    message, is_active_lock = parse_dump_error(result.stderr)
+
+    if is_active_lock:
+        # Database locked by another process — no point attempting recovery
+        _, _, holder_info = check_database_lock(profile)
+        err_msg = (
+            "Cannot dump: Neo4j database is locked by another process.\n"
+            "Stop Neo4j first: iter-codex graph stop"
+        )
+        if holder_info:
+            err_msg += f"\n\nRunning processes:\n{holder_info}"
+        if verbose:
+            click.echo(result.stderr, err=True)
+        raise click.ClickException(err_msg)
+
+    # Stale lock / unclean shutdown — attempt recovery cycle
+    if verbose:
+        click.echo(f"  Initial dump stderr:\n{result.stderr}", err=True)
+    click.echo(f"  Initial dump failed ({message}) — performing recovery cycle...")
+
+    # Start Neo4j so it replays transaction logs and releases stale locks
+    logs_dir = profile.data_dir / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    _recovery_start_cmd = [
+        "apptainer",
+        "exec",
+        "--bind",
+        f"{profile.data_dir}/data:/data",
+        "--bind",
+        f"{logs_dir}:/logs",
+        "--bind",
+        f"{logs_dir}:/var/lib/neo4j/logs",
+        "--writable-tmpfs",
+        "--env",
+        f"NEO4J_server_bolt_listen__address=127.0.0.1:{profile.bolt_port}",
+        "--env",
+        f"NEO4J_server_http_listen__address=127.0.0.1:{profile.http_port}",
+        str(image),
+        "neo4j",
+        "console",
+    ]
+    recovery_proc = subprocess.Popen(
+        _recovery_start_cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    import time
+
+    click.echo("  Waiting for Neo4j recovery start...")
+    for _ in range(60):
+        if is_neo4j_running(profile.http_port):
+            break
+        time.sleep(1)
+    else:
+        recovery_proc.terminate()
+        recovery_proc.wait(timeout=10)
+        raise click.ClickException(
+            f"Graph dump failed and recovery start timed out: {message}\n"
+            "Run with --verbose for full error output."
+        )
+
+    # Stop cleanly — Neo4j may take time to checkpoint on GPFS
+    click.echo("  Recovery start successful — stopping cleanly...")
+    recovery_proc.terminate()
+    try:
+        recovery_proc.wait(timeout=90)
+    except subprocess.TimeoutExpired:
+        recovery_proc.kill()
+        recovery_proc.wait(timeout=10)
+
+    for _ in range(30):
+        if not is_neo4j_running(profile.http_port):
+            break
+        time.sleep(1)
+
+    # Retry dump
+    click.echo("  Retrying dump after recovery...")
+    result = subprocess.run(cmd_verbose, capture_output=True, text=True)
+    if result.returncode != 0:
+        message, _ = parse_dump_error(result.stderr)
+        if verbose:
+            click.echo(result.stderr, err=True)
+        raise click.ClickException(
+            f"Graph dump failed after recovery: {message}\n"
+            "Run with --verbose for full error output."
+        )
+    click.echo("  Dump succeeded after recovery")

@@ -28,7 +28,7 @@ def test_enrich_batch_items_injects_hybrid_neighbours():
     # Verify the function signature accepts the expected args
     import inspect
 
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _hybrid_search_neighbours,
     )
 
@@ -44,7 +44,7 @@ def test_enrich_batch_items_injects_related_neighbours():
     """related_neighbours are injected per-item when related paths found."""
     import inspect
 
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _related_path_neighbours,
     )
 
@@ -56,7 +56,7 @@ def test_enrich_batch_items_injects_related_neighbours():
 
 def test_enrich_batch_items_populates_all_context_keys():
     """_enrich_batch_items populates hybrid, related, error, and identifier keys."""
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _enrich_batch_items,
     )
 
@@ -126,13 +126,13 @@ def test_enrich_batch_items_populates_all_context_keys():
     ]
 
     with (
-        patch("imas_codex.graph.client.GraphClient") as MockGC,
+        patch("iter_codex.graph.client.GraphClient") as MockGC,
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours_batch",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours_batch",
             return_value=[mock_hybrid],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
             return_value=mock_related,
         ),
     ):
@@ -163,7 +163,7 @@ async def test_compose_context_has_scored_examples_key():
     receives. A missing assignment anywhere on that path fails here, whatever
     module the batch processor lives in.
     """
-    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+    from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
         compose_batch,
     )
 
@@ -190,20 +190,20 @@ async def test_compose_context_has_scored_examples_key():
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
+            "iter_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
             side_effect=lambda items: items,
         ),
-        patch("imas_codex.settings.get_model", return_value="test-compose"),
+        patch("iter_codex.settings.get_model", return_value="test-compose"),
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
-        patch("imas_codex.graph.client.GraphClient", return_value=mock_gc),
+        patch("iter_codex.graph.client.GraphClient", return_value=mock_gc),
         patch(
-            "imas_codex.standard_names.example_loader.load_compose_examples",
+            "iter_codex.standard_names.example_loader.load_compose_examples",
             return_value=scored_examples,
         ),
-        patch("imas_codex.llm.prompt_loader.render_prompt", side_effect=_render_prompt),
+        patch("iter_codex.llm.prompt_loader.render_prompt", side_effect=_render_prompt),
     ):
         with pytest.raises(_Rendered):
             await compose_batch(batch, MagicMock(), asyncio.Event())
@@ -225,7 +225,7 @@ def test_review_context_has_scored_examples_key():
 
     pipeline_path = (
         Path(__file__).resolve().parents[2]
-        / "imas_codex"
+        / "iter_codex"
         / "standard_names"
         / "review"
         / "pipeline.py"
@@ -250,7 +250,7 @@ def test_review_context_has_scored_examples_key():
 
 def test_review_dd_context_injects_neighbours():
     """_fetch_review_dd_context enriches review items with hybrid + related."""
-    from imas_codex.standard_names.review.pipeline import _fetch_review_dd_context
+    from iter_codex.standard_names.review.pipeline import _fetch_review_dd_context
 
     mock_gc = MagicMock()
 
@@ -283,13 +283,13 @@ def test_review_dd_context_injects_neighbours():
     mock_related = [{"path": "mhd_linear/flux_surface/psi", "relationship": "unit"}]
 
     with (
-        patch("imas_codex.graph.client.GraphClient") as MockGC,
+        patch("iter_codex.graph.client.GraphClient") as MockGC,
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours_batch",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours_batch",
             return_value=[mock_hybrid],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
             return_value=mock_related,
         ),
     ):
@@ -313,8 +313,8 @@ def test_review_dd_context_injects_neighbours():
 
 def test_retry_accessors_return_configured_defaults():
     """Retry tunables are accessible via settings and workers."""
-    from imas_codex.settings import get_sn_retry_attempts, get_sn_retry_k_expansion
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.settings import get_sn_retry_attempts, get_sn_retry_k_expansion
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _retry_attempts,
         _retry_k_expansion,
     )
@@ -330,7 +330,7 @@ def test_retry_accessors_return_configured_defaults():
 
 def test_example_settings_return_configured_defaults():
     """Example injection tunables are accessible via settings."""
-    from imas_codex.settings import (
+    from iter_codex.settings import (
         get_sn_example_per_bucket,
         get_sn_example_target_scores,
         get_sn_example_tolerance,

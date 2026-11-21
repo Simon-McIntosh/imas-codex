@@ -1,6 +1,6 @@
 """The candidate worker ends its stage before claiming when the decisions key is absent.
 
-With ``OPENROUTER_API_KEY_IMAS_CODEX`` unset ``candidate_worker`` must not claim
+With ``OPENROUTER_API_KEY_ITER_CODEX`` unset ``candidate_worker`` must not claim
 a single source: every claim it made could only fail to judge and be released,
 so the stage would claim and release in a loop until its deadline. The worker
 checks ``judgments_available`` once before the first claim, logs one warning
@@ -21,8 +21,8 @@ import time
 
 import pytest
 
-from imas_codex.ids import candidates as cand
-from imas_codex.ids.workers import CandidateDiscoveryState, candidate_worker
+from iter_codex.ids import candidates as cand
+from iter_codex.ids.workers import CandidateDiscoveryState, candidate_worker
 
 FACILITY = "jet"
 
@@ -35,7 +35,7 @@ _DEADLINE_SECONDS = 10.0
 @pytest.fixture(autouse=True)
 def _no_decisions_key(monkeypatch):
     """Remove the decisions key and start each test with a fresh warning latch."""
-    monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEY_ITER_CODEX", raising=False)
     monkeypatch.setattr(cand, "_key_absence_warned", False)
 
 
@@ -74,15 +74,15 @@ def test_candidate_worker_ends_before_claiming_without_the_decisions_key(
         return None
 
     monkeypatch.setattr(
-        "imas_codex.ids.workers.claim_sources_for_candidates", fake_claim
+        "iter_codex.ids.workers.claim_sources_for_candidates", fake_claim
     )
-    monkeypatch.setattr("imas_codex.ids.workers.route_ids", fake_route_ids)
-    monkeypatch.setattr("imas_codex.ids.workers.judge_candidates", fake_judge)
+    monkeypatch.setattr("iter_codex.ids.workers.route_ids", fake_route_ids)
+    monkeypatch.setattr("iter_codex.ids.workers.judge_candidates", fake_judge)
     monkeypatch.setattr(
-        "imas_codex.ids.workers.release_mapping_claim",
+        "iter_codex.ids.workers.release_mapping_claim",
         lambda source_id: released.append(source_id),
     )
-    monkeypatch.setattr("imas_codex.ids.workers.GraphClient", lambda: _FakeGraph())
+    monkeypatch.setattr("iter_codex.ids.workers.GraphClient", lambda: _FakeGraph())
 
     state = _state()
     start = time.monotonic()
@@ -104,6 +104,6 @@ def test_candidate_worker_ends_before_claiming_without_the_decisions_key(
         record
         for record in caplog.records
         if record.levelno == logging.WARNING
-        and "OPENROUTER_API_KEY_IMAS_CODEX" in record.getMessage()
+        and "OPENROUTER_API_KEY_ITER_CODEX" in record.getMessage()
     ]
     assert len(warnings) == 1

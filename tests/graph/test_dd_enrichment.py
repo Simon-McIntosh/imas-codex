@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.graph.dd_enrichment import (
+from iter_codex.graph.dd_enrichment import (
     BOILERPLATE_PATTERNS,
     IMASPathEnrichmentBatch,
     IMASPathEnrichmentResult,
@@ -166,7 +166,7 @@ class TestGenerateEmbeddingText:
 
     def test_uses_description_when_present(self) -> None:
         """Test that description is used as primary text without path prepended."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         path_info = {
             "name": "psi",
@@ -189,7 +189,7 @@ class TestGenerateEmbeddingText:
 
     def test_falls_back_to_documentation(self) -> None:
         """Test fallback to raw documentation when no description."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         path_info = {
             "name": "psi",
@@ -206,7 +206,7 @@ class TestGenerateEmbeddingText:
 
     def test_empty_returns_empty(self) -> None:
         """Test that missing description and documentation returns empty."""
-        from imas_codex.graph.build_dd import generate_embedding_text
+        from iter_codex.graph.build_dd import generate_embedding_text
 
         text = generate_embedding_text("equilibrium/time_slice/x", {})
         assert text == ""
@@ -215,10 +215,10 @@ class TestGenerateEmbeddingText:
 class TestEnrichImasPaths:
     """Test the main enrichment function (mocked)."""
 
-    @patch("imas_codex.discovery.base.llm.call_llm_structured")
+    @patch("iter_codex.discovery.base.llm.call_llm_structured")
     def test_enrichment_calls_llm(self, mock_llm: MagicMock) -> None:
         """Test that enrichment calls the LLM correctly."""
-        from imas_codex.graph.dd_enrichment import enrich_imas_paths
+        from iter_codex.graph.dd_enrichment import enrich_imas_paths
 
         # Mock graph client
         mock_client = MagicMock()

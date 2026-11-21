@@ -11,11 +11,11 @@ then mislead the standard-name reviewer:
    the pint normalizer must round-trip multi-character symbols intact.
 """
 
-from imas_codex.graph.build_dd import (
+from iter_codex.graph.build_dd import (
     _is_unit_parent_placeholder,
     _resolve_unit_placeholder,
 )
-from imas_codex.units import normalize_unit_symbol
+from iter_codex.units import normalize_unit_symbol
 
 
 class TestPlaceholderDetection:
@@ -189,11 +189,11 @@ class TestDdUnitDefectCuration:
     """
 
     def test_exact_resolution_cohort_retires_legacy_graph_correction(self, monkeypatch):
-        from imas_codex.standard_names import dd_resolutions
-        from imas_codex.standard_names.dd_resolutions import (
+        from iter_codex.standard_names import dd_resolutions
+        from iter_codex.standard_names.dd_resolutions import (
             IONISATION_POTENTIAL_RESOLUTION_PATHS,
         )
-        from imas_codex.units import resolve_dd_unit
+        from iter_codex.units import resolve_dd_unit
 
         manifest = dd_resolutions.load_dd_resolution_manifest()
         monkeypatch.setattr(
@@ -203,19 +203,19 @@ class TestDdUnitDefectCuration:
             assert resolve_dd_unit(path, "e") == "e", path
 
     def test_noncohort_descendant_keeps_legacy_graph_correction(self):
-        from imas_codex.units import resolve_dd_unit
+        from iter_codex.units import resolve_dd_unit
 
         path = "plasma_profiles/ggd/ion/state/ionisation_potential/uncertainty_index"
         assert resolve_dd_unit(path, "e") == "eV"
 
     def test_scalar_sibling_declaration_is_unchanged(self):
-        from imas_codex.units import resolve_dd_unit
+        from iter_codex.units import resolve_dd_unit
 
         path = "edge_profiles/profiles_1d/ion/state/ionisation_potential"
         assert resolve_dd_unit(path, "eV") == "eV"
 
     def test_charge_numbers_keep_the_charge_unit(self):
-        from imas_codex.units import resolve_dd_unit
+        from iter_codex.units import resolve_dd_unit
 
         for parent in (
             "edge_profiles/ggd/ion/state",
@@ -226,7 +226,7 @@ class TestDdUnitDefectCuration:
                 assert resolve_dd_unit(path, "e") == "e", path
 
     def test_uncurated_paths_fall_through_to_normalisation(self):
-        from imas_codex.units import resolve_dd_unit
+        from iter_codex.units import resolve_dd_unit
 
         assert resolve_dd_unit("equilibrium/time_slice/profiles_1d/psi", "Wb") == "Wb"
         assert resolve_dd_unit("equilibrium/time_slice/boundary/elongation", "-") == "1"

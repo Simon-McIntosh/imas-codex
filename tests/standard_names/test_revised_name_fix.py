@@ -22,7 +22,7 @@ def _make_name_review(
     score: int = 15,
 ):
     """Build a fake name-axis review with verdict=revise and a revised_name."""
-    from imas_codex.standard_names.models import (
+    from iter_codex.standard_names.models import (
         StandardNameQualityScoreNameOnly,
     )
 
@@ -46,7 +46,7 @@ class TestRevisedNamePreservesOriginalId:
 
     def test_scored_entry_keeps_original_id(self) -> None:
         """The entry returned by _match_reviews_to_entries has id == original name."""
-        from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+        from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
         wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
         original_id = "electron_temperature"
@@ -75,7 +75,7 @@ class TestRevisedNamePreservesOriginalId:
 
     def test_suggested_name_stored_separately(self) -> None:
         """The suggested name is available under _suggested_name, not id."""
-        from imas_codex.standard_names.review.pipeline import _match_reviews_to_entries
+        from iter_codex.standard_names.review.pipeline import _match_reviews_to_entries
 
         wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
         original_id = "ion_temperature"
@@ -96,7 +96,7 @@ class TestRevisedNamePreservesOriginalId:
 
     def test_build_review_record_uses_original_id(self) -> None:
         """_build_review_record uses _original_id when present."""
-        from imas_codex.standard_names.review.pipeline import _build_review_record
+        from iter_codex.standard_names.review.pipeline import _build_review_record
 
         original_id = "plasma_current"
         suggested = "toroidal_plasma_current"
@@ -143,7 +143,7 @@ class TestRevisedNamePreservesOriginalId:
             }
         ]
 
-        from imas_codex.standard_names.graph_store.graph_foundation import _ensure_json
+        from iter_codex.standard_names.graph_store.graph_foundation import _ensure_json
 
         # Replicate the batch-building logic from write_name_review_results
         batch = [

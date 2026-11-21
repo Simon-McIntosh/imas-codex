@@ -33,15 +33,15 @@ python("ingest_nodes('Facility', [{'id': 'tcv', 'name': 'EPFL'}])")
 
 ```bash
 # Neo4j service management
-uv run imas-codex neo4j status
-systemctl --user restart imas-codex-neo4j
+uv run iter-codex neo4j status
+systemctl --user restart iter-codex-neo4j
 
 # Graph backup/restore
-uv run imas-codex neo4j dump
-uv run imas-codex neo4j load graph.dump
+uv run iter-codex neo4j dump
+uv run iter-codex neo4j load graph.dump
 
 # Interactive Cypher shell
-uv run imas-codex neo4j shell
+uv run iter-codex neo4j shell
 ```
 
 ## Restrictions

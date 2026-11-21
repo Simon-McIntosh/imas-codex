@@ -13,12 +13,12 @@ import pytest
 from rich.panel import Panel
 from rich.text import Text
 
-from imas_codex.discovery.base.supervision import (
+from iter_codex.discovery.base.supervision import (
     SupervisedWorkerGroup,
     WorkerState,
     WorkerStatus,
 )
-from imas_codex.discovery.signals.progress import (
+from iter_codex.discovery.signals.progress import (
     CheckItem,
     DataProgressDisplay,
     DataProgressState,
@@ -716,7 +716,7 @@ class TestDisplayLayout:
 
     def test_min_width(self):
         """Width never goes below MIN_WIDTH."""
-        from imas_codex.discovery.base.progress import MIN_WIDTH
+        from iter_codex.discovery.base.progress import MIN_WIDTH
 
         display = DataProgressDisplay(facility="test", cost_limit=1.0, console=None)
         assert display.width >= MIN_WIDTH

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.discovery.base.claims import release_claim, release_claims_batch
+from iter_codex.discovery.base.claims import release_claim, release_claims_batch
 
 
 class _FakeGraph:
@@ -36,7 +36,7 @@ class _FakeGraph:
 @pytest.fixture
 def fake_graph(monkeypatch):
     graph = _FakeGraph([{"released": 2}])
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: graph)
     return graph
 
 

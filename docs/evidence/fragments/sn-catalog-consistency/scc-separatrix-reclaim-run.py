@@ -23,8 +23,8 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import edit
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import edit
 
 HERE = Path(__file__).resolve().parent
 NODE = "scc-separatrix-reclaim"

@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.graph.vector_search import build_vector_search
+from iter_codex.graph.vector_search import build_vector_search
 
 
 class TestBuildVectorSearch:
@@ -142,7 +142,7 @@ class TestBuildVectorSearch:
 
     def test_all_vector_indexes_from_schema(self):
         """Verify builder works with all known vector indexes."""
-        from imas_codex.graph.schema_context_data import VECTOR_INDEXES
+        from iter_codex.graph.schema_context_data import VECTOR_INDEXES
 
         for index_name, (label, _prop) in VECTOR_INDEXES.items():
             result = build_vector_search(index_name, label)

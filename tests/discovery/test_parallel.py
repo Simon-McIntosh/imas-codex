@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.paths.parallel import (
+from iter_codex.discovery.paths.parallel import (
     DiscoveryState,
     WorkerStats,
 )
@@ -22,11 +22,11 @@ class TestGetCheckpointDir:
         # Patch home to use tmp_path
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
-        from imas_codex.discovery.signals.parallel import get_checkpoint_dir
+        from iter_codex.discovery.signals.parallel import get_checkpoint_dir
 
         checkpoint_dir = get_checkpoint_dir()
 
-        expected_path = tmp_path / ".local/share/imas-codex/checkpoints/data"
+        expected_path = tmp_path / ".local/share/iter-codex/checkpoints/data"
         assert checkpoint_dir == expected_path
         assert checkpoint_dir.exists()
         assert checkpoint_dir.is_dir()
@@ -37,7 +37,7 @@ class TestGetCheckpointDir:
 
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
-        from imas_codex.discovery.signals.parallel import get_checkpoint_dir
+        from iter_codex.discovery.signals.parallel import get_checkpoint_dir
 
         dir1 = get_checkpoint_dir()
         dir2 = get_checkpoint_dir()
@@ -157,7 +157,7 @@ class TestDiscoveryState:
         state.score_stats.cost = 5.5
         assert state.should_stop()
 
-    @patch("imas_codex.discovery.paths.parallel.has_pending_work", return_value=False)
+    @patch("iter_codex.discovery.paths.parallel.has_pending_work", return_value=False)
     def test_should_stop_when_both_idle(self, mock_has_pending):
         """Test should_stop returns True when all workers idle."""
         state = DiscoveryState(facility="test", cost_limit=10.0)
@@ -168,7 +168,7 @@ class TestDiscoveryState:
         state.score_phase._idle_count = 3
         assert state.should_stop()
 
-    @patch("imas_codex.discovery.paths.parallel.has_pending_work", return_value=True)
+    @patch("iter_codex.discovery.paths.parallel.has_pending_work", return_value=True)
     def test_should_not_stop_when_pending_work(self, mock_has_pending):
         """Test should_stop returns False when has_pending_work reports work.
 
@@ -205,10 +205,10 @@ class TestDiscoveryState:
 class TestClaimPaths:
     """Tests for atomic path claiming functions."""
 
-    @patch("imas_codex.graph.GraphClient")
+    @patch("iter_codex.graph.GraphClient")
     def test_claim_paths_for_scanning_calls_graph(self, mock_gc_class):
         """Test claim_paths_for_scanning calls graph correctly."""
-        from imas_codex.discovery.paths.parallel import claim_paths_for_scanning
+        from iter_codex.discovery.paths.parallel import claim_paths_for_scanning
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -230,10 +230,10 @@ class TestClaimPaths:
         assert result[0]["path"] == "/path1"
         assert result[0]["is_expanding"] is False
 
-    @patch("imas_codex.graph.GraphClient")
+    @patch("iter_codex.graph.GraphClient")
     def test_claim_paths_for_expanding_calls_graph(self, mock_gc_class):
         """Test claim_paths_for_expanding claims expansion paths."""
-        from imas_codex.discovery.paths.parallel import claim_paths_for_expanding
+        from iter_codex.discovery.paths.parallel import claim_paths_for_expanding
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -254,10 +254,10 @@ class TestClaimPaths:
         assert result[0]["path"] == "/path2"
         assert result[0]["is_expanding"] is True
 
-    @patch("imas_codex.graph.GraphClient")
+    @patch("iter_codex.graph.GraphClient")
     def test_claim_paths_for_scoring_calls_graph(self, mock_gc_class):
         """Test claim_paths_for_scoring calls graph correctly."""
-        from imas_codex.discovery.paths.parallel import claim_paths_for_scoring
+        from iter_codex.discovery.paths.parallel import claim_paths_for_scoring
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -282,10 +282,10 @@ class TestClaimPaths:
 class TestFindCloneGroups:
     """Tests for _find_clone_groups graph query."""
 
-    @patch("imas_codex.graph.GraphClient")
+    @patch("iter_codex.graph.GraphClient")
     def test_returns_sorted_groups(self, mock_gc_class):
         """Clone groups are sorted: accessible > has_remote > shallowest > earliest."""
-        from imas_codex.discovery.paths.parallel import _find_clone_groups
+        from iter_codex.discovery.paths.parallel import _find_clone_groups
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -336,10 +336,10 @@ class TestFindCloneGroups:
         # Last = no remote
         assert paths[2]["id"] == "tcv:/mid/meq"
 
-    @patch("imas_codex.graph.GraphClient")
+    @patch("iter_codex.graph.GraphClient")
     def test_empty_result(self, mock_gc_class):
         """Returns empty list when no clone groups found."""
-        from imas_codex.discovery.paths.parallel import _find_clone_groups
+        from iter_codex.discovery.paths.parallel import _find_clone_groups
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -349,10 +349,10 @@ class TestFindCloneGroups:
         groups = _find_clone_groups("tcv")
         assert groups == []
 
-    @patch("imas_codex.graph.GraphClient")
+    @patch("iter_codex.graph.GraphClient")
     def test_none_result(self, mock_gc_class):
         """Handles None result from graph client."""
-        from imas_codex.discovery.paths.parallel import _find_clone_groups
+        from iter_codex.discovery.paths.parallel import _find_clone_groups
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -366,10 +366,10 @@ class TestFindCloneGroups:
 class TestMarkClonesTerminal:
     """Tests for _mark_clones_terminal graph mutation."""
 
-    @patch("imas_codex.graph.GraphClient")
+    @patch("iter_codex.graph.GraphClient")
     def test_marks_clones_and_returns_count(self, mock_gc_class):
         """Marks clone paths terminal and returns count."""
-        from imas_codex.discovery.paths.parallel import _mark_clones_terminal
+        from iter_codex.discovery.paths.parallel import _mark_clones_terminal
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -389,10 +389,10 @@ class TestMarkClonesTerminal:
         assert "UNWIND" in query_str
         assert "terminal_reason" in query_str
 
-    @patch("imas_codex.graph.GraphClient")
+    @patch("iter_codex.graph.GraphClient")
     def test_returns_zero_on_empty_result(self, mock_gc_class):
         """Returns 0 when graph returns empty result."""
-        from imas_codex.discovery.paths.parallel import _mark_clones_terminal
+        from iter_codex.discovery.paths.parallel import _mark_clones_terminal
 
         mock_gc = MagicMock()
         mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -412,14 +412,14 @@ class TestDedupWorker:
 
     @pytest.mark.anyio
     @patch(
-        "imas_codex.discovery.paths.parallel._mark_accessible_elsewhere",
+        "iter_codex.discovery.paths.parallel._mark_accessible_elsewhere",
         return_value=False,
     )
-    @patch("imas_codex.discovery.paths.parallel._mark_clones_terminal", return_value=2)
-    @patch("imas_codex.discovery.paths.parallel._find_clone_groups")
+    @patch("iter_codex.discovery.paths.parallel._mark_clones_terminal", return_value=2)
+    @patch("iter_codex.discovery.paths.parallel._find_clone_groups")
     async def test_processes_clone_groups(self, mock_find, mock_mark, mock_mark_ae):
         """Dedup worker processes clone groups and reports progress."""
-        from imas_codex.discovery.paths.parallel import dedup_worker
+        from iter_codex.discovery.paths.parallel import dedup_worker
 
         mock_find.side_effect = [
             [
@@ -464,16 +464,16 @@ class TestDedupWorker:
 
     @pytest.mark.anyio
     @patch(
-        "imas_codex.discovery.paths.parallel._mark_accessible_elsewhere",
+        "iter_codex.discovery.paths.parallel._mark_accessible_elsewhere",
         return_value=True,
     )
-    @patch("imas_codex.discovery.paths.parallel._mark_clones_terminal", return_value=1)
-    @patch("imas_codex.discovery.paths.parallel._find_clone_groups")
+    @patch("iter_codex.discovery.paths.parallel._mark_clones_terminal", return_value=1)
+    @patch("iter_codex.discovery.paths.parallel._find_clone_groups")
     async def test_marks_canonical_accessible_elsewhere(
         self, mock_find, mock_mark, mock_mark_ae
     ):
         """When canonical is externally accessible, it's also marked terminal."""
-        from imas_codex.discovery.paths.parallel import dedup_worker
+        from iter_codex.discovery.paths.parallel import dedup_worker
 
         mock_find.side_effect = [
             [
@@ -510,16 +510,16 @@ class TestDedupWorker:
 
     @pytest.mark.anyio
     @patch(
-        "imas_codex.discovery.paths.parallel._mark_accessible_elsewhere",
+        "iter_codex.discovery.paths.parallel._mark_accessible_elsewhere",
         return_value=True,
     )
-    @patch("imas_codex.discovery.paths.parallel._mark_clones_terminal", return_value=0)
-    @patch("imas_codex.discovery.paths.parallel._find_clone_groups")
+    @patch("iter_codex.discovery.paths.parallel._mark_clones_terminal", return_value=0)
+    @patch("iter_codex.discovery.paths.parallel._find_clone_groups")
     async def test_single_instance_accessible_marked_terminal(
         self, mock_find, mock_mark, mock_mark_ae
     ):
         """Single-instance repo that is accessible elsewhere is marked terminal."""
-        from imas_codex.discovery.paths.parallel import dedup_worker
+        from iter_codex.discovery.paths.parallel import dedup_worker
 
         mock_find.side_effect = [
             [
@@ -560,10 +560,10 @@ class TestDedupWorker:
         assert results[0]["clones_marked"] == 1  # 0 clones + 1 canonical
 
     @pytest.mark.anyio
-    @patch("imas_codex.discovery.paths.parallel._find_clone_groups", return_value=[])
+    @patch("iter_codex.discovery.paths.parallel._find_clone_groups", return_value=[])
     async def test_idles_when_no_groups(self, mock_find):
         """Dedup worker idles and reports waiting when no clone groups."""
-        from imas_codex.discovery.paths.parallel import dedup_worker
+        from iter_codex.discovery.paths.parallel import dedup_worker
 
         state = DiscoveryState(facility="tcv", cost_limit=10.0)
         progress_calls = []
@@ -582,7 +582,7 @@ class TestParseVcsRemoteUrl:
     """Tests for _parse_vcs_remote_url handling git, SVN, and Hg URLs."""
 
     def test_git_ssh_github(self):
-        from imas_codex.discovery.paths.frontier import _parse_vcs_remote_url
+        from iter_codex.discovery.paths.frontier import _parse_vcs_remote_url
 
         source, owner, name = _parse_vcs_remote_url(
             "git@github.com:owner/repo.git", "git"
@@ -592,7 +592,7 @@ class TestParseVcsRemoteUrl:
         assert name == "repo"
 
     def test_git_https_gitlab(self):
-        from imas_codex.discovery.paths.frontier import _parse_vcs_remote_url
+        from iter_codex.discovery.paths.frontier import _parse_vcs_remote_url
 
         source, owner, name = _parse_vcs_remote_url(
             "https://gitlab.epfl.ch/spc/tcv/analysis/rdpa.git", "git"
@@ -602,7 +602,7 @@ class TestParseVcsRemoteUrl:
         assert name == "tcv/analysis/rdpa"  # Nested GitLab groups
 
     def test_svn_https(self):
-        from imas_codex.discovery.paths.frontier import _parse_vcs_remote_url
+        from iter_codex.discovery.paths.frontier import _parse_vcs_remote_url
 
         source, owner, name = _parse_vcs_remote_url(
             "https://spcsvn.epfl.ch/repos/CaxeKinx", "svn"
@@ -612,7 +612,7 @@ class TestParseVcsRemoteUrl:
         assert name == "CaxeKinx"
 
     def test_svn_protocol(self):
-        from imas_codex.discovery.paths.frontier import _parse_vcs_remote_url
+        from iter_codex.discovery.paths.frontier import _parse_vcs_remote_url
 
         source, owner, name = _parse_vcs_remote_url(
             "svn://svnserver.example.com/project/trunk", "svn"
@@ -621,7 +621,7 @@ class TestParseVcsRemoteUrl:
         assert name == "trunk"
 
     def test_svn_ssh(self):
-        from imas_codex.discovery.paths.frontier import _parse_vcs_remote_url
+        from iter_codex.discovery.paths.frontier import _parse_vcs_remote_url
 
         source, owner, name = _parse_vcs_remote_url(
             "svn+ssh://svnserver.example.com/repos/code", "svn"
@@ -631,7 +631,7 @@ class TestParseVcsRemoteUrl:
 
     def test_same_svn_url_produces_same_id(self):
         """Two paths with the same SVN remote should produce the same repo ID."""
-        from imas_codex.discovery.paths.frontier import _parse_vcs_remote_url
+        from iter_codex.discovery.paths.frontier import _parse_vcs_remote_url
 
         s1, o1, n1 = _parse_vcs_remote_url(
             "https://spcsvn.epfl.ch/repos/CaxeKinx", "svn"
@@ -646,7 +646,7 @@ class TestReconcileSoftwareRepos:
     """Tests for _reconcile_software_repos root_commit merging."""
 
     def test_merges_root_into_remote(self):
-        from imas_codex.discovery.paths.frontier import _reconcile_software_repos
+        from iter_codex.discovery.paths.frontier import _reconcile_software_repos
 
         gc = MagicMock()
         # Simulate finding a root:... sibling
@@ -668,7 +668,7 @@ class TestReconcileSoftwareRepos:
         assert move_call.kwargs["canonical_id"] == "github:owner/repo"
 
     def test_noop_when_no_siblings(self):
-        from imas_codex.discovery.paths.frontier import _reconcile_software_repos
+        from iter_codex.discovery.paths.frontier import _reconcile_software_repos
 
         gc = MagicMock()
         gc.query.return_value = []

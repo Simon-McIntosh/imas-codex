@@ -17,8 +17,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from neo4j.exceptions import ClientError, ServiceUnavailable
 
-from imas_codex.graph.query_builder import render_chunk_source
-from imas_codex.llm.search_formatters import (
+from iter_codex.graph.query_builder import render_chunk_source
+from iter_codex.llm.search_formatters import (
     _interpolate_template,
     format_code_report,
     format_docs_report,
@@ -26,7 +26,7 @@ from imas_codex.llm.search_formatters import (
     format_imas_report,
     format_signals_report,
 )
-from imas_codex.llm.search_tools import (
+from iter_codex.llm.search_tools import (
     _CHUNK_DOCUMENTS_CAP,
     _ROLE_RERANK_QUESTION,
     _SIGNAL_RERANK_DESCRIPTION_CHARS,
@@ -429,7 +429,7 @@ class TestSearchSignals:
 
     def test_embedding_unavailable(self, mock_gc):
         """When encoder raises, return helpful error message."""
-        from imas_codex.embeddings.encoder import EmbeddingBackendError
+        from iter_codex.embeddings.encoder import EmbeddingBackendError
 
         bad_encoder = MagicMock()
         bad_encoder.embed_texts.side_effect = EmbeddingBackendError("unavailable")
@@ -660,7 +660,7 @@ class TestSignalRerankSwitch:
     def test_switch_off_leaves_the_fused_order_and_never_reranks(
         self, mock_gc, mock_encoder, monkeypatch
     ):
-        from imas_codex.llm import search_tools
+        from iter_codex.llm import search_tools
 
         calls: list[tuple[str, list[dict[str, Any]], dict[str, Any]]] = []
 
@@ -683,7 +683,7 @@ class TestSignalRerankSwitch:
     def test_switch_on_calls_the_shared_rerank_once_with_the_signal_state(
         self, mock_gc, mock_encoder, monkeypatch
     ):
-        from imas_codex.llm import search_tools
+        from iter_codex.llm import search_tools
 
         calls: list[dict[str, Any]] = []
 
@@ -723,7 +723,7 @@ class TestSignalRerankSwitch:
         A signal the fused order places below k can still be lifted into the
         report, so the pool the rerank judges is not cut at k.
         """
-        from imas_codex.llm import search_tools
+        from iter_codex.llm import search_tools
 
         pool_ids = [f"tcv:pool/{i}" for i in range(2 * RERANK_POOL)]
         monkeypatch.setattr(
@@ -768,7 +768,7 @@ class TestSignalRerankFollowsServerMode:
 
     @pytest.fixture()
     def server_module(self):
-        from imas_codex.llm import server as module
+        from iter_codex.llm import server as module
 
         prior = module._rerank_signals
         yield module
@@ -1260,7 +1260,7 @@ class TestSearchDocs:
 
     def test_embedding_unavailable(self, mock_gc):
         """When encoder is unavailable, return helpful message."""
-        from imas_codex.embeddings.encoder import EmbeddingBackendError
+        from iter_codex.embeddings.encoder import EmbeddingBackendError
 
         bad_encoder = MagicMock()
         bad_encoder.embed_texts.side_effect = EmbeddingBackendError("unavailable")
@@ -1431,7 +1431,7 @@ class TestSearchCode:
 
     def test_code_example_facility_filter_inside_search(self, mock_gc, mock_encoder):
         """Code-example facility predicate is an in-index pre-filter, inside SEARCH."""
-        from imas_codex.llm.search_tools import _vector_search_code_examples
+        from iter_codex.llm.search_tools import _vector_search_code_examples
 
         _vector_search_code_examples(mock_gc, [0.1] * 1024, facility="jt-60sa", k=10)
         for call in mock_gc.query.call_args_list:
@@ -1449,7 +1449,7 @@ class TestSearchCode:
         """A missing/unavailable index yields no examples rather than failing."""
         from neo4j.exceptions import ClientError
 
-        from imas_codex.llm.search_tools import _vector_search_code_examples
+        from iter_codex.llm.search_tools import _vector_search_code_examples
 
         mock_gc.query.side_effect = ClientError("no such index")
         assert (
@@ -1461,7 +1461,7 @@ class TestSearchCode:
 
     def test_code_example_programming_error_propagates(self, mock_gc):
         """A non-client error is not swallowed by the narrowed except."""
-        from imas_codex.llm.search_tools import _vector_search_code_examples
+        from iter_codex.llm.search_tools import _vector_search_code_examples
 
         mock_gc.query.side_effect = ValueError("boom")
         with pytest.raises(ValueError):
@@ -1484,7 +1484,7 @@ class TestSearchCode:
 
     def test_embedding_unavailable(self, mock_gc):
         """When encoder is unavailable, return helpful message."""
-        from imas_codex.embeddings.encoder import EmbeddingBackendError
+        from iter_codex.embeddings.encoder import EmbeddingBackendError
 
         bad_encoder = MagicMock()
         bad_encoder.embed_texts.side_effect = EmbeddingBackendError("unavailable")
@@ -1758,7 +1758,7 @@ class TestSearchImas:
 
     def test_embedding_unavailable(self, mock_gc):
         """When encoder raises, return helpful error message."""
-        from imas_codex.embeddings.encoder import EmbeddingBackendError
+        from iter_codex.embeddings.encoder import EmbeddingBackendError
 
         bad_encoder = MagicMock()
         bad_encoder.embed_texts.side_effect = EmbeddingBackendError("unavailable")
@@ -2034,7 +2034,7 @@ class TestFetch:
     def test_neo4j_not_running(self):
         """ServiceUnavailable returns descriptive message."""
         with patch(
-            "imas_codex.llm.search_tools.GraphClient",
+            "iter_codex.llm.search_tools.GraphClient",
             side_effect=ServiceUnavailable("Connection refused"),
         ):
             result = _fetch("anything")
@@ -2318,7 +2318,7 @@ class TestSchemaGuard:
 
     def test_imas_enrichment_includes_lifecycle_fields(self, mock_gc, mock_encoder):
         """IMAS enrichment returns lifecycle_status and structure_reference."""
-        from imas_codex.tools.graph_search import GraphSearchTool
+        from iter_codex.tools.graph_search import GraphSearchTool
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -2341,7 +2341,7 @@ class TestSchemaGuard:
 
     def test_facility_crossrefs_uses_property_match(self, mock_gc, mock_encoder):
         """Facility crossrefs use property-based matching, not relationship traversal."""
-        from imas_codex.tools.graph_search import GraphSearchTool
+        from iter_codex.tools.graph_search import GraphSearchTool
 
         mock_gc.query.side_effect = _route_query(
             {
@@ -2711,7 +2711,7 @@ class TestCodeChunkSourceResolution:
         assert "CODE_EXAMPLE_ID" not in cypher
 
     def test_code_chunk_search_embeds_renderer(self):
-        from imas_codex.llm.server import _code_chunk_search_query
+        from iter_codex.llm.server import _code_chunk_search_query
 
         cypher = _code_chunk_search_query()
         assert render_chunk_source("node", "source_file") in cypher
@@ -2767,7 +2767,7 @@ class TestRerankCandidates:
         The rerank skips every call when the key is absent, which would make
         these tests measure the skip rather than the ordering they replace.
         """
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
 
     def _candidates(self) -> list[dict[str, Any]]:
         return [
@@ -2777,7 +2777,7 @@ class TestRerankCandidates:
         ]
 
     def test_higher_score_ranks_first(self, monkeypatch):
-        from imas_codex.discovery.base import judgment
+        from iter_codex.discovery.base import judgment
 
         monkeypatch.setattr(
             judgment,
@@ -2791,7 +2791,7 @@ class TestRerankCandidates:
         assert note is None
 
     def test_state_carries_the_locator_and_bounds_the_text(self, monkeypatch):
-        from imas_codex.discovery.base import judgment
+        from iter_codex.discovery.base import judgment
 
         seen: list[dict[str, Any]] = []
 
@@ -2830,7 +2830,7 @@ class TestRerankCandidates:
     def test_a_failed_decision_keeps_the_embedding_order_and_notes_it(
         self, monkeypatch
     ):
-        from imas_codex.discovery.base import judgment
+        from iter_codex.discovery.base import judgment
 
         monkeypatch.setattr(
             judgment,
@@ -2846,7 +2846,7 @@ class TestRerankCandidates:
         assert "embedding position" in note
 
     def test_a_candidate_unfinished_at_the_budget_keeps_its_position(self, monkeypatch):
-        from imas_codex.discovery.base import judgment
+        from iter_codex.discovery.base import judgment
 
         monkeypatch.setattr(
             judgment,
@@ -2861,7 +2861,7 @@ class TestRerankCandidates:
         assert "1 of 3" in note
 
     def test_a_failed_batch_returns_the_embedding_order_with_a_note(self, monkeypatch):
-        from imas_codex.llm import search_tools
+        from iter_codex.llm import search_tools
 
         def boom(coro):
             coro.close()
@@ -2882,7 +2882,7 @@ class TestSearchToolsRerank:
     @pytest.fixture(autouse=True)
     def _decisions_key(self, monkeypatch):
         """Set a decisions key so the search reaches the rerank it asserts on."""
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
 
     @pytest.fixture()
     def mock_gc(self):
@@ -2953,7 +2953,7 @@ class TestSearchToolsRerank:
     def test_docs_report_follows_the_rerank_order(
         self, mock_gc, mock_encoder, monkeypatch
     ):
-        from imas_codex.discovery.base import judgment
+        from iter_codex.discovery.base import judgment
 
         mock_gc.query = MagicMock(side_effect=self._wiki_handler(["c0", "c1", "c2"]))
         monkeypatch.setattr(
@@ -2972,7 +2972,7 @@ class TestSearchToolsRerank:
     def test_docs_appends_a_note_when_the_rerank_fails(
         self, mock_gc, mock_encoder, monkeypatch
     ):
-        from imas_codex.discovery.base import judgment
+        from iter_codex.discovery.base import judgment
 
         mock_gc.query = MagicMock(side_effect=self._wiki_handler(["c0", "c1"]))
         monkeypatch.setattr(
@@ -2992,7 +2992,7 @@ class TestSearchToolsRerank:
     def test_code_report_follows_the_rerank_order(
         self, mock_gc, mock_encoder, monkeypatch
     ):
-        from imas_codex.discovery.base import judgment
+        from iter_codex.discovery.base import judgment
 
         mock_gc.query = MagicMock(side_effect=self._code_handler(["k0", "k1", "k2"]))
         monkeypatch.setattr(

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from imas_codex.standard_names.domain_audit import (
+from iter_codex.standard_names.domain_audit import (
     CHECK_DOMAIN_EDGES_SOURCE_DOMAINS,
     CHECK_PHYSICS_DOMAIN_DECISION,
     CHECK_PHYSICS_DOMAIN_SET,

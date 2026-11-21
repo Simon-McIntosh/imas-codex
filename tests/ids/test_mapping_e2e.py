@@ -14,8 +14,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.core.data_model import IdsNode
-from imas_codex.ids.models import (
+from iter_codex.core.data_model import IdsNode
+from iter_codex.ids.models import (
     EscalationFlag,
     EscalationSeverity,
     SignalMappingBatch,
@@ -26,7 +26,7 @@ from imas_codex.ids.models import (
     ValidatedSignalMapping,
     persist_mapping_result,
 )
-from imas_codex.ids.tools import (
+from iter_codex.ids.tools import (
     analyze_units,
     check_dd_paths,
     fetch_imas_fields,
@@ -36,8 +36,8 @@ from imas_codex.ids.tools import (
     search_existing_mappings,
     search_imas_semantic,
 )
-from imas_codex.models.error_models import ToolError
-from imas_codex.models.result_models import FetchPathsResult
+from iter_codex.models.error_models import ToolError
+from iter_codex.models.result_models import FetchPathsResult
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -306,7 +306,7 @@ class TestFetchImasFields:
         assert result[0]["units"] == "m"
 
     @patch(
-        "imas_codex.tools.graph_search.GraphPathTool.fetch_dd_paths",
+        "iter_codex.tools.graph_search.GraphPathTool.fetch_dd_paths",
         new_callable=AsyncMock,
     )
     def test_returns_stable_dict_output_for_string_cluster_labels(
@@ -343,7 +343,7 @@ class TestFetchImasFields:
 
 class TestSearchImasSemantic:
     @patch(
-        "imas_codex.tools.graph_search.GraphSearchTool.search_dd_paths",
+        "iter_codex.tools.graph_search.GraphSearchTool.search_dd_paths",
         new_callable=AsyncMock,
     )
     def test_degrades_cleanly_on_tool_error(self, mock_search, mock_gc):
@@ -411,7 +411,7 @@ class TestSearchExistingMappings:
                     "ids_name": "pf_active",
                     "dd_version": "4.1.1",
                     "status": "validated",
-                    "provider": "imas-codex",
+                    "provider": "iter-codex",
                 }
             ],
             [
@@ -546,20 +546,20 @@ class TestPersistMappingResult:
 class TestPipelineOrchestrator:
     """Test the full pipeline with mocked LLM and graph."""
 
-    @patch("imas_codex.ids.mapping.search_imas_semantic")
+    @patch("iter_codex.ids.mapping.search_imas_semantic")
     def test_gather_context(
         self, mock_semantic, mock_gc, sample_groups, sample_subtree
     ):
         """Test context gathering."""
-        from imas_codex.ids.mapping import gather_context
+        from iter_codex.ids.mapping import gather_context
 
         mock_semantic.return_value = sample_subtree
 
         # Patch fetch_imas_subtree to use our mock
         with (
-            patch("imas_codex.ids.mapping.fetch_imas_subtree") as mock_subtree,
-            patch("imas_codex.ids.mapping.query_signal_sources") as mock_qsg,
-            patch("imas_codex.ids.mapping.search_existing_mappings") as mock_sem,
+            patch("iter_codex.ids.mapping.fetch_imas_subtree") as mock_subtree,
+            patch("iter_codex.ids.mapping.query_signal_sources") as mock_qsg,
+            patch("iter_codex.ids.mapping.search_existing_mappings") as mock_sem,
         ):
             mock_subtree.return_value = sample_subtree
             mock_qsg.return_value = sample_groups
@@ -574,10 +574,10 @@ class TestPipelineOrchestrator:
         assert len(ctx["groups"]) == 2
         assert len(ctx["subtree"]) == 3
 
-    @patch("imas_codex.ids.mapping.fetch_source_code_refs")
-    @patch("imas_codex.ids.mapping._call_llm")
-    @patch("imas_codex.ids.mapping.fetch_imas_fields")
-    @patch("imas_codex.ids.mapping.fetch_imas_subtree")
+    @patch("iter_codex.ids.mapping.fetch_source_code_refs")
+    @patch("iter_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping.fetch_imas_fields")
+    @patch("iter_codex.ids.mapping.fetch_imas_subtree")
     def test_map_signals(
         self,
         mock_subtree,
@@ -591,7 +591,7 @@ class TestPipelineOrchestrator:
         sample_field_batch,
     ):
         """Test signal mapping generation."""
-        from imas_codex.ids.mapping import PipelineCost, map_signals
+        from iter_codex.ids.mapping import PipelineCost, map_signals
 
         mock_fields.return_value = sample_subtree[1:]
         mock_subtree.return_value = sample_subtree[1:]
@@ -618,7 +618,7 @@ class TestPipelineOrchestrator:
         assert len(result) == 2
         assert len(result[0].mappings) == 2
 
-    @patch("imas_codex.ids.validation.check_dd_paths")
+    @patch("iter_codex.ids.validation.check_dd_paths")
     def test_validate_mappings(
         self,
         mock_check,
@@ -627,7 +627,7 @@ class TestPipelineOrchestrator:
         sample_field_batch,
     ):
         """Test validation — programmatic, not LLM."""
-        from imas_codex.ids.mapping import validate_mappings
+        from iter_codex.ids.mapping import validate_mappings
 
         mock_check.return_value = [
             {"path": "pf_active/coil/element/geometry/rectangle/r", "exists": True},
@@ -651,7 +651,7 @@ class TestPipelineOrchestrator:
 
 class TestMapCLI:
     def test_map_help(self):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         runner = CliRunner()
         result = runner.invoke(map_cmd, ["--help"])
@@ -661,7 +661,7 @@ class TestMapCLI:
         assert "Union of filters" in result.output
 
     def test_map_status_help(self):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         runner = CliRunner()
         result = runner.invoke(map_cmd, ["status", "--help"])
@@ -669,28 +669,28 @@ class TestMapCLI:
         assert "Show mapping status" in result.output
 
     def test_map_show_help(self):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         runner = CliRunner()
         result = runner.invoke(map_cmd, ["show", "--help"])
         assert result.exit_code == 0
 
     def test_map_validate_help(self):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         runner = CliRunner()
         result = runner.invoke(map_cmd, ["validate", "--help"])
         assert result.exit_code == 0
 
     def test_map_clear_help(self):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         runner = CliRunner()
         result = runner.invoke(map_cmd, ["clear", "--help"])
         assert result.exit_code == 0
 
     def test_map_activate_help(self):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         runner = CliRunner()
         result = runner.invoke(map_cmd, ["activate", "--help"])
@@ -698,7 +698,7 @@ class TestMapCLI:
         assert "active" in result.output.lower()
 
     def test_map_no_args_shows_help(self):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         runner = CliRunner()
         result = runner.invoke(map_cmd, [])
@@ -706,13 +706,13 @@ class TestMapCLI:
         assert "signal mapping pipeline" in result.output.lower()
 
     @pytest.mark.integration
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.ids.tools.discover_mappable_ids")
-    @patch("imas_codex.ids.workers.run_mapping_engine", new_callable=AsyncMock)
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.ids.tools.discover_mappable_ids")
+    @patch("iter_codex.ids.workers.run_mapping_engine", new_callable=AsyncMock)
     def test_map_run(
         self, mock_engine, mock_discover, mock_gc, sample_validated_result
     ):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         mock_discover.return_value = {
             "available_domains": ["magnetics"],
@@ -733,11 +733,11 @@ class TestMapCLI:
         mock_engine.assert_called_once()
 
     @pytest.mark.integration
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.ids.tools.discover_mappable_ids")
-    @patch("imas_codex.ids.workers.run_mapping_engine", new_callable=AsyncMock)
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.ids.tools.discover_mappable_ids")
+    @patch("iter_codex.ids.workers.run_mapping_engine", new_callable=AsyncMock)
     def test_map_run_error(self, mock_engine, mock_discover, mock_gc):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         mock_discover.return_value = {
             "available_domains": ["magnetics"],
@@ -760,7 +760,7 @@ class TestDiscoverMappableIds:
     def test_union_of_domain_and_ids_filters(self):
         from unittest.mock import MagicMock
 
-        from imas_codex.ids.tools import discover_mappable_ids
+        from iter_codex.ids.tools import discover_mappable_ids
 
         gc = MagicMock()
         gc.query.side_effect = [
@@ -823,7 +823,7 @@ class TestPromptTemplates:
     """Test that prompt templates exist and render correctly."""
 
     def test_target_assignment_prompt_exists(self):
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         path = PROMPTS_DIR / "mapping" / "target_assignment.md"
         assert path.exists()
@@ -831,7 +831,7 @@ class TestPromptTemplates:
         assert "listed candidates" in prompt
 
     def test_signal_mapping_prompt_exists(self):
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         path = PROMPTS_DIR / "mapping" / "signal_mapping.md"
         assert path.exists()
@@ -840,7 +840,7 @@ class TestPromptTemplates:
         assert "transform" in prompt
 
     def test_validation_prompt_exists(self):
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         path = PROMPTS_DIR / "mapping" / "validation.md"
         assert path.exists()
@@ -848,7 +848,7 @@ class TestPromptTemplates:
         assert "valid" in prompt
 
     def test_target_assignment_prompt_renders(self):
-        from imas_codex.ids.mapping import _render_prompt
+        from iter_codex.ids.mapping import _render_prompt
 
         rendered = _render_prompt(
             "target_assignment",
@@ -863,7 +863,7 @@ class TestPromptTemplates:
         assert "group1" in rendered
 
     def test_signal_mapping_prompt_renders(self):
-        from imas_codex.ids.mapping import _render_prompt
+        from iter_codex.ids.mapping import _render_prompt
 
         rendered = _render_prompt(
             "signal_mapping",
@@ -881,7 +881,7 @@ class TestPromptTemplates:
         assert "pf_active/coil" in rendered
 
     def test_signal_mapping_prompt_has_transform_examples(self):
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         # Transform examples are now in the system prompt
         prompt = (PROMPTS_DIR / "mapping" / "signal_mapping_system.md").read_text()
@@ -892,7 +892,7 @@ class TestPromptTemplates:
         assert "MUST" in prompt
 
     def test_validation_prompt_renders(self):
-        from imas_codex.ids.mapping import _render_prompt
+        from iter_codex.ids.mapping import _render_prompt
 
         rendered = _render_prompt(
             "validation",
@@ -915,7 +915,7 @@ class TestPromptTemplates:
 
 class TestPipelineCost:
     def test_cost_accumulation(self):
-        from imas_codex.ids.mapping import PipelineCost
+        from iter_codex.ids.mapping import PipelineCost
 
         cost = PipelineCost()
         cost.add("step1", 0.001, 100)
@@ -927,7 +927,7 @@ class TestPipelineCost:
         assert cost.steps["step2"] == pytest.approx(0.003)
 
     def test_empty_cost(self):
-        from imas_codex.ids.mapping import PipelineCost
+        from iter_codex.ids.mapping import PipelineCost
 
         cost = PipelineCost()
         assert cost.total_usd == 0.0
@@ -941,7 +941,7 @@ class TestPipelineCost:
 
 class TestFormatHelpers:
     def test_format_subtree(self, sample_subtree):
-        from imas_codex.ids.mapping import _format_subtree
+        from iter_codex.ids.mapping import _format_subtree
 
         result = _format_subtree(sample_subtree)
         assert "pf_active/coil" in result
@@ -949,7 +949,7 @@ class TestFormatHelpers:
         assert "Geometric centre R" in result
 
     def test_format_sources(self, sample_groups):
-        from imas_codex.ids.mapping import _format_sources
+        from iter_codex.ids.mapping import _format_sources
 
         result = _format_sources(sample_groups)
         assert "pf_coils:group1" in result
@@ -957,14 +957,14 @@ class TestFormatHelpers:
         assert "members=6" in result
 
     def test_format_fields(self, sample_subtree):
-        from imas_codex.ids.mapping import _format_fields
+        from iter_codex.ids.mapping import _format_fields
 
         result = _format_fields(sample_subtree[1:])
         assert "FLT_0D" in result
         assert "[m]" in result
 
     def test_format_empty(self):
-        from imas_codex.ids.mapping import (
+        from iter_codex.ids.mapping import (
             _format_fields,
             _format_sources,
             _format_subtree,
@@ -983,19 +983,19 @@ class TestFormatHelpers:
 class TestGatherContextFields:
     """Test that gather_context returns all enriched fields."""
 
-    @patch("imas_codex.ids.mapping.search_imas_semantic")
+    @patch("iter_codex.ids.mapping.search_imas_semantic")
     def test_context_has_enriched_source_fields(
         self, mock_semantic, mock_gc, sample_groups, sample_subtree
     ):
         """All expected enriched keys present in context signal sources."""
-        from imas_codex.ids.mapping import gather_context
+        from iter_codex.ids.mapping import gather_context
 
         mock_semantic.return_value = sample_subtree
 
         with (
-            patch("imas_codex.ids.mapping.fetch_imas_subtree") as mock_subtree,
-            patch("imas_codex.ids.mapping.query_signal_sources") as mock_qsg,
-            patch("imas_codex.ids.mapping.search_existing_mappings") as mock_sem,
+            patch("iter_codex.ids.mapping.fetch_imas_subtree") as mock_subtree,
+            patch("iter_codex.ids.mapping.query_signal_sources") as mock_qsg,
+            patch("iter_codex.ids.mapping.search_existing_mappings") as mock_sem,
         ):
             mock_subtree.return_value = sample_subtree
             mock_qsg.return_value = sample_groups
@@ -1018,10 +1018,10 @@ class TestGatherContextFields:
 class TestMapSignalsMultiTarget:
     """Test that map_signals supports multi-target (same source → multiple targets)."""
 
-    @patch("imas_codex.ids.mapping.fetch_source_code_refs")
-    @patch("imas_codex.ids.mapping._call_llm")
-    @patch("imas_codex.ids.mapping.fetch_imas_fields")
-    @patch("imas_codex.ids.mapping.fetch_imas_subtree")
+    @patch("iter_codex.ids.mapping.fetch_source_code_refs")
+    @patch("iter_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping.fetch_imas_fields")
+    @patch("iter_codex.ids.mapping.fetch_imas_subtree")
     def test_same_source_multiple_targets(
         self,
         mock_subtree,
@@ -1032,7 +1032,7 @@ class TestMapSignalsMultiTarget:
         sample_groups,
         sample_subtree,
     ):
-        from imas_codex.ids.mapping import PipelineCost, map_signals
+        from iter_codex.ids.mapping import PipelineCost, map_signals
 
         # LLM returns batch with same source mapped to two targets
         multi_target_batch = SignalMappingBatch(
@@ -1095,8 +1095,8 @@ class TestMapSignalsMultiTarget:
 class TestDiscoverAssemblyPatterns:
     """Test that discover_assembly returns valid AssemblyBatch."""
 
-    @patch("imas_codex.ids.mapping.fetch_imas_subtree")
-    @patch("imas_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping.fetch_imas_subtree")
+    @patch("iter_codex.ids.mapping._call_llm")
     def test_returns_assembly_batch(
         self,
         mock_call_llm,
@@ -1107,8 +1107,8 @@ class TestDiscoverAssemblyPatterns:
         sample_section_assignment,
         sample_field_batch,
     ):
-        from imas_codex.ids.mapping import PipelineCost, discover_assembly
-        from imas_codex.ids.models import AssemblyConfig, AssemblyPattern
+        from iter_codex.ids.mapping import PipelineCost, discover_assembly
+        from iter_codex.ids.models import AssemblyConfig, AssemblyPattern
 
         mock_subtree.return_value = sample_subtree
         mock_call_llm.return_value = AssemblyConfig(
@@ -1143,9 +1143,9 @@ class TestDiscoverAssemblyPatterns:
 class TestValidateMappingsCatchesUnitMismatch:
     """Test that validation catches identity transform with unit mismatch."""
 
-    @patch("imas_codex.ids.validation.check_dd_paths")
+    @patch("iter_codex.ids.validation.check_dd_paths")
     def test_identity_transform_unit_mismatch(self, mock_check, mock_gc):
-        from imas_codex.ids.mapping import validate_mappings
+        from iter_codex.ids.mapping import validate_mappings
 
         mock_check.return_value = [
             {"path": "pf_active/coil/element/geometry/rectangle/r", "exists": True}
@@ -1179,7 +1179,7 @@ class TestValidateMappingsCatchesUnitMismatch:
             ],
         )
 
-        with patch("imas_codex.ids.validation.analyze_units") as mock_units:
+        with patch("iter_codex.ids.validation.analyze_units") as mock_units:
             mock_units.return_value = {"compatible": True, "conversion_factor": 0.001}
             result = validate_mappings(
                 "jet", "pf_active", "4.1.1", sections, [field_batch], gc=mock_gc
@@ -1195,9 +1195,9 @@ class TestValidateMappingsCatchesUnitMismatch:
 class TestValidateMappingsCatchesCOCOSMissing:
     """Test that validation catches sign-flip path without COCOS handling."""
 
-    @patch("imas_codex.ids.validation.check_dd_paths")
+    @patch("iter_codex.ids.validation.check_dd_paths")
     def test_sign_flip_path_no_cocos(self, mock_check, mock_gc):
-        from imas_codex.ids.mapping import validate_mappings
+        from iter_codex.ids.mapping import validate_mappings
 
         target = "equilibrium/time_slice/profiles_1d/psi"
         mock_check.return_value = [{"path": target, "exists": True}]
@@ -1229,7 +1229,7 @@ class TestValidateMappingsCatchesCOCOSMissing:
         )
 
         # Patch get_sign_flip_paths to return our target
-        with patch("imas_codex.ids.tools.get_sign_flip_paths") as mock_flip:
+        with patch("iter_codex.ids.tools.get_sign_flip_paths") as mock_flip:
             mock_flip.return_value = [target]
             result = validate_mappings(
                 "jet",
@@ -1250,9 +1250,9 @@ class TestValidateMappingsCatchesCOCOSMissing:
 class TestValidateSameSourceDiffTargetsOk:
     """Test one source → multiple targets produces no warning."""
 
-    @patch("imas_codex.ids.validation.check_dd_paths")
+    @patch("iter_codex.ids.validation.check_dd_paths")
     def test_no_warning_for_multi_target(self, mock_check, mock_gc):
-        from imas_codex.ids.validation import validate_mapping
+        from iter_codex.ids.validation import validate_mapping
 
         mock_check.return_value = [
             {"path": "pf_active/coil/element/geometry/rectangle/r", "exists": True},
@@ -1297,7 +1297,7 @@ class TestIntegrationMappingPipeline:
     @pytest.fixture(autouse=True)
     def _setup_graph_nodes(self):
         """Create prerequisite nodes for integration tests, clean up after."""
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         gc = GraphClient()
         # Create SignalSource, IMASNode, and Facility nodes used by fixtures
@@ -1325,8 +1325,8 @@ class TestIntegrationMappingPipeline:
 
     def test_persist_and_load_roundtrip(self, sample_validated_result):
         """Persist result → load → verify bindings match."""
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.ids.tools import search_existing_mappings
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.ids.tools import search_existing_mappings
 
         gc = GraphClient()
         persist_mapping_result(sample_validated_result, gc=gc)
@@ -1336,8 +1336,8 @@ class TestIntegrationMappingPipeline:
 
     def test_assembly_config_persisted_on_populates(self, sample_validated_result):
         """Assembly config properties appear on POPULATES relationships."""
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.ids.models import (
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.ids.models import (
             AssemblyBatch,
             AssemblyConfig,
             AssemblyPattern,
@@ -1375,7 +1375,7 @@ class TestIntegrationMappingPipeline:
 
 class TestAssemblyPromptRenders:
     def test_assembly_prompt_renders_all_vars(self):
-        from imas_codex.ids.mapping import _render_prompt
+        from iter_codex.ids.mapping import _render_prompt
 
         rendered = _render_prompt(
             "assembly",
@@ -1400,7 +1400,7 @@ class TestPromptsNoSignalMappingTerminology:
         import os
         import re
 
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         prompts_dir = PROMPTS_DIR / "mapping"
         # Match "field mapping" but not when preceded by "Validated" or
@@ -1421,7 +1421,7 @@ class TestPromptsNoSignalMappingTerminology:
 class TestStaticFirstOrdering:
     def test_static_in_system_prompt_dynamic_in_user_prompt(self):
         """Static instructions are in the system prompt file, dynamic in user."""
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         system = (PROMPTS_DIR / "mapping" / "signal_mapping_system.md").read_text()
         user = (PROMPTS_DIR / "mapping" / "signal_mapping.md").read_text()
@@ -1440,7 +1440,7 @@ class TestStaticFirstOrdering:
 
     def test_all_system_prompts_are_static(self):
         """Verify none of the system prompt files contain Jinja2 variables."""
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         for name in [
             "signal_mapping_system.md",
@@ -1458,13 +1458,13 @@ class TestStaticFirstOrdering:
 
 class TestMapRunCostLimit:
     @pytest.mark.integration
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.ids.tools.discover_mappable_ids")
-    @patch("imas_codex.ids.workers.run_mapping_engine", new_callable=AsyncMock)
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.ids.tools.discover_mappable_ids")
+    @patch("iter_codex.ids.workers.run_mapping_engine", new_callable=AsyncMock)
     def test_cost_limit_flag_accepted(
         self, mock_engine, mock_discover, mock_gc, sample_validated_result
     ):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         mock_discover.return_value = {
             "available_domains": ["magnetics"],
@@ -1490,13 +1490,13 @@ class TestMapRunCostLimit:
 
 class TestMapRunTimeLimit:
     @pytest.mark.integration
-    @patch("imas_codex.graph.client.GraphClient")
-    @patch("imas_codex.ids.tools.discover_mappable_ids")
-    @patch("imas_codex.ids.workers.run_mapping_engine", new_callable=AsyncMock)
+    @patch("iter_codex.graph.client.GraphClient")
+    @patch("iter_codex.ids.tools.discover_mappable_ids")
+    @patch("iter_codex.ids.workers.run_mapping_engine", new_callable=AsyncMock)
     def test_time_flag_accepted(
         self, mock_engine, mock_discover, mock_gc, sample_validated_result
     ):
-        from imas_codex.cli.map import map_cmd
+        from iter_codex.cli.map import map_cmd
 
         mock_discover.return_value = {
             "available_domains": ["magnetics"],
@@ -1620,7 +1620,7 @@ class TestCoverageThreshold:
     """Test the coverage threshold enforcement."""
 
     def test_import(self):
-        from imas_codex.ids.validation import (
+        from iter_codex.ids.validation import (
             COVERAGE_ERROR_THRESHOLD,
             COVERAGE_WARNING_THRESHOLD,
             check_coverage_threshold,
@@ -1630,7 +1630,7 @@ class TestCoverageThreshold:
         assert COVERAGE_ERROR_THRESHOLD >= 0
 
     def test_check_returns_list(self):
-        from imas_codex.ids.validation import check_coverage_threshold
+        from iter_codex.ids.validation import check_coverage_threshold
 
         # With mock gc that returns no fields, coverage = 0%
         gc = MagicMock()
@@ -1643,7 +1643,7 @@ class TestMappingDiscoveryState:
     """Test the MappingDiscoveryState from workers.py."""
 
     def test_create(self):
-        from imas_codex.ids.workers import MappingDiscoveryState
+        from iter_codex.ids.workers import MappingDiscoveryState
 
         state = MappingDiscoveryState(
             facility="jet",
@@ -1657,7 +1657,7 @@ class TestMappingDiscoveryState:
         assert state.total_cost == 0.0
 
     def test_phases_initially_not_done(self):
-        from imas_codex.ids.workers import MappingDiscoveryState
+        from iter_codex.ids.workers import MappingDiscoveryState
 
         state = MappingDiscoveryState(facility="jet", target_ids_list=["pf_active"])
         assert not state.context_phase.done
@@ -1666,7 +1666,7 @@ class TestMappingDiscoveryState:
         assert not state.validate_phase.done
 
     def test_phase_mark_done(self):
-        from imas_codex.ids.workers import MappingDiscoveryState
+        from iter_codex.ids.workers import MappingDiscoveryState
 
         state = MappingDiscoveryState(facility="jet", target_ids_list=["pf_active"])
         state.context_phase.mark_done()
@@ -1674,7 +1674,7 @@ class TestMappingDiscoveryState:
         assert not state.assign_phase.done
 
     def test_should_stop_when_requested(self):
-        from imas_codex.ids.workers import MappingDiscoveryState
+        from iter_codex.ids.workers import MappingDiscoveryState
 
         state = MappingDiscoveryState(facility="jet", target_ids_list=["pf_active"])
         assert not state.should_stop()
@@ -1682,7 +1682,7 @@ class TestMappingDiscoveryState:
         assert state.should_stop()
 
     def test_should_stop_when_budget_exhausted(self):
-        from imas_codex.ids.workers import MappingDiscoveryState
+        from iter_codex.ids.workers import MappingDiscoveryState
 
         state = MappingDiscoveryState(
             facility="jet",
@@ -1713,7 +1713,7 @@ class TestWorkerImports:
     """Test that all worker components import correctly."""
 
     def test_worker_functions_importable(self):
-        from imas_codex.ids.workers import (
+        from iter_codex.ids.workers import (
             assign_worker,
             claim_sources_for_mapping,
             context_worker,
@@ -1736,7 +1736,7 @@ class TestSemanticCandidatesInPrompt:
     """Test that semantic_candidates renders in signal_mapping prompt."""
 
     def test_semantic_candidates_placeholder(self):
-        from imas_codex.ids.mapping import _render_prompt
+        from iter_codex.ids.mapping import _render_prompt
 
         rendered = _render_prompt(
             "signal_mapping",

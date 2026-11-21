@@ -20,13 +20,13 @@ import asyncio
 
 import pytest
 
-from imas_codex.discovery.base.llm import (
+from iter_codex.discovery.base.llm import (
     _ActivityState,
     _advance_cadence,
     _heartbeat_material_change,
     _heartbeat_should_warn,
 )
-from imas_codex.discovery.base.rate_governor import (
+from iter_codex.discovery.base.rate_governor import (
     AdaptiveConcurrencyGovernor,
     get_rate_governor,
     reset_rate_governor,
@@ -531,7 +531,7 @@ def _snap(in_flight, failed=0):
 async def test_heartbeat_loop_advertises_next_beat_and_idle_trailer(
     monkeypatch, caplog
 ):
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     intervals: list[float] = []
 
@@ -548,7 +548,7 @@ async def test_heartbeat_loop_advertises_next_beat_and_idle_trailer(
     monkeypatch.setattr(llm, "_ACTIVITY", fake)
     monkeypatch.setattr(llm, "get_rate_governor", lambda: _Gov())
 
-    with caplog.at_level("INFO", logger="imas_codex.discovery.base.llm"):
+    with caplog.at_level("INFO", logger="iter_codex.discovery.base.llm"):
         await llm._heartbeat_loop(
             15.0, max_interval=120.0, fast_beats=3, backoff_factor=2.0
         )
@@ -567,7 +567,7 @@ async def test_heartbeat_loop_advertises_next_beat_and_idle_trailer(
 
 
 async def test_heartbeat_loop_backs_off_when_steady(monkeypatch, caplog):
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     async def fake_sleep(secs):
         pass
@@ -582,7 +582,7 @@ async def test_heartbeat_loop_backs_off_when_steady(monkeypatch, caplog):
     monkeypatch.setattr(llm, "_ACTIVITY", fake)
     monkeypatch.setattr(llm, "get_rate_governor", lambda: _Gov())
 
-    with caplog.at_level("INFO", logger="imas_codex.discovery.base.llm"):
+    with caplog.at_level("INFO", logger="iter_codex.discovery.base.llm"):
         await llm._heartbeat_loop(
             15.0, max_interval=120.0, fast_beats=3, backoff_factor=2.0
         )
@@ -617,10 +617,10 @@ def test_singleton_is_stable():
 
 
 def test_singleton_reads_settings(monkeypatch):
-    monkeypatch.setenv("IMAS_CODEX_RATE_GOVERNOR_MAX_CEILING", "16")
+    monkeypatch.setenv("ITER_CODEX_RATE_GOVERNOR_MAX_CEILING", "16")
     reset_rate_governor()
     gov = get_rate_governor()
     assert gov.ceiling == 16
     reset_rate_governor()
-    monkeypatch.delenv("IMAS_CODEX_RATE_GOVERNOR_MAX_CEILING", raising=False)
+    monkeypatch.delenv("ITER_CODEX_RATE_GOVERNOR_MAX_CEILING", raising=False)
     reset_rate_governor()

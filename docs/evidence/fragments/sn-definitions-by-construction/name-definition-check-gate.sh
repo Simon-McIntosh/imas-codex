@@ -10,7 +10,7 @@ export UV_NO_SYNC=1
 export UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
 export PYTHONPATH="$W"
 
-SEAT=imas_codex/standard_names/review/name_definition_seat.py
+SEAT=iter_codex/standard_names/review/name_definition_seat.py
 TESTS="tests/standard_names/test_name_definition_agreement.py tests/standard_names/test_review_checks.py"
 
 echo "# revision: $(git rev-parse HEAD)"

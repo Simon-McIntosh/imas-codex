@@ -20,17 +20,17 @@ pytestmark = pytest.mark.graph
 def _use_production_embedder():
     """Override embedding config to match graph vector indexes."""
     prior = {
-        "IMAS_CODEX_EMBEDDING_MODEL": os.environ.get("IMAS_CODEX_EMBEDDING_MODEL"),
-        "IMAS_CODEX_EMBEDDING_LOCATION": os.environ.get(
-            "IMAS_CODEX_EMBEDDING_LOCATION"
+        "ITER_CODEX_EMBEDDING_MODEL": os.environ.get("ITER_CODEX_EMBEDDING_MODEL"),
+        "ITER_CODEX_EMBEDDING_LOCATION": os.environ.get(
+            "ITER_CODEX_EMBEDDING_LOCATION"
         ),
-        "IMAS_CODEX_EMBEDDING_DIMENSION": os.environ.get(
-            "IMAS_CODEX_EMBEDDING_DIMENSION"
+        "ITER_CODEX_EMBEDDING_DIMENSION": os.environ.get(
+            "ITER_CODEX_EMBEDDING_DIMENSION"
         ),
     }
-    os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = "Qwen/Qwen3-Embedding-0.6B"
-    os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = "titan"
-    os.environ["IMAS_CODEX_EMBEDDING_DIMENSION"] = "256"
+    os.environ["ITER_CODEX_EMBEDDING_MODEL"] = "Qwen/Qwen3-Embedding-0.6B"
+    os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = "titan"
+    os.environ["ITER_CODEX_EMBEDDING_DIMENSION"] = "256"
     yield
     for key, value in prior.items():
         if value is None:
@@ -42,7 +42,7 @@ def _use_production_embedder():
 @pytest.fixture(scope="module")
 def search_tool(_use_production_embedder):
     """Live GraphSearchTool instance."""
-    from imas_codex.llm.server import _get_imas_tools
+    from iter_codex.llm.server import _get_imas_tools
 
     try:
         tools = _get_imas_tools(semantic_search=True)

@@ -24,16 +24,16 @@ def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
     """Call write_standard_names with a mocked GraphClient."""
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC,
         patch(
-            "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+            "iter_codex.standard_names.protection._fetch_catalog_edit_names",
             return_value=set(),
         ),
     ):
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -342,7 +342,7 @@ class TestWriteStandardNames:
 
     def test_write_standard_names_called_with_all_fields(self) -> None:
         """write_standard_names receives all populated fields without losing any."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_standard_names,
         )
 
@@ -371,10 +371,10 @@ class TestWriteStandardNames:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+                "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
             ) as MockGC,
             patch(
-                "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+                "iter_codex.standard_names.protection._fetch_catalog_edit_names",
                 return_value=set(),
             ),
         ):

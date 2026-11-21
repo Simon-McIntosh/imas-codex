@@ -16,9 +16,9 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   # ACR image name is always the upstream path so Azure picks up fork RC
   # builds. GHCR uses IMAGE_NAME (per-fork) — each fork has its own GHCR.
-  ACR_IMAGE_NAME: iterorganization/imas-codex
+  ACR_IMAGE_NAME: iterorganization/iter-codex
   # Graph OCI artifacts: try the repo owner's registry first (where
-  # `imas-codex release` pushes them), fall back to the upstream org
+  # `iter-codex release` pushes them), fall back to the upstream org
   # registry for forks that haven't pushed their own graph yet.
   GRAPH_REGISTRY: ghcr.io/${{ github.repository_owner }}
   GRAPH_REGISTRY_FALLBACK: ghcr.io/iterorganization
@@ -40,7 +40,7 @@ jobs:
           - 7474:7474
           - 7687:7687
         env:
-          NEO4J_AUTH: neo4j/imas-codex
+          NEO4J_AUTH: neo4j/iter-codex
           NEO4J_PLUGINS: '["apoc"]'
           NEO4J_server_memory_heap_initial__size: 512m
           NEO4J_server_memory_heap_max__size: 1G
@@ -70,7 +70,7 @@ jobs:
       - name: Resolve graph tag
         id: graph-tag
         run: |
-          IMAS_PACKAGE="imas-codex-graph"
+          IMAS_PACKAGE="iter-codex-graph"
           OWNER_REGISTRY=$(echo "${{ env.GRAPH_REGISTRY }}" | tr '[:upper:]' '[:lower:]')
           FALLBACK_REGISTRY="${{ env.GRAPH_REGISTRY_FALLBACK }}"
 
@@ -118,7 +118,7 @@ jobs:
         if: steps.graph-tag.outputs.imas-tag != 'none'
         run: |
           REGISTRY="${{ steps.graph-tag.outputs.graph-registry }}"
-          ARTIFACT="${REGISTRY}/imas-codex-graph:${{ steps.graph-tag.outputs.imas-tag }}"
+          ARTIFACT="${REGISTRY}/iter-codex-graph:${{ steps.graph-tag.outputs.imas-tag }}"
           echo "Pulling: ${ARTIFACT}"
           mkdir -p /tmp/graph-dump
           oras pull "${ARTIFACT}" -o /tmp/graph-dump --allow-path-traversal
@@ -196,14 +196,14 @@ jobs:
         if: steps.graph-tag.outputs.imas-tag != 'none'
         run: |
           NEO4J_CONTAINER=$(docker ps -q --filter "ancestor=neo4j:2026.01.4-community" | head -1)
-          docker exec "${NEO4J_CONTAINER}" neo4j-admin dbms set-initial-password imas-codex 2>/dev/null || true
+          docker exec "${NEO4J_CONTAINER}" neo4j-admin dbms set-initial-password iter-codex 2>/dev/null || true
 
       - name: Verify graph is loaded
         if: steps.graph-tag.outputs.imas-tag != 'none'
         run: |
           NEO4J_CONTAINER=$(docker ps -q --filter "ancestor=neo4j:2026.01.4-community" | head -1)
           docker exec "${NEO4J_CONTAINER}" cypher-shell \
-            -u neo4j -p imas-codex \
+            -u neo4j -p iter-codex \
             "MATCH (n) RETURN count(n) AS nodes, labels(n)[0] AS label ORDER BY nodes DESC LIMIT 10"
 
       - name: Install uv
@@ -232,7 +232,7 @@ jobs:
         continue-on-error: true
         run: |
           uv run python -c "
-          from imas_codex.graph.client import GraphClient
+          from iter_codex.graph.client import GraphClient
           with GraphClient() as gc:
               gc.initialize_schema()
               print('Schema initialized')
@@ -240,7 +240,7 @@ jobs:
         env:
           NEO4J_URI: bolt://localhost:7687
           NEO4J_USERNAME: neo4j
-          NEO4J_PASSWORD: imas-codex
+          NEO4J_PASSWORD: iter-codex
 
       - name: Run graph quality tests
         if: steps.graph-tag.outputs.imas-tag != 'none'
@@ -253,8 +253,8 @@ jobs:
           CI: true
           NEO4J_URI: bolt://localhost:7687
           NEO4J_USERNAME: neo4j
-          NEO4J_PASSWORD: imas-codex
-          IMAS_CODEX_GRAPH_LOCATION: local
+          NEO4J_PASSWORD: iter-codex
+          ITER_CODEX_GRAPH_LOCATION: local
 
       - name: Upload test results
         if: always() && steps.graph-tag.outputs.imas-tag != 'none'
@@ -298,10 +298,10 @@ jobs:
         with:
           context: .
           load: true
-          tags: imas-codex:smoke-test
+          tags: iter-codex:smoke-test
           build-args: |
             GRAPH_TAG=${{ needs.graph-quality.outputs.graph-tag-imas }}
-            GRAPH_PACKAGE=imas-codex-graph-dd
+            GRAPH_PACKAGE=iter-codex-graph-dd
             GHCR_REGISTRY=${{ needs.graph-quality.outputs.graph-registry }}
           secrets: |
             GHCR_TOKEN=${{ secrets.GHCR_TOKEN }}
@@ -313,7 +313,7 @@ jobs:
             --name smoke-test \
             -p 8000:8000 \
             -e OPENROUTER_API_KEY=dummy \
-            imas-codex:smoke-test
+            iter-codex:smoke-test
           echo "Container started, waiting for services..."
 
       - name: Wait for health check
@@ -335,7 +335,7 @@ jobs:
 
       - name: Test version endpoint
         run: |
-          VERSION=$(docker exec smoke-test imas-codex --version 2>/dev/null || echo "failed")
+          VERSION=$(docker exec smoke-test iter-codex --version 2>/dev/null || echo "failed")
           echo "Container version: ${VERSION}"
           if [ "$VERSION" = "failed" ]; then
             echo "❌ Version check failed"
@@ -425,7 +425,7 @@ jobs:
       matrix:
         graph_variant:
           - name: dd-only
-            package: imas-codex-graph-dd
+            package: iter-codex-graph-dd
             suffix: ""
     permissions:
       contents: read
@@ -604,7 +604,7 @@ jobs:
           echo "Testing image: $IMAGE expecting version: $EXPECTED"
           docker pull "$IMAGE"
           # Bypass entrypoint (which starts Neo4j) and call CLI directly
-          ACTUAL=$(docker run --rm --entrypoint imas-codex "$IMAGE" --version || true)
+          ACTUAL=$(docker run --rm --entrypoint iter-codex "$IMAGE" --version || true)
           echo "Version reported by image: $ACTUAL"
           if [ -z "$ACTUAL" ]; then
             echo "ERROR: No version output from CLI" >&2
@@ -626,7 +626,7 @@ jobs:
           echo "Testing image: $IMAGE expecting version: $EXPECTED"
           docker pull "$IMAGE"
           # Bypass entrypoint (which starts Neo4j) and call CLI directly
-          ACTUAL=$(docker run --rm --entrypoint imas-codex "$IMAGE" --version || true)
+          ACTUAL=$(docker run --rm --entrypoint iter-codex "$IMAGE" --version || true)
           echo "Version reported by image: $ACTUAL"
           if [ -z "$ACTUAL" ]; then
             echo "ERROR: No version output from CLI" >&2

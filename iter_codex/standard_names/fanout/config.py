@@ -1,0 +1,272 @@
+"""Configuration for structured fan-out.
+
+Reads ``[tool.iter-codex.sn-fanout]`` from ``pyproject.toml`` into a
+:class:`FanoutSettings` Pydantic model and exposes :data:`CATALOG_VERSION`
+— a sha256 over the **fully rendered proposer prompt body** — for
+the literal ``catalog_version=<hex>`` line at the top
+of the proposer system prompt.
+
+Hash semantics
+--------------
+
+The hash deliberately covers the rendered prompt body, not the schema
+dict, because:
+
+- ``Pydantic.model_json_schema()`` output is not stable across minor
+  versions (e.g. ``definitions`` -> ``$defs``); a dependency bump would
+  silently invalidate caches on the wrong axis.
+- The proposer prompt's help text is not in the schema dict; help-text
+  edits would change the actual prompt prefix without flipping a
+  schema-only hash.
+
+Sampling parameters (e.g. ``proposer-temperature``) are *not* part of
+the hash — caching covers the prompt, not the sampling distribution.
+"""
+
+from __future__ import annotations
+
+import hashlib
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic import BaseModel, Field
+
+from iter_codex.settings import _load_pyproject_settings
+
+# =====================================================================
+# Settings model
+# =====================================================================
+
+
+class FanoutSettings(BaseModel):
+    """Pydantic-validated settings for structured fan-out.
+
+    All fields default to documented values so an empty
+    ``[tool.iter-codex.sn-fanout]`` block yields a fully usable
+    (default-disabled) config.
+    """
+
+    enabled: bool = False
+    """Master switch.  Default off until rolled out."""
+
+    max_fan_degree: int = 3
+    """Hard cap on proposer query count (parse-time bound)."""
+
+    function_timeout_s: float = 5.0
+    """Per-runner ``asyncio.wait_for`` timeout."""
+
+    total_timeout_s: float = 12.0
+    """Whole-gather ``asyncio.wait_for`` timeout."""
+
+    result_hit_cap: int = 8
+    """Per-result hit cap applied by the renderer."""
+
+    evidence_token_cap_baseline: int = 2000
+    """Total evidence-block token cap on baseline (Sonnet/Haiku) cycles."""
+
+    evidence_token_cap_escalation: int = 800
+    """Total evidence-block token cap on Opus-escalation cycles."""
+
+    proposer_model: str = "local/deepseek-v4.1-flash"
+    """Proposer LLM model identifier.
+
+    Defaults to the locally-hosted DeepSeek flash endpoint the ambix router
+    serves, so the full SN pipeline stays zero-cost end to end.  Override
+    per-run via ``[tool.iter-codex.sn-fanout].proposer-model`` (e.g. set it to
+    ``openrouter/google/gemini-3.8-flash`` when willing to spend budget on a
+    higher-capability planner).
+    """
+
+    proposer_temperature: float = 0.1
+    """Proposer sampling temperature (low for output stability)."""
+
+    fanout_cost_estimate_baseline: float = 0.005
+    """Baseline parent-lease pad ($) for fan-out cycles."""
+
+    fanout_cost_estimate_escalation: float = 0.05
+    """Escalation parent-lease pad ($) for fan-out cycles."""
+
+    fanout_max_charge_per_cycle_baseline: float = 0.02
+    """Hard cap on cumulative fan-out sub-event spend (baseline)."""
+
+    fanout_max_charge_per_cycle_escalation: float = 0.10
+    """Hard cap on cumulative fan-out sub-event spend (escalation)."""
+
+    refine_trigger_check_threshold: float = Field(default=0.5, ge=0.0, le=1.0)
+    """Minimum failure probability for a retrieval check to trigger fan-out."""
+
+    refine_fanout_arm_percent: int = 50
+    """Within-cohort A/B on-arm percentage.
+
+    ``50`` (default) is a balanced 50/50 split; ``0`` forces every
+    trigger-eligible item to the off arm (kill switch); ``100`` forces
+    every item to the on arm (full rollout).  Used by
+    :func:`iter_codex.standard_names.fanout.trigger.assign_arm`.
+    """
+
+    sites: dict[str, bool] = Field(
+        default_factory=lambda: {"refine_name": False},
+        description="Per-site enable flags (under [tool.iter-codex.sn-fanout.sites]).",
+    )
+
+    def cap_for_charge(self, *, escalate: bool) -> float:
+        """Return the per-cycle fan-out spend cap for the cycle's tier."""
+        return (
+            self.fanout_max_charge_per_cycle_escalation
+            if escalate
+            else self.fanout_max_charge_per_cycle_baseline
+        )
+
+    def evidence_token_cap_for(self, *, escalate: bool) -> int:
+        """Return the renderer evidence-token cap for the cycle's tier."""
+        return (
+            self.evidence_token_cap_escalation
+            if escalate
+            else self.evidence_token_cap_baseline
+        )
+
+    def cost_estimate_for(self, *, escalate: bool) -> float:
+        """Return the parent-lease pad amount for the cycle's tier."""
+        return (
+            self.fanout_cost_estimate_escalation
+            if escalate
+            else self.fanout_cost_estimate_baseline
+        )
+
+
+# =====================================================================
+# Settings loader
+# =====================================================================
+
+
+def _kebab_to_snake(key: str) -> str:
+    """Convert pyproject TOML kebab-case keys to Pydantic snake_case."""
+    return key.replace("-", "_")
+
+
+def load_settings() -> FanoutSettings:
+    """Load :class:`FanoutSettings` from ``[tool.iter-codex.sn-fanout]``.
+
+    Missing or empty section -> all defaults (fan-out disabled).  Unknown
+    keys are silently ignored so plan revisions can add new fields
+    without breaking older configs.
+    """
+    raw = _load_pyproject_settings()
+    section = raw.get("sn-fanout", {})
+    if not isinstance(section, dict):
+        return FanoutSettings()
+
+    sites = section.get("sites", {}) or {}
+    if not isinstance(sites, dict):
+        sites = {}
+
+    converted: dict[str, object] = {}
+    for k, v in section.items():
+        if k == "sites":
+            continue
+        snake = _kebab_to_snake(k)
+        if snake in FanoutSettings.model_fields:
+            converted[snake] = v
+
+    converted["sites"] = {str(k): bool(v) for k, v in sites.items()}
+    return FanoutSettings(**converted)
+
+
+# =====================================================================
+# CATALOG_VERSION — sha256 over the rendered proposer-prompt body
+# =====================================================================
+
+
+_PROMPT_NAME = "sn/fanout_propose"
+
+
+def _read_proposer_prompt_body() -> str:
+    """Return the proposer prompt body (everything below the version line).
+
+    The body is the post-frontmatter proposer system prompt **excluding**
+    the literal ``catalog_version=<hex>`` line that we prepend at
+    runtime.  The body — not the schema dict — is what is hashed,
+    for the reasons given in the module docstring.
+
+    Implementation note: we read directly from
+    :func:`iter_codex.llm.prompt_loader.load_prompts` (which strips
+    frontmatter) but do *not* call :func:`render_prompt`, so the hash
+    is independent of unrelated schema-context provider changes.
+    """
+    from iter_codex.llm.prompt_loader import load_prompts
+
+    prompts = load_prompts()
+    if _PROMPT_NAME not in prompts:
+        raise KeyError(
+            f"Fan-out proposer prompt {_PROMPT_NAME!r} missing from prompts dir."
+        )
+    return prompts[_PROMPT_NAME].content
+
+
+@lru_cache(maxsize=1)
+def _compute_catalog_version() -> str:
+    """Compute the sha256 of the proposer-prompt body."""
+    body = _read_proposer_prompt_body()
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
+
+
+CATALOG_VERSION: str = _compute_catalog_version()
+"""Sha256 of the proposer-prompt body.
+
+Computed once at module import via :func:`_compute_catalog_version`;
+the literal first line of the rendered system prompt is::
+
+    catalog_version=<CATALOG_VERSION>
+
+so any change to the body flips this hash and busts every cached
+prompt prefix.
+"""
+
+
+def render_proposer_system_prompt() -> str:
+    """Return the proposer system prompt with the version line prepended.
+
+    Output shape::
+
+        catalog_version=<sha256>
+        <body>
+
+    Used by :func:`iter_codex.standard_names.fanout.dispatcher.propose`.
+    """
+    body = _read_proposer_prompt_body()
+    return f"catalog_version={_compute_catalog_version()}\n{body}"
+
+
+def _reset_catalog_version_cache() -> None:
+    """Clear the cached catalog version (test-only).
+
+    The proposer prompt is static at runtime; this hook exists solely
+    so ``test_catalog_version_hash_covers_body`` can mutate the prompt
+    file and observe the hash flipping.
+    """
+    _compute_catalog_version.cache_clear()
+    # Also clear the prompt-loader's own cache so the test sees the
+    # newly-written prompt body on the next read.
+    from iter_codex.llm.prompt_loader import load_prompts
+
+    if hasattr(load_prompts, "cache_clear"):
+        load_prompts.cache_clear()  # type: ignore[attr-defined]
+    global CATALOG_VERSION
+    CATALOG_VERSION = _compute_catalog_version()
+
+
+def _prompt_path(name: str = _PROMPT_NAME) -> Path:
+    """Return the on-disk path for a prompt (test helper)."""
+    from iter_codex.llm.prompt_loader import PROMPTS_DIR
+
+    return Path(PROMPTS_DIR) / f"{name}.md"
+
+
+__all__ = [
+    "CATALOG_VERSION",
+    "FanoutSettings",
+    "load_settings",
+    "render_proposer_system_prompt",
+    "_compute_catalog_version",
+    "_reset_catalog_version_cache",
+]

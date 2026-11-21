@@ -28,7 +28,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 try:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 except ImportError:  # pragma: no cover
     GraphClient = None  # type: ignore[assignment,misc]
 
@@ -409,11 +409,11 @@ def _build_sn_run_cmd(
     min_score: float | None,
     dry_run: bool,
 ) -> list[str]:
-    """Build the ``uv run imas-codex sn run`` subprocess command."""
+    """Build the ``uv run iter-codex sn run`` subprocess command."""
     cmd = [
         sys.executable,
         "-m",
-        "imas_codex",
+        "iter_codex",
         "sn",
         "run",
         "--source",

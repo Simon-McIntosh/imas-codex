@@ -1,4 +1,4 @@
-from imas_codex.graph import dd_graph_ops
+from iter_codex.graph import dd_graph_ops
 
 
 class _FakeGraphClient:

@@ -4,16 +4,16 @@ Driver for the ``ssog-segment-selection-measure`` node.  It loads golden A
 (``golden-name-acceptable.json``) and the human ``sn edit`` rename targets from
 the live graph, resolves each target name to its DD source through the name's
 ``PRODUCED_NAME`` provenance, runs Jev's selection
-(:func:`imas_codex.standard_names.segment_selection.select_segments`) once per
+(:func:`iter_codex.standard_names.segment_selection.select_segments`) once per
 source, and reports the figures the plan fixes before the run: exact-name match,
 per-slot accuracy, family agreement, the composer's figures, cost per name, and
 the composer-against-Jev disagreement AUC with its bootstrap interval.
 
-Metrics drawn from :mod:`imas_codex.discovery.base.evaluation`:
+Metrics drawn from :mod:`iter_codex.discovery.base.evaluation`:
 ``load_labelled_fixture`` (the golden A cohort), ``paired_auc`` and
 ``bootstrap_interval`` (the cross-check separation), and
 ``cost_latency_summary`` (cost and latency).  Per-slot accuracy delegates its
-slot comparison to :func:`imas_codex.standard_names.benchmark_roles.exact_match_accuracy`,
+slot comparison to :func:`iter_codex.standard_names.benchmark_roles.exact_match_accuracy`,
 the project's own match, rather than re-implementing it.  The remaining figures
 are driver-local helpers: exact-name match (:func:`_figures`), family agreement
 (:func:`_family_agreement`), and the composer's agreement and per-slot accuracy
@@ -48,7 +48,7 @@ BOUNDARY_FAMILY_SIGNATURE = "_density_at_plasma_boundary"
 
 
 def _load_golden() -> list[dict[str, Any]]:
-    from imas_codex.discovery.base.evaluation import load_labelled_fixture
+    from iter_codex.discovery.base.evaluation import load_labelled_fixture
 
     return load_labelled_fixture(str(GOLDEN))
 
@@ -60,7 +60,7 @@ def _human_edit_targets() -> list[dict[str, Any]]:
     (what the human replaced), so it is not circular the way golden A's own
     positives are.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         rows = gc.query(
@@ -82,7 +82,7 @@ def _human_edit_targets() -> list[dict[str, Any]]:
 
 def _resolve_sources(names: list[str], batch: int = 200) -> dict[str, dict[str, Any]]:
     """One bounded, indexed read per batch: name -> its first DD source."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     out: dict[str, dict[str, Any] | None] = {}
     with GraphClient() as gc:
@@ -119,7 +119,7 @@ def _source_doc(src: dict[str, Any] | None) -> dict[str, Any] | None:
 
 def _gold_segments(name: str) -> dict[str, str | None] | None:
     """Parse a canonical name into its per-slot gold tokens, or None if it does not parse."""
-    from imas_codex.standard_names.grammar_adapter import parse_canonical_name
+    from iter_codex.standard_names.grammar_adapter import parse_canonical_name
 
     try:
         ir = parse_canonical_name(name).ir
@@ -151,7 +151,7 @@ def _agreement(a: dict[str, str | None], b: dict[str, str | None]) -> float:
 async def _select_chunk(
     sources: list[dict[str, Any]], concurrency: int
 ) -> tuple[list[Any], float, float]:
-    from imas_codex.standard_names.segment_selection import select_segments
+    from iter_codex.standard_names.segment_selection import select_segments
 
     t0 = time.monotonic()
     run = await select_segments(sources, concurrency=concurrency)
@@ -309,14 +309,14 @@ def _slot_accuracy(
     """Per-slot accuracy over (predicted, expected) segment-dict pairs.
 
     Delegates the slot comparison to
-    :func:`imas_codex.standard_names.benchmark_roles.exact_match_accuracy`, the
+    :func:`iter_codex.standard_names.benchmark_roles.exact_match_accuracy`, the
     project's own match, rather than re-implementing it.  Its comparison is
     ``predicted.get(slot) == expected[slot]``, so a predicted ``None`` equals no
     token.  An absent prediction is therefore forwarded as
     :data:`_MISSING_PREDICTION`, not as ``None``: forwarding ``None`` would let
     an unparseable spelling match every slot whose gold token is itself empty.
     """
-    from imas_codex.standard_names.benchmark_roles import exact_match_accuracy
+    from iter_codex.standard_names.benchmark_roles import exact_match_accuracy
 
     if not pairs:
         return dict.fromkeys(SLOTS, 0.0)
@@ -418,7 +418,7 @@ def _family_agreement(records: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _cross_check(records: list[dict[str, Any]]) -> dict[str, Any]:
-    from imas_codex.discovery.base.evaluation import bootstrap_interval, paired_auc
+    from iter_codex.discovery.base.evaluation import bootstrap_interval, paired_auc
 
     usable = [
         r
@@ -459,7 +459,7 @@ def _aggregate(
     excluded_no_parse: int,
     cohort_size: int,
 ) -> dict[str, Any]:
-    from imas_codex.discovery.base.evaluation import cost_latency_summary
+    from iter_codex.discovery.base.evaluation import cost_latency_summary
 
     positives = [r for r in records if r["kind"] == "golden" and r["label"] == 1]
     edits = [r for r in records if r["kind"] == "edit"]

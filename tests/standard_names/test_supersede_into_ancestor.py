@@ -11,13 +11,13 @@ from unittest.mock import patch
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_audits as _owning_graph_audits,
     graph_supersession as _owning_graph_supersession,
 )
-from imas_codex.standard_names.graph_store.graph_supersession import (
+from iter_codex.standard_names.graph_store.graph_supersession import (
     SupersedeIntoAncestorConflict,
     supersede_into_ancestor,
 )
@@ -257,7 +257,7 @@ def test_absent_upstream_stale_source_detaches_and_stays_stale(
 
         assert applied["sources_stale_detached"] == 1
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as graph_client:
             graph_client.return_value.__enter__.return_value = client
             graph_client.return_value.__exit__.return_value = False
@@ -401,7 +401,7 @@ def test_source_revalidation_refusal_rolls_back(
         )
         with (
             patch(
-                "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+                "iter_codex.standard_names.attachment_audit.guard_source_pairings",
                 return_value=rejected,
             ),
             pytest.raises(SupersedeIntoAncestorConflict, match="re-validation failed"),
@@ -485,7 +485,7 @@ def test_concurrent_authority_drift_invalidates_apply(
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_supersession._lock_ancestor_supersession_authority",
+                "iter_codex.standard_names.graph_store.graph_supersession._lock_ancestor_supersession_authority",
                 side_effect=drift_then_lock,
             ),
             pytest.raises(

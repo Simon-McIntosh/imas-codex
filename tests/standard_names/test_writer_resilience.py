@@ -18,7 +18,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.budget import (
+from iter_codex.standard_names.budget import (
     _WRITER_CALL_TIMEOUT,
     _WRITER_HEARTBEAT_SEC,
     _WRITER_MAX_RETRIES,
@@ -62,10 +62,10 @@ async def test_write_single_timeout_then_succeed():
     # Use a short timeout for test speed
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
+            "iter_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
             side_effect=_mock_record,
         ),
-        patch("imas_codex.standard_names.budget._WRITER_CALL_TIMEOUT", 1.0),
+        patch("iter_codex.standard_names.budget._WRITER_CALL_TIMEOUT", 1.0),
     ):
         # Charge an event — goes through the writer loop
         lease = mgr.reserve(1.0, phase="test")
@@ -97,7 +97,7 @@ async def test_write_single_always_fails():
 
     await mgr.start()
     with patch(
-        "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
+        "iter_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
         side_effect=_mock_record,
     ):
         lease = mgr.reserve(1.0, phase="test")
@@ -139,7 +139,7 @@ async def test_writer_crash_recreation():
 
     # First enqueue — should detect dead writer and recreate
     with patch(
-        "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
+        "iter_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
     ):
         mgr._enqueue_write(0.001, _EVENT, 0.0)
 
@@ -152,7 +152,7 @@ async def test_writer_crash_recreation():
 
     # Second enqueue should NOT trigger recreation (writer is alive)
     with patch(
-        "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
+        "iter_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
     ):
         mgr._enqueue_write(0.001, _EVENT, 0.0)
 
@@ -172,8 +172,8 @@ async def test_heartbeat_fires_debug_when_idle(caplog):
 
     # Patch heartbeat interval AND ensure DEBUG logs are captured
     with (
-        patch("imas_codex.standard_names.budget._WRITER_HEARTBEAT_SEC", 0.1),
-        caplog.at_level(logging.DEBUG, logger="imas_codex.standard_names.budget"),
+        patch("iter_codex.standard_names.budget._WRITER_HEARTBEAT_SEC", 0.1),
+        caplog.at_level(logging.DEBUG, logger="iter_codex.standard_names.budget"),
     ):
         await mgr.start()
         # Let the writer idle for a bit
@@ -201,8 +201,8 @@ async def test_heartbeat_fires_info_when_pending(caplog):
         mgr._pending_cost = 1.23
 
     with (
-        patch("imas_codex.standard_names.budget._WRITER_HEARTBEAT_SEC", 0.1),
-        caplog.at_level(logging.DEBUG, logger="imas_codex.standard_names.budget"),
+        patch("iter_codex.standard_names.budget._WRITER_HEARTBEAT_SEC", 0.1),
+        caplog.at_level(logging.DEBUG, logger="iter_codex.standard_names.budget"),
     ):
         await mgr.start()
         await asyncio.sleep(0.4)

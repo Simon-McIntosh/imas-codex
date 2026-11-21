@@ -14,7 +14,7 @@ between a removed and an added structure node across a version pair.
 
 from __future__ import annotations
 
-from imas_codex.graph.dd_lifecycle import dd_path_index
+from iter_codex.graph.dd_lifecycle import dd_path_index
 
 
 def test_ids_rename_maps_every_descendant_path():
@@ -26,7 +26,7 @@ def test_ids_rename_maps_every_descendant_path():
 
 
 def test_struct_array_rename_maps_every_shared_descendant_path():
-    from imas_codex.graph.build_dd import (
+    from iter_codex.graph.build_dd import (
         _detect_container_renames,
         extract_paths_for_version,
     )
@@ -41,7 +41,7 @@ def test_struct_array_rename_maps_every_shared_descendant_path():
 
 
 def test_rename_record_builder_carries_both_container_renames():
-    from imas_codex.graph.build_dd import (
+    from iter_codex.graph.build_dd import (
         _detect_container_renames,
         collect_renamed_to_mappings,
         extract_paths_for_version,
@@ -71,7 +71,7 @@ def test_rename_record_builder_carries_both_container_renames():
 def test_renamed_to_writer_receives_both_container_pairs():
     from unittest.mock import MagicMock
 
-    from imas_codex.graph.build_dd import (
+    from iter_codex.graph.build_dd import (
         _batch_create_renamed_to,
         _detect_container_renames,
         collect_renamed_to_mappings,

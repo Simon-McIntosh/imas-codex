@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.discovery.signals import group_enrichment as module
-from imas_codex.graph.client import GraphClient
+from iter_codex.discovery.signals import group_enrichment as module
+from iter_codex.graph.client import GraphClient
 
 COMPONENT = "iter:plant_component:DEMO-UNIT:QAZ0001"
 PATTERN = "iter:archive_field_pattern:invented"

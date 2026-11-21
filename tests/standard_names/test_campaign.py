@@ -10,7 +10,7 @@ import json
 
 import pytest
 
-from imas_codex.standard_names.campaign import (
+from iter_codex.standard_names.campaign import (
     PROSE_CLASSES,
     BatchOutcome,
     CampaignBudget,

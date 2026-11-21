@@ -150,7 +150,7 @@ def read(gc: Any, cypher: str, **params: Any) -> list[dict[str, Any]]:
 
 def release_holds() -> dict[str, tuple[str, str]]:
     """The export gate's own hold table, read from the gate rather than copied."""
-    from imas_codex.standard_names.export import _RELEASE_IDENTITY_HOLDS
+    from iter_codex.standard_names.export import _RELEASE_IDENTITY_HOLDS
 
     return dict(_RELEASE_IDENTITY_HOLDS)
 
@@ -205,11 +205,11 @@ ORDER BY path LIMIT 500"""
 
 
 def collect_live() -> dict[str, Any]:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
-    from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+    from iter_codex.standard_names.source_invariant import find_sourceless_live_names
 
     holds = release_holds()
     gc = GraphClient()
@@ -404,25 +404,25 @@ def run_fixture() -> dict[str, Any]:
         for key in (
             "NEO4J_URI",
             "NEO4J_PASSWORD",
-            "IMAS_CODEX_TEST_NEO4J_URI",
-            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL",
+            "ITER_CODEX_TEST_NEO4J_URI",
+            "ITER_CODEX_TEST_NEO4J_EPHEMERAL",
         )
     }
     os.environ.update(
         {
             "NEO4J_URI": uri,
             "NEO4J_PASSWORD": "",
-            "IMAS_CODEX_TEST_NEO4J_URI": uri,
-            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+            "ITER_CODEX_TEST_NEO4J_URI": uri,
+            "ITER_CODEX_TEST_NEO4J_EPHEMERAL": "1",
         }
     )
     try:
         _wipe(uri)
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.graph_store.graph_supersession import (
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.standard_names.graph_store.graph_supersession import (
             classify_sourceless_standard_names,
         )
-        from imas_codex.standard_names.source_invariant import (
+        from iter_codex.standard_names.source_invariant import (
             find_sourceless_live_names,
         )
 

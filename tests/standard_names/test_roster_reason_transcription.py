@@ -1,4 +1,4 @@
-from imas_codex.standard_names.graph_store.graph_audits import (
+from iter_codex.standard_names.graph_store.graph_audits import (
     fetch_manifest_source_release_rows,
 )
 

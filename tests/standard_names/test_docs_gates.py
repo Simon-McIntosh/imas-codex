@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.standard_names.doc_links import _is_prose_bracket
-from imas_codex.standard_names.docs_gates import (
+from iter_codex.standard_names.doc_links import _is_prose_bracket
+from iter_codex.standard_names.docs_gates import (
     DOCUMENTATION_GATE_NAMES,
     MIN_DOCUMENTATION_WORDS,
     NORMATIVE_GATE_NAMES,
@@ -22,8 +22,8 @@ from imas_codex.standard_names.docs_gates import (
 )
 
 HOLDOUT_PATH = Path("tests/standard_names/eval_sets/docs_holdout.json")
-SYSTEM_PROMPT_PATH = Path("imas_codex/llm/prompts/sn/generate_docs_system.md")
-SHARED_FORMAT_PATH = Path("imas_codex/llm/prompts/shared/sn/_docs_format.md")
+SYSTEM_PROMPT_PATH = Path("iter_codex/llm/prompts/sn/generate_docs_system.md")
+SHARED_FORMAT_PATH = Path("iter_codex/llm/prompts/shared/sn/_docs_format.md")
 
 
 def _catalog_documentation(name: str) -> str:
@@ -489,7 +489,7 @@ def test_helium_phrases_are_prose_despite_a_digit() -> None:
 
 
 def test_live_documentation_audit_rejects_a_self_link() -> None:
-    from imas_codex.standard_names.review.audits import run_documentation_gate_checks
+    from iter_codex.standard_names.review.audits import run_documentation_gate_checks
 
     text = _LIMITER_PROSE.replace(
         "[ion density at a limiter]",
@@ -647,7 +647,7 @@ ARGON_POPULATION_PARAPHRASE = (
 def _argon_parts():
     from imas_standard_names.grammar.terms import select_conventions
 
-    from imas_codex.standard_names.docs_gates import shared_part_sentences
+    from iter_codex.standard_names.docs_gates import shared_part_sentences
 
     return shared_part_sentences("argon_density", select_conventions("argon_density"))
 
@@ -659,7 +659,7 @@ def test_a_definition_already_in_the_stored_wording_is_left_untouched() -> None:
     paraphrase; beside it the writer's own unrelated sentence stays.
     """
 
-    from imas_codex.standard_names.docs_gates import replace_altered_shared_parts
+    from iter_codex.standard_names.docs_gates import replace_altered_shared_parts
 
     unrelated = "Argon line emission is used to diagnose impurity transport."
     rendered = replace_altered_shared_parts(
@@ -679,7 +679,7 @@ def test_a_definition_that_already_carries_the_stored_wording_is_unchanged() -> 
     to the stored wording cannot reach it.
     """
 
-    from imas_codex.standard_names.docs_gates import (
+    from iter_codex.standard_names.docs_gates import (
         replace_altered_shared_parts,
         species_family_sentence,
     )
@@ -702,7 +702,7 @@ def test_both_documentation_writers_share_one_docs_exhaust_transition() -> None:
     than over a named pair, so a third copy is caught wherever it is written.
     """
 
-    root = Path(__file__).resolve().parents[2] / "imas_codex" / "standard_names"
+    root = Path(__file__).resolve().parents[2] / "iter_codex" / "standard_names"
     owners = {
         path.relative_to(root).as_posix()
         for path in root.rglob("*.py")

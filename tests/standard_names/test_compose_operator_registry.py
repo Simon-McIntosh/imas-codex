@@ -18,8 +18,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR, _get_jinja_env, render_prompt
-from imas_codex.standard_names.context import (
+from iter_codex.llm.prompt_loader import PROMPTS_DIR, _get_jinja_env, render_prompt
+from iter_codex.standard_names.context import (
     _load_operators_full,
     build_compose_context,
     clear_context_cache,

@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.core.progress_monitor import (
+from iter_codex.core.progress_monitor import (
     BuildProgressMonitor,
     PhaseTracker,
     ProgressMonitor,

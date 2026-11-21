@@ -7,7 +7,7 @@ different status, and the ones carrying no status at all. The second class is
 silent, and the reading it should take is a judgement the query text never
 records, so a later reader cannot tell whether the drop was intended.
 
-This module reads every Cypher string under ``imas_codex/`` through the
+This module reads every Cypher string under ``iter_codex/`` through the
 project's own readers and refuses a ``.status`` comparison against ``<>``
 whose null handling is implicit. A comparison is explicit when either
 
@@ -27,11 +27,11 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-import imas_codex
-from imas_codex.cli.sn import CYPHER_LITERAL_OR_COMMENT
-from imas_codex.graph.cypher_property_check import python_cypher_strings
+import iter_codex
+from iter_codex.cli.sn import CYPHER_LITERAL_OR_COMMENT
+from iter_codex.graph.cypher_property_check import python_cypher_strings
 
-PACKAGE_ROOT = Path(imas_codex.__file__).resolve().parent
+PACKAGE_ROOT = Path(iter_codex.__file__).resolve().parent
 
 _STATUS_SUFFIX = "status"
 _COALESCE_RE = re.compile(r"\bcoalesce\s*\(", re.IGNORECASE)
@@ -111,8 +111,8 @@ def _package_modules() -> list[Path]:
         path
         for path in PACKAGE_ROOT.rglob("*.py")
         if not any(
-            imas_codex_part.startswith(".")
-            for imas_codex_part in path.relative_to(PACKAGE_ROOT).parts
+            iter_codex_part.startswith(".")
+            for iter_codex_part in path.relative_to(PACKAGE_ROOT).parts
         )
     )
 

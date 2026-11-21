@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.signals.parallel import (
+from iter_codex.discovery.signals.parallel import (
     _classify_check_error,
     _resolve_check_tree,
 )
@@ -392,7 +392,7 @@ class TestCheckSignalsBatchInputFormat:
 
     def test_backward_compat_shot_field(self):
         """Script should handle legacy shot+fallback_shots format."""
-        from imas_codex.remote.scripts.check_signals_batch import (
+        from iter_codex.remote.scripts.check_signals_batch import (
             _normalize_signal_shots,
         )
 
@@ -418,7 +418,7 @@ class TestBatchRetryLogic:
     def test_failed_shots_tracks_all_failures(self):
         """When a signal fails on shots 1,2,3 and succeeds on 4,
         failed_shots should list all failed shots."""
-        from imas_codex.remote.scripts.check_signals_batch import (
+        from iter_codex.remote.scripts.check_signals_batch import (
             _is_shot_dependent_error,
         )
 
@@ -442,7 +442,7 @@ class TestBatchRetryLogic:
 
     def test_structural_error_stops_retries(self):
         """Structural errors (SYNTAX, MISS_ARG) should not trigger retries."""
-        from imas_codex.remote.scripts.check_signals_batch import (
+        from iter_codex.remote.scripts.check_signals_batch import (
             _is_shot_dependent_error,
         )
 
@@ -452,7 +452,7 @@ class TestBatchRetryLogic:
 
     def test_shot_dependent_errors_trigger_retries(self):
         """Shot-dependent errors should trigger retry on next check_shot."""
-        from imas_codex.remote.scripts.check_signals_batch import (
+        from iter_codex.remote.scripts.check_signals_batch import (
             _is_shot_dependent_error,
         )
 
@@ -463,7 +463,7 @@ class TestBatchRetryLogic:
 
     def test_normalize_preserves_shot_order(self):
         """check_shots order must be preserved — first shot tried first."""
-        from imas_codex.remote.scripts.check_signals_batch import (
+        from iter_codex.remote.scripts.check_signals_batch import (
             _normalize_signal_shots,
         )
 
@@ -482,7 +482,7 @@ class TestExpressionNodeErrors:
 
     def test_roprand_is_shot_dependent(self):
         """$ROPRAND may resolve at different versions — should be retried."""
-        from imas_codex.remote.scripts.check_signals_batch import (
+        from iter_codex.remote.scripts.check_signals_batch import (
             _is_shot_dependent_error,
         )
 
@@ -490,7 +490,7 @@ class TestExpressionNodeErrors:
 
     def test_extra_arg_is_structural(self):
         """EXTRA_ARG is a function signature error — no retry."""
-        from imas_codex.remote.scripts.check_signals_batch import (
+        from iter_codex.remote.scripts.check_signals_batch import (
             _is_shot_dependent_error,
         )
 
@@ -498,7 +498,7 @@ class TestExpressionNodeErrors:
 
     def test_missing_library_is_structural(self):
         """Missing shared library errors should never be retried."""
-        from imas_codex.remote.scripts.check_signals_batch import (
+        from iter_codex.remote.scripts.check_signals_batch import (
             _is_shot_dependent_error,
         )
 
@@ -537,7 +537,7 @@ class TestTDIFunctionCategorization:
 
     def test_hardware_functions_excluded(self):
         """Hardware control functions should be excluded from checking."""
-        from imas_codex.discovery.signals.parallel import _is_excluded_tdi_function
+        from iter_codex.discovery.signals.parallel import _is_excluded_tdi_function
 
         excluded = [
             "tile_store",
@@ -554,7 +554,7 @@ class TestTDIFunctionCategorization:
 
     def test_physics_functions_not_excluded(self):
         """Core physics accessor functions should NOT be excluded."""
-        from imas_codex.discovery.signals.parallel import _is_excluded_tdi_function
+        from iter_codex.discovery.signals.parallel import _is_excluded_tdi_function
 
         excluded = ["tile_store", "beckhoff_setstate"]
         physics = ["tcv_eq", "tcv_get", "tcv_ip", "fir_aut", "ts_rawdata"]

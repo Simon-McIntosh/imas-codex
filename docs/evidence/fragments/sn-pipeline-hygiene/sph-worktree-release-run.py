@@ -44,8 +44,8 @@ def guard_verdict(name: str, call) -> dict:
 
 
 def main() -> int:
-    from imas_codex.cli.release import _check_on_main as cli_guard
-    from imas_codex.standard_names.catalog_release import (
+    from iter_codex.cli.release import _check_on_main as cli_guard
+    from iter_codex.standard_names.catalog_release import (
         _check_on_main as catalog_guard,
     )
 

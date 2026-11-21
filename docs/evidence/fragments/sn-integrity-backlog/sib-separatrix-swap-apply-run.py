@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 4247a6d5e0a55261c6cac175c0f2c8c4e15d1ce7, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.classify_sourceless_standard_names.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Apply the separatrix temperature DD-source swap through the signed exchange writer.
@@ -48,8 +48,8 @@ SCRATCH = Path(
     "/tmp/reckon-crew-scratch/r-20261020T044913680539-sib-separatrix-swap-apply"
 )
 ARCHIVE = (
-    Path.home() / ".local/share/imas-codex/exports/"
-    "imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
+    Path.home() / ".local/share/iter-codex/exports/"
+    "iter-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
 )
 PYTHON = Path("/home/ITER/mcintos/Code/imas-codex/.venv/bin/python")
 
@@ -105,15 +105,15 @@ class Log:
 # ── shared helpers ────────────────────────────────────────────────────────
 def _import_operator():
     sys.path.insert(0, str(WORKTREE))
-    from imas_codex.standard_names import signed_manifest as operator
+    from iter_codex.standard_names import signed_manifest as operator
 
     return operator
 
 
 def build_authority(path: Path) -> tuple[str, str]:
     """Build the swap authority through the canonical builder — never by hand."""
-    from imas_codex.standard_names import signed_manifest as operator
-    from imas_codex.standard_names.repair_authority import build_repair_authority
+    from iter_codex.standard_names import signed_manifest as operator
+    from iter_codex.standard_names.repair_authority import build_repair_authority
 
     built = build_repair_authority(
         {
@@ -261,7 +261,7 @@ ORDER BY id
 
 
 def _classifier_counts(gc) -> tuple[Counter, set[str]]:
-    from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
+    from iter_codex.standard_names.graph_ops import classify_sourceless_standard_names
 
     rows = classify_sourceless_standard_names(gc)
     return Counter(row["population"] for row in rows), {row["id"] for row in rows}
@@ -272,7 +272,7 @@ def read_back(gc) -> dict:
     by_id = {row["id"]: row for row in rows}
     if set(by_id) != {GIVER, RECEIVER}:
         raise RuntimeError(f"read-back returned {sorted(by_id)}")
-    from imas_codex.standard_names.source_invariant import require_producing_sources
+    from iter_codex.standard_names.source_invariant import require_producing_sources
 
     source_invariant_ok = True
     invariant_error = None
@@ -380,7 +380,7 @@ def _start_bootstrap(place: Path, bolt: int, http: int) -> tuple[object, Path]:
     nodes, with the relationships already gone. Neo4j bootstraps a fresh store
     when the data dir is empty, which is the same start path minus the load.
     """
-    from imas_codex.graph import temp_neo4j as t
+    from iter_codex.graph import temp_neo4j as t
 
     for subdir in ("run", "tmp", "logs", "conf"):
         (place / subdir).mkdir(parents=True, exist_ok=True)
@@ -423,7 +423,7 @@ def _start_bootstrap(place: Path, bolt: int, http: int) -> tuple[object, Path]:
 
 
 def start_instance(log: Log, *, load: bool = True) -> tuple[object, str]:
-    from imas_codex.graph.temp_neo4j import start_temp_neo4j
+    from iter_codex.graph.temp_neo4j import start_temp_neo4j
 
     place, tmpdir = _instance_paths()
     previous_bind = os.environ.get("APPTAINER_BIND")
@@ -448,7 +448,7 @@ def start_instance(log: Log, *, load: bool = True) -> tuple[object, str]:
 
 
 def stop_instance(proc, log: Log) -> None:
-    from imas_codex.graph.temp_neo4j import stop_temp_neo4j
+    from iter_codex.graph.temp_neo4j import stop_temp_neo4j
 
     if proc is not None:
         stop_temp_neo4j(proc)
@@ -456,7 +456,7 @@ def stop_instance(proc, log: Log) -> None:
 
 
 def _scratch_client(uri: str):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     return GraphClient(uri=uri, username="neo4j", password="", graph_name="swap-apply")
 
@@ -474,8 +474,8 @@ def _run_graph_test(uri: str, log: Log) -> int:
         text=True,
     ).stdout.strip()
     env = os.environ.copy()
-    env["IMAS_CODEX_TEST_NEO4J_URI"] = uri
-    env["IMAS_CODEX_TEST_NEO4J_EPHEMERAL"] = "1"
+    env["ITER_CODEX_TEST_NEO4J_URI"] = uri
+    env["ITER_CODEX_TEST_NEO4J_EPHEMERAL"] = "1"
     env["PYTHONPATH"] = str(WORKTREE)
     env["TMPDIR"] = str(SCRATCH)
     cmd = [
@@ -633,7 +633,7 @@ RETURN given IS NOT NULL AS given_source_node,
 
 
 def phase_preconditions() -> int:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     log = Log(LOGS / "step3-live-preconditions.log")
     log.write(
@@ -682,8 +682,8 @@ def guarded_apply(gc, path: Path, digests, manifest_sha256: str, activity) -> di
 
 
 def phase_live() -> int:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.graph.offsite import GraphActivity, live_graph_activity
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.graph.offsite import GraphActivity, live_graph_activity
 
     log = Log(LOGS / "step3-live-apply.log")
     log.write(f"# command: {sys.executable} {Path(__file__).name} --phase live")

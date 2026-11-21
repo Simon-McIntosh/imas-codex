@@ -2,7 +2,7 @@
 """Classify the brackets that make accepted documents fail the prose-link rule.
 
 The instrument under measurement is the ``link_hygiene`` gate in
-``imas_codex.standard_names.docs_gates`` as the prose-link node left it: it
+``iter_codex.standard_names.docs_gates`` as the prose-link node left it: it
 fails a bracketed prose phrase that is neither a markdown link nor inside
 mathematics, and a ``name:`` link that targets the documented name itself.
 That revision is not yet merged, so the gate is imported from that node's own
@@ -48,13 +48,13 @@ GATE_WORKTREE = Path(
 )
 sys.path.insert(0, str(GATE_WORKTREE))
 
-import imas_codex.standard_names.docs_gates as _gate_module  # noqa: E402
-from imas_codex.graph.client import GraphClient  # noqa: E402
-from imas_codex.standard_names.doc_links import (  # noqa: E402
+import iter_codex.standard_names.docs_gates as _gate_module  # noqa: E402
+from iter_codex.graph.client import GraphClient  # noqa: E402
+from iter_codex.standard_names.doc_links import (  # noqa: E402
     _is_prose_bracket,
     find_prose_bracket_phrases,
 )
-from imas_codex.standard_names.docs_gates import (  # noqa: E402
+from iter_codex.standard_names.docs_gates import (  # noqa: E402
     DocumentationGateOutcome,
     score_documentation,
 )
@@ -450,7 +450,7 @@ def main() -> int:
         "created_at": datetime.now(UTC).isoformat(),
         "gate_module_path": str(Path(_gate_module.__file__).resolve()),
         "doc_links_module_path": str(
-            Path(sys.modules["imas_codex.standard_names.doc_links"].__file__).resolve()
+            Path(sys.modules["iter_codex.standard_names.doc_links"].__file__).resolve()
         ),
         "gate_worktree": str(GATE_WORKTREE),
         "working_directory": str(Path.cwd()),

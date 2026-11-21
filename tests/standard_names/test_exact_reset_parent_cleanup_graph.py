@@ -11,7 +11,7 @@ import uuid
 
 import pytest
 
-from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+from iter_codex.standard_names.graph_store.graph_catalog_reset import (
     clear_standard_names,
 )
 
@@ -21,7 +21,7 @@ _PREFIX = "__exact_reset_scaffold__"
 @pytest.fixture()
 def _graph():
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()

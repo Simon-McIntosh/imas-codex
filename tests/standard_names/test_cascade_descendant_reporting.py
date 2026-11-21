@@ -28,7 +28,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.standard_names.cascade import cascade_descendants_of, rename_cascade
+from iter_codex.standard_names.cascade import cascade_descendants_of, rename_cascade
 from tests.standard_names.test_edit_engine import FakeGraph
 
 

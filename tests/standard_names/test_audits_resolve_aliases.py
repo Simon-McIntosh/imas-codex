@@ -14,8 +14,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.attachment_audit import _attachment_consistency
-from imas_codex.standard_names.audits import (
+from iter_codex.standard_names.attachment_audit import _attachment_consistency
+from iter_codex.standard_names.audits import (
     _isn_operator_advisory_aliases,
     name_unit_consistency_check,
     resolve_retired_operator_spellings,

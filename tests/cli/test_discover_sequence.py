@@ -9,7 +9,7 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import sequence
+from iter_codex.cli.discover import sequence
 
 STAGE_ORDER = [
     "paths",
@@ -175,7 +175,7 @@ def test_raising_pending_query_reads_unreachable(monkeypatch):
     """A graph fault in a pending predicate reads unreachable, not empty."""
     _probes(monkeypatch, graph=True, ssh=True, wiki=True)
 
-    from imas_codex.discovery.code import graph_ops
+    from iter_codex.discovery.code import graph_ops
 
     def boom(facility: str) -> bool:
         raise RuntimeError("graph unavailable")
@@ -190,7 +190,7 @@ def test_raising_pending_query_reads_unreachable(monkeypatch):
 
 def test_dry_run_prints_every_stage_and_runs_nothing(monkeypatch, healthy):
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda f: _config()
+        "iter_codex.discovery.base.facility.get_facility", lambda f: _config()
     )
     monkeypatch.setattr(sequence, "_stage_function", MagicMock())
 
@@ -205,7 +205,7 @@ def test_dry_run_prints_every_stage_and_runs_nothing(monkeypatch, healthy):
 
 
 def test_discover_hides_the_run_command():
-    from imas_codex.cli.discover import discover
+    from iter_codex.cli.discover import discover
 
     listed = CliRunner().invoke(discover, ["--help"])
     assert listed.exit_code == 0, listed.output
@@ -227,16 +227,16 @@ def test_discover_hides_the_run_command():
 def test_bare_facility_routes_to_hidden_run_and_status_keeps_its_command(
     monkeypatch, healthy, tmp_path
 ):
-    from imas_codex import discovery, settings
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import discover
+    from iter_codex import discovery, settings
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import discover
 
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **kw: None)
     monkeypatch.setattr(
         cli_logging, "get_log_file", lambda *a, **kw: tmp_path / "discover.log"
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda f: _config()
+        "iter_codex.discovery.base.facility.get_facility", lambda f: _config()
     )
     dry = CliRunner().invoke(discover, ["jt-60sa", "--dry-run"])
     assert dry.exit_code == 0, dry.output
@@ -428,15 +428,15 @@ def test_document_seeding_runs_before_any_document_is_pending(monkeypatch, healt
 def test_cli_parses_repeated_and_comma_separated_domains(
     monkeypatch, healthy, tmp_path
 ):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import discover
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import discover
 
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **kw: None)
     monkeypatch.setattr(
         cli_logging, "get_log_file", lambda *a, **kw: tmp_path / "discover.log"
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda f: _config()
+        "iter_codex.discovery.base.facility.get_facility", lambda f: _config()
     )
     calls = _recording_stages(monkeypatch)
     result = CliRunner().invoke(
@@ -476,15 +476,15 @@ def test_cli_parses_repeated_and_comma_separated_domains(
 def test_until_runs_dependency_closure_in_registry_order(
     monkeypatch, healthy, tmp_path, target, expected
 ):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import discover
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import discover
 
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **kw: None)
     monkeypatch.setattr(
         cli_logging, "get_log_file", lambda *a, **kw: tmp_path / "discover.log"
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda f: _config()
+        "iter_codex.discovery.base.facility.get_facility", lambda f: _config()
     )
     calls = _recording_stages(monkeypatch)
 
@@ -555,15 +555,15 @@ def test_conflicting_options_are_refused(arguments):
 def test_bare_focus_requires_one_domain_before_stages(
     monkeypatch, healthy, tmp_path, selection
 ):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import discover
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import discover
 
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **kw: None)
     monkeypatch.setattr(
         cli_logging, "get_log_file", lambda *a, **kw: tmp_path / "discover.log"
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda f: _config()
+        "iter_codex.discovery.base.facility.get_facility", lambda f: _config()
     )
     stage_function = MagicMock()
     monkeypatch.setattr(sequence, "_stage_function", stage_function)
@@ -574,15 +574,15 @@ def test_bare_focus_requires_one_domain_before_stages(
 
 
 def test_bare_candidate_focus_reaches_stage(monkeypatch, healthy, tmp_path):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import discover, map as discover_map
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import discover, map as discover_map
 
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **kw: None)
     monkeypatch.setattr(
         cli_logging, "get_log_file", lambda *a, **kw: tmp_path / "discover.log"
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda f: _config()
+        "iter_codex.discovery.base.facility.get_facility", lambda f: _config()
     )
     candidate_stage = MagicMock(return_value={"sources_judged": 1, "remaining": 0})
     monkeypatch.setattr(discover_map, "run_candidates_stage", candidate_stage)
@@ -625,7 +625,7 @@ def test_final_table_lists_every_domain(monkeypatch, healthy, capsys):
 
 
 def test_mapping_calls_existing_pipeline_with_remaining_limits(monkeypatch):
-    from imas_codex.cli.map import map_run
+    from iter_codex.cli.map import map_run
 
     callback = MagicMock()
     monkeypatch.setattr(map_run, "callback", callback)
@@ -643,7 +643,7 @@ def test_mapping_calls_existing_pipeline_with_remaining_limits(monkeypatch):
 
 
 def test_no_candidate_route_skips_mapping_as_nothing_to_do(monkeypatch, healthy):
-    from imas_codex.ids import workers
+    from iter_codex.ids import workers
 
     monkeypatch.setattr(workers, "has_pending_mapping_work", lambda facility: False)
     monkeypatch.setattr(workers, "has_pending_validation_work", lambda facility: False)
@@ -652,9 +652,9 @@ def test_no_candidate_route_skips_mapping_as_nothing_to_do(monkeypatch, healthy)
 
 
 def test_mapping_focus_and_limit_restrict_ids_targets(monkeypatch, tmp_path):
-    from imas_codex.cli.map import map_run
-    from imas_codex.graph import client
-    from imas_codex.ids import tools
+    from iter_codex.cli.map import map_run
+    from iter_codex.graph import client
+    from iter_codex.ids import tools
 
     manifest = tmp_path / "ids.yaml"
     manifest.write_text("items:\n  - equilibrium\n  - pf_active\n")
@@ -684,7 +684,7 @@ def test_mapping_focus_and_limit_restrict_ids_targets(monkeypatch, tmp_path):
 
 
 def test_mapping_focus_and_ids_without_overlap_are_refused(monkeypatch):
-    from imas_codex.cli.map import map_run
+    from iter_codex.cli.map import map_run
 
     callback = MagicMock()
     monkeypatch.setattr(map_run, "callback", callback)
@@ -699,7 +699,7 @@ def test_mapping_focus_and_ids_without_overlap_are_refused(monkeypatch):
 
 
 def test_missing_remaining_key_uses_pending_predicate(monkeypatch):
-    from imas_codex.ids import workers
+    from iter_codex.ids import workers
 
     stage = _stage("mapping")
     monkeypatch.setattr(workers, "has_pending_mapping_work", lambda facility: False)
@@ -710,14 +710,14 @@ def test_missing_remaining_key_uses_pending_predicate(monkeypatch):
 
 
 def test_signals_halves_resolve_to_the_signals_stage_function():
-    from imas_codex.cli.discover.signals import run_signals_stage
+    from iter_codex.cli.discover.signals import run_signals_stage
 
     assert sequence._stage_function(_stage("signals scan")) is run_signals_stage
     assert sequence._stage_function(_stage("signals enrich")) is run_signals_stage
 
 
 def test_stage_without_return_still_supplies_its_cost_receipt(monkeypatch):
-    from imas_codex.cli.discover import common
+    from iter_codex.cli.discover import common
 
     monkeypatch.setattr(
         common, "run_discovery", lambda *args, **kwargs: {"cost": 2.25, "scanned": 4}
@@ -731,7 +731,7 @@ def test_stage_without_return_still_supplies_its_cost_receipt(monkeypatch):
 
 
 def test_stage_without_return_preserves_receipt_errors(monkeypatch):
-    from imas_codex.cli.discover import common
+    from iter_codex.cli.discover import common
 
     monkeypatch.setattr(
         common,
@@ -747,7 +747,7 @@ def test_stage_without_return_preserves_receipt_errors(monkeypatch):
 
 
 def test_failed_stage_receipt_reduces_independent_stage_budget(monkeypatch, healthy):
-    from imas_codex.cli.discover import common
+    from iter_codex.cli.discover import common
 
     monkeypatch.setattr(common, "run_discovery", lambda *a, **kw: {"cost": 2.0})
     received = []
@@ -859,7 +859,7 @@ def test_dry_run_does_not_wait_for_an_unreachable_host(monkeypatch, healthy):
 
 def test_flush_reset_runs_in_the_enrich_stage() -> None:
     """--flush excludes the signals scan, so the enrich stage carries the reset."""
-    from imas_codex.cli.discover import sequence
+    from iter_codex.cli.discover import sequence
 
     stages = {stage.name: stage for stage in sequence.STAGES}
     flushed = sequence.SequenceOptions(
@@ -883,7 +883,7 @@ def test_repeated_category_and_scanner_options_all_reach_the_run(monkeypatch):
     monkeypatch.setattr(sequence, "run_sequence", fake_run_sequence)
     monkeypatch.setattr(sequence, "_report", lambda facility, outcomes: "")
     monkeypatch.setattr(
-        "imas_codex.cli.logging.configure_cli_logging", lambda *a, **k: None
+        "iter_codex.cli.logging.configure_cli_logging", lambda *a, **k: None
     )
 
     result = CliRunner().invoke(

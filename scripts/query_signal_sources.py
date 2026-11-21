@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Query TCV SignalSources to understand skip behavior."""
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 with GraphClient() as gc:
     # Get discovered SignalSources on TCV

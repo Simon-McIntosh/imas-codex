@@ -9,7 +9,7 @@ import pytest
 
 def test_fetch_review_feedback_includes_suggested_name():
     """Regression: reviewer_suggested_name and justification must be returned to compose."""
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         fetch_review_feedback_for_sources,
     )
 
@@ -35,7 +35,7 @@ def test_fetch_review_feedback_includes_suggested_name():
     fake_client.query = MagicMock(return_value=fake_rows)
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=fake_client,
     ):
         result = fetch_review_feedback_for_sources(["dd:eq/profiles_1d/psi"])
@@ -54,7 +54,7 @@ def test_fetch_review_feedback_includes_suggested_name():
 
 def test_fetch_review_feedback_handles_null_suggested_name():
     """When verdict is accept, suggested_name + justification are null — fetch must not crash."""
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         fetch_review_feedback_for_sources,
     )
 
@@ -80,7 +80,7 @@ def test_fetch_review_feedback_handles_null_suggested_name():
     fake_client.query = MagicMock(return_value=fake_rows)
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=fake_client,
     ):
         result = fetch_review_feedback_for_sources(["dd:cp/electrons/temperature"])

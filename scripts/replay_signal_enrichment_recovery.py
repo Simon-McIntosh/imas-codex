@@ -9,9 +9,9 @@ import sqlite3
 from pathlib import Path
 from types import SimpleNamespace
 
-from imas_codex.discovery.base import llm
-from imas_codex.discovery.signals.enrichment import EnrichmentOptions
-from imas_codex.settings import get_model
+from iter_codex.discovery.base import llm
+from iter_codex.discovery.signals.enrichment import EnrichmentOptions
+from iter_codex.settings import get_model
 from scripts import benchmark_signal_enrichment as bench
 from scripts.refine_signal_enrichment import frozen_signal_order, subset_messages
 
@@ -98,7 +98,7 @@ async def replay(
         messages = subset_messages(original_messages, [order.index(id) + 1])
         # The frozen draft already includes its fitted task and grounding rules.
         # The stage itself applies those controls to the same baseline task.
-        from imas_codex.discovery.signals.enrichment import fit_enrichment_prompt
+        from iter_codex.discovery.signals.enrichment import fit_enrichment_prompt
 
         if options.fitted_prompt:
             messages[0]["content"] = fit_enrichment_prompt(messages[0]["content"])

@@ -8,26 +8,26 @@ import pytest
 class TestEnsureEmbeddingReady:
     """Tests for the centralized ensure_embedding_ready function."""
 
-    @patch("imas_codex.embeddings.client.RemoteEmbeddingClient")
-    @patch("imas_codex.settings.get_embed_server_port", return_value=18765)
-    @patch("imas_codex.settings.get_embed_remote_url", return_value=None)
+    @patch("iter_codex.embeddings.client.RemoteEmbeddingClient")
+    @patch("iter_codex.settings.get_embed_server_port", return_value=18765)
+    @patch("iter_codex.settings.get_embed_remote_url", return_value=None)
     def test_returns_false_when_no_remote_url(self, mock_url, mock_port, mock_client):
         """Should fail fast when no remote URL is configured."""
-        from imas_codex.embeddings.readiness import ensure_embedding_ready
+        from iter_codex.embeddings.readiness import ensure_embedding_ready
 
         ok, msg = ensure_embedding_ready()
         assert ok is False
         assert "not configured" in msg
 
-    @patch("imas_codex.embeddings.client.RemoteEmbeddingClient")
-    @patch("imas_codex.settings.get_embed_server_port", return_value=18765)
+    @patch("iter_codex.embeddings.client.RemoteEmbeddingClient")
+    @patch("iter_codex.settings.get_embed_server_port", return_value=18765)
     @patch(
-        "imas_codex.settings.get_embed_remote_url",
+        "iter_codex.settings.get_embed_remote_url",
         return_value="http://localhost:18765",
     )
     def test_returns_true_when_already_healthy(self, mock_url, mock_port, mock_client):
         """Should return immediately if server is already responding."""
-        from imas_codex.embeddings.readiness import ensure_embedding_ready
+        from iter_codex.embeddings.readiness import ensure_embedding_ready
 
         client_instance = MagicMock()
         client_instance.is_available.return_value = True
@@ -43,20 +43,20 @@ class TestEnsureEmbeddingReady:
         client_instance.is_available.assert_called_once()
 
     @patch(
-        "imas_codex.embeddings.readiness._get_embed_host",
+        "iter_codex.embeddings.readiness._get_embed_host",
         return_value="98dci4-srv-1003",
     )
-    @patch("imas_codex.embeddings.readiness._is_on_login_node", return_value=True)
-    @patch("imas_codex.embeddings.readiness._is_on_facility", return_value=True)
-    @patch("imas_codex.embeddings.readiness._try_start_service", return_value=True)
+    @patch("iter_codex.embeddings.readiness._is_on_login_node", return_value=True)
+    @patch("iter_codex.embeddings.readiness._is_on_facility", return_value=True)
+    @patch("iter_codex.embeddings.readiness._try_start_service", return_value=True)
     @patch(
-        "imas_codex.embeddings.readiness.socket.gethostname",
+        "iter_codex.embeddings.readiness.socket.gethostname",
         return_value="98dci4-srv-1003",
     )
-    @patch("imas_codex.embeddings.client.RemoteEmbeddingClient")
-    @patch("imas_codex.settings.get_embed_server_port", return_value=18765)
+    @patch("iter_codex.embeddings.client.RemoteEmbeddingClient")
+    @patch("iter_codex.settings.get_embed_server_port", return_value=18765)
     @patch(
-        "imas_codex.settings.get_embed_remote_url",
+        "iter_codex.settings.get_embed_remote_url",
         return_value="http://localhost:18765",
     )
     def test_tries_systemd_service_on_login_node(
@@ -71,7 +71,7 @@ class TestEnsureEmbeddingReady:
         mock_embed_host,
     ):
         """On login node with embed server on same host, should try systemd service."""
-        from imas_codex.embeddings.readiness import ensure_embedding_ready
+        from iter_codex.embeddings.readiness import ensure_embedding_ready
 
         client_instance = MagicMock()
         client_instance.is_available.side_effect = [False, True]
@@ -86,20 +86,20 @@ class TestEnsureEmbeddingReady:
         mock_start.assert_called_once()
 
     @patch(
-        "imas_codex.embeddings.readiness._get_embed_host",
+        "iter_codex.embeddings.readiness._get_embed_host",
         return_value="98dci4-gpu-0002",
     )
-    @patch("imas_codex.embeddings.readiness._is_on_login_node", return_value=True)
-    @patch("imas_codex.embeddings.readiness._is_on_facility", return_value=True)
-    @patch("imas_codex.embeddings.readiness._try_start_service", return_value=True)
+    @patch("iter_codex.embeddings.readiness._is_on_login_node", return_value=True)
+    @patch("iter_codex.embeddings.readiness._is_on_facility", return_value=True)
+    @patch("iter_codex.embeddings.readiness._try_start_service", return_value=True)
     @patch(
-        "imas_codex.embeddings.readiness.socket.gethostname",
+        "iter_codex.embeddings.readiness.socket.gethostname",
         return_value="98dci4-srv-1003",
     )
-    @patch("imas_codex.embeddings.client.RemoteEmbeddingClient")
-    @patch("imas_codex.settings.get_embed_server_port", return_value=18765)
+    @patch("iter_codex.embeddings.client.RemoteEmbeddingClient")
+    @patch("iter_codex.settings.get_embed_server_port", return_value=18765)
     @patch(
-        "imas_codex.settings.get_embed_remote_url",
+        "iter_codex.settings.get_embed_remote_url",
         return_value="http://localhost:18765",
     )
     def test_skips_systemd_when_embed_on_titan(
@@ -114,7 +114,7 @@ class TestEnsureEmbeddingReady:
         mock_embed_host,
     ):
         """On login node, should NOT try systemd when embed server is on Titan."""
-        from imas_codex.embeddings.readiness import ensure_embedding_ready
+        from iter_codex.embeddings.readiness import ensure_embedding_ready
 
         client_instance = MagicMock()
         client_instance.is_available.side_effect = [False, True]
@@ -128,12 +128,12 @@ class TestEnsureEmbeddingReady:
         assert ok is True
         mock_start.assert_not_called()
 
-    @patch("imas_codex.embeddings.readiness._is_on_facility", return_value=False)
-    @patch("imas_codex.embeddings.readiness._ensure_ssh_tunnel", return_value=True)
-    @patch("imas_codex.embeddings.client.RemoteEmbeddingClient")
-    @patch("imas_codex.settings.get_embed_server_port", return_value=18765)
+    @patch("iter_codex.embeddings.readiness._is_on_facility", return_value=False)
+    @patch("iter_codex.embeddings.readiness._ensure_ssh_tunnel", return_value=True)
+    @patch("iter_codex.embeddings.client.RemoteEmbeddingClient")
+    @patch("iter_codex.settings.get_embed_server_port", return_value=18765)
     @patch(
-        "imas_codex.settings.get_embed_remote_url",
+        "iter_codex.settings.get_embed_remote_url",
         return_value="http://localhost:18765",
     )
     def test_creates_ssh_tunnel_off_facility(
@@ -145,7 +145,7 @@ class TestEnsureEmbeddingReady:
         mock_on_facility,
     ):
         """Off facility, should create SSH tunnel before retrying health check."""
-        from imas_codex.embeddings.readiness import ensure_embedding_ready
+        from iter_codex.embeddings.readiness import ensure_embedding_ready
 
         client_instance = MagicMock()
         client_instance.is_available.side_effect = [False, True]
@@ -159,19 +159,19 @@ class TestEnsureEmbeddingReady:
         assert ok is True
         mock_tunnel.assert_called_once_with(18765)
 
-    @patch("imas_codex.embeddings.readiness._is_on_facility", return_value=False)
-    @patch("imas_codex.embeddings.readiness._ensure_ssh_tunnel", return_value=False)
-    @patch("imas_codex.embeddings.client.RemoteEmbeddingClient")
-    @patch("imas_codex.settings.get_embed_server_port", return_value=18765)
+    @patch("iter_codex.embeddings.readiness._is_on_facility", return_value=False)
+    @patch("iter_codex.embeddings.readiness._ensure_ssh_tunnel", return_value=False)
+    @patch("iter_codex.embeddings.client.RemoteEmbeddingClient")
+    @patch("iter_codex.settings.get_embed_server_port", return_value=18765)
     @patch(
-        "imas_codex.settings.get_embed_remote_url",
+        "iter_codex.settings.get_embed_remote_url",
         return_value="http://localhost:18765",
     )
     def test_fails_when_ssh_tunnel_fails(
         self, mock_url, mock_port, mock_client, mock_tunnel, mock_on_facility
     ):
         """Off facility, should fail if SSH tunnel cannot be established."""
-        from imas_codex.embeddings.readiness import ensure_embedding_ready
+        from iter_codex.embeddings.readiness import ensure_embedding_ready
 
         client_instance = MagicMock()
         client_instance.is_available.return_value = False
@@ -181,18 +181,18 @@ class TestEnsureEmbeddingReady:
         assert ok is False
         assert "SSH tunnel" in msg
 
-    @patch("imas_codex.embeddings.readiness._is_on_facility", return_value=True)
-    @patch("imas_codex.embeddings.readiness._is_on_login_node", return_value=True)
-    @patch("imas_codex.embeddings.readiness._get_embed_host", return_value=None)
+    @patch("iter_codex.embeddings.readiness._is_on_facility", return_value=True)
+    @patch("iter_codex.embeddings.readiness._is_on_login_node", return_value=True)
+    @patch("iter_codex.embeddings.readiness._get_embed_host", return_value=None)
     @patch(
-        "imas_codex.embeddings.readiness.socket.gethostname",
+        "iter_codex.embeddings.readiness.socket.gethostname",
         return_value="98dci4-srv-1003",
     )
-    @patch("imas_codex.embeddings.readiness._try_start_service", return_value=True)
-    @patch("imas_codex.embeddings.client.RemoteEmbeddingClient")
-    @patch("imas_codex.settings.get_embed_server_port", return_value=18765)
+    @patch("iter_codex.embeddings.readiness._try_start_service", return_value=True)
+    @patch("iter_codex.embeddings.client.RemoteEmbeddingClient")
+    @patch("iter_codex.settings.get_embed_server_port", return_value=18765)
     @patch(
-        "imas_codex.settings.get_embed_remote_url",
+        "iter_codex.settings.get_embed_remote_url",
         return_value="http://localhost:18765",
     )
     def test_fails_when_server_never_responds(
@@ -207,7 +207,7 @@ class TestEnsureEmbeddingReady:
         mock_on_facility,
     ):
         """Should fail gracefully when server never becomes available."""
-        from imas_codex.embeddings.readiness import ensure_embedding_ready
+        from iter_codex.embeddings.readiness import ensure_embedding_ready
 
         client_instance = MagicMock()
         client_instance.is_available.return_value = False
@@ -217,10 +217,10 @@ class TestEnsureEmbeddingReady:
         assert ok is False
         assert "not available" in msg.lower()
 
-    @patch("imas_codex.settings.get_embed_remote_url", return_value=None)
+    @patch("iter_codex.settings.get_embed_remote_url", return_value=None)
     def test_log_fn_callback_called(self, mock_url):
         """Should call log_fn callback with status messages."""
-        from imas_codex.embeddings.readiness import ensure_embedding_ready
+        from iter_codex.embeddings.readiness import ensure_embedding_ready
 
         messages = []
 
@@ -231,7 +231,7 @@ class TestEnsureEmbeddingReady:
 
     def test_resolve_source_label(self):
         """Should resolve hostname to human-readable labels."""
-        from imas_codex.embeddings.readiness import _resolve_source_label
+        from iter_codex.embeddings.readiness import _resolve_source_label
 
         # Returns hostname directly
         info = MagicMock()
@@ -252,26 +252,26 @@ class TestEnsureEmbeddingReady:
 class TestEnsureSshTunnel:
     """Tests for SSH tunnel establishment."""
 
-    @patch("imas_codex.embeddings.readiness.ensure_tunnel", return_value=True)
+    @patch("iter_codex.embeddings.readiness.ensure_tunnel", return_value=True)
     def test_returns_true_when_tunnel_active(self, mock_ensure):
         """Should return True when ensure_tunnel succeeds."""
-        from imas_codex.embeddings.readiness import _ensure_ssh_tunnel
+        from iter_codex.embeddings.readiness import _ensure_ssh_tunnel
 
         assert _ensure_ssh_tunnel(18765) is True
         mock_ensure.assert_called_once_with(port=18765, ssh_host="iter")
 
-    @patch("imas_codex.embeddings.readiness.ensure_tunnel", return_value=False)
+    @patch("iter_codex.embeddings.readiness.ensure_tunnel", return_value=False)
     def test_returns_false_when_tunnel_fails(self, mock_ensure):
         """Should return False when ensure_tunnel fails."""
-        from imas_codex.embeddings.readiness import _ensure_ssh_tunnel
+        from iter_codex.embeddings.readiness import _ensure_ssh_tunnel
 
         assert _ensure_ssh_tunnel(18765) is False
         mock_ensure.assert_called_once()
 
-    @patch("imas_codex.embeddings.readiness.ensure_tunnel", return_value=True)
+    @patch("iter_codex.embeddings.readiness.ensure_tunnel", return_value=True)
     def test_uses_explicit_ssh_host(self, mock_ensure):
         """Should pass explicit ssh_host to ensure_tunnel."""
-        from imas_codex.embeddings.readiness import _ensure_ssh_tunnel
+        from iter_codex.embeddings.readiness import _ensure_ssh_tunnel
 
         assert _ensure_ssh_tunnel(18765, ssh_host="tcv") is True
         mock_ensure.assert_called_once_with(port=18765, ssh_host="tcv")
@@ -280,33 +280,33 @@ class TestEnsureSshTunnel:
 class TestTryStartService:
     """Tests for systemd service start attempts."""
 
-    @patch("imas_codex.embeddings.readiness.subprocess.run")
+    @patch("iter_codex.embeddings.readiness.subprocess.run")
     def test_returns_true_when_systemctl_succeeds(self, mock_run):
         """Should return True when systemctl start succeeds."""
-        from imas_codex.embeddings.readiness import _try_start_service
+        from iter_codex.embeddings.readiness import _try_start_service
 
         mock_run.return_value = MagicMock(returncode=0)
         assert _try_start_service() is True
         mock_run.assert_called_once()
         cmd = mock_run.call_args[0][0]
         assert "systemctl" in cmd
-        assert "imas-codex-embed" in cmd
+        assert "iter-codex-embed" in cmd
 
-    @patch("imas_codex.embeddings.readiness.subprocess.run")
+    @patch("iter_codex.embeddings.readiness.subprocess.run")
     def test_returns_false_when_systemctl_fails(self, mock_run):
         """Should return False when systemctl start fails."""
-        from imas_codex.embeddings.readiness import _try_start_service
+        from iter_codex.embeddings.readiness import _try_start_service
 
         mock_run.return_value = MagicMock(returncode=1, stderr="Unit not found")
         assert _try_start_service() is False
 
     @patch(
-        "imas_codex.embeddings.readiness.subprocess.run",
+        "iter_codex.embeddings.readiness.subprocess.run",
         side_effect=FileNotFoundError,
     )
     def test_returns_false_when_systemctl_missing(self, mock_run):
         """Should return False when systemctl is not available."""
-        from imas_codex.embeddings.readiness import _try_start_service
+        from iter_codex.embeddings.readiness import _try_start_service
 
         assert _try_start_service() is False
 
@@ -314,20 +314,20 @@ class TestTryStartService:
 class TestIsOnFacility:
     """Tests for facility detection."""
 
-    @patch("imas_codex.remote.locations.is_location_local", return_value=True)
-    @patch("imas_codex.settings.get_embedding_location", return_value="titan")
+    @patch("iter_codex.remote.locations.is_location_local", return_value=True)
+    @patch("iter_codex.settings.get_embedding_location", return_value="titan")
     def test_detects_local_facility(self, mock_location, mock_local):
         """Should return True when on the embedding facility."""
-        from imas_codex.embeddings.readiness import _is_on_facility
+        from iter_codex.embeddings.readiness import _is_on_facility
 
         assert _is_on_facility() is True
         mock_local.assert_called_once_with("titan")
 
-    @patch("imas_codex.remote.locations.is_location_local", return_value=False)
-    @patch("imas_codex.settings.get_embedding_location", return_value="titan")
+    @patch("iter_codex.remote.locations.is_location_local", return_value=False)
+    @patch("iter_codex.settings.get_embedding_location", return_value="titan")
     def test_detects_remote(self, mock_location, mock_local):
         """Should return False when not on the embedding facility."""
-        from imas_codex.embeddings.readiness import _is_on_facility
+        from iter_codex.embeddings.readiness import _is_on_facility
 
         assert _is_on_facility() is False
 
@@ -335,28 +335,28 @@ class TestIsOnFacility:
 class TestIsOnLoginNode:
     """Tests for login node detection via systemd."""
 
-    @patch("imas_codex.embeddings.readiness.subprocess.run")
+    @patch("iter_codex.embeddings.readiness.subprocess.run")
     def test_detects_login_node(self, mock_run):
         """Should return True when systemd user session is running."""
-        from imas_codex.embeddings.readiness import _is_on_login_node
+        from iter_codex.embeddings.readiness import _is_on_login_node
 
         mock_run.return_value = MagicMock(returncode=0, stdout="running")
         assert _is_on_login_node() is True
 
-    @patch("imas_codex.embeddings.readiness.subprocess.run")
+    @patch("iter_codex.embeddings.readiness.subprocess.run")
     def test_detects_compute_node(self, mock_run):
         """Should return False when no systemd user session."""
-        from imas_codex.embeddings.readiness import _is_on_login_node
+        from iter_codex.embeddings.readiness import _is_on_login_node
 
         mock_run.return_value = MagicMock(returncode=1, stdout="")
         assert _is_on_login_node() is False
 
     @patch(
-        "imas_codex.embeddings.readiness.subprocess.run",
+        "iter_codex.embeddings.readiness.subprocess.run",
         side_effect=FileNotFoundError,
     )
     def test_returns_false_when_no_systemctl(self, mock_run):
         """Should return False when systemctl is not found."""
-        from imas_codex.embeddings.readiness import _is_on_login_node
+        from iter_codex.embeddings.readiness import _is_on_login_node
 
         assert _is_on_login_node() is False

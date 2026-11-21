@@ -34,8 +34,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 
-from imas_codex.graph.client import GraphClient  # noqa: E402
-from imas_codex.standard_names.signed_manifest import (  # noqa: E402
+from iter_codex.graph.client import GraphClient  # noqa: E402
+from iter_codex.standard_names.signed_manifest import (  # noqa: E402
     apply_signed_manifest,
     compose_edge_archive_authority,
     signed_payload_sha256,

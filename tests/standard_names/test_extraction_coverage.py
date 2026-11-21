@@ -6,7 +6,7 @@ import inspect
 
 import pytest
 
-from imas_codex.standard_names.enrichment import (
+from iter_codex.standard_names.enrichment import (
     group_by_concept_and_unit,
     select_grouping_cluster,
     select_primary_cluster,
@@ -236,20 +236,20 @@ class TestExtractDdForceParameter:
     """extract_dd_candidates accepts a force parameter."""
 
     def test_force_parameter_exists(self):
-        from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
         sig = inspect.signature(extract_dd_candidates)
         assert "force" in sig.parameters
 
     def test_force_default_is_false(self):
-        from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
         sig = inspect.signature(extract_dd_candidates)
         assert sig.parameters["force"].default is False
 
     def test_limit_parameter_exists(self):
         """Extraction query has a LIMIT parameter to bound path count."""
-        from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
         sig = inspect.signature(extract_dd_candidates)
         assert "limit" in sig.parameters

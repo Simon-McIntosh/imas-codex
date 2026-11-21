@@ -6,15 +6,15 @@ from uuid import uuid4
 
 import pytest
 
-from imas_codex.discovery.base.reset import SIGNAL_RESET_SPECS, reset_to_status
-from imas_codex.discovery.signals import parallel
-from imas_codex.discovery.signals.models import (
+from iter_codex.discovery.base.reset import SIGNAL_RESET_SPECS, reset_to_status
+from iter_codex.discovery.signals import parallel
+from iter_codex.discovery.signals.models import (
     SignalEnrichmentBatch,
     SignalEnrichmentResult,
 )
-from imas_codex.discovery.signals.scanners.base import ScanResult
-from imas_codex.discovery.signals.scanners.edas import EDASScanner
-from imas_codex.graph import GraphClient
+from iter_codex.discovery.signals.scanners.base import ScanResult
+from iter_codex.discovery.signals.scanners.edas import EDASScanner
+from iter_codex.graph import GraphClient
 from tests.discovery.enrichment_fixtures import with_description_review
 
 CATALOGUE_TEXT = "Lower FPPCC Current (LKAT2)"
@@ -35,7 +35,7 @@ async def _scan_signal():
         "ncats": 1,
     }
     remote = AsyncMock(return_value=json.dumps(catalogue))
-    with patch("imas_codex.remote.executor.async_run_python_script", remote):
+    with patch("iter_codex.remote.executor.async_run_python_script", remote):
         result = await EDASScanner().scan("jt-60sa", "facility-host", SCAN_CONFIG)
     remote.assert_awaited_once()
     return result.signals[0]
@@ -111,11 +111,11 @@ async def test_reset_signal_prompt_uses_catalogue_text():
         patch.object(parallel, "mark_signals_underspecified"),
         patch.object(parallel, "propagate_source_enrichment", return_value=0),
         patch(
-            "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+            "iter_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=with_description_review(llm),
         ),
     ):
@@ -140,7 +140,7 @@ async def test_edas_seed_uses_catalogue_only_update_for_existing_rows():
 
     with (
         patch(
-            "imas_codex.discovery.signals.scanners.base.get_scanner",
+            "iter_codex.discovery.signals.scanners.base.get_scanner",
             return_value=Scanner(),
         ),
         patch.object(parallel, "ingest_discovered_signals", return_value=1) as ingest,
@@ -233,7 +233,7 @@ async def test_reenumeration_only_refills_catalogue_text_on_enriched_signal():
                 "source_description": CATALOGUE_TEXT,
             }
             with patch(
-                "imas_codex.graph.GraphClient",
+                "iter_codex.graph.GraphClient",
                 return_value=TransactionClient(transaction),
             ):
                 assert reset_to_status(SIGNAL_RESET_SPECS["discovered"], facility) == 1

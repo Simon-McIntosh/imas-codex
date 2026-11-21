@@ -6,8 +6,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.standard_names import segment_selection, vocabulary_definitions
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names import segment_selection, vocabulary_definitions
+from iter_codex.standard_names.worker_tasks import (
     worker_review_names as _owning_worker_review_names,
 )
 

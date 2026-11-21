@@ -231,7 +231,7 @@ def _make_call(
     """Make a single LLM call through our discovery infrastructure."""
     import litellm
 
-    from imas_codex.discovery.base.llm import (
+    from iter_codex.discovery.base.llm import (
         ensure_model_prefix,
         extract_cost,
         get_api_key,

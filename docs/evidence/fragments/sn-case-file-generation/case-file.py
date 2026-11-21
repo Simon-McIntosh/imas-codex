@@ -32,7 +32,7 @@ from datetime import UTC, datetime
 from html import escape
 from pathlib import Path
 
-from imas_codex.standard_names.source_reads import source_paths_projection
+from iter_codex.standard_names.source_reads import source_paths_projection
 
 ROOT = Path(__file__).resolve().parent
 REPO = ROOT.parents[3]
@@ -156,8 +156,8 @@ def row_of(record) -> dict[str, object]:
 
 def build(ids: list[str], limit: int = 0) -> dict[str, object]:
     """Build one case file per name through a single graph client."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.case_file import build_name_case_file
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.case_file import build_name_case_file
 
     run_dir = RUN / "case-files"
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -673,7 +673,7 @@ def document(report: dict[str, object], *, standalone: bool) -> str:
         node = f'<meta name="node-id" content="{NODE}">'
     return (
         '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
-        '<meta name="docs-project" content="imas-codex">\n'
+        '<meta name="docs-project" content="iter-codex">\n'
         f'<meta name="reckon-type" content="{"evidence" if standalone else "evidence-fragment"}">\n'
         f"{slug}\n{node}\n<title>{escape(title)}</title>\n</head>\n<body>\n<main>\n"
         f"{body}\n</main>\n</body>\n</html>\n"

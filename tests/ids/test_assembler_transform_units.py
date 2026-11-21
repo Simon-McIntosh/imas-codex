@@ -8,7 +8,7 @@ units. The assembler must not convert the transformed value a second time.
 import logging
 from types import SimpleNamespace
 
-from imas_codex.ids.assembler import IDSAssembler
+from iter_codex.ids.assembler import IDSAssembler
 
 
 def _assembler(ids_name: str) -> IDSAssembler:

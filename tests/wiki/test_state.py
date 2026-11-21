@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.discovery.wiki.state import WikiDiscoveryState
+from iter_codex.discovery.wiki.state import WikiDiscoveryState
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def _no_pending_work(*args, **kwargs):
 class TestShouldStop:
     """Tests for WikiDiscoveryState.should_stop()."""
 
-    @patch("imas_codex.discovery.wiki.state._get_graph_ops")
+    @patch("iter_codex.discovery.wiki.state._get_graph_ops")
     def test_stop_when_all_idle_no_pending(self, mock_graph_ops, state):
         """All idle + no pending work -> should stop."""
         _set_all_idle(state)
@@ -52,7 +52,7 @@ class TestShouldStop:
 
         assert state.should_stop() is True
 
-    @patch("imas_codex.discovery.wiki.state._get_graph_ops")
+    @patch("iter_codex.discovery.wiki.state._get_graph_ops")
     def test_no_stop_when_score_not_idle(self, mock_graph_ops, state):
         """Score worker not idle -> should not stop."""
         _set_all_idle(state)
@@ -65,7 +65,7 @@ class TestShouldStop:
         state.stop_requested = True
         assert state.should_stop() is True
 
-    @patch("imas_codex.discovery.wiki.state._get_graph_ops")
+    @patch("iter_codex.discovery.wiki.state._get_graph_ops")
     def test_budget_exhausted_llm_idle_bypass(self, mock_graph_ops, state):
         """When budget exhausted, LLM workers with idle_count=0 count as done.
 
@@ -94,7 +94,7 @@ class TestShouldStop:
 
         assert state.should_stop() is True
 
-    @patch("imas_codex.discovery.wiki.state._get_graph_ops")
+    @patch("iter_codex.discovery.wiki.state._get_graph_ops")
     def test_budget_exhausted_io_work_pending(self, mock_graph_ops, state):
         """Budget exhausted but I/O ingest work pending -> don't stop yet."""
         state.score_stats.cost = 2.50
@@ -121,7 +121,7 @@ class TestShouldStop:
         assert state.document_score_phase.idle_count == 0
         assert state.image_phase.idle_count == 0
 
-    @patch("imas_codex.discovery.wiki.state._get_graph_ops")
+    @patch("iter_codex.discovery.wiki.state._get_graph_ops")
     def test_budget_exhausted_ignores_llm_pending_work(self, mock_graph_ops, state):
         """Budget exhausted: pending scoring work should be ignored.
 
@@ -152,7 +152,7 @@ class TestShouldStop:
         mock_ops.has_pending_image_work.assert_not_called()
         mock_ops.has_pending_document_work.assert_not_called()
 
-    @patch("imas_codex.discovery.wiki.state._get_graph_ops")
+    @patch("iter_codex.discovery.wiki.state._get_graph_ops")
     def test_no_budget_resets_all_idle_on_pending(self, mock_graph_ops, state):
         """Without budget exhaustion, all idle counts reset on pending work."""
         _set_all_idle(state)
@@ -199,14 +199,14 @@ class TestShouldStopScoring:
 class TestShouldStopIngesting:
     """Tests for ingest worker stop conditions."""
 
-    @patch("imas_codex.discovery.wiki.state._get_graph_ops")
+    @patch("iter_codex.discovery.wiki.state._get_graph_ops")
     def test_continues_after_budget(self, mock_graph_ops, state):
         """Ingest workers should continue even after budget exhaustion."""
         state.score_stats.cost = 2.50  # Budget exhausted
         state.ingest_phase._idle_count = 0  # Still working
         assert state.should_stop_ingesting() is False
 
-    @patch("imas_codex.discovery.wiki.state._get_graph_ops")
+    @patch("iter_codex.discovery.wiki.state._get_graph_ops")
     def test_stops_when_scoring_done_and_no_work(self, mock_graph_ops, state):
         """Ingest stops when scoring done + no pending ingest work."""
         state.score_stats.cost = 2.50  # Budget exhausted

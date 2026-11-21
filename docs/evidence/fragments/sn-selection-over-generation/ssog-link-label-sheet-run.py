@@ -3,12 +3,12 @@
 Driver for the ``ssog-link-label-sheet`` node. It reads the accepted names'
 documentation from the
 live graph, finds every documentation link whose target names a standard name
-(:func:`imas_codex.standard_names.doc_links.find_name_links`), and marks the
+(:func:`iter_codex.standard_names.doc_links.find_name_links`), and marks the
 self-links — links that point back at the documenting name — with
 :func:`find_self_links`. It draws a sample of at least 150 links that includes
 every self-link and spreads the rest across the documenting names' physics
 domains, then asks Jev one Noul per link through
-:func:`imas_codex.discovery.base.judgment.decide_batch` under the ``sn-judge``
+:func:`iter_codex.discovery.base.judgment.decide_batch` under the ``sn-judge``
 seat and the ``standard-names`` service: does the link text describe the
 target's description? The state carries the link text, the target's name and
 description, and the documenting name.
@@ -38,7 +38,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from imas_codex.standard_names.doc_links import (
+from iter_codex.standard_names.doc_links import (
     NameLink,
     find_name_links,
     link_judgement_state,
@@ -55,7 +55,7 @@ COST_CEILING_USD = 1.00
 def _load_names() -> list[dict[str, Any]]:
     """Every standard name whose documentation carries a ``name:`` link, bounded."""
 
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         return gc.query(
@@ -71,7 +71,7 @@ def _load_names() -> list[dict[str, Any]]:
 def _descriptions() -> dict[str, str]:
     """The description of every standard name, so a link target's own may be shown."""
 
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         rows = gc.query(
@@ -158,8 +158,8 @@ async def _judge(
 ) -> tuple[list[float | None], float, float]:
     """Ask Jev one link-label Noul per candidate; return probabilities and cost."""
 
-    from imas_codex.discovery.base.judgment import decide_batch
-    from imas_codex.settings import get_model
+    from iter_codex.discovery.base.judgment import decide_batch
+    from iter_codex.settings import get_model
 
     states = [
         link_judgement_state(

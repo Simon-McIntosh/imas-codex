@@ -7,17 +7,17 @@ import asyncio
 import click
 import pytest
 
-from imas_codex.cli.discover.common import resolve_focus_items
-from imas_codex.cli.discover.documents import DocumentsOptions, run_documents_stage
-from imas_codex.discovery.base.image import claim_images_for_scoring
-from imas_codex.discovery.documents.pipeline import (
+from iter_codex.cli.discover.common import resolve_focus_items
+from iter_codex.cli.discover.documents import DocumentsOptions, run_documents_stage
+from iter_codex.discovery.base.image import claim_images_for_scoring
+from iter_codex.discovery.documents.pipeline import (
     DocumentDiscoveryState,
     _has_pending_image_documents,
     _has_pending_image_scores,
     has_pending_work,
     run_document_discovery,
 )
-from imas_codex.discovery.documents.workers import (
+from iter_codex.discovery.documents.workers import (
     _claim_image_documents,
     image_fetch_worker,
     image_score_worker,
@@ -108,7 +108,7 @@ class Graph:
 @pytest.fixture
 def graph(monkeypatch):
     graph = Graph()
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: graph)
     return graph
 
 
@@ -147,7 +147,7 @@ def test_pipeline_pending_checks_receive_path_prefixes(monkeypatch, graph):
         state.image_score_phase.refresh_has_work()
 
     monkeypatch.setattr(
-        "imas_codex.discovery.documents.pipeline.run_discovery_engine", fake_engine
+        "iter_codex.discovery.documents.pipeline.run_discovery_engine", fake_engine
     )
     state = DocumentDiscoveryState(facility=FACILITY, path_prefixes=(PREFIX,))
     asyncio.run(run_document_discovery(state))
@@ -168,13 +168,13 @@ def test_workers_forward_path_prefixes_to_both_claims(monkeypatch):
         return []
 
     monkeypatch.setattr(
-        "imas_codex.discovery.documents.workers._claim_image_documents",
+        "iter_codex.discovery.documents.workers._claim_image_documents",
         fake_fetch_claim,
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.base.image.claim_images_for_scoring", fake_score_claim
+        "iter_codex.discovery.base.image.claim_images_for_scoring", fake_score_claim
     )
-    monkeypatch.setattr("imas_codex.discovery.base.facility.get_facility", lambda _: {})
+    monkeypatch.setattr("iter_codex.discovery.base.facility.get_facility", lambda _: {})
     state = DocumentDiscoveryState(facility=FACILITY, path_prefixes=(PREFIX,))
     state.image_phase.mark_done()
     state.image_score_phase.mark_done()
@@ -189,9 +189,9 @@ def test_workers_forward_path_prefixes_to_both_claims(monkeypatch):
 @pytest.fixture
 def stage(monkeypatch, graph):
     states = []
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda facility: {"id": facility, "ssh_host": "remote"},
     )
 
@@ -203,10 +203,10 @@ def stage(monkeypatch, graph):
         return asyncio.run(async_main(None, None))
 
     monkeypatch.setattr(
-        "imas_codex.discovery.documents.pipeline.run_document_discovery", fake_pipeline
+        "iter_codex.discovery.documents.pipeline.run_document_discovery", fake_pipeline
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.run_discovery", fake_run_discovery
+        "iter_codex.cli.discover.common.run_discovery", fake_run_discovery
     )
     return states
 

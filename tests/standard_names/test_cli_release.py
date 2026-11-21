@@ -10,12 +10,12 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.catalog_release import ReleaseReport
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.catalog_release import ReleaseReport
 
-MOCK_RUN_RELEASE = "imas_codex.standard_names.catalog_release.run_release"
-MOCK_GET_STATUS = "imas_codex.standard_names.catalog_release.get_release_status"
-MOCK_ISNC_DIR = "imas_codex.settings.get_sn_isnc_dir"
+MOCK_RUN_RELEASE = "iter_codex.standard_names.catalog_release.run_release"
+MOCK_GET_STATUS = "iter_codex.standard_names.catalog_release.get_release_status"
+MOCK_ISNC_DIR = "iter_codex.settings.get_sn_isnc_dir"
 
 
 def _success_report(**overrides) -> ReleaseReport:
@@ -177,8 +177,8 @@ class TestBatchTargetAuto:
 
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
-        from imas_codex.standard_names.catalog_release import ReviewReleaseReport
+        from iter_codex.cli.sn import sn
+        from iter_codex.standard_names.catalog_release import ReviewReleaseReport
 
         captured: dict = {}
 
@@ -187,7 +187,7 @@ class TestBatchTargetAuto:
             return ReviewReleaseReport(rc_version="v0.1.0rc1", batch_size=1)
 
         with patch(
-            "imas_codex.standard_names.catalog_release.run_review_release",
+            "iter_codex.standard_names.catalog_release.run_review_release",
             side_effect=_fake,
         ):
             result = CliRunner().invoke(
@@ -223,7 +223,7 @@ class TestBatchVersionVisibility:
     """A batch RC must be recognisable as such in the CLI output."""
 
     def test_batch_label_and_labelled_version_are_reported(self):
-        from imas_codex.standard_names.catalog_release import ReviewReleaseReport
+        from iter_codex.standard_names.catalog_release import ReviewReleaseReport
 
         def _fake(**kw):
             return ReviewReleaseReport(
@@ -233,7 +233,7 @@ class TestBatchVersionVisibility:
             )
 
         with patch(
-            "imas_codex.standard_names.catalog_release.run_review_release",
+            "iter_codex.standard_names.catalog_release.run_review_release",
             side_effect=_fake,
         ):
             result = CliRunner().invoke(

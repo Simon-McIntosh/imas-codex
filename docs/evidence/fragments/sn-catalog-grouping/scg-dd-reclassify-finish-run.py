@@ -155,7 +155,7 @@ def _score(
 
 
 def _readback(args: argparse.Namespace) -> int:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     labels = json.loads(Path(args.labels).read_text())["path_answers"]
     label_paths = sorted(labels)

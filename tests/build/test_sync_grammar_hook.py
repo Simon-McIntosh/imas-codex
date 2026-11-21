@@ -88,24 +88,24 @@ def _make_hook(tmp_path: Path) -> Any:
 def test_sync_grammar_skipped_via_env_var(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """IMAS_CODEX_SKIP_GRAMMAR_SYNC=1 must suppress the grammar sync."""
-    monkeypatch.setenv("IMAS_CODEX_SKIP_GRAMMAR_SYNC", "1")
+    """ITER_CODEX_SKIP_GRAMMAR_SYNC=1 must suppress the grammar sync."""
+    monkeypatch.setenv("ITER_CODEX_SKIP_GRAMMAR_SYNC", "1")
     hook = _make_hook(tmp_path)
 
     with patch(
-        "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+        "iter_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
     ) as mock_sync:
         hook._sync_grammar_best_effort(tmp_path.parent)
         assert not mock_sync.called, (
-            "sync should be skipped when IMAS_CODEX_SKIP_GRAMMAR_SYNC=1"
+            "sync should be skipped when ITER_CODEX_SKIP_GRAMMAR_SYNC=1"
         )
 
 
 def test_sync_grammar_skips_silently_on_import_error(tmp_path: Path) -> None:
-    """When imas_codex is not importable (bootstrap), the hook must not raise."""
+    """When iter_codex is not importable (bootstrap), the hook must not raise."""
     hook = _make_hook(tmp_path)
 
-    with patch.dict(sys.modules, {"imas_codex.standard_names.grammar_sync": None}):
+    with patch.dict(sys.modules, {"iter_codex.standard_names.grammar_sync": None}):
         try:
             hook._sync_grammar_best_effort(tmp_path.parent)
         except Exception as exc:  # noqa: BLE001
@@ -121,7 +121,7 @@ def test_sync_grammar_skips_silently_on_graph_error(tmp_path: Path) -> None:
         side_effect=RuntimeError("bolt://nonexistent:7687 — connection refused")
     )
     with patch(
-        "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph",
+        "iter_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph",
         fake_sync,
     ):
         try:
@@ -141,7 +141,7 @@ def test_sync_grammar_reports_on_success(tmp_path: Path) -> None:
     mock_report.templates = 5
 
     with patch(
-        "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph",
+        "iter_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph",
         return_value=mock_report,
     ):
         try:

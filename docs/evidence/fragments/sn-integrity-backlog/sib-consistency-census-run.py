@@ -264,14 +264,14 @@ def _member_row(row: dict[str, Any]) -> dict[str, Any]:
 def family_anchor(members: list[dict[str, Any]]) -> str | None:
     """The member the family should converge on, by the shared anchor rule.
 
-    Delegates to :func:`imas_codex.standard_names.families.select_anchor`, the
+    Delegates to :func:`iter_codex.standard_names.families.select_anchor`, the
     one rule the docs pipeline and the harmonize command both use, so this
     census cannot name a different anchor from the pipeline that rewrites the
     family.  A census family has no parent row of its own, so the parent arm of
     the rule is left off and the anchor is the highest-scoring DD-sourced
     accepted member, or its deterministic fallbacks.
     """
-    from imas_codex.standard_names.families import select_anchor
+    from iter_codex.standard_names.families import select_anchor
 
     return select_anchor(
         None,
@@ -598,7 +598,7 @@ def census(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def read_live() -> list[dict[str, Any]]:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as graph:
         return graph.query(NAME_QUERY, stages=list(LIVE_NAME_STAGES))
@@ -611,7 +611,7 @@ def planted_control() -> dict[str, Any]:
     members of another must not.  The graph is started by the module that owns
     the disposable-Neo4j lifecycle and is torn down here.
     """
-    from imas_codex.graph import temp_neo4j
+    from iter_codex.graph import temp_neo4j
 
     scratch = tempfile.mkdtemp(
         prefix="sib-consistency-census-", dir=tempfile.gettempdir()
@@ -624,7 +624,7 @@ def planted_control() -> dict[str, Any]:
             directory, bolt_port, http_port, load_dump=False
         )
         uri = f"bolt://127.0.0.1:{bolt_port}"
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         planted = [
             {

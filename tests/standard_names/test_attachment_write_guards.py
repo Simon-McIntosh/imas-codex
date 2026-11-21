@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.attachment_audit import guard_source_pairings
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from iter_codex.standard_names.attachment_audit import guard_source_pairings
+from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _is_attachment_consistent,
 )
 
@@ -16,7 +16,7 @@ from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment imp
 def _no_approved_names():
     """Make the approval-backed protection lookup explicit for this suite."""
     with patch(
-        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        "iter_codex.standard_names.protection._fetch_catalog_edit_names",
         return_value=set(),
     ):
         yield
@@ -111,7 +111,7 @@ def test_pairing_guard_preserves_existing_and_rejects_only_fresh_conflict() -> N
 
 
 def test_bulk_writer_does_not_materialize_rejected_dd_pairing() -> None:
-    from imas_codex.standard_names.graph_store.graph_catalog import write_standard_names
+    from iter_codex.standard_names.graph_store.graph_catalog import write_standard_names
 
     class FakeGraph:
         def __init__(self) -> None:
@@ -254,7 +254,7 @@ def test_attachment_persist_refuses_a_pairing_the_name_contradicts() -> None:
     """A distinct vector field of one device cannot join a name's sources."""
     from unittest.mock import patch
 
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         persist_claimed_attachments,
     )
 
@@ -270,7 +270,7 @@ def test_attachment_persist_refuses_a_pairing_the_name_contradicts() -> None:
         outcome="attachment_collision",
     )
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=_graph_returning(tx),
     ):
         winners = persist_claimed_attachments([dict(_CONFLICTING_ATTACHMENT)])
@@ -296,7 +296,7 @@ def test_attachment_persist_refuses_a_pairing_the_name_contradicts() -> None:
 def test_attachment_persist_lands_a_consistent_pairing() -> None:
     from unittest.mock import patch
 
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         persist_claimed_attachments,
     )
 
@@ -311,7 +311,7 @@ def test_attachment_persist_lands_a_consistent_pairing() -> None:
         outcome="winner",
     )
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=_graph_returning(tx),
     ):
         winners = persist_claimed_attachments([dict(_CONFLICTING_ATTACHMENT)])
@@ -331,7 +331,7 @@ def test_guard_runs_before_the_binding_query_reserves_the_edge() -> None:
     """
     from unittest.mock import patch
 
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         persist_claimed_attachments,
     )
 
@@ -345,7 +345,7 @@ def test_guard_runs_before_the_binding_query_reserves_the_edge() -> None:
         outcome="attachment_collision",
     )
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=_graph_returning(tx),
     ):
         persist_claimed_attachments([dict(_CONFLICTING_ATTACHMENT)])
@@ -362,7 +362,7 @@ def test_compose_persist_guards_a_binding_onto_an_established_name() -> None:
     """The stable-reuse branch is the phantom-attach case, and it is gated."""
     from unittest.mock import patch
 
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         persist_generated_name_winners,
     )
 
@@ -394,7 +394,7 @@ def test_compose_persist_guards_a_binding_onto_an_established_name() -> None:
         "source_claim_seq": 3,
     }
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=_graph_returning(tx),
     ):
         finalized = persist_generated_name_winners(
@@ -421,7 +421,7 @@ def test_compose_persist_guards_a_binding_onto_an_established_name() -> None:
 
 
 def test_position_locus_is_not_tested_as_a_device() -> None:
-    from imas_codex.standard_names.segments import is_place_locus
+    from iter_codex.standard_names.segments import is_place_locus
 
     assert is_place_locus("detector_pixel")
 
@@ -435,7 +435,7 @@ def test_position_locus_is_not_tested_as_a_device() -> None:
 
 
 def test_entity_locus_still_enters_the_device_test() -> None:
-    from imas_codex.standard_names.segments import is_place_locus
+    from iter_codex.standard_names.segments import is_place_locus
 
     assert not is_place_locus("langmuir_probe")
 
@@ -450,14 +450,14 @@ def test_entity_locus_still_enters_the_device_test() -> None:
 
 def test_unregistered_locus_keeps_the_device_test() -> None:
     """Withdrawing the rule needs ISN evidence, which an unknown token is not."""
-    from imas_codex.standard_names.segments import is_place_locus
+    from iter_codex.standard_names.segments import is_place_locus
 
     assert not is_place_locus("entirely_made_up_locus")
 
 
 def test_locus_types_are_read_from_isn_not_duplicated_in_codex() -> None:
     """A restructured registry must fail loudly, not silently disable the rule."""
-    from imas_codex.standard_names.segments import locus_types
+    from iter_codex.standard_names.segments import locus_types
 
     types = locus_types()
     assert types, "ISN locus registry unreachable — the rule would turn off"

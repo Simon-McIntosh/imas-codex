@@ -15,16 +15,16 @@ from typing import Any
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_audits as _owning_graph_audits,
     graph_foundation as _owning_graph_foundation,
 )
-from imas_codex.standard_names.graph_store.graph_audits import (
+from iter_codex.standard_names.graph_store.graph_audits import (
     realign_grammar_segments_for_name,
 )
-from imas_codex.standard_names.graph_store.graph_catalog import _GRAMMAR_SEGMENT_COLUMNS
-from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
+from iter_codex.standard_names.graph_store.graph_catalog import _GRAMMAR_SEGMENT_COLUMNS
+from iter_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
 #: A name whose stored ``physical_base`` has drifted from its own id parse.
 DRIFTED_NAME = "electron_density"
@@ -264,7 +264,7 @@ def test_cli_route_passes_the_name_and_dry_run_and_prints_the_drift(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """``sn realign-segments NAME --dry-run`` is the operator surface."""
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     calls: list[tuple[str, bool]] = []
 
@@ -296,7 +296,7 @@ def test_cli_route_passes_the_name_and_dry_run_and_prints_the_drift(
 def test_cli_route_surfaces_a_refusal_as_a_usage_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     monkeypatch.setattr(
         _owning_graph_audits,
@@ -314,7 +314,7 @@ def test_cli_route_reports_the_aligned_base_on_a_noop(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """An aligned name still shows the value the parse agreed on."""
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     monkeypatch.setattr(
         _owning_graph_audits,

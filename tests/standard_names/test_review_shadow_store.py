@@ -21,8 +21,8 @@ import pytest
 yaml = pytest.importorskip("yaml")
 
 _REPO = Path(__file__).resolve().parents[2]
-_SCHEMA = _REPO / "imas_codex" / "schemas" / "standard_name.yaml"
-_GENERATED = _REPO / "imas_codex" / "graph" / "models.py"
+_SCHEMA = _REPO / "iter_codex" / "schemas" / "standard_name.yaml"
+_GENERATED = _REPO / "iter_codex" / "graph" / "models.py"
 
 _SHADOW_FIELDS = (
     "judge_kind",
@@ -58,7 +58,7 @@ def _judgment() -> dict:
 
 
 def _build(*args, **kwargs):
-    from imas_codex.standard_names.review.pipeline import _build_review_record
+    from iter_codex.standard_names.review.pipeline import _build_review_record
 
     return _build_review_record(*args, **kwargs)
 
@@ -97,10 +97,10 @@ class _ReviewGraph:
 
 
 def _write_records(records: list[dict], graph: _ReviewGraph) -> None:
-    from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
+    from iter_codex.standard_names.graph_store.graph_catalog import write_reviews
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         write_reviews(records)
@@ -230,10 +230,10 @@ class TestAcceptScoreSelection:
         return review, logging.LoggerAdapter(logging.getLogger("shadow-test"), {})
 
     def _scored(self, *, shadow: bool) -> tuple[dict, _ReviewGraph]:
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             write_name_review_results,
         )
-        from imas_codex.standard_names.review.pipeline import (
+        from iter_codex.standard_names.review.pipeline import (
             _match_reviews_to_entries,
         )
 
@@ -244,7 +244,7 @@ class TestAcceptScoreSelection:
         review, wlog = self._review(shadow=persisted)
         scored, _, _ = _match_reviews_to_entries([review], [_item()], wlog)
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ):
             write_name_review_results(scored)
@@ -269,7 +269,7 @@ class TestAcceptScoreSelection:
 class TestRefineTriggerIgnoresShadowRecords:
     def test_refine_decision_is_identical_with_shadow_attributes_present(self) -> None:
         """The refining trigger reads no review node, so a shadow record is invisible."""
-        from imas_codex.standard_names.pools import standard_name_pool_predicates
+        from iter_codex.standard_names.pools import standard_name_pool_predicates
 
         refine = None
         for predicate in standard_name_pool_predicates():

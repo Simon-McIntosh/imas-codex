@@ -15,8 +15,8 @@ import asyncio
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.pools import (
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.pools import (
     _EMPTY_CLAIM_EXCLUDE_THRESHOLD,
     POOL_WEIGHTS,
     PoolSpec,

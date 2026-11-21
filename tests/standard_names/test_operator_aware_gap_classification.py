@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.segments import (
+from iter_codex.standard_names.segments import (
     OPERATOR_SEGMENT,
     classify_gap,
     describe_gap,
@@ -55,7 +55,7 @@ class TestGrammarTokensBySegment:
     ):
         import imas_standard_names
 
-        import imas_codex.standard_names.segments as seg_mod
+        import iter_codex.standard_names.segments as seg_mod
 
         real_accessor = seg_mod.grammar_tokens_by_segment
         calls: list[bool] = []
@@ -118,7 +118,7 @@ class TestGrammarTokensBySegment:
 
     def test_degrades_to_empty_without_isn(self, monkeypatch):
         """Absent ISN the accessor yields nothing — the rule turns off, never stale."""
-        import imas_codex.standard_names.segments as seg_mod
+        import iter_codex.standard_names.segments as seg_mod
 
         monkeypatch.setattr(seg_mod, "_load_segment_token_map", lambda: None)
         monkeypatch.setattr(seg_mod, "_operator_tokens", lambda: frozenset())
@@ -262,7 +262,7 @@ class TestOperatorComposition:
         assert operator_composition("square_of_zzz_unknown_xyzzy") is None
 
     def test_atomic_compounds_are_not_decomposed(self):
-        from imas_codex.standard_names.segments import ATOMIC_COMPOUNDS
+        from iter_codex.standard_names.segments import ATOMIC_COMPOUNDS
 
         for compound in ("magnetic_field", "current_density", "safety_factor"):
             assert compound in ATOMIC_COMPOUNDS
@@ -289,7 +289,7 @@ class TestClassifyGapOperatorAware:
 
     @pytest.mark.parametrize(("segment", "token"), OPERATOR_EXPRESSIBLE)
     def test_not_actionable_for_operator_expressible(self, segment, token):
-        from imas_codex.standard_names.segments import is_actionable_gap
+        from iter_codex.standard_names.segments import is_actionable_gap
 
         assert not is_actionable_gap(segment, token), (
             f"{segment}/{token} must not strand its source as a vocabulary gap"

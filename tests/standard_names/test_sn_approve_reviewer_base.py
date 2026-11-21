@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.promote import (
+from iter_codex.standard_names.promote import (
     ApprovalChange,
     read_pr_changes,
     resolve_merged_pr,
@@ -111,7 +111,7 @@ def test_additive_pr_detects_edit_against_cut_time_catalog(tmp_path: Path) -> No
         "base": {"ref": "main"},
     }
     with patch(
-        "imas_codex.graph.ghcr.github_api_call",
+        "iter_codex.graph.ghcr.github_api_call",
         return_value=(200, payload),
     ):
         resolved = resolve_merged_pr(pr_url)
@@ -127,7 +127,7 @@ def test_additive_pr_detects_edit_against_cut_time_catalog(tmp_path: Path) -> No
         )
     ]
 
-    with patch("imas_codex.standard_names.promote._name_exists", return_value=True):
+    with patch("iter_codex.standard_names.promote._name_exists", return_value=True):
         report = run_approval(
             isnc_dir=repo,
             base_ref=additive_base,
@@ -155,10 +155,10 @@ def test_guard_stops_a_resolve_whose_mock_misses_the_transport_seam() -> None:
     """
     with (
         patch(
-            "imas_codex.standard_names.promote._pull_request_state",
+            "iter_codex.standard_names.promote._pull_request_state",
             return_value="MERGED",
         ),
-        patch("imas_codex.graph.ghcr.resolve_api_token", return_value="token"),
+        patch("iter_codex.graph.ghcr.resolve_api_token", return_value="token"),
         pytest.raises(RealTransportAttempted),
     ):
         resolve_merged_pr("https://github.com/example/catalog/pull/3")

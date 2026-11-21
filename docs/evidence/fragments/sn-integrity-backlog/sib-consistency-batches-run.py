@@ -36,7 +36,7 @@ RENAME_LINEAGE_PARTNER = "toroidal_momentum_diffusion_coefficient"
 HERE = Path(__file__).resolve().parent
 CENSUS_PATH = HERE / "sib-consistency-census.json"
 CENSUS_RUNNER = HERE / "sib-consistency-census-run.py"
-RELEASE_LOG = Path.home() / ".local/share/imas-codex/logs/sn_sn-release.log"
+RELEASE_LOG = Path.home() / ".local/share/iter-codex/logs/sn_sn-release.log"
 
 AXIS_CODES = {"documentation": "d", "grouping": "g", "rename": "r"}
 

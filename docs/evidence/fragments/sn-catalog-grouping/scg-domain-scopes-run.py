@@ -6,7 +6,7 @@ in ``scg-domain-path-measure-results.json``) and, for every pair the measure
 flagged as confused, records one of two verdicts:
 
 - ``defect`` — the two scopes claim the same quantity. One scope is rewritten in
-  ``imas_codex/definitions/physics/domains.yaml`` so the two exclude each other,
+  ``iter_codex/definitions/physics/domains.yaml`` so the two exclude each other,
   via an ``excludes`` entry naming the neighbour.
 - ``overlap`` — the quantity genuinely belongs to both. Precedence settles it,
   and the guidance carries an ``excludes`` entry naming precedence as the reason.
@@ -29,7 +29,7 @@ import yaml
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[3]
-GUIDANCE = REPO / "imas_codex/definitions/physics/domains.yaml"
+GUIDANCE = REPO / "iter_codex/definitions/physics/domains.yaml"
 
 # ---------------------------------------------------------------------------
 # Per-pair adjudication.
@@ -620,7 +620,7 @@ def main() -> int:
 
     out = {
         "generated_from": "scg-domain-path-measure-results.json",
-        "guidance": "imas_codex/definitions/physics/domains.yaml",
+        "guidance": "iter_codex/definitions/physics/domains.yaml",
         "pair_count": len(pair_entries(measure)),
         "distinct_pair_count": len(PAIRS),
         "verdicts": verdicts,

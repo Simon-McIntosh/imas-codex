@@ -9,7 +9,7 @@ that difference. See ``test_attachment_guard.py`` for the lexical tense rule
 covering everything except this operator-scope distinction.
 """
 
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _is_attachment_consistent,
 )
 

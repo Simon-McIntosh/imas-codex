@@ -12,13 +12,13 @@ import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from imas_codex.ids.models import (
+from iter_codex.ids.models import (
     SignalMappingBatch,
     SignalMappingEntry,
     ValidatedMappingResult,
     ValidatedSignalMapping,
 )
-from imas_codex.ids.workers import (
+from iter_codex.ids.workers import (
     MappingDiscoveryState,
     assign_worker,
     map_worker,
@@ -58,27 +58,27 @@ async def _run_pipeline(state) -> None:
 
     # --- assign: one escalated source whose choice raises ---
     with (
-        patch("imas_codex.ids.workers.GraphClient", return_value=graph),
+        patch("iter_codex.ids.workers.GraphClient", return_value=graph),
         patch(
-            "imas_codex.ids.workers.get_mapping_route_thresholds",
+            "iter_codex.ids.workers.get_mapping_route_thresholds",
             return_value=SimpleNamespace(shortlist_size=5),
         ),
         patch(
-            "imas_codex.ids.workers.claim_sources_for_escalated",
+            "iter_codex.ids.workers.claim_sources_for_escalated",
             return_value=[{"id": ESCALATED, "physics_domain": "magnetics"}],
         ),
         patch(
-            "imas_codex.ids.graph_ops.read_candidates",
+            "iter_codex.ids.graph_ops.read_candidates",
             return_value={ESCALATED: [_edge(TARGET)]},
         ),
         patch(
-            "imas_codex.ids.mapping.achoose_targets",
+            "iter_codex.ids.mapping.achoose_targets",
             new_callable=AsyncMock,
             side_effect=RuntimeError("model named a path outside its shortlist"),
         ),
-        patch("imas_codex.ids.workers.release_mapping_claim"),
-        patch("imas_codex.ids.workers.has_pending_assignment_work", _pending),
-        patch("imas_codex.ids.workers.asyncio.sleep", new_callable=AsyncMock),
+        patch("iter_codex.ids.workers.release_mapping_claim"),
+        patch("iter_codex.ids.workers.has_pending_assignment_work", _pending),
+        patch("iter_codex.ids.workers.asyncio.sleep", new_callable=AsyncMock),
     ):
         await assign_worker(state)
     assert state.assign_phase.done, "assign phase did not reach done"
@@ -106,25 +106,25 @@ async def _run_pipeline(state) -> None:
         ],
     )
     with (
-        patch("imas_codex.ids.workers.claim_sources_for_mapping", _claim),
-        patch("imas_codex.ids.workers.GraphClient", return_value=graph),
+        patch("iter_codex.ids.workers.claim_sources_for_mapping", _claim),
+        patch("iter_codex.ids.workers.GraphClient", return_value=graph),
         patch(
-            "imas_codex.ids.graph_ops.read_candidates",
+            "iter_codex.ids.graph_ops.read_candidates",
             return_value={SELECTED: [_edge(TARGET)]},
         ),
         patch(
-            "imas_codex.ids.mapping._prepare_section_context",
+            "iter_codex.ids.mapping._prepare_section_context",
             return_value={"prompt": "probe"},
         ),
-        patch("imas_codex.ids.mapping._build_messages", return_value=[]),
+        patch("iter_codex.ids.mapping._build_messages", return_value=[]),
         patch(
-            "imas_codex.ids.mapping._acall_llm",
+            "iter_codex.ids.mapping._acall_llm",
             new_callable=AsyncMock,
             return_value=batch,
         ),
-        patch("imas_codex.ids.workers.refresh_mapping_status", return_value="mapped"),
-        patch("imas_codex.ids.workers.has_pending_mapping_work", return_value=False),
-        patch("imas_codex.ids.workers.asyncio.sleep", new_callable=AsyncMock),
+        patch("iter_codex.ids.workers.refresh_mapping_status", return_value="mapped"),
+        patch("iter_codex.ids.workers.has_pending_mapping_work", return_value=False),
+        patch("iter_codex.ids.workers.asyncio.sleep", new_callable=AsyncMock),
     ):
         await map_worker(state)
     assert state.map_phase.done, "map phase did not complete"
@@ -156,11 +156,11 @@ async def _run_pipeline(state) -> None:
         return "mapping-id"
 
     with (
-        patch("imas_codex.ids.mapping.adiscover_assembly", _no_assembly),
-        patch("imas_codex.ids.mapping.validate_mappings", return_value=validated),
-        patch("imas_codex.ids.models.persist_mapping_result", side_effect=_persist),
-        patch("imas_codex.ids.workers.GraphClient", return_value=graph),
-        patch("imas_codex.ids.workers.refresh_mapping_status"),
+        patch("iter_codex.ids.mapping.adiscover_assembly", _no_assembly),
+        patch("iter_codex.ids.mapping.validate_mappings", return_value=validated),
+        patch("iter_codex.ids.models.persist_mapping_result", side_effect=_persist),
+        patch("iter_codex.ids.workers.GraphClient", return_value=graph),
+        patch("iter_codex.ids.workers.refresh_mapping_status"),
     ):
         await validate_worker(state)
     assert SELECTED in persisted, "validation did not persist the mapped source"

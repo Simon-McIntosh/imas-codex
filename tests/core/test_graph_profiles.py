@@ -8,7 +8,7 @@ probes occur.
 
 import pytest
 
-from imas_codex.graph.profiles import (
+from iter_codex.graph.profiles import (
     BOLT_BASE_PORT,
     HTTP_BASE_PORT,
     Neo4jProfile,
@@ -23,7 +23,7 @@ from imas_codex.graph.profiles import (
     list_profiles,
     resolve_neo4j,
 )
-from imas_codex.settings import _load_pyproject_settings
+from iter_codex.settings import _load_pyproject_settings
 
 
 @pytest.fixture(autouse=True)
@@ -38,12 +38,12 @@ def _clear_uri_cache():
 def _mock_is_local_host(monkeypatch):
     """Prevent any SSH probes — treat all hosts as local."""
     monkeypatch.setattr(
-        "imas_codex.remote.executor.is_local_host",
+        "iter_codex.remote.executor.is_local_host",
         lambda h: True,
     )
     # Prevent compute host fallback from reading private YAML.
     monkeypatch.setattr(
-        "imas_codex.remote.locations._resolve_compute_host",
+        "iter_codex.remote.locations._resolve_compute_host",
         lambda info: None,
     )
 
@@ -106,11 +106,11 @@ class TestResolveNeo4j:
         monkeypatch.delenv("NEO4J_URI", raising=False)
         monkeypatch.delenv("NEO4J_USERNAME", raising=False)
         monkeypatch.delenv("NEO4J_PASSWORD", raising=False)
-        monkeypatch.delenv("IMAS_CODEX_GRAPH_LOCATION", raising=False)
+        monkeypatch.delenv("ITER_CODEX_GRAPH_LOCATION", raising=False)
 
         # Mock SLURM discovery to return a known compute node
         monkeypatch.setattr(
-            "imas_codex.remote.tunnel.discover_compute_node_local",
+            "iter_codex.remote.tunnel.discover_compute_node_local",
             lambda service_job_name=None: "gpu-node-01",
         )
 
@@ -164,7 +164,7 @@ class TestHostField:
         monkeypatch.delenv("NEO4J_URI", raising=False)
         monkeypatch.delenv("NEO4J_USERNAME", raising=False)
         monkeypatch.delenv("NEO4J_PASSWORD", raising=False)
-        monkeypatch.delenv("IMAS_CODEX_GRAPH_LOCATION", raising=False)
+        monkeypatch.delenv("ITER_CODEX_GRAPH_LOCATION", raising=False)
 
         profile = resolve_neo4j()
         assert profile.host == "iter"
@@ -200,8 +200,8 @@ class TestGetActiveGraphName:
 
     def test_no_active_returns_uninitialized(self, tmp_path, monkeypatch):
         """Returns 'uninitialized' when no active graph symlink exists."""
-        monkeypatch.setattr("imas_codex.graph.dirs.GRAPH_STORE", tmp_path / ".neo4j")
-        monkeypatch.setattr("imas_codex.graph.dirs.ACTIVE_LINK", tmp_path / "neo4j")
+        monkeypatch.setattr("iter_codex.graph.dirs.GRAPH_STORE", tmp_path / ".neo4j")
+        monkeypatch.setattr("iter_codex.graph.dirs.ACTIVE_LINK", tmp_path / "neo4j")
         name = get_active_graph_name()
         assert name == "uninitialized"
 
@@ -215,8 +215,8 @@ class TestGetActiveGraphName:
         link = tmp_path / "neo4j"
         link.symlink_to(graph_dir)
 
-        monkeypatch.setattr("imas_codex.graph.dirs.GRAPH_STORE", store)
-        monkeypatch.setattr("imas_codex.graph.dirs.ACTIVE_LINK", link)
+        monkeypatch.setattr("iter_codex.graph.dirs.GRAPH_STORE", store)
+        monkeypatch.setattr("iter_codex.graph.dirs.ACTIVE_LINK", link)
 
         name = get_active_graph_name()
         assert name == "my-graph"

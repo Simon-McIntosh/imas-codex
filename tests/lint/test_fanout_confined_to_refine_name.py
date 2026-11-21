@@ -25,7 +25,7 @@ import pathlib
 import pytest
 
 _STANDARD_NAMES = pathlib.Path(__file__).resolve().parents[2] / (
-    "imas_codex/standard_names"
+    "iter_codex/standard_names"
 )
 
 WORKERS_PATH = _STANDARD_NAMES / "workers.py"

@@ -12,12 +12,12 @@ Structural agreement alone (axis token, base carrier, locus, physics_domain,
 canonical axis triple) does not catch this shape: every structural field is
 consistent and only the documentation is missing. These tests lock in the
 documentation-completeness arm of ``vector_family_consistency_check``
-(imas_codex/standard_names/audits.py) — case 6 of its docstring.
+(iter_codex/standard_names/audits.py) — case 6 of its docstring.
 """
 
 from __future__ import annotations
 
-from imas_codex.standard_names.audits import vector_family_consistency_check
+from iter_codex.standard_names.audits import vector_family_consistency_check
 
 
 def _axis_member(

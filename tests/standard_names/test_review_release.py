@@ -14,15 +14,15 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.catalog_release import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.catalog_release import (
     _assert_approved_entries_unchanged,
     batch_build_metadata,
     compute_next_version,
     run_release,
     run_review_release,
 )
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     approved_baseline_delta,
     assemble_review_catalog,
 )
@@ -104,7 +104,7 @@ _PR_TARGET = {
 def _isolate_release_tests_from_live_dd_gaps(monkeypatch):
     """Release orchestration tests must not read the operator's live graph."""
     monkeypatch.setattr(
-        "imas_codex.standard_names.dd_gaps.list_dd_gaps",
+        "iter_codex.standard_names.dd_gaps.list_dd_gaps",
         lambda **_kwargs: [],
         raising=False,
     )
@@ -952,7 +952,7 @@ def test_review_release_source_batch_excludes_unbound_family(
         child_name,
     ]
     monkeypatch.setattr(
-        "imas_codex.standard_names.minting.mint_sn_list",
+        "iter_codex.standard_names.minting.mint_sn_list",
         lambda *_args, **_kwargs: SimpleNamespace(names=broader_family),
     )
     record: dict = {}
@@ -1102,7 +1102,7 @@ def test_pr_target_derived_from_remotes(isnc_repo, tmp_path):
     )
     # origin now points at github, so push must be stubbed out via dry_run=False
     # is not possible; instead verify derivation directly.
-    from imas_codex.standard_names.catalog_release import _github_slug
+    from iter_codex.standard_names.catalog_release import _github_slug
 
     assert _github_slug(isnc_repo, "upstream") == ("example-org", "example-catalog")
     assert _github_slug(isnc_repo, "origin") == ("example-fork", "example-catalog")
@@ -1155,7 +1155,7 @@ def test_pr_target_fork_uses_origin_slug(isnc_repo, tmp_path):
     # target locally by re-pointing origin back after derivation is not
     # possible mid-call, so assert via dry_run=False is skipped; instead
     # verify the derivation helper directly.
-    from imas_codex.standard_names.catalog_release import _github_slug
+    from iter_codex.standard_names.catalog_release import _github_slug
 
     assert _github_slug(isnc_repo, "origin") == ("example-fork", "example-catalog")
 
@@ -1165,7 +1165,7 @@ def test_pr_target_fork_uses_origin_slug(isnc_repo, tmp_path):
 
 def test_collect_catalog_changes(isnc_repo):
     """Per-domain added/changed/removed entry names vs the base branch."""
-    from imas_codex.standard_names.release_notes import collect_catalog_changes
+    from iter_codex.standard_names.release_notes import collect_catalog_changes
 
     sn_dir = isnc_repo / "standard_names"
     sn_dir.mkdir()
@@ -1195,12 +1195,12 @@ def test_collect_catalog_changes(isnc_repo):
 
 
 def test_build_pr_notes_falls_back_on_llm_failure(monkeypatch):
-    from imas_codex.standard_names import release_notes
+    from iter_codex.standard_names import release_notes
 
     def _boom(**kw):
         raise RuntimeError("no model")
 
-    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _boom)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.call_llm_structured", _boom)
     title, body = release_notes.build_pr_notes(
         message="WEST batch",
         rc_version="v0.1.0rc1+west-task-2e",
@@ -1223,7 +1223,7 @@ def test_build_pr_notes_falls_back_on_llm_failure(monkeypatch):
 
 
 def test_review_title_uses_domain_only_for_single_domain():
-    from imas_codex.standard_names.release_notes import review_pr_title
+    from iter_codex.standard_names.release_notes import review_pr_title
 
     single_domain = [
         {
@@ -1256,7 +1256,7 @@ def test_review_title_uses_domain_only_for_single_domain():
 
 
 def test_dd_gap_release_summary_is_warning_only_and_lifecycle_complete():
-    from imas_codex.standard_names.release_notes import summarize_dd_gap_facts
+    from iter_codex.standard_names.release_notes import summarize_dd_gap_facts
 
     facts = [
         {
@@ -1315,7 +1315,7 @@ def test_dd_gap_release_summary_is_warning_only_and_lifecycle_complete():
 
 
 def test_static_notes_omit_problem_narration():
-    from imas_codex.standard_names.release_notes import (
+    from iter_codex.standard_names.release_notes import (
         static_pr_notes,
         summarize_dd_gap_facts,
     )
@@ -1358,7 +1358,7 @@ def test_static_notes_omit_problem_narration():
 
 
 def test_release_notes_prompt_omits_problem_evidence(monkeypatch):
-    from imas_codex.standard_names import release_notes
+    from iter_codex.standard_names import release_notes
 
     seen: dict = {}
 
@@ -1377,7 +1377,7 @@ def test_release_notes_prompt_omits_problem_evidence(monkeypatch):
             {},
         )
 
-    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _ok)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.call_llm_structured", _ok)
     summary = release_notes.summarize_dd_gap_facts(
         [
             {
@@ -1414,7 +1414,7 @@ def test_release_notes_prompt_omits_problem_evidence(monkeypatch):
 
 
 def test_enumerating_model_body_is_rejected_before_publish(monkeypatch):
-    from imas_codex.standard_names import release_notes
+    from iter_codex.standard_names import release_notes
 
     model_body = "Summary.\n- plasma_current\nReview the batch."
 
@@ -1428,7 +1428,7 @@ def test_enumerating_model_body_is_rejected_before_publish(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "imas_codex.discovery.base.llm.call_llm_structured", _misleading
+        "iter_codex.discovery.base.llm.call_llm_structured", _misleading
     )
     summary = release_notes.summarize_dd_gap_facts(
         [
@@ -1467,7 +1467,7 @@ def test_enumerating_model_body_is_rejected_before_publish(monkeypatch):
 
 
 def test_model_cannot_invent_dd_caveats_for_empty_fact_set(monkeypatch):
-    from imas_codex.standard_names import release_notes
+    from iter_codex.standard_names import release_notes
 
     def _invented(**_kwargs):
         return (
@@ -1479,7 +1479,7 @@ def test_model_cannot_invent_dd_caveats_for_empty_fact_set(monkeypatch):
             {},
         )
 
-    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _invented)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.call_llm_structured", _invented)
     _title, body = release_notes.build_pr_notes(
         message="Batch",
         rc_version="v0.1.0rc1",
@@ -1493,7 +1493,7 @@ def test_model_cannot_invent_dd_caveats_for_empty_fact_set(monkeypatch):
 
 
 def test_missing_model_title_is_rejected_before_publish(monkeypatch):
-    from imas_codex.standard_names import release_notes
+    from iter_codex.standard_names import release_notes
 
     class MissingTitle:
         body = (
@@ -1503,7 +1503,7 @@ def test_missing_model_title_is_rejected_before_publish(monkeypatch):
         )
 
     monkeypatch.setattr(
-        "imas_codex.discovery.base.llm.call_llm_structured",
+        "iter_codex.discovery.base.llm.call_llm_structured",
         lambda **_kwargs: (MissingTitle(), 0.0, {}),
     )
     title, body = release_notes.build_pr_notes(
@@ -1528,12 +1528,12 @@ def test_missing_model_title_is_rejected_before_publish(monkeypatch):
 def test_build_approval_notes_falls_back_to_empty_on_llm_failure(monkeypatch):
     """An approval-summary synthesis failure yields '' so the deterministic tag
     block is written alone — the fold-back is never blocked by the notes model."""
-    from imas_codex.standard_names import release_notes
+    from iter_codex.standard_names import release_notes
 
     def _boom(**kw):
         raise RuntimeError("no model")
 
-    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _boom)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.call_llm_structured", _boom)
     notes = release_notes.build_approval_notes(
         pr_description="Review batch demo",
         conversation=[{"author": "rev", "kind": "review", "body": "approve"}],
@@ -1545,7 +1545,7 @@ def test_build_approval_notes_falls_back_to_empty_on_llm_failure(monkeypatch):
 
 def test_build_approval_notes_returns_model_summary(monkeypatch):
     """When the model succeeds, its grounded summary is returned verbatim."""
-    from imas_codex.standard_names import release_notes
+    from iter_codex.standard_names import release_notes
 
     def _ok(**kw):
         return (
@@ -1554,7 +1554,7 @@ def test_build_approval_notes_returns_model_summary(monkeypatch):
             {},
         )
 
-    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _ok)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.call_llm_structured", _ok)
     notes = release_notes.build_approval_notes(
         pr_description="d",
         conversation=[],
@@ -1669,7 +1669,7 @@ def test_review_release_explicit_pr_text_wins_verbatim(isnc_repo, tmp_path):
     ],
 )
 def test_explicit_pr_text_contract_rejects_invalid_prose(title, body, error):
-    from imas_codex.standard_names.release_notes import validate_pr_text
+    from iter_codex.standard_names.release_notes import validate_pr_text
 
     with pytest.raises(ValueError, match=error):
         validate_pr_text(title, body)
@@ -1678,7 +1678,7 @@ def test_explicit_pr_text_contract_rejects_invalid_prose(title, body, error):
 def test_release_help_names_explicit_pr_text_options():
     from click.testing import CliRunner
 
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     result = CliRunner().invoke(sn, ["release", "--help"])
 
@@ -1692,7 +1692,7 @@ def test_release_cli_forwards_body_file_bytes(tmp_path):
 
     from click.testing import CliRunner
 
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     focus = _write_names_focus(tmp_path)
     body_file = tmp_path / "pr-body.md"
@@ -1715,7 +1715,7 @@ def test_release_cli_forwards_body_file_bytes(tmp_path):
         )
 
     with patch(
-        "imas_codex.standard_names.catalog_release.run_review_release",
+        "iter_codex.standard_names.catalog_release.run_review_release",
         side_effect=release,
     ):
         result = CliRunner().invoke(
@@ -1795,7 +1795,7 @@ def test_review_release_scopes_dd_caveats_to_batch_names(isnc_repo, tmp_path):
 def test_unavailable_dd_gap_read_is_visible_but_not_release_blocking(
     isnc_repo, tmp_path, monkeypatch
 ):
-    from imas_codex.standard_names import release_notes
+    from iter_codex.standard_names import release_notes
 
     focus = _write_names_focus(tmp_path)
     seen: dict = {}
@@ -1818,7 +1818,7 @@ def test_unavailable_dd_gap_read_is_visible_but_not_release_blocking(
         return 5, f"https://github.com/{repo}/pull/5"
 
     monkeypatch.setattr(
-        "imas_codex.discovery.base.llm.call_llm_structured", _misleading
+        "iter_codex.discovery.base.llm.call_llm_structured", _misleading
     )
 
     report = run_review_release(
@@ -1878,7 +1878,7 @@ def test_batch_label_falls_back_to_the_manifest_filename_stem(isnc_repo, tmp_pat
     # The sn_names schema requires 'name', so the focus load fails first —
     # but the label derivation itself is independent of that and is asserted
     # directly here.
-    from imas_codex.standard_names.catalog_release import batch_build_metadata
+    from iter_codex.standard_names.catalog_release import batch_build_metadata
 
     assert batch_build_metadata(focus) == "no-name-batch"
     assert report.errors  # schema still enforces 'name' on sn_names files
@@ -1932,7 +1932,7 @@ def test_frozen_artifact_is_schema_valid_with_the_label(isnc_repo, tmp_path):
     Driven by a real run: a label-carrying roster is only observable on an
     artifact that was actually written, which a rehearsal no longer does.
     """
-    from imas_codex.standard_names.sources_manifest import load_names_file
+    from iter_codex.standard_names.sources_manifest import load_names_file
 
     focus = _write_names_focus(tmp_path, name="west-task-2e")
     report = run_review_release(

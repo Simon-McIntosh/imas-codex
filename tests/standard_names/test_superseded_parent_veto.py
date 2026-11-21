@@ -4,12 +4,12 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.derivation import DerivedEdge
-from imas_codex.standard_names.graph_store.graph_lineage import (
+from iter_codex.standard_names.derivation import DerivedEdge
+from iter_codex.standard_names.graph_store.graph_lineage import (
     _filter_admissible_parents,
 )
-from imas_codex.standard_names.parents import superseded_parent_names
-from imas_codex.standard_names.signed_manifest import _apply_structural_edge_reconcile
+from iter_codex.standard_names.parents import superseded_parent_names
+from iter_codex.standard_names.signed_manifest import _apply_structural_edge_reconcile
 
 RETIRED = "area_of_flux_surface"
 CURRENT = "poloidal_plane_cross_sectional_area_of_flux_surface"
@@ -98,7 +98,7 @@ def test_reconcile_releases_existing_edge_to_superseded_parent():
         props={"operator_kind": "qualifier"},
     )
     with patch(
-        "imas_codex.standard_names.derivation.derive_edges", return_value=[edge]
+        "iter_codex.standard_names.derivation.derive_edges", return_value=[edge]
     ):
         assert _apply_structural_edge_reconcile(graph, [CHILD]) == 1
 

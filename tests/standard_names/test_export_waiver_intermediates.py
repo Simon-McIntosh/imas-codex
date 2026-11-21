@@ -18,7 +18,7 @@ import pytest
 
 pytest.importorskip("imas_standard_names")
 
-from imas_codex.standard_names.export import (  # noqa: E402
+from iter_codex.standard_names.export import (  # noqa: E402
     _WAIVED_CHAIN_DEPTH_BOUND,
     _WAIVED_SOURCES_DECLARATION,
     WaivedSourceDeclarationError,
@@ -174,26 +174,26 @@ def _run_fixture_export(
 ):
     with (
         patch(
-            "imas_codex.standard_names.export._fetch_export_population",
+            "iter_codex.standard_names.export._fetch_export_population",
             return_value=population,
         ),
         patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=_ChainGraphClient(chains),
         ),
         patch(
-            "imas_codex.standard_names.export._validate_entry",
+            "iter_codex.standard_names.export._validate_entry",
             side_effect=lambda entry: entry,
         ),
         patch(
-            "imas_codex.standard_names.export._fetch_deprecation_stubs",
+            "iter_codex.standard_names.export._fetch_deprecation_stubs",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+            "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
             return_value=([], set()),
         ),
-        patch("imas_codex.standard_names.export._write_domain_yaml"),
+        patch("iter_codex.standard_names.export._write_domain_yaml"),
     ):
         return run_export(
             staging_dir,

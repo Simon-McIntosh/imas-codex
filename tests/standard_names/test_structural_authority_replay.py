@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from imas_codex.standard_names import graph_ops, parents
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops, parents
+from iter_codex.standard_names.graph_store import (
     graph_parent_lifecycle as _owning_graph_parent_lifecycle,
 )
 

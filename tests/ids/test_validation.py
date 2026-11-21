@@ -1,11 +1,11 @@
-"""Tests for imas_codex.ids.validation module."""
+"""Tests for iter_codex.ids.validation module."""
 
 from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.ids.models import ValidatedSignalMapping
-from imas_codex.ids.validation import (
+from iter_codex.ids.models import ValidatedSignalMapping
+from iter_codex.ids.validation import (
     AssemblyCoverageReport,
     BindingCheck,
     ConfidenceDistribution,
@@ -57,7 +57,7 @@ class TestValidateMapping:
         # check_dd_paths mock — return path exists
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [
                 {
                     "path": "pf_active/coil/element/geometry/rectangle/r",
@@ -84,7 +84,7 @@ class TestValidateMapping:
         binding = _make_binding()
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [{"path": binding.target_id, "exists": True}]
             report = validate_mapping([binding], gc=mock_gc)
 
@@ -98,7 +98,7 @@ class TestValidateMapping:
         binding = _make_binding(target_id="pf_active/nonexistent/field")
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [
                 {"path": "pf_active/nonexistent/field", "exists": False}
             ]
@@ -113,7 +113,7 @@ class TestValidateMapping:
         binding = _make_binding(target_id="pf_active/old_path")
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [
                 {
                     "path": "pf_active/old_path",
@@ -132,7 +132,7 @@ class TestValidateMapping:
         binding = _make_binding(transform_expression="invalid_syntax(")
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [{"path": binding.target_id, "exists": True}]
             report = validate_mapping([binding], gc=mock_gc)
 
@@ -146,9 +146,9 @@ class TestValidateMapping:
         binding = _make_binding(source_units="m", target_units="kg")
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [{"path": binding.target_id, "exists": True}]
-            with patch("imas_codex.ids.validation.analyze_units") as mock_units:
+            with patch("iter_codex.ids.validation.analyze_units") as mock_units:
                 mock_units.return_value = {"compatible": False}
                 report = validate_mapping([binding], gc=mock_gc)
 
@@ -166,9 +166,9 @@ class TestValidateMapping:
         )
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [{"path": binding.target_id, "exists": True}]
-            with patch("imas_codex.ids.validation.analyze_units") as mock_units:
+            with patch("iter_codex.ids.validation.analyze_units") as mock_units:
                 mock_units.return_value = {
                     "compatible": True,
                     "conversion_factor": 0.001,
@@ -184,7 +184,7 @@ class TestValidateMapping:
         binding = _make_binding(source_units=None, target_units=None)
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [{"path": binding.target_id, "exists": True}]
             report = validate_mapping([binding], gc=mock_gc)
 
@@ -225,7 +225,7 @@ class TestValidateMapping:
         )
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [
                 {"path": "pf_active/circuit/description", "exists": True}
             ]
@@ -274,7 +274,7 @@ class TestValidateMapping:
         )
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [
                 {"path": "pf_active/circuit/description", "exists": True}
             ]
@@ -299,7 +299,7 @@ class TestValidateMapping:
         )
         from unittest.mock import patch
 
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [
                 {"path": "pf_active/coil/name", "exists": True},
                 {"path": "pf_active/nonexistent", "exists": False},
@@ -623,7 +623,7 @@ class TestEveryRecordedErrorFailsTheBinding:
         from unittest.mock import patch
 
         mock_gc.query.return_value = [{"id": binding.source_id}]
-        with patch("imas_codex.ids.validation.check_dd_paths") as mock_check:
+        with patch("iter_codex.ids.validation.check_dd_paths") as mock_check:
             mock_check.return_value = [
                 {"path": binding.target_id, "exists": True, "data_type": "FLT_0D"}
             ]

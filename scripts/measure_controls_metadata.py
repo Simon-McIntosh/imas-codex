@@ -232,8 +232,8 @@ def plot_coverage(result, path):
     import matplotlib.pyplot as plt
     from matplotlib.ticker import MaxNLocator
 
-    from imas_codex.plotting import save_figure
-    from imas_codex.plotting.style import BASE_STYLE, CANVAS, SUBJECT
+    from iter_codex.plotting import save_figure
+    from iter_codex.plotting.style import BASE_STYLE, CANVAS, SUBJECT
 
     systems = result["coverage"]["systems"]
     with plt.style.context(BASE_STYLE):

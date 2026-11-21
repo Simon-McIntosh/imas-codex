@@ -3,7 +3,7 @@
 A manifest cut owes every source a name, so a source the pipeline correctly
 refuses forever would otherwise render a cut permanently ungenerable. The
 authority settles such a source by enumerating its path in
-``imas_codex/standard_names/waived_sources.yaml``; the export leg reads that
+``iter_codex/standard_names/waived_sources.yaml``; the export leg reads that
 enumeration and marks the row ``waived``.
 
 Everything here is about the boundary of that enumeration. Membership is the
@@ -26,7 +26,7 @@ import yaml
 
 pytest.importorskip("imas_standard_names")
 
-from imas_codex.standard_names.export import (  # noqa: E402
+from iter_codex.standard_names.export import (  # noqa: E402
     _WAIVED_SOURCES_DECLARATION,
     WaivedSourceDeclarationError,
     _load_waived_source_paths,

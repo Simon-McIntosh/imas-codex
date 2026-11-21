@@ -6,7 +6,7 @@ import pytest
 
 
 def _census(rows):
-    from imas_codex.standard_names.audits import unit_spelling_census
+    from iter_codex.standard_names.audits import unit_spelling_census
 
     return unit_spelling_census(rows)
 
@@ -111,13 +111,13 @@ def test_census_reports_an_unrecorded_divergence() -> None:
     ],
 )
 def test_quantity_of_name_reads_the_head_the_qualifiers_modify(name, quantity) -> None:
-    from imas_codex.standard_names.unit_audit import quantity_of_name
+    from iter_codex.standard_names.unit_audit import quantity_of_name
 
     assert quantity_of_name(name) == quantity
 
 
 def test_extraction_rewrites_a_dictionary_unit_to_the_recorded_spelling() -> None:
-    from imas_codex.standard_names.sources.dd import _apply_unit_overrides
+    from iter_codex.standard_names.sources.dd import _apply_unit_overrides
 
     rows = [
         {"path": "core_profiles/profiles_1d/ion/torque_tor", "unit": "kg.m^2.s^-2"},
@@ -138,7 +138,7 @@ def test_extraction_rewrites_a_dictionary_unit_to_the_recorded_spelling() -> Non
 
 
 def test_extraction_leaves_a_dimensionally_different_spelling_alone() -> None:
-    from imas_codex.standard_names.unit_overrides import resolve_quantity_spelling
+    from iter_codex.standard_names.unit_overrides import resolve_quantity_spelling
 
     # A frequency path carrying an angular frequency is a different quantity
     # of meaning, so the spelling record does not rewrite it.
@@ -152,7 +152,7 @@ def test_extraction_leaves_a_dimensionally_different_spelling_alone() -> None:
 
 def test_a_compound_head_is_judged_once_and_its_words_not_separately() -> None:
     """The longest registered head decides, and its words are not re-judged."""
-    from imas_codex.standard_names.audits import name_unit_consistency_check
+    from iter_codex.standard_names.audits import name_unit_consistency_check
 
     assert (
         name_unit_consistency_check({"id": "ion_torque_density", "unit": "N.m^-2"})
@@ -165,7 +165,7 @@ def test_a_compound_head_is_judged_once_and_its_words_not_separately() -> None:
 def test_the_committed_census_is_reproducible_from_the_repository() -> None:
     """The live read and the census are one committed path, so the artifact
     can be regenerated from the revision it was taken at."""
-    from imas_codex.standard_names.audits import (
+    from iter_codex.standard_names.audits import (
         LIVE_NAME_CENSUS_QUERY,
         live_unit_spelling_census,
         unit_spelling_census,
@@ -209,12 +209,12 @@ def test_catalog_write_takes_the_recorded_spelling_on_a_disposable_graph(
     keeps the spelling the dictionary carries — so the write is shown to store
     what the pipeline decided rather than to rewrite it.
     """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         write_standard_names,
     )
-    from imas_codex.standard_names.sources.dd import _apply_unit_overrides
+    from iter_codex.standard_names.sources.dd import _apply_unit_overrides
 
     torque_path = "core_profiles/profiles_1d/ion/torque_density_tor"
     temperature_path = "core_profiles/profiles_1d/electron_temperature"

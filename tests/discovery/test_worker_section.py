@@ -8,8 +8,8 @@ Verifies that the shared worker section renderer correctly:
 - Appends extra indicators (e.g. embedding source)
 """
 
-from imas_codex.discovery.base.progress import build_worker_status_section
-from imas_codex.discovery.base.supervision import (
+from iter_codex.discovery.base.progress import build_worker_status_section
+from iter_codex.discovery.base.supervision import (
     SupervisedWorkerGroup,
     WorkerState,
 )

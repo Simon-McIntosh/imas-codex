@@ -1,7 +1,7 @@
 # Gitleaks configuration - https://github.com/gitleaks/gitleaks
-title = "imas-codex"
+title = "iter-codex"
 
 [allowlist]
   description = "Known development defaults"
-  regexes = ['''imas-codex''']  # Local Neo4j password
+  regexes = ['''iter-codex''']  # Local Neo4j password
   paths = ['''env\.example''']

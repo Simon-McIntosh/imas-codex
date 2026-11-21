@@ -6,7 +6,7 @@ import math
 
 import pytest
 
-from imas_codex.ids.models import (
+from iter_codex.ids.models import (
     BindingTransformSlots,
     CocosLabel,
     IndexLayout,
@@ -16,7 +16,7 @@ from imas_codex.ids.models import (
     UnitConversion,
     ValidatedSignalMapping,
 )
-from imas_codex.ids.transforms import compose_transform, execute_transform
+from iter_codex.ids.transforms import compose_transform, execute_transform
 
 EXACT_UNIT_PAIRS = [
     ("%", "1"),
@@ -171,7 +171,7 @@ def test_exact_unit_pair_composes(source, target, input_value, expected):
 
 @pytest.mark.parametrize(("source", "target"), EXACT_UNIT_PAIRS)
 def test_all_census_exact_unit_pairs_execute(source, target):
-    from imas_codex.units import unit_registry
+    from iter_codex.units import unit_registry
 
     decision = slots(
         unit_conversion=settled(UnitConversion(source_unit=source, target_unit=target))

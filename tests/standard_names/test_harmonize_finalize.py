@@ -7,8 +7,8 @@ from typing import Any
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.standard_names import graph_ops, harmonize
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops, harmonize
+from iter_codex.standard_names.graph_store import (
     graph_docs_persistence as _owning_graph_docs_persistence,
     graph_source_bindings as _owning_graph_source_bindings,
 )
@@ -23,8 +23,8 @@ from tests.standard_names.test_harmonize_reverse_links import (
 
 
 def _fixture(monkeypatch: Any) -> _LinkGraph:
-    from imas_codex.graph import client as graph_client
-    from imas_codex.standard_names import protection
+    from iter_codex.graph import client as graph_client
+    from iter_codex.standard_names import protection
 
     graph = _LinkGraph(_family_nodes())
     monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
@@ -92,9 +92,9 @@ def test_quarantined_member_cannot_gain_a_stamp(monkeypatch: Any) -> None:
 def test_clean_family_reconciles_stamps_and_plans_no_calls(
     monkeypatch: Any,
 ) -> None:
-    from imas_codex.cli import sn as sn_module
-    from imas_codex.cli.discover import common
-    from imas_codex.discovery.base import llm
+    from iter_codex.cli import sn as sn_module
+    from iter_codex.cli.discover import common
+    from iter_codex.discovery.base import llm
 
     graph = _fixture(monkeypatch)
     calls: list[tuple[Any, ...]] = []
@@ -169,8 +169,8 @@ def test_stamp_readback_requires_every_member_current_signature(
 
 
 def test_cli_refusal_names_member_and_reason(monkeypatch: Any) -> None:
-    from imas_codex.cli.discover import common
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.discover import common
+    from iter_codex.cli.sn import sn
 
     graph = _fixture(monkeypatch)
     monkeypatch.setattr(common, "setup_logging", lambda *_a, **_kw: None)
@@ -201,7 +201,7 @@ def test_catalog_protected_member_refuses_before_any_write(
 
 
 def test_late_protection_refuses_all_reconciliation_writes(monkeypatch: Any) -> None:
-    from imas_codex.standard_names import protection
+    from iter_codex.standard_names import protection
 
     graph = _fixture(monkeypatch)
     graph.node(_PROBE)["name_stage"] = "approved"
@@ -216,7 +216,7 @@ def test_late_protection_refuses_all_reconciliation_writes(monkeypatch: Any) -> 
 
 
 def test_open_review_roster_refuses_dry_run(monkeypatch: Any) -> None:
-    from imas_codex.standard_names import protection
+    from iter_codex.standard_names import protection
 
     graph = _fixture(monkeypatch)
     monkeypatch.setattr(

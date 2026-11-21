@@ -91,7 +91,7 @@ def load_census():
 
 
 def live_rows(names):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     query = """
     MATCH (sn:StandardName) WHERE sn.id IN $names
@@ -348,7 +348,7 @@ def settled_records():
 
 
 def live_rows_all():
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     module = census_module()
     with GraphClient() as client:
@@ -381,7 +381,7 @@ def form_is_stored(form, sentence):
 def source_evidence(names):
     """The DD source paths and their descriptions, for names that need a rename."""
 
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     query = """
     MATCH (sn:StandardName) WHERE sn.id IN $names
@@ -649,7 +649,7 @@ def report():
     sourceless_before = before.get("sourceless", {}).get("count")
     with_source = None
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         with GraphClient() as client:
             sourceless_after = module.sourceless(client)
@@ -731,7 +731,7 @@ def report():
             },
             {
                 "clause": "live names with no producer edge at or below the recorded ten",
-                "measure": "imas-codex sn sourceless",
+                "measure": "iter-codex sn sourceless",
                 "before": str(sourceless_before),
                 "after": str(with_source.get("count")),
                 "state": "within the recorded bound"
@@ -1475,7 +1475,7 @@ def verify(delivered_path=None):
                 operators[operator][key],
             )
 
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as client:
         sourceless_after = module.sourceless(client)

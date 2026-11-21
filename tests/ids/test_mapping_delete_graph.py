@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.ids.workers import clear_mappings_for_ids
+from iter_codex.graph.client import GraphClient
+from iter_codex.ids.workers import clear_mappings_for_ids
 
 FACILITY = "zz-delete-owner-test"
 IDS_NAME = "test_ids"

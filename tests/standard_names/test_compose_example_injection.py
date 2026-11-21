@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR, _get_jinja_env
+from iter_codex.llm.prompt_loader import PROMPTS_DIR, _get_jinja_env
 
 
 def _render_compose(examples: list[dict]) -> str:

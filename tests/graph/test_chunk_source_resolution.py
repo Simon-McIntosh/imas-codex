@@ -11,7 +11,7 @@ resolved value equals the owning ``CodeExample``'s ``source_file``.
 
 ``source_facility`` in the semantic-search reader is read from the chunk
 (``node.facility_id``) rather than from the owning file: the chunk writer in
-``imas_codex/ingestion/pipeline.py`` stamps ``facility_id`` on every chunk and
+``iter_codex/ingestion/pipeline.py`` stamps ``facility_id`` on every chunk and
 writes ``AT_FACILITY`` from that same value, so the chunk carries the writer's
 facility and needs no join to recover it.
 
@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.graph.query_builder import render_chunk_source
+from iter_codex.graph.query_builder import render_chunk_source
 
 pytestmark = pytest.mark.graph
 

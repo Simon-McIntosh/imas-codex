@@ -10,7 +10,7 @@ from collections import Counter, defaultdict, deque
 from html import escape
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 ROOT = Path(__file__).resolve().parents[4]
 OUTPUT = Path(__file__).with_name("sib-source-loss-census-results.json")

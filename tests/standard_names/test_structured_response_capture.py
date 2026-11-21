@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 from pydantic import BaseModel
 
-from imas_codex.discovery.base.llm import call_llm_structured
+from iter_codex.discovery.base.llm import call_llm_structured
 
 
 class _Candidate(BaseModel):
@@ -49,7 +49,7 @@ class _Response:
 def test_completed_response_remains_recoverable_when_candidate_rendering_raises(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "sk-test")
     content = (
         '{"candidates": ['
         '{"source_id": "dd:first", "spelling": "first_candidate"}, '

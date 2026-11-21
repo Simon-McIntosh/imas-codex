@@ -14,8 +14,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.defaults import DEFAULT_ORPHAN_SWEEP_TIMEOUT_S
-from imas_codex.standard_names.graph_store.graph_claim_scope import (
+from iter_codex.standard_names.defaults import DEFAULT_ORPHAN_SWEEP_TIMEOUT_S
+from iter_codex.standard_names.graph_store.graph_claim_scope import (
     _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
     _EXACT_NAME_SCOPE_STAMP_QUERY,
     ExactNameScopeConflict,

@@ -7,14 +7,14 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import campaign_pricing
-from imas_codex.standard_names.campaign_pricing import (
+from iter_codex.standard_names import campaign_pricing
+from iter_codex.standard_names.campaign_pricing import (
     CampaignCostCeilingExceeded,
     CampaignPricingPolicy,
     project_name_review_campaign,
     project_name_review_campaign_range,
 )
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_review_names as _owning_worker_review_names,
 )
 
@@ -95,7 +95,7 @@ def test_projection_issues_exactly_zero_model_calls(
         model_calls += 1
         raise AssertionError("campaign projection must not call a model")
 
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     monkeypatch.setattr(llm, "acall_llm_structured", _guarded_model_call)
     _install_projection_fakes(monkeypatch)
@@ -124,7 +124,7 @@ def test_exact_range_reports_minimum_and_worst_case_without_model_calls(
         model_calls += 1
         raise AssertionError("campaign projection must not call a model")
 
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     monkeypatch.setattr(llm, "acall_llm_structured", _guarded_model_call)
     _install_projection_fakes(monkeypatch)
@@ -161,7 +161,7 @@ def test_refusal_one_cent_below_projection_issues_exactly_zero_model_calls(
         model_calls += 1
         raise AssertionError("campaign refusal must not call a model")
 
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     monkeypatch.setattr(llm, "acall_llm_structured", _guarded_model_call)
     _install_projection_fakes(monkeypatch)
@@ -182,7 +182,7 @@ def test_refusal_one_cent_below_projection_issues_exactly_zero_model_calls(
 def test_review_request_renders_production_source_and_neighbour_context(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     def _production_enrichment(items: list[dict[str, Any]]) -> None:
         items[0]["dd_source_docs"] = [
@@ -342,7 +342,7 @@ def test_exact_cohort_resolution_is_read_only_and_uses_live_identities(
             assert params["identities"] == ["redraw_beta", "redraw_alpha"]
             return [{"id": "redraw_alpha"}, {"id": "redraw_beta"}]
 
-    from imas_codex.graph import client
+    from iter_codex.graph import client
 
     monkeypatch.setattr(client, "GraphClient", _Graph)
     cohorts = campaign_pricing.resolve_exact_campaign_cohorts(census)

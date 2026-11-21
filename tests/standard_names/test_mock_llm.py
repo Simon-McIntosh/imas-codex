@@ -18,7 +18,7 @@ class _DummyResponse(BaseModel):
 @pytest.mark.asyncio
 async def test_mock_llm_basic(mock_llm):
     """Scripted response is returned and call is recorded."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     mock_llm.add_response("generate_name", response=_DummyResponse(value="ok"))
 
@@ -41,7 +41,7 @@ async def test_mock_llm_basic(mock_llm):
 @pytest.mark.asyncio
 async def test_mock_llm_unscripted_raises(mock_llm):
     """Calls without a scripted response raise RuntimeError immediately."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     with pytest.raises(RuntimeError, match="no scripted response"):
         await acall_llm_structured(
@@ -55,7 +55,7 @@ async def test_mock_llm_unscripted_raises(mock_llm):
 @pytest.mark.asyncio
 async def test_mock_llm_dict_coercion(mock_llm):
     """A dict scripted response is coerced to the expected Pydantic model."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     mock_llm.add_response("generate_name", response={"value": "coerced"})
 
@@ -75,7 +75,7 @@ async def test_mock_llm_dict_coercion(mock_llm):
 @pytest.mark.asyncio
 async def test_mock_llm_stage_inference_review(mock_llm):
     """Stage is inferred from 'review' keyword in system prompt."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     mock_llm.add_response("review_name", response=_DummyResponse(value="reviewed"))
 
@@ -95,7 +95,7 @@ async def test_mock_llm_stage_inference_review(mock_llm):
 @pytest.mark.asyncio
 async def test_mock_llm_fifo_ordering(mock_llm):
     """Multiple responses for the same stage are returned in FIFO order."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     mock_llm.add_response("generate_name", response=_DummyResponse(value="first"))
     mock_llm.add_response("generate_name", response=_DummyResponse(value="second"))
@@ -121,7 +121,7 @@ async def test_mock_llm_fifo_ordering(mock_llm):
 @pytest.mark.asyncio
 async def test_mock_llm_model_filter(mock_llm):
     """Responses pinned to a specific model are skipped for other models."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     mock_llm.add_response(
         "generate_name",

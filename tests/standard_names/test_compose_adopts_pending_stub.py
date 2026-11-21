@@ -20,7 +20,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 pytestmark = pytest.mark.graph
 
@@ -36,8 +36,8 @@ OWNER_SOURCE = "test_adopt_projection_owner"
 
 @pytest.fixture()
 def services():
-    import imas_codex.standard_names.graph_ops  # noqa: F401 — wires the services
-    from imas_codex.standard_names.graph_store import graph_foundation
+    import iter_codex.standard_names.graph_ops  # noqa: F401 — wires the services
+    from iter_codex.standard_names.graph_store import graph_foundation
 
     return graph_foundation.get_services()
 
@@ -189,7 +189,7 @@ def _candidate() -> dict:
 
 
 def _persist_candidate(**overrides):
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         persist_generated_name_batch,
     )
 
@@ -214,10 +214,10 @@ def _persist_candidate(**overrides):
 @pytest.mark.parametrize("owned", [False, True])
 def test_worker_attachment_uses_the_graph_source_type(graph, services, owned):
     """Worker outcomes carry a fence, while the graph owns the source type."""
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _claimed_source_outcome,
     )
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _process_attachments_core,
     )
 
@@ -301,7 +301,7 @@ def test_structural_parent_projection_stub_is_adopted(graph, services):
 
 
 def test_second_claim_after_unpark_finalizes(graph, services, monkeypatch):
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         claim_explicit_standard_name_sources,
         retry_failed_sources,
     )
@@ -373,7 +373,7 @@ def test_second_claim_after_unpark_finalizes(graph, services, monkeypatch):
         )[0]["count"]
         == 1
     )
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         retarget_standard_name_sources,
     )
 
@@ -406,7 +406,7 @@ def _seed_finalized_successor(graph):
 
 
 def test_projection_migration_refuses_a_mismatched_dd_unit(graph, services):
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         retarget_standard_name_sources,
     )
 
@@ -451,10 +451,10 @@ def test_projection_migration_refuses_a_mismatched_dd_unit(graph, services):
 @pytest.mark.parametrize("stage", ["drafted", "reviewed", "accepted", "pending"])
 @pytest.mark.parametrize("entrypoint", ["supersession", "retarget"])
 def test_non_stub_predecessor_is_still_refused(graph, services, stage, entrypoint):
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         supersede_prior_source_names,
     )
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         retarget_standard_name_sources,
     )
 
@@ -498,7 +498,7 @@ def test_non_stub_predecessor_is_still_refused(graph, services, stage, entrypoin
 
 
 def test_rich_write_then_adoption_keeps_the_ownership_guard(graph, services):
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         stage_claimed_generated_candidates,
     )
 
@@ -556,7 +556,7 @@ def test_stolen_claim_aborts_transaction(graph, services, monkeypatch):
 
 def test_batch_claim_adopts_an_unowned_projection_stub(graph, services) -> None:
     """The batch compose claim binds a pending projection stub of its own path."""
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         stage_claimed_generated_candidates,
     )
 
@@ -580,7 +580,7 @@ def test_focused_claim_adopts_the_stub_and_writes_the_producing_edge(
     graph, services
 ) -> None:
     """The focused claim path adopts the stub and binds the source to it."""
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         persist_claimed_attachments,
     )
 
@@ -614,7 +614,7 @@ def test_focused_claim_adopts_the_stub_and_writes_the_producing_edge(
 
 def test_production_writer_adopts_an_unowned_projection_stub(graph, services) -> None:
     """The live compose writer adopts the stub and finalizes its source."""
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         persist_generated_name_batch,
     )
 
@@ -659,7 +659,7 @@ def test_production_writer_adopts_an_unowned_projection_stub(graph, services) ->
 
 def test_stub_owned_by_another_claim_is_still_refused(graph, services) -> None:
     """An adoption candidate owned by another claim remains a collision."""
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         stage_claimed_generated_candidates,
     )
 
@@ -677,10 +677,10 @@ def test_parked_source_keeps_the_collision_reason_beside_the_cap_message(
     graph, services
 ) -> None:
     """Parking at the claim cap preserves the refusal that led there."""
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         _MAX_COMPOSE_CLAIM_ATTEMPTS,
     )
-    from imas_codex.standard_names.orphan_sweep import _orphan_sweep_tick
+    from iter_codex.standard_names.orphan_sweep import _orphan_sweep_tick
 
     collision = (
         'standard-name binding collision: candidate "test_adopt_projection_probe_stub" '

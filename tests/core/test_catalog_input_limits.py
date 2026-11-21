@@ -15,10 +15,10 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.discovery.base import llm
-from imas_codex.settings import get_openrouter_pricing
-from imas_codex.standard_names import workers
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.discovery.base import llm
+from iter_codex.settings import get_openrouter_pricing
+from iter_codex.standard_names import workers
+from iter_codex.standard_names.worker_tasks import (
     worker_review_docs as _owning_worker_review_docs,
 )
 
@@ -31,7 +31,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 _PRICING_TABLE = (
     tomllib.loads((_REPO_ROOT / "pyproject.toml").read_text())
     .get("tool", {})
-    .get("imas-codex", {})
+    .get("iter-codex", {})
     .get("llm", {})
     .get("openrouter-pricing", {})
 )

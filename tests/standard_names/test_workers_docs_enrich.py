@@ -40,7 +40,7 @@ _NO_CHILDREN: list = []
 
 def test_t12_base_quantity_context_injection():
     """When a StandardName has a HAS_PARENT parent, base_quantity is injected."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -77,7 +77,7 @@ def test_t12_base_quantity_context_injection():
 
 def test_t12_base_quantity_not_injected_without_parent():
     """When there is no HAS_PARENT parent, base_quantity is not added."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -105,7 +105,7 @@ def test_t12_base_quantity_not_injected_without_parent():
 
 def test_t13_derivative_siblings_populated():
     """Sibling derivatives sharing the same parent are listed in derivative_context."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -141,7 +141,7 @@ def test_t13_derivative_siblings_populated():
 
 def test_t13_null_siblings_filtered():
     """Null entries returned by Cypher collect() are filtered from siblings."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -171,7 +171,7 @@ def test_t13_null_siblings_filtered():
 
 def test_t13_no_derivative_context_for_unknown_name():
     """Names not in DD_DERIVATIVE_MAP get base_quantity but not derivative_context."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -209,7 +209,7 @@ def test_t13_no_derivative_context_for_unknown_name():
 
 def test_t14_dpsi_drho_tor_resolves():
     """DD_DERIVATIVE_MAP maps dpsi_drho_tor to the correct (numerator, denominator)."""
-    from imas_codex.standard_names.families import DD_DERIVATIVE_MAP
+    from iter_codex.standard_names.families import DD_DERIVATIVE_MAP
 
     result = DD_DERIVATIVE_MAP.get("dpsi_drho_tor")
     assert result is not None, "dpsi_drho_tor should be in DD_DERIVATIVE_MAP"
@@ -220,7 +220,7 @@ def test_t14_dpsi_drho_tor_resolves():
 
 def test_t14_all_map_entries_are_2_tuples():
     """Every entry in DD_DERIVATIVE_MAP is a (numerator, denominator) 2-tuple."""
-    from imas_codex.standard_names.families import DD_DERIVATIVE_MAP
+    from iter_codex.standard_names.families import DD_DERIVATIVE_MAP
 
     for key, value in DD_DERIVATIVE_MAP.items():
         assert isinstance(value, tuple), f"{key}: expected tuple, got {type(value)}"
@@ -232,7 +232,7 @@ def test_t14_all_map_entries_are_2_tuples():
 
 def test_t14_derivative_context_numerator_denominator():
     """_enrich_for_docs_gen sets correct numerator/denominator from DD_DERIVATIVE_MAP."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 

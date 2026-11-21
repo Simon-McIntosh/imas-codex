@@ -131,11 +131,11 @@ class _FakeBudgetManager:
 
 async def _run_batch(items: list[dict[str, Any]], llm):
     """Run one compose batch with *llm* answering its structured call."""
-    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+    from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
         compose_batch,
     )
 
-    with patch("imas_codex.discovery.base.llm.acall_llm_structured", llm):
+    with patch("iter_codex.discovery.base.llm.acall_llm_structured", llm):
         return await compose_batch(items, _FakeBudgetManager(), asyncio.Event())
 
 
@@ -160,65 +160,65 @@ def compose_deps():
 
     patches = [
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
-        patch("imas_codex.settings.get_model", return_value="local/test-model"),
+        patch("iter_codex.settings.get_model", return_value="local/test-model"),
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             side_effect=lambda name, *a, **k: "compose prompt",
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items",
             side_effect=lambda items: None,
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
             return_value=None,
         ),
         patch(
-            "imas_codex.standard_names.context.build_domain_vocabulary_preseed",
+            "iter_codex.standard_names.context.build_domain_vocabulary_preseed",
             return_value="",
         ),
         patch(
-            "imas_codex.standard_names.review.themes.extract_reviewer_themes",
+            "iter_codex.standard_names.review.themes.extract_reviewer_themes",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.example_loader.load_compose_examples",
+            "iter_codex.standard_names.example_loader.load_compose_examples",
             return_value=[],
         ),
-        patch("imas_codex.graph.client.GraphClient", return_value=mock_gc),
+        patch("iter_codex.graph.client.GraphClient", return_value=mock_gc),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
+            "iter_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
             side_effect=lambda items, **_kwargs: items,
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_common._persist_description_checked_candidates",
+            "iter_codex.standard_names.worker_tasks.worker_common._persist_description_checked_candidates",
             side_effect=_fake_persist,
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_common._mark_source_prevalidation_failed",
+            "iter_codex.standard_names.worker_tasks.worker_common._mark_source_prevalidation_failed",
             side_effect=_record_refusal,
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._write_composed_name_domains",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._write_composed_name_domains",
             new=AsyncMock(return_value=None),
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
             return_value=1,
         ),
         patch(
-            "imas_codex.standard_names.audits.run_audits",
+            "iter_codex.standard_names.audits.run_audits",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_common._auto_detect_physical_base_gaps",
+            "iter_codex.standard_names.worker_tasks.worker_common._auto_detect_physical_base_gaps",
             return_value=[],
         ),
     ]

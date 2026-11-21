@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.discovery.paths.scorer import (
+from iter_codex.discovery.paths.scorer import (
     build_path_judgment_questions,
     build_path_judgment_state,
     path_judgment_fields,
 )
-from imas_codex.graph.schema import get_schema
+from iter_codex.graph.schema import get_schema
 
 
 def test_path_questions_cover_schema_purposes_and_scores():
@@ -141,7 +141,7 @@ def test_typed_path_judgment_stores_distributions_and_computes_gates():
 
 
 def test_code_scan_claim_uses_judged_facets(monkeypatch):
-    from imas_codex.discovery.code import graph_ops
+    from iter_codex.discovery.code import graph_ops
 
     queries = []
 
@@ -164,7 +164,7 @@ def test_code_scan_claim_uses_judged_facets(monkeypatch):
 
 
 def test_rescoring_preserves_enriched_metadata(monkeypatch):
-    from imas_codex.discovery.paths.parallel import mark_score_complete
+    from iter_codex.discovery.paths.parallel import mark_score_complete
 
     stored = {
         "physics_domain": "equilibrium",
@@ -200,7 +200,7 @@ def test_rescoring_preserves_enriched_metadata(monkeypatch):
                     stored[field] = value
             return []
 
-    monkeypatch.setattr("imas_codex.graph.GraphClient", FakeGraph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", FakeGraph)
     mark_score_complete(
         "jt-60sa",
         [
@@ -226,9 +226,9 @@ def test_rescoring_preserves_enriched_metadata(monkeypatch):
 
 @pytest.mark.parametrize("purpose", ["empty_directory", "other"])
 def test_triage_keeps_judged_purpose_and_uses_text_only_model(monkeypatch, purpose):
-    from imas_codex.discovery.base import facility, judgment, llm
-    from imas_codex.discovery.paths.models import PathDescription, PathDescriptionBatch
-    from imas_codex.discovery.paths.scorer import DirectoryTriager
+    from iter_codex.discovery.base import facility, judgment, llm
+    from iter_codex.discovery.paths.models import PathDescription, PathDescriptionBatch
+    from iter_codex.discovery.paths.scorer import DirectoryTriager
 
     path = "/analysis/example"
 

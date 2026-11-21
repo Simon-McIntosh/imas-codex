@@ -6,10 +6,10 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.promote import ApprovalReport, UndoApprovalReport
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.promote import ApprovalReport, UndoApprovalReport
 
-MOCK_TARGET = "imas_codex.standard_names.promote.run_approval"
+MOCK_TARGET = "iter_codex.standard_names.promote.run_approval"
 
 
 def test_sn_approve_forwards_flags_and_reports():
@@ -76,7 +76,7 @@ def test_sn_approve_names_refused_promotions_and_exits_nonzero():
 
 
 def test_sn_approve_undo_reports_both_lifecycle_reversals():
-    target = "imas_codex.standard_names.promote.undo_approval"
+    target = "iter_codex.standard_names.promote.undo_approval"
     report = UndoApprovalReport(pr_number=12, demoted=["a"])
     with patch(target, return_value=report):
         result = CliRunner().invoke(
@@ -97,7 +97,7 @@ def test_sn_merge_alias_is_absent():
 
 
 def test_sn_resolve_keeps_contested_override_semantics():
-    target = "imas_codex.standard_names.promote.resolve_contested_override"
+    target = "iter_codex.standard_names.promote.resolve_contested_override"
     with patch(target, return_value=True) as resolve:
         result = CliRunner().invoke(
             sn,

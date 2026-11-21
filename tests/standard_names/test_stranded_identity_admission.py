@@ -2,14 +2,14 @@
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.defaults import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
-from imas_codex.standard_names.graph_store.graph_catalog import (
+from iter_codex.standard_names.graph_store.graph_catalog import (
     docs_review_eligibility_params,
 )
-from imas_codex.standard_names.pools import (
+from iter_codex.standard_names.pools import (
     classify_identity_state_groups,
     identity_state_groups,
     standard_name_pool_predicates,
@@ -365,7 +365,7 @@ def _plant_states(graph, states):
     """,
         nodes=nodes,
     )
-    from imas_codex.standard_names.review.holds import raise_hold
+    from iter_codex.standard_names.review.holds import raise_hold
 
     for state in states:
         if state.get("has_open_docs_hold"):
@@ -441,8 +441,8 @@ def test_rendered_admission_matches_planted_classes(
             assert f"control_{predicate.pool}" in expected
             assert {row["id"] for row in rows} == expected
 
-        from imas_codex.cli.sn import _compute_pool_pending
-        from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+        from iter_codex.cli.sn import _compute_pool_pending
+        from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
             pool_pending_counts,
         )
 
@@ -470,23 +470,23 @@ def test_rendered_admission_matches_planted_classes(
             ids=parked_ids,
         )
 
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_review_name_batch,
         )
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             claim_generate_docs_batch,
             claim_refine_docs_batch,
         )
-        from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+        from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
             claim_enrich_parents_batch,
         )
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             claim_review_docs_batch,
         )
-        from imas_codex.standard_names.worker_tasks import worker_compose_and_validate
+        from iter_codex.standard_names.worker_tasks import worker_compose_and_validate
 
         validated = []
 
@@ -537,7 +537,7 @@ def test_rendered_admission_matches_planted_classes(
 @pytest.mark.graph
 @pytest.mark.timeout(120)
 def test_invalid_pending_candidate_is_quarantined_before_review(disposable_neo4j_empty):
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         claim_review_name_batch,
     )
 
@@ -567,8 +567,8 @@ def test_invalid_pending_candidate_is_quarantined_before_review(disposable_neo4j
 @pytest.mark.graph
 @pytest.mark.timeout(120)
 def test_passing_docs_with_open_hold_are_owned_by_refinement(disposable_neo4j_empty):
-    from imas_codex.cli.sn import _compute_pool_pending
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.cli.sn import _compute_pool_pending
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_refine_docs_batch,
     )
 

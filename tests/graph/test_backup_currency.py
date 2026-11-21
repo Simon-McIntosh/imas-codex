@@ -9,13 +9,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 
-from imas_codex.graph import neo4j_ops
+from iter_codex.graph import neo4j_ops
 
 
 def _write_recovery_archive(path: Path, timestamp: float) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = b"recoverable graph dump"
-    member = tarfile.TarInfo("imas-codex-graph/graph.dump")
+    member = tarfile.TarInfo("iter-codex-graph/graph.dump")
     member.size = len(payload)
     with tarfile.open(path, "w:gz") as archive:
         archive.addfile(member, io.BytesIO(payload))
@@ -37,14 +37,14 @@ def test_currency_uses_stale_recovery_archive_beside_newer_trial_dump(
     exports_dir = tmp_path / "exports"
     data_dir = tmp_path / "neo4j"
     stale_archive = _write_recovery_archive(
-        backups_dir / "imas-codex-graph.tar.gz", 100.0
+        backups_dir / "iter-codex-graph.tar.gz", 100.0
     )
     trial_dump = _write_file(backups_dir / "offsite-trial.dump", 300.0, b"x" * 4_748)
     live_file = _write_file(data_dir / "data" / "checkpoint", 400.0, b"live")
-    monkeypatch.setattr("imas_codex.graph.dirs.EXPORTS_DIR", exports_dir)
-    monkeypatch.setattr("imas_codex.graph.profiles.BACKUPS_DIR", backups_dir)
+    monkeypatch.setattr("iter_codex.graph.dirs.EXPORTS_DIR", exports_dir)
+    monkeypatch.setattr("iter_codex.graph.profiles.BACKUPS_DIR", backups_dir)
     monkeypatch.setattr(
-        "imas_codex.graph.profiles.resolve_neo4j",
+        "iter_codex.graph.profiles.resolve_neo4j",
         lambda: SimpleNamespace(data_dir=data_dir),
     )
 
@@ -67,10 +67,10 @@ def test_currency_does_not_treat_a_nonarchive_as_a_backup(
     data_dir = tmp_path / "neo4j"
     trial_dump = _write_file(backups_dir / "offsite-trial.dump", 300.0, b"x" * 4_748)
     live_file = _write_file(data_dir / "data" / "checkpoint", 400.0, b"live")
-    monkeypatch.setattr("imas_codex.graph.dirs.EXPORTS_DIR", exports_dir)
-    monkeypatch.setattr("imas_codex.graph.profiles.BACKUPS_DIR", backups_dir)
+    monkeypatch.setattr("iter_codex.graph.dirs.EXPORTS_DIR", exports_dir)
+    monkeypatch.setattr("iter_codex.graph.profiles.BACKUPS_DIR", backups_dir)
     monkeypatch.setattr(
-        "imas_codex.graph.profiles.resolve_neo4j",
+        "iter_codex.graph.profiles.resolve_neo4j",
         lambda: SimpleNamespace(data_dir=data_dir),
     )
 
@@ -91,7 +91,7 @@ def test_offsite_currency_names_full_graph_package_artifact(
     data_dir = tmp_path / "neo4j"
     live_file = _write_file(data_dir / "data" / "checkpoint", 400.0, b"live")
     monkeypatch.setattr(
-        "imas_codex.graph.profiles.resolve_neo4j",
+        "iter_codex.graph.profiles.resolve_neo4j",
         lambda: SimpleNamespace(data_dir=data_dir),
     )
     calls: list[tuple[str, str | None, str]] = []
@@ -107,13 +107,13 @@ def test_offsite_currency_names_full_graph_package_artifact(
             }
         ]
 
-    monkeypatch.setattr("imas_codex.graph.ghcr.list_package_versions", list_versions)
+    monkeypatch.setattr("iter_codex.graph.ghcr.list_package_versions", list_versions)
 
     currency = neo4j_ops.get_offsite_currency("ghcr.io/example", "token")
 
-    assert calls == [("ghcr.io/example", "token", "imas-codex-graph")]
+    assert calls == [("ghcr.io/example", "token", "iter-codex-graph")]
     assert currency.status == "stale"
-    assert currency.offsite_ref == "ghcr.io/example/imas-codex-graph:verified"
+    assert currency.offsite_ref == "ghcr.io/example/iter-codex-graph:verified"
     assert currency.offsite_size_bytes == 2_458_442_456
     assert currency.offsite_modified_at == datetime.fromtimestamp(100.0, tz=UTC)
     assert currency.live_path == live_file

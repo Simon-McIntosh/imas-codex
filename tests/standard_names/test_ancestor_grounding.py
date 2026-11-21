@@ -13,13 +13,13 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.worker_tasks.worker_common import (
+from iter_codex.standard_names.worker_tasks.worker_common import (
     _ANCESTOR_CONTEXT_QUERY,
 )
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _enrich_batch_items,
 )
-from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
     _enrich_for_docs_gen,
 )
 
@@ -30,7 +30,7 @@ GROUNDED_NAME = "toroidal_carbon_velocity_at_pedestal_top"
 
 @pytest.fixture
 def _pedestal_graph(seed_dd_resolutions):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     seed_dd_resolutions(
         [{"path": PEDESTAL_LEAF, "published": "cm.s^-1", "effective": "m.s^-1"}]
@@ -96,7 +96,7 @@ def test_enrich_batch_items_surfaces_pedestal_top_ancestor_live(_pedestal_graph)
 def test_enrich_for_docs_gen_surfaces_pedestal_top_ancestor_live(_pedestal_graph):
     """Docs-gen: an accepted name grounded on a template-stub source leaf gains
     the parent quantity node's rich locus-bearing description."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         item = {"id": GROUNDED_NAME}

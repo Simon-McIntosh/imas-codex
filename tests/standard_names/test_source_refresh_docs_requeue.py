@@ -9,9 +9,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import graph_ops, loop, source_refresh
-from imas_codex.standard_names.graph_store import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import graph_ops, loop, source_refresh
+from iter_codex.standard_names.graph_store import (
     graph_docs_persistence as _owning_graph_docs_persistence,
 )
 
@@ -67,7 +67,7 @@ async def test_drift_refresh_is_claimable_by_docs_pool_in_same_run(
         )
         return MagicMock(blocked=None)
 
-    monkeypatch.setattr("imas_codex.standard_names.edit.apply_edit", apply_edit)
+    monkeypatch.setattr("iter_codex.standard_names.edit.apply_edit", apply_edit)
 
     refreshed = source_refresh.refresh_drifted_sources(
         scope_run_id=active_run,
@@ -95,12 +95,12 @@ async def test_drift_refresh_is_claimable_by_docs_pool_in_same_run(
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
+            "iter_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
             side_effect=claim_generate_docs_batch,
         ),
-        patch("imas_codex.settings.get_pool_replicas", return_value=1),
+        patch("iter_codex.settings.get_pool_replicas", return_value=1),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_generate_docs.process_generate_docs_batch",
+            "iter_codex.standard_names.worker_tasks.worker_generate_docs.process_generate_docs_batch",
             new_callable=AsyncMock,
         ),
     ):
@@ -122,7 +122,7 @@ async def test_drift_refresh_is_claimable_by_docs_pool_in_same_run(
 def sourced_name(
     disposable_neo4j_uri: str, monkeypatch: pytest.MonkeyPatch
 ) -> Iterator[GraphClient]:
-    assert os.environ["IMAS_CODEX_TEST_NEO4J_EPHEMERAL"] == "1"
+    assert os.environ["ITER_CODEX_TEST_NEO4J_EPHEMERAL"] == "1"
 
     def resolved(
         path: str, unit: str | None, documentation: str | None

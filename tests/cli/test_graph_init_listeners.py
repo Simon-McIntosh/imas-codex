@@ -7,9 +7,9 @@ from types import SimpleNamespace
 
 from click.testing import CliRunner
 
-from imas_codex.cli import services
-from imas_codex.cli.graph import data
-from imas_codex.graph import dirs
+from iter_codex.cli import services
+from iter_codex.cli.graph import data
+from iter_codex.graph import dirs
 
 
 def _listener_settings(config: str) -> dict[str, str]:
@@ -36,10 +36,10 @@ def test_new_and_restored_graphs_use_compute_service_listeners(tmp_path, monkeyp
     monkeypatch.setattr(dirs, "GRAPH_STORE", graph_store)
     monkeypatch.setattr(dirs, "ACTIVE_LINK", active_link)
     monkeypatch.setattr(
-        "imas_codex.graph.profiles.resolve_neo4j", lambda **_kwargs: profile
+        "iter_codex.graph.profiles.resolve_neo4j", lambda **_kwargs: profile
     )
     monkeypatch.setattr(
-        "imas_codex.graph.remote.is_remote_location", lambda _host: False
+        "iter_codex.graph.remote.is_remote_location", lambda _host: False
     )
     monkeypatch.setattr(data, "is_neo4j_running", lambda _port: False)
     monkeypatch.setattr(data, "_start_neo4j_after_switch", lambda _profile: None)

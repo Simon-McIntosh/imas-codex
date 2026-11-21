@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, Mock, patch
 import numpy as np
 import pytest
 
-from imas_codex.embeddings.openrouter_embed import (
+from iter_codex.embeddings.openrouter_embed import (
     EMBEDDING_MODEL_COSTS,
     MODEL_NAME_MAP,
     EmbeddingBudgetExhaustedError,
@@ -278,7 +278,7 @@ class TestGetOpenRouterClient:
         """Test returns None when API key not configured."""
         with patch.dict("os.environ", {}, clear=True):
             with patch(
-                "imas_codex.embeddings.openrouter_embed.os.getenv", return_value=None
+                "iter_codex.embeddings.openrouter_embed.os.getenv", return_value=None
             ):
                 client = get_openrouter_client(api_key=None)
                 # Client created but not available
@@ -357,7 +357,7 @@ class TestCalculateEmbeddingCost:
 
     def test_calculate_uses_actual_tokens(self):
         """Test calculate_embedding_cost uses actual token count."""
-        from imas_codex.embeddings.openrouter_embed import calculate_embedding_cost
+        from iter_codex.embeddings.openrouter_embed import calculate_embedding_cost
 
         # With actual token count from API response
         cost = calculate_embedding_cost(1000, "qwen/qwen3-embedding-8b")

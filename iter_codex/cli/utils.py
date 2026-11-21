@@ -1,0 +1,184 @@
+"""CLI utilities and shared helpers."""
+
+import json
+from pathlib import Path
+from typing import Any
+
+import click
+from rich.console import Console
+
+console = Console()
+
+
+def validate_directory(
+    ctx: click.Context, param: click.Parameter, value: str | None
+) -> Path | None:
+    """Validate that a path is a directory."""
+    if value is None:
+        return None
+    path = Path(value)
+    if not path.is_dir():
+        raise click.BadParameter(f"Directory not found: {value}")
+    return path
+
+
+def validate_file(
+    ctx: click.Context, param: click.Parameter, value: str | None
+) -> Path | None:
+    """Validate that a path is a file."""
+    if value is None:
+        return None
+    path = Path(value)
+    if not path.is_file():
+        raise click.BadParameter(f"File not found: {value}")
+    return path
+
+
+def output_json(data: Any, pretty: bool = True) -> None:
+    """Output data as JSON."""
+    if pretty:
+        click.echo(json.dumps(data, indent=2, default=str))
+    else:
+        click.echo(json.dumps(data, default=str))
+
+
+def output_table(
+    title: str,
+    columns: list[tuple[str, str]],
+    rows: list[list[str]],
+) -> None:
+    """Output data as a rich table.
+
+    Args:
+        title: Table title
+        columns: List of (name, style) tuples
+        rows: List of row data (each row is a list of strings)
+    """
+    from rich.table import Table
+
+    table = Table(title=title)
+    for name, style in columns:
+        table.add_column(name, style=style)
+
+    for row in rows:
+        table.add_row(*row)
+
+    console.print(table)
+
+
+def confirm_action(message: str, default: bool = False) -> bool:
+    """Prompt user for confirmation."""
+    return click.confirm(message, default=default)
+
+
+def get_facility_or_fail(name: str) -> Any:
+    """Get facility config or raise ClickException."""
+    from iter_codex.discovery.base.facility import get_facility, list_facilities
+
+    try:
+        return get_facility(name)
+    except ValueError as e:
+        available = ", ".join(list_facilities())
+        raise click.ClickException(
+            f"Unknown facility '{name}'. Available: {available}"
+        ) from e
+
+
+def run_async(coro: Any) -> Any:
+    """Run an async coroutine in the current event loop or create one."""
+    import asyncio
+
+    try:
+        loop = asyncio.get_running_loop()
+        # Already in async context - shouldn't happen in CLI but handle it
+        import nest_asyncio
+
+        nest_asyncio.apply()
+        return loop.run_until_complete(coro)
+    except RuntimeError:
+        # No running loop - normal CLI case
+        from iter_codex.cli.shutdown import safe_asyncio_run
+
+        return safe_asyncio_run(coro)
+
+
+def setup_logging(log_level: str) -> None:
+    """Configure logging for CLI commands."""
+    import logging
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(getattr(logging, log_level))
+
+    # Update all handlers
+    for handler in root_logger.handlers:
+        handler.setLevel(getattr(logging, log_level))
+
+
+def get_workspace_root() -> Path:
+    """Get the iter-codex workspace root directory."""
+    # Look for pyproject.toml going up from current file
+    current = Path(__file__).parent
+    while current != current.parent:
+        if (current / "pyproject.toml").exists():
+            return current
+        current = current.parent
+
+    # Fallback to cwd
+    return Path.cwd()
+
+
+def format_size(size_bytes: int) -> str:
+    """Format byte size as human-readable string."""
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
+        if abs(size_bytes) < 1024.0:
+            return f"{size_bytes:.1f} {unit}"
+        size_bytes /= 1024.0
+    return f"{size_bytes:.1f} PB"
+
+
+def format_duration(seconds: float) -> str:
+    """Format duration in seconds as human-readable string."""
+    if seconds < 60:
+        return f"{seconds:.1f}s"
+    elif seconds < 3600:
+        minutes = seconds / 60
+        return f"{minutes:.1f}m"
+    else:
+        hours = seconds / 3600
+        return f"{hours:.1f}h"
+
+
+class ProgressReporter:
+    """Simple progress reporter with automatic rich detection."""
+
+    def __init__(self, use_rich: bool | None = None, total: int | None = None):
+        if use_rich is None:
+            from iter_codex.cli.rich_output import should_use_rich
+
+            use_rich = should_use_rich()
+        self.use_rich = use_rich
+        self.total = total
+        self.current = 0
+        self._progress = None
+
+    def __enter__(self):
+        if self.use_rich and self.total:
+            from rich.progress import Progress
+
+            self._progress = Progress()
+            self._progress.__enter__()
+            self._task = self._progress.add_task("Processing...", total=self.total)
+        return self
+
+    def __exit__(self, *args):
+        if self._progress:
+            self._progress.__exit__(*args)
+
+    def update(self, advance: int = 1, description: str | None = None) -> None:
+        self.current += advance
+        if self._progress:
+            self._progress.update(self._task, advance=advance, description=description)
+        else:
+            # Simple text progress
+            if description:
+                click.echo(f"  {description}")

@@ -17,8 +17,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph import GraphClient
-from imas_codex.standard_names.promote import (
+from iter_codex.graph import GraphClient
+from iter_codex.standard_names.promote import (
     mark_catalog_name_approved,
     undo_approval,
 )

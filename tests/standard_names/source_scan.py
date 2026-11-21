@@ -13,7 +13,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-_PACKAGE_DIR = Path(__file__).resolve().parents[2] / "imas_codex" / "standard_names"
+_PACKAGE_DIR = Path(__file__).resolve().parents[2] / "iter_codex" / "standard_names"
 
 _WORKER_ROOT = _PACKAGE_DIR / "workers.py"
 _WORKER_SUBPACKAGE = _PACKAGE_DIR / "worker_tasks"

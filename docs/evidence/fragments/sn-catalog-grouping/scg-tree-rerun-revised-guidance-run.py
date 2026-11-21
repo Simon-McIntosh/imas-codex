@@ -85,10 +85,10 @@ async def classify_paths(path_ids: list[str]) -> tuple[dict, float, str, float]:
     Returns ``(decisions_by_id, spend_usd, model, threshold)`` where each
     decision carries the raw category, domain, probability and probabilities.
     """
-    import imas_codex.graph.dd_domain_classifier as ddc
-    from imas_codex.core.physics_domain import PhysicsDomain
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.settings import get_model, get_sn_domain_tree_threshold
+    import iter_codex.graph.dd_domain_classifier as ddc
+    from iter_codex.core.physics_domain import PhysicsDomain
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.settings import get_model, get_sn_domain_tree_threshold
 
     model = get_model("sn-domain-tree")
     threshold = get_sn_domain_tree_threshold()

@@ -7,8 +7,8 @@ from collections.abc import Iterator
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_ops import (
     reconcile_structural_edges_for_standard_names,
 )
 

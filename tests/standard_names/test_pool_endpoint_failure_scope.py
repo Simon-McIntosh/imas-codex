@@ -15,11 +15,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-_GO = "imas_codex.standard_names.graph_ops"
-_AA = "imas_codex.standard_names.attachment_audit"
-_DGO = "imas_codex.graph.dd_graph_ops"
-_BM = "imas_codex.standard_names.budget.BudgetManager"
-_WK = "imas_codex.standard_names.workers"
+_GO = "iter_codex.standard_names.graph_ops"
+_AA = "iter_codex.standard_names.attachment_audit"
+_DGO = "iter_codex.graph.dd_graph_ops"
+_BM = "iter_codex.standard_names.budget.BudgetManager"
+_WK = "iter_codex.standard_names.workers"
 
 #: A batch each usable pool can claim exactly once, then the graph is empty.
 _ONE_BATCH = [
@@ -39,47 +39,47 @@ def _stub_parent_lifecycle_startup():
     """Keep graph-backed startup maintenance inside the test mock boundary."""
     startup_patches = (
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_vocab_gaps",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_vocab_gaps",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.revive_unit_skipped_sources",
+            "iter_codex.standard_names.graph_store.graph_audits.revive_unit_skipped_sources",
             return_value={"checked": 0, "revived": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.retry_vocab_gap_sources_on_grammar_change",
+            "iter_codex.standard_names.graph_store.graph_audits.retry_vocab_gap_sources_on_grammar_change",
             return_value={"checked": 0, "revived": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_provenance",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_provenance",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_source_status_liveness",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_source_status_liveness",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.retire_unreachable_hint_edits",
+            "iter_codex.standard_names.graph_store.graph_audits.retire_unreachable_hint_edits",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_grammar_segments",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_grammar_segments",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_catalog_status",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_catalog_status",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_reviewable_name_stage",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_reviewable_name_stage",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_cocos_links",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_cocos_links",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_unit_edges",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_unit_edges",
             return_value={
                 "names_realigned": 0,
                 "edges_dropped": 0,
@@ -87,45 +87,45 @@ def _stub_parent_lifecycle_startup():
             },
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_dd_edges",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_dd_edges",
             return_value={"edges_created": 0, "pairs_dropped": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_source_paths",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_source_paths",
             return_value={"names_reconciled": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
+            "iter_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
+            "iter_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
+            "iter_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.structural_accept_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.structural_accept_derived_parents",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.reconcile_orphan_parent_sources",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.reconcile_orphan_parent_sources",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.promote_stranded_reviewed",
+            "iter_codex.standard_names.graph_store.graph_audits.promote_stranded_reviewed",
             return_value={"name": 0, "docs": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.mark_orphaned_standard_name_runs_stale",
+            "iter_codex.standard_names.graph_store.graph_audits.mark_orphaned_standard_name_runs_stale",
             return_value=0,
         ),
         patch(f"{_AA}.reconcile_attachment_consistency", return_value=MagicMock()),
         patch(f"{_DGO}.reconcile_dd_unit_corrections", return_value={}),
         patch(
-            "imas_codex.discovery.base.embed_worker.embed_description_worker",
+            "iter_codex.discovery.base.embed_worker.embed_description_worker",
             new_callable=AsyncMock,
         ),
     )
@@ -142,7 +142,7 @@ def _fast_idle_run_pools_patch():
     effect — so the wrapper delegates to the real harness rather than to its
     own mock.
     """
-    import imas_codex.standard_names.pools as pools_module
+    import iter_codex.standard_names.pools as pools_module
 
     real_run_pools = pools_module.run_pools
 
@@ -152,7 +152,7 @@ def _fast_idle_run_pools_patch():
         kwargs.setdefault("stall_seconds", 5.0)
         return await real_run_pools(*args, **kwargs)
 
-    return patch("imas_codex.standard_names.pools.run_pools", side_effect=_fast)
+    return patch("iter_codex.standard_names.pools.run_pools", side_effect=_fast)
 
 
 class _HealthRecorder:
@@ -195,70 +195,70 @@ def _run_scaffold_patches():
     """The graph/budget/finalize scaffolding run_sn_pools needs to stay local."""
     return (
         patch(
-            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
+            "iter_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
             return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
         ),
-        patch("imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"),
-        patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.create_sn_run_open"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.release_all_orphan_claims",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.release_all_orphan_claims",
             return_value={"sn": 0, "sns": 0},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
+            "iter_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
+            "iter_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
+            "iter_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
             return_value=0,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_doc_links.resolve_doc_links",
+            "iter_codex.standard_names.graph_store.graph_doc_links.resolve_doc_links",
             return_value={},
         ),
         patch(f"{_BM}.start", new_callable=AsyncMock),
         patch(f"{_BM}.drain_pending", new_callable=AsyncMock, return_value=True),
         patch(f"{_BM}.get_total_spent", new_callable=AsyncMock, return_value=0.0),
         patch(
-            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
+            "iter_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
             side_effect=_claim_once_then_empty(),
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
+            "iter_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_review_name_batch",
+            "iter_codex.standard_names.graph_store.graph_cost_and_claims.claim_review_name_batch",
             side_effect=_claim_once_then_empty(),
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_review_persistence.claim_review_docs_batch",
+            "iter_codex.standard_names.graph_store.graph_review_persistence.claim_review_docs_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch",
+            "iter_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch",
+            "iter_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.claim_enrich_parents_batch",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.claim_enrich_parents_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+            "iter_codex.standard_names.source_refresh.refresh_drifted_sources",
             return_value={},
         ),
         _fast_idle_run_pools_patch(),
         # The post-create SNRun assertion opens its own GraphClient; a
         # default-tier mock graph keeps it out of the live database.
-        patch("imas_codex.graph.client.GraphClient", return_value=_mock_graph()),
+        patch("iter_codex.graph.client.GraphClient", return_value=_mock_graph()),
     )
 
 
@@ -270,7 +270,7 @@ async def _drive_run():
     Both pools claim exactly one batch, then the graph is empty so the run
     falls through to natural idle exhaustion.
     """
-    from imas_codex.standard_names.loop import run_sn_pools
+    from iter_codex.standard_names.loop import run_sn_pools
 
     recorder = _HealthRecorder()
     with ExitStack() as stack:
@@ -278,7 +278,7 @@ async def _drive_run():
             stack.enter_context(p)
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_compose_batches.process_generate_name_batch",
+                "iter_codex.standard_names.worker_tasks.worker_compose_batches.process_generate_name_batch",
                 side_effect=ConnectionError(
                     "Failed to connect to http://localhost:18800/v1: "
                     "[Errno 111] Connection refused"
@@ -287,38 +287,38 @@ async def _drive_run():
         )
         review_process = stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_review_names.process_review_name_batch",
+                "iter_codex.standard_names.worker_tasks.worker_review_names.process_review_name_batch",
                 new_callable=AsyncMock,
             )
         )
         review_process.return_value = 1
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_generate_docs.process_generate_docs_batch",
+                "iter_codex.standard_names.worker_tasks.worker_generate_docs.process_generate_docs_batch",
                 new_callable=AsyncMock,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_review_docs.process_review_docs_batch",
+                "iter_codex.standard_names.worker_tasks.worker_review_docs.process_review_docs_batch",
                 new_callable=AsyncMock,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_refine_names.process_refine_name_batch",
+                "iter_codex.standard_names.worker_tasks.worker_refine_names.process_refine_name_batch",
                 new_callable=AsyncMock,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_refine_docs.process_refine_docs_batch",
+                "iter_codex.standard_names.worker_tasks.worker_refine_docs.process_refine_docs_batch",
                 new_callable=AsyncMock,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_enrich_parents.process_enrich_parents_batch",
+                "iter_codex.standard_names.worker_tasks.worker_enrich_parents.process_enrich_parents_batch",
                 new_callable=AsyncMock,
             )
         )
@@ -333,7 +333,7 @@ async def test_unreachable_compose_seat_degrades_run_not_stops_it() -> None:
 
     Review (bound to a reachable seat) still claims and completes, the run
     reaches a terminal state rather than aborting first, and the surfaced
-    message names ``[tool.imas-codex.sn-compose]`` rather than the dead URL.
+    message names ``[tool.iter-codex.sn-compose]`` rather than the dead URL.
     """
     summary, recorder = await _drive_run()
 
@@ -371,14 +371,14 @@ async def test_reachable_seat_pool_commits_work_while_compose_is_dead() -> None:
 
 def test_unreachable_classification_degrades_failed_otherwise() -> None:
     """The stop-reason classifier separates a dead seat from a real bug."""
-    from imas_codex.standard_names.loop import _pool_error_stop_reason
+    from iter_codex.standard_names.loop import _pool_error_stop_reason
 
     seat_health = SimpleNamespace(error_count=1, last_error="Connection refused")
     classified_health = SimpleNamespace(
         error_count=1,
         last_error="generate_name pool could not reach the endpoint "
         "configured for its seat; the address is set in "
-        "[tool.imas-codex.sn-compose] (api-base / model-route)",
+        "[tool.iter-codex.sn-compose] (api-base / model-route)",
     )
     bug_health = SimpleNamespace(
         error_count=1,

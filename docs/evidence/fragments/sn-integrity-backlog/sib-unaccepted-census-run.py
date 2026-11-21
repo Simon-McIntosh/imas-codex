@@ -29,12 +29,12 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
     _MAX_COMPOSE_CLAIM_ATTEMPTS as COMPOSE_CLAIM_CAP,
 )
-from imas_codex.standard_names.graph_store.graph_source_bindings import (
+from iter_codex.standard_names.graph_store.graph_source_bindings import (
     CAP_PARKED_DISPOSITIONS,
     classify_parked_source,
 )

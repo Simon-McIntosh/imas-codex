@@ -14,13 +14,13 @@ import time
 
 import pytest
 
-from imas_codex.cli.sn import _compute_pool_progress, _require_terminal_drain
-from imas_codex.standard_names.display import (
+from iter_codex.cli.sn import _compute_pool_progress, _require_terminal_drain
+from iter_codex.standard_names.display import (
     POOL_ORDER,
     PoolDisplayState,
     SN6PoolDisplay,
 )
-from imas_codex.standard_names.pools import FLUSH_POOL_NAMES
+from iter_codex.standard_names.pools import FLUSH_POOL_NAMES
 
 
 class TestTerminalDrainContract:
@@ -148,23 +148,23 @@ class TestOnEventNoneDoesNotCrash:
         """
         import inspect
 
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
             compose_batch,
             process_generate_name_batch,
         )
-        from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
             process_generate_docs_batch,
         )
-        from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+        from iter_codex.standard_names.worker_tasks.worker_refine_docs import (
             process_refine_docs_batch,
         )
-        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        from iter_codex.standard_names.worker_tasks.worker_refine_names import (
             process_refine_name_batch,
         )
-        from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+        from iter_codex.standard_names.worker_tasks.worker_review_docs import (
             process_review_docs_batch,
         )
-        from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        from iter_codex.standard_names.worker_tasks.worker_review_names import (
             process_review_name_batch,
         )
 

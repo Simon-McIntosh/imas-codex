@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 204494370c9e7f791357bf3372eae17152e25fce, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.classify_sourceless_standard_names.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Apply the lead's ruled provenance changes to live standard names without a source.
@@ -54,11 +54,11 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from imas_codex.graph import GraphClient
-from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
-from imas_codex.standard_names.provenance_rebuild import bind_recovery_sources
-from imas_codex.standard_names.repair_authority import build_repair_authority
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.graph import GraphClient
+from iter_codex.standard_names.graph_ops import classify_sourceless_standard_names
+from iter_codex.standard_names.provenance_rebuild import bind_recovery_sources
+from iter_codex.standard_names.repair_authority import build_repair_authority
+from iter_codex.standard_names.signed_manifest import (
     apply_signed_manifest,
     signed_payload_sha256,
 )
@@ -752,7 +752,7 @@ def falsify() -> dict[str, Any]:
 
 def quiet_graph_check() -> dict[str, Any]:
     """Ask the repository's own activity probe whether another client is writing."""
-    from imas_codex.graph.offsite import live_graph_activity
+    from iter_codex.graph.offsite import live_graph_activity
 
     live_dir = Path.home() / ".config" / "reckon" / "crew" / "live"
     recent: list[dict[str, Any]] = []

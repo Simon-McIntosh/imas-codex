@@ -29,22 +29,22 @@ Sequence:
 
 ```bash
 # Focus on a single path
-uv run imas-codex sn run --focus equilibrium/time_slice/profiles_1d/psi -c 5
+uv run iter-codex sn run --focus equilibrium/time_slice/profiles_1d/psi -c 5
 
 # Focus on multiple paths (space-separated)
-uv run imas-codex sn run --focus equilibrium/time_slice/profiles_1d/psi equilibrium/time_slice/profiles_1d/q -c 5
+uv run iter-codex sn run --focus equilibrium/time_slice/profiles_1d/psi equilibrium/time_slice/profiles_1d/q -c 5
 
 # Focus on multiple paths (repeated flag)
-uv run imas-codex sn run --focus equilibrium/time_slice/profiles_1d/psi --focus core_profiles/profiles_1d/electrons/temperature -c 5
+uv run iter-codex sn run --focus equilibrium/time_slice/profiles_1d/psi --focus core_profiles/profiles_1d/electrons/temperature -c 5
 ```
 
 ## Closed-Loop Workflow
 
 1. **Identify** a problematic path (from `sn status`, quarantined names, low benchmark scores, or a specific path you want to improve)
-2. **Run focus**: `uv run imas-codex sn run --focus <path> -c 5`
+2. **Run focus**: `uv run iter-codex sn run --focus <path> -c 5`
 3. **Inspect** the result: check the graph for the generated name, reviewer scores, validation status, and documentation
-4. **If quality is poor**: modify the relevant prompt template in `imas_codex/llm/prompts/sn/`
-5. **Re-run**: `uv run imas-codex sn run --focus <path> -c 5` — the previous result is automatically reset and re-processed
+4. **If quality is poor**: modify the relevant prompt template in `iter_codex/llm/prompts/sn/`
+5. **Re-run**: `uv run iter-codex sn run --focus <path> -c 5` — the previous result is automatically reset and re-processed
 6. **Repeat** steps 3–5 until name quality is acceptable
 7. **Verify**: run a broader rotation (without `--focus`) to confirm the prompt change does not regress other names
 
@@ -59,6 +59,6 @@ uv run imas-codex sn run --focus equilibrium/time_slice/profiles_1d/psi --focus 
 
 | File | Purpose |
 |------|---------|
-| `imas_codex/llm/prompts/sn/` | Prompt templates for all 6 pools |
-| `imas_codex/standard_names/pool_adapter.py` | Pool routing logic; `--focus` entry point |
-| `imas_codex/llm/config/sn_review_criteria.yaml` | Reviewer scoring criteria |
+| `iter_codex/llm/prompts/sn/` | Prompt templates for all 6 pools |
+| `iter_codex/standard_names/pool_adapter.py` | Pool routing logic; `--focus` entry point |
+| `iter_codex/llm/config/sn_review_criteria.yaml` | Reviewer scoring criteria |

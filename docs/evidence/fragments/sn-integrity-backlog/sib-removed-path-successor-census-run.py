@@ -40,11 +40,11 @@ HERE = Path(__file__).resolve().parent
 OUTPUT = HERE / "sib-removed-path-successor-census.json"
 REPORT = HERE / "sib-removed-path-successor-census.html"
 
-GRAPH_AUDITS = "imas_codex/standard_names/graph_store/graph_audits.py"
-SOURCE_BINDINGS = "imas_codex/standard_names/graph_store/graph_source_bindings.py"
-DD_LIFECYCLE = "imas_codex/graph/dd_lifecycle.py"
-SOURCE_INVARIANT = "imas_codex/standard_names/source_invariant.py"
-EXPORT_PY = "imas_codex/standard_names/export.py"
+GRAPH_AUDITS = "iter_codex/standard_names/graph_store/graph_audits.py"
+SOURCE_BINDINGS = "iter_codex/standard_names/graph_store/graph_source_bindings.py"
+DD_LIFECYCLE = "iter_codex/graph/dd_lifecycle.py"
+SOURCE_INVARIANT = "iter_codex/standard_names/source_invariant.py"
+EXPORT_PY = "iter_codex/standard_names/export.py"
 
 POPULATION_CYPHER = """
 MATCH (sn:StandardName)<-[:PRODUCED_NAME]-(src:StandardNameSource)
@@ -111,7 +111,7 @@ def dd_rename_metadata() -> dict[str, dict[str, str]]:
 
     import imas_data_dictionaries as idd
 
-    from imas_codex import dd_version
+    from iter_codex import dd_version
 
     raw = idd.get_dd_xml(dd_version)
     root = ET.fromstring(raw if isinstance(raw, bytes) else raw.encode())
@@ -144,7 +144,7 @@ def dd_rename_metadata() -> dict[str, dict[str, str]]:
 
 def dd_valid_paths() -> set[str]:
     """Every machine path the current DD declares."""
-    from imas_codex.graph.dd_lifecycle import dd_path_index
+    from iter_codex.graph.dd_lifecycle import dd_path_index
 
     valid, _ = dd_path_index()
     return set(valid)
@@ -325,21 +325,21 @@ def _fixture_once() -> dict:
             for k in (
                 "NEO4J_URI",
                 "NEO4J_PASSWORD",
-                "IMAS_CODEX_TEST_NEO4J_URI",
-                "IMAS_CODEX_TEST_NEO4J_EPHEMERAL",
+                "ITER_CODEX_TEST_NEO4J_URI",
+                "ITER_CODEX_TEST_NEO4J_EPHEMERAL",
             )
         }
         os.environ.update(
             {
                 "NEO4J_URI": uri,
                 "NEO4J_PASSWORD": "",
-                "IMAS_CODEX_TEST_NEO4J_URI": uri,
-                "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+                "ITER_CODEX_TEST_NEO4J_URI": uri,
+                "ITER_CODEX_TEST_NEO4J_EPHEMERAL": "1",
             }
         )
         try:
             _wipe(uri)
-            from imas_codex.graph.client import GraphClient
+            from iter_codex.graph.client import GraphClient
 
             with GraphClient() as gc:
                 gc.query(
@@ -366,7 +366,7 @@ def _fixture_once() -> dict:
                     CREATE (kept)-[:FROM_DD_PATH]->(live)
                     """
                 )
-                from imas_codex.standard_names.graph_store.graph_audits import (
+                from iter_codex.standard_names.graph_store.graph_audits import (
                     reconcile_standard_name_sources,
                 )
 
@@ -431,7 +431,7 @@ def _fixture_once() -> dict:
 
 
 def build() -> dict:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     renames = dd_rename_metadata()
     valid = dd_valid_paths()
@@ -552,7 +552,7 @@ def generator() -> dict:
         ),
         "rename_records": {
             "builder": line_of(
-                "imas_codex/graph/build_dd.py", "def _batch_create_renamed_to"
+                "iter_codex/graph/build_dd.py", "def _batch_create_renamed_to"
             ),
             "source": "DDChange entries of type path_renamed",
             "ids_rename_reconciler": line_of(DD_LIFECYCLE, "def dd_path_index"),
@@ -579,8 +579,8 @@ def repair_node() -> dict:
             "live name sourceless."
         ),
         "write_paths": [
-            "imas_codex/standard_names/graph_store/graph_audits.py",
-            "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+            "iter_codex/standard_names/graph_store/graph_audits.py",
+            "iter_codex/standard_names/graph_store/graph_source_bindings.py",
             "tests/standard_names/test_source_invariants.py",
         ],
         "guard_test": (

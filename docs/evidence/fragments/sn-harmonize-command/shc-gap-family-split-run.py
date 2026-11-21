@@ -33,14 +33,14 @@ import json
 import os
 import sys
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.cascade import _isn_parser, _isn_round_trip_ok
-from imas_codex.standard_names.edit import supersede_into
-from imas_codex.standard_names.provenance_lifecycle import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.cascade import _isn_parser, _isn_round_trip_ok
+from iter_codex.standard_names.edit import supersede_into
+from iter_codex.standard_names.provenance_lifecycle import (
     retarget_standard_name_sources,
 )
-from imas_codex.standard_names.repair_authority import build_repair_authority
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.standard_names.repair_authority import build_repair_authority
+from iter_codex.standard_names.signed_manifest import (
     apply_signed_manifest,
     signed_payload_sha256,
 )

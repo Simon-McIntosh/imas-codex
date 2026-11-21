@@ -1,4 +1,4 @@
-"""Unit tests for imas_codex.standard_names.derivation.
+"""Unit tests for iter_codex.standard_names.derivation.
 
 Pure logic tests — no graph, no I/O.  The ISN bases used here
 (temperature, pressure, current_density) are all parseable by the
@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from imas_standard_names.grammar import ir as isn_ir
 
-from imas_codex.standard_names.derivation import DerivedEdge, derive_edges
+from iter_codex.standard_names.derivation import DerivedEdge, derive_edges
 
 # ---------------------------------------------------------------------------
 # leaf name (no operators, no projection)
@@ -506,7 +506,7 @@ class TestSelfLoopGuard:
         # version regresses tomorrow we must never emit a self-edge.
         # Hand-roll an edge to exercise the filter without depending on
         # which name happens to trigger the parser asymmetry today.
-        from imas_codex.standard_names.derivation import _drop_self_loops
+        from iter_codex.standard_names.derivation import _drop_self_loops
 
         edges = [
             DerivedEdge("HAS_PARENT", "foo", "foo", {"operator": "magnitude"}),

@@ -333,7 +333,7 @@ def normalise_verdict(reading, name: str) -> dict:
 
 
 async def judge_batch(batch, system_prompt, user_prompt, model, effort):
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     result, cost, _ = await acall_llm_structured(
         model=model,
@@ -546,7 +546,7 @@ def decision_state(item: dict) -> dict:
 
 
 async def decisions_one(item: dict, model: str) -> dict:
-    from imas_codex.discovery.base.llm import acall_decisions
+    from iter_codex.discovery.base.llm import acall_decisions
 
     semaphore = _DECISIONS_GATE
     async with semaphore:
@@ -781,7 +781,7 @@ def fit_thresholds(
 async def arm_b_batch(
     batch: list[dict], classes: list[str], system_prompt: str, model: str, effort
 ) -> tuple[list[dict], float]:
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     user = [items_prompt(batch, "## Items to review")]
     result, cost, _ = await acall_llm_structured(
@@ -1067,7 +1067,7 @@ def physical_base_of(name: str) -> str | None:
 
 
 def unit_check(item: dict) -> tuple[bool, str]:
-    from imas_codex.standard_names.unit_audit import unit_dimension
+    from iter_codex.standard_names.unit_audit import unit_dimension
 
     base = physical_base_of(item["id"])
     if base is None:
@@ -1091,7 +1091,7 @@ def unit_check(item: dict) -> tuple[bool, str]:
 
 def repo_unit_check(item: dict) -> tuple[bool, str]:
     """The repository's own name-versus-unit audit, read-only over one name."""
-    from imas_codex.standard_names.audits import name_unit_consistency_check
+    from iter_codex.standard_names.audits import name_unit_consistency_check
 
     issues = name_unit_consistency_check({"id": item["id"], "unit": item["unit"]})
     if issues:
@@ -2872,7 +2872,7 @@ ADOPTED_CHAT_MODEL = "openrouter/anthropic/claude-sonnet-5.5"
 def mode_probe(args) -> None:
     import httpx
 
-    from imas_codex.discovery.base.llm import acall_decisions, get_api_key_for_service
+    from iter_codex.discovery.base.llm import acall_decisions, get_api_key_for_service
 
     key = get_api_key_for_service("standard-names")
     response = httpx.get(

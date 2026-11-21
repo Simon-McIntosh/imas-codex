@@ -36,7 +36,7 @@ _PREFIX = "test_dd_unit_correction__"
 def _gc():
     """A client on the live graph, for the drift invariant that reads it."""
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -57,8 +57,8 @@ def _disposable_gc(disposable_graph, monkeypatch):
     the mock tier uses: it is nonempty and mentions none of the registry paths,
     so the correction under test still applies.
     """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import dd_resolutions
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import dd_resolutions
     from tests.standard_names.conftest import SyntheticDDResolutionReader
     from tests.standard_names.dd_resolution_test_data import (
         SYNTHETIC_GRAPH_RESOLUTION_ROWS,
@@ -137,7 +137,7 @@ def test_measurement_position_flux_is_corrected_in_graph():
     suppression the composer inherits whichever facet it read, which is how an
     accepted poloidal-flux name came to declare total power.
     """
-    from imas_codex.units import resolve_dd_unit
+    from iter_codex.units import resolve_dd_unit
 
     assert resolve_dd_unit("ece/channel/position/psi", "W") == "Wb"
     # the facet that is already right must pass through untouched
@@ -151,7 +151,7 @@ def test_a_suppression_only_entry_is_not_rewritten():
     correctly carries dimensionless and the axis suppresses the pair. The DD
     unit must stay as declared so the axis can keep reporting it.
     """
-    from imas_codex.units import resolve_dd_unit
+    from iter_codex.units import resolve_dd_unit
 
     assert resolve_dd_unit("core_profiles/profiles_1d/ion/z_ion", "e") == "e"
 
@@ -165,7 +165,7 @@ def test_reconcile_reports_zero_without_candidates():
     """No stored node disagrees with the registry → zeros, and no write."""
     from unittest.mock import MagicMock
 
-    from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
+    from iter_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
 
     gc = MagicMock()
     gc.query.return_value = []
@@ -178,7 +178,7 @@ def test_reconcile_reports_zero_without_candidates():
 @pytest.mark.timeout(300)
 def test_stored_self_contradiction_is_realigned(_disposable_gc, _clean):
     """A stored node carrying the wrong facet's unit is corrected in place."""
-    from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
+    from iter_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
 
     # A synthetic path under the same registry glob as the real defect.
     path = _node(_disposable_gc, f"{_PREFIX}ids/channel/position/psi", "W")
@@ -195,7 +195,7 @@ def test_stored_self_contradiction_is_realigned(_disposable_gc, _clean):
 @pytest.mark.timeout(300)
 def test_suppression_only_path_is_untouched(_disposable_gc, _clean):
     """A node under a suppression-only entry keeps its declared unit."""
-    from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
+    from iter_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
 
     path = _node(_disposable_gc, f"{_PREFIX}core_profiles/profiles_1d/ion/z_ion", "e")
     reconcile_dd_unit_corrections(_disposable_gc)
@@ -208,7 +208,7 @@ def test_suppression_only_path_is_untouched(_disposable_gc, _clean):
 @pytest.mark.timeout(300)
 def test_reconcile_is_idempotent(_disposable_gc, _clean):
     """A second pass corrects nothing, so it is safe on every run."""
-    from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
+    from iter_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
 
     _node(_disposable_gc, f"{_PREFIX}ids/channel/position/psi", "W")
     first = reconcile_dd_unit_corrections(_disposable_gc)
@@ -221,7 +221,7 @@ def test_reconcile_is_idempotent(_disposable_gc, _clean):
 @pytest.mark.timeout(300)
 def test_already_correct_node_is_not_rewritten(_disposable_gc, _clean):
     """The facet that already declares the right unit is left alone."""
-    from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
+    from iter_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
 
     path = _node(_disposable_gc, f"{_PREFIX}ids/beam/position/psi", "Wb")
     reconcile_dd_unit_corrections(_disposable_gc)
@@ -238,7 +238,7 @@ def test_no_live_dd_node_contradicts_the_registry(_gc):
     once it has run. A failure means a registry entry was added without the
     correction reaching the graph — exactly the silent-no-op this guards.
     """
-    from imas_codex.graph.dd_graph_ops import find_dd_unit_correction_drift
+    from iter_codex.graph.dd_graph_ops import find_dd_unit_correction_drift
 
     drift = find_dd_unit_correction_drift(_gc)
     assert not drift, (

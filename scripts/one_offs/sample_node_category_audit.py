@@ -53,7 +53,7 @@ import random
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@ Tests graph construction, structural analysis, and cross-IDS pattern detection.
 
 import pytest
 
-from imas_codex.graph_analyzer import IMASGraphAnalyzer, analyze_imas_graphs
+from iter_codex.graph_analyzer import IMASGraphAnalyzer, analyze_imas_graphs
 
 
 class TestIMASGraphAnalyzer:

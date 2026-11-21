@@ -9,13 +9,13 @@ over, and its rewrite could never be verified.
 
 from __future__ import annotations
 
-from imas_codex.standard_names.families import (
+from iter_codex.standard_names.families import (
     _anchor_score_candidates,
     _eligible_anchor_candidate,
     member_has_dd_source,
     select_anchor,
 )
-from imas_codex.standard_names.harmonize import assemble_family
+from iter_codex.standard_names.harmonize import assemble_family
 
 
 def _member(

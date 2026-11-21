@@ -140,7 +140,7 @@ def top_level_symbols(node: ast.stmt) -> list[str]:
 
 
 def source_inventory(source: str) -> dict:
-    path = ROOT / "imas_codex" / "standard_names" / source
+    path = ROOT / "iter_codex" / "standard_names" / source
     content = path.read_text()
     lines = content.splitlines(keepends=True)
     tree = ast.parse(content)
@@ -213,7 +213,7 @@ def patch_targets(inventories: dict) -> dict:
     unknown = Counter()
     test_files = sorted((ROOT / "tests").rglob("*.py"))
     pattern = re.compile(
-        r"^imas_codex\.standard_names\.(graph_ops|workers)\.([A-Za-z_]\w*)$"
+        r"^iter_codex\.standard_names\.(graph_ops|workers)\.([A-Za-z_]\w*)$"
     )
     for path in test_files:
         try:
@@ -272,8 +272,8 @@ def live_claims() -> tuple[list[dict], dict]:
             and (name.endswith("/graph_ops.py") or name.endswith("/workers.py"))
         ]
 
-    assert selected(["imas_codex/standard_names/graph_ops.py"]) == [
-        "imas_codex/standard_names/graph_ops.py"
+    assert selected(["iter_codex/standard_names/graph_ops.py"]) == [
+        "iter_codex/standard_names/graph_ops.py"
     ]
     for path in sorted(live.glob("*.json")):
         data = json.loads(path.read_text())
@@ -337,9 +337,9 @@ def migration_steps(inventories: dict) -> list[dict]:
         (
             "hold synchronization",
             [
-                "imas_codex/standard_names/graph_ops.py",
-                "imas_codex/standard_names/workers.py",
-                "imas_codex/standard_names/review/holds.py",
+                "iter_codex/standard_names/graph_ops.py",
+                "iter_codex/standard_names/workers.py",
+                "iter_codex/standard_names/review/holds.py",
                 "tests/standard_names/test_review_docs_stages.py",
                 "tests/standard_names/test_docs_hold_dd_bindings.py",
             ],
@@ -351,8 +351,8 @@ def migration_steps(inventories: dict) -> list[dict]:
         (
             "documentation regeneration stamp",
             [
-                "imas_codex/standard_names/graph_ops.py",
-                "imas_codex/standard_names/workers.py",
+                "iter_codex/standard_names/graph_ops.py",
+                "iter_codex/standard_names/workers.py",
                 "tests/standard_names/test_source_refresh_docs_requeue.py",
                 "tests/standard_names/test_persist_stages.py",
             ],
@@ -381,7 +381,7 @@ def migration_steps(inventories: dict) -> list[dict]:
         )
 
     source_lines = {
-        source: (ROOT / "imas_codex" / "standard_names" / source)
+        source: (ROOT / "iter_codex" / "standard_names" / source)
         .read_text()
         .splitlines(keepends=True)
         for source in RANGES
@@ -411,12 +411,12 @@ def migration_steps(inventories: dict) -> list[dict]:
         gate_tokens = sum(tokens(gate) for gate in gates)
         total = before + moved + gate_tokens
         package = "graph_store" if source == "graph_ops.py" else "worker_tasks"
-        paths = [f"imas_codex/standard_names/{source}"]
+        paths = [f"iter_codex/standard_names/{source}"]
         paths.extend(
-            f"imas_codex/standard_names/{package}/{module}.py" for module in modules
+            f"iter_codex/standard_names/{package}/{module}.py" for module in modules
         )
         if modules == EXTRACTION_ORDER[0] or "worker_common" in modules:
-            paths.append(f"imas_codex/standard_names/{package}/__init__.py")
+            paths.append(f"iter_codex/standard_names/{package}/__init__.py")
         remaining[source].difference_update(modules)
         steps.append(
             {
@@ -467,8 +467,8 @@ def main() -> None:
                 "-1",
                 "--format=%H",
                 "--",
-                "imas_codex/standard_names/graph_ops.py",
-                "imas_codex/standard_names/workers.py",
+                "iter_codex/standard_names/graph_ops.py",
+                "iter_codex/standard_names/workers.py",
             ],
             cwd=ROOT,
             text=True,

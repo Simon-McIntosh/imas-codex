@@ -7,15 +7,15 @@ from subprocess import CompletedProcess
 
 from click.testing import CliRunner
 
-from imas_codex.cli.graph import graph, registry
-from imas_codex.cli.graph.registry import graph_push
+from iter_codex.cli.graph import graph, registry
+from iter_codex.cli.graph.registry import graph_push
 
 
 def _schedule_files(tmp_path: Path) -> tuple[Path, Path]:
     service_dir = tmp_path / "systemd" / "user"
     return (
-        service_dir / "imas-codex-graph-push.service",
-        service_dir / "imas-codex-graph-push.timer",
+        service_dir / "iter-codex-graph-push.service",
+        service_dir / "iter-codex-graph-push.timer",
     )
 
 
@@ -24,7 +24,7 @@ def _configure_schedule(
 ) -> tuple[Path, Path, list[list[str]]]:
     project_dir = tmp_path / "project"
     project_dir.mkdir()
-    (project_dir / "pyproject.toml").write_text("[project]\nname='imas-codex'\n")
+    (project_dir / "pyproject.toml").write_text("[project]\nname='iter-codex'\n")
     service_file, timer_file = _schedule_files(tmp_path)
     calls: list[list[str]] = []
 
@@ -62,7 +62,7 @@ def test_push_help_documents_login_node_schedule() -> None:
 
 def test_generated_service_and_timer_run_weekly_on_login_node() -> None:
     service = registry._push_schedule_service_text(
-        Path("/srv/imas-codex"),
+        Path("/srv/iter-codex"),
         uv_path="/usr/bin/uv",
         oras_path="/opt/oras/bin/oras",
         hostname="login.example.org",
@@ -71,15 +71,15 @@ def test_generated_service_and_timer_run_weekly_on_login_node() -> None:
 
     assert "ConditionHost=login.example.org" in service
     assert "Type=oneshot" in service
-    assert "WorkingDirectory=/srv/imas-codex" in service
+    assert "WorkingDirectory=/srv/iter-codex" in service
     assert 'Environment="PATH=/opt/oras/bin:' in service
     assert (
-        "ExecStart=/usr/bin/uv run --no-sync --project /srv/imas-codex "
-        "imas-codex graph push --cycle"
+        "ExecStart=/usr/bin/uv run --no-sync --project /srv/iter-codex "
+        "iter-codex graph push --cycle"
     ) in service
     assert "OnCalendar=daily" in timer
     assert "Persistent=true" in timer
-    assert "Unit=imas-codex-graph-push.service" in timer
+    assert "Unit=iter-codex-graph-push.service" in timer
     assert "sbatch" not in service + timer
 
 
@@ -93,7 +93,7 @@ def test_schedule_dry_run_prints_units_without_writing_or_systemctl(
     assert result.exit_code == 0
     assert "[DRY RUN] systemd user service:" in result.output
     assert "ConditionHost=login.example.org" in result.output
-    assert "imas-codex graph push --cycle" in result.output
+    assert "iter-codex graph push --cycle" in result.output
     assert "[DRY RUN] systemd user timer:" in result.output
     assert "OnCalendar=daily" in result.output
     assert "systemctl was not called" in result.output
@@ -110,7 +110,7 @@ def test_schedule_install_writes_and_enables_timer(monkeypatch, tmp_path) -> Non
     assert result.exit_code == 0
     assert service_file.exists()
     assert timer_file.exists()
-    assert "imas-codex graph push --cycle" in service_file.read_text()
+    assert "iter-codex graph push --cycle" in service_file.read_text()
     assert "OnCalendar=daily" in timer_file.read_text()
     assert calls == [
         ["/usr/bin/systemctl", "--user", "daemon-reload"],
@@ -119,7 +119,7 @@ def test_schedule_install_writes_and_enables_timer(monkeypatch, tmp_path) -> Non
             "--user",
             "enable",
             "--now",
-            "imas-codex-graph-push.timer",
+            "iter-codex-graph-push.timer",
         ],
     ]
     assert "installed and enabled" in result.output
@@ -159,7 +159,7 @@ def test_schedule_status_uses_systemctl(monkeypatch, tmp_path) -> None:
             "/usr/bin/systemctl",
             "--user",
             "status",
-            "imas-codex-graph-push.timer",
+            "iter-codex-graph-push.timer",
         ]
     ]
 
@@ -181,13 +181,13 @@ def test_remove_schedule_disables_and_deletes_units(monkeypatch, tmp_path) -> No
             "--user",
             "disable",
             "--now",
-            "imas-codex-graph-push.timer",
+            "iter-codex-graph-push.timer",
         ],
         [
             "/usr/bin/systemctl",
             "--user",
             "stop",
-            "imas-codex-graph-push.service",
+            "iter-codex-graph-push.service",
         ],
         ["/usr/bin/systemctl", "--user", "daemon-reload"],
     ]

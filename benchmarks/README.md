@@ -1,6 +1,6 @@
-# IMAS Codex Performance Benchmarks
+# ITER Codex Performance Benchmarks
 
-Performance benchmarking for IMAS Codex using [ASV (airspeed velocity)](https://asv.readthedocs.io/). Benchmarks run against a real GHCR graph dump on tagged releases.
+Performance benchmarking for ITER Codex using [ASV (airspeed velocity)](https://asv.readthedocs.io/). Benchmarks run against a real GHCR graph dump on tagged releases.
 
 ## Benchmark Modules
 
@@ -54,7 +54,7 @@ asv publish
 
 Benchmarks run automatically on tagged releases (`v*`) via `.github/workflows/benchmark.yml`:
 
-1. Pull graph dump from GHCR (`imas-codex-graph:latest`)
+1. Pull graph dump from GHCR (`iter-codex-graph:latest`)
 2. Load into Neo4j via `neo4j-admin database load`
 3. Run all ASV benchmarks with CPU-only embeddings
 4. Compare against previous tag for regression detection

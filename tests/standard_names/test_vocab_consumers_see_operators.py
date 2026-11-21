@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.segments import (
+from iter_codex.standard_names.segments import (
     OPERATOR_SEGMENT,
     grammar_tokens_by_segment,
 )
@@ -43,7 +43,7 @@ class TestTokenFilterSeesOperators:
     """The plural-dedup check compares against operators as well as segments."""
 
     def test_every_operator_is_in_the_comparison_set(self):
-        from imas_codex.standard_names.vocab_token_filter import _load_existing_tokens
+        from iter_codex.standard_names.vocab_token_filter import _load_existing_tokens
 
         tokens = _load_existing_tokens()
         operators = set(grammar_tokens_by_segment()[OPERATOR_SEGMENT])
@@ -51,7 +51,7 @@ class TestTokenFilterSeesOperators:
         assert not missing, f"dedup cannot see operators: {missing}"
 
     def test_segment_tokens_are_still_present(self):
-        from imas_codex.standard_names.vocab_token_filter import _load_existing_tokens
+        from iter_codex.standard_names.vocab_token_filter import _load_existing_tokens
 
         tokens = _load_existing_tokens()
         for token in ("electron", "toroidal", "density"):
@@ -59,29 +59,29 @@ class TestTokenFilterSeesOperators:
 
     def test_plural_of_an_operator_is_rejected_as_a_duplicate(self):
         """``squares`` duplicates the operator ``square``, so it is not novel."""
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         verdict = classify_vocab_token("squares", "qualifier")
         assert verdict.action == "reject"
         assert "square" in verdict.reason
 
     def test_plural_of_a_segment_token_still_rejected(self):
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         verdict = classify_vocab_token("electrons", "subject")
         assert verdict.action == "reject"
 
     def test_a_genuinely_novel_token_is_still_accepted(self):
         """Widening the comparison set must not start rejecting real proposals."""
-        from imas_codex.standard_names.vocab_token_filter import classify_vocab_token
+        from iter_codex.standard_names.vocab_token_filter import classify_vocab_token
 
         verdict = classify_vocab_token("wibble_frobnicator", "physical_base")
         assert verdict.action == "accept"
 
     def test_degrades_to_empty_without_the_grammar(self, monkeypatch):
         """Absent ISN the check turns off rather than dedupe against a stale list."""
-        import imas_codex.standard_names.vocab_token_filter as filter_mod
-        from imas_codex.standard_names import segments as seg_mod
+        import iter_codex.standard_names.vocab_token_filter as filter_mod
+        from iter_codex.standard_names import segments as seg_mod
 
         monkeypatch.setattr(seg_mod, "_load_segment_token_map", lambda: None)
         monkeypatch.setattr(seg_mod, "_operator_tokens", lambda: frozenset())
@@ -98,14 +98,14 @@ class TestPromotionSeesOperators:
 
     @pytest.fixture(autouse=True)
     def _clear_cache(self):
-        import imas_codex.standard_names.vocab_promotion as promo
+        import iter_codex.standard_names.vocab_promotion as promo
 
         promo._SEGMENT_VOCAB_CACHE = None
         yield
         promo._SEGMENT_VOCAB_CACHE = None
 
     def test_operator_class_is_present(self):
-        from imas_codex.standard_names.vocab_promotion import _load_isn_segment_vocab
+        from iter_codex.standard_names.vocab_promotion import _load_isn_segment_vocab
 
         vocab = _load_isn_segment_vocab()
         assert OPERATOR_SEGMENT in vocab
@@ -113,7 +113,7 @@ class TestPromotionSeesOperators:
             assert operator in vocab[OPERATOR_SEGMENT]
 
     def test_segment_classes_are_still_present(self):
-        from imas_codex.standard_names.vocab_promotion import _load_isn_segment_vocab
+        from iter_codex.standard_names.vocab_promotion import _load_isn_segment_vocab
 
         vocab = _load_isn_segment_vocab()
         assert "physical_base" in vocab
@@ -133,10 +133,10 @@ class TestNoConsumerReadsTheSegmentMapAlone:
 
     #: path -> why reading the segment map directly is CORRECT there.
     LEGITIMATE_READERS = {
-        "imas_codex/standard_names/segments.py": (
+        "iter_codex/standard_names/segments.py": (
             "owns the accessor; reads the map to build it"
         ),
-        "imas_codex/standard_names/context.py": (
+        "iter_codex/standard_names/context.py": (
             "renders the closed-vocab prompt block; injects operators separately "
             "via _load_operators_full, and the drift test asserts both arrive"
         ),
@@ -162,7 +162,7 @@ class TestNoConsumerReadsTheSegmentMapAlone:
                 r"^\s*from imas_standard_names\.grammar\.constants import "
                 r".*SEGMENT_TOKEN_MAP",
                 "--",
-                "imas_codex/",
+                "iter_codex/",
             ],
             cwd=root,
             capture_output=True,
@@ -184,14 +184,14 @@ class TestNoConsumerReadsTheSegmentMapAlone:
         """The modules routed through the accessor must not regress."""
         readers = self._readers()
         for path in (
-            "imas_codex/standard_names/vocab_token_filter.py",
-            "imas_codex/standard_names/vocab_promotion.py",
-            "imas_codex/standard_names/vocab_semantic_dedup.py",
+            "iter_codex/standard_names/vocab_token_filter.py",
+            "iter_codex/standard_names/vocab_promotion.py",
+            "iter_codex/standard_names/vocab_semantic_dedup.py",
             # model-facing: a composer asking this tool what operators exist was
             # told the class does not exist, so it kept offering them as
             # qualifiers — upstream of every gap the classifier then had to sort.
-            "imas_codex/llm/sn_tools.py",
-            "imas_codex/standard_names/workers.py",
+            "iter_codex/llm/sn_tools.py",
+            "iter_codex/standard_names/workers.py",
         ):
             assert path not in readers, (
                 f"{path} reads SEGMENT_TOKEN_MAP again — it must go through "

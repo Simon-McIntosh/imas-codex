@@ -27,7 +27,7 @@ from types import ModuleType
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 pytestmark = pytest.mark.requires_graph
 
@@ -205,7 +205,7 @@ def test_seed_query_finds_real_domains():
     A previous bug used ``HAS_PATH*`` and returned 0 rows, silently breaking
     auto-seed.
     """
-    from imas_codex.standard_names.loop import (
+    from iter_codex.standard_names.loop import (
         _list_physics_domains_with_extractable_paths,
     )
 
@@ -226,7 +226,7 @@ def test_seed_query_finds_real_domains():
 
 @_REQUIRES_DD_CONTENT
 def test_seed_query_returns_empty_for_non_dd_source():
-    from imas_codex.standard_names.loop import (
+    from iter_codex.standard_names.loop import (
         _list_physics_domains_with_extractable_paths,
     )
 

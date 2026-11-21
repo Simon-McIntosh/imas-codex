@@ -18,7 +18,7 @@ import pytest
 # Helpers
 # ---------------------------------------------------------------------------
 
-_MODULE = "imas_codex.standard_names.loop"
+_MODULE = "iter_codex.standard_names.loop"
 
 
 def _patch_list_domains(return_value: list[str]):
@@ -42,7 +42,7 @@ def _patch_seed_domain(side_effect=None, return_value: int = 1):
 # ---------------------------------------------------------------------------
 
 
-from imas_codex.standard_names.loop import _seed_all_domains  # noqa: E402
+from iter_codex.standard_names.loop import _seed_all_domains  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # mixed-domain skipping

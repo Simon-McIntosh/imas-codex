@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.remote import python as remote_python, tools as remote_tools
+from iter_codex.remote import python as remote_python, tools as remote_tools
 
 SCRIPT = Path(remote_tools.__file__).parent / "scripts" / "probe_environment.py"
 
@@ -62,7 +62,7 @@ class TestProbeScript:
             {
                 "modules": [
                     {"name": "sys", "path": None},
-                    {"name": "imas_codex_missing_module_xyz", "path": None},
+                    {"name": "iter_codex_missing_module_xyz", "path": None},
                 ]
             }
         )
@@ -78,10 +78,10 @@ class TestProbeScript:
         assert data["python_version"].split(".")[0] == str(sys.version_info[0])
         by_name = {m["name"]: m for m in data["modules"]}
         assert by_name["sys"]["importable"] is True
-        assert by_name["imas_codex_missing_module_xyz"]["importable"] is False
+        assert by_name["iter_codex_missing_module_xyz"]["importable"] is False
         assert (
-            "imas_codex_missing_module_xyz"
-            in by_name["imas_codex_missing_module_xyz"]["error"]
+            "iter_codex_missing_module_xyz"
+            in by_name["iter_codex_missing_module_xyz"]["error"]
         )
 
     def test_adds_module_path_before_import(self, tmp_path: Path) -> None:

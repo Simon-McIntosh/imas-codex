@@ -19,7 +19,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.budget import BudgetManager
 
 # ---------------------------------------------------------------------------
 # Test 1: budget_saturated shutdown
@@ -84,7 +84,7 @@ class TestAllPoolsIdleShutdown:
     async def test_idle_shutdown_with_finite_work(self) -> None:
         """With ample budget and idle pools, shutdown must be via idle
         watchdog — not budget_saturated."""
-        from imas_codex.standard_names.pools import PoolSpec, run_pools
+        from iter_codex.standard_names.pools import PoolSpec, run_pools
 
         async def empty_claim() -> None:
             await asyncio.sleep(0.01)
@@ -133,7 +133,7 @@ class TestAllPoolsIdleShutdown:
 
 # Directories containing runtime shutdown logic.
 _SN_DIR = (
-    Path(__file__).resolve().parent.parent.parent / "imas_codex" / "standard_names"
+    Path(__file__).resolve().parent.parent.parent / "iter_codex" / "standard_names"
 )
 _SHUTDOWN_FILES = ["pools.py", "loop.py", "budget.py"]
 
@@ -178,7 +178,7 @@ class TestPendingWritesMetric:
         """After enqueuing writes, ``pending_writes`` must reflect depth."""
         mgr = BudgetManager(total_budget=5.0, run_id="test-run")
         # Don't start the writer — enqueued items stay in queue.
-        from imas_codex.standard_names.budget import LLMCostEvent
+        from iter_codex.standard_names.budget import LLMCostEvent
 
         event = LLMCostEvent(
             model="test",

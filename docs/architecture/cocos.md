@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `imas_codex.cocos` module provides utilities for working with tokamak coordinate conventions (COCOS) as defined in Sauter & Medvedev, CPC 184 (2013) 293-302.
+The `iter_codex.cocos` module provides utilities for working with tokamak coordinate conventions (COCOS) as defined in Sauter & Medvedev, CPC 184 (2013) 293-302.
 
 **Key capabilities:**
 - Calculate COCOS from equilibrium physics quantities (ψ, Ip, B0, q)
@@ -71,7 +71,7 @@ cocos_info(17)
 ### Core Functions
 
 ```python
-from imas_codex.cocos import (
+from iter_codex.cocos import (
     VALID_COCOS,           # frozenset of valid values {1-8, 11-18}
     KNOWN_CODE_COCOS,      # dict mapping code names to COCOS
     COCOSParameters,       # Dataclass with 4 parameters
@@ -87,7 +87,7 @@ from imas_codex.cocos import (
 ### Path Transforms
 
 ```python
-from imas_codex.cocos import (
+from iter_codex.cocos import (
     path_needs_cocos_transform,  # Check if path needs DD3→DD4 sign flip
     get_sign_flip_paths,         # Get all sign-flip paths for an IDS
     list_ids_with_sign_flips,    # List IDS names with sign-flip paths
@@ -104,7 +104,7 @@ get_sign_flip_paths("equilibrium")
 ### Data Loaders
 
 ```python
-from imas_codex.cocos import (
+from iter_codex.cocos import (
     EquilibriumData,       # Dataclass for physics quantities
     load_from_imas_ids,    # Load from IMAS IDS object
     load_from_eqdsk,       # Load from G-EQDSK file
@@ -126,7 +126,7 @@ data = load_from_imas_ids(equilibrium_ids)
 ### Determining COCOS from Data
 
 ```python
-from imas_codex.cocos import determine_cocos
+from iter_codex.cocos import determine_cocos
 
 # From equilibrium quantities (Eq. 23 from Sauter paper)
 cocos, confidence = determine_cocos(
@@ -148,7 +148,7 @@ print(f"COCOS={cocos} (confidence={confidence:.2f})")
 ### Validating COCOS
 
 ```python
-from imas_codex.cocos import validate_cocos_from_data
+from iter_codex.cocos import validate_cocos_from_data
 
 # Data-agnostic: works with any source (MDSplus, IMAS IDS, EQDSK, etc.)
 # Caller loads physics quantities from their data source
@@ -177,7 +177,7 @@ if not result.is_consistent:
 ### DD Version Mapping
 
 ```python
-from imas_codex.cocos import cocos_from_dd_version
+from iter_codex.cocos import cocos_from_dd_version
 
 cocos_from_dd_version("3.41.0")  # → 11
 cocos_from_dd_version("4.0.0")   # → 17

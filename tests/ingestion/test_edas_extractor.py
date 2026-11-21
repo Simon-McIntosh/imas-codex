@@ -4,14 +4,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.discovery.base.facility import get_facility, list_facilities
-from imas_codex.ingestion.extractors import (
+from iter_codex.discovery.base.facility import get_facility, list_facilities
+from iter_codex.ingestion.extractors import (
     REFERENCE_HANDLERS,
     reference_handlers_for_systems,
 )
-from imas_codex.ingestion.extractors.edas import extract_edas_references
-from imas_codex.ingestion.graph import link_chunks_to_edas_signals
-from imas_codex.ingestion.pipeline import _split_and_extract
+from iter_codex.ingestion.extractors.edas import extract_edas_references
+from iter_codex.ingestion.graph import link_chunks_to_edas_signals
+from iter_codex.ingestion.pipeline import _split_and_extract
 
 
 @pytest.mark.parametrize(
@@ -111,7 +111,7 @@ def test_configured_data_systems_select_reference_extractors(facility, monkeypat
     assert len(handlers) == len({handler.extractor for handler in handlers})
 
     monkeypatch.setattr(
-        "imas_codex.ingestion.pipeline.chunk_code",
+        "iter_codex.ingestion.pipeline.chunk_code",
         lambda content, **kwargs: [
             SimpleNamespace(text=content, start_line=1, end_line=1)
         ],

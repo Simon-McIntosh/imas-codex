@@ -1,6 +1,6 @@
 # LlamaIndex Agents Architecture
 
-> **Module**: `imas_codex.llm`
+> **Module**: `iter_codex.llm`
 
 ## Overview
 
@@ -10,7 +10,7 @@ The agent system uses LlamaIndex ReActAgent for autonomous exploration, metadata
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     imas_codex.llm                           │
+│                     iter_codex.llm                           │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
@@ -37,13 +37,13 @@ The agent system uses LlamaIndex ReActAgent for autonomous exploration, metadata
 
 ```bash
 # Ad-hoc agent task
-uv run imas-codex agent run "describe path \\RESULTS::PSI"
+uv run iter-codex agent run "describe path \\RESULTS::PSI"
 
 # Batch enrichment
-uv run imas-codex agent enrich --tree results --batch-size 50
+uv run iter-codex agent enrich --tree results --batch-size 50
 
 # Mark nodes for re-enrichment
-uv run imas-codex agent mark-stale "\\RESULTS::*"
+uv run iter-codex agent mark-stale "\\RESULTS::*"
 ```
 
 ## Tool Library
@@ -60,7 +60,7 @@ uv run imas-codex agent mark-stale "\\RESULTS::*"
 ## ReAct Workflow
 
 ```python
-from imas_codex.llm import create_enrichment_agent
+from iter_codex.llm import create_enrichment_agent
 
 agent = create_enrichment_agent(model="gemini-2.0-flash")
 result = await agent.run("Enrich these DataNodes: \\RESULTS::PSI, \\RESULTS::IP")
@@ -80,7 +80,7 @@ The agents MCP server exposes tools for VS Code chat:
 
 ```bash
 # Start agents server
-uv run imas-codex serve
+uv run iter-codex serve
 
 # In VS Code, tools available via MCP:
 # - cypher(query)

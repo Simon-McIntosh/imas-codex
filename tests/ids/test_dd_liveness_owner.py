@@ -1,6 +1,6 @@
 """DD path liveness is decided by the search layer's version clause.
 
-``_dd_version_clause`` in ``imas_codex.tools.graph_search`` is the one owner of
+``_dd_version_clause`` in ``iter_codex.tools.graph_search`` is the one owner of
 the "active at this DD version" rule, and ``dd_path_lifecycles`` renders its
 filter through it rather than re-implementing the comparison in Python. The
 owner requires an ``INTRODUCED_IN`` edge, so a path with no recorded
@@ -12,12 +12,12 @@ run carries no version.
 
 from __future__ import annotations
 
-from imas_codex.ids import graph_ops
-from imas_codex.ids.graph_ops import (
+from iter_codex.ids import graph_ops
+from iter_codex.ids.graph_ops import (
     dd_path_lifecycles,
     dd_path_live_at,
 )
-from imas_codex.tools.graph_search import _dd_version_clause
+from iter_codex.tools.graph_search import _dd_version_clause
 
 DD_VERSION = "4.1.1"
 CONDUCTOR = "tf/coil/conductor/current/data"

@@ -1,9 +1,9 @@
 """``tools status`` environment exit codes and the signal discovery refusal.
 
 The probe is stubbed at both probe sites: the tool summary
-(``imas_codex.remote.tools``) and the ``discover`` preflight
-(``imas_codex.remote.tools``), plus the python module
-(``imas_codex.remote.python``), which binds the probe by direct import. Each
+(``iter_codex.remote.tools``) and the ``discover`` preflight
+(``iter_codex.remote.tools``), plus the python module
+(``iter_codex.remote.python``), which binds the probe by direct import. Each
 command is asserted to open the remote environment exactly once per
 invocation, the install path included.
 """
@@ -13,9 +13,9 @@ from __future__ import annotations
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import discover, sequence
-from imas_codex.cli.tools import tools
-from imas_codex.remote import python as remote_python, tools as remote_tools
+from iter_codex.cli.discover import discover, sequence
+from iter_codex.cli.tools import tools
+from iter_codex.remote import python as remote_python, tools as remote_tools
 
 SETUP = ["module unload python/3.5.6", "module load python/3.12"]
 
@@ -125,7 +125,7 @@ def test_status_fails_and_shows_fix_on_unmet_floor(
 def test_discover_signals_refuses_on_failing_probe(
     no_ssh: None, monkeypatch: pytest.MonkeyPatch, tmp_path
 ) -> None:
-    from imas_codex.cli import logging as cli_logging
+    from iter_codex.cli import logging as cli_logging
 
     monkeypatch.setattr(
         sequence,
@@ -158,7 +158,7 @@ def test_discover_signals_refuses_on_failing_probe(
 def test_discover_environment_skips_facility_without_block(
     no_ssh: None, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from imas_codex.cli.discover import common
+    from iter_codex.cli.discover import common
 
     # A facility declaring no block is left alone (nothing probed, no refusal).
     calls: list = []
@@ -196,7 +196,7 @@ def test_discover_preflight_probes_the_environment_once(
     no_ssh: None, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """One ``discover`` preflight opens the remote environment once."""
-    from imas_codex.cli.discover import common
+    from iter_codex.cli.discover import common
 
     calls: list = []
     payload = _declared("3.12.9", "3.12", [])

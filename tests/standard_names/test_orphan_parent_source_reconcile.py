@@ -8,14 +8,14 @@ from collections.abc import Iterator
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient as RealGraphClient
+from iter_codex.graph.client import GraphClient as RealGraphClient
 
 
 @pytest.mark.graph
 def test_stale_structural_sources_are_not_rebound(
     disposable_neo4j: tuple[str, str],
 ) -> None:
-    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+    from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
         reconcile_orphan_parent_sources,
         reconcile_orphan_parent_sources_batched,
     )

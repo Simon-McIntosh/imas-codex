@@ -23,22 +23,22 @@ from unittest.mock import MagicMock, patch
 
 import yaml
 
-from imas_codex.config.discovery_config import DiscoveryConfig
-from imas_codex.discovery.code.scanner import _get_extensions_list
-from imas_codex.ingestion.readers.remote import (
+from iter_codex.config.discovery_config import DiscoveryConfig
+from iter_codex.discovery.code.scanner import _get_extensions_list
+from iter_codex.ingestion.readers.remote import (
     EXTENSION_TO_LANGUAGE,
     _fetch_batch_tar,
     _fetch_sequential,
     detect_language,
 )
-from imas_codex.remote.scripts import scan_files
+from iter_codex.remote.scripts import scan_files
 
 # A filename that begins with "#", which opens a comment in a shell.
 HASH_INCLUDE = "/analysis/src/client_eqdbms.EQ32.Rev1/inc/F/#AAA.bf"
 
 
 def _config_patterns_dir():
-    from imas_codex.config import discovery_config as dc
+    from iter_codex.config import discovery_config as dc
 
     return dc.__file__.rsplit("/", 1)[0] + "/patterns"
 
@@ -90,7 +90,7 @@ class TestFortranIncludeExtensions:
 
 class TestHashPathQuoting:
     def test_fetch_sequential_quotes_the_remote_path(self):
-        with patch("imas_codex.ingestion.readers.remote.subprocess.run") as run:
+        with patch("iter_codex.ingestion.readers.remote.subprocess.run") as run:
             run.return_value = MagicMock(returncode=0, stdout=b"c field list\n")
             list(_fetch_sequential("jt-60sa", [HASH_INCLUDE]))
 
@@ -104,7 +104,7 @@ class TestHashPathQuoting:
         buf = io.BytesIO()
         with tarfile.open(fileobj=buf, mode="w:gz"):
             pass
-        with patch("imas_codex.ingestion.readers.remote.subprocess.run") as run:
+        with patch("iter_codex.ingestion.readers.remote.subprocess.run") as run:
             run.return_value = MagicMock(returncode=0, stdout=buf.getvalue())
             list(_fetch_batch_tar("jt-60sa", [HASH_INCLUDE]))
 

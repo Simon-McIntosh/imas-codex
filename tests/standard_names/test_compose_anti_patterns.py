@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
+from iter_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
 
 
 def _load(name: str) -> str:
@@ -137,7 +137,7 @@ class TestSystemPromptRendersWithDefaultContext:
 
     @pytest.fixture
     def context(self) -> dict:
-        from imas_codex.standard_names.context import build_compose_context
+        from iter_codex.standard_names.context import build_compose_context
 
         return build_compose_context()
 

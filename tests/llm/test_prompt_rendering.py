@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import (
+from iter_codex.llm.prompt_loader import (
     PromptContextError,
     StrictPromptError,
     load_strict_prompt,
@@ -52,8 +52,8 @@ def test_strict_prompt_digest_covers_resolved_includes(tmp_path) -> None:
 @pytest.fixture()
 def rendered_compose_system() -> str:
     """Render sn/generate_name_system.md with full grammar context."""
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.context import (
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.context import (
         build_compose_context,
         clear_context_cache,
     )

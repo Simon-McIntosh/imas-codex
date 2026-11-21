@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from imas_codex.llm.server import _serialize_neo4j_value
+from iter_codex.llm.server import _serialize_neo4j_value
 
 
 class MockNeo4jDateTime:

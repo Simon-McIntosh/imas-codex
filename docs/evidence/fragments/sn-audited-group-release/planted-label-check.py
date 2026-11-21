@@ -63,10 +63,10 @@ def collect():
         ]["rows"]
     )
     assert len(ids) == len(set(ids)) == 40
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.source_paths import split_source_paths
-    from imas_codex.standard_names.source_reads import source_paths_projection
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.source_paths import split_source_paths
+    from iter_codex.standard_names.source_reads import source_paths_projection
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _ANCESTOR_CONTEXT_QUERY,
         ancestor_statements,
     )
@@ -187,7 +187,7 @@ def collect():
 
 def verify_sources():
     """Require the duplicate-candidate join to recover each known producer."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     data = json.loads(DATA.read_text())
     packets = data["packets"]
@@ -539,7 +539,7 @@ def render_page(data):
     lines = [
         '<!doctype html><html lang="en"><head><meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width,initial-scale=1">',
-        '<meta name="docs-project" content="imas-codex">',
+        '<meta name="docs-project" content="iter-codex">',
         '<meta name="reckon-type" content="evidence-fragment">',
         '<meta name="plan-slug" content="sn-audited-group-release">',
         "<title>Planted labels checked against their sources</title>",

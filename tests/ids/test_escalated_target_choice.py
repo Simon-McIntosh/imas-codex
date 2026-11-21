@@ -14,15 +14,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.ids.graph_ops import CandidateWriteError
-from imas_codex.ids.mapping import (
+from iter_codex.ids.graph_ops import CandidateWriteError
+from iter_codex.ids.mapping import (
     PipelineCost,
     _format_shortlist,
     _render_choice_prompt,
     choose_targets,
     escalated_shortlist,
 )
-from imas_codex.ids.models import TargetChoice, TargetChoiceBatch
+from iter_codex.ids.models import TargetChoice, TargetChoiceBatch
 
 
 def _edge(path, rank, ids="magnetics", arms=None):
@@ -104,7 +104,7 @@ class TestShortlistPrompt:
 
 
 class TestChoiceRefusal:
-    @patch("imas_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping._call_llm")
     def test_choice_refuses_path_outside_shortlist(self, mock_call_llm):
         shortlist = [_edge("magnetics/ip", 1), _edge("magnetics/coil", 2)]
         mock_call_llm.return_value = _batch(
@@ -113,7 +113,7 @@ class TestChoiceRefusal:
         with pytest.raises(CandidateWriteError):
             choose_targets("jet", {"id": "jet:coil:1"}, shortlist, cost=PipelineCost())
 
-    @patch("imas_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping._call_llm")
     def test_choice_accepts_only_listed_paths(self, mock_call_llm):
         shortlist = [_edge("magnetics/ip", 1), _edge("magnetics/coil", 2)]
         mock_call_llm.return_value = _batch("jet:coil:1", ["magnetics/ip"])
@@ -122,16 +122,16 @@ class TestChoiceRefusal:
         )
         assert choice.paths == ["magnetics/ip"]
 
-    @patch("imas_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping._call_llm")
     def test_empty_choice_requires_a_disposition(self, mock_call_llm):
         shortlist = [_edge("magnetics/ip", 1)]
         mock_call_llm.return_value = _batch("jet:coil:1", [])
         with pytest.raises(CandidateWriteError):
             choose_targets("jet", {"id": "jet:coil:1"}, shortlist, cost=PipelineCost())
 
-    @patch("imas_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping._call_llm")
     def test_paths_with_a_disposition_are_refused(self, mock_call_llm):
-        from imas_codex.ids.models import MappingDisposition
+        from iter_codex.ids.models import MappingDisposition
 
         shortlist = [_edge("magnetics/ip", 1)]
         mock_call_llm.return_value = _batch(
@@ -144,14 +144,14 @@ class TestChoiceRefusal:
 
 
 class TestSemanticBridgeNarrowed:
-    @patch("imas_codex.ids.mapping.fetch_code_context", return_value=[])
-    @patch("imas_codex.ids.mapping.fetch_wiki_context", return_value=[])
-    @patch("imas_codex.ids.mapping.compute_semantic_matches", return_value={})
-    @patch("imas_codex.ids.mapping.query_signal_sources")
+    @patch("iter_codex.ids.mapping.fetch_code_context", return_value=[])
+    @patch("iter_codex.ids.mapping.fetch_wiki_context", return_value=[])
+    @patch("iter_codex.ids.mapping.compute_semantic_matches", return_value={})
+    @patch("iter_codex.ids.mapping.query_signal_sources")
     @patch(
-        "imas_codex.ids.mapping.query_ids_physics_domains", return_value=["magnetics"]
+        "iter_codex.ids.mapping.query_ids_physics_domains", return_value=["magnetics"]
     )
-    @patch("imas_codex.embeddings.encoder.Encoder")
+    @patch("iter_codex.embeddings.encoder.Encoder")
     def test_bridge_runs_only_for_escalated_sources(
         self,
         mock_encoder,
@@ -161,7 +161,7 @@ class TestSemanticBridgeNarrowed:
         mock_wiki,
         mock_code,
     ):
-        from imas_codex.ids.mapping import gather_shared_context
+        from iter_codex.ids.mapping import gather_shared_context
 
         mock_sources.return_value = [
             {"id": "jet:s1", "description": "d1", "rep_description": "d1"},
@@ -188,7 +188,7 @@ class TestSemanticBridgeNarrowed:
 
 class TestAssignWorkerSelects:
     def _state(self):
-        from imas_codex.ids.workers import MappingDiscoveryState
+        from iter_codex.ids.workers import MappingDiscoveryState
 
         state = MappingDiscoveryState(facility="jet", target_ids_list=["magnetics"])
         state.assign_phase = MagicMock(done=True)
@@ -197,7 +197,7 @@ class TestAssignWorkerSelects:
     def _run(self, choice_paths):
         import asyncio
 
-        from imas_codex.ids.workers import assign_worker
+        from iter_codex.ids.workers import assign_worker
 
         source = {"id": "jet:coil:1", "physics_domain": "magnetics"}
         edges = {
@@ -209,14 +209,14 @@ class TestAssignWorkerSelects:
         gc = MagicMock()
         with (
             patch(
-                "imas_codex.ids.workers.claim_sources_for_escalated",
+                "iter_codex.ids.workers.claim_sources_for_escalated",
                 return_value=[source],
             ),
-            patch("imas_codex.ids.workers.GraphClient") as mock_gc_cls,
-            patch("imas_codex.ids.graph_ops.read_candidates", return_value=edges),
-            patch("imas_codex.ids.graph_ops.select_candidates") as mock_select,
+            patch("iter_codex.ids.workers.GraphClient") as mock_gc_cls,
+            patch("iter_codex.ids.graph_ops.read_candidates", return_value=edges),
+            patch("iter_codex.ids.graph_ops.select_candidates") as mock_select,
             patch(
-                "imas_codex.ids.mapping.achoose_targets",
+                "iter_codex.ids.mapping.achoose_targets",
                 return_value=_batch("jet:coil:1", choice_paths).choices[0],
             ),
         ):
@@ -242,7 +242,7 @@ class TestAssignWorkerSelects:
 
 class TestNoCandidateLogged:
     def _state(self):
-        from imas_codex.ids.workers import CandidateDiscoveryState
+        from iter_codex.ids.workers import CandidateDiscoveryState
 
         state = CandidateDiscoveryState(facility="jet")
         state.candidate_phase = MagicMock(done=True)
@@ -255,14 +255,14 @@ class TestNoCandidateLogged:
         The worker ends the stage before its first claim when the key is
         absent, so an unset key would test the skip instead of the routing.
         """
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
 
     def test_candidate_worker_skips_and_logs_no_candidate(self, caplog):
         import asyncio
         import logging
 
-        from imas_codex.ids.candidates import PairJudgment, Route
-        from imas_codex.ids.workers import candidate_worker
+        from iter_codex.ids.candidates import PairJudgment, Route
+        from iter_codex.ids.workers import candidate_worker
 
         source = {"id": "jet:s1", "description": "coil current"}
         judgments = [
@@ -279,24 +279,24 @@ class TestNoCandidateLogged:
         gc = MagicMock()
         with (
             patch(
-                "imas_codex.ids.workers.claim_sources_for_candidates",
+                "iter_codex.ids.workers.claim_sources_for_candidates",
                 side_effect=[[source], []],
             ),
-            patch("imas_codex.ids.workers.GraphClient") as mock_gc_cls,
-            patch("imas_codex.ids.workers._facility_block", return_value={}),
-            patch("imas_codex.ids.workers.route_ids", return_value=["magnetics"]),
+            patch("iter_codex.ids.workers.GraphClient") as mock_gc_cls,
+            patch("iter_codex.ids.workers._facility_block", return_value={}),
+            patch("iter_codex.ids.workers.route_ids", return_value=["magnetics"]),
             patch(
-                "imas_codex.ids.workers.retrieve_candidates",
+                "iter_codex.ids.workers.retrieve_candidates",
                 return_value={"jet:s1": [MagicMock()]},
             ),
-            patch("imas_codex.ids.workers.judge_candidates", return_value=judgments),
+            patch("iter_codex.ids.workers.judge_candidates", return_value=judgments),
             patch(
-                "imas_codex.ids.workers.expand_cluster_siblings",
+                "iter_codex.ids.workers.expand_cluster_siblings",
                 return_value=([], []),
             ),
-            patch("imas_codex.ids.workers.route", return_value=decision),
-            patch("imas_codex.ids.workers._candidate_records", return_value=[]),
-            patch("imas_codex.ids.workers.write_candidates", return_value=0),
+            patch("iter_codex.ids.workers.route", return_value=decision),
+            patch("iter_codex.ids.workers._candidate_records", return_value=[]),
+            patch("iter_codex.ids.workers.write_candidates", return_value=0),
         ):
             mock_gc_cls.return_value.__enter__.return_value = gc
             with caplog.at_level(logging.INFO):
@@ -311,7 +311,7 @@ class TestNoPathVerdictPersisted:
     """A 'none' choice is paid once: its verdict is persisted, not released."""
 
     def _state(self):
-        from imas_codex.ids.workers import MappingDiscoveryState
+        from iter_codex.ids.workers import MappingDiscoveryState
 
         state = MappingDiscoveryState(facility="jet", target_ids_list=["magnetics"])
         state.assign_phase = MagicMock(done=True)
@@ -320,8 +320,8 @@ class TestNoPathVerdictPersisted:
     def _run(self, disposition):
         import asyncio
 
-        from imas_codex.ids.models import TargetChoice
-        from imas_codex.ids.workers import assign_worker
+        from iter_codex.ids.models import TargetChoice
+        from iter_codex.ids.workers import assign_worker
 
         source = {"id": "jet:coil:1", "physics_domain": "magnetics"}
         edges = {"jet:coil:1": [_edge("magnetics/ip", 1)]}
@@ -335,23 +335,23 @@ class TestNoPathVerdictPersisted:
         )
         with (
             patch(
-                "imas_codex.ids.workers.claim_sources_for_escalated",
+                "iter_codex.ids.workers.claim_sources_for_escalated",
                 return_value=[source],
             ),
-            patch("imas_codex.ids.workers.GraphClient") as mock_gc_cls,
-            patch("imas_codex.ids.graph_ops.read_candidates", return_value=edges),
-            patch("imas_codex.ids.graph_ops.select_candidates") as mock_select,
-            patch("imas_codex.ids.mapping.achoose_targets", return_value=choice),
-            patch("imas_codex.ids.workers.refresh_mapping_status") as mock_status,
-            patch("imas_codex.ids.workers.record_mapping_verdict") as mock_verdict,
-            patch("imas_codex.ids.workers.release_mapping_claim") as mock_release,
+            patch("iter_codex.ids.workers.GraphClient") as mock_gc_cls,
+            patch("iter_codex.ids.graph_ops.read_candidates", return_value=edges),
+            patch("iter_codex.ids.graph_ops.select_candidates") as mock_select,
+            patch("iter_codex.ids.mapping.achoose_targets", return_value=choice),
+            patch("iter_codex.ids.workers.refresh_mapping_status") as mock_status,
+            patch("iter_codex.ids.workers.record_mapping_verdict") as mock_verdict,
+            patch("iter_codex.ids.workers.release_mapping_claim") as mock_release,
         ):
             mock_gc_cls.return_value.__enter__.return_value = gc
             asyncio.run(assign_worker(self._state()))
         return mock_status, mock_verdict, mock_select, mock_release
 
     def test_none_choice_persists_disposition_and_evidence(self):
-        from imas_codex.ids.models import MappingDisposition
+        from iter_codex.ids.models import MappingDisposition
 
         mock_status, mock_verdict, mock_select, mock_release = self._run(
             MappingDisposition.NO_IMAS_EQUIVALENT
@@ -366,21 +366,21 @@ class TestNoPathVerdictPersisted:
 
 class TestDecidedSourceNotReclaimed:
     def test_claim_predicate_excludes_decided_sources(self):
-        from imas_codex.ids.workers import claim_sources_for_escalated
+        from iter_codex.ids.workers import claim_sources_for_escalated
 
-        with patch("imas_codex.ids.workers.claim_batch", return_value=[]) as mock_claim:
+        with patch("iter_codex.ids.workers.claim_batch", return_value=[]) as mock_claim:
             claim_sources_for_escalated("jet", ["magnetics"])
         predicate = mock_claim.call_args.kwargs["status_predicate"]
         assert "n.candidate_route = 'escalated'" in predicate
         assert "n.mapping_disposition IS NULL" in predicate
 
     def test_claim_predicate_skips_shortlists_judged_from_old_text(self):
-        from imas_codex.ids.workers import (
+        from iter_codex.ids.workers import (
             _ROUTE_IS_CURRENT,
             claim_sources_for_escalated,
         )
 
-        with patch("imas_codex.ids.workers.claim_batch", return_value=[]) as mock_claim:
+        with patch("iter_codex.ids.workers.claim_batch", return_value=[]) as mock_claim:
             claim_sources_for_escalated("jet", ["magnetics"])
         predicate = mock_claim.call_args.kwargs["status_predicate"]
         assert _ROUTE_IS_CURRENT in predicate
@@ -388,11 +388,11 @@ class TestDecidedSourceNotReclaimed:
 
 class TestResetClearsVerdict:
     def test_reset_nulls_disposition_and_evidence(self):
-        from imas_codex.ids.workers import reset_mapping_state
+        from iter_codex.ids.workers import reset_mapping_state
 
         gc = MagicMock()
         gc.query.return_value = [{"cleared": 0}]
-        with patch("imas_codex.ids.workers.GraphClient") as mock_cls:
+        with patch("iter_codex.ids.workers.GraphClient") as mock_cls:
             mock_cls.return_value.__enter__.return_value = gc
             reset_mapping_state("jet")
         query = gc.query.call_args[0][0]

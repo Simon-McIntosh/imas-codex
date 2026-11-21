@@ -1,4 +1,4 @@
-"""Unit tests for imas_codex.graph.ghcr module.
+"""Unit tests for iter_codex.graph.ghcr module.
 
 Tests for GHCR helper functions that were extracted from graph_cli.py.
 All subprocess calls and filesystem access are mocked.
@@ -13,7 +13,7 @@ from unittest.mock import patch
 import click
 import pytest
 
-from imas_codex.graph.ghcr import (
+from iter_codex.graph.ghcr import (
     get_git_info,
     get_package_name,
     get_registry,
@@ -48,7 +48,7 @@ class TestGetGitInfo:
                 return CompletedProcess(cmd, 1, stdout="", stderr="")
             return CompletedProcess(cmd, 1, stdout="", stderr="")
 
-        monkeypatch.setattr("imas_codex.graph.ghcr.subprocess.run", mock_run)
+        monkeypatch.setattr("iter_codex.graph.ghcr.subprocess.run", mock_run)
         info = get_git_info()
         assert info["commit"] == "abc1234def5678"
         assert info["commit_short"] == "abc1234"
@@ -68,7 +68,7 @@ class TestGetGitInfo:
                 return CompletedProcess(cmd, 1, stdout="", stderr="")
             return CompletedProcess(cmd, 1, stdout="", stderr="")
 
-        monkeypatch.setattr("imas_codex.graph.ghcr.subprocess.run", mock_run)
+        monkeypatch.setattr("iter_codex.graph.ghcr.subprocess.run", mock_run)
         info = get_git_info()
         assert info["tag"] == "v1.2.3"
 
@@ -87,7 +87,7 @@ class TestGetGitInfo:
                 return CompletedProcess(cmd, 1, stdout="", stderr="")
             return CompletedProcess(cmd, 1, stdout="", stderr="")
 
-        monkeypatch.setattr("imas_codex.graph.ghcr.subprocess.run", mock_run)
+        monkeypatch.setattr("iter_codex.graph.ghcr.subprocess.run", mock_run)
         info = get_git_info()
         assert info["is_dirty"] is True
 
@@ -106,12 +106,12 @@ class TestGetGitInfo:
                 return CompletedProcess(
                     cmd,
                     0,
-                    stdout="https://github.com/myuser/imas-codex.git\n",
+                    stdout="https://github.com/myuser/iter-codex.git\n",
                     stderr="",
                 )
             return CompletedProcess(cmd, 1, stdout="", stderr="")
 
-        monkeypatch.setattr("imas_codex.graph.ghcr.subprocess.run", mock_run)
+        monkeypatch.setattr("iter_codex.graph.ghcr.subprocess.run", mock_run)
         info = get_git_info()
         assert info["is_fork"] is True
         assert info["remote_owner"] == "myuser"
@@ -147,9 +147,9 @@ class TestGetVersionTag:
     """Tests for get_version_tag()."""
 
     def test_dev_returns_revision_format(self, monkeypatch):
-        monkeypatch.setattr("imas_codex.graph.ghcr.__version__", "0.5.0.dev123")
+        monkeypatch.setattr("iter_codex.graph.ghcr.__version__", "0.5.0.dev123")
         monkeypatch.setattr(
-            "imas_codex.graph.ghcr.get_local_graph_manifest", lambda: None
+            "iter_codex.graph.ghcr.get_local_graph_manifest", lambda: None
         )
         tag = get_version_tag({"tag": None}, dev=True)
         assert tag == "0.5.0.dev123-r1"
@@ -172,20 +172,20 @@ class TestGetPackageName:
     """Tests for get_package_name()."""
 
     def test_default(self):
-        assert get_package_name() == "imas-codex-graph"
+        assert get_package_name() == "iter-codex-graph"
 
     def test_with_facilities(self):
-        assert get_package_name(["tcv", "iter"]) == "imas-codex-graph-iter-tcv"
+        assert get_package_name(["tcv", "iter"]) == "iter-codex-graph-iter-tcv"
 
     def test_dd_only(self):
-        assert get_package_name(dd_only=True) == "imas-codex-graph-dd"
+        assert get_package_name(dd_only=True) == "iter-codex-graph-dd"
 
     def test_without_dd(self):
-        assert get_package_name(without_dd=True) == "imas-codex-graph-without-dd"
+        assert get_package_name(without_dd=True) == "iter-codex-graph-without-dd"
 
     def test_facilities_with_without_dd(self):
         name = get_package_name(["jet"], without_dd=True)
-        assert name == "imas-codex-graph-jet-without-dd"
+        assert name == "iter-codex-graph-jet-without-dd"
 
 
 # ============================================================================
@@ -198,20 +198,20 @@ class TestNextDevRevision:
 
     def test_fresh_returns_1(self, monkeypatch):
         monkeypatch.setattr(
-            "imas_codex.graph.ghcr.get_local_graph_manifest", lambda: None
+            "iter_codex.graph.ghcr.get_local_graph_manifest", lambda: None
         )
         assert next_dev_revision("0.5.0.dev123") == 1
 
     def test_increments(self, monkeypatch):
         monkeypatch.setattr(
-            "imas_codex.graph.ghcr.get_local_graph_manifest",
+            "iter_codex.graph.ghcr.get_local_graph_manifest",
             lambda: {"dev_base_version": "0.5.0.dev123", "dev_revision": 3},
         )
         assert next_dev_revision("0.5.0.dev123") == 4
 
     def test_resets_on_version_change(self, monkeypatch):
         monkeypatch.setattr(
-            "imas_codex.graph.ghcr.get_local_graph_manifest",
+            "iter_codex.graph.ghcr.get_local_graph_manifest",
             lambda: {"dev_base_version": "0.5.0.dev100", "dev_revision": 5},
         )
         assert next_dev_revision("0.5.0.dev123") == 1
@@ -237,7 +237,7 @@ class TestResolveToken:
         from subprocess import CompletedProcess
 
         monkeypatch.setattr(
-            "imas_codex.graph.ghcr.subprocess.run",
+            "iter_codex.graph.ghcr.subprocess.run",
             lambda *a, **kw: CompletedProcess(a, 1, stdout="", stderr=""),
         )
         with pytest.raises(click.ClickException, match="No GitHub token found"):
@@ -253,14 +253,14 @@ class TestParseDumpError:
     """Tests for parse_dump_error()."""
 
     def test_database_in_use(self):
-        from imas_codex.graph.neo4j_ops import parse_dump_error
+        from iter_codex.graph.neo4j_ops import parse_dump_error
 
         msg, is_lock = parse_dump_error("Error: database is in use")
         assert is_lock is True
         assert "in use" in msg
 
     def test_generic_with_caused_by(self):
-        from imas_codex.graph.neo4j_ops import parse_dump_error
+        from iter_codex.graph.neo4j_ops import parse_dump_error
 
         stderr = "Some error\nCaused by: java.io.IOException: disk full"
         msg, is_lock = parse_dump_error(stderr)

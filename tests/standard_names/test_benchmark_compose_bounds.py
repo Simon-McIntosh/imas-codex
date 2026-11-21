@@ -15,10 +15,10 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.discovery.base.llm import _build_kwargs
-from imas_codex.settings import get_reasoning_effort
-from imas_codex.standard_names.benchmark import BenchmarkConfig, _run_model
-from imas_codex.standard_names.models import StandardNameComposeBatch
+from iter_codex.discovery.base.llm import _build_kwargs
+from iter_codex.settings import get_reasoning_effort
+from iter_codex.standard_names.benchmark import BenchmarkConfig, _run_model
+from iter_codex.standard_names.models import StandardNameComposeBatch
 
 # A self-hosted seat, so the kwargs builder applies the local model-family
 # token and time bounds rather than a provider default.
@@ -56,7 +56,7 @@ async def _capture_compose_call(config: BenchmarkConfig) -> dict:
         return StandardNameComposeBatch(candidates=[], skipped=[]), 0.0, 0
 
     with patch(
-        "imas_codex.discovery.base.llm.acall_llm_structured",
+        "iter_codex.discovery.base.llm.acall_llm_structured",
         side_effect=_mock_llm,
     ):
         await _run_model(

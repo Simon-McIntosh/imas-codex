@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.discovery.base.transfer import (
+from iter_codex.discovery.base.transfer import (
     TransferResult,
     decode_url,
     detect_content_type,

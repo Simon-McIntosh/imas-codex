@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.cli.sn import _require_terminal_drain
-from imas_codex.standard_names import graph_ops, loop
-from imas_codex.standard_names.graph_store import (
+from iter_codex.cli.sn import _require_terminal_drain
+from iter_codex.standard_names import graph_ops, loop
+from iter_codex.standard_names.graph_store import (
     graph_catalog_reset as _owning_graph_catalog_reset,
     graph_foundation as _owning_graph_foundation,
     graph_source_bindings as _owning_graph_source_bindings,

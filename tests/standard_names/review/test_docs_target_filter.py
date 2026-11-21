@@ -17,7 +17,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.review.pipeline import extract_review_worker
+from iter_codex.standard_names.review.pipeline import extract_review_worker
 
 
 class _FakeGraphClient:
@@ -136,7 +136,7 @@ _NAME_UNREVIEWED = {
 async def _run_extract_with_rows(state, rows):
     _FakeGraphClient._rows = rows
     with patch(
-        "imas_codex.graph.client.GraphClient",
+        "iter_codex.graph.client.GraphClient",
         _FakeGraphClient,
     ):
         await extract_review_worker(state)

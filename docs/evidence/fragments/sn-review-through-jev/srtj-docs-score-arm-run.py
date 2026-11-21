@@ -22,9 +22,9 @@ from sklearn import set_config
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.model_selection import GroupKFold
 
-from imas_codex.standard_names.review.audits import AuditReport
-from imas_codex.standard_names.review.checks import load_review_checks
-from imas_codex.standard_names.review.jev_review import (
+from iter_codex.standard_names.review.audits import AuditReport
+from iter_codex.standard_names.review.checks import load_review_checks
+from iter_codex.standard_names.review.jev_review import (
     CONTRADICTION_VETO_PROBABILITY,
     aggregate_docs_review,
     build_docs_audit_report,
@@ -70,7 +70,7 @@ def _prior_context() -> dict:
 
 
 def _query_names(ids: list[str]) -> dict[str, dict]:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     graph = GraphClient()
     query = """
@@ -246,7 +246,7 @@ def _feature_rows(split: str, context: dict) -> list[dict]:
 
 
 def _polarity(rows: list[dict]) -> dict:
-    from imas_codex.discovery.base.evaluation import roc_auc
+    from iter_codex.discovery.base.evaluation import roc_auc
 
     names = sorted(rows[0]["components"])
     labels = [row["label"] for row in rows]

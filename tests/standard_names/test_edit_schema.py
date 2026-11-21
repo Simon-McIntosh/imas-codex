@@ -3,7 +3,7 @@
 Covers the LinkML-generated enums (EditMode, EditOrigin, EditStatus,
 EditScope) and the scalar edit-steering slots on StandardName
 (edit_mode, name_hint, docs_hint, edit_reason, edit_origin, edit_status,
-edit_scope, edit_requested_at) added to support `imas-codex sn edit`.
+edit_scope, edit_requested_at) added to support `iter-codex sn edit`.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ class TestEditEnums:
     """Verify the four sn-edit enums exist with the expected members."""
 
     def test_edit_mode_members(self) -> None:
-        from imas_codex.graph.models import EditMode
+        from iter_codex.graph.models import EditMode
 
         assert EditMode.hint == "hint"
         assert EditMode.rename == "rename"
@@ -24,14 +24,14 @@ class TestEditEnums:
         assert len(EditMode) == 3
 
     def test_edit_origin_members(self) -> None:
-        from imas_codex.graph.models import EditOrigin
+        from iter_codex.graph.models import EditOrigin
 
         assert EditOrigin.human == "human"
         assert EditOrigin.agent == "agent"
         assert len(EditOrigin) == 2
 
     def test_edit_status_members(self) -> None:
-        from imas_codex.graph.models import EditStatus
+        from iter_codex.graph.models import EditStatus
 
         assert EditStatus.open == "open"
         assert EditStatus.applied == "applied"
@@ -43,7 +43,7 @@ class TestEditEnums:
         """`self` collides with jsonasobj2's ExtendedNamespace kwarg — the
         member is named `only_self` instead (see EditScope description in
         the schema for the full rationale)."""
-        from imas_codex.graph.models import EditScope
+        from iter_codex.graph.models import EditScope
 
         assert EditScope.only_self == "only_self"
         assert EditScope.family == "family"
@@ -55,7 +55,7 @@ class TestStandardNameEditFields:
     """Verify StandardName accepts and round-trips the edit-steering slots."""
 
     def test_fields_present_on_model(self) -> None:
-        from imas_codex.graph.models import StandardName
+        from iter_codex.graph.models import StandardName
 
         fields = StandardName.model_fields
         for name in (
@@ -71,7 +71,7 @@ class TestStandardNameEditFields:
             assert name in fields, f"missing slot: {name}"
 
     def test_construct_with_edit_fields(self) -> None:
-        from imas_codex.graph.models import StandardName
+        from iter_codex.graph.models import StandardName
 
         sn = StandardName(
             id="electron_temperature",
@@ -93,7 +93,7 @@ class TestStandardNameEditFields:
         assert sn.edit_scope == "only_self"
 
     def test_model_dump_round_trips_edit_fields(self) -> None:
-        from imas_codex.graph.models import StandardName
+        from iter_codex.graph.models import StandardName
 
         sn = StandardName(
             id="ion_temperature",
@@ -115,7 +115,7 @@ class TestStandardNameEditFields:
 
     def test_edit_fields_default_to_none(self) -> None:
         """A StandardName with no edit attached leaves all edit fields null."""
-        from imas_codex.graph.models import StandardName
+        from iter_codex.graph.models import StandardName
 
         sn = StandardName(id="plasma_current")
         assert sn.edit_mode is None
@@ -128,13 +128,13 @@ class TestStandardNameEditFields:
         assert sn.edit_requested_at is None
 
     def test_invalid_edit_mode_rejected(self) -> None:
-        from imas_codex.graph.models import StandardName
+        from iter_codex.graph.models import StandardName
 
         with pytest.raises(ValidationError):
             StandardName(id="plasma_current", edit_mode="not_a_real_mode")
 
     def test_invalid_edit_scope_rejected(self) -> None:
-        from imas_codex.graph.models import StandardName
+        from iter_codex.graph.models import StandardName
 
         with pytest.raises(ValidationError):
             StandardName(id="plasma_current", edit_scope="self")

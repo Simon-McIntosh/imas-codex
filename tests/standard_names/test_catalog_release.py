@@ -22,7 +22,7 @@ import click
 import pytest
 import yaml
 
-from imas_codex.standard_names.catalog_release import (
+from iter_codex.standard_names.catalog_release import (
     GitHubRestError,
     PublicGrammarEvidence,
     PublicGrammarFinding,
@@ -41,7 +41,7 @@ from imas_codex.standard_names.catalog_release import (
     run_release,
     sanitize_build_metadata,
 )
-from imas_codex.standard_names.export import _write_manifest
+from iter_codex.standard_names.export import _write_manifest
 
 
 def _git(*args, cwd):
@@ -158,7 +158,7 @@ def test_each_public_grammar_assertion_reports_its_own_failure(
 
     _isolate_release_preflight(monkeypatch)
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release.check_public_grammar_release",
+        "iter_codex.standard_names.catalog_release.check_public_grammar_release",
         lambda: findings,
     )
     report = run_release(
@@ -178,7 +178,7 @@ def test_unreachable_package_index_fails_closed(tagged_repo, tmp_path, monkeypat
     _git("remote", "add", "upstream", str(upstream), cwd=tagged_repo)
     _git("push", "upstream", "refs/tags/v0.9.0", cwd=tagged_repo)
     monkeypatch.setattr(
-        "imas_codex.standard_names.export.loaded_grammar_checkout",
+        "iter_codex.standard_names.export.loaded_grammar_checkout",
         lambda: tagged_repo,
     )
 
@@ -186,7 +186,7 @@ def test_unreachable_package_index_fails_closed(tagged_repo, tmp_path, monkeypat
         raise OSError("timed out")
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release._read_package_index_versions",
+        "iter_codex.standard_names.catalog_release._read_package_index_versions",
         unreachable_index,
     )
 
@@ -200,22 +200,22 @@ def test_unreachable_package_index_fails_closed(tagged_repo, tmp_path, monkeypat
 
 def _isolate_release_preflight(monkeypatch):
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release._check_on_main", lambda _path: None
+        "iter_codex.standard_names.catalog_release._check_on_main", lambda _path: None
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release._check_clean_tree",
+        "iter_codex.standard_names.catalog_release._check_clean_tree",
         lambda _path, **_kwargs: [],
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release._check_synced",
+        "iter_codex.standard_names.catalog_release._check_synced",
         lambda _path, _remote, **_kwargs: [],
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release.compute_next_version",
+        "iter_codex.standard_names.catalog_release.compute_next_version",
         lambda *_args, **_kwargs: ("v1.0.0", "1.0.0"),
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release._tag_exists",
+        "iter_codex.standard_names.catalog_release._tag_exists",
         lambda *_args, **_kwargs: True,
     )
 
@@ -277,7 +277,7 @@ class _SilentGitHub:
 
 def _prepare_cut(repo: Path, monkeypatch, tag: str = "v1.0.0rc1") -> None:
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release.compute_next_version",
+        "iter_codex.standard_names.catalog_release.compute_next_version",
         lambda *_args, **_kwargs: (tag, tag.lstrip("v")),
     )
 
@@ -395,7 +395,7 @@ def test_a_release_cut_from_an_unmerged_detached_head_is_refused(
 def test_the_catalog_guard_accepts_a_detached_head_merged_into_main(
     tagged_repo, tmp_path
 ):
-    from imas_codex.standard_names.catalog_release import _check_on_main
+    from iter_codex.standard_names.catalog_release import _check_on_main
 
     wt = _detached_worktree(tagged_repo, tmp_path)
 
@@ -405,7 +405,7 @@ def test_the_catalog_guard_accepts_a_detached_head_merged_into_main(
 def test_the_cli_guard_accepts_a_detached_head_merged_into_main(
     tagged_repo, tmp_path, monkeypatch
 ):
-    from imas_codex.cli.release import _check_on_main
+    from iter_codex.cli.release import _check_on_main
 
     wt = _detached_worktree(tagged_repo, tmp_path)
     monkeypatch.chdir(wt)
@@ -414,7 +414,7 @@ def test_the_cli_guard_accepts_a_detached_head_merged_into_main(
 
 
 def test_the_catalog_guard_refuses_an_unmerged_detached_head(tagged_repo, tmp_path):
-    from imas_codex.standard_names.catalog_release import _check_on_main
+    from iter_codex.standard_names.catalog_release import _check_on_main
 
     wt = _detached_worktree(tagged_repo, tmp_path)
     (wt / "unreviewed.txt").write_text("not on main\n", encoding="utf-8")
@@ -428,7 +428,7 @@ def test_the_catalog_guard_refuses_an_unmerged_detached_head(tagged_repo, tmp_pa
 def test_the_cli_guard_refuses_an_unmerged_detached_head(
     tagged_repo, tmp_path, monkeypatch
 ):
-    from imas_codex.cli.release import _check_on_main
+    from iter_codex.cli.release import _check_on_main
 
     wt = _detached_worktree(tagged_repo, tmp_path)
     (wt / "unreviewed.txt").write_text("not on main\n", encoding="utf-8")
@@ -449,7 +449,7 @@ def test_release_targeting_origin_does_not_run_the_public_grammar_gate(
         raise AssertionError("origin release reached the upstream-only grammar gate")
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release.check_public_grammar_release",
+        "iter_codex.standard_names.catalog_release.check_public_grammar_release",
         unexpected_gate,
     )
 
@@ -476,7 +476,7 @@ def test_upstream_dry_run_reports_failed_grammar_findings_without_blocking(
         )
     ]
     monkeypatch.setattr(
-        "imas_codex.standard_names.catalog_release.check_public_grammar_release",
+        "iter_codex.standard_names.catalog_release.check_public_grammar_release",
         lambda: findings,
     )
 
@@ -558,7 +558,7 @@ class TestBatchBuildMetadata:
     def test_a_committed_manifest_yields_its_declared_name(self):
         manifests = (
             Path(__file__).resolve().parents[2]
-            / "imas_codex"
+            / "iter_codex"
             / "standard_names"
             / "manifests"
         )
@@ -736,7 +736,7 @@ class TestPullRequestTransport:
 
         fake_api.response = payload
         monkeypatch.setattr(
-            "imas_codex.standard_names.catalog_release._github_api", fake_api
+            "iter_codex.standard_names.catalog_release._github_api", fake_api
         )
         return calls
 
@@ -745,7 +745,7 @@ class TestPullRequestTransport:
             raise AssertionError(f"pull-request work shelled out to {args[0]!r}")
 
         monkeypatch.setattr(
-            "imas_codex.standard_names.catalog_release.subprocess.run", fail
+            "iter_codex.standard_names.catalog_release.subprocess.run", fail
         )
 
     def test_update_patches_the_pull_request_endpoint_with_the_body(self, monkeypatch):
@@ -927,7 +927,7 @@ class TestClosedPullRequestHeadLookup:
                 raise GitHubRestError("HTTP 500 Server Error")
 
         monkeypatch.setattr(
-            "imas_codex.standard_names.catalog_release._github_slug",
+            "iter_codex.standard_names.catalog_release._github_slug",
             lambda _path, remote: ("fork", "catalog"),
         )
 
@@ -950,7 +950,7 @@ class TestClosedPullRequestHeadLookup:
 
         slugs = {"origin": ("fork", "catalog"), "upstream": ("upstream", "catalog")}
         monkeypatch.setattr(
-            "imas_codex.standard_names.catalog_release._github_slug",
+            "iter_codex.standard_names.catalog_release._github_slug",
             lambda _path, remote: slugs[remote],
         )
 
@@ -975,8 +975,8 @@ class TestOnePullRequestTransport:
     """
 
     def test_catalog_client_calls_the_shared_transport(self):
-        from imas_codex.graph import ghcr
-        from imas_codex.standard_names import catalog_release
+        from iter_codex.graph import ghcr
+        from iter_codex.standard_names import catalog_release
 
         assert catalog_release._github_api is ghcr.github_api_call
         assert catalog_release.GitHubRestError is ghcr.GitHubRestError
@@ -984,8 +984,8 @@ class TestOnePullRequestTransport:
     def test_the_shared_transport_is_the_only_urllib_request_builder(self):
         import inspect
 
-        from imas_codex.graph import ghcr
-        from imas_codex.standard_names import catalog_release
+        from iter_codex.graph import ghcr
+        from iter_codex.standard_names import catalog_release
 
         for module in (ghcr, catalog_release):
             source = inspect.getsource(module)
@@ -1020,7 +1020,7 @@ class TestOnePullRequestTransport:
 
         monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
 
-        from imas_codex.graph.ghcr import github_api_call
+        from iter_codex.graph.ghcr import github_api_call
 
         status, body = github_api_call(
             "POST", "/repos/o/r/pulls", payload={"title": "t"}, token="tok"

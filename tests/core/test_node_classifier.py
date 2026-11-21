@@ -5,7 +5,7 @@ Covers geometry detection, Pass 1 rules (1–15), and Pass 2 rules (R1–R3).
 
 import pytest
 
-from imas_codex.core.node_classifier import (
+from iter_codex.core.node_classifier import (
     _BOOLEAN_FLAG_LEAVES,
     _DATA_ENTRY_ID_LEAVES,
     _PHYSICS_INT_LEAVES,

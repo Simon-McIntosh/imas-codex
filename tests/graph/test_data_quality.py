@@ -139,7 +139,7 @@ class TestEmbeddingSelfSimilarity:
         if not result:
             pytest.skip(f"No {label} nodes with both description and embedding")
 
-        from imas_codex.embeddings.description import embed_description
+        from iter_codex.embeddings.description import embed_description
 
         low_similarity = []
         dim_mismatches = 0
@@ -373,7 +373,7 @@ class TestCOCOSLabelIntegrity:
         assert count == 0, (
             f"{count} IMASNode nodes have cocos_label_source set but "
             f"cocos_transformation_type is null (half-state bug). "
-            f"Run: imas-codex graph repair cocos-labels"
+            f"Run: iter-codex graph repair cocos-labels"
         )
 
     def test_cocos_labels_are_valid(self, graph_client, label_counts):

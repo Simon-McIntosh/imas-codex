@@ -1,4 +1,4 @@
-# IMAS Codex Server
+# ITER Codex Server
 
 [![pre-commit][pre-commit-badge]][pre-commit-link]
 [![Ruff][ruff-badge]][ruff-link]
@@ -12,10 +12,10 @@ A Model Context Protocol (MCP) server providing AI assistants with access to IMA
 
 ## MCP Server
 
-IMAS Codex provides a unified MCP server:
+ITER Codex provides a unified MCP server:
 
 ```bash
-imas-codex serve
+iter-codex serve
 ```
 
 This single server provides IMAS Data Dictionary knowledge, semantic search, and remote facility exploration.
@@ -24,7 +24,7 @@ This single server provides IMAS Data Dictionary knowledge, semantic search, and
 
 ```bash
 # Read-only mode (for container deployments)
-imas-codex serve --read-only --transport streamable-http
+iter-codex serve --read-only --transport streamable-http
 ```
 
 ## Quick Start
@@ -74,7 +74,7 @@ Linux: `~/.config/claude/claude_desktop_config.json`
 ```json
 {
   "mcpServers": {
-    "imas-codex-hosted": {
+    "iter-codex-hosted": {
       "command": "npx",
       "args": ["mcp-remote", "https://imas-dd.iter.org/mcp"]
     }
@@ -92,10 +92,10 @@ Install with [uv](https://docs.astral.sh/uv/):
 
 ```bash
 # Standard installation (includes sentence-transformers)
-uv tool install imas-codex
+uv tool install iter-codex
 
 # Add to a project env
-uv add imas-codex
+uv add iter-codex
 ```
 
 #### Data Dictionary Version
@@ -106,14 +106,14 @@ The IMAS Data Dictionary version determines which schema definitions are used. T
 |----------|--------|-------------|
 | 1 | `--dd-version` CLI option | Highest priority, explicit override |
 | 2 | `IMAS_DD_VERSION` env var | Environment-based override |
-| 3 | `pyproject.toml` default | Configured default from `[tool.imas-codex.data-dictionary].version` |
+| 3 | `pyproject.toml` default | Configured default from `[tool.iter-codex.data-dictionary].version` |
 
 **Configuration:**
 
 Set the default DD version in `pyproject.toml`:
 
 ```toml
-[tool.imas-codex.data-dictionary]
+[tool.iter-codex.data-dictionary]
 version = "4.1.0"
 ```
 
@@ -121,10 +121,10 @@ version = "4.1.0"
 
 ```bash
 # Via CLI option
-imas-codex --dd-version 3.42.2
+iter-codex --dd-version 3.42.2
 
 # Via environment variable
-IMAS_DD_VERSION=3.42.2 imas-codex
+IMAS_DD_VERSION=3.42.2 iter-codex
 
 # Docker build
 docker build --build-arg IMAS_DD_VERSION=3.42.2 ...
@@ -141,14 +141,14 @@ Update imas-data-dictionaries dependency or use a lower version.
 
 #### Embedding Configuration
 
-The IMAS Codex server uses Qwen3-Embedding-8B for generating 256-dim embeddings:
+The ITER Codex server uses Qwen3-Embedding-8B for generating 256-dim embeddings:
 
 **Configuration:**
 
-The embedding model is configured in `pyproject.toml` under `[tool.imas-codex]`:
+The embedding model is configured in `pyproject.toml` under `[tool.iter-codex]`:
 
 ```toml
-[tool.imas-codex]
+[tool.iter-codex]
 imas-embedding-model = "Qwen/Qwen3-Embedding-8B"
 embedding-dimensions = 256
 ```
@@ -156,7 +156,7 @@ embedding-dimensions = 256
 Environment variables override pyproject.toml settings:
 
 ```bash
-export IMAS_CODEX_EMBEDDING_MODEL="Qwen/Qwen3-Embedding-8B"
+export ITER_CODEX_EMBEDDING_MODEL="Qwen/Qwen3-Embedding-8B"
 ```
 
 **Path Inclusion Settings:**
@@ -165,13 +165,13 @@ Control which IMAS paths are indexed and searchable. These settings affect schem
 
 | Setting              | pyproject.toml         | Environment Variable              | Default | Description                                                             |
 | -------------------- | ---------------------- | --------------------------------- | ------- | ----------------------------------------------------------------------- |
-| Include GGD          | `include-ggd`          | `IMAS_CODEX_INCLUDE_GGD`          | `true`  | Include Grid Geometry Description paths                                 |
-| Include Error Fields | `include-error-fields` | `IMAS_CODEX_INCLUDE_ERROR_FIELDS` | `false` | Include uncertainty bound fields (`_error_upper`, `_error_lower`, etc.) |
+| Include GGD          | `include-ggd`          | `ITER_CODEX_INCLUDE_GGD`          | `true`  | Include Grid Geometry Description paths                                 |
+| Include Error Fields | `include-error-fields` | `ITER_CODEX_INCLUDE_ERROR_FIELDS` | `false` | Include uncertainty bound fields (`_error_upper`, `_error_lower`, etc.) |
 
 Example pyproject.toml configuration:
 
 ```toml
-[tool.imas-codex]
+[tool.iter-codex]
 include-ggd = true
 include-error-fields = false
 ```
@@ -179,8 +179,8 @@ include-error-fields = false
 Environment variable overrides:
 
 ```bash
-export IMAS_CODEX_INCLUDE_GGD=false     # Exclude GGD paths
-export IMAS_CODEX_INCLUDE_ERROR_FIELDS=true  # Include error fields
+export ITER_CODEX_INCLUDE_GGD=false     # Exclude GGD paths
+export ITER_CODEX_INCLUDE_ERROR_FIELDS=true  # Include error fields
 ```
 
 **Error Handling:**
@@ -192,10 +192,10 @@ VS Code (`.vscode/mcp.json`):
 ```json
 {
   "servers": {
-    "imas-codex-uv": {
+    "iter-codex-uv": {
       "type": "stdio",
       "command": "uv",
-      "args": ["run", "imas-codex", "serve", "--transport", "stdio"]
+      "args": ["run", "iter-codex", "serve", "--transport", "stdio"]
     }
   }
 }
@@ -206,9 +206,9 @@ Claude Desktop:
 ```json
 {
   "mcpServers": {
-    "imas-codex-uv": {
+    "iter-codex-uv": {
       "command": "uv",
-      "args": ["run", "imas-codex", "serve", "--transport", "stdio"]
+      "args": ["run", "iter-codex", "serve", "--transport", "stdio"]
     }
   }
 }
@@ -264,14 +264,14 @@ Once SSH is configured, explore facilities directly from the terminal:
 
 ```bash
 # Execute commands on remote facility
-uv run imas-codex tcv "python --version"
-uv run imas-codex tcv "ls /common/tcv/codes"
+uv run iter-codex tcv "python --version"
+uv run iter-codex tcv "ls /common/tcv/codes"
 
 # View session history
-uv run imas-codex tcv --status
+uv run iter-codex tcv --status
 
 # Persist learnings when done
-uv run imas-codex tcv --finish << 'EOF'
+uv run iter-codex tcv --finish << 'EOF'
 python:
   version: "3.9.21"
 tools:
@@ -281,7 +281,7 @@ paths:
 EOF
 
 # Or discard session
-uv run imas-codex tcv --discard
+uv run iter-codex tcv --discard
 ```
 
 #### ReAct Agents (Autonomous Discovery)
@@ -291,7 +291,7 @@ ReAct agents provide autonomous discovery and evaluation of remote resources usi
 **Prerequisites:**
 - SSH configured for the target facility (see above)
 - OpenRouter API key in `.env`: `OPENROUTER_API_KEY=sk-or-...`
-- Neo4j running (auto-starts as systemd service, or: `imas-codex neo4j start`)
+- Neo4j running (auto-starts as systemd service, or: `iter-codex neo4j start`)
 
 **Wiki Discovery Pipeline:**
 
@@ -299,21 +299,21 @@ Discover and evaluate wiki pages in three phases:
 
 ```bash
 # Full discovery (scan + score in one command)
-imas-codex wiki discover tcv
+iter-codex wiki discover tcv
 
 # Or run phases separately for more control:
 
 # Phase 1: Fast link scanning (no LLM, builds graph structure)
-imas-codex wiki scan tcv --max-pages 500
+iter-codex wiki scan tcv --max-pages 500
 
 # Phase 2: Agent-based scoring (evaluates pages using graph metrics)
-imas-codex wiki score tcv -v  # -v for verbose agent reasoning
+iter-codex wiki score tcv -v  # -v for verbose agent reasoning
 
 # Phase 3: Ingest high-score pages
-imas-codex wiki ingest tcv --min-score 0.7
+iter-codex wiki ingest tcv --min-score 0.7
 
 # Check progress
-imas-codex wiki status tcv
+iter-codex wiki status tcv
 ```
 
 **Model Configuration:**
@@ -321,7 +321,7 @@ imas-codex wiki status tcv
 Models are configured centrally in `pyproject.toml`:
 
 ```toml
-[tool.imas-codex.models]
+[tool.iter-codex.models]
 discovery = "anthropic/claude-sonnet-4.5"   # Accurate scoring for discovery
 scoring = "anthropic/claude-sonnet-4.5"     # Accurate evaluation
 enrichment = "google/gemini-3-pro-preview"  # Physics understanding
@@ -333,7 +333,7 @@ Discovery uses a cost budget (default $10) tracked via OpenRouter:
 
 ```bash
 # Set lower cost limit for testing
-imas-codex wiki discover tcv --cost-limit 2.0
+iter-codex wiki discover tcv --cost-limit 2.0
 ```
 
 **Graph-Driven Workflow:**
@@ -356,16 +356,16 @@ facility signals. Six worker pools run concurrently:
 
 ```bash
 # Full six-pool run — all domains, up to $50 LLM budget
-imas-codex sn run -c 50
+iter-codex sn run -c 50
 
 # Scope to one physics domain
-imas-codex sn run --physics-domain equilibrium -c 5
+iter-codex sn run --physics-domain equilibrium -c 5
 
 # Dry run — preview extraction without LLM calls
-imas-codex sn run --physics-domain magnetics --dry-run
+iter-codex sn run --physics-domain magnetics --dry-run
 
 # Tighter quality bar, deeper refine chains, custom escalation model
-imas-codex sn run --min-score 0.85 --rotation-cap 5 --escalation-model openrouter/anthropic/claude-opus-4.7 -c 20
+iter-codex sn run --min-score 0.85 --rotation-cap 5 --escalation-model openrouter/anthropic/claude-opus-4.7 -c 20
 ```
 
 **Refine-pipeline flags:**
@@ -388,12 +388,12 @@ Run locally in a container (pre-built indexes included):
 
 ```bash
 docker run -d \
-  --name imas-codex \
+  --name iter-codex \
   -p 8000:8000 \
-  ghcr.io/iterorganization/imas-codex:latest
+  ghcr.io/iterorganization/iter-codex:latest
 
 # Optional: verify
-docker ps --filter name=imas-codex --format "table {{.Names}}\t{{.Status}}"
+docker ps --filter name=iter-codex --format "table {{.Names}}\t{{.Status}}"
 ```
 
 VS Code (`.vscode/mcp.json`):
@@ -401,7 +401,7 @@ VS Code (`.vscode/mcp.json`):
 ```json
 {
   "servers": {
-    "imas-codex-docker": { "type": "http", "url": "http://localhost:8000/mcp" }
+    "iter-codex-docker": { "type": "http", "url": "http://localhost:8000/mcp" }
   }
 }
 ```
@@ -411,7 +411,7 @@ Claude Desktop:
 ```json
 {
   "mcpServers": {
-    "imas-codex-docker": {
+    "iter-codex-docker": {
       "command": "npx",
       "args": ["mcp-remote", "http://localhost:8000/mcp"]
     }
@@ -421,7 +421,7 @@ Claude Desktop:
 
 ### Slurm / HPC (STDIO)
 
-Helper script: `scripts/imas_codex_slurm_stdio.sh`
+Helper script: `scripts/iter_codex_slurm_stdio.sh`
 
 VS Code (`.vscode/mcp.json`, JSONC ok):
 
@@ -430,7 +430,7 @@ VS Code (`.vscode/mcp.json`, JSONC ok):
   "servers": {
     "imas-slurm-stdio": {
       "type": "stdio",
-      "command": "scripts/imas_codex_slurm_stdio.sh"
+      "command": "scripts/iter_codex_slurm_stdio.sh"
     }
   }
 }
@@ -445,27 +445,27 @@ Resource tuning (export before client starts):
 
 | Variable                     | Purpose                                    | Default         |
 | ---------------------------- | ------------------------------------------ | --------------- |
-| `IMAS_CODEX_SLURM_TIME`      | Walltime                                   | `08:00:00`      |
-| `IMAS_CODEX_SLURM_CPUS`      | CPUs per task                              | `1`             |
-| `IMAS_CODEX_SLURM_MEM`       | Memory (e.g. `4G`)                         | Slurm default   |
-| `IMAS_CODEX_SLURM_PARTITION` | Partition                                  | Cluster default |
-| `IMAS_CODEX_SLURM_ACCOUNT`   | Account/project                            | User default    |
-| `IMAS_CODEX_SLURM_EXTRA`     | Extra raw `srun` flags                     | (empty)         |
-| `IMAS_CODEX_USE_ENTRYPOINT`  | Use `imas-codex` entrypoint vs `python -m` | `0`             |
+| `ITER_CODEX_SLURM_TIME`      | Walltime                                   | `08:00:00`      |
+| `ITER_CODEX_SLURM_CPUS`      | CPUs per task                              | `1`             |
+| `ITER_CODEX_SLURM_MEM`       | Memory (e.g. `4G`)                         | Slurm default   |
+| `ITER_CODEX_SLURM_PARTITION` | Partition                                  | Cluster default |
+| `ITER_CODEX_SLURM_ACCOUNT`   | Account/project                            | User default    |
+| `ITER_CODEX_SLURM_EXTRA`     | Extra raw `srun` flags                     | (empty)         |
+| `ITER_CODEX_USE_ENTRYPOINT`  | Use `iter-codex` entrypoint vs `python -m` | `0`             |
 
 Example:
 
 ```bash
-export IMAS_CODEX_SLURM_TIME=02:00:00
-export IMAS_CODEX_SLURM_CPUS=4
-export IMAS_CODEX_SLURM_MEM=8G
-export IMAS_CODEX_SLURM_PARTITION=compute
+export ITER_CODEX_SLURM_TIME=02:00:00
+export ITER_CODEX_SLURM_CPUS=4
+export ITER_CODEX_SLURM_MEM=8G
+export ITER_CODEX_SLURM_PARTITION=compute
 ```
 
 Direct CLI:
 
 ```bash
-scripts/imas_codex_slurm_stdio.sh --ids-filter "core_profiles equilibrium"
+scripts/iter_codex_slurm_stdio.sh --ids-filter "core_profiles equilibrium"
 ```
 
 Why STDIO? Avoids opening network ports; all traffic rides the existing `srun` pseudo-TTY.
@@ -474,7 +474,7 @@ Why STDIO? Avoids opening network ports; all traffic rides the existing `srun` p
 
 ## Example IMAS Queries
 
-Once you have the IMAS Codex server configured, you can interact with it using natural language queries. Use the `@imas` prefix to direct queries to the IMAS server:
+Once you have the ITER Codex server configured, you can interact with it using natural language queries. Use the `@imas` prefix to direct queries to the IMAS server:
 
 ### Basic Search Examples
 
@@ -521,7 +521,7 @@ Show me the branching logic for diagnostic identifier schemas
 Export physics domain data for comprehensive transport analysis
 ```
 
-The IMAS Codex server provides 8 specialized tools for different types of queries:
+The ITER Codex server provides 8 specialized tools for different types of queries:
 
 - **Search**: Natural language and structured search across IMAS data paths
 - **Explain**: Physics concepts with IMAS context and domain expertise
@@ -600,8 +600,8 @@ docker-compose up --build
 #### Local Development
 
 ```bash
-# Start IMAS Codex server
-python -m imas_codex
+# Start ITER Codex server
+python -m iter_codex
 ```
 
 #### API Key Configuration
@@ -630,19 +630,19 @@ docker build --secret id=GHCR_TOKEN,env=GHCR_TOKEN .
 
 # Build with a specific graph package
 docker build --secret id=GHCR_TOKEN,env=GHCR_TOKEN \
-  --build-arg GRAPH_PACKAGE=imas-codex-graph-tcv .
+  --build-arg GRAPH_PACKAGE=iter-codex-graph-tcv .
 ```
 
 ## Graph Management
 
-IMAS Codex uses a Neo4j knowledge graph to store facility data, IMAS Data Dictionary paths, and semantic embeddings. The CLI provides comprehensive tools for managing graph instances.
+ITER Codex uses a Neo4j knowledge graph to store facility data, IMAS Data Dictionary paths, and semantic embeddings. The CLI provides comprehensive tools for managing graph instances.
 
 ### Graph Data and Server Location
 
-The active `~/.local/share/imas-codex/neo4j` symlink selects the graph data
-directory. Change it with `imas-codex graph switch NAME`; setting
-`IMAS_CODEX_GRAPH` does not select graph data. The independent
-`IMAS_CODEX_GRAPH_LOCATION` variable selects where the Neo4j server runs and
+The active `~/.local/share/iter-codex/neo4j` symlink selects the graph data
+directory. Change it with `iter-codex graph switch NAME`; setting
+`ITER_CODEX_GRAPH` does not select graph data. The independent
+`ITER_CODEX_GRAPH_LOCATION` variable selects where the Neo4j server runs and
 therefore which host and Bolt/HTTP port slot is used.
 
 **Convention ports** (no configuration needed for known facilities):
@@ -655,24 +655,24 @@ therefore which host and Bolt/HTTP port slot is used.
 
 Select graph data:
 ```bash
-imas-codex graph switch tcv
+iter-codex graph switch tcv
 ```
 
 ### Quick Start (End User)
 
 ```bash
 # Select the data directory that the pull may replace
-imas-codex graph switch tcv
+iter-codex graph switch tcv
 
 # Pull a facility graph from GHCR
-imas-codex graph pull --facility tcv
+iter-codex graph pull --facility tcv
 
 # Start Neo4j
-imas-codex graph start
+iter-codex graph start
 
 # Verify
-imas-codex graph status
-imas-codex graph shell
+iter-codex graph status
+iter-codex graph shell
 # > MATCH (n:FacilityPath) RETURN n.facility_id, count(n)
 ```
 
@@ -681,10 +681,10 @@ imas-codex graph shell
 For IMAS Data Dictionary access without facility-specific data:
 
 ```bash
-pip install imas-codex
-imas-codex graph init imas
-imas-codex graph pull --dd-only
-imas-codex serve
+pip install iter-codex
+iter-codex graph init imas
+iter-codex graph pull --dd-only
+iter-codex serve
 ```
 
 This pulls a lightweight graph containing only the IMAS Data Dictionary schema, paths, and semantic clusters. Use `--registry ghcr.io/<owner>` to pull from a specific registry.
@@ -698,7 +698,7 @@ The `host` field on each profile records where Neo4j physically runs. At connect
 
 For dual-instance setups (local + tunneled), set a tunnel port override in `.env`:
 ```bash
-IMAS_CODEX_TUNNEL_BOLT_ITER=17687
+ITER_CODEX_TUNNEL_BOLT_ITER=17687
 # Then: ssh -f -N -L 17687:localhost:7687 iter
 ```
 
@@ -706,31 +706,31 @@ IMAS_CODEX_TUNNEL_BOLT_ITER=17687
 
 ```bash
 # Start tunnel to remote graph (reads profile host/port)
-imas-codex tunnel start iter
+iter-codex tunnel start iter
 
 # Show active tunnels
-imas-codex tunnel status
+iter-codex tunnel status
 
 # Stop tunnel
-imas-codex tunnel stop iter
+iter-codex tunnel stop iter
 ```
 
 ### Export, Load, and Clear
 
 ```bash
 # Create a restorable graph archive
-imas-codex graph export
+iter-codex graph export
 
 # Destructive commands must name the graph selected by the active symlink
-imas-codex graph load archive.tar.gz codex
-imas-codex graph clear codex
+iter-codex graph load archive.tar.gz codex
+iter-codex graph clear codex
 ```
 
-To load or clear a different graph, first run `imas-codex graph switch NAME`,
+To load or clear a different graph, first run `iter-codex graph switch NAME`,
 then pass the same `NAME` as `TARGET`. A mismatch is refused before backup,
 transfer, service-state, or graph write side effects.
 
-`imas-codex graph status` reports the newest non-empty backup, the newest live
+`iter-codex graph status` reports the newest non-empty backup, the newest live
 database file, and the measured number of seconds the backup is behind live
 data. This backup-currency figure distinguishes `current`, `stale`, and
 `no_backup` state instead of treating the existence of a file as recovery.
@@ -739,17 +739,17 @@ data. This backup-currency figure distinguishes `current`, `stale`, and
 
 ```bash
 # Push (requires GHCR_TOKEN with write:packages scope)
-imas-codex graph push              # Release push (requires git tag)
-imas-codex graph push --dev        # Dev push (auto-increments revision)
-imas-codex graph push --facility tcv --dev  # Per-facility push
+iter-codex graph push              # Release push (requires git tag)
+iter-codex graph push --dev        # Dev push (auto-increments revision)
+iter-codex graph push --facility tcv --dev  # Per-facility push
 
 # Pull
-imas-codex graph pull              # Pull latest unified graph
-imas-codex graph pull --facility tcv  # Pull per-facility graph
+iter-codex graph pull              # Pull latest unified graph
+iter-codex graph pull --facility tcv  # Pull per-facility graph
 
 # List and cleanup
-imas-codex graph tags              # List available versions
-imas-codex graph prune --dev-only --keep 5 --dry-run  # Preview old dev-tag cleanup
+iter-codex graph tags              # List available versions
+iter-codex graph prune --dev-only --keep 5 --dry-run  # Preview old dev-tag cleanup
 ```
 
 ### Per-Facility Federation
@@ -758,13 +758,13 @@ The full graph contains all facilities. Per-facility graphs are extracted via du
 
 ```bash
 # Dump filtered to a single facility (keeps IMAS DD nodes)
-imas-codex graph export --facility tcv
+iter-codex graph export --facility tcv
 
 # Push to per-facility GHCR package
-imas-codex graph push --facility tcv --dev
+iter-codex graph push --facility tcv --dev
 ```
 
-This creates `ghcr.io/iterorganization/imas-codex-graph-tcv` containing only TCV data plus the shared IMAS Data Dictionary.
+This creates `ghcr.io/iterorganization/iter-codex-graph-tcv` containing only TCV data plus the shared IMAS Data Dictionary.
 
 ### Release Workflow
 
@@ -773,25 +773,25 @@ semantic versioning with graph data publishing.
 
 ```bash
 # Check current release state and permitted commands
-imas-codex release status
+iter-codex release status
 
 # Start a major release candidate
-imas-codex release --bump major -m "IMAS DD 4.1.0 support"
+iter-codex release --bump major -m "IMAS DD 4.1.0 support"
 
 # Iterate on the RC after fixes
-imas-codex release -m "Fix signal mapping edge case"
+iter-codex release -m "Fix signal mapping edge case"
 
 # Finalize: promote RC to stable release
-imas-codex release --final -m "Production release"
+iter-codex release --final -m "Production release"
 
 # Abandon current RC, start a different bump level
-imas-codex release --bump minor -m "New approach"
+iter-codex release --bump minor -m "New approach"
 
 # Direct release (skip RC)
-imas-codex release --bump patch --final -m "Hotfix"
+iter-codex release --bump patch --final -m "Hotfix"
 
 # Preview without executing
-imas-codex release --bump major --dry-run -m "Test"
+iter-codex release --bump major --dry-run -m "Test"
 ```
 
 The release pipeline:
@@ -805,11 +805,11 @@ The release pipeline:
 
 | Package | Contents | Visibility |
 |---------|----------|------------|
-| `imas-codex-graph-dd` | IMAS Data Dictionary only | Public-safe |
-| `imas-codex-graph` | All facilities + DD | Private |
-| `imas-codex-graph-{facility}` | Single facility + DD | Private |
+| `iter-codex-graph-dd` | IMAS Data Dictionary only | Public-safe |
+| `iter-codex-graph` | All facilities + DD | Private |
+| `iter-codex-graph-{facility}` | Single facility + DD | Private |
 
-**Setup:** Set `GHCR_TOKEN` with `write:packages` scope. Add upstream remote: `git remote add upstream https://github.com/iterorganization/imas-codex.git`
+**Setup:** Set `GHCR_TOKEN` with `write:packages` scope. Add upstream remote: `git remote add upstream https://github.com/iterorganization/iter-codex.git`
 
 ### Docker Compose
 
@@ -829,8 +829,8 @@ For local development and customization:
 
 ```bash
 # Clone repository
-git clone https://github.com/iterorganization/imas-codex.git
-cd imas-codex
+git clone https://github.com/iterorganization/iter-codex.git
+cd iter-codex
 
 # Install development dependencies (search index build takes ~8 minutes first time)
 uv sync --all-extras
@@ -880,13 +880,13 @@ uv run build-schemas
 uv run build-embeddings
 
 # Run the server locally (default: streamable-http on port 8000)
-uv run imas-codex serve
+uv run iter-codex serve
 
 # Run with stdio transport for MCP clients
-uv run imas-codex serve --transport stdio
+uv run iter-codex serve --transport stdio
 
 # Read-only mode (suppresses write tools and Python REPL)
-uv run imas-codex serve --read-only
+uv run iter-codex serve --read-only
 ```
 
 ### Build Scripts
@@ -928,8 +928,8 @@ Add to your config file:
   "mcpServers": {
     "imas-local-dev": {
       "command": "uv",
-      "args": ["run", "imas-codex", "serve", "--transport", "stdio"],
-      "cwd": "/path/to/imas-codex"
+      "args": ["run", "iter-codex", "serve", "--transport", "stdio"],
+      "cwd": "/path/to/iter-codex"
     }
   }
 }
@@ -941,18 +941,18 @@ Add to your config file:
 2. **Build Process**: The system parses the IMAS data dictionary and creates comprehensive JSON files with structured data
 3. **Embedding Generation**: Creates semantic embeddings using sentence transformers for advanced search capabilities
 4. **Serialization**: The system stores indexes in organized subdirectories:
-   - **JSON data**: `imas_codex/resources/schemas/` (LLM-optimized structured data)
+   - **JSON data**: `iter_codex/resources/schemas/` (LLM-optimized structured data)
    - **Embeddings cache**: Pre-computed sentence transformer embeddings for semantic search
 5. **Import**: When importing the module, the pre-built index and embeddings load in ~1 second
 
 ## Optional Dependencies and Runtime Requirements
 
-The IMAS Codex server now includes `imas-data-dictionaries` as a core dependency, providing stable DD version access (default: 4.0.0). The git development package (`imas-data-dictionary`) is used during wheel building when parsing latest DD changes.
+The ITER Codex server now includes `imas-data-dictionaries` as a core dependency, providing stable DD version access (default: 4.0.0). The git development package (`imas-data-dictionary`) is used during wheel building when parsing latest DD changes.
 
 ### Package Installation Options
 
-- **Runtime**: `uv add imas-codex` - Includes all transports (stdio, sse, streamable-http)
-- **Full installation**: `uv add imas-codex` - Recommended for all users
+- **Runtime**: `uv add iter-codex` - Includes all transports (stdio, sse, streamable-http)
+- **Full installation**: `uv add iter-codex` - Recommended for all users
 
 ### Data Dictionary Access
 
@@ -1091,7 +1091,7 @@ The server is available as a pre-built Docker container with the index already b
 
 ```bash
 # Pull and run the latest container
-docker run -d -p 8000:8000 ghcr.io/iterorganization/imas-codex:latest
+docker run -d -p 8000:8000 ghcr.io/iterorganization/iter-codex:latest
 
 # Or use Docker Compose
 docker-compose up -d
@@ -1105,11 +1105,11 @@ See [DOCKER.md](DOCKER.md) for detailed container usage, deployment options, and
 [ruff-link]: https://docs.astral.sh/ruff/
 [pre-commit-badge]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
 [pre-commit-link]: https://github.com/pre-commit/pre-commit
-[build-deploy-badge]: https://img.shields.io/github/actions/workflow/status/simon-mcintosh/imas-codex/test.yml?branch=main&color=brightgreen&label=CI%2FCD
-[build-deploy-link]: https://github.com/iterorganization/imas-codex/actions/workflows/test.yml
-[codecov-badge]: https://codecov.io/gh/simon-mcintosh/imas-codex/graph/badge.svg
-[codecov-link]: https://codecov.io/gh/simon-mcintosh/imas-codex
+[build-deploy-badge]: https://img.shields.io/github/actions/workflow/status/simon-mcintosh/iter-codex/test.yml?branch=main&color=brightgreen&label=CI%2FCD
+[build-deploy-link]: https://github.com/iterorganization/iter-codex/actions/workflows/test.yml
+[codecov-badge]: https://codecov.io/gh/simon-mcintosh/iter-codex/graph/badge.svg
+[codecov-link]: https://codecov.io/gh/simon-mcintosh/iter-codex
 [docs-badge]: https://img.shields.io/badge/docs-online-brightgreen
-[docs-link]: https://simon-mcintosh.github.io/imas-codex/
+[docs-link]: https://simon-mcintosh.github.io/iter-codex/
 [asv-badge]: https://img.shields.io/badge/ASV-Benchmarks-blue?style=flat&logo=speedtest&logoColor=white
-[asv-link]: https://simon-mcintosh.github.io/imas-codex/benchmarks/
+[asv-link]: https://simon-mcintosh.github.io/iter-codex/benchmarks/

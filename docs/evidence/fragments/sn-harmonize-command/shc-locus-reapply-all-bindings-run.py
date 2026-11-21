@@ -30,14 +30,14 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.harmonize import docs_score_regressions
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.harmonize import docs_score_regressions
 
 NODE = "shc-locus-reapply-all-bindings"
 RESULTS = Path(__file__).with_name(f"{NODE}.json")
 HTML = Path(__file__).with_name(f"{NODE}.html")
 REPO_ROOT = Path(__file__).resolve().parents[4]
-REVIEWS_DIR = REPO_ROOT / "imas_codex/standard_names/manifests/reviews"
+REVIEWS_DIR = REPO_ROOT / "iter_codex/standard_names/manifests/reviews"
 
 SEED = "electrostatic_potential"
 # A name the roster search is known to find, so a zero member count is shown to
@@ -85,7 +85,7 @@ def _fmt(value: object, digits: int = 4) -> str:
 class _CostServices:
     """The only collaborator the cost owner reads off its services object."""
 
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
 
 def roster_check(members: list[str]) -> dict:
@@ -110,8 +110,8 @@ def roster_check(members: list[str]) -> dict:
 
 
 def snapshot(phase: str) -> None:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.harmonize import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.harmonize import (
         measure_doc_call_cost,
         plan_family_applies,
         preview_recommended_refusals,
@@ -350,7 +350,7 @@ def _window(log_path: str) -> tuple[str, str]:
 
 def select_runs(log_path: str) -> None:
     """Select the run ids that own this apply's cost rows, from the graph."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     started, ended = _window(log_path)
     payload = read_results()
@@ -412,7 +412,7 @@ def select_runs(log_path: str) -> None:
 
 def record_cost() -> None:
     """Record the apply's calls, per-phase spend, per-name cost and its scope."""
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
         aggregate_calls_per_phase,
         aggregate_spend_per_name,
         aggregate_spend_per_phase,
@@ -537,8 +537,8 @@ def record_vetoes(log_path: str) -> None:
     all-bindings rule says must not be held, so a veto whose fold is
     ``supports`` is recorded for the coordinator rather than trusted.
     """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.review.jev_review import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.review.jev_review import (
         aggregate_binding_answers,
         build_docs_state,
         claim_contradicts,
@@ -1192,8 +1192,8 @@ def main() -> None:
     subcommands.add_parser("verify")
     args = parser.parse_args()
     if args.command == "roster":
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.harmonize import plan_family_applies
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.standard_names.harmonize import plan_family_applies
 
         with GraphClient() as graph:
             plan = plan_family_applies(graph, seeds=[SEED])[0]

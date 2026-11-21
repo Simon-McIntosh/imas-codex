@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import anyio
 
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names.physics_judge import (
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.standard_names.physics_judge import (
     PhysicsVerdict,
     load_bench_paths,
     run_calibration_gate,

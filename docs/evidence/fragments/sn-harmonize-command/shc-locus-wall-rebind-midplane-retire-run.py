@@ -38,7 +38,7 @@ RUN = Path(
     "r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire"
 )
 LOGS = RUN / "logs"
-CLI = Path("/home/ITER/mcintos/Code/imas-codex/.venv/bin/imas-codex")
+CLI = Path("/home/ITER/mcintos/Code/imas-codex/.venv/bin/iter-codex")
 
 FRAGMENT_HTML = HERE / "shc-locus-wall-rebind-midplane-retire.html"
 EXCHANGE_AUTHORITY = (
@@ -117,7 +117,7 @@ def _json(value: object) -> str:
 
 
 def _client():
-    from imas_codex.graph import GraphClient
+    from iter_codex.graph import GraphClient
 
     return GraphClient()
 
@@ -280,8 +280,8 @@ def phase_read() -> int:
 
 # ── phase: exchange (the adapter's applicability, previewed) ──────────────
 def exchange_authority(rows: list[dict]) -> tuple[bytes, str, str]:
-    from imas_codex.standard_names import signed_manifest as operator
-    from imas_codex.standard_names.repair_authority import build_repair_authority
+    from iter_codex.standard_names import signed_manifest as operator
+    from iter_codex.standard_names.repair_authority import build_repair_authority
 
     built = build_repair_authority(
         {
@@ -302,7 +302,7 @@ def exchange_authority(rows: list[dict]) -> tuple[bytes, str, str]:
 
 
 def phase_exchange() -> int:
-    from imas_codex.standard_names import signed_manifest as operator
+    from iter_codex.standard_names import signed_manifest as operator
 
     log = Log(LOGS / "exchange.log")
     log.write(f"# command: {sys.executable} {Path(__file__).name} --phase exchange")
@@ -431,7 +431,7 @@ def retirement_spec() -> dict:
 
 
 def phase_authorities() -> int:
-    from imas_codex.standard_names.repair_authority import build_repair_authority
+    from iter_codex.standard_names.repair_authority import build_repair_authority
 
     log = Log(LOGS / "authorities.log")
     log.write(f"# command: {sys.executable} {Path(__file__).name} --phase authorities")
@@ -472,7 +472,7 @@ def phase_authorities() -> int:
             "adapter_verdict": "transfer-not-expressible",
             "adapter_attempts": attempts,
             "applied_writer": (
-                "imas_codex.standard_names.provenance_lifecycle."
+                "iter_codex.standard_names.provenance_lifecycle."
                 "retarget_standard_name_sources"
             ),
             "migration_manifest": migration_manifest,
@@ -495,7 +495,7 @@ def phase_authorities() -> int:
 
 # ── phase: preview (with the declared stale-authority control) ────────────
 def preview_retirement(gc, path: Path) -> dict:
-    from imas_codex.standard_names.signed_manifest import (
+    from iter_codex.standard_names.signed_manifest import (
         apply_signed_manifest,
         signed_payload_sha256,
     )
@@ -513,7 +513,7 @@ def preview_retirement(gc, path: Path) -> dict:
 
 
 def phase_preview() -> int:
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         retarget_standard_name_sources,
     )
 
@@ -591,10 +591,10 @@ def phase_preview() -> int:
 
 # ── phase: apply ──────────────────────────────────────────────────────────
 def phase_apply() -> int:
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         retarget_standard_name_sources,
     )
-    from imas_codex.standard_names.signed_manifest import (
+    from iter_codex.standard_names.signed_manifest import (
         apply_signed_manifest,
         signed_payload_sha256,
     )
@@ -824,7 +824,7 @@ def attachment_row_as_applied() -> dict:
 def signed_authority(
     rows: list[dict], operation: str, tag: str
 ) -> tuple[Path, str, str]:
-    from imas_codex.standard_names.repair_authority import build_repair_authority
+    from iter_codex.standard_names.repair_authority import build_repair_authority
 
     built = build_repair_authority(
         {
@@ -849,7 +849,7 @@ def signed_authority(
 
 def preview_signed(gc, rows: list[dict], operation: str, tag: str) -> dict:
     """Preview a signed row set; apply it only when the engine admits it."""
-    from imas_codex.standard_names import signed_manifest as operator
+    from iter_codex.standard_names import signed_manifest as operator
 
     attempt: dict = {
         "label": tag,
@@ -894,7 +894,7 @@ def preview_signed(gc, rows: list[dict], operation: str, tag: str) -> dict:
 
 def exchange_replay(binding: dict, gc) -> dict:
     """Re-offer the ruled exchange direction now that the move is already made."""
-    from imas_codex.standard_names import signed_manifest as operator
+    from iter_codex.standard_names import signed_manifest as operator
 
     attempt: dict = {
         "label": "dd-source-exchange-replay",
@@ -1012,7 +1012,7 @@ def phase_signed() -> int:
 
 # ── phase: readback ──────────────────────────────────────────────────────
 def _classifier(gc) -> dict:
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
 

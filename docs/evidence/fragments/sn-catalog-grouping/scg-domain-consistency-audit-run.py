@@ -129,8 +129,8 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     sys.path.insert(0, str(ROOT))
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.domain_audit import audit_domains
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.domain_audit import audit_domains
 
     sheet = json.loads(SHEET.read_text())
 

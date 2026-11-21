@@ -11,16 +11,16 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_ops import (
     apply_adjudicated_source_dispositions,
     reconcile_lifecycleless_standard_name_stubs,
 )
-from imas_codex.standard_names.graph_store import graph_lineage
-from imas_codex.standard_names.graph_store.graph_lineage import (
+from iter_codex.standard_names.graph_store import graph_lineage
+from iter_codex.standard_names.graph_store.graph_lineage import (
     LifecyclelessStubConflict,
 )
-from imas_codex.standard_names.signed_manifest import (
+from iter_codex.standard_names.signed_manifest import (
     _apply_ordinary_source_migration,
     _Authority,
     _LoadedRow,

@@ -41,10 +41,10 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from imas_codex.discovery.base.evaluation import bootstrap_interval
-from imas_codex.discovery.base.judgment import decide_batch
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.dd_domain_classifier import SERVICE_TAG
+from iter_codex.discovery.base.evaluation import bootstrap_interval
+from iter_codex.discovery.base.judgment import decide_batch
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.dd_domain_classifier import SERVICE_TAG
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
@@ -52,7 +52,7 @@ STEM = Path(__file__).stem.removesuffix("-run")
 RESULTS = HERE / f"{STEM}-results.json"
 FRAGMENT = HERE / f"{STEM}.html"
 FIGURE = ROOT / "docs/figures/sn-catalog-grouping" / STEM / "accuracy.svg"
-GUIDANCE = ROOT / "imas_codex/definitions/physics/domains.yaml"
+GUIDANCE = ROOT / "iter_codex/definitions/physics/domains.yaml"
 
 SEAT = "sn-domain-tree"
 QUESTION = "physics_domain"
@@ -106,7 +106,7 @@ COHORTS = ("approved", "calibration", "validation")
 
 
 def model_id() -> str:
-    from imas_codex.settings import get_model
+    from iter_codex.settings import get_model
 
     return get_model(SEAT)
 
@@ -435,7 +435,7 @@ def render(payload: dict) -> None:
         "of its source paths, the graph domains of its source IDSs, the band "
         "umbrella of each band those candidates fall in, and <code>general</code>. "
         "Each option carries its scope, includes and excludes rendered from "
-        "<code>imas_codex/definitions/physics/domains.yaml</code>. Code builds "
+        "<code>iter_codex/definitions/physics/domains.yaml</code>. Code builds "
         "the question; the model supplies only the judgment. No graph write was "
         "made.</p>",
         "<p>The two controls are re-measured at the current graph with the "

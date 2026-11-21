@@ -24,7 +24,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.signals.parallel import (
+from iter_codex.discovery.signals.parallel import (
     DataDiscoveryState,
     check_worker,
     run_parallel_data_discovery,
@@ -66,8 +66,8 @@ FACILITY_CONFIG = {
 
 @pytest.fixture
 def bare_discover_stage(monkeypatch, tmp_path):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import sequence
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import sequence
 
     monkeypatch.setattr(
         sequence,
@@ -289,7 +289,7 @@ class TestSeedWorker:
     @pytest.mark.anyio
     async def test_seed_static_versions(self):
         """seed_worker creates SignalEpochs from config."""
-        from imas_codex.discovery.signals.parallel import seed_worker
+        from iter_codex.discovery.signals.parallel import seed_worker
 
         state = DataDiscoveryState(
             facility=FACILITY,
@@ -318,10 +318,10 @@ class TestSeedWorker:
 
         with (
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.seed_versions",
+                "iter_codex.discovery.mdsplus.graph_ops.seed_versions",
                 return_value=3,
             ) as mock_seed,
-            patch("imas_codex.graph.GraphClient") as mock_gc_class,
+            patch("iter_codex.graph.GraphClient") as mock_gc_class,
         ):
             mock_gc = MagicMock()
             mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -339,7 +339,7 @@ class TestSeedWorker:
     @pytest.mark.anyio
     async def test_seed_dynamic_tree_with_reference_shot(self):
         """seed_worker uses reference_shot for trees without config versions."""
-        from imas_codex.discovery.signals.parallel import seed_worker
+        from iter_codex.discovery.signals.parallel import seed_worker
 
         state = DataDiscoveryState(
             facility=FACILITY,
@@ -364,10 +364,10 @@ class TestSeedWorker:
 
         with (
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.seed_versions",
+                "iter_codex.discovery.mdsplus.graph_ops.seed_versions",
                 return_value=1,
             ) as mock_seed,
-            patch("imas_codex.graph.GraphClient") as mock_gc_class,
+            patch("iter_codex.graph.GraphClient") as mock_gc_class,
         ):
             mock_gc = MagicMock()
             mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -389,9 +389,9 @@ class TestSeedWorker:
         DATA_ACCESS edge, so a DataAccess written after the signals leaves a
         facility's first scan with signals but no access edges.
         """
-        from imas_codex.discovery.signals.parallel import seed_worker
-        from imas_codex.discovery.signals.scanners.base import ScanResult
-        from imas_codex.graph.models import (
+        from iter_codex.discovery.signals.parallel import seed_worker
+        from iter_codex.discovery.signals.scanners.base import ScanResult
+        from iter_codex.graph.models import (
             DataAccess,
             FacilitySignal,
             SignalDataClass,
@@ -463,15 +463,15 @@ class TestSeedWorker:
 
         with (
             patch(
-                "imas_codex.discovery.signals.scanners.base.get_scanner",
+                "iter_codex.discovery.signals.scanners.base.get_scanner",
                 return_value=_FakeScanner(),
             ),
             patch(
-                "imas_codex.discovery.signals.parallel.ingest_discovered_signals",
+                "iter_codex.discovery.signals.parallel.ingest_discovered_signals",
                 side_effect=_record_ingest,
             ),
             patch(
-                "imas_codex.discovery.signals.parallel.GraphClient",
+                "iter_codex.discovery.signals.parallel.GraphClient",
                 return_value=mock_gc,
             ),
         ):
@@ -490,9 +490,9 @@ class TestSeedWorker:
         Thin-client scanners may return access metadata with an empty signal
         list; the single writer must run independently of the signal branch.
         """
-        from imas_codex.discovery.signals.parallel import seed_worker
-        from imas_codex.discovery.signals.scanners.base import ScanResult
-        from imas_codex.graph.models import DataAccess
+        from iter_codex.discovery.signals.parallel import seed_worker
+        from iter_codex.discovery.signals.scanners.base import ScanResult
+        from iter_codex.graph.models import DataAccess
 
         data_access = DataAccess(
             id=f"{FACILITY}:edas:test_access",
@@ -535,14 +535,14 @@ class TestSeedWorker:
 
         with (
             patch(
-                "imas_codex.discovery.signals.scanners.base.get_scanner",
+                "iter_codex.discovery.signals.scanners.base.get_scanner",
                 return_value=_ThinClientScanner(),
             ),
             patch(
-                "imas_codex.discovery.signals.parallel.ingest_discovered_signals"
+                "iter_codex.discovery.signals.parallel.ingest_discovered_signals"
             ) as mock_ingest,
             patch(
-                "imas_codex.discovery.signals.parallel.GraphClient",
+                "iter_codex.discovery.signals.parallel.GraphClient",
                 return_value=mock_gc,
             ),
         ):
@@ -558,7 +558,7 @@ class TestSeedWorker:
         The MDSplus branch builds its access metadata inline; it must route
         through ``persist_data_access`` rather than issuing its own MERGE.
         """
-        from imas_codex.discovery.signals.parallel import seed_worker
+        from iter_codex.discovery.signals.parallel import seed_worker
 
         state = DataDiscoveryState(
             facility=FACILITY,
@@ -572,12 +572,12 @@ class TestSeedWorker:
 
         with (
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.seed_versions",
+                "iter_codex.discovery.mdsplus.graph_ops.seed_versions",
                 return_value=0,
             ),
-            patch("imas_codex.discovery.mdsplus.graph_ops.backfill_tree_relationships"),
+            patch("iter_codex.discovery.mdsplus.graph_ops.backfill_tree_relationships"),
             patch(
-                "imas_codex.discovery.signals.parallel.persist_data_access"
+                "iter_codex.discovery.signals.parallel.persist_data_access"
             ) as mock_persist,
         ):
             await seed_worker(state)
@@ -619,7 +619,7 @@ class TestSingleDataAccessWriter:
 
     def test_one_data_access_merge_inside_persist_data_access(self):
         """Exactly one DataAccess MERGE, inside persist_data_access."""
-        from imas_codex.discovery.signals import parallel as parallel_mod
+        from iter_codex.discovery.signals import parallel as parallel_mod
 
         src_path = Path(parallel_mod.__file__)
         src = src_path.read_text(encoding="utf-8")
@@ -655,7 +655,7 @@ class TestEpochWorker:
     @pytest.mark.anyio
     async def test_epoch_detects_dynamic_tree(self):
         """epoch_worker runs detection on trees without config versions."""
-        from imas_codex.discovery.signals.parallel import epoch_worker
+        from iter_codex.discovery.signals.parallel import epoch_worker
 
         state = DataDiscoveryState(
             facility=FACILITY,
@@ -679,14 +679,14 @@ class TestEpochWorker:
 
         with (
             patch(
-                "imas_codex.discovery.mdsplus.epochs.detect_epochs_for_tree",
+                "iter_codex.discovery.mdsplus.epochs.detect_epochs_for_tree",
                 return_value=mock_epochs,
             ) as mock_detect,
             patch(
-                "imas_codex.discovery.signals.parallel.ingest_epochs",
+                "iter_codex.discovery.signals.parallel.ingest_epochs",
             ) as mock_ingest,
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.seed_versions",
+                "iter_codex.discovery.mdsplus.graph_ops.seed_versions",
                 return_value=2,
             ),
         ):
@@ -705,7 +705,7 @@ class TestEpochWorker:
         epochs detected on the parent should be seeded for each subtree
         so extraction opens the small subtree instead of the full parent.
         """
-        from imas_codex.discovery.signals.parallel import epoch_worker
+        from iter_codex.discovery.signals.parallel import epoch_worker
 
         # Config with parent tree containing subtrees (like TCV)
         config_with_subtrees = {
@@ -747,14 +747,14 @@ class TestEpochWorker:
 
         with (
             patch(
-                "imas_codex.discovery.mdsplus.epochs.detect_epochs_for_tree",
+                "iter_codex.discovery.mdsplus.epochs.detect_epochs_for_tree",
                 return_value=mock_epochs,
             ),
             patch(
-                "imas_codex.discovery.signals.parallel.ingest_epochs",
+                "iter_codex.discovery.signals.parallel.ingest_epochs",
             ),
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.seed_versions",
+                "iter_codex.discovery.mdsplus.graph_ops.seed_versions",
                 side_effect=mock_seed,
             ),
         ):
@@ -774,7 +774,7 @@ class TestEpochWorker:
     @pytest.mark.anyio
     async def test_epoch_skips_static_trees(self):
         """epoch_worker skips trees that have versions in config."""
-        from imas_codex.discovery.signals.parallel import epoch_worker
+        from iter_codex.discovery.signals.parallel import epoch_worker
 
         # Config where ALL trees have versions — no epochs needed
         config_all_static = {
@@ -802,7 +802,7 @@ class TestEpochWorker:
     @pytest.mark.anyio
     async def test_epoch_skips_non_mdsplus(self):
         """epoch_worker exits immediately for non-MDSplus scanners."""
-        from imas_codex.discovery.signals.parallel import epoch_worker
+        from iter_codex.discovery.signals.parallel import epoch_worker
 
         state = DataDiscoveryState(
             facility=FACILITY,
@@ -823,7 +823,7 @@ class TestExtractWorker:
     @pytest.mark.anyio
     async def test_extract_claims_and_processes(self):
         """extract_worker claims versions and runs SSH extraction."""
-        from imas_codex.discovery.signals.parallel import mdsplus_extract_worker
+        from iter_codex.discovery.signals.parallel import mdsplus_extract_worker
 
         _extracted_versions.clear()
 
@@ -881,22 +881,22 @@ class TestExtractWorker:
 
         with (
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction_facility",
+                "iter_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction_facility",
                 side_effect=mock_claim,
             ),
             patch(
-                "imas_codex.mdsplus.extraction.async_extract_tree_version",
+                "iter_codex.mdsplus.extraction.async_extract_tree_version",
                 side_effect=mock_extract,
             ),
             patch(
-                "imas_codex.mdsplus.extraction.merge_version_results",
+                "iter_codex.mdsplus.extraction.merge_version_results",
                 return_value={},
             ),
             patch(
-                "imas_codex.mdsplus.extraction.ingest_static_tree",
+                "iter_codex.mdsplus.extraction.ingest_static_tree",
             ),
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.mark_version_extracted",
+                "iter_codex.discovery.mdsplus.graph_ops.mark_version_extracted",
             ),
         ):
             await mdsplus_extract_worker(state)
@@ -910,7 +910,7 @@ class TestPromoteWorker:
     @pytest.mark.anyio
     async def test_promote_creates_signals(self):
         """promote_worker creates FacilitySignals from leaf DataNodes."""
-        from imas_codex.discovery.signals.parallel import mdsplus_promote_worker
+        from iter_codex.discovery.signals.parallel import mdsplus_promote_worker
 
         state = DataDiscoveryState(
             facility=FACILITY,
@@ -942,17 +942,17 @@ class TestPromoteWorker:
 
         with (
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.claim_tree_for_promote",
+                "iter_codex.discovery.mdsplus.graph_ops.claim_tree_for_promote",
                 side_effect=mock_claim_promote,
             ),
             patch(
-                "imas_codex.discovery.mdsplus.graph_ops.promote_leaf_nodes_to_signals",
+                "iter_codex.discovery.mdsplus.graph_ops.promote_leaf_nodes_to_signals",
                 return_value=25,
             ),
         ):
             # Suppress TDI linkage import
             with patch(
-                "imas_codex.discovery.mdsplus.tdi_linkage.link_tdi_to_data_nodes",
+                "iter_codex.discovery.mdsplus.tdi_linkage.link_tdi_to_data_nodes",
                 return_value=0,
                 create=True,
             ):
@@ -981,9 +981,9 @@ class TestCategoryScope:
         ]
 
     def test_enrichment_claim_filters_by_category(self):
-        from imas_codex.discovery.signals.parallel import claim_signals_for_enrichment
+        from iter_codex.discovery.signals.parallel import claim_signals_for_enrichment
 
-        with patch("imas_codex.discovery.signals.parallel.GraphClient") as gc_class:
+        with patch("iter_codex.discovery.signals.parallel.GraphClient") as gc_class:
             mock_gc = gc_class.return_value.__enter__.return_value
             claim_signals_for_enrichment(FACILITY, categories=["MAG", "PSRC"])
 
@@ -993,9 +993,9 @@ class TestCategoryScope:
             assert call.kwargs["categories"] == ["MAG", "PSRC"]
 
     def test_check_claim_filters_by_category(self):
-        from imas_codex.discovery.signals.parallel import claim_signals_for_check
+        from iter_codex.discovery.signals.parallel import claim_signals_for_check
 
-        with patch("imas_codex.discovery.signals.parallel.GraphClient") as gc_class:
+        with patch("iter_codex.discovery.signals.parallel.GraphClient") as gc_class:
             mock_gc = gc_class.return_value.__enter__.return_value
             claim_signals_for_check(FACILITY, categories=["MMSYS"])
 
@@ -1005,13 +1005,13 @@ class TestCategoryScope:
             assert call.kwargs["categories"] == ["MMSYS"]
 
     def test_pending_work_predicates_filter_by_category(self):
-        from imas_codex.discovery.signals.parallel import (
+        from iter_codex.discovery.signals.parallel import (
             has_pending_check_work,
             has_pending_enrich_work,
         )
 
         for fn in (has_pending_enrich_work, has_pending_check_work):
-            with patch("imas_codex.discovery.signals.parallel.GraphClient") as gc_class:
+            with patch("iter_codex.discovery.signals.parallel.GraphClient") as gc_class:
                 mock_gc = gc_class.return_value.__enter__.return_value
                 mock_gc.query.return_value = [{"has_work": False}]
                 fn(FACILITY, categories=["FAME"])
@@ -1023,7 +1023,7 @@ class TestCategoryScope:
     def test_cli_category_routes_to_pipeline(self, bare_discover_stage):
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover import discover
+        from iter_codex.cli.discover import discover
 
         captured_kwargs = {}
 
@@ -1039,29 +1039,29 @@ class TestCategoryScope:
             }
 
         with (
-            patch("imas_codex.cli.rich_output.should_use_rich", return_value=False),
-            patch("imas_codex.cli.logging.configure_cli_logging"),
+            patch("iter_codex.cli.rich_output.should_use_rich", return_value=False),
+            patch("iter_codex.cli.logging.configure_cli_logging"),
             patch(
-                "imas_codex.discovery.base.facility.get_facility",
+                "iter_codex.discovery.base.facility.get_facility",
                 return_value=FACILITY_CONFIG,
             ),
             patch(
-                "imas_codex.discovery.signals.scanners.base.get_scanners_for_facility",
+                "iter_codex.discovery.signals.scanners.base.get_scanners_for_facility",
                 return_value=[MagicMock(scanner_type="mdsplus")],
             ),
             patch(
-                "imas_codex.discovery.signals.scanners.base.list_scanners",
+                "iter_codex.discovery.signals.scanners.base.list_scanners",
                 return_value=["mdsplus"],
             ),
             patch(
-                "imas_codex.discovery.signals.parallel.run_parallel_data_discovery",
+                "iter_codex.discovery.signals.parallel.run_parallel_data_discovery",
                 side_effect=mock_pipeline,
             ),
             patch(
-                "imas_codex.cli.shutdown.safe_asyncio_run",
+                "iter_codex.cli.shutdown.safe_asyncio_run",
                 side_effect=lambda coro: asyncio.run(coro),
             ),
-            patch("imas_codex.cli.shutdown.install_shutdown_handlers"),
+            patch("iter_codex.cli.shutdown.install_shutdown_handlers"),
         ):
             result = CliRunner().invoke(
                 discover,
@@ -1174,108 +1174,108 @@ class TestPipelineE2E:
         patches = {
             # --- Lazy imports: patch at origin module ---
             "get_facility": patch(
-                "imas_codex.discovery.base.facility.get_facility",
+                "iter_codex.discovery.base.facility.get_facility",
                 return_value=FACILITY_CONFIG,
             ),
             "get_scanners": patch(
-                "imas_codex.discovery.signals.scanners.base.get_scanners_for_facility",
+                "iter_codex.discovery.signals.scanners.base.get_scanners_for_facility",
                 return_value=[MagicMock(scanner_type="mdsplus")],
             ),
             "seed_versions": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.seed_versions",
+                "iter_codex.discovery.mdsplus.graph_ops.seed_versions",
                 return_value=3,
             ),
             "detect_epochs": patch(
-                "imas_codex.discovery.mdsplus.epochs.detect_epochs_for_tree",
+                "iter_codex.discovery.mdsplus.epochs.detect_epochs_for_tree",
                 return_value=mock_epochs,
             ),
             "claim_version": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction_facility",
+                "iter_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction_facility",
                 side_effect=mock_claim_version_facility,
             ),
             "mark_extracted": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.mark_version_extracted",
+                "iter_codex.discovery.mdsplus.graph_ops.mark_version_extracted",
             ),
             "release_version": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.release_version_claim",
+                "iter_codex.discovery.mdsplus.graph_ops.release_version_claim",
             ),
             "claim_units": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.claim_tree_for_units",
+                "iter_codex.discovery.mdsplus.graph_ops.claim_tree_for_units",
                 side_effect=mock_claim_tree_units,
             ),
             "merge_units": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.merge_units_to_graph",
+                "iter_codex.discovery.mdsplus.graph_ops.merge_units_to_graph",
             ),
             "mark_units": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.mark_all_versions_units_extracted",
+                "iter_codex.discovery.mdsplus.graph_ops.mark_all_versions_units_extracted",
             ),
             "claim_promote": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.claim_tree_for_promote",
+                "iter_codex.discovery.mdsplus.graph_ops.claim_tree_for_promote",
                 side_effect=mock_claim_tree_promote,
             ),
             "promote": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.promote_leaf_nodes_to_signals",
+                "iter_codex.discovery.mdsplus.graph_ops.promote_leaf_nodes_to_signals",
                 return_value=LEAF_NODES_PER_VERSION,
             ),
             "extract_tree": patch(
-                "imas_codex.mdsplus.extraction.async_extract_tree_version",
+                "iter_codex.mdsplus.extraction.async_extract_tree_version",
                 side_effect=mock_extract,
             ),
             "merge_results": patch(
-                "imas_codex.mdsplus.extraction.merge_version_results",
+                "iter_codex.mdsplus.extraction.merge_version_results",
                 return_value={},
             ),
             "ingest_static": patch(
-                "imas_codex.mdsplus.extraction.ingest_static_tree",
+                "iter_codex.mdsplus.extraction.ingest_static_tree",
             ),
             "extract_units": patch(
-                "imas_codex.mdsplus.extraction.async_extract_units_for_version",
+                "iter_codex.mdsplus.extraction.async_extract_units_for_version",
                 side_effect=mock_extract_units,
             ),
             "link_tdi": patch(
-                "imas_codex.discovery.mdsplus.tdi_linkage.link_tdi_to_data_nodes",
+                "iter_codex.discovery.mdsplus.tdi_linkage.link_tdi_to_data_nodes",
                 return_value=0,
                 create=True,
             ),
             # --- Module-level graph_ops has_work_fn patches ---
             "has_pending_extract": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.has_pending_extract_work_facility",
+                "iter_codex.discovery.mdsplus.graph_ops.has_pending_extract_work_facility",
                 return_value=False,
             ),
             "has_pending_units": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.has_pending_units_work_facility",
+                "iter_codex.discovery.mdsplus.graph_ops.has_pending_units_work_facility",
                 return_value=False,
             ),
             "has_pending_promote": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.has_pending_promote_work_facility",
+                "iter_codex.discovery.mdsplus.graph_ops.has_pending_promote_work_facility",
                 return_value=False,
             ),
             "get_version_counts": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.get_version_counts",
+                "iter_codex.discovery.mdsplus.graph_ops.get_version_counts",
                 return_value={"total": 0, "discovered": 0, "ingested": 0, "failed": 0},
             ),
             "get_signal_counts": patch(
-                "imas_codex.discovery.mdsplus.graph_ops.get_signal_counts",
+                "iter_codex.discovery.mdsplus.graph_ops.get_signal_counts",
                 return_value={"total": 0, "discovered": 0, "enriched": 0, "checked": 0},
             ),
             # --- Module-level imports in parallel.py ---
             "gc_module": patch(
-                "imas_codex.discovery.signals.parallel.GraphClient",
+                "iter_codex.discovery.signals.parallel.GraphClient",
                 side_effect=make_gc_cm,
             ),
             "gc_origin": patch(
-                "imas_codex.graph.GraphClient",
+                "iter_codex.graph.GraphClient",
                 side_effect=make_gc_cm,
             ),
             "reset_transient": patch(
-                "imas_codex.discovery.signals.parallel.reset_transient_signals",
+                "iter_codex.discovery.signals.parallel.reset_transient_signals",
                 return_value={},
             ),
             "ingest_epochs": patch(
-                "imas_codex.discovery.signals.parallel.ingest_epochs",
+                "iter_codex.discovery.signals.parallel.ingest_epochs",
             ),
             "orphan_recovery": patch(
-                "imas_codex.discovery.base.engine.make_orphan_recovery_tick",
+                "iter_codex.discovery.base.engine.make_orphan_recovery_tick",
                 return_value=AsyncMock(),
             ),
         }
@@ -1356,7 +1356,7 @@ class TestPipelineE2E:
         patches = self._build_patches()
         # Override config to static-only
         patches["get_facility"] = patch(
-            "imas_codex.discovery.base.facility.get_facility",
+            "iter_codex.discovery.base.facility.get_facility",
             return_value=config_static_only,
         )
 
@@ -1396,15 +1396,15 @@ class TestPipelineE2E:
             return None
 
         patches["claim_version"] = patch(
-            "imas_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction_facility",
+            "iter_codex.discovery.mdsplus.graph_ops.claim_version_for_extraction_facility",
             side_effect=mock_claim,
         )
         patches["claim_units"] = patch(
-            "imas_codex.discovery.mdsplus.graph_ops.claim_tree_for_units",
+            "iter_codex.discovery.mdsplus.graph_ops.claim_tree_for_units",
             side_effect=mock_claim_units,
         )
         patches["claim_promote"] = patch(
-            "imas_codex.discovery.mdsplus.graph_ops.claim_tree_for_promote",
+            "iter_codex.discovery.mdsplus.graph_ops.claim_tree_for_promote",
             side_effect=mock_claim_promote,
         )
 
@@ -1449,7 +1449,7 @@ class TestPipelineE2E:
         """
         patches = self._build_patches()
         patches["get_facility"] = patch(
-            "imas_codex.discovery.base.facility.get_facility",
+            "iter_codex.discovery.base.facility.get_facility",
             return_value={
                 **FACILITY_CONFIG,
                 "wiki_sites": ["https://example.test/wiki"],
@@ -1474,23 +1474,23 @@ class TestPipelineE2E:
 
         with (
             patch(
-                "imas_codex.discovery.signals.parallel.run_discovery_engine",
+                "iter_codex.discovery.signals.parallel.run_discovery_engine",
                 side_effect=mock_run_engine,
             ),
             patch(
-                "imas_codex.discovery.signals.scanners.wiki.load_wiki_context",
+                "iter_codex.discovery.signals.scanners.wiki.load_wiki_context",
                 return_value={"\\MAGNETICS::TOP.NODE_000": {"description": "wiki"}},
             ) as load_wiki_context,
             patch(
-                "imas_codex.discovery.signals.parallel.individualize_source_descriptions",
+                "iter_codex.discovery.signals.parallel.individualize_source_descriptions",
                 new=AsyncMock(return_value=0),
             ),
             patch(
-                "imas_codex.discovery.base.embed_worker.embed_description_worker",
+                "iter_codex.discovery.base.embed_worker.embed_description_worker",
                 new_callable=AsyncMock,
             ),
             patch(
-                "imas_codex.discovery.signals.parallel.carry_forward_recorded_checks",
+                "iter_codex.discovery.signals.parallel.carry_forward_recorded_checks",
                 return_value=7,
             ) as carry_forward,
         ):
@@ -1560,11 +1560,11 @@ class TestPipelineE2E:
 
         with (
             patch(
-                "imas_codex.discovery.signals.parallel.claim_signals_for_check",
+                "iter_codex.discovery.signals.parallel.claim_signals_for_check",
                 side_effect=mock_claim_check,
             ),
             patch(
-                "imas_codex.discovery.signals.parallel.carry_forward_recorded_checks",
+                "iter_codex.discovery.signals.parallel.carry_forward_recorded_checks",
                 return_value=0,
             ),
             patch("asyncio.sleep", new=AsyncMock()),
@@ -1662,7 +1662,7 @@ class TestPipelineE2E:
             event.set()
 
         with patch(
-            "imas_codex.cli.shutdown.watch_stop_event",
+            "iter_codex.cli.shutdown.watch_stop_event",
             side_effect=fake_watch_stop_event,
         ):
             try:
@@ -1695,7 +1695,7 @@ class TestCLISignals:
         """The bare command exposes signal discovery options."""
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover import discover
+        from iter_codex.cli.discover import discover
 
         runner = CliRunner()
         result = runner.invoke(discover, [FACILITY, "--help"])
@@ -1709,29 +1709,29 @@ class TestCLISignals:
         """CLI rejects unknown scanner types."""
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover import discover
+        from iter_codex.cli.discover import discover
 
         runner = CliRunner()
         messages = []
         with (
             patch(
-                "imas_codex.cli.rich_output.should_use_rich",
+                "iter_codex.cli.rich_output.should_use_rich",
                 return_value=False,
             ),
             patch(
-                "imas_codex.cli.logging.configure_cli_logging",
+                "iter_codex.cli.logging.configure_cli_logging",
             ),
             patch(
-                "imas_codex.discovery.base.facility.get_facility",
+                "iter_codex.discovery.base.facility.get_facility",
                 return_value=FACILITY_CONFIG,
             ),
             patch(
-                "imas_codex.discovery.signals.scanners.base.list_scanners",
+                "iter_codex.discovery.signals.scanners.base.list_scanners",
                 return_value=["mdsplus", "tdi"],
             ),
-            patch("imas_codex.cli.discover.common.ensure_remote_environment"),
+            patch("iter_codex.cli.discover.common.ensure_remote_environment"),
             patch(
-                "imas_codex.cli.discover.common.make_log_print",
+                "iter_codex.cli.discover.common.make_log_print",
                 return_value=messages.append,
             ),
         ):
@@ -1754,7 +1754,7 @@ class TestCLISignals:
         """CLI --scan-only routes to run_parallel_data_discovery with discover_only."""
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover import discover
+        from iter_codex.cli.discover import discover
 
         runner = CliRunner()
 
@@ -1776,34 +1776,34 @@ class TestCLISignals:
 
         with (
             patch(
-                "imas_codex.cli.rich_output.should_use_rich",
+                "iter_codex.cli.rich_output.should_use_rich",
                 return_value=False,
             ),
             patch(
-                "imas_codex.cli.logging.configure_cli_logging",
+                "iter_codex.cli.logging.configure_cli_logging",
             ),
             patch(
-                "imas_codex.discovery.base.facility.get_facility",
+                "iter_codex.discovery.base.facility.get_facility",
                 return_value=FACILITY_CONFIG,
             ),
             patch(
-                "imas_codex.discovery.signals.scanners.base.get_scanners_for_facility",
+                "iter_codex.discovery.signals.scanners.base.get_scanners_for_facility",
                 return_value=[MagicMock(scanner_type="mdsplus")],
             ),
             patch(
-                "imas_codex.discovery.signals.scanners.base.list_scanners",
+                "iter_codex.discovery.signals.scanners.base.list_scanners",
                 return_value=["mdsplus", "tdi"],
             ),
             patch(
-                "imas_codex.discovery.signals.parallel.run_parallel_data_discovery",
+                "iter_codex.discovery.signals.parallel.run_parallel_data_discovery",
                 side_effect=mock_pipeline,
             ),
             patch(
-                "imas_codex.cli.shutdown.safe_asyncio_run",
+                "iter_codex.cli.shutdown.safe_asyncio_run",
                 side_effect=lambda coro: asyncio.run(coro),
             ),
             patch(
-                "imas_codex.cli.shutdown.install_shutdown_handlers",
+                "iter_codex.cli.shutdown.install_shutdown_handlers",
             ),
         ):
             result = runner.invoke(
@@ -1824,7 +1824,7 @@ class TestSignalPatternDetection:
 
     def test_accessor_to_source_key(self):
         """Numeric segments are replaced with NNN."""
-        from imas_codex.discovery.signals.parallel import _accessor_to_source_key
+        from iter_codex.discovery.signals.parallel import _accessor_to_source_key
 
         assert (
             _accessor_to_source_key("CALIB_GAS_010:PROPERTIES:PARAM_048:LIM")
@@ -1845,7 +1845,7 @@ class TestSignalPatternDetection:
 
     def test_detect_signal_sources(self):
         """Pattern detection groups indexed signals and creates SignalSource nodes."""
-        from imas_codex.discovery.signals.parallel import detect_signal_sources
+        from iter_codex.discovery.signals.parallel import detect_signal_sources
 
         # Mock GraphClient to return indexed signals
         mock_results = [
@@ -1861,7 +1861,7 @@ class TestSignalPatternDetection:
         mock_gc.query = MagicMock(return_value=mock_results)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             patterns, followers = detect_signal_sources("tcv", min_instances=3)
@@ -1883,7 +1883,7 @@ class TestSignalPatternDetection:
 
     def test_detect_groups_below_threshold(self):
         """Members below the pattern threshold each get a one-member source."""
-        from imas_codex.discovery.signals.parallel import detect_signal_sources
+        from iter_codex.discovery.signals.parallel import detect_signal_sources
 
         # Only 2 signals in the group (below default min_instances=3)
         mock_results = [
@@ -1898,7 +1898,7 @@ class TestSignalPatternDetection:
         mock_gc.query = MagicMock(return_value=mock_results)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             patterns, followers = detect_signal_sources("tcv", min_instances=3)
@@ -1909,7 +1909,7 @@ class TestSignalPatternDetection:
 
     def test_propagate_source_enrichment(self):
         """Enrichment is propagated from representative to group members."""
-        from imas_codex.discovery.signals.parallel import (
+        from iter_codex.discovery.signals.parallel import (
             propagate_source_enrichment,
         )
 
@@ -1939,7 +1939,7 @@ class TestSignalPatternDetection:
         }
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             result = propagate_source_enrichment(
@@ -1957,7 +1957,7 @@ class TestCodeContextFacilityPredicate:
     """
 
     def test_facility_predicate_inside_search(self):
-        from imas_codex.discovery.signals.parallel import _build_code_context_query
+        from iter_codex.discovery.signals.parallel import _build_code_context_query
 
         cypher = _build_code_context_query()
         open_idx = cypher.index("SEARCH")
@@ -1968,8 +1968,8 @@ class TestCodeContextFacilityPredicate:
         assert "code_chunk_embedding" in cypher
 
     def test_source_resolved_through_renderer(self):
-        from imas_codex.discovery.signals.parallel import _build_code_context_query
-        from imas_codex.graph.query_builder import render_chunk_source
+        from iter_codex.discovery.signals.parallel import _build_code_context_query
+        from iter_codex.graph.query_builder import render_chunk_source
 
         cypher = _build_code_context_query()
         assert render_chunk_source("node", "source_path") in cypher, cypher
@@ -1996,7 +1996,7 @@ class TestCodeContextLookupErrors:
         return encoder
 
     def _fetch(self, query_error: Exception) -> list[dict[str, str]]:
-        from imas_codex.discovery.signals import parallel as parallel_mod
+        from iter_codex.discovery.signals import parallel as parallel_mod
 
         gc = MagicMock()
         gc.__enter__ = MagicMock(return_value=gc)
@@ -2006,11 +2006,11 @@ class TestCodeContextLookupErrors:
         with (
             patch.object(parallel_mod, "GraphClient", return_value=gc),
             patch(
-                "imas_codex.embeddings.encoder.Encoder",
+                "iter_codex.embeddings.encoder.Encoder",
                 return_value=self._fake_encoder(),
             ),
             patch(
-                "imas_codex.embeddings.config.EncoderConfig",
+                "iter_codex.embeddings.config.EncoderConfig",
                 return_value=MagicMock(),
             ),
         ):

@@ -44,7 +44,7 @@ class _ObservedGraph:
             return session.run(cypher, **params)
 
     def run(self, cypher: str, *_args: Any, **params: Any) -> list[dict[str, Any]]:
-        from imas_codex.cli.sn import cypher_mutation_clause
+        from iter_codex.cli.sn import cypher_mutation_clause
 
         if cypher_mutation_clause(cypher) is not None:
             type(self).mutation_queries.append(cypher)
@@ -72,8 +72,8 @@ def _summary() -> SimpleNamespace:
 
 
 def _install_review_layers(monkeypatch: Any, observed_layers: list[str]) -> None:
-    from imas_codex.graph import client as graph_client
-    from imas_codex.standard_names.review import audits, consolidation, pipeline
+    from iter_codex.graph import client as graph_client
+    from iter_codex.standard_names.review import audits, consolidation, pipeline
 
     monkeypatch.setattr(graph_client, "GraphClient", _ObservedGraph)
 
@@ -146,7 +146,7 @@ def test_report_only_runs_every_layer_without_creating_review_nodes(
     monkeypatch: Any,
 ) -> None:
     """Report-only changes persistence, not the computed review or exit status."""
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     observed_layers: list[str] = []
     _install_review_layers(monkeypatch, observed_layers)
@@ -194,7 +194,7 @@ def test_report_only_runs_every_layer_without_creating_review_nodes(
 
 def test_report_only_refuses_dry_run_combination() -> None:
     """A Layer-1 preview cannot masquerade as a full report-only review."""
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     result = CliRunner().invoke(sn, ["review", "--dry-run", "--report-only"])
 
@@ -204,7 +204,7 @@ def test_report_only_refuses_dry_run_combination() -> None:
 
 def test_report_only_refuses_skipping_the_audit_layer() -> None:
     """The report-only contract always includes deterministic review."""
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     result = CliRunner().invoke(sn, ["review", "--report-only", "--skip-audit"])
 

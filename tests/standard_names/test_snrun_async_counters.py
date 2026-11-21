@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-import imas_codex.standard_names.graph_ops  # noqa: F401  (wires the graph composition root)
+import iter_codex.standard_names.graph_ops  # noqa: F401  (wires the graph composition root)
 
 from tests.standard_names.conftest import answer_domain_state as _answer_domain_state
 from tests.standard_names.graph_transaction_doubles import transaction_double
@@ -31,7 +31,7 @@ _RUN_ID = "run-async-counter-test"
 def _mock_gc_ctx():
     """Return (patcher, mock_gc) that patches GraphClient as context manager."""
     patcher = patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     )
     MockGC = patcher.start()
     mock_gc = MagicMock()
@@ -75,7 +75,7 @@ class TestGenerateNameBumpsComposed:
 
     def test_single_batch_bumps_composed(self):
         """Verify bump_sn_run_counter is called with correct counter and delta."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             bump_sn_run_counter,
         )
 
@@ -103,7 +103,7 @@ class TestAccumulation:
     def test_two_bumps_accumulate(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 bump_sn_run_counter,
             )
 
@@ -136,9 +136,9 @@ class TestReviewNameBumpsReviewed:
                 [],
             ]
             with patch(
-                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
+                "iter_codex.standard_names.graph_store.graph_catalog.write_reviews"
             ):
-                from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                from iter_codex.standard_names.graph_store.graph_review_persistence import (
                     persist_reviewed_name,
                 )
 
@@ -188,7 +188,7 @@ class TestRefineNameBumpsRegenerated:
             mock_gc.session.return_value.__exit__ = MagicMock(return_value=False)
             mock_gc.query.return_value = []
 
-            from imas_codex.standard_names.graph_store.graph_refinement import (
+            from iter_codex.standard_names.graph_store.graph_refinement import (
                 persist_refined_name,
             )
 
@@ -220,7 +220,7 @@ class TestGenerateDocsBumpsEnriched:
         try:
             mock_gc.query.return_value = [{"docs_stage": "drafted"}]
 
-            from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            from iter_codex.standard_names.graph_store.graph_docs_persistence import (
                 persist_generated_docs,
             )
 
@@ -266,9 +266,9 @@ class TestReviewDocsBumpsReviewed:
             ).session
             mock_gc.query.return_value = []
             with patch(
-                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
+                "iter_codex.standard_names.graph_store.graph_catalog.write_reviews"
             ):
-                from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                from iter_codex.standard_names.graph_store.graph_review_persistence import (
                     persist_reviewed_docs,
                 )
 
@@ -314,7 +314,7 @@ class TestRefineDocsBumpsRegenerated:
             mock_gc.session.return_value.__exit__ = MagicMock(return_value=False)
             mock_gc.query.return_value = []
 
-            from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            from iter_codex.standard_names.graph_store.graph_docs_persistence import (
                 persist_refined_docs,
             )
 
@@ -350,7 +350,7 @@ class TestNoRunIdNoBump:
         try:
             mock_gc.query.return_value = [{"docs_stage": "drafted"}]
 
-            from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            from iter_codex.standard_names.graph_store.graph_docs_persistence import (
                 persist_generated_docs,
             )
 
@@ -379,7 +379,7 @@ class TestBumpSNRunCounter:
     def test_bump_issues_correct_cypher(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 bump_sn_run_counter,
             )
 
@@ -399,7 +399,7 @@ class TestBumpSNRunCounter:
     def test_bump_rejects_unknown_counter(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 bump_sn_run_counter,
             )
 
@@ -411,7 +411,7 @@ class TestBumpSNRunCounter:
     def test_bump_skips_zero_delta(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 bump_sn_run_counter,
             )
 
@@ -423,7 +423,7 @@ class TestBumpSNRunCounter:
     def test_bump_skips_none_run_id(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 bump_sn_run_counter,
             )
 
@@ -438,7 +438,7 @@ class TestBumpSNRunCounter:
         try:
             mock_gc.query.side_effect = RuntimeError("Neo4j down")
 
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 bump_sn_run_counter,
             )
 
@@ -459,7 +459,7 @@ class TestConcurrentBumps:
     def test_concurrent_bumps_all_fire(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 bump_sn_run_counter,
             )
 
@@ -494,7 +494,7 @@ class TestPersistSignatures:
     def test_persist_generated_name_batch_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -504,7 +504,7 @@ class TestPersistSignatures:
     def test_persist_reviewed_name_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_name,
         )
 
@@ -514,7 +514,7 @@ class TestPersistSignatures:
     def test_persist_reviewed_docs_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_docs,
         )
 
@@ -524,7 +524,7 @@ class TestPersistSignatures:
     def test_persist_refined_name_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             persist_refined_name,
         )
 
@@ -534,7 +534,7 @@ class TestPersistSignatures:
     def test_persist_refined_docs_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             persist_refined_docs,
         )
 
@@ -544,7 +544,7 @@ class TestPersistSignatures:
     def test_persist_generated_docs_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             persist_generated_docs,
         )
 

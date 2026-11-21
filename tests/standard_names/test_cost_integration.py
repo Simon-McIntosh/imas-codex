@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
 
 pytestmark = pytest.mark.graph
 
@@ -33,7 +33,7 @@ def _allow_test_model_writes(monkeypatch):
     NEVER ``codex``. Cleanup is by ``run_id`` so a stray run only
     leaks its own ``test-...`` rows, not anyone else's.
     """
-    monkeypatch.setenv("IMAS_CODEX_ALLOW_TEST_MODEL", "1")
+    monkeypatch.setenv("ITER_CODEX_ALLOW_TEST_MODEL", "1")
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ def _unique_run_id() -> str:
 
 def _cleanup_run(run_id: str) -> None:
     """Delete all nodes tied to *run_id* (SNRun + LLMCost)."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         gc.query("MATCH (n {run_id: $rid}) DETACH DELETE n", rid=run_id)
@@ -67,7 +67,7 @@ def _make_event(**overrides) -> LLMCostEvent:
 
 
 def _count_llm_cost_rows(run_id: str) -> int:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         rows = gc.query(
@@ -85,10 +85,10 @@ def _count_llm_cost_rows(run_id: str) -> int:
 class TestIdempotentDoubleCharge:
     def test_idempotent_double_charge_creates_one_row(self):
         """Calling record_llm_cost twice with identical args → 1 row."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             create_sn_run_open,
         )
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             record_llm_cost,
         )
 
@@ -125,10 +125,10 @@ class TestIdempotentDoubleCharge:
 class TestPerNameApportionment:
     def test_per_name_apportionment_correct(self):
         """One cost row over two Standard Names apportions 0.5 to each."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             create_sn_run_open,
         )
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             aggregate_spend_per_name,
             record_llm_cost,
         )
@@ -164,10 +164,10 @@ class TestPerNameApportionment:
 class TestPerPhaseAggregation:
     def test_per_phase_aggregation(self):
         """LLMCost rows with different phases → grouped correctly."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             create_sn_run_open,
         )
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             aggregate_spend_per_phase,
             record_llm_cost,
         )
@@ -212,10 +212,10 @@ class TestAggregateMatchesBudgetManager:
     @pytest.mark.asyncio
     async def test_aggregate_spend_matches_budget_manager_pending(self):
         """After drain, graph aggregate ≈ BudgetManager.get_total_spent."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             create_sn_run_open,
         )
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             aggregate_spend_for_run,
         )
 
@@ -260,7 +260,7 @@ class TestDrainBarrier:
     @pytest.mark.asyncio
     async def test_drain_barrier_on_shutdown_writes_all_pending(self):
         """Enqueue 5 events, drain → all 5 LLMCost rows in graph."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             create_sn_run_open,
         )
 
@@ -299,8 +299,8 @@ class TestDrainBarrier:
 class TestSNRunPreCreated:
     def test_loop_pre_creates_sn_run_at_start(self):
         """create_sn_run_open → node exists with status='started'."""
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.standard_names.graph_store.graph_audits import (
             create_sn_run_open,
         )
 
@@ -331,8 +331,8 @@ class TestFinalizeDrainFailure:
     @pytest.mark.asyncio
     async def test_finalize_sn_run_marks_cost_is_exact_false_on_drain_failure(self):
         """When writer fails, drain returns False → cost_is_exact=False."""
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.standard_names.graph_store.graph_audits import (
             create_sn_run_open,
             finalize_sn_run,
         )
@@ -349,7 +349,7 @@ class TestFinalizeDrainFailure:
             lease = mgr.reserve(1.0, phase="generate")
             assert lease is not None
             with patch(
-                "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
+                "iter_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
                 side_effect=RuntimeError("boom"),
             ):
                 evt = _make_event(phase="generate", batch_id="fail-batch")
@@ -390,11 +390,11 @@ class TestFinalizeDrainFailure:
 class TestForRunEdge:
     def test_llm_cost_has_for_run_edge(self):
         """LLMCost row → FOR_RUN → SNRun edge exists."""
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.standard_names.graph_store.graph_audits import (
             create_sn_run_open,
         )
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             record_llm_cost,
         )
 

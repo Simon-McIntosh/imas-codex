@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.graph_store import (
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.graph_store import (
     owner_module_path as _owner_module_path,
 )
 
@@ -56,17 +56,17 @@ def test_dry_run_prints_plan_without_writes_claims_or_llm_calls() -> None:
     )
     with ExitStack() as stack:
         stack.enter_context(
-            patch("imas_codex.graph.client.GraphClient", ReadOnlyGraphClient)
+            patch("iter_codex.graph.client.GraphClient", ReadOnlyGraphClient)
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_claim_scope.get_existing_standard_names",
+                "iter_codex.standard_names.graph_store.graph_claim_scope.get_existing_standard_names",
                 return_value=set(),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.sources.dd.extract_dd_candidates",
+                "iter_codex.standard_names.sources.dd.extract_dd_candidates",
                 return_value=[
                     SimpleNamespace(
                         items=[
@@ -78,7 +78,7 @@ def test_dry_run_prints_plan_without_writes_claims_or_llm_calls() -> None:
             )
         )
         llm = stack.enter_context(
-            patch("imas_codex.discovery.base.llm.call_llm_structured")
+            patch("iter_codex.discovery.base.llm.call_llm_structured")
         )
         claims = [
             stack.enter_context(patch(f"{_owner_module_path(claim_name)}.{claim_name}"))

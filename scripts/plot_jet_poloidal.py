@@ -20,8 +20,8 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.plotting.style import save_figure
+from iter_codex.graph.client import GraphClient
+from iter_codex.plotting.style import save_figure
 
 
 def _parse_multi_value(raw: str | float | int | None) -> list[float]:

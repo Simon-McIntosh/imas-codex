@@ -24,9 +24,9 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.review import jev_review
-from imas_codex.standard_names.review.audits import AuditReport
-from imas_codex.standard_names.review.checks import load_review_checks
+from iter_codex.standard_names.review import jev_review
+from iter_codex.standard_names.review.audits import AuditReport
+from iter_codex.standard_names.review.checks import load_review_checks
 
 CLAIM_KEY = "check:claim_contradicts_source:0"
 

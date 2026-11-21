@@ -5,14 +5,14 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from imas_codex.graph.models import (
+from iter_codex.graph.models import (
     COCOSClass,
     ConventionObservation,
     ConventionStatus,
     FacilitySignal,
     SignalSource,
 )
-from imas_codex.graph.schema import GraphSchema
+from iter_codex.graph.schema import GraphSchema
 
 
 def test_source_convention_fields_round_trip() -> None:

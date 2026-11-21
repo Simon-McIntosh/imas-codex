@@ -18,12 +18,12 @@ import json
 import pytest
 from pydantic import BaseModel
 
-from imas_codex.discovery.base.llm import (
+from iter_codex.discovery.base.llm import (
     call_decisions,
     call_llm,
     call_llm_structured,
 )
-from imas_codex.settings import (
+from iter_codex.settings import (
     _get_section,
     get_model,
     get_sn_benchmark_candidate_models,
@@ -204,7 +204,7 @@ def test_decisions_seat_answers_one_live_request(
     POST. The guard stays in force for every other test in the file and for
     every other test in the suite.
     """
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     monkeypatch.setattr(llm, "_post_decisions", _post_decisions_live)
     answers, cost = call_decisions(

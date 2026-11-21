@@ -21,7 +21,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt  # noqa: E402
 
-from imas_codex.plotting.style import BASE_STYLE, save_figure  # noqa: E402
+from iter_codex.plotting.style import BASE_STYLE, save_figure  # noqa: E402
 
 EVIDENCE = Path(
     "docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.json"

@@ -7,7 +7,7 @@ These tests exercise only pure scoring/seed helpers and need no catalog.
 
 from __future__ import annotations
 
-from imas_codex.standard_names import benchmark_roles as br
+from iter_codex.standard_names import benchmark_roles as br
 
 
 class TestDiscriminationMetrics:

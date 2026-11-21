@@ -13,14 +13,14 @@ from __future__ import annotations
 import pytest
 from imas_standard_names.grammar.terms import select_conventions
 
-from imas_codex.standard_names import workers
-from imas_codex.standard_names.context import conventions_context_for
-from imas_codex.standard_names.docs_gates import (
+from iter_codex.standard_names import workers
+from iter_codex.standard_names.context import conventions_context_for
+from iter_codex.standard_names.docs_gates import (
     HouseStyleFindingClass,
     conformance_findings,
     locus_definition_sentence,
 )
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_generate_docs as _owning_worker_generate_docs,
     worker_review_docs as _owning_worker_review_docs,
 )

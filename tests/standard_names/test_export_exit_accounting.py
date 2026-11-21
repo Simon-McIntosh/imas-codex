@@ -30,7 +30,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import run_export
+from iter_codex.standard_names.export import run_export
 from tests.standard_names.conftest import clean_source_audit_graph
 
 # A null link_status was the strongest surviving signal on the six
@@ -94,49 +94,49 @@ def _run_fixture_export(
     with ExitStack() as stack:
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_export_population",
+                "iter_codex.standard_names.export._fetch_export_population",
                 return_value=population,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
                 return_value=_ReadOnlyGraphClient(),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_retired_batch_ids",
+                "iter_codex.standard_names.export._fetch_retired_batch_ids",
                 return_value=retired_batch_ids or [],
             )
         )
         if classify_result is not None:
             stack.enter_context(
                 patch(
-                    "imas_codex.standard_names.export._classify_export_population",
+                    "iter_codex.standard_names.export._classify_export_population",
                     return_value=classify_result,
                 )
             )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._validate_entry",
+                "iter_codex.standard_names.export._validate_entry",
                 side_effect=lambda entry: entry,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_deprecation_stubs",
+                "iter_codex.standard_names.export._fetch_deprecation_stubs",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+                "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
                 return_value=([], set()),
             )
         )
         stack.enter_context(
-            patch("imas_codex.standard_names.export._write_domain_yaml")
+            patch("iter_codex.standard_names.export._write_domain_yaml")
         )
         return run_export(
             staging_dir,
@@ -185,7 +185,7 @@ def test_uncounted_exit_refuses_naming_shortfall(tmp_path: Path) -> None:
     # Simulate an exit no mechanism counters: the classifier drops
     # ``vanished_name`` with no exclusion record at all.
     with patch(
-        "imas_codex.standard_names.export._classify_export_population",
+        "iter_codex.standard_names.export._classify_export_population",
         return_value=([population[0]], []),
     ):
         report = _run_fixture_export(tmp_path, population)

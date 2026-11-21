@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.example_loader import (
+from iter_codex.standard_names.example_loader import (
     load_compose_examples,
     load_review_examples,
 )

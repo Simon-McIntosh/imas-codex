@@ -14,12 +14,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.signals.models import (
+from iter_codex.discovery.signals.models import (
     ContextQuality,
     SignalEnrichmentBatch,
     SignalEnrichmentResult,
 )
-from imas_codex.graph.models import FacilitySignalStatus
+from iter_codex.graph.models import FacilitySignalStatus
 
 # =============================================================================
 # ContextQuality enum
@@ -143,12 +143,12 @@ class TestMarkSignalsUnderspecified:
     """Test mark_signals_underspecified graph persistence."""
 
     def test_empty_list_returns_zero(self):
-        from imas_codex.discovery.signals.parallel import mark_signals_underspecified
+        from iter_codex.discovery.signals.parallel import mark_signals_underspecified
 
         assert mark_signals_underspecified([], 0.0) == 0
 
     def test_calls_graph_with_underspecified_status(self):
-        from imas_codex.discovery.signals.parallel import mark_signals_underspecified
+        from iter_codex.discovery.signals.parallel import mark_signals_underspecified
 
         mock_gc = MagicMock()
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
@@ -168,7 +168,7 @@ class TestMarkSignalsUnderspecified:
         ]
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             count = mark_signals_underspecified(signals, 0.01)
@@ -179,7 +179,7 @@ class TestMarkSignalsUnderspecified:
         assert call_args.kwargs["status"] == "underspecified"
 
     def test_graph_error_returns_zero(self):
-        from imas_codex.discovery.signals.parallel import mark_signals_underspecified
+        from iter_codex.discovery.signals.parallel import mark_signals_underspecified
 
         mock_gc = MagicMock()
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
@@ -200,7 +200,7 @@ class TestMarkSignalsUnderspecified:
         ]
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             count = mark_signals_underspecified(signals, 0.01)
@@ -218,7 +218,7 @@ class TestClaimIncludesUnderspecified:
 
     def test_claim_query_includes_underspecified_status(self):
         """The claim query should match both discovered and underspecified signals."""
-        from imas_codex.discovery.signals.parallel import claim_signals_for_enrichment
+        from iter_codex.discovery.signals.parallel import claim_signals_for_enrichment
 
         mock_gc = MagicMock()
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
@@ -226,7 +226,7 @@ class TestClaimIncludesUnderspecified:
         mock_gc.query.return_value = []
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             claim_signals_for_enrichment("tcv", batch_size=5)

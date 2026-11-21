@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 39039fcdf9227cdde108f0c0a1d2b01585493d34, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Re-measure one non-WEST locus family through ``sn harmonize``.
@@ -44,13 +44,13 @@ import re
 import sys
 from pathlib import Path
 
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.harmonize import docs_score_regressions
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.harmonize import docs_score_regressions
 
 RESULTS = Path(__file__).with_name("shc-locus-converge-measure.json")
 HTML = Path(__file__).with_name("shc-locus-converge-measure.html")
 REPO_ROOT = Path(__file__).resolve().parents[4]
-REVIEWS_DIR = REPO_ROOT / "imas_codex/standard_names/manifests/reviews"
+REVIEWS_DIR = REPO_ROOT / "iter_codex/standard_names/manifests/reviews"
 
 SEED = "electrostatic_potential"
 # A name the roster search is known to find, so a zero member count is shown
@@ -119,8 +119,8 @@ def roster_check(members: list[str]) -> dict:
 
 
 def snapshot(phase: str) -> None:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.harmonize import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.harmonize import (
         measure_doc_call_cost,
         plan_family_applies,
         preview_recommended_refusals,
@@ -360,9 +360,9 @@ def record_cost() -> None:
     # graph_ops is the services composition root: importing it wires the
     # collaborators the owner module reads through ``get_services``.  The cost
     # functions themselves are called on the owner module directly.
-    from imas_codex.standard_names import graph_ops  # noqa: F401
-    from imas_codex.standard_names.graph_store import graph_cost_and_claims
-    from imas_codex.standard_names.graph_store.graph_foundation import (
+    from iter_codex.standard_names import graph_ops  # noqa: F401
+    from iter_codex.standard_names.graph_store import graph_cost_and_claims
+    from iter_codex.standard_names.graph_store.graph_foundation import (
         get_services,
     )
 
@@ -851,8 +851,8 @@ def main() -> None:
     subcommands.add_parser("check")
     args = parser.parse_args()
     if args.command == "roster":
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.harmonize import plan_family_applies
+        from iter_codex.graph.client import GraphClient
+        from iter_codex.standard_names.harmonize import plan_family_applies
 
         with GraphClient() as graph:
             plan = plan_family_applies(graph, seeds=[SEED])[0]

@@ -13,7 +13,7 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 
 @pytest.fixture()
@@ -22,11 +22,11 @@ def runner():
 
 
 # Patch target for the rotator entrypoint in the CLI module.
-_ROTATOR = "imas_codex.cli.sn._run_sn_cmd"
+_ROTATOR = "iter_codex.cli.sn._run_sn_cmd"
 # The single-pass path reaches ``run_explicit_paths`` via a local import
 # inside the CLI function.  Patching the source module blocks it
 # effectively because the import resolves each invocation.
-_SINGLE_PASS = "imas_codex.standard_names.pool_adapter.run_explicit_paths"
+_SINGLE_PASS = "iter_codex.standard_names.pool_adapter.run_explicit_paths"
 
 
 async def _async_noop(*args, **kwargs):  # pragma: no cover - test helper

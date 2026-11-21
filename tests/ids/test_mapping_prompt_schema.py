@@ -7,14 +7,14 @@ the whole batch is dropped.
 
 import pytest
 
-from imas_codex.ids.models import (
+from iter_codex.ids.models import (
     AssemblyConfig,
     EscalationFlag,
     SignalMappingBatch,
     SignalMappingEntry,
     UnmappedSignal,
 )
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 
 @pytest.mark.parametrize(

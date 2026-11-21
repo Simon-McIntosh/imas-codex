@@ -50,7 +50,7 @@ SCRIPT = Path(__file__).resolve()
 REPO_ROOT = SCRIPT.parents[4]
 ROSTER = (
     REPO_ROOT
-    / "imas_codex/standard_names/manifests/reviews"
+    / "iter_codex/standard_names/manifests/reviews"
     / "v0.4.0rc7+west-task-2e.sn_names.yaml"
 )
 DEFAULT_RESULTS = SCRIPT.with_name("shs-registry-worklist-rerun-results.json")

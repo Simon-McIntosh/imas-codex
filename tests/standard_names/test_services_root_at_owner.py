@@ -24,11 +24,11 @@ _READER_PROBE = textwrap.dedent(
     """
     import sys
 
-    from imas_codex.standard_names.graph_store.graph_supersession import (
+    from iter_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
 
-    if "imas_codex.standard_names.graph_ops" in sys.modules:
+    if "iter_codex.standard_names.graph_ops" in sys.modules:
         print("the facade was imported before the reader; this probe cannot measure")
         raise SystemExit(4)
 

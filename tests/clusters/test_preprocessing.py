@@ -2,9 +2,9 @@
 
 import pytest
 
-from imas_codex.clusters.config import RelationshipExtractionConfig
-from imas_codex.clusters.preprocessing import PathFilter, UnitFamilyBuilder
-from imas_codex.embeddings.config import EncoderConfig
+from iter_codex.clusters.config import RelationshipExtractionConfig
+from iter_codex.clusters.preprocessing import PathFilter, UnitFamilyBuilder
+from iter_codex.embeddings.config import EncoderConfig
 
 
 class TestPathFilter:

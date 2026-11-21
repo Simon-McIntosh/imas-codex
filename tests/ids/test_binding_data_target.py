@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from imas_codex.ids.mapping import validate_mappings
-from imas_codex.ids.models import (
+from iter_codex.ids.mapping import validate_mappings
+from iter_codex.ids.models import (
     EscalationSeverity,
     SignalMappingBatch,
     SignalMappingEntry,
@@ -96,9 +96,9 @@ def _validate(batch: SignalMappingBatch):
     passing.all_passed = True
     passing.binding_checks = []
     with (
-        patch("imas_codex.ids.validation.validate_mapping", return_value=passing),
-        patch("imas_codex.ids.validation.check_coverage_threshold", return_value=[]),
-        patch("imas_codex.ids.tools.get_sign_flip_paths", return_value=set()),
+        patch("iter_codex.ids.validation.validate_mapping", return_value=passing),
+        patch("iter_codex.ids.validation.check_coverage_threshold", return_value=[]),
+        patch("iter_codex.ids.tools.get_sign_flip_paths", return_value=set()),
     ):
         return validate_mappings(
             "jt-60sa", "pf_active", "4.1.1", _sections(), [batch], gc=_gc()

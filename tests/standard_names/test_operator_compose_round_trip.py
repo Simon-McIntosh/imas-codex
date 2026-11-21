@@ -24,11 +24,11 @@ import pytest
 
 pytest.importorskip("imas_standard_names")
 
-from imas_codex.standard_names import models as standard_name_models  # noqa: E402
-from imas_codex.standard_names.grammar_adapter import (  # noqa: E402
+from iter_codex.standard_names import models as standard_name_models  # noqa: E402
+from iter_codex.standard_names.grammar_adapter import (  # noqa: E402
     is_canonical_name,
 )
-from imas_codex.standard_names.models import (  # noqa: E402
+from iter_codex.standard_names.models import (  # noqa: E402
     GrammarSegments,
     _operator_uses_bare_prefix,
 )
@@ -53,7 +53,7 @@ def _compose(
             OperatorKind,
         )
 
-        from imas_codex.standard_names.grammar_adapter import compose_canonical_ir
+        from iter_codex.standard_names.grammar_adapter import compose_canonical_ir
 
         operand = GrammarSegments(
             base_token=base_token,

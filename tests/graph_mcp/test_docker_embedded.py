@@ -50,7 +50,7 @@ class TestDockerfileStructure:
 
     def test_oras_pull_dd_only(self):
         """Pulls DD-only graph package, not full graph."""
-        assert "imas-codex-graph-dd" in self.content
+        assert "iter-codex-graph-dd" in self.content
 
     def test_graph_tag_arg_defaults_to_latest(self):
         """GRAPH_TAG build arg defaults to 'latest'."""
@@ -137,7 +137,7 @@ class TestDockerfileStructure:
 
     def test_embedding_location_local(self):
         """Embedding location set to local for container deployment."""
-        assert "IMAS_CODEX_EMBEDDING_LOCATION=local" in self.content
+        assert "ITER_CODEX_EMBEDDING_LOCATION=local" in self.content
 
     def test_pytorch_cpu_only(self):
         """PyTorch CPU-only index configured to minimize image size."""
@@ -190,8 +190,8 @@ class TestEntrypointScript:
         assert "failed to start" in self.content.lower()
 
     def test_starts_mcp_server(self):
-        """Launches imas-codex MCP server after Neo4j is ready."""
-        assert "imas-codex" in self.content
+        """Launches iter-codex MCP server after Neo4j is ready."""
+        assert "iter-codex" in self.content
 
     def test_trap_handler(self):
         """Signal trap for graceful shutdown."""
@@ -221,12 +221,12 @@ class TestDockerCompose:
     def _load(self):
         self.config = yaml.safe_load(COMPOSE.read_text())
 
-    def test_imas_codex_service_exists(self):
-        assert "imas-codex" in self.config["services"]
+    def test_iter_codex_service_exists(self):
+        assert "iter-codex" in self.config["services"]
 
-    def test_imas_codex_no_neo4j_dependency(self):
-        """imas-codex should not depend on standalone neo4j service."""
-        svc = self.config["services"]["imas-codex"]
+    def test_iter_codex_no_neo4j_dependency(self):
+        """iter-codex should not depend on standalone neo4j service."""
+        svc = self.config["services"]["iter-codex"]
         depends = svc.get("depends_on", {})
         if isinstance(depends, list):
             assert "neo4j" not in depends
@@ -235,13 +235,13 @@ class TestDockerCompose:
 
     def test_ghcr_token_secret(self):
         """Build uses GHCR_TOKEN secret (not openai_api_key)."""
-        svc = self.config["services"]["imas-codex"]
+        svc = self.config["services"]["iter-codex"]
         build_secrets = svc.get("build", {}).get("secrets", [])
         assert "ghcr_token" in build_secrets
 
     def test_graph_tag_build_arg(self):
         """GRAPH_TAG build arg is configurable."""
-        svc = self.config["services"]["imas-codex"]
+        svc = self.config["services"]["iter-codex"]
         build_args = svc.get("build", {}).get("args", [])
         graph_tag_args = [a for a in build_args if "GRAPH_TAG" in str(a)]
         assert graph_tag_args, "Missing GRAPH_TAG build arg"
@@ -254,7 +254,7 @@ class TestDockerCompose:
 
     def test_healthcheck_uses_curl(self):
         """Health check uses curl (available in container)."""
-        svc = self.config["services"]["imas-codex"]
+        svc = self.config["services"]["iter-codex"]
         healthcheck = svc.get("healthcheck", {})
         test_cmd = healthcheck.get("test", [])
         assert any("curl" in str(t) for t in test_cmd)

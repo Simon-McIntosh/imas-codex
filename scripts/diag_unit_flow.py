@@ -26,7 +26,7 @@ import argparse
 import asyncio
 import sys
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 # Reference paths and their DD-truth units.  Update if the DD changes.
 REFERENCE_PATHS: dict[str, str] = {
@@ -58,7 +58,7 @@ def _dd_truth_unit(gc: GraphClient, path: str) -> str | None:
 def _read_items_for_paths(paths: list[str]) -> list[dict]:
     """Run pool_adapter._read_items via its closure.  Mirrors the
     compose-time read path so we observe the exact dict the worker sees."""
-    from imas_codex.standard_names import pool_adapter  # noqa: F401
+    from iter_codex.standard_names import pool_adapter  # noqa: F401
 
     # _read_items is defined inside pool_adapter.enrich_paths; we replicate
     # its body here so the diag does not need a full enrich invocation.
@@ -115,7 +115,7 @@ def diag_one(path: str, expected_unit: str | None) -> tuple[bool, list[str]]:
         ok = False
 
     # Stage 2: ISN-dict construction (mirrors workers.py:_validate_isn_layers)
-    from imas_codex.standard_names.kind_derivation import to_isn_kind
+    from iter_codex.standard_names.kind_derivation import to_isn_kind
 
     entry = {"id": "diag_test_name", "kind": "scalar", "unit": pool_unit}
     isn_dict: dict[str, str] = {

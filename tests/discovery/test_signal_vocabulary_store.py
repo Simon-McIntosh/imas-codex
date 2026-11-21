@@ -11,7 +11,7 @@ import json
 
 import pytest
 
-from imas_codex.discovery.signals.vocabulary_graph import (
+from iter_codex.discovery.signals.vocabulary_graph import (
     VOCABULARY_KEYS,
     archive_unit,
     assign_cohort,
@@ -246,7 +246,7 @@ class TestUnitAgreement:
 
 def test_every_stored_key_is_a_declared_property():
     """The nine keys the write sets are the nine the schema generates."""
-    from imas_codex.graph.models import FacilitySignal
+    from iter_codex.graph.models import FacilitySignal
 
     fields = set(FacilitySignal.model_fields)
     assert set(VOCABULARY_KEYS) <= fields

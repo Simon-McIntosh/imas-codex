@@ -29,15 +29,15 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.attachment_audit import AttachmentPairingGuardResult
-from imas_codex.standard_names.graph_store.graph_supersession import (
+from iter_codex.standard_names.attachment_audit import AttachmentPairingGuardResult
+from iter_codex.standard_names.graph_store.graph_supersession import (
     supersede_prior_source_names,
 )
-from imas_codex.standard_names.provenance_lifecycle import (
+from iter_codex.standard_names.provenance_lifecycle import (
     SourceBindingConflictError,
     SourceRetiredSuccessorConflictError,
 )
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_common as _owning_worker_common,
 )
 
@@ -165,7 +165,7 @@ def test_compose_supersede_over_dual_bound_source_raises_adjudicable_conflict() 
     """
     tx = _Tx()
     with patch(
-        "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+        "iter_codex.standard_names.attachment_audit.guard_source_pairings",
         return_value=AttachmentPairingGuardResult((_SOURCE_NODE,), ()),
     ):
         with pytest.raises(SourceBindingConflictError) as raised:
@@ -192,8 +192,8 @@ def test_compose_persist_withholds_a_dual_bound_source_without_spending_an_attem
     conflict and leave the source claimed and withheld, returning no winner id
     and releasing no claim.
     """
-    from imas_codex.standard_names import workers
-    from imas_codex.standard_names.provenance_lifecycle import SourceBindingConflict
+    from iter_codex.standard_names import workers
+    from iter_codex.standard_names.provenance_lifecycle import SourceBindingConflict
 
     conflict = SourceBindingConflictError(
         [
@@ -222,11 +222,11 @@ def test_compose_persist_withholds_a_dual_bound_source_without_spending_an_attem
     with (
         caplog.at_level("WARNING"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
+            "iter_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
             side_effect=conflict,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release.release_generate_name_failed_claims",
+            "iter_codex.standard_names.graph_store.graph_claim_release.release_generate_name_failed_claims",
             side_effect=_release,
         ),
     ):
@@ -259,11 +259,11 @@ def test_compose_persist_withholds_a_retired_successor_without_spending_an_attem
     means the source is already held, so the persist boundary must record it and
     leave the source claimed — returning no winner id and releasing no claim.
     """
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     tx = _Tx(_retired_migration_row())
     with patch(
-        "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+        "iter_codex.standard_names.attachment_audit.guard_source_pairings",
         return_value=AttachmentPairingGuardResult((_SOURCE_NODE,), ()),
     ):
         with pytest.raises(SourceRetiredSuccessorConflictError) as raised:
@@ -295,11 +295,11 @@ def test_compose_persist_withholds_a_retired_successor_without_spending_an_attem
     with (
         caplog.at_level("WARNING"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
+            "iter_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
             side_effect=conflict,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release.release_generate_name_failed_claims",
+            "iter_codex.standard_names.graph_store.graph_claim_release.release_generate_name_failed_claims",
             side_effect=_release,
         ),
     ):

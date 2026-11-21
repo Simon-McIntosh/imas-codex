@@ -1,4 +1,4 @@
-# IMAS Codex Architecture: Facility Access
+# ITER Codex Architecture: Facility Access
 
 > **Document Purpose**: Technical architecture overview for facility system administrators  
 > **Author**: Simon McIntosh, ITER Organization  
@@ -11,9 +11,9 @@
 
 The creation of transforms that map fusion data from facility specific data formats into the IMAS Data Dictionary format is labour intensive. We propose an automation to this process to increase the speed of production as well as the quality and coverage of these data maps. The generation of IMAS mapping transforms requires a detailed understanding of both the source facility data and the target Data Dictionary. We infer the meaning of facility data by examining documentation, code, and example datasets and persist our findings. By extracting the semantics of the IMAS Data Dictionary in a similar way we can identify source-target data pairs with similar meaning and extract the required maps. 
 
-We separate the extraction of source-target knowledge from the persistence of deterministic maps by creating two separate projects, IMAS Codex and IMAS Ambix. Here, the Codex project manages our private knowledge state whilst Ambix serves our public distilled IMAS mappings for each facility.
+We separate the extraction of source-target knowledge from the persistence of deterministic maps by creating two separate projects, ITER Codex and IMAS Ambix. Here, the Codex project manages our private knowledge state whilst Ambix serves our public distilled IMAS mappings for each facility.
 
-IMAS Codex is a knowledge graph builder that maps facility-specific data structures to the IMAS (Integrated Modelling & Analysis Suite) standard. This document explains the data flow architecture and SSH access patterns used for facility discovery.
+ITER Codex is a knowledge graph builder that maps facility-specific data structures to the IMAS (Integrated Modelling & Analysis Suite) standard. This document explains the data flow architecture and SSH access patterns used for facility discovery.
 
 IMAS Ambix is a partner project that consumes distilled mappings from the Codex knowledge graph. Ambix is a deterministic runtime product with no LLM usage; end users employ Ambix to transform facility data to IMAS format or to generate UDA mapping files, all derived from validated mapping links exported from the Codex graph.
 
@@ -42,7 +42,7 @@ flowchart TB
     end
 
     subgraph ITER["ITER (SDCC)"]
-        subgraph BUILD["imas-codex"]
+        subgraph BUILD["iter-codex"]
             direction LR
             INGEST["Ingestion"]
             AGENTS["Agents"]
@@ -74,7 +74,7 @@ flowchart TB
 ```
 
 **Components:**
-- **imas-codex** — Graph builder that connects to facilities via SSH and uses LLMs for semantic analysis
+- **iter-codex** — Graph builder that connects to facilities via SSH and uses LLMs for semantic analysis
 - **Fusion Knowledge Graph** — Neo4j database storing IMAS Data Dictionary, facility mappings, and code examples  
 - **imas-ambix** — Runtime library that reads frozen mappings from the graph to enable data transformation (no LLM, no SSH)
 
@@ -83,7 +83,7 @@ flowchart TB
 - **Ingestion triggers Agents** — Ingestion pipelines invoke agents for scoring and enrichment tasks
 
 **Build-time vs Runtime:**
-- **imas-codex (build-time)** — Connects to facilities via SSH, uses LLMs for semantic analysis, builds the knowledge graph
+- **iter-codex (build-time)** — Connects to facilities via SSH, uses LLMs for semantic analysis, builds the knowledge graph
 - **imas-ambix (runtime)** — Reads frozen mappings from graph, performs data transformation; no SSH or LLM access needed
 
 **Key clarifications:**
@@ -105,7 +105,7 @@ For performance optimization, a small set of fast search tools may be installed 
 | `scc` | Code complexity metrics | ~3 MB |
 | `dust` | Disk usage visualization | ~2 MB |
 
-These tools are optional performance optimizations — standard shell commands (`grep`, `find`) work but are slower on large codebases. The imas-codex project itself runs entirely on ITER infrastructure.
+These tools are optional performance optimizations — standard shell commands (`grep`, `find`) work but are slower on large codebases. The iter-codex project itself runs entirely on ITER infrastructure.
 
 ---
 
@@ -149,7 +149,7 @@ flowchart TB
     end
 
     subgraph ITER["ITER (SDCC)"]
-        subgraph BUILD["imas-codex"]
+        subgraph BUILD["iter-codex"]
             direction LR
             MAP["Map & Ingest"]
             SCORE["Score"]
@@ -205,7 +205,7 @@ flowchart TB
     end
 
     subgraph ITER["ITER (SDCC)"]
-        subgraph BUILD["imas-codex"]
+        subgraph BUILD["iter-codex"]
             direction LR
             WALK["Walk"]
             ENRICH["Enrich"]
@@ -260,7 +260,7 @@ flowchart TB
     end
 
     subgraph ITER["ITER (SDCC)"]
-        subgraph BUILD["imas-codex"]
+        subgraph BUILD["iter-codex"]
             direction LR
             SCAN["Scan & Ingest"]
             SCORE["Score"]
@@ -449,10 +449,10 @@ TCV uses LIUQE equilibrium code which operates in COCOS 17.
 These scalar values are retrieved via SSH, and COCOS validation runs locally.
 
 ```python
-from imas_codex.cocos import validate_cocos_from_data
+from iter_codex.cocos import validate_cocos_from_data
 
 # These values came from EPFL/TCV via SSH query above
-# LIUQE is known to use COCOS 17 (see imas_codex/cocos/calculator.py)
+# LIUQE is known to use COCOS 17 (see iter_codex/cocos/calculator.py)
 result = validate_cocos_from_data(
     declared_cocos=17,      # LIUQE uses COCOS 17
     psi_axis=0.5,           # From MDSplus: \RESULTS::PSI_AXIS
@@ -493,7 +493,7 @@ The mappings discovered by Codex are exported to **imas-ambix** for deterministi
 
 | Phase | Tool | Uses LLM? | Output |
 |-------|------|-----------|--------|
-| **Discovery** | imas-codex | ✅ Yes | Candidate mappings in graph |
+| **Discovery** | iter-codex | ✅ Yes | Candidate mappings in graph |
 | **Validation** | Human review | ❌ No | Approved mappings |
 | **Export** | Graph query | ❌ No | Frozen YAML files |
 | **Runtime** | imas-ambix | ❌ No | Deterministic data access |
@@ -563,13 +563,13 @@ ORDER BY tn.path
 | Infrastructure YAML | `config/facilities/<facility>_infrastructure.yaml` | ❌ No (gitignored) |
 | Hostnames / IPs | Infrastructure YAML | ❌ No |
 | API keys | `.env` | ❌ No |
-| Neo4j database | `~/.local/share/imas-codex/neo4j/` | ❌ No |
+| Neo4j database | `~/.local/share/iter-codex/neo4j/` | ❌ No |
 
 #### Graph Snapshots (Private GHCR)
 
 | Data Type | Location | Access |
 |-----------|----------|--------|
-| Graph dump (`.dump`) | `ghcr.io/iterorganization/imas-codex-graph` | **Authenticated only** |
+| Graph dump (`.dump`) | `ghcr.io/iterorganization/iter-codex-graph` | **Authenticated only** |
 | Schema version | OCI annotations | **Authenticated only** |
 
 **Important**: The graph is stored on GHCR for version control but is **not public**. Access requires GHCR authentication tokens.
@@ -598,7 +598,7 @@ Codex uses two LLM providers:
 CLI/batch jobs use OpenRouter with ZDR enforced:
 
 ```python
-# Enforced in imas_codex/llm/llm.py
+# Enforced in iter_codex/llm/llm.py
 provider = {
     "zdr": True,                    # Zero Data Retention
     "data_collection": "deny",      # No training on prompts
@@ -676,5 +676,5 @@ auditctl -a always,exit -F arch=b64 -S execve -F auid>=1000
 For questions about this architecture or to request access:
 
 - **Technical Contact**: Simon McIntosh, ITER Organization
-- **Project Repository**: [github.com/iterorganization/imas-codex](https://github.com/iterorganization/imas-codex)
-- **Documentation**: [imas-codex docs](https://iterorganization.github.io/imas-codex/)
+- **Project Repository**: [github.com/iterorganization/iter-codex](https://github.com/iterorganization/iter-codex)
+- **Documentation**: [iter-codex docs](https://iterorganization.github.io/iter-codex/)

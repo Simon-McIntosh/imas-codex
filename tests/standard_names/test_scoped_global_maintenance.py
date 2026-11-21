@@ -10,14 +10,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
-from imas_codex.standard_names.graph_store import (
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.attachment_audit import AttachmentAuditResult
+from iter_codex.standard_names.graph_store import (
     owner_module_path as _owner_module_path,
 )
 
-_GO = "imas_codex.standard_names.graph_ops"
-_LOOP = "imas_codex.standard_names.loop"
+_GO = "iter_codex.standard_names.graph_ops"
+_LOOP = "iter_codex.standard_names.loop"
 
 
 def _graph_context(
@@ -82,38 +82,38 @@ def _maintenance_mocks(stack: ExitStack) -> dict[str, MagicMock]:
     }
     mocks["reconcile_dd_unit_corrections"] = stack.enter_context(
         patch(
-            "imas_codex.graph.dd_graph_ops.reconcile_dd_unit_corrections",
+            "iter_codex.graph.dd_graph_ops.reconcile_dd_unit_corrections",
             return_value={},
         )
     )
     mocks["reconcile_attachment_consistency"] = stack.enter_context(
         patch(
-            "imas_codex.standard_names.attachment_audit."
+            "iter_codex.standard_names.attachment_audit."
             "reconcile_attachment_consistency",
             return_value=AttachmentAuditResult(),
         )
     )
     mocks["refresh_drifted_sources"] = stack.enter_context(
         patch(
-            "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+            "iter_codex.standard_names.source_refresh.refresh_drifted_sources",
             return_value={},
         )
     )
     mocks["restamp_harmonized_families"] = stack.enter_context(
         patch(
-            "imas_codex.standard_names.harmonize.restamp_harmonized_families",
+            "iter_codex.standard_names.harmonize.restamp_harmonized_families",
             return_value={},
         )
     )
     mocks["run_orphan_sweep_loop"] = stack.enter_context(
         patch(
-            "imas_codex.standard_names.orphan_sweep.run_orphan_sweep_loop",
+            "iter_codex.standard_names.orphan_sweep.run_orphan_sweep_loop",
             new_callable=AsyncMock,
         )
     )
     mocks["embed_description_worker"] = stack.enter_context(
         patch(
-            "imas_codex.discovery.base.embed_worker.embed_description_worker",
+            "iter_codex.discovery.base.embed_worker.embed_description_worker",
             new_callable=AsyncMock,
         )
     )
@@ -159,47 +159,47 @@ async def _run_loop(
             maintenance["reconcile_catalog_status"].return_value = catalog_status
         create_run = stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+                "iter_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
             )
         )
         finalize_run = stack.enter_context(
-            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
+            patch("iter_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
         )
         terminal_probe = stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
+                "iter_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
                 return_value=terminal_residue
                 or {"total": 0, "names": [], "sources": []},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.ledger.find_provenance_orphans",
+                "iter_codex.standard_names.ledger.find_provenance_orphans",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.audits."
+                "iter_codex.standard_names.audits."
                 "find_flux_surface_reduction_violations",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.audits.find_removed_dd_sources",
+                "iter_codex.standard_names.audits.find_removed_dd_sources",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+                "iter_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+                "iter_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
             )
         )
         build_specs = stack.enter_context(
@@ -207,35 +207,35 @@ async def _run_loop(
         )
         run_pools = stack.enter_context(
             patch(
-                "imas_codex.standard_names.pools.run_pools",
+                "iter_codex.standard_names.pools.run_pools",
                 new_callable=AsyncMock,
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.budget.BudgetManager.start",
+                "iter_codex.standard_names.budget.BudgetManager.start",
                 new_callable=AsyncMock,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.budget.BudgetManager.drain_pending",
+                "iter_codex.standard_names.budget.BudgetManager.drain_pending",
                 new_callable=AsyncMock,
                 return_value=True,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
+                "iter_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
                 return_value=0.0,
             )
         )
         stack.enter_context(
-            patch("imas_codex.graph.client.GraphClient", return_value=graph_context)
+            patch("iter_codex.graph.client.GraphClient", return_value=graph_context)
         )
 
-        from imas_codex.standard_names.loop import run_sn_pools
+        from iter_codex.standard_names.loop import run_sn_pools
 
         stop = asyncio.Event()
         stop.set()
@@ -333,45 +333,45 @@ async def test_scoped_idle_completion_refuses_transient_claim_residue() -> None:
         maintenance = _maintenance_mocks(stack)
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+                "iter_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
             )
         )
         finalize_run = stack.enter_context(
-            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
+            patch("iter_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
+                "iter_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
                 return_value=residue,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.ledger.find_provenance_orphans",
+                "iter_codex.standard_names.ledger.find_provenance_orphans",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.audits.find_flux_surface_reduction_violations",
+                "iter_codex.standard_names.audits.find_flux_surface_reduction_violations",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.audits.find_removed_dd_sources",
+                "iter_codex.standard_names.audits.find_removed_dd_sources",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+                "iter_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+                "iter_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
             )
         )
         stack.enter_context(patch(f"{_LOOP}._build_pool_specs", return_value=[]))
@@ -381,32 +381,32 @@ async def test_scoped_idle_completion_refuses_transient_claim_residue() -> None:
             return {}
 
         stack.enter_context(
-            patch("imas_codex.standard_names.pools.run_pools", side_effect=idle_run)
+            patch("iter_codex.standard_names.pools.run_pools", side_effect=idle_run)
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.budget.BudgetManager.start",
+                "iter_codex.standard_names.budget.BudgetManager.start",
                 new_callable=AsyncMock,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.budget.BudgetManager.drain_pending",
+                "iter_codex.standard_names.budget.BudgetManager.drain_pending",
                 new_callable=AsyncMock,
                 return_value=True,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
+                "iter_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
                 return_value=0.0,
             )
         )
         stack.enter_context(
-            patch("imas_codex.graph.client.GraphClient", return_value=graph_context)
+            patch("iter_codex.graph.client.GraphClient", return_value=graph_context)
         )
 
-        from imas_codex.standard_names.loop import run_sn_pools
+        from iter_codex.standard_names.loop import run_sn_pools
 
         summary = await run_sn_pools(
             cost_limit=5.0,
@@ -428,7 +428,7 @@ async def test_scoped_idle_completion_refuses_transient_claim_residue() -> None:
 
 @pytest.mark.asyncio
 async def test_orchestrator_rejects_unbounded_maintenance_bypass() -> None:
-    from imas_codex.standard_names.loop import run_sn_pools
+    from iter_codex.standard_names.loop import run_sn_pools
 
     with pytest.raises(ValueError, match="requires scope_run_id"):
         await run_sn_pools(cost_limit=1.0, skip_global_maintenance=True)
@@ -513,10 +513,10 @@ def test_cli_rejects_unsafe_maintenance_bypass_combinations(
 def test_cli_dry_run_previews_scope_without_graph_writes() -> None:
     with (
         patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             side_effect=AssertionError("graph opened"),
         ),
-        patch("imas_codex.cli.sn._run_sn_cmd") as run_cmd,
+        patch("iter_codex.cli.sn._run_sn_cmd") as run_cmd,
     ):
         result = CliRunner().invoke(
             sn,
@@ -536,10 +536,10 @@ def test_cli_dry_run_previews_scope_without_graph_writes() -> None:
 
 def test_cli_wires_bypass_to_existing_pool_orchestrator() -> None:
     with (
-        patch("imas_codex.cli.sn._require_embed_ready"),
-        patch("imas_codex.cli.sn._auto_sync_grammar") as grammar_sync,
-        patch("imas_codex.cli.sn._note_pipeline_version_drift") as drift_note,
-        patch("imas_codex.cli.sn._run_sn_cmd", return_value={}) as run_cmd,
+        patch("iter_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.cli.sn._auto_sync_grammar") as grammar_sync,
+        patch("iter_codex.cli.sn._note_pipeline_version_drift") as drift_note,
+        patch("iter_codex.cli.sn._run_sn_cmd", return_value={}) as run_cmd,
     ):
         result = CliRunner().invoke(
             sn,
@@ -564,23 +564,23 @@ def test_focused_bypass_seeds_exact_scope_without_global_run_id_clear() -> None:
     graph_context, graph = _graph_context()
     focus_path = "equilibrium/time_slice/profiles_1d/psi"
     with (
-        patch("imas_codex.cli.sn._require_embed_ready"),
-        patch("imas_codex.cli.sn._auto_sync_grammar") as grammar_sync,
-        patch("imas_codex.cli.sn._note_pipeline_version_drift") as drift_note,
-        patch("imas_codex.cli.sn._run_sn_cmd", return_value={}) as run_cmd,
-        patch("imas_codex.graph.client.GraphClient", return_value=graph_context),
+        patch("iter_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.cli.sn._auto_sync_grammar") as grammar_sync,
+        patch("iter_codex.cli.sn._note_pipeline_version_drift") as drift_note,
+        patch("iter_codex.cli.sn._run_sn_cmd", return_value={}) as run_cmd,
+        patch("iter_codex.graph.client.GraphClient", return_value=graph_context),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_scope.partition_focus_by_accepted",
+            "iter_codex.standard_names.graph_store.graph_claim_scope.partition_focus_by_accepted",
             return_value=([focus_path], []),
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
             return_value=1,
         ) as merge_sources,
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_scope.scope_focus_names"
+            "iter_codex.standard_names.graph_store.graph_claim_scope.scope_focus_names"
         ) as scope_names,
-        patch("imas_codex.settings.get_dd_version", return_value="4.0.0"),
+        patch("iter_codex.settings.get_dd_version", return_value="4.0.0"),
     ):
         result = CliRunner().invoke(
             sn,
@@ -606,10 +606,10 @@ def test_focused_bypass_seeds_exact_scope_without_global_run_id_clear() -> None:
 
 def test_ordinary_cli_run_keeps_global_startup() -> None:
     with (
-        patch("imas_codex.cli.sn._require_embed_ready"),
-        patch("imas_codex.cli.sn._auto_sync_grammar") as grammar_sync,
-        patch("imas_codex.cli.sn._note_pipeline_version_drift") as drift_note,
-        patch("imas_codex.cli.sn._run_sn_cmd", return_value={}) as run_cmd,
+        patch("iter_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.cli.sn._auto_sync_grammar") as grammar_sync,
+        patch("iter_codex.cli.sn._note_pipeline_version_drift") as drift_note,
+        patch("iter_codex.cli.sn._run_sn_cmd", return_value={}) as run_cmd,
     ):
         result = CliRunner().invoke(
             sn,

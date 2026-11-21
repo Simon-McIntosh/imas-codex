@@ -7,7 +7,7 @@ and cluster structure.
 
 import pytest
 
-from imas_codex.graph.client import EXPECTED_VECTOR_INDEXES
+from iter_codex.graph.client import EXPECTED_VECTOR_INDEXES
 
 pytestmark = pytest.mark.graph
 

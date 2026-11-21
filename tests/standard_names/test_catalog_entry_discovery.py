@@ -27,7 +27,7 @@ from pathlib import Path
 
 import yaml
 
-from imas_codex.standard_names.catalog_import import _catalog_entry_files
+from iter_codex.standard_names.catalog_import import _catalog_entry_files
 
 #: A real per-domain entry, written the way the exporter emits it.
 _ENTRY = [

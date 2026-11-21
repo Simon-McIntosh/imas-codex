@@ -8,9 +8,9 @@ from unittest.mock import MagicMock
 import pytest
 import yaml
 
-from imas_codex.standard_names.catalog_import import guard_catalog_write_payloads
-from imas_codex.standard_names.catalog_reconcile import reconcile_catalog
-from imas_codex.standard_names.protection import (
+from iter_codex.standard_names.catalog_import import guard_catalog_write_payloads
+from iter_codex.standard_names.catalog_reconcile import reconcile_catalog
+from iter_codex.standard_names.protection import (
     PIPELINE_AUTHORITY_FIELDS,
     PIPELINE_AUTHORITY_RELATIONSHIPS,
     PipelineAuthorityError,

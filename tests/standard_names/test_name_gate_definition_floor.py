@@ -22,9 +22,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from imas_codex.standard_names.audits import semantic_similarity_check
-from imas_codex.standard_names.defaults import SEMANTIC_SIM_CRITICAL
-from imas_codex.standard_names.worker_tasks import worker_review_names
+from iter_codex.standard_names.audits import semantic_similarity_check
+from iter_codex.standard_names.defaults import SEMANTIC_SIM_CRITICAL
+from iter_codex.standard_names.worker_tasks import worker_review_names
 
 
 def semantic_gate_name_text(name: str) -> str:
@@ -156,7 +156,7 @@ def test_gate_embeds_the_definition_and_clears_the_floor(monkeypatch) -> None:
             item["embedding"] = np.asarray(vectors[text], dtype=np.float32)
 
     monkeypatch.setattr(
-        "imas_codex.embeddings.description.embed_descriptions_batch", fake_embed
+        "iter_codex.embeddings.description.embed_descriptions_batch", fake_embed
     )
 
     identifier_sim, identifier_issues = semantic_similarity_check("beta", description)
@@ -210,7 +210,7 @@ def test_unresolved_one_word_token_fails_the_gate(token: str, monkeypatch) -> No
             )
 
     monkeypatch.setattr(
-        "imas_codex.embeddings.description.embed_descriptions_batch", fake_embed
+        "iter_codex.embeddings.description.embed_descriptions_batch", fake_embed
     )
 
     sim, issues = semantic_similarity_check(name_text, description)

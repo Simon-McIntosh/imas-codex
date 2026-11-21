@@ -15,8 +15,8 @@ import time
 
 import pytest
 
-from imas_codex.standard_names.pools import PoolHealth
-from imas_codex.standard_names.progress import (
+from iter_codex.standard_names.pools import PoolHealth
+from iter_codex.standard_names.progress import (
     _ENRICH_SUBPOOLS,
     _GENERATE_SUBPOOLS,
     _REVIEW_SUBPOOLS,

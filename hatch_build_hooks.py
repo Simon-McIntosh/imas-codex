@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 # hatchling is a build system for Python projects, and this hook will be used to
-# create JSON data structures for the IMAS Codex server during the wheel build process.
+# create JSON data structures for the ITER Codex server during the wheel build process.
 from hatchling.builders.hooks.plugin.interface import (
     BuildHookInterface,  # type: ignore[import]
 )
@@ -30,7 +30,7 @@ class CustomBuildHook(BuildHookInterface):
     def _check_graph_models_exist(self) -> bool:
         """Check if graph models exist and are up to date."""
         package_root = Path(__file__).parent
-        schemas_dir = package_root / "imas_codex" / "schemas"
+        schemas_dir = package_root / "iter_codex" / "schemas"
 
         # Check all schema files that contribute to generated models
         schema_files = [
@@ -44,12 +44,12 @@ class CustomBuildHook(BuildHookInterface):
 
         # All generated output files that must exist
         output_files = [
-            package_root / "imas_codex" / "graph" / "models.py",
-            package_root / "imas_codex" / "graph" / "dd_models.py",
-            package_root / "imas_codex" / "config" / "models.py",
+            package_root / "iter_codex" / "graph" / "models.py",
+            package_root / "iter_codex" / "graph" / "dd_models.py",
+            package_root / "iter_codex" / "config" / "models.py",
             # schema_context_data.py is a runtime dependency
             # (imported by schema_context.py, query_builder.py, client.py)
-            package_root / "imas_codex" / "graph" / "schema_context_data.py",
+            package_root / "iter_codex" / "graph" / "schema_context_data.py",
         ]
 
         # If no schema files exist yet, nothing to generate
@@ -95,7 +95,7 @@ class CustomBuildHook(BuildHookInterface):
     def _generate_schema_reference(self, package_root: Path) -> None:
         """Generate agents/schema-reference.md from LinkML schemas."""
         output_file = package_root / "agents" / "schema-reference.md"
-        schemas_dir = package_root / "imas_codex" / "schemas"
+        schemas_dir = package_root / "iter_codex" / "schemas"
 
         # Freshness check
         schema_files = [
@@ -128,9 +128,9 @@ class CustomBuildHook(BuildHookInterface):
             sys.path[:] = original_path
 
     def _generate_schema_context(self, package_root: Path) -> None:
-        """Generate imas_codex/graph/schema_context_data.py from LinkML schemas."""
-        output_file = package_root / "imas_codex" / "graph" / "schema_context_data.py"
-        schemas_dir = package_root / "imas_codex" / "schemas"
+        """Generate iter_codex/graph/schema_context_data.py from LinkML schemas."""
+        output_file = package_root / "iter_codex" / "graph" / "schema_context_data.py"
+        schemas_dir = package_root / "iter_codex" / "schemas"
 
         schema_files = [
             schemas_dir / "facility.yaml",
@@ -182,20 +182,20 @@ class CustomBuildHook(BuildHookInterface):
         """Sync ISN grammar into the graph if reachable.
 
         Best-effort: silently skipped when graph is unreachable (CI, Docker
-        build, offline dev) or when `IMAS_CODEX_SKIP_GRAMMAR_SYNC=1` is set.
+        build, offline dev) or when `ITER_CODEX_SKIP_GRAMMAR_SYNC=1` is set.
         Prevents grammar-version drift between the installed ISN package and
         the graph's `GrammarToken` nodes, which otherwise causes the compose
         worker to fall back to stale tokens and emit noisy warnings.
         """
-        if os.environ.get("IMAS_CODEX_SKIP_GRAMMAR_SYNC") == "1":
-            self._trace("Grammar sync skipped (IMAS_CODEX_SKIP_GRAMMAR_SYNC=1)")
+        if os.environ.get("ITER_CODEX_SKIP_GRAMMAR_SYNC") == "1":
+            self._trace("Grammar sync skipped (ITER_CODEX_SKIP_GRAMMAR_SYNC=1)")
             return
 
         original_path = sys.path[:]
         if str(package_root) not in sys.path:
             sys.path.insert(0, str(package_root))
         try:
-            from imas_codex.standard_names.grammar_sync import (
+            from iter_codex.standard_names.grammar_sync import (
                 sync_isn_grammar_to_graph,
             )
 
@@ -222,10 +222,10 @@ class CustomBuildHook(BuildHookInterface):
         start_time = time.time()
         self._trace(f"initialize() called with version={version}")
 
-        # Signal to imas_codex internals that we are in a build context.
+        # Signal to iter_codex internals that we are in a build context.
         # This prevents the schema.py daemon thread from starting
         # (avoids import-lock contention with linkml_runtime on NFS).
-        os.environ["_IMAS_CODEX_BUILD"] = "1"
+        os.environ["_ITER_CODEX_BUILD"] = "1"
 
         # Add package root to sys.path temporarily to resolve internal imports
         package_root = Path(__file__).parent
@@ -235,7 +235,7 @@ class CustomBuildHook(BuildHookInterface):
 
         try:
             # Lightweight import for path resolution
-            from imas_codex.resource_path_accessor import ResourcePathAccessor
+            from iter_codex.resource_path_accessor import ResourcePathAccessor
         finally:
             sys.path[:] = original_path
 
@@ -260,7 +260,7 @@ class CustomBuildHook(BuildHookInterface):
             if str(package_root) not in sys.path:
                 sys.path.insert(0, str(package_root))
             try:
-                from imas_codex import dd_version
+                from iter_codex import dd_version
 
                 resolved_dd_version = dd_version
             finally:
@@ -277,7 +277,7 @@ class CustomBuildHook(BuildHookInterface):
             self._generate_graph_models(package_root)
 
         # Schema reference (agents/schema-reference.md) and schema context
-        # (imas_codex/graph/schema_context_data.py) are generated inside
+        # (iter_codex/graph/schema_context_data.py) are generated inside
         # build_models.main() above, with their own freshness checks.
         # No need to call them again here.
 
@@ -308,7 +308,7 @@ class CustomBuildHook(BuildHookInterface):
             sys.path.insert(0, str(package_root))
 
         try:
-            from imas_codex.core.xml_parser import DataDictionaryTransformer
+            from iter_codex.core.xml_parser import DataDictionaryTransformer
             from scripts.build_path_map import build_path_map
         finally:
             sys.path[:] = original_path
@@ -316,12 +316,12 @@ class CustomBuildHook(BuildHookInterface):
         # Create DD accessor based on version config
         dd_accessor = None
         if dd_version_config:
-            from imas_codex.dd_accessor import ImasDataDictionariesAccessor
+            from iter_codex.dd_accessor import ImasDataDictionariesAccessor
 
             dd_accessor = ImasDataDictionariesAccessor(dd_version_config)
             self._trace(f"Building with IMAS DD version: {dd_version_config}")
         else:
-            from imas_codex.dd_accessor import ImasDataDictionaryAccessor
+            from iter_codex.dd_accessor import ImasDataDictionaryAccessor
 
             dd_accessor = ImasDataDictionaryAccessor()
             self._trace(f"Building with IMAS DD version: {dd_accessor.get_version()}")

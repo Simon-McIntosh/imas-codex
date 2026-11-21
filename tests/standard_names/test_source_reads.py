@@ -17,7 +17,7 @@ sourceless from search, from ``read_source_paths`` and from the count alike.
 The last test walks the whole package for a touch of the copied list, so a
 reader added in any module fails it, and every touch that is not a reader is
 listed with the role that licenses it. A reader is never on that list: a reader
-asks :mod:`imas_codex.standard_names.source_reads` for the enumerated population
+asks :mod:`iter_codex.standard_names.source_reads` for the enumerated population
 or for the edges.
 
 The population is one rule in one place, so a test also walks the package for a
@@ -37,13 +37,13 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.search import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.search import (
     fetch_standard_names,
     search_standard_names,
 )
-from imas_codex.standard_names.source_paths import merge_source_paths
-from imas_codex.standard_names.source_reads import (
+from iter_codex.standard_names.source_paths import merge_source_paths
+from iter_codex.standard_names.source_reads import (
     count_live_names_without_source,
     normalize_source_ids,
     read_source_paths,
@@ -99,7 +99,7 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
     client = GraphClient(
         uri=disposable_neo4j_uri,
         username="neo4j",
-        password=os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", ""),
+        password=os.environ.get("ITER_CODEX_TEST_NEO4J_PASSWORD", ""),
         graph_name="source-reads-fixture",
     )
     client.query(
@@ -158,7 +158,7 @@ def stale_source_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
     client = GraphClient(
         uri=disposable_neo4j_uri,
         username="neo4j",
-        password=os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", ""),
+        password=os.environ.get("ITER_CODEX_TEST_NEO4J_PASSWORD", ""),
         graph_name="source-reads-stale-fixture",
     )
     client.query(
@@ -263,7 +263,7 @@ def test_the_count_is_the_owner_s_enumeration(planted_graph: GraphClient) -> Non
     lists are therefore the same names in the same order, so a second query
     re-entering the command cannot answer differently from the invariant.
     """
-    from imas_codex.standard_names.source_invariant import (
+    from iter_codex.standard_names.source_invariant import (
         find_sourceless_live_name_rows,
     )
 
@@ -337,7 +337,7 @@ _COPIED_LIST = re.compile(r"\b[A-Za-z_][A-Za-z0-9_]*\.source_paths\b")
 def test_each_reader_reads_sources_from_the_one_place(module: str) -> None:
     """A reader that spells the copied list, or the edge pattern, itself fails
     here: sources come from the projection that owns them."""
-    package = Path(__file__).resolve().parents[2] / "imas_codex" / "standard_names"
+    package = Path(__file__).resolve().parents[2] / "iter_codex" / "standard_names"
     path = package / module
     assert path.is_file(), f"reader module is missing: {module}"
     text = _without_extraction_records(path.read_text(encoding="utf-8"))
@@ -358,7 +358,7 @@ def test_each_reader_reads_sources_from_the_one_place(module: str) -> None:
 def test_the_review_pipeline_reads_sources_from_the_one_place() -> None:
     """The review pipeline loads the catalog with its own query, so its
     projection is checked where it sits: it must ask the one place too."""
-    cli = Path(__file__).resolve().parents[2] / "imas_codex" / "cli" / "sn.py"
+    cli = Path(__file__).resolve().parents[2] / "iter_codex" / "cli" / "sn.py"
     tree = ast.parse(cli.read_text(encoding="utf-8"))
     load_catalog = next(
         (
@@ -402,7 +402,7 @@ def test_a_reader_in_an_unlisted_record_constant_is_still_refused() -> None:
 
 #: What a touch of the copied list may be. A reader is deliberately absent: a
 #: reader answers "what are this name's sources" and must ask
-#: :func:`imas_codex.standard_names.source_reads.source_paths_projection`
+#: :func:`iter_codex.standard_names.source_reads.source_paths_projection`
 #: instead, so that no two readers can answer differently for one name.
 ROLES = {
     "owner": "encodes, parses or unions the property's value",
@@ -733,7 +733,7 @@ def test_every_touch_of_the_copied_list_is_classified() -> None:
     names — the review pipeline included — is caught here rather than by
     whichever caller first asks it for a name's sources.
     """
-    package = Path(__file__).resolve().parents[2] / "imas_codex"
+    package = Path(__file__).resolve().parents[2] / "iter_codex"
     touches = package_touches(package)
 
     # Positive control: a broken or empty scan would otherwise license every
@@ -791,7 +791,7 @@ SOURCE_RULE_ROLES = {
 #: Every statement in the package that states both halves of the rule, by module
 #: and statement, with the role that licenses it. A statement added anywhere
 #: fails :func:`test_no_second_enumeration_of_the_sourceless_population` until it
-#: asks :func:`imas_codex.standard_names.source_invariant.find_sourceless_live_name_rows`
+#: asks :func:`iter_codex.standard_names.source_invariant.find_sourceless_live_name_rows`
 #: or is listed here with a role that makes it a precondition rather than a
 #: population read.
 SOURCE_RULE_SITES: dict[tuple[str, str], str] = {
@@ -956,8 +956,8 @@ def sourceless_rule_sites(root: Path) -> dict[tuple[str, str], set[int]]:
 
 def test_the_pool_projection_reads_the_live_child_rule() -> None:
     """``pools.py`` reads the rule rather than restating its stage half."""
-    from imas_codex.standard_names.pools import identity_state_expressions
-    from imas_codex.standard_names.source_invariant import live_child_cypher
+    from iter_codex.standard_names.pools import identity_state_expressions
+    from iter_codex.standard_names.source_invariant import live_child_cypher
 
     expression = identity_state_expressions()["has_live_child"]
     assert expression == live_child_cypher()
@@ -997,7 +997,7 @@ def test_no_second_enumeration_of_the_sourceless_population() -> None:
     2026-11-15, the source audit's own query named 27, and the producer edges
     named 10.
     """
-    package = Path(__file__).resolve().parents[2] / "imas_codex"
+    package = Path(__file__).resolve().parents[2] / "iter_codex"
     sites = sourceless_rule_sites(package)
 
     # Positive control: the scan must see the owner's own enumeration, and the

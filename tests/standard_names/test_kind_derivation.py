@@ -19,7 +19,7 @@ import pytest
 
 pytest.importorskip("imas_standard_names")
 
-from imas_codex.standard_names.kind_derivation import (  # noqa: E402
+from iter_codex.standard_names.kind_derivation import (  # noqa: E402
     derive_kind,
     to_isn_kind,
 )
@@ -177,8 +177,8 @@ class TestKindVocabularyConsistency:
 
         from imas_standard_names.models import Kind as IsnKind
 
-        from imas_codex.graph.models import StandardNameKind
-        from imas_codex.standard_names.models import EntryKind
+        from iter_codex.graph.models import StandardNameKind
+        from iter_codex.standard_names.models import EntryKind
 
         literal = set(get_args(EntryKind))
         graph = {e.value for e in StandardNameKind}

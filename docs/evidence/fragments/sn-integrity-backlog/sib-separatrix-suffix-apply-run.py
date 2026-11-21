@@ -47,8 +47,8 @@ from typing import Any
 
 sys.path.insert(0, "/home/ITER/mcintos/Code/imas-codex")
 
-from imas_codex.graph.client import GraphClient  # noqa: E402
-from imas_codex.standard_names.edit import apply_edit  # noqa: E402
+from iter_codex.graph.client import GraphClient  # noqa: E402
+from iter_codex.standard_names.edit import apply_edit  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 NODE = "sib-separatrix-suffix-apply"

@@ -7,9 +7,9 @@ from dataclasses import dataclass
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.pools import PoolSpec, _budget_saturation_watchdog
-from imas_codex.standard_names.rescore import (
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.pools import PoolSpec, _budget_saturation_watchdog
+from iter_codex.standard_names.rescore import (
     apply_rescore_pool_contract,
     classify_rescore_budget_stop,
 )

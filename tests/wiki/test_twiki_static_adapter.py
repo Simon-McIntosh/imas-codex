@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.wiki.adapters import (
+from iter_codex.discovery.wiki.adapters import (
     DiscoveredPage,
     TWikiStaticAdapter,
     get_adapter,
@@ -92,9 +92,9 @@ class TestTWikiStaticAdapterDiscovery:
 
         assert len(pages) == 0
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html_direct")
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html_via_socks")
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html_via_ssh")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html_direct")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html_via_socks")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html_via_ssh")
     def test_bulk_discover_pages_via_ssh(
         self, mock_ssh_fetch, mock_socks_fetch, mock_direct_fetch
     ):
@@ -141,9 +141,9 @@ class TestTWikiStaticAdapterDiscovery:
         assert "TopicBeta" in names
         assert "WebHome" not in names
 
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html_direct")
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html_via_socks")
-    @patch("imas_codex.discovery.wiki.adapters._fetch_html_via_ssh")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html_direct")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html_via_socks")
+    @patch("iter_codex.discovery.wiki.adapters._fetch_html_via_ssh")
     def test_bulk_discover_pages_ssh_failure(
         self, mock_ssh_fetch, mock_socks_fetch, mock_direct_fetch
     ):
@@ -175,14 +175,14 @@ class TestGetAdapter:
 
     def test_get_adapter_static_html(self):
         """Test get_adapter returns StaticHtmlAdapter for static_html."""
-        from imas_codex.discovery.wiki.adapters import StaticHtmlAdapter
+        from iter_codex.discovery.wiki.adapters import StaticHtmlAdapter
 
         adapter = get_adapter("static_html", base_url="https://example.org")
         assert isinstance(adapter, StaticHtmlAdapter)
 
     def test_get_adapter_mediawiki(self):
         """Test get_adapter still works for mediawiki."""
-        from imas_codex.discovery.wiki.adapters import MediaWikiAdapter
+        from iter_codex.discovery.wiki.adapters import MediaWikiAdapter
 
         adapter = get_adapter("mediawiki", ssh_host="test")
         assert isinstance(adapter, MediaWikiAdapter)

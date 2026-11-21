@@ -92,21 +92,21 @@ class TestPersistGeneratedNameBatch:
         gc.session = _session
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+                "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=gc,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
+                "iter_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names",
+                "iter_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names",
                 return_value=0,
             ),
         ):
             yield
 
     def test_empty_candidates_returns_zero(self):
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -114,14 +114,14 @@ class TestPersistGeneratedNameBatch:
         assert result == 0
 
     @patch(
-        "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
+        "iter_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
     )
-    @patch("imas_codex.standard_names.graph_store.graph_catalog.write_standard_names")
-    @patch("imas_codex.embeddings.description.embed_descriptions_batch")
+    @patch("iter_codex.standard_names.graph_store.graph_catalog.write_standard_names")
+    @patch("iter_codex.embeddings.description.embed_descriptions_batch")
     def test_enriches_with_provenance(
         self, mock_embed, mock_write, mock_finalize, sample_candidates
     ):
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -150,14 +150,14 @@ class TestPersistGeneratedNameBatch:
             assert "generated_at" in entry
 
     @patch(
-        "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
+        "iter_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
     )
-    @patch("imas_codex.standard_names.graph_store.graph_catalog.write_standard_names")
-    @patch("imas_codex.embeddings.description.embed_descriptions_batch")
+    @patch("iter_codex.standard_names.graph_store.graph_catalog.write_standard_names")
+    @patch("iter_codex.embeddings.description.embed_descriptions_batch")
     def test_extracts_grammar_fields(
         self, mock_embed, mock_write, mock_finalize, sample_candidates
     ):
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -182,16 +182,16 @@ class TestPersistGeneratedNameBatch:
         assert "subject" not in written[0]
 
     @patch(
-        "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
+        "iter_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
     )
-    @patch("imas_codex.standard_names.graph_store.graph_catalog.write_standard_names")
+    @patch("iter_codex.standard_names.graph_store.graph_catalog.write_standard_names")
     def test_embeds_name_string(self, mock_write, mock_finalize, sample_candidates):
         """persist_generated_name_batch defers embedding to embed worker pool.
 
         Embedding is not done inline — the embed_text_hash is cleared so
         the dedicated embed pool picks it up.
         """
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -206,15 +206,15 @@ class TestPersistGeneratedNameBatch:
             assert entry.get("embed_text_hash") is None
 
     @patch(
-        "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
+        "iter_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
     )
-    @patch("imas_codex.standard_names.graph_store.graph_catalog.write_standard_names")
+    @patch("iter_codex.standard_names.graph_store.graph_catalog.write_standard_names")
     def test_writes_embedding_and_embedded_at(
         self, mock_write, mock_finalize, sample_candidates
     ):
         """Embedding is deferred — persist sets embedding=None and
         embed_text_hash=None for the embed worker to pick up."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -230,14 +230,14 @@ class TestPersistGeneratedNameBatch:
             assert entry["validation_status"] != "quarantined"
 
     @patch(
-        "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
+        "iter_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
     )
-    @patch("imas_codex.standard_names.graph_store.graph_catalog.write_standard_names")
+    @patch("iter_codex.standard_names.graph_store.graph_catalog.write_standard_names")
     def test_embed_failure_marks_retry_not_quarantine(
         self, mock_write, mock_finalize, sample_candidates
     ):
         """Embedding is deferred — no embed failure possible inline."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -251,14 +251,14 @@ class TestPersistGeneratedNameBatch:
             assert entry.get("validation_status") != "quarantined"
 
     @patch(
-        "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
+        "iter_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
     )
-    @patch("imas_codex.standard_names.graph_store.graph_catalog.write_standard_names")
+    @patch("iter_codex.standard_names.graph_store.graph_catalog.write_standard_names")
     def test_records_embed_failure_timestamp_on_total_embed_failure(
         self, mock_write, mock_finalize, sample_candidates
     ):
         """Embedding is deferred — no embed_failed_at set inline."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -271,14 +271,14 @@ class TestPersistGeneratedNameBatch:
             assert entry.get("embedding") is None
 
     @patch(
-        "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
+        "iter_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
     )
-    @patch("imas_codex.standard_names.graph_store.graph_catalog.write_standard_names")
+    @patch("iter_codex.standard_names.graph_store.graph_catalog.write_standard_names")
     def test_idempotent_rerun(self, mock_write, mock_finalize, sample_candidates):
         """Re-running persist on the same batch produces same result."""
         from copy import deepcopy
 
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             persist_generated_name_batch,
         )
 
@@ -308,9 +308,9 @@ class TestPersistGeneratedNameBatch:
 class TestClaimNamesForValidation:
     """Tests for validation claim/mark/release protocol."""
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_claim_returns_token_and_items(self, mock_client_cls):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             claim_names_for_validation,
         )
 
@@ -350,9 +350,9 @@ class TestClaimNamesForValidation:
         assert items[0]["id"] == "electron_temperature"
         assert gc.query.call_count == 2
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_claim_uses_random_ordering(self, mock_client_cls):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             claim_names_for_validation,
         )
 
@@ -366,9 +366,9 @@ class TestClaimNamesForValidation:
         cypher = gc.query.call_args_list[0][0][0]
         assert "ORDER BY rand()" in cypher
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_claim_empty_returns_empty(self, mock_client_cls):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             claim_names_for_validation,
         )
 
@@ -380,10 +380,10 @@ class TestClaimNamesForValidation:
         token, items = claim_names_for_validation(limit=10)
         assert items == []
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_claim_stale_claims_reclaimed(self, mock_client_cls):
         """Verify Cypher checks claimed_at against timeout for orphan recovery."""
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             claim_names_for_validation,
         )
 
@@ -397,10 +397,10 @@ class TestClaimNamesForValidation:
         cypher = gc.query.call_args_list[0][0][0]
         assert "duration($timeout)" in cypher
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_two_step_verify_pattern(self, mock_client_cls):
         """Verify claim uses SET then read-by-token (anti double-claim)."""
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             claim_names_for_validation,
         )
 
@@ -429,9 +429,9 @@ class TestClaimNamesForValidation:
 class TestMarkNamesValidated:
     """Tests for writing validation results with token verification."""
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_mark_with_token_verification(self, mock_client_cls):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             mark_names_validated,
         )
 
@@ -464,16 +464,16 @@ class TestMarkNamesValidated:
         assert "claim_token: $token" in cypher
 
     def test_mark_empty_returns_zero(self):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             mark_names_validated,
         )
 
         assert mark_names_validated("token", []) == 0
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_mark_clears_claim(self, mock_client_cls):
         """Verify mark sets claimed_at and claim_token to null."""
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             mark_names_validated,
         )
 
@@ -497,9 +497,9 @@ class TestMarkNamesValidated:
 class TestReleaseValidationClaims:
     """Tests for releasing claims on error."""
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_release_clears_claimed_at(self, mock_client_cls):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             release_validation_claims,
         )
 
@@ -524,10 +524,10 @@ class TestReleaseValidationClaims:
 class TestClaimNamesForEmbedding:
     """Tests for embedding claim protocol."""
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_claim_embedding_requires_validated(self, mock_client_cls):
         """Embedding claims should only target validated names."""
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             claim_names_for_embedding,
         )
 
@@ -542,10 +542,10 @@ class TestClaimNamesForEmbedding:
         assert "validated_at IS NOT NULL" in cypher
         assert "embedding IS NULL" in cypher
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_claim_embedding_two_step(self, mock_client_cls):
         """Verify embedding claim uses SET then read-by-token."""
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             claim_names_for_embedding,
         )
 
@@ -567,9 +567,9 @@ class TestClaimNamesForEmbedding:
 class TestMarkNamesEmbedded:
     """Tests for writing embeddings with token verification."""
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_mark_embedded_with_token(self, mock_client_cls):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             mark_names_embedded,
         )
 
@@ -590,15 +590,15 @@ class TestMarkNamesEmbedded:
         assert call_kwargs["token"] == "emb-token"
 
     def test_mark_embedded_empty_returns_zero(self):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             mark_names_embedded,
         )
 
         assert mark_names_embedded("token", []) == 0
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_mark_embedded_skips_null_embeddings(self, mock_client_cls):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             mark_names_embedded,
         )
 
@@ -625,9 +625,9 @@ class TestMarkNamesEmbedded:
 class TestGetValidatedNames:
     """Tests for read-only consolidation query."""
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_returns_validated_names(self, mock_client_cls):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             get_validated_names,
         )
 
@@ -651,9 +651,9 @@ class TestGetValidatedNames:
         assert len(names) == 1
         assert names[0]["id"] == "electron_temperature"
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_ids_filter(self, mock_client_cls):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             get_validated_names,
         )
 
@@ -676,9 +676,9 @@ class TestGetValidatedNames:
 class TestMarkNamesConsolidated:
     """Tests for consolidation marking."""
 
-    @patch("imas_codex.standard_names.graph_store.graph_foundation.GraphClient")
+    @patch("iter_codex.standard_names.graph_store.graph_foundation.GraphClient")
     def test_marks_consolidated(self, mock_client_cls):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             mark_names_consolidated,
         )
 
@@ -694,7 +694,7 @@ class TestMarkNamesConsolidated:
         assert "consolidated_at" in cypher
 
     def test_empty_returns_zero(self):
-        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        from iter_codex.standard_names.graph_store.graph_catalog_reset import (
             mark_names_consolidated,
         )
 
@@ -712,7 +712,7 @@ class TestValidateWorkerClaimLoop:
     @pytest.mark.asyncio()
     async def test_validate_exits_on_empty_claims(self):
         """validate_worker exits after MAX_IDLE empty claims."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             validate_worker,
         )
 
@@ -720,7 +720,7 @@ class TestValidateWorkerClaimLoop:
         state.stop_requested = True  # Exit immediately on empty claim
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_validation"
+            "iter_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_validation"
         ) as mock_claim:
             mock_claim.return_value = ("token", [])
 
@@ -732,7 +732,7 @@ class TestValidateWorkerClaimLoop:
     @pytest.mark.asyncio()
     async def test_validate_processes_claimed_names(self):
         """validate_worker processes claimed names and marks results."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             validate_worker,
         )
 
@@ -766,11 +766,11 @@ class TestValidateWorkerClaimLoop:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_validation",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_validation",
                 side_effect=_claim_side_effect,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.mark_names_validated",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.mark_names_validated",
                 return_value=1,
             ) as mock_mark,
             patch(
@@ -781,7 +781,7 @@ class TestValidateWorkerClaimLoop:
                 return_value="electron_temperature",
             ),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
+                "iter_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
                 return_value=([], {"pydantic": {"passed": 5}}),
             ),
         ):
@@ -796,7 +796,7 @@ class TestValidateWorkerClaimLoop:
     @pytest.mark.asyncio()
     async def test_validate_releases_on_error(self):
         """validate_worker releases claims when mark fails."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             validate_worker,
         )
 
@@ -814,15 +814,15 @@ class TestValidateWorkerClaimLoop:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_validation",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_validation",
                 side_effect=_claim_side_effect,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.mark_names_validated",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.mark_names_validated",
                 side_effect=RuntimeError("graph write failed"),
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.release_validation_claims",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.release_validation_claims",
                 return_value=1,
             ) as mock_release,
             patch(
@@ -830,7 +830,7 @@ class TestValidateWorkerClaimLoop:
                 side_effect=ValueError("bad grammar"),
             ),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
+                "iter_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
                 return_value=([], {}),
             ),
         ):
@@ -842,7 +842,7 @@ class TestValidateWorkerClaimLoop:
     @pytest.mark.asyncio()
     async def test_drain_validation_backlog_marks_until_empty(self):
         """drain_validation_backlog loops claim→validate→mark until no claims."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             drain_validation_backlog,
         )
 
@@ -865,11 +865,11 @@ class TestValidateWorkerClaimLoop:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_validation",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_validation",
                 side_effect=_claim_side_effect,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.mark_names_validated",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.mark_names_validated",
                 return_value=1,
             ) as mock_mark,
             patch(
@@ -880,7 +880,7 @@ class TestValidateWorkerClaimLoop:
                 return_value="electron_temperature",
             ),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
+                "iter_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
                 return_value=([], {"pydantic": {"passed": 5}}),
             ),
         ):
@@ -895,21 +895,21 @@ class TestValidateWorkerClaimLoop:
     @pytest.mark.asyncio()
     async def test_drain_validation_backlog_releases_and_raises_on_error(self):
         """drain_validation_backlog releases the claim batch when mark fails."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             drain_validation_backlog,
         )
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_validation",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_validation",
                 return_value=("token-err", [{"id": "bad_name"}]),
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.mark_names_validated",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.mark_names_validated",
                 side_effect=RuntimeError("graph write failed"),
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.release_validation_claims",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.release_validation_claims",
                 return_value=1,
             ) as mock_release,
             patch(
@@ -917,7 +917,7 @@ class TestValidateWorkerClaimLoop:
                 side_effect=ValueError("bad grammar"),
             ),
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
+                "iter_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
                 return_value=([], {}),
             ),
         ):
@@ -929,7 +929,7 @@ class TestValidateWorkerClaimLoop:
     @pytest.mark.asyncio()
     async def test_validate_dry_run_skips(self):
         """validate_worker skips all processing in dry run."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             validate_worker,
         )
 
@@ -946,7 +946,7 @@ class TestPersistWorkerClaimLoop:
 
     @pytest.mark.asyncio()
     async def test_persist_exits_on_empty(self):
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             persist_worker,
         )
 
@@ -954,7 +954,7 @@ class TestPersistWorkerClaimLoop:
         state.stop_requested = True  # Exit immediately on empty claim
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_embedding"
+            "iter_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_embedding"
         ) as mock_claim:
             mock_claim.return_value = ("token", [])
 
@@ -964,7 +964,7 @@ class TestPersistWorkerClaimLoop:
 
     @pytest.mark.asyncio()
     async def test_persist_embeds_and_marks(self):
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             persist_worker,
         )
 
@@ -982,15 +982,15 @@ class TestPersistWorkerClaimLoop:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_embedding",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.claim_names_for_embedding",
                 side_effect=_claim_side_effect,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.mark_names_embedded",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.mark_names_embedded",
                 return_value=1,
             ) as mock_mark,
             patch(
-                "imas_codex.embeddings.description.embed_descriptions_batch",
+                "iter_codex.embeddings.description.embed_descriptions_batch",
                 return_value=[{"id": "te", "embedding": [0.1, 0.2]}],
             ),
         ):
@@ -1001,7 +1001,7 @@ class TestPersistWorkerClaimLoop:
 
     @pytest.mark.asyncio()
     async def test_persist_dry_run_skips(self):
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             persist_worker,
         )
 
@@ -1016,7 +1016,7 @@ class TestConsolidateWorkerGraphPrimary:
 
     @pytest.mark.asyncio()
     async def test_consolidate_reads_from_graph(self):
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             consolidate_worker,
         )
 
@@ -1031,15 +1031,15 @@ class TestConsolidateWorkerGraphPrimary:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.get_validated_names",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.get_validated_names",
                 return_value=[{"id": "te", "description": "Te"}],
             ),
             patch(
-                "imas_codex.standard_names.consolidation.consolidate_candidates",
+                "iter_codex.standard_names.consolidation.consolidate_candidates",
                 return_value=mock_result,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog_reset.mark_names_consolidated",
+                "iter_codex.standard_names.graph_store.graph_catalog_reset.mark_names_consolidated",
                 return_value=1,
             ) as mock_mark,
         ):
@@ -1050,14 +1050,14 @@ class TestConsolidateWorkerGraphPrimary:
 
     @pytest.mark.asyncio()
     async def test_consolidate_skips_when_empty(self):
-        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        from iter_codex.standard_names.worker_tasks.worker_compose_and_validate import (
             consolidate_worker,
         )
 
         state = _make_mock_state()
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_catalog_reset.get_validated_names",
+            "iter_codex.standard_names.graph_store.graph_catalog_reset.get_validated_names",
             return_value=[],
         ):
             await consolidate_worker(state)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_foundation as _owning_graph_foundation,
     graph_lineage as _owning_graph_lineage,
@@ -24,7 +24,7 @@ def _name() -> dict:
 
 
 def _write_with_candidates(candidate_ids: set[str]):
-    from imas_codex.standard_names import graph_ops
+    from iter_codex.standard_names import graph_ops
 
     main = MagicMock()
     main.__enter__.return_value = main
@@ -56,7 +56,7 @@ def _write_with_candidates(candidate_ids: set[str]):
             _owning_graph_foundation, "GraphClient", side_effect=graph_clients
         ) as client,
         patch(
-            "imas_codex.standard_names.protection.filter_protected",
+            "iter_codex.standard_names.protection.filter_protected",
             side_effect=lambda names, **_kwargs: (names, []),
         ),
         patch.object(
@@ -111,8 +111,8 @@ def test_durable_and_source_backed_names_are_excluded() -> None:
 
 
 def test_edge_writer_reports_every_standard_name_merge_endpoint() -> None:
-    from imas_codex.standard_names.derivation import DerivedEdge
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.derivation import DerivedEdge
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         _write_standard_name_edges,
     )
 
@@ -145,11 +145,11 @@ def test_edge_writer_reports_every_standard_name_merge_endpoint() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.derivation.derive_edges",
+            "iter_codex.standard_names.derivation.derive_edges",
             side_effect=lambda name: edges.get(name, []),
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
             side_effect=lambda batch, _graph, **_kwargs: batch,
         ),
     ):

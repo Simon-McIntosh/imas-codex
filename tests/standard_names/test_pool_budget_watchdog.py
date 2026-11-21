@@ -12,8 +12,8 @@ import asyncio
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.pools import PoolSpec, run_pools
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.pools import PoolSpec, run_pools
 
 # ---------------------------------------------------------------------------
 # Helpers

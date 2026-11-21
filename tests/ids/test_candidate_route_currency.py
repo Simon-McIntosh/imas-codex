@@ -16,7 +16,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.ids.graph_ops import clear_candidates, write_candidates
+from iter_codex.ids.graph_ops import clear_candidates, write_candidates
 
 
 def _normalised(gc) -> str:
@@ -80,8 +80,8 @@ class TestJudgedTextIsWrittenWithTheRoute:
 @pytest.mark.graph
 def test_rewritten_description_makes_a_route_unjudged():
     """Drive the claim predicate through every change that unsettles a route."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.ids.workers import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.ids.workers import (
         claim_sources_for_candidates,
         claim_sources_for_escalated,
         has_pending_candidate_work,

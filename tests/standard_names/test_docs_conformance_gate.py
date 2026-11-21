@@ -18,19 +18,19 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names import workers
-from imas_codex.standard_names.context import conventions_context_for
-from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
-from imas_codex.standard_names.docs_gates import (
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.standard_names import workers
+from iter_codex.standard_names.context import conventions_context_for
+from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from iter_codex.standard_names.docs_gates import (
     HouseStyleFindingClass,
     conformance_findings,
 )
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_review_persistence as _owning_graph_review_persistence,
 )
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_common as _owning_worker_common,
     worker_review_docs as _owning_worker_review_docs,
     worker_review_names as _owning_worker_review_names,
@@ -103,7 +103,7 @@ def _quorum(score: float = 1.0) -> dict[str, Any]:
 
 def _review(name: str, documentation: str, *, score: float = 1.0) -> dict[str, Any]:
     """Run the review worker over one drafted name and return what it persisted."""
-    import imas_codex.standard_names.graph_ops as graph_ops
+    import iter_codex.standard_names.graph_ops as graph_ops
 
     request = {
         "response_model": MagicMock(),

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from imas_codex.standard_names.review.enrichment import build_neighborhood_context
+from iter_codex.standard_names.review.enrichment import build_neighborhood_context
 
 
 def _catalog_name(
@@ -52,7 +52,7 @@ def test_every_candidate_receives_a_unit_anchored_comparator(monkeypatch) -> Non
     spent.
     """
     monkeypatch.setattr(
-        "imas_codex.standard_names.search.search_standard_names_vector",
+        "iter_codex.standard_names.search.search_standard_names_vector",
         lambda _query, *, k: [],
     )
     candidates = [
@@ -99,7 +99,7 @@ def test_returned_neighbourhood_respects_the_stated_bound(monkeypatch) -> None:
         ]
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.search.search_standard_names_vector", search
+        "iter_codex.standard_names.search.search_standard_names_vector", search
     )
     batch_size = 15
     candidates = [
@@ -149,7 +149,7 @@ def test_large_catalog_saturation_lands_on_the_bound(monkeypatch) -> None:
         ]
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.search.search_standard_names_vector", search
+        "iter_codex.standard_names.search.search_standard_names_vector", search
     )
     batch_size = 61
     candidates = [
@@ -200,11 +200,11 @@ def test_over_supplied_channel_is_closed_at_the_terminal_bound(monkeypatch) -> N
         for index in range(40)
     ]
     monkeypatch.setattr(
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
         lambda _items, **_kwargs: list(over_supplied),
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.search.search_standard_names_vector",
+        "iter_codex.standard_names.search.search_standard_names_vector",
         lambda _query, *, k: [],
     )
     candidates = [

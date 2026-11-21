@@ -1,0 +1,2772 @@
+"""Benchmark runner for comparing LLM models on standard name generation.
+
+Extracts a fixed dataset, runs it through multiple models, validates
+output via grammar round-trip, and compares against a reference set.
+Produces a :class:`BenchmarkReport` with per-model metrics suitable
+for Rich table display and JSON export.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import hashlib
+import json
+import logging
+import math
+import os
+import time
+from collections import Counter
+from collections.abc import Mapping, Sequence
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
+from typing import Any
+
+from iter_codex.standard_names.benchmark_roles import spearman_rho
+from iter_codex.standard_names.grammar_adapter import parse_canonical_name
+from iter_codex.standard_names.models import StandardNameComposeBatch
+from iter_codex.standard_names.physics_judge import PhysicsVerdict
+
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Configuration and result dataclasses
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class BenchmarkConfig:
+    """Configuration for a benchmark run."""
+
+    models: list[str]
+    max_candidates: int = 54
+    runs_per_model: int = 1
+    temperature: float = 0.0
+    reviewer_models: list[str] = field(default_factory=list)
+    names_only: bool = True
+    output_path: str | None = None
+    # Reasoning-effort overrides for the effort-axis scan. When set, the
+    # benchmark composes / reviews at this effort instead of the production
+    # [sn-compose] / [sn-review] config — so a scan can fix the model(s) and
+    # vary effort to measure accuracy vs speed vs cost. None = production config.
+    reasoning_effort: str | None = None
+    review_reasoning_effort: str | None = None
+    # Physics-correctness judging
+    physics_judge: bool = False
+    physics_judge_model: str | None = None
+    gold_set_path: str | None = None
+    # Carry the production nearby-name comparator block into the harness
+    # compose prompt. Off by default so the rendered prompt is byte-identical
+    # to the base revision; when on, the block is built by the production
+    # helpers and reranked by the compose rerank switch exactly as the compose
+    # path does.
+    comparator_block: bool = False
+    # Explicit Data Dictionary source paths for a held-out batch. When set,
+    # extraction composes exactly these paths instead of the fixed reference
+    # set, so a benchmark can draw a source list it does not hard-code.
+    source_paths: list[str] | None = None
+    # Legacy fields kept for backward-compatible deserialization
+    source: str = "dd"
+    ids_filter: str | None = None
+    domain_filter: str | None = None
+    facility: str | None = None
+    force: bool = True
+    reviewer_model: str | None = None  # legacy single-reviewer compat
+
+
+@dataclass
+class ReviewerScores:
+    """Scores from a single reviewer model for one compose model's output."""
+
+    reviewer_model: str
+    target: str = "names"  # "names" or "docs"
+    scores: list[dict] = field(default_factory=list)
+    avg_score: float = 0.0
+    distribution: dict[str, int] = field(default_factory=dict)
+    cost: float = 0.0
+    elapsed_seconds: float = 0.0
+    error: str = ""
+    # Per-dimension averages (names: grammar/semantic/convention/completeness)
+    # (docs: description_quality/documentation_quality/completeness/physics_accuracy)
+    dim_averages: dict[str, float] = field(default_factory=dict)
+
+
+@dataclass
+class ModelResult:
+    """Results from running one model."""
+
+    model: str
+    status: str = "pending"  # pending | composed | reviewed | completed | failed
+    error: str = ""
+    compose_error: str = ""
+    review_error: str = ""
+    docs_error: str = ""
+    candidates: list[dict] = field(default_factory=list)
+    grammar_valid_count: int = 0
+    grammar_invalid_count: int = 0
+    fields_consistent_count: int = 0
+    total_cost: float = 0.0
+    total_tokens: int = 0
+    elapsed_seconds: float = 0.0
+    names_per_minute: float = 0.0
+    cost_per_name: float = 0.0
+    skipped_count: int = 0
+    attachment_count: int = 0
+    vocab_gap_count: int = 0
+    batch_errors: int = 0
+    # Why each failed batch failed, counted by cause so a report can be
+    # gated on the mechanism rather than on the bare failure count.
+    batch_error_causes: dict[str, int] = field(default_factory=dict)
+    # Quality against reference set
+    reference_overlap: int = 0
+    reference_total: int = 0
+    reference_precision: float = 0.0
+    reference_recall: float = 0.0
+    # Multi-reviewer results (new — matrix evaluation)
+    name_reviewer_results: list[ReviewerScores] = field(default_factory=list)
+    docs_reviewer_results: list[ReviewerScores] = field(default_factory=list)
+    # Compose-time description scoring (per-judge ReviewerScores; the four
+    # description dims live in each ReviewerScores.dim_averages — no flat
+    # avg_*_score fields, to avoid collision with the docs physics_accuracy dim)
+    description_reviewer_results: list[ReviewerScores] = field(default_factory=list)
+    avg_description_score: float = 0.0
+    description_reviewer_cost: float = 0.0
+    description_review_elapsed_seconds: float = 0.0
+    # Legacy single-reviewer fields (populated from first reviewer for compat)
+    quality_scores: list[dict] = field(default_factory=list)
+    quality_distribution: dict[str, int] = field(default_factory=dict)
+    avg_quality_score: float = 0.0
+    avg_doc_length: float = 0.0
+    avg_fields_populated: float = 0.0
+    # Per-dimension score averages
+    avg_grammar_score: float = 0.0
+    avg_semantic_score: float = 0.0
+    avg_convention_score: float = 0.0
+    avg_completeness_score: float = 0.0
+    # Prompt-cache statistics
+    cache_read_tokens: int = 0
+    cache_creation_tokens: int = 0
+    # Reviewer cost and timing breakdown
+    reviewer_cost: float = 0.0
+    compose_elapsed_seconds: float = 0.0
+    review_elapsed_seconds: float = 0.0
+    # Docs quality scoring
+    docs_quality_scores: list[dict] = field(default_factory=list)
+    docs_quality_distribution: dict[str, int] = field(default_factory=dict)
+    avg_docs_quality_score: float = 0.0
+    # Docs per-dimension averages
+    avg_description_quality_score: float = 0.0
+    avg_documentation_quality_score: float = 0.0
+    avg_docs_completeness_score: float = 0.0
+    avg_physics_accuracy_score: float = 0.0
+    # Docs cost/timing
+    docs_compose_cost: float = 0.0
+    docs_compose_elapsed_seconds: float = 0.0
+    docs_review_elapsed_seconds: float = 0.0
+    docs_reviewer_cost: float = 0.0
+    # Physics-correctness judging
+    physics_verdicts: list[dict] = field(default_factory=list)
+    physics_faithful_count: int = 0
+    physics_total: int = 0
+    physics_rate: float = 0.0
+    physics_hardcase_faithful: int = 0
+    physics_hardcase_total: int = 0
+    physics_hardcase_rate: float = 0.0
+
+
+@dataclass
+class BenchmarkProvenance:
+    """Version provenance for reproducibility."""
+
+    codex_version: str = ""
+    codex_commit: str = ""
+    isn_version: str = ""
+    dd_version: str = ""
+
+    @classmethod
+    def capture(cls) -> BenchmarkProvenance:
+        """Capture current versions from installed packages and config."""
+        codex_ver = codex_commit = isn_ver = dd_ver = ""
+        try:
+            from importlib.metadata import version
+
+            codex_ver = version("iter-codex")
+        except Exception:
+            pass
+        try:
+            import subprocess
+
+            result = subprocess.run(
+                ["git", "rev-parse", "--short", "HEAD"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode == 0:
+                codex_commit = result.stdout.strip()
+        except Exception:
+            pass
+        try:
+            from importlib.metadata import version
+
+            isn_ver = version("imas-standard-names")
+        except Exception:
+            pass
+        try:
+            from iter_codex.settings import get_dd_version
+
+            dd_ver = get_dd_version()
+        except Exception:
+            pass
+        return cls(
+            codex_version=codex_ver,
+            codex_commit=codex_commit,
+            isn_version=isn_ver,
+            dd_version=dd_ver,
+        )
+
+
+@dataclass
+class BenchmarkReport:
+    """Full benchmark report."""
+
+    config: BenchmarkConfig
+    results: list[ModelResult]
+    reference_names: list[str]
+    extraction_count: int = 0
+    extraction_source_ids: list[str] = field(default_factory=list)
+    dataset_hash: str = ""
+    timestamp: str = ""
+    provenance: BenchmarkProvenance = field(default_factory=BenchmarkProvenance)
+
+    def to_json(self) -> str:
+        """Serialize to JSON string."""
+        return json.dumps(asdict(self), indent=2, default=str)
+
+    def save_atomic(self, path: str) -> None:
+        """Write report to *path* atomically (tmp + os.replace).
+
+        Crash-safe: a partial write never corrupts the previous version.
+        """
+        import tempfile
+        from pathlib import Path
+
+        dest = Path(path)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        fd, tmp = tempfile.mkstemp(
+            dir=str(dest.parent), suffix=".tmp", prefix=dest.stem
+        )
+        try:
+            with os.fdopen(fd, "w") as fh:
+                fh.write(self.to_json())
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(tmp, str(dest))
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
+
+    @classmethod
+    def from_json(cls, data: str) -> BenchmarkReport:
+        """Deserialize from JSON string."""
+        raw = json.loads(data)
+        # Filter unknown config keys for backward compatibility
+        known_config_keys = {
+            f.name for f in BenchmarkConfig.__dataclass_fields__.values()
+        }
+        config_data = {k: v for k, v in raw["config"].items() if k in known_config_keys}
+        config = BenchmarkConfig(**config_data)
+
+        results = []
+        known_result_keys = {f.name for f in ModelResult.__dataclass_fields__.values()}
+        for r in raw["results"]:
+            # Deserialize nested ReviewerScores lists
+            name_revs = [
+                ReviewerScores(**rs) for rs in r.pop("name_reviewer_results", [])
+            ]
+            docs_revs = [
+                ReviewerScores(**rs) for rs in r.pop("docs_reviewer_results", [])
+            ]
+            desc_revs = [
+                ReviewerScores(**rs) for rs in r.pop("description_reviewer_results", [])
+            ]
+            filtered = {k: v for k, v in r.items() if k in known_result_keys}
+            mr = ModelResult(
+                **filtered,
+                name_reviewer_results=name_revs,
+                docs_reviewer_results=docs_revs,
+                description_reviewer_results=desc_revs,
+            )
+            results.append(mr)
+
+        prov_data = raw.get("provenance", {})
+        provenance = (
+            BenchmarkProvenance(**prov_data) if prov_data else BenchmarkProvenance()
+        )
+        return cls(
+            config=config,
+            results=results,
+            reference_names=raw["reference_names"],
+            extraction_count=raw.get("extraction_count", 0),
+            extraction_source_ids=raw.get("extraction_source_ids", []),
+            dataset_hash=raw.get("dataset_hash", ""),
+            timestamp=raw.get("timestamp", ""),
+            provenance=provenance,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Grammar validation
+# ---------------------------------------------------------------------------
+
+
+def _get_segment_fields(candidate: dict) -> dict:
+    """Extract segment fields from a candidate dict.
+
+    Handles both nested format (``{segments: {base_token: ...}}``)
+    and legacy flat format (``{base_token: ...}``).
+    """
+    segs = candidate.get("segments")
+    if isinstance(segs, dict):
+        return segs
+    return candidate
+
+
+def _resolve_name(candidate: dict) -> str:
+    """Resolve the composed standard name from a candidate dict.
+
+    Tries ``standard_name`` key first (legacy), then composes from
+    IR segment fields via ISN.
+    """
+    name = candidate.get("standard_name", "") or candidate.get("id", "")
+    if name:
+        return name
+
+    segs = _get_segment_fields(candidate)
+    if not segs.get("base_token"):
+        return ""
+
+    # Compose via the CANONICAL GrammarSegments.to_ir() — the same path the
+    # production pipeline uses. A hand-rolled IR subset here silently drops
+    # projection / locus / process / operator segments, flattening faithful
+    # names (e.g. major_radius_of_magnetic_axis → major_radius) and producing
+    # spurious "collapse" measurements.
+    try:
+        from iter_codex.standard_names.models import GrammarSegments
+
+        allowed = set(GrammarSegments.model_fields)
+        gs = GrammarSegments(**{k: v for k, v in segs.items() if k in allowed})
+        return gs.compose_name()
+    except Exception:
+        return ""
+
+
+#: Candidate name resolution is part of this module's public surface: the
+#: advisory benchmark and the role scorer both compose names through it, and
+#: moving it would duplicate the ISN composition path scoring shares.
+resolve_name = _resolve_name
+
+
+def validate_candidate(candidate: dict) -> tuple[bool, bool]:
+    """Validate a single candidate via grammar round-trip.
+
+    Returns:
+        (grammar_valid, fields_consistent) tuple.
+        grammar_valid: True if the name parses and round-trips.
+        fields_consistent: True if IR compose produces the same name.
+    """
+    segs = _get_segment_fields(candidate)
+    name = _resolve_name(candidate)
+
+    grammar_valid = False
+    fields_consistent = False
+
+    # Check grammar round-trip
+    try:
+        parse_canonical_name(name)
+        normalized = name
+        grammar_valid = True
+    except Exception:
+        return False, False
+
+    # Check IR consistency: compose from the FULL segment set via the canonical
+    # GrammarSegments path (NOT a hand-rolled base+qualifiers subset, which would
+    # drop projection/locus/process/operator and report false inconsistency).
+    try:
+        if segs.get("base_token"):
+            from iter_codex.standard_names.models import GrammarSegments
+
+            allowed = set(GrammarSegments.model_fields)
+            gs = GrammarSegments(**{k: v for k, v in segs.items() if k in allowed})
+            from_ir = gs.compose_name()
+            fields_consistent = from_ir == normalized
+    except Exception:
+        pass
+
+    return grammar_valid, fields_consistent
+
+
+# ---------------------------------------------------------------------------
+# Reference comparison
+# ---------------------------------------------------------------------------
+
+
+def compare_to_reference(
+    candidates: list[dict],
+    reference: dict[str, dict],
+) -> tuple[int, int, float, float]:
+    """Compare model output against the reference set.
+
+    Args:
+        candidates: List of candidate dicts with source_id and standard_name.
+        reference: REFERENCE_NAMES dict mapping source_path → {name, fields}.
+
+    Returns:
+        (overlap, ref_total, precision, recall) tuple.
+        overlap: Number of candidates whose standard_name matches reference.
+        ref_total: Total entries in reference set.
+        precision: overlap / len(candidates) if candidates else 0.
+        recall: overlap / ref_total if ref_total else 0.
+    """
+    # Build lookup from source_id → generated name
+    generated = {}
+    for c in candidates:
+        sid = c.get("source_id", "")
+        generated[sid] = _resolve_name(c)
+
+    overlap = 0
+    ref_total = len(reference)
+    for path, ref_entry in reference.items():
+        if path in generated:
+            # Normalize both for comparison
+            gen_name = generated[path]
+            ref_name = ref_entry["name"]
+            try:
+                gen_normalized = parse_canonical_name(gen_name).name
+            except Exception:
+                gen_normalized = gen_name
+
+            try:
+                ref_normalized = parse_canonical_name(ref_name).name
+            except Exception:
+                ref_normalized = ref_name
+
+            if gen_normalized == ref_normalized:
+                overlap += 1
+
+    n_candidates = len(candidates)
+    precision = overlap / n_candidates if n_candidates else 0.0
+    recall = overlap / ref_total if ref_total else 0.0
+
+    return overlap, ref_total, precision, recall
+
+
+# ---------------------------------------------------------------------------
+# Quality tier labels
+# ---------------------------------------------------------------------------
+
+
+async def score_with_reviewer(
+    candidates: list[dict],
+    reviewer_model: str,
+    target: str = "names",
+    reasoning_effort: str | None = None,
+    *,
+    temperature: float | None = None,
+    seed: int | None = None,
+    rendered_message_hashes: list[str] | None = None,
+) -> tuple[list[dict], float]:
+    """Score candidates using the production-fidelity review pipeline.
+
+    Uses the split system/user prompt pair (``sn/review_names_system`` +
+    ``sn/review_names_user``) with full graph context: scored calibration
+    examples, vector/same-base/same-path neighbour comparators, and grammar
+    vocabulary.
+
+    target="names" (default) — uses the 4-dimensional ``sn/review_names``
+        rubric (grammar, semantic, convention, completeness; 0-80 total,
+        normalised to 0-1).
+
+    Returns (reviews, total_cost) where reviews is a list of dicts with:
+    name, quality_tier, score, and per-dimension scores keyed ``<dim>_score``.
+    When supplied, ``rendered_message_hashes`` receives one SHA-256 digest for
+    each exact system/user message pair sent to the provider.
+    """
+    from iter_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.context import (
+        build_compose_context,
+        fetch_review_neighbours,
+    )
+    from iter_codex.standard_names.example_loader import load_review_examples
+
+    # "none" → explicit no-reasoning-budget (provider default).
+    review_effort = None if reasoning_effort == "none" else reasoning_effort
+
+    if target == "names":
+        from iter_codex.standard_names.models import (
+            StandardNameQualityReviewNameOnlyBatch,
+        )
+
+        response_model: type = StandardNameQualityReviewNameOnlyBatch
+        system_template = "sn/review_names_system"
+        user_template = "sn/review_names_user"
+        dim_keys = ("grammar", "semantic", "convention", "completeness")
+    elif target == "docs":
+        from iter_codex.standard_names.models import (
+            StandardNameQualityReviewDocsBatch,
+        )
+
+        response_model = StandardNameQualityReviewDocsBatch
+        system_template = "sn/review_docs_system"
+        user_template = "sn/review_docs_user"
+        dim_keys = (
+            "description_quality",
+            "documentation_quality",
+            "completeness",
+            "physics_accuracy",
+        )
+    else:
+        raise ValueError(
+            f"Unknown review target {target!r}; expected 'names' or 'docs'."
+        )
+
+    # Get compose context (grammar enums + shared include variables)
+    compose_ctx = build_compose_context()
+
+    # Load scored calibration examples from graph
+    review_scored_examples: list[dict] = []
+    review_axis = "name" if target == "names" else "docs"
+    try:
+        with GraphClient() as gc:
+            review_scored_examples = load_review_examples(
+                gc, physics_domains=[], axis=review_axis
+            )
+    except Exception as exc:
+        logger.debug("Could not load review examples: %s", exc)
+
+    # Build system prompt (static, cached across batches)
+    system_context = {
+        **compose_ctx,
+        "review_scored_examples": review_scored_examples,
+    }
+    system_prompt = render_prompt(system_template, system_context)
+
+    # Process in batches of 10
+    all_reviews: list[dict] = []
+    total_reviewer_cost: float = 0.0
+    # Bounds the per-batch docs-review fan-out (see the concurrent path below).
+    _docs_sem = asyncio.Semaphore(8)
+    for i in range(0, len(candidates), 10):
+        batch = candidates[i : i + 10]
+
+        # Build per-candidate items with neighbour context
+        batch_items = []
+        for c in batch:
+            name = _resolve_name(c)
+            if target == "docs":
+                item: dict[str, Any] = {
+                    "id": name,
+                    "standard_name": name,
+                    "description": c.get("docs_description", c.get("description", "")),
+                    "documentation": c.get("documentation", ""),
+                    "unit": c.get("unit", "N/A"),
+                    "kind": c.get("kind", "N/A"),
+                    "source_paths": c.get("source_paths", []),
+                }
+                # DD ground truth for the grounded physics_accuracy rubric —
+                # mirrors the production docs-review enrichment (workers.py).
+                _src_paths = c.get("source_paths") or []
+                _first_src = c.get("source_id") or (
+                    _src_paths[0] if _src_paths else None
+                )
+                if _first_src:
+                    try:
+                        from iter_codex.graph.client import GraphClient
+                        from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
+                            _enrich_dd_path_context,
+                        )
+
+                        with GraphClient() as _gc:
+                            _enrich_dd_path_context(_gc, item, _first_src)
+                    except Exception:
+                        logger.debug(
+                            "bench docs review: dd context fetch failed for %s",
+                            _first_src,
+                            exc_info=True,
+                        )
+            else:
+                item = {
+                    "standard_name": name,
+                    "source_id": c.get("source_id", ""),
+                    "description": c.get("description", "") or "",
+                    "documentation": (c.get("documentation", "") or "")[:500],
+                    "unit": c.get("unit", "N/A"),
+                    "kind": c.get("kind", "N/A"),
+                    "source_paths": c.get("source_paths", []),
+                }
+
+            # Fetch review neighbours from live graph
+            try:
+                neighbours = fetch_review_neighbours(
+                    {
+                        "id": name,
+                        "name": name,
+                        "description": c.get("description", ""),
+                        "physical_base": (
+                            c.get("base_token")
+                            or (c.get("segments") or {}).get("base_token")
+                        ),
+                        "source_paths": c.get("source_paths", []),
+                    }
+                )
+                item.update(neighbours)
+            except Exception:
+                item["vector_neighbours"] = []
+                item["same_base_neighbours"] = []
+                item["same_path_neighbours"] = []
+
+            batch_items.append(item)
+
+        # Build user prompt — docs template expects single `item`, names
+        # template iterates over `items` list.
+        if target == "docs":
+            # Single-item docs template → one call per candidate. Fire the
+            # batch's per-item calls CONCURRENTLY (bounded) instead of serially
+            # — a serial await-per-item made each 10-item batch take minutes at
+            # effort=high. The global rate governor still throttles across the
+            # whole fleet; this bound just caps the per-batch fan-out.
+            async def _score_one_doc(
+                item_ctx: dict[str, Any],
+            ) -> tuple[float, list[dict[str, Any]]]:
+                user_context = {
+                    **compose_ctx,
+                    "review_scored_examples": review_scored_examples,
+                    "item": item_ctx,
+                }
+                try:
+                    user_prompt = render_prompt(user_template, user_context)
+                except Exception as exc:
+                    logger.warning(
+                        "Failed to render docs review prompt for %s: %s",
+                        item_ctx.get("id", "?"),
+                        exc,
+                    )
+                    return 0.0, []
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ]
+                if rendered_message_hashes is not None:
+                    rendered_message_hashes.append(_rendered_messages_hash(messages))
+                async with _docs_sem:
+                    try:
+                        result, cost, _ = await acall_llm_structured(
+                            model=reviewer_model,
+                            messages=messages,
+                            response_model=response_model,
+                            service="standard-names",
+                            reasoning_effort=review_effort,
+                            temperature=temperature,
+                            seed=seed,
+                            max_retries=2,
+                        )
+                    except Exception as e:
+                        logger.warning(
+                            "Docs review failed for %s: %s",
+                            item_ctx.get("id", "?"),
+                            e,
+                        )
+                        return 0.0, []
+                revs: list[dict[str, Any]] = []
+                for r in result.reviews:
+                    review_dict: dict[str, Any] = {
+                        "name": r.standard_name,
+                        "quality_tier": r.scores.tier,
+                        "score": r.scores.score,
+                    }
+                    for dim in dim_keys:
+                        review_dict[f"{dim}_score"] = getattr(r.scores, dim, 0)
+                    if hasattr(r, "reasoning"):
+                        review_dict["reasoning"] = r.reasoning
+                    revs.append(review_dict)
+                return cost, revs
+
+            for _cost, _revs in await asyncio.gather(
+                *(_score_one_doc(ic) for ic in batch_items)
+            ):
+                total_reviewer_cost += _cost
+                all_reviews.extend(_revs)
+        else:
+            # Batch template: render with items list
+            user_context = {
+                **compose_ctx,
+                "review_scored_examples": review_scored_examples,
+                "items": batch_items,
+                "existing_names": [],
+                "batch_context": "",
+                "nearby_existing_names": [],
+                "audit_findings": [],
+                "vector_neighbours": batch_items[0].get("vector_neighbours", [])
+                if batch_items
+                else [],
+                "same_base_neighbours": batch_items[0].get("same_base_neighbours", [])
+                if batch_items
+                else [],
+                "same_path_neighbours": batch_items[0].get("same_path_neighbours", [])
+                if batch_items
+                else [],
+            }
+
+            try:
+                user_prompt = render_prompt(user_template, user_context)
+            except Exception as exc:
+                logger.warning("Failed to render review user prompt: %s", exc)
+                continue
+
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+            if rendered_message_hashes is not None:
+                rendered_message_hashes.append(_rendered_messages_hash(messages))
+
+            try:
+                result, cost, _ = await acall_llm_structured(
+                    model=reviewer_model,
+                    messages=messages,
+                    response_model=response_model,
+                    service="standard-names",
+                    reasoning_effort=review_effort,
+                    temperature=temperature,
+                    seed=seed,
+                    max_retries=2,
+                )
+                total_reviewer_cost += cost
+                for r in result.reviews:
+                    review_dict: dict[str, Any] = {
+                        "name": r.standard_name,
+                        "quality_tier": r.scores.tier,
+                        "score": r.scores.score,
+                    }
+                    for dim in dim_keys:
+                        review_dict[f"{dim}_score"] = getattr(r.scores, dim, 0)
+                    if hasattr(r, "reasoning"):
+                        review_dict["reasoning"] = r.reasoning
+                    all_reviews.append(review_dict)
+            except Exception as e:
+                logger.warning("Reviewer scoring failed for batch: %s", e)
+
+    return all_reviews, total_reviewer_cost
+
+
+def _rendered_messages_hash(messages: list[dict[str, Any]]) -> str:
+    """Hash the exact JSON-compatible messages submitted to a reviewer."""
+    payload = json.dumps(
+        messages,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+async def score_descriptions(
+    candidates: list[dict],
+    reviewer_model: str,
+) -> tuple[list[dict], float]:
+    """Score each candidate's SHORT compose-time ``description``.
+
+    Parallel in style to :func:`score_with_reviewer` but scores the
+    one-line compose-time ``description`` (NOT ``docs_description``) on a
+    4-dimensional 0–20 rubric: physics_accuracy, specificity, consistency,
+    concision. Unlike the names review, this pass is **self-contained** — it
+    scores against the candidate's own DD context (unit, kind, source_paths,
+    physics_domain) and its companion name, with no graph-neighbour fetch.
+    That keeps the standalone ``--rescore`` path offline.
+
+    Returns (reviews, total_cost) where each review dict carries:
+    ``name``, ``quality_tier``, ``score``, ``reasoning`` and the four
+    per-dimension ``<dim>_score`` keys.
+    """
+    from iter_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.models import (
+        StandardNameQualityReviewDescriptionBatch,
+    )
+
+    dim_keys = ("physics_accuracy", "specificity", "consistency", "concision")
+
+    # Static system prompt (cached across batches via schema_needs injection).
+    system_prompt = render_prompt("sn/review_description_system", {})
+
+    all_reviews: list[dict] = []
+    total_cost: float = 0.0
+    for i in range(0, len(candidates), 10):
+        batch = candidates[i : i + 10]
+        batch_items = []
+        for c in batch:
+            name = _resolve_name(c)
+            batch_items.append(
+                {
+                    "standard_name": name,
+                    "source_id": c.get("source_id", ""),
+                    "description": c.get("description", "") or "",
+                    "unit": c.get("unit", "N/A"),
+                    "kind": c.get("kind", "N/A"),
+                    "physics_domain": c.get("physics_domain", ""),
+                    "source_paths": c.get("source_paths", []),
+                }
+            )
+
+        try:
+            user_prompt = render_prompt(
+                "sn/review_description_user", {"items": batch_items}
+            )
+        except Exception as exc:
+            logger.warning("Failed to render description review prompt: %s", exc)
+            continue
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+        try:
+            result, cost, _ = await acall_llm_structured(
+                model=reviewer_model,
+                messages=messages,
+                response_model=StandardNameQualityReviewDescriptionBatch,
+                service="standard-names",
+                max_retries=2,
+            )
+            total_cost += cost
+            for r in result.reviews:
+                review_dict: dict[str, Any] = {
+                    "name": r.standard_name,
+                    "quality_tier": r.scores.tier,
+                    "score": r.scores.score,
+                    "reasoning": r.reasoning,
+                }
+                for dim in dim_keys:
+                    review_dict[f"{dim}_score"] = getattr(r.scores, dim, 0)
+                all_reviews.append(review_dict)
+        except Exception as e:
+            logger.warning("Description scoring failed for batch: %s", e)
+
+    return all_reviews, total_cost
+
+
+# ---------------------------------------------------------------------------
+# Docs generation for benchmark
+# ---------------------------------------------------------------------------
+
+
+async def generate_docs_for_candidates(
+    candidates: list[dict],
+    model: str,
+    context: dict[str, Any],
+) -> tuple[list[dict], float, float]:
+    """Generate documentation for benchmark candidates.
+
+    Returns (updated_candidates, total_cost, elapsed_seconds).
+    Each candidate dict is updated with 'docs_description' and 'documentation' keys.
+    """
+    from iter_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.settings import get_reasoning_effort
+    from iter_codex.standard_names.models import GeneratedDocs
+
+    system_prompt = render_prompt("sn/generate_docs_system", context)
+    t0 = time.monotonic()
+    _docs_effort = get_reasoning_effort("sn-docs")
+    # GPT-5.x models don't support temperature=0.0.
+    temp = None if "gpt-5" in model else 0.0
+    # Candidates are independent → generate concurrently (bounded). A serial
+    # loop let one hung provider call block the whole set; max_retries=2 fails
+    # a hang fast instead of the default 5×timeout amplification.
+    _gen_sem = asyncio.Semaphore(8)
+
+    async def _gen_one(c: dict) -> float:
+        name = _resolve_name(c)
+        item = {
+            "name": name,
+            "unit": c.get("unit", ""),
+            "kind": c.get("kind", "scalar"),
+            "physics_domain": c.get("physics_domain", ""),
+            "description": c.get("description", ""),
+            "source_paths": c.get("source_paths", []),
+            "reviewer_score_name": None,
+            "reviewer_comments_name": "",
+            "chain_history": [],
+        }
+        try:
+            user_prompt = render_prompt(
+                "sn/generate_docs_user", {**context, "item": item}
+            )
+        except Exception as exc:
+            logger.warning("Failed to render docs prompt for %s: %s", name, exc)
+            return 0.0
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+        async with _gen_sem:
+            try:
+                result, cost, _ = await acall_llm_structured(
+                    model=model,
+                    messages=messages,
+                    response_model=GeneratedDocs,
+                    temperature=temp,
+                    service="standard-names",
+                    reasoning_effort=_docs_effort,
+                    max_retries=2,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Docs generation failed for %s with %s: %s", name, model, exc
+                )
+                c["docs_description"] = ""
+                c["documentation"] = ""
+                return 0.0
+        c["docs_description"] = result.description
+        c["documentation"] = result.documentation
+        return cost
+
+    total_cost = sum(await asyncio.gather(*(_gen_one(c) for c in candidates)))
+    elapsed = time.monotonic() - t0
+    return candidates, total_cost, round(elapsed, 2)
+
+
+# ---------------------------------------------------------------------------
+# Core benchmark runner
+# ---------------------------------------------------------------------------
+
+
+async def run_benchmark(
+    config: BenchmarkConfig,
+    extraction_batches: list[dict] | None = None,
+) -> BenchmarkReport:
+    """Run the benchmark across all configured models.
+
+    Each model is processed as a complete unit (compose → review → optional
+    docs) before moving to the next.  After each model completes (or fails),
+    an incremental report is saved to ``config.output_path``.  If the
+    process is killed, the report contains all fully-processed models.
+
+    Args:
+        config: Benchmark configuration.
+        extraction_batches: Pre-extracted candidate batches (list of dicts
+            with items grouped by IDS). If None, extracts from graph.
+
+    Returns:
+        BenchmarkReport with per-model results.
+    """
+    from iter_codex.standard_names.benchmark_reference import REFERENCE_NAMES
+
+    # --- Fail-fast: at least one reviewer model is required ---
+    reviewer_models = config.reviewer_models
+    if not reviewer_models:
+        # Backward compat: single reviewer_model → list of one
+        if config.reviewer_model:
+            reviewer_models = [config.reviewer_model]
+        else:
+            raise ValueError(
+                "reviewer_models is required for benchmarking. "
+                "Reviewer scores are the quality metric."
+            )
+
+    # --- 1. Extract candidates (same for all models) ---
+    if extraction_batches is None:
+        extraction_batches = _extract_candidates(config)
+
+    # Flatten items for counting
+    all_items = []
+    for batch in extraction_batches:
+        all_items.extend(batch.get("items", []))
+
+    # Limit to max_candidates
+    if len(all_items) > config.max_candidates:
+        all_items = all_items[: config.max_candidates]
+        extraction_batches = _rebuild_batches(extraction_batches, config.max_candidates)
+
+    logger.info(
+        "Benchmark: %d extraction items across %d batches",
+        len(all_items),
+        len(extraction_batches),
+    )
+
+    # Record source IDs for cross-model identity assertion
+    extraction_source_ids = [
+        item.get("source_id", item.get("id", "")) for item in all_items
+    ]
+
+    # Compute deterministic dataset hash from ordered source IDs
+    dataset_hash = hashlib.sha256(
+        "\n".join(sorted(extraction_source_ids)).encode()
+    ).hexdigest()[:16]
+
+    # --- Pre-build shared prompt context (reused across models) ---
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.context import build_compose_context
+
+    context = build_compose_context()
+    context["compose_scored_examples"] = []
+    system_prompt = render_prompt("sn/generate_name_system", context)
+
+    provenance = BenchmarkProvenance.capture()
+    reference_names_list = list(REFERENCE_NAMES.keys())
+
+    def _build_partial_report(results_so_far: list[ModelResult]) -> BenchmarkReport:
+        return BenchmarkReport(
+            config=config,
+            results=results_so_far,
+            reference_names=reference_names_list,
+            extraction_count=len(all_items),
+            extraction_source_ids=extraction_source_ids,
+            dataset_hash=dataset_hash,
+            timestamp=datetime.now(tz=UTC).isoformat(),
+            provenance=provenance,
+        )
+
+    def _save_incremental(results_so_far: list[ModelResult]) -> None:
+        if not config.output_path:
+            return
+        try:
+            report = _build_partial_report(results_so_far)
+            report.save_atomic(config.output_path)
+            logger.info(
+                "Incremental save: %d/%d models → %s",
+                len(results_so_far),
+                len(config.models),
+                config.output_path,
+            )
+        except Exception as exc:
+            logger.error("Failed to save incremental report: %s", exc)
+
+    # --- 2. Per-model loop: compose → review → (docs) → save ---
+    results: list[ModelResult] = []
+
+    for model_idx, model in enumerate(config.models):
+        logger.info(
+            "Benchmarking model %d/%d: %s",
+            model_idx + 1,
+            len(config.models),
+            model,
+        )
+
+        # --- 2a. Compose phase ---
+        try:
+            model_result = await _run_model(
+                model=model,
+                extraction_batches=extraction_batches,
+                config=config,
+                reference=REFERENCE_NAMES,
+                system_prompt=system_prompt,
+                context=context,
+            )
+            model_result.compose_elapsed_seconds = model_result.elapsed_seconds
+            model_result.status = "composed"
+        except Exception as exc:
+            logger.error("Model %s compose failed: %s", model, exc)
+            model_result = ModelResult(
+                model=model, status="failed", compose_error=str(exc), error=str(exc)
+            )
+            results.append(model_result)
+            _save_incremental(results)
+            continue
+
+        # --- 2b. Review names phase (all reviewer models in parallel) ---
+        if model_result.candidates:
+
+            async def _review_names(
+                rev_model: str,
+                _candidates: list = model_result.candidates,
+                _model: str = model,
+            ) -> ReviewerScores:
+                rs = ReviewerScores(reviewer_model=rev_model, target="names")
+                try:
+                    t0 = time.monotonic()
+                    revs, cost = await score_with_reviewer(
+                        _candidates,
+                        rev_model,
+                        target="names",
+                        reasoning_effort=config.review_reasoning_effort,
+                    )
+                    rs.elapsed_seconds = round(time.monotonic() - t0, 2)
+                    rs.cost = cost
+                    rs.scores = revs
+                    _apply_reviewer_scores_metrics(rs, revs, "names")
+                    logger.info(
+                        "  ✓ names review by %s: avg=%.3f, $%.4f, %.1fs",
+                        rev_model.split("/")[-1],
+                        rs.avg_score,
+                        cost,
+                        rs.elapsed_seconds,
+                    )
+                except Exception as exc:
+                    logger.error(
+                        "Model %s name review by %s failed: %s",
+                        _model,
+                        rev_model,
+                        exc,
+                    )
+                    rs.error = str(exc)
+                return rs
+
+            name_review_tasks = [_review_names(rm) for rm in reviewer_models]
+            model_result.name_reviewer_results = list(
+                await asyncio.gather(*name_review_tasks)
+            )
+
+            # Populate legacy single-reviewer fields from first successful reviewer
+            first_ok = next(
+                (r for r in model_result.name_reviewer_results if not r.error), None
+            )
+            if first_ok:
+                model_result.quality_scores = first_ok.scores
+                model_result.reviewer_cost = sum(
+                    r.cost for r in model_result.name_reviewer_results
+                )
+                model_result.review_elapsed_seconds = sum(
+                    r.elapsed_seconds for r in model_result.name_reviewer_results
+                )
+                _apply_review_metrics(model_result, first_ok.scores)
+                model_result.status = "reviewed"
+            else:
+                model_result.review_error = "All reviewer models failed for names"
+
+            # --- 2b'. Description scoring phase (same reviewer matrix) ---
+            async def _review_descriptions(
+                rev_model: str,
+                _candidates: list = model_result.candidates,
+                _model: str = model,
+            ) -> ReviewerScores:
+                rs = ReviewerScores(reviewer_model=rev_model, target="descriptions")
+                try:
+                    t0 = time.monotonic()
+                    revs, cost = await score_descriptions(_candidates, rev_model)
+                    rs.elapsed_seconds = round(time.monotonic() - t0, 2)
+                    rs.cost = cost
+                    rs.scores = revs
+                    _apply_reviewer_scores_metrics(rs, revs, "descriptions")
+                    logger.info(
+                        "  ✓ description review by %s: avg=%.3f, $%.4f, %.1fs",
+                        rev_model.split("/")[-1],
+                        rs.avg_score,
+                        cost,
+                        rs.elapsed_seconds,
+                    )
+                except Exception as exc:
+                    logger.error(
+                        "Model %s description review by %s failed: %s",
+                        _model,
+                        rev_model,
+                        exc,
+                    )
+                    rs.error = str(exc)
+                return rs
+
+            desc_review_tasks = [_review_descriptions(rm) for rm in reviewer_models]
+            model_result.description_reviewer_results = list(
+                await asyncio.gather(*desc_review_tasks)
+            )
+            _apply_description_aggregate(model_result)
+
+        # --- 2c. Docs phase (when not names-only) ---
+        if not config.names_only:
+            try:
+                valid_candidates = [
+                    c for c in model_result.candidates if validate_candidate(c)[0]
+                ]
+                if valid_candidates:
+                    # Generate docs (once per compose model — shared across reviewers)
+                    _, docs_cost, docs_elapsed = await generate_docs_for_candidates(
+                        valid_candidates, model, context
+                    )
+                    model_result.docs_compose_cost = docs_cost
+                    model_result.docs_compose_elapsed_seconds = docs_elapsed
+
+                    # Review docs with all reviewer models in parallel
+                    async def _review_docs(
+                        rev_model: str,
+                        _candidates: list = valid_candidates,
+                        _model: str = model,
+                    ) -> ReviewerScores:
+                        rs = ReviewerScores(reviewer_model=rev_model, target="docs")
+                        try:
+                            t0 = time.monotonic()
+                            dr, dc = await score_with_reviewer(
+                                _candidates,
+                                rev_model,
+                                target="docs",
+                                reasoning_effort=config.review_reasoning_effort,
+                            )
+                            rs.elapsed_seconds = round(time.monotonic() - t0, 2)
+                            rs.cost = dc
+                            rs.scores = dr
+                            _apply_reviewer_scores_metrics(rs, dr, "docs")
+                            logger.info(
+                                "  ✓ docs review by %s: avg=%.3f, $%.4f, %.1fs",
+                                rev_model.split("/")[-1],
+                                rs.avg_score,
+                                dc,
+                                rs.elapsed_seconds,
+                            )
+                        except Exception as exc:
+                            logger.error(
+                                "Model %s docs review by %s failed: %s",
+                                _model,
+                                rev_model,
+                                exc,
+                            )
+                            rs.error = str(exc)
+                        return rs
+
+                    docs_review_tasks = [_review_docs(rm) for rm in reviewer_models]
+                    model_result.docs_reviewer_results = list(
+                        await asyncio.gather(*docs_review_tasks)
+                    )
+
+                    # Populate legacy fields from first successful reviewer
+                    first_docs_ok = next(
+                        (r for r in model_result.docs_reviewer_results if not r.error),
+                        None,
+                    )
+                    if first_docs_ok:
+                        model_result.docs_quality_scores = first_docs_ok.scores
+                        model_result.docs_reviewer_cost = sum(
+                            r.cost for r in model_result.docs_reviewer_results
+                        )
+                        model_result.docs_review_elapsed_seconds = sum(
+                            r.elapsed_seconds
+                            for r in model_result.docs_reviewer_results
+                        )
+                        _apply_docs_review_metrics(model_result, first_docs_ok.scores)
+            except Exception as exc:
+                logger.error("Model %s docs phase failed: %s", model, exc)
+                model_result.docs_error = str(exc)
+
+        # Mark final status
+        if not model_result.compose_error:
+            model_result.status = "completed"
+        model_result.error = " | ".join(
+            filter(
+                None,
+                [
+                    model_result.compose_error,
+                    model_result.review_error,
+                    model_result.docs_error,
+                ],
+            )
+        )
+
+        results.append(model_result)
+        _save_incremental(results)
+
+    # --- 3. Physics-correctness judging (optional) ---
+    if config.physics_judge:
+        from functools import partial
+
+        from iter_codex.settings import get_sn_benchmark_reviewer_model
+        from iter_codex.standard_names.physics_judge import (
+            judge_name_physics,
+            load_bench_paths,
+            score_physics_batch,
+        )
+
+        judge_model = config.physics_judge_model or get_sn_benchmark_reviewer_model()
+        bench_paths = load_bench_paths()
+        hardcase_paths = {
+            p["path"] for p in bench_paths if p.get("category") != "control"
+        }
+        jfn = partial(judge_name_physics, model=judge_model)
+        for model_result in results:
+            scored: list[dict] = []
+            hard_names: set[str] = set()
+            for cand in model_result.candidates:
+                nm = _resolve_name(cand)
+                if not nm:
+                    continue
+                # Composed candidates carry the seeding path in ``source_id`` and
+                # the full dedup group in ``dd_paths``. (There is NO ``source_paths``
+                # key on a composed candidate — that is an extraction-item field.)
+                cand_paths = [cand.get("source_id"), *(cand.get("dd_paths") or [])]
+                cand_paths = [p for p in cand_paths if p]
+                pth = cand_paths[0] if cand_paths else ""
+                scored.append(
+                    {
+                        "name": nm,
+                        "path": pth,
+                        "unit": cand.get("unit"),
+                        "documentation": cand.get("documentation")
+                        or cand.get("description")
+                        or "",
+                    }
+                )
+                if any(p in hardcase_paths for p in cand_paths):
+                    hard_names.add(nm)
+            verdicts = await score_physics_batch(scored, jfn)
+            # A model that composed candidates but got ZERO physics verdicts
+            # means the judge pass did not actually score it (judge error or an
+            # interrupted run) — NOT a genuine 0% faithfulness. Surface it so
+            # the empty physics column is never silently misread as a result.
+            if scored and not verdicts:
+                logger.warning(
+                    "physics_judge: model %s composed %d candidate(s) but the "
+                    "judge returned 0 verdicts — physics metrics are EMPTY for "
+                    "this model (judge failure or interrupted run), not 0%% "
+                    "faithfulness. Re-run; do not compare this as a score.",
+                    model_result.model,
+                    len(scored),
+                )
+            apply_physics_metrics(model_result, verdicts, hard_names)
+        # Tripwire: if nothing matched the hard-case set, the bench-path↔candidate
+        # binding is broken (e.g. wrong source field) — surface it loudly rather
+        # than silently reporting a meaningless 0/0 hard-case column.
+        if hardcase_paths and not any(r.physics_hardcase_total for r in results):
+            logger.warning(
+                "physics_judge: 0 hard-case candidates matched across all %d models "
+                "(hardcase_paths=%d) — check candidate source-path binding",
+                len(results),
+                len(hardcase_paths),
+            )
+        _save_incremental(results)
+
+    return _build_partial_report(results)
+
+
+def _apply_reviewer_scores_metrics(
+    rev: ReviewerScores, reviews: list[dict], target: str
+) -> None:
+    """Compute and set metrics on a ReviewerScores instance in-place."""
+    if not reviews:
+        return
+
+    # Average score
+    rev.avg_score = sum(r.get("score", 0) for r in reviews) / len(reviews)
+
+    # Tier distribution
+    for r in reviews:
+        tier = r.get("quality_tier", "unknown")
+        rev.distribution[tier] = rev.distribution.get(tier, 0) + 1
+
+    # Per-dimension averages
+    if target == "names":
+        dims = ("grammar", "semantic", "convention", "completeness")
+    elif target == "descriptions":
+        dims = ("physics_accuracy", "specificity", "consistency", "concision")
+    else:
+        dims = (
+            "description_quality",
+            "documentation_quality",
+            "completeness",
+            "physics_accuracy",
+        )
+    for dim in dims:
+        key = f"{dim}_score"
+        vals = [r[key] for r in reviews if key in r and r[key] > 0]
+        if vals:
+            rev.dim_averages[dim] = round(sum(vals) / len(vals), 2)
+
+
+def _apply_review_metrics(result: ModelResult, reviews: list[dict]) -> None:
+    """Compute and set name-review metrics on *result* in-place."""
+    n_candidates = len(result.candidates)
+    n_reviews = len(reviews)
+    if n_reviews < n_candidates:
+        logger.warning(
+            "Model %s: only %d/%d candidates reviewed "
+            "(partial reviews may bias scores)",
+            result.model,
+            n_reviews,
+            n_candidates,
+        )
+
+    # Tier distribution
+    for r in reviews:
+        tier = r.get("quality_tier", "unknown")
+        result.quality_distribution[tier] = result.quality_distribution.get(tier, 0) + 1
+
+    if reviews:
+        result.avg_quality_score = sum(r.get("score", 0) for r in reviews) / len(
+            reviews
+        )
+        for dim in ("grammar", "semantic", "convention", "completeness"):
+            key = f"{dim}_score"
+            vals = [r[key] for r in reviews if key in r and r[key] > 0]
+            if vals:
+                setattr(result, f"avg_{key}", sum(vals) / len(vals))
+
+    # Doc-length and field-coverage (name-phase metadata)
+    docs = [c.get("documentation", "") or "" for c in result.candidates]
+    result.avg_doc_length = sum(len(d) for d in docs) / len(docs) if docs else 0.0
+
+    all_fields = {
+        "base_token",
+        "qualifiers",
+        "projection_axis",
+        "locus_token",
+        "process_token",
+        "operators",
+    }
+    field_counts = []
+    for c in result.candidates:
+        populated = sum(
+            1 for f in all_fields if c.get(f) or (c.get("segments") or {}).get(f)
+        )
+        field_counts.append(populated / len(all_fields))
+    result.avg_fields_populated = (
+        sum(field_counts) / len(field_counts) if field_counts else 0.0
+    )
+
+
+def apply_physics_metrics(
+    result: ModelResult,
+    verdicts: list[PhysicsVerdict],
+    hardcase_names: set[str],
+) -> None:
+    """Aggregate a PhysicsVerdict list onto a ModelResult in-place."""
+    result.physics_verdicts = [v.model_dump() for v in verdicts]
+    result.physics_total = len(verdicts)
+    result.physics_faithful_count = sum(1 for v in verdicts if v.faithful)
+    result.physics_rate = (
+        result.physics_faithful_count / result.physics_total
+        if result.physics_total
+        else 0.0
+    )
+    hc = [v for v in verdicts if v.name in hardcase_names]
+    result.physics_hardcase_total = len(hc)
+    result.physics_hardcase_faithful = sum(1 for v in hc if v.faithful)
+    result.physics_hardcase_rate = (
+        result.physics_hardcase_faithful / result.physics_hardcase_total
+        if result.physics_hardcase_total
+        else 0.0
+    )
+
+
+def _apply_description_aggregate(result: ModelResult) -> None:
+    """Aggregate compose-time description scores across judges in-place.
+
+    Sets ``avg_description_score`` to the mean over successful judges, plus
+    the summed reviewer cost and elapsed time. Per-dimension averages remain
+    on each judge's ``ReviewerScores.dim_averages``.
+    """
+    judges = result.description_reviewer_results
+    ok = [r for r in judges if not r.error]
+    if ok:
+        result.avg_description_score = round(sum(r.avg_score for r in ok) / len(ok), 4)
+    result.description_reviewer_cost = sum(r.cost for r in judges)
+    result.description_review_elapsed_seconds = sum(r.elapsed_seconds for r in judges)
+
+
+def _apply_docs_review_metrics(result: ModelResult, docs_reviews: list[dict]) -> None:
+    """Compute and set docs-review metrics on *result* in-place."""
+    for r in docs_reviews:
+        tier = r.get("quality_tier", "unknown")
+        result.docs_quality_distribution[tier] = (
+            result.docs_quality_distribution.get(tier, 0) + 1
+        )
+    if docs_reviews:
+        result.avg_docs_quality_score = sum(
+            r.get("score", 0) for r in docs_reviews
+        ) / len(docs_reviews)
+        for dim in (
+            "description_quality",
+            "documentation_quality",
+            "completeness",
+            "physics_accuracy",
+        ):
+            key = f"{dim}_score"
+            vals = [r[key] for r in docs_reviews if key in r and r[key] > 0]
+            if vals:
+                setattr(result, f"avg_{key}", sum(vals) / len(vals))
+
+
+def _extract_candidates(config: BenchmarkConfig) -> list[dict]:
+    """Extract candidates using the fixed reference dataset.
+
+    Uses REFERENCE_NAMES paths as explicit inputs, enriched through the
+    same production pipeline (graph context, clustering, batching).
+    This ensures benchmark reproducibility — same paths every run.
+
+    Returns list of batch dicts with keys: group_key, items, existing_names, context.
+    """
+    from iter_codex.standard_names.benchmark_reference import REFERENCE_NAMES
+    from iter_codex.standard_names.sources.dd import extract_dd_candidates
+
+    # An explicit source list wins: a caller that names the paths to compose
+    # draws its own batch through the same extraction. Physics-correctness mode
+    # composes the fixed hard-case test set (research/physics_bench_paths.json)
+    # so the judge scores the failure classes the benchmark targets; otherwise
+    # compose the curated reference dataset for reproducible name/docs scoring.
+    if config.source_paths:
+        reference_paths = list(config.source_paths)
+        total_available = len(reference_paths)
+    elif config.physics_judge:
+        from iter_codex.standard_names.physics_judge import load_bench_paths
+
+        reference_paths = [p["path"] for p in load_bench_paths()]
+        total_available = len(reference_paths)
+    else:
+        reference_paths = list(REFERENCE_NAMES.keys())
+        total_available = len(REFERENCE_NAMES)
+
+    # Cap by max_candidates
+    if config.max_candidates and len(reference_paths) > config.max_candidates:
+        reference_paths = reference_paths[: config.max_candidates]
+
+    logger.info(
+        "Benchmark extraction: %d/%d reference paths",
+        len(reference_paths),
+        total_available,
+    )
+
+    batches = extract_dd_candidates(
+        explicit_paths=reference_paths,
+        force=True,  # always force — benchmark paths are pre-curated
+        write_skipped=False,  # no graph side effects
+    )
+
+    # A reference path can fail to yield a candidate for two DISTINCT reasons,
+    # which need DIFFERENT corrective action — so classify them explicitly
+    # rather than emit a single ambiguous "missing from graph" line:
+    #   (a) the path does not exist in the Data Dictionary at all → a fixture
+    #       typo/renamed path; fix the reference path (e.g. profiles_1d/q, not
+    #       .../safety_factor).
+    #   (b) the path exists in the DD but was not admitted as a standard-name
+    #       SOURCE (e.g. signal-STRUCTURE quantities pending source admission)
+    #       → expected until that admission lands; the candidate cannot be
+    #       composed yet, not a benchmark bug.
+    extracted_paths = set()
+    for batch in batches:
+        for item in batch.items:
+            extracted_paths.add(item.get("path", item.get("source_id", "")))
+    missing = set(reference_paths) - extracted_paths
+    if missing:
+        from iter_codex.standard_names.sources.dd import dd_path_exists
+
+        not_in_dd = sorted(p for p in missing if not dd_path_exists(p))
+        not_admitted = sorted(p for p in missing if p not in not_in_dd)
+        if not_in_dd:
+            logger.warning(
+                "Benchmark: %d/%d reference paths do NOT exist in the Data "
+                "Dictionary — fix the fixture path(s): %s",
+                len(not_in_dd),
+                len(reference_paths),
+                not_in_dd,
+            )
+        if not_admitted:
+            logger.warning(
+                "Benchmark: %d/%d reference paths exist in the DD but are not "
+                "admitted as standard-name sources yet (cannot compose until "
+                "source admission lands) — expected, not a benchmark bug: %s",
+                len(not_admitted),
+                len(reference_paths),
+                not_admitted,
+            )
+
+    # Convert ExtractionBatch to plain dicts
+    result = []
+    for batch in batches:
+        result.append(
+            {
+                "group_key": batch.group_key,
+                "items": batch.items,
+                "existing_names": list(batch.existing_names),
+                "context": batch.context,
+            }
+        )
+    return result
+
+
+def _rebuild_batches(batches: list[dict], max_items: int) -> list[dict]:
+    """Rebuild batches capping total items at max_items."""
+    result = []
+    count = 0
+    for batch in batches:
+        items = batch.get("items", [])
+        remaining = max_items - count
+        if remaining <= 0:
+            break
+        if len(items) > remaining:
+            items = items[:remaining]
+        result.append({**batch, "items": items})
+        count += len(items)
+    return result
+
+
+def _classify_batch_error(exc: BaseException) -> str:
+    """Name why a compose batch produced no usable result.
+
+    A structured call reports how many provider responses it received before
+    failing. Zero responses means the transport failed before the provider
+    answered - an endpoint drop - whereas one or more responses means the
+    provider answered and its answer could not be turned into a batch.
+    """
+    response_count = getattr(exc, "response_count", None)
+    if response_count is not None:
+        return "endpoint_drop" if response_count == 0 else "model_refusal"
+    if isinstance(exc, (ConnectionError, TimeoutError, OSError)):
+        return "endpoint_drop"
+    return "provider_error"
+
+
+async def _run_model(
+    model: str,
+    extraction_batches: list[dict],
+    config: BenchmarkConfig,
+    reference: dict[str, dict],
+    system_prompt: str,
+    context: dict[str, Any],
+) -> ModelResult:
+    """Run a single model across all extraction batches."""
+    from iter_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.llm.prompt_loader import render_prompt
+
+    result = ModelResult(model=model)
+    all_candidates: list[dict] = []
+
+    t0 = time.monotonic()
+
+    for _run_idx in range(config.runs_per_model):
+        for batch in extraction_batches:
+            items = batch.get("items", [])
+            if not items:
+                continue
+
+            group_key = batch.get("group_key", "unknown")
+            existing = set(batch.get("existing_names", []))
+
+            # Build user prompt context — mirrors workers.py pattern
+            user_context = {
+                "items": items,
+                "ids_name": group_key,
+                "existing_names": sorted(existing)[:200],
+                "cluster_context": batch.get("context", ""),
+            }
+
+            # Opt-in: carry the production nearby-name comparator block, built
+            # by the same helpers the compose path uses and reranked by the
+            # compose rerank switch, so the harness prompt sees the block
+            # exactly as production does. Any rerank spend is booked to this
+            # model result's compose cost.
+            if config.comparator_block:
+                from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+                    _collect_nearby_name_comparators,
+                    _rerank_comparators_for_compose,
+                )
+
+                nearby = await asyncio.to_thread(
+                    _collect_nearby_name_comparators, items
+                )
+                nearby, rerank_cost, _seat = await _rerank_comparators_for_compose(
+                    items, nearby
+                )
+                result.total_cost += rerank_cost
+                user_context["nearby_existing_names"] = nearby
+
+            try:
+                user_prompt = render_prompt(
+                    "sn/generate_name_dd", {**context, **user_context}
+                )
+            except Exception:
+                logger.warning("Failed to render prompt for batch %s", group_key)
+                result.batch_errors += 1
+                continue
+
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+
+            try:
+                # Mirror production: compose runs at the [sn-compose] reasoning
+                # effort so bench name quality reflects campaign settings —
+                # unless the run overrides it for an effort-axis scan.
+                # No temperature is sent, matching the production compose call,
+                # which omits it and takes the provider default. A thinking
+                # seat given an explicit greedy temperature does not terminate
+                # and runs to the token budget, so the call never returns.
+                from iter_codex.settings import get_reasoning_effort
+
+                compose_effort = config.reasoning_effort or get_reasoning_effort(
+                    "sn-compose"
+                )
+                if compose_effort == "none":  # explicit no-reasoning-budget
+                    compose_effort = None
+                llm_response = await acall_llm_structured(
+                    model=model,
+                    messages=messages,
+                    response_model=StandardNameComposeBatch,
+                    service="standard-names",
+                    reasoning_effort=compose_effort,
+                    max_retries=2,
+                )
+                llm_result, cost, tokens = llm_response
+                result.total_cost += cost
+                result.total_tokens += tokens
+                result.cache_read_tokens += getattr(
+                    llm_response, "cache_read_tokens", 0
+                )
+                result.cache_creation_tokens += getattr(
+                    llm_response, "cache_creation_tokens", 0
+                )
+                logger.debug(
+                    "Batch %s: cost=%.4f tokens=%d",
+                    group_key,
+                    cost,
+                    tokens,
+                )
+
+                # Collect candidates — merge extraction context
+                for c_idx, c in enumerate(llm_result.candidates):
+                    candidate = c.model_dump()
+                    # Compose the standard name from segments
+                    candidate["standard_name"] = _resolve_name(candidate)
+                    # Carry forward extraction context for docs generation
+                    if c_idx < len(items):
+                        src = items[c_idx]
+                        for key in ("source_paths", "physics_domain", "unit"):
+                            if key in src and key not in candidate:
+                                candidate[key] = src[key]
+                    all_candidates.append(candidate)
+                result.skipped_count += len(llm_result.skipped)
+                result.attachment_count += len(llm_result.attachments)
+                result.vocab_gap_count += len(getattr(llm_result, "vocab_gaps", []))
+
+            except Exception as exc:
+                logger.warning(
+                    "LLM call failed for model %s batch %s: %s",
+                    model,
+                    group_key,
+                    exc,
+                )
+                result.batch_errors += 1
+                cause = _classify_batch_error(exc)
+                result.batch_error_causes[cause] = (
+                    result.batch_error_causes.get(cause, 0) + 1
+                )
+
+    elapsed = time.monotonic() - t0
+    result.elapsed_seconds = round(elapsed, 2)
+    result.candidates = all_candidates
+
+    # --- Validate grammar ---
+    valid = 0
+    invalid = 0
+    fields_ok = 0
+    for c in all_candidates:
+        g_valid, f_consistent = validate_candidate(c)
+        if g_valid:
+            valid += 1
+        else:
+            invalid += 1
+        if f_consistent:
+            fields_ok += 1
+
+    result.grammar_valid_count = valid
+    result.grammar_invalid_count = invalid
+    result.fields_consistent_count = fields_ok
+
+    # --- Derived metrics ---
+    n = len(all_candidates)
+    if elapsed > 0 and n > 0:
+        result.names_per_minute = round(n / elapsed * 60, 1)
+    if n > 0:
+        result.cost_per_name = round(result.total_cost / n, 6)
+
+    # --- Reference comparison ---
+    overlap, ref_total, precision, recall = compare_to_reference(
+        all_candidates, reference
+    )
+    result.reference_overlap = overlap
+    result.reference_total = ref_total
+    result.reference_precision = round(precision, 4)
+    result.reference_recall = round(recall, 4)
+
+    logger.info(
+        "Model %s: %d names, %d valid, %d invalid, $%.4f cost, %.1f names/min",
+        model,
+        n,
+        valid,
+        invalid,
+        result.total_cost,
+        result.names_per_minute,
+    )
+
+    return result
+
+
+async def rescore_descriptions_report(
+    report: BenchmarkReport,
+) -> BenchmarkReport:
+    """Run ONLY the compose-time description-scoring pass on an existing report.
+
+    Loads the stored candidates from each :class:`ModelResult` (they carry the
+    compose-time ``description``), scores them with every reviewer model in
+    ``report.config.reviewer_models`` (each judge independently), and merges
+    the new ``description_reviewer_results`` + ``avg_description_score`` back
+    onto the report in-place. Does NOT re-run composition or names review.
+
+    Returns the same (mutated) report for convenience.
+    """
+    reviewer_models = report.config.reviewer_models
+    if not reviewer_models and report.config.reviewer_model:
+        reviewer_models = [report.config.reviewer_model]
+    if not reviewer_models:
+        raise ValueError(
+            "No reviewer_models on the report config; cannot rescore descriptions."
+        )
+
+    for model_result in report.results:
+        if not model_result.candidates:
+            continue
+
+        async def _review_descriptions(
+            rev_model: str,
+            _candidates: list = model_result.candidates,
+            _model: str = model_result.model,
+        ) -> ReviewerScores:
+            rs = ReviewerScores(reviewer_model=rev_model, target="descriptions")
+            try:
+                t0 = time.monotonic()
+                revs, cost = await score_descriptions(_candidates, rev_model)
+                rs.elapsed_seconds = round(time.monotonic() - t0, 2)
+                rs.cost = cost
+                rs.scores = revs
+                _apply_reviewer_scores_metrics(rs, revs, "descriptions")
+                logger.info(
+                    "  ✓ [rescore] description review by %s for %s: avg=%.3f, $%.4f",
+                    rev_model.split("/")[-1],
+                    _model,
+                    rs.avg_score,
+                    cost,
+                )
+            except Exception as exc:
+                logger.error(
+                    "[rescore] %s description review by %s failed: %s",
+                    _model,
+                    rev_model,
+                    exc,
+                )
+                rs.error = str(exc)
+            return rs
+
+        tasks = [_review_descriptions(rm) for rm in reviewer_models]
+        model_result.description_reviewer_results = list(await asyncio.gather(*tasks))
+        _apply_description_aggregate(model_result)
+
+    return report
+
+
+# ---------------------------------------------------------------------------
+# Rich table rendering
+# ---------------------------------------------------------------------------
+
+
+def render_comparison_table(report: BenchmarkReport) -> None:
+    """Render Rich comparison tables to stdout.
+
+    Shows compose metrics, quality scores per reviewer (matrix when
+    multiple reviewers), and cost/timing summary.
+    """
+    from rich.console import Console
+    from rich.table import Table
+
+    console = Console()
+
+    # --- Compose metrics table ---
+    has_quality = any(r.quality_scores for r in report.results)
+    has_multi_rev = any(len(r.name_reviewer_results) > 1 for r in report.results)
+    has_desc = any(r.description_reviewer_results for r in report.results)
+
+    table = Table(
+        title="SN Benchmark — Compose Results",
+        show_header=True,
+        header_style="bold cyan",
+    )
+
+    table.add_column("Model", style="bold")
+    table.add_column("Status", justify="center")
+    table.add_column("Names", justify="right")
+    table.add_column("Skip/Att/Gap", justify="right")
+    table.add_column("Valid %", justify="right")
+    table.add_column("Fields %", justify="right")
+    table.add_column("Ref Match", justify="right")
+    table.add_column("Cost", justify="right")
+    table.add_column("Names/min", justify="right")
+    table.add_column("$/name", justify="right")
+    table.add_column("Cache %", justify="right")
+    table.add_column("Errors", justify="right")
+    if has_desc:
+        table.add_column("Desc", justify="right")
+    if has_quality and not has_multi_rev:
+        # Single-reviewer: inline scores in compose table
+        table.add_column("Avg Quality", justify="right")
+        table.add_column("Gram", justify="right")
+        table.add_column("Sem", justify="right")
+        table.add_column("Conv", justify="right")
+        table.add_column("Compl", justify="right")
+
+    for r in report.results:
+        n = len(r.candidates)
+        status_colours = {
+            "completed": "green",
+            "composed": "yellow",
+            "reviewed": "cyan",
+            "failed": "red",
+            "pending": "dim",
+        }
+        colour = status_colours.get(r.status, "white")
+        status_str = f"[{colour}]{r.status}[/{colour}]"
+        sag_str = f"{r.skipped_count}/{r.attachment_count}/{r.vocab_gap_count}"
+        valid_pct = f"{r.grammar_valid_count / n * 100:.0f}%" if n else "—"
+        fields_pct = f"{r.fields_consistent_count / n * 100:.0f}%" if n else "—"
+        ref_match = (
+            f"{r.reference_overlap}/{r.reference_total}" if r.reference_total else "—"
+        )
+        cost_str = f"${r.total_cost:.4f}" if r.total_cost > 0 else "—"
+        speed_str = f"{r.names_per_minute:.0f}" if r.names_per_minute > 0 else "—"
+        cpn_str = f"${r.cost_per_name:.4f}" if r.cost_per_name > 0 else "—"
+        cache_total = r.cache_read_tokens + r.cache_creation_tokens
+        cache_pct = (
+            f"{r.cache_read_tokens / cache_total * 100:.0f}%"
+            if cache_total > 0
+            else "—"
+        )
+        err_str = str(r.batch_errors) if r.batch_errors > 0 else "0"
+
+        row_data = [
+            r.model,
+            status_str,
+            str(n),
+            sag_str,
+            valid_pct,
+            fields_pct,
+            ref_match,
+            cost_str,
+            speed_str,
+            cpn_str,
+            cache_pct,
+            err_str,
+        ]
+
+        if has_desc:
+            desc_str = (
+                f"{r.avg_description_score:.2f}"
+                if r.description_reviewer_results
+                and any(not jr.error for jr in r.description_reviewer_results)
+                else "—"
+            )
+            row_data.append(desc_str)
+
+        if has_quality and not has_multi_rev:
+            qual_str = f"{r.avg_quality_score:.2f}" if r.quality_scores else "—"
+            gram_str = f"{r.avg_grammar_score:.1f}" if r.quality_scores else "—"
+            sem_str = f"{r.avg_semantic_score:.1f}" if r.quality_scores else "—"
+            conv_str = f"{r.avg_convention_score:.1f}" if r.quality_scores else "—"
+            compl_str = f"{r.avg_completeness_score:.1f}" if r.quality_scores else "—"
+            row_data.extend([qual_str, gram_str, sem_str, conv_str, compl_str])
+
+        table.add_row(*row_data)
+
+    console.print()
+    console.print(table)
+
+    # --- Multi-reviewer names quality matrix ---
+    if has_multi_rev:
+        _render_reviewer_matrix(console, report, "names")
+
+    # --- Single-reviewer quality distribution (legacy) ---
+    elif has_quality:
+        _render_quality_distribution(console, report)
+
+    # --- Docs quality ---
+    has_docs = any(r.docs_quality_scores for r in report.results)
+    has_multi_docs_rev = any(len(r.docs_reviewer_results) > 1 for r in report.results)
+    if has_multi_docs_rev:
+        _render_reviewer_matrix(console, report, "docs")
+    elif has_docs:
+        _render_docs_table(console, report)
+
+    # --- Reviewer agreement (when multiple reviewers) ---
+    if has_multi_rev:
+        _render_reviewer_agreement(console, report, "names")
+    if has_multi_docs_rev:
+        _render_reviewer_agreement(console, report, "docs")
+
+    # --- Physics correctness ---
+    if any(getattr(r, "physics_total", 0) for r in report.results):
+        physics_table = Table(
+            title="Physics Correctness", show_header=True, header_style="bold"
+        )
+        physics_table.add_column("Model", style="bold")
+        physics_table.add_column("Physics %", justify="right")
+        physics_table.add_column("Hard-case %", justify="right")
+        physics_table.add_column("Valid %", justify="right")
+        physics_table.add_column("$/name", justify="right")
+        for r in sorted(report.results, key=lambda x: x.physics_rate, reverse=True):
+            n = len(r.candidates)
+            valid_pct = (r.grammar_valid_count / n * 100) if n else 0.0
+            cost_per = (r.total_cost / n) if n else 0.0
+            physics_table.add_row(
+                r.model,
+                f"{r.physics_rate * 100:.0f}",
+                f"{r.physics_hardcase_rate * 100:.0f}",
+                f"{valid_pct:.0f}",
+                f"${cost_per:.4f}",
+            )
+        console.print()
+        console.print(physics_table)
+
+    # --- Cost summary ---
+    _render_cost_summary(console, report)
+
+
+def _render_reviewer_matrix(console: Any, report: BenchmarkReport, target: str) -> None:
+    """Render a compose_model × reviewer_model quality matrix."""
+    from rich.table import Table
+
+    title = "Names" if target == "names" else "Docs"
+    results_attr = (
+        "name_reviewer_results" if target == "names" else "docs_reviewer_results"
+    )
+
+    # Collect all reviewer models across all results
+    all_reviewers: list[str] = []
+    seen: set[str] = set()
+    for r in report.results:
+        for rv in getattr(r, results_attr, []):
+            if rv.reviewer_model not in seen:
+                all_reviewers.append(rv.reviewer_model)
+                seen.add(rv.reviewer_model)
+
+    if not all_reviewers:
+        return
+
+    dims = (
+        ("grammar", "semantic", "convention", "completeness")
+        if target == "names"
+        else (
+            "description_quality",
+            "documentation_quality",
+            "completeness",
+            "physics_accuracy",
+        )
+    )
+    dim_short = {
+        "grammar": "Gr",
+        "semantic": "Se",
+        "convention": "Cv",
+        "completeness": "Cp",
+        "description_quality": "Desc",
+        "documentation_quality": "Doc",
+        "physics_accuracy": "Phys",
+    }
+
+    table = Table(
+        title=f"{title} Quality Matrix (compose × reviewer)",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    table.add_column("Compose Model", style="bold")
+    for rev in all_reviewers:
+        short_rev = rev.split("/")[-1]
+        table.add_column(f"{short_rev}\nAvg", justify="right")
+        for d in dims:
+            table.add_column(dim_short.get(d, d[:4]), justify="right")
+        table.add_column("Cost", justify="right")
+
+    for r in report.results:
+        rev_map = {rv.reviewer_model: rv for rv in getattr(r, results_attr, [])}
+        row: list[str] = [r.model]
+        for rev in all_reviewers:
+            rv = rev_map.get(rev)
+            if rv and not rv.error:
+                row.append(f"{rv.avg_score:.3f}")
+                for d in dims:
+                    val = rv.dim_averages.get(d, 0)
+                    row.append(f"{val:.1f}" if val else "—")
+                row.append(f"${rv.cost:.3f}")
+            else:
+                error_str = rv.error[:20] if rv and rv.error else "—"
+                row.extend([error_str] + ["—"] * len(dims) + ["—"])
+        table.add_row(*row)
+
+    console.print()
+    console.print(table)
+
+
+def _render_reviewer_agreement(
+    console: Any, report: BenchmarkReport, target: str
+) -> None:
+    """Show pairwise rank correlation between reviewers."""
+    from rich.table import Table
+
+    results_attr = (
+        "name_reviewer_results" if target == "names" else "docs_reviewer_results"
+    )
+    title = "Names" if target == "names" else "Docs"
+
+    # Build reviewer → compose_model → avg_score mapping
+    reviewer_scores: dict[str, dict[str, float]] = {}
+    for r in report.results:
+        for rv in getattr(r, results_attr, []):
+            if rv.error:
+                continue
+            reviewer_scores.setdefault(rv.reviewer_model, {})[r.model] = rv.avg_score
+
+    reviewers = list(reviewer_scores.keys())
+    if len(reviewers) < 2:
+        return
+
+    # Compute Spearman rank correlation for each pair
+    table = Table(
+        title=f"{title} Reviewer Agreement (Spearman ρ)",
+        show_header=True,
+        header_style="bold yellow",
+    )
+    table.add_column("Reviewer", style="bold")
+    for rev in reviewers:
+        table.add_column(rev.split("/")[-1], justify="right")
+
+    for rev_a in reviewers:
+        row = [rev_a.split("/")[-1]]
+        for rev_b in reviewers:
+            if rev_a == rev_b:
+                row.append("1.000")
+                continue
+            # Find shared compose models
+            shared = sorted(set(reviewer_scores[rev_a]) & set(reviewer_scores[rev_b]))
+            if len(shared) < 3:
+                row.append("—")
+                continue
+            # Spearman rank correlation
+            scores_a = [reviewer_scores[rev_a][m] for m in shared]
+            scores_b = [reviewer_scores[rev_b][m] for m in shared]
+            rho = spearman_rho(scores_a, scores_b)
+            row.append(f"{rho:.3f}")
+        table.add_row(*row)
+
+    console.print()
+    console.print(table)
+
+
+def _render_quality_distribution(console: Any, report: BenchmarkReport) -> None:
+    """Render single-reviewer quality distribution table."""
+    from rich.table import Table
+
+    qual_table = Table(
+        title="Quality Distribution",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    qual_table.add_column("Model", style="bold")
+    qual_table.add_column("Outstanding", justify="right")
+    qual_table.add_column("Good", justify="right")
+    qual_table.add_column("Inadequate", justify="right")
+    qual_table.add_column("Poor", justify="right")
+
+    for r in report.results:
+        if r.quality_scores:
+            dist = r.quality_distribution
+            n_reviews = len(r.quality_scores)
+            qual_table.add_row(
+                r.model,
+                _dist_cell(dist, "outstanding", n_reviews),
+                _dist_cell(dist, "good", n_reviews),
+                _dist_cell(dist, "inadequate", n_reviews),
+                _dist_cell(dist, "poor", n_reviews),
+            )
+
+    console.print()
+    console.print(qual_table)
+
+
+def _dist_cell(dist: dict[str, int], tier: str, total: int) -> str:
+    count = dist.get(tier, 0)
+    if total <= 0:
+        return "—"
+    return f"{count} ({count / total * 100:.0f}%)"
+
+
+def _render_docs_table(console: Any, report: BenchmarkReport) -> None:
+    """Render single-reviewer docs quality table."""
+    from rich.table import Table
+
+    docs_table = Table(
+        title="Docs Quality Results",
+        show_header=True,
+        header_style="bold green",
+    )
+    docs_table.add_column("Model", style="bold")
+    docs_table.add_column("Docs Scored", justify="right")
+    docs_table.add_column("Avg Docs Q", justify="right")
+    docs_table.add_column("Desc", justify="right")
+    docs_table.add_column("Docs", justify="right")
+    docs_table.add_column("Compl", justify="right")
+    docs_table.add_column("Physics", justify="right")
+    docs_table.add_column("Docs Cost", justify="right")
+
+    for r in report.results:
+        if r.docs_quality_scores:
+            n_docs = len(r.docs_quality_scores)
+            docs_table.add_row(
+                r.model,
+                str(n_docs),
+                f"{r.avg_docs_quality_score:.2f}",
+                f"{r.avg_description_quality_score:.1f}",
+                f"{r.avg_documentation_quality_score:.1f}",
+                f"{r.avg_docs_completeness_score:.1f}",
+                f"{r.avg_physics_accuracy_score:.1f}",
+                f"${r.docs_compose_cost + r.docs_reviewer_cost:.4f}",
+            )
+        else:
+            docs_table.add_row(r.model, "—", "—", "—", "—", "—", "—", "—")
+
+    console.print()
+    console.print(docs_table)
+
+
+def _render_cost_summary(console: Any, report: BenchmarkReport) -> None:
+    """Render cost and timing summary."""
+    # Determine reviewer label
+    reviewer_models = report.config.reviewer_models
+    if not reviewer_models and report.config.reviewer_model:
+        reviewer_models = [report.config.reviewer_model]
+    reviewer_str = (
+        f" | Reviewers: {', '.join(m.split('/')[-1] for m in reviewer_models)}"
+        if reviewer_models
+        else ""
+    )
+
+    total_compose_cost = sum(r.total_cost for r in report.results)
+    total_reviewer_cost = sum(r.reviewer_cost for r in report.results)
+    total_docs_compose_cost = sum(r.docs_compose_cost for r in report.results)
+    total_docs_reviewer_cost = sum(r.docs_reviewer_cost for r in report.results)
+    total_cost = (
+        total_compose_cost
+        + total_reviewer_cost
+        + total_docs_compose_cost
+        + total_docs_reviewer_cost
+    )
+    total_compose_elapsed = sum(r.compose_elapsed_seconds for r in report.results)
+    total_review_elapsed = sum(r.review_elapsed_seconds for r in report.results)
+    total_docs_compose_elapsed = sum(
+        r.docs_compose_elapsed_seconds for r in report.results
+    )
+    total_docs_review_elapsed = sum(
+        r.docs_review_elapsed_seconds for r in report.results
+    )
+    total_elapsed = (
+        total_compose_elapsed
+        + total_review_elapsed
+        + total_docs_compose_elapsed
+        + total_docs_review_elapsed
+    )
+
+    has_docs = any(r.docs_quality_scores for r in report.results)
+
+    console.print("\n[bold]Cost Summary[/bold]")
+    console.print(f"  Compose cost:  ${total_compose_cost:.4f}")
+    console.print(f"  Reviewer cost: ${total_reviewer_cost:.4f}")
+    if has_docs:
+        console.print(f"  Docs compose cost:  ${total_docs_compose_cost:.4f}")
+        console.print(f"  Docs reviewer cost: ${total_docs_reviewer_cost:.4f}")
+    console.print(f"  [bold]Total cost:  ${total_cost:.4f}[/bold]")
+    console.print(
+        f"  Compose time:  {total_compose_elapsed:.1f}s ({total_compose_elapsed / 60:.1f}min)"
+    )
+    console.print(
+        f"  Review time:   {total_review_elapsed:.1f}s ({total_review_elapsed / 60:.1f}min)"
+    )
+    if has_docs:
+        console.print(
+            f"  Docs compose time:  {total_docs_compose_elapsed:.1f}s ({total_docs_compose_elapsed / 60:.1f}min)"
+        )
+        console.print(
+            f"  Docs review time:   {total_docs_review_elapsed:.1f}s ({total_docs_review_elapsed / 60:.1f}min)"
+        )
+    console.print(
+        f"  Total wall-clock: {total_elapsed:.1f}s ({total_elapsed / 60:.1f}min)"
+    )
+    console.print(f"  Models evaluated: {len(report.results)}")
+    completed = sum(1 for r in report.results if r.status == "completed")
+    failed = sum(1 for r in report.results if r.status == "failed")
+    partial = len(report.results) - completed - failed
+    parts = [f"{completed} completed"]
+    if partial:
+        parts.append(f"{partial} partial")
+    if failed:
+        parts.append(f"{failed} failed")
+    console.print(f"  Status: {', '.join(parts)}")
+
+    prov = report.provenance
+    prov_str = ""
+    if prov.codex_version or prov.codex_commit:
+        prov_str = (
+            f" | codex={prov.codex_version}@{prov.codex_commit}"
+            f" ISN={prov.isn_version} DD={prov.dd_version}"
+        )
+
+    console.print(
+        f"\n[dim]Extraction: {report.extraction_count} items | "
+        f"Temperature: provider default{reviewer_str} | "
+        f"Timestamp: {report.timestamp}{prov_str}[/dim]"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Record benchmark: a structure crossed with a model, scored blind
+# ---------------------------------------------------------------------------
+
+RECORD_BENCHMARK_SCHEMA = "imas-codex.standard-name-record-benchmark/1"
+RECORD_STRUCTURES = ("one-pass", "staged")
+RECORD_VERDICTS = ("right", "wrong", "blocked")
+RECORD_SPLITS = ("development", "held_out")
+# What a blocked row may report, as buckets the report can be read and compared
+# on. A generator's own wording is mapped into these: anything outside them is
+# "other", so a typo never becomes its own row in a published table.
+RECORD_BLOCKER_BUCKETS = (
+    "collision",
+    "insufficient-source-text",
+    "grammar-gap",
+    "registry-conflict",
+    "no-incumbent",
+    "generation-failure",
+    "judge-failure",
+    "other",
+)
+_BLOCKER_ALIASES = {
+    "bound_source": "insufficient-source-text",
+    "missing_bound_source": "insufficient-source-text",
+    "wrong_bound_source": "insufficient-source-text",
+    "missing-source-text": "insufficient-source-text",
+    "insufficient_source_text": "insufficient-source-text",
+    "source_scope_conflict": "registry-conflict",
+    "missing_coordinate_convention": "grammar-gap",
+    "grammar": "grammar-gap",
+}
+
+
+def blocker_bucket(blocker: str) -> str:
+    """Map a generator's blocker wording onto the published vocabulary."""
+    text = blocker.strip()
+    for prefix in ("generation-failure:", "judge-failure:"):
+        if text.startswith(prefix):
+            return prefix.rstrip(":")
+    if text in RECORD_BLOCKER_BUCKETS:
+        return text
+    return _BLOCKER_ALIASES.get(text, "other")
+
+
+class BenchmarkControlDidNotSeparate(RuntimeError):
+    """Raised when a control arm does not move the way the measure requires."""
+
+
+def wilson_interval(
+    successes: int,
+    total: int,
+    z: float = 1.9599639845400546,
+) -> tuple[float, float]:
+    """Return the Wilson score interval for ``successes`` of ``total``.
+
+    The report quotes this interval per arm. It is bounded in [0, 1] and keeps
+    a non-zero width at a perfect or zero share, so a small arm never reports
+    [1.0, 1.0] as certainty.
+    """
+    if total <= 0:
+        return (0.0, 0.0)
+    if not 0 <= successes <= total:
+        raise ValueError("successes must lie between zero and total")
+    share = successes / total
+    denominator = 1.0 + z * z / total
+    centre = (share + z * z / (2 * total)) / denominator
+    spread = (
+        z
+        * math.sqrt(share * (1.0 - share) / total + z * z / (2 * total) ** 2)
+        / denominator
+    )
+    return (max(0.0, centre - spread), min(1.0, centre + spread))
+
+
+def assign_development_split(
+    members: Sequence[str],
+    *,
+    seed: int,
+    strata: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    """Split members into ``development`` and ``held_out`` halves once.
+
+    Members are ranked by a salted digest inside their stratum and alternate
+    between the halves. The assignment depends only on the seed and the
+    members' names, so a rerun of the runner reproduces the split, and a
+    member's stratum (a defective or sound reference answer, say) is spread
+    evenly rather than landing on one side.
+    """
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise TypeError("seed must be an integer")
+    names = list(dict.fromkeys(members))
+    if not names:
+        return {}
+    if len(names) != len(members):
+        raise ValueError("members must be unique")
+    labels = dict(strata or {})
+    unknown = [name for name in names if name not in labels]
+    for name in unknown:
+        labels[name] = "all"
+    by_stratum: dict[str, list[str]] = {}
+    for name in names:
+        by_stratum.setdefault(stratum := str(labels[name]), []).append(name)
+    split: dict[str, str] = {}
+    for stratum in sorted(by_stratum):
+        group = by_stratum[stratum]
+        ranked = sorted(
+            group,
+            key=lambda name: hashlib.sha256(f"{seed}:{name}".encode()).hexdigest(),
+        )
+        for index, name in enumerate(ranked):
+            split[name] = "development" if index % 2 == 0 else "held_out"
+    return split
+
+
+@dataclass(frozen=True)
+class RecordBenchmarkArm:
+    """One arm of the record benchmark: a structure crossed with a model."""
+
+    name: str
+    structure: str
+    model: str
+    withheld_enclosing_text: bool = False
+    incumbent_unchanged: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.name.strip():
+            raise ValueError("an arm needs a name")
+        if self.incumbent_unchanged:
+            if self.structure:
+                raise ValueError(
+                    "the incumbent-unchanged control has no generation structure"
+                )
+            return
+        if self.structure not in RECORD_STRUCTURES:
+            raise ValueError(f"unknown structure {self.structure!r}")
+        if not self.model.strip():
+            raise ValueError(f"arm {self.name!r} needs a model")
+
+
+@dataclass(frozen=True)
+class RecordBenchmarkRow:
+    """One arm's scored record for one reference member."""
+
+    member: str
+    arm: str
+    verdict: str
+    blocker: str | None = None
+    changed_incumbent: bool | None = None
+    incumbent_right: bool | None = None
+    cost_usd: float = 0.0
+    seconds: float = 0.0
+    input_tokens: int = 0
+    output_tokens: int = 0
+
+    def __post_init__(self) -> None:
+        if not self.member.strip():
+            raise ValueError("a row needs a member")
+        if not self.arm.strip():
+            raise ValueError("a row needs an arm")
+        if self.verdict not in RECORD_VERDICTS:
+            raise ValueError(f"unknown verdict {self.verdict!r}")
+        if self.verdict == "blocked" and not (self.blocker or "").strip():
+            raise ValueError("a blocked row must name its blocker type")
+        if self.verdict != "blocked" and self.blocker:
+            raise ValueError("only a blocked row carries a blocker type")
+        for field_name in ("cost_usd", "seconds"):
+            value = getattr(self, field_name)
+            if (
+                not isinstance(value, int | float)
+                or not math.isfinite(value)
+                or value < 0
+            ):
+                raise ValueError(f"{field_name} must be finite and non-negative")
+        for field_name in ("input_tokens", "output_tokens"):
+            value = getattr(self, field_name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"{field_name} must be a non-negative integer")
+
+    @property
+    def right(self) -> bool:
+        return self.verdict == "right"
+
+
+@dataclass(frozen=True)
+class RecordArmReport:
+    """Per-arm figures the choice between structures and models is read from."""
+
+    arm: str
+    structure: str
+    model: str
+    total: int
+    right: int
+    wrong: int
+    blocked: int
+    share_right: float
+    interval: tuple[float, float]
+    blocked_by_type: dict[str, int]
+    changed_right_incumbent: int
+    right_incumbent_total: int
+    changed_right_incumbent_share: float
+    cost_usd: float
+    seconds: float
+    input_tokens: int
+    output_tokens: int
+    cost_per_name: float
+    seconds_per_name: float
+    tokens_read_per_name: float
+
+    def to_dict(self) -> dict[str, Any]:
+        result = asdict(self)
+        result["interval"] = list(self.interval)
+        return result
+
+
+def summarize_record_arm(
+    rows: Sequence[RecordBenchmarkRow],
+    arm: RecordBenchmarkArm,
+) -> RecordArmReport:
+    """Tally one arm's rows into the share right, blockers, drift and spend.
+
+    A row whose ``member`` is not unique is refused: the same member scored
+    twice would silently weight one name more than another.
+    """
+    arm_rows = [row for row in rows if row.arm == arm.name]
+    if not arm_rows:
+        raise ValueError(f"arm {arm.name!r} has no scored rows")
+    members = [row.member for row in arm_rows]
+    if len(set(members)) != len(members):
+        raise ValueError(f"arm {arm.name!r} scores a member more than once")
+    right = sum(row.right for row in arm_rows)
+    wrong = sum(row.verdict == "wrong" for row in arm_rows)
+    blocked_rows = [row for row in arm_rows if row.verdict == "blocked"]
+    right_incumbent = [row for row in arm_rows if row.incumbent_right]
+    changed_right = sum(bool(row.changed_incumbent) for row in right_incumbent)
+    total = len(arm_rows)
+    seconds = sum(row.seconds for row in arm_rows)
+    cost = sum(row.cost_usd for row in arm_rows)
+    tokens_in = sum(row.input_tokens for row in arm_rows)
+    return RecordArmReport(
+        arm=arm.name,
+        structure=arm.structure,
+        model=arm.model,
+        total=total,
+        right=right,
+        wrong=wrong,
+        blocked=len(blocked_rows),
+        share_right=right / total,
+        interval=wilson_interval(right, total),
+        blocked_by_type=dict(
+            sorted(
+                Counter(
+                    blocker_bucket(row.blocker or "unspecified") for row in blocked_rows
+                ).items()
+            )
+        ),
+        changed_right_incumbent=changed_right,
+        right_incumbent_total=len(right_incumbent),
+        changed_right_incumbent_share=(
+            changed_right / len(right_incumbent) if right_incumbent else 0.0
+        ),
+        cost_usd=cost,
+        seconds=seconds,
+        input_tokens=tokens_in,
+        output_tokens=sum(row.output_tokens for row in arm_rows),
+        cost_per_name=cost / total,
+        seconds_per_name=seconds / total,
+        tokens_read_per_name=tokens_in / total,
+    )
+
+
+def _paired_rights(
+    rows: Sequence[RecordBenchmarkRow],
+    arm_a: str,
+    arm_b: str,
+    members: Sequence[str] | None = None,
+) -> tuple[list[str], list[int], list[int]]:
+    wanted = set(members) if members is not None else None
+    by_arm: dict[str, dict[str, int]] = {arm_a: {}, arm_b: {}}
+    for row in rows:
+        if row.arm not in by_arm:
+            continue
+        if wanted is not None and row.member not in wanted:
+            continue
+        by_arm[row.arm][row.member] = int(row.right)
+    shared = sorted(set(by_arm[arm_a]) & set(by_arm[arm_b]))
+    if not shared:
+        raise ValueError("the two arms share no scored member")
+    return (
+        shared,
+        [by_arm[arm_a][member] for member in shared],
+        [by_arm[arm_b][member] for member in shared],
+    )
+
+
+def compare_record_arms(
+    rows: Sequence[RecordBenchmarkRow],
+    arm_a: str,
+    arm_b: str,
+    *,
+    members: Sequence[str] | None = None,
+    seed: int = 0,
+    draws: int = 4000,
+) -> dict[str, Any]:
+    """Compare two arms member by member, not on their totals.
+
+    The difference is ``share(right in b) - share(right in a)`` over the
+    members both arms scored. Its 95 % interval is a paired bootstrap over
+    those members, and ``called_win`` is true only when the interval excludes
+    zero: a difference smaller than the interval is a tie, not a win.
+    """
+    shared, rights_a, rights_b = _paired_rights(rows, arm_a, arm_b, members)
+    count = len(shared)
+    # The paired interval belongs to the repository's evaluation module: it
+    # resamples units, keeps copy groups together and returns the percentile
+    # bounds. A custom statistic makes it the mean-difference interval here,
+    # with the arm passed as ``scores`` and the other as ``scores_b``.
+    from iter_codex.discovery.base.evaluation import bootstrap_interval
+
+    def mean_share(_labels: Any, values: Any) -> float:
+        return sum(values) / len(values)
+
+    draw = bootstrap_interval(
+        [0.0] * count,
+        rights_a,
+        scores_b=rights_b,
+        statistic=mean_share,
+        n_resamples=max(2, draws),
+        seed=seed,
+    )
+    if draw["lower"] is None or draw["upper"] is None:
+        raise ValueError("the paired interval is undefined")
+    difference = (sum(rights_b) - sum(rights_a)) / count
+    # ``bootstrap_interval`` returns mean(a) - mean(b); the caller's sign is
+    # b - a, so the bounds are negated and swapped.
+    low = -float(draw["upper"])
+    high = -float(draw["lower"])
+    return {
+        "arms": [arm_a, arm_b],
+        "members": count,
+        "right_a": sum(rights_a),
+        "right_b": sum(rights_b),
+        "both_right": sum(a and b for a, b in zip(rights_a, rights_b, strict=True)),
+        "only_a_right": sum(
+            a and not b for a, b in zip(rights_a, rights_b, strict=True)
+        ),
+        "only_b_right": sum(
+            b and not a for a, b in zip(rights_a, rights_b, strict=True)
+        ),
+        "difference": difference,
+        "interval": [low, high],
+        "called_win": low > 0.0 or high < 0.0,
+    }
+
+
+def evaluate_controls(
+    reports: Sequence[RecordArmReport],
+    rows: Sequence[RecordBenchmarkRow],
+    *,
+    incumbent_arm: str | None = None,
+    withheld_arm: str | None = None,
+    withheld_compared_to: str | None = None,
+    dependent_members: Sequence[str] | None = None,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Score the two control arms against the arms they are meant to separate.
+
+    ``incumbent_arm`` is the arm that returns every incumbent unchanged; it
+    must score below at least one repairing arm on the shared members.
+    ``withheld_arm`` is the best arm rerun with the enclosing-structure text
+    left out; on the members whose right answer rests on that text it must
+    score below the arm it was rerun from. A benchmark in which either control
+    fails to separate is measuring nothing.
+    """
+    if not reports:
+        raise ValueError("no arm report was supplied")
+    by_name = {report.arm: report for report in reports}
+    repair_arms = [
+        report for report in reports if report.arm not in {incumbent_arm, withheld_arm}
+    ]
+    if not repair_arms:
+        raise ValueError("no repairing arm was supplied to compare a control against")
+
+    incumbent: dict[str, Any] = {"arm": incumbent_arm, "separated": False}
+    if incumbent_arm:
+        if incumbent_arm not in by_name:
+            raise ValueError(f"control arm {incumbent_arm!r} has no report")
+        comparisons = []
+        for report in repair_arms:
+            comparison = compare_record_arms(rows, incumbent_arm, report.arm, seed=seed)
+            comparisons.append({"arm": report.arm, **comparison})
+        incumbent = {
+            "arm": incumbent_arm,
+            "share_right": by_name[incumbent_arm].share_right,
+            "interval": list(by_name[incumbent_arm].interval),
+            "comparisons": comparisons,
+            "separated": any(
+                row["called_win"] and row["difference"] > 0 for row in comparisons
+            ),
+        }
+
+    withheld: dict[str, Any] = {"arm": withheld_arm, "separated": False}
+    if withheld_arm:
+        if withheld_arm not in by_name:
+            raise ValueError(f"control arm {withheld_arm!r} has no report")
+        if not withheld_compared_to:
+            raise ValueError("a withheld-text control needs the arm it was rerun from")
+        dependent = list(dependent_members or ())
+        if not dependent:
+            raise ValueError(
+                "a withheld-text control needs the members whose answer rests on "
+                "the withheld text"
+            )
+        comparison = compare_record_arms(
+            rows,
+            withheld_compared_to,
+            withheld_arm,
+            members=dependent,
+            seed=seed,
+        )
+        withheld = {
+            "arm": withheld_arm,
+            "compared_to": withheld_compared_to,
+            "dependent_members": len(dependent),
+            "share_right_full": comparison["right_a"] / comparison["members"],
+            "share_right_withheld": comparison["right_b"] / comparison["members"],
+            "comparison": comparison,
+            "separated": bool(
+                comparison["called_win"] and comparison["difference"] < 0
+            ),
+        }
+
+    return {
+        "incumbent": incumbent,
+        "withheld": withheld,
+        "measuring": bool(incumbent["separated"] and withheld["separated"]),
+    }
+
+
+def assert_controls_separate(controls: Mapping[str, Any]) -> None:
+    """Refuse a benchmark whose controls did not separate."""
+    if controls.get("incumbent", {}).get("separated") is not True:
+        raise BenchmarkControlDidNotSeparate(
+            "the incumbent-unchanged control did not score below a repairing arm"
+        )
+    if controls.get("withheld", {}).get("separated") is not True:
+        raise BenchmarkControlDidNotSeparate(
+            "the withheld-text control did not score below the full arm on the "
+            "members whose answer rests on that text"
+        )

@@ -26,17 +26,17 @@ You are an **ingestion agent** for processing discovered source files into the k
 
 ```bash
 # Queue files for ingestion
-uv run imas-codex ingest queue tcv /path/a.py /path/b.py
+uv run iter-codex ingest queue tcv /path/a.py /path/b.py
 
 # Check queue status
-uv run imas-codex ingest status tcv
+uv run iter-codex ingest status tcv
 
 # Run ingestion
-uv run imas-codex ingest run tcv
+uv run iter-codex ingest run tcv
 
 # List discovered/failed files
-uv run imas-codex ingest list tcv -s discovered
-uv run imas-codex ingest list tcv -s failed
+uv run iter-codex ingest list tcv -s discovered
+uv run iter-codex ingest list tcv -s failed
 ```
 
 ## Restrictions

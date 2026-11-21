@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.core.physics_categorization import physics_categorizer
-from imas_codex.graph.build_dd import refresh_physics_domains
+from iter_codex.core.physics_categorization import physics_categorizer
+from iter_codex.graph.build_dd import refresh_physics_domains
 from tests.recording_graph_client import RecordingGraphClient
 
 # The twenty-five IDS nodes the reviewed map moves, keyed to their target.
@@ -184,7 +184,7 @@ def test_dry_run_reads_the_ruled_ids_nodes_from_the_graph() -> None:
     place. The map is applied in the same node, so each ruled IDS node must
     already carry its mapped domain and the dry run reports no change for it.
     """
-    from imas_codex.graph import GraphClient
+    from iter_codex.graph import GraphClient
 
     with GraphClient() as gc:
         result = refresh_physics_domains(gc, dry_run=True)

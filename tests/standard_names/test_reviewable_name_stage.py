@@ -38,7 +38,7 @@ _PREFIX = "test_review_entry__"
 @pytest.fixture()
 def _gc():
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -133,7 +133,7 @@ def test_name_review_quarantines_strict_parser_failure() -> None:
     """A high reviewer score cannot promote a grammar-invalid identity."""
     from unittest.mock import MagicMock, patch
 
-    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+    from iter_codex.standard_names.graph_store.graph_review_persistence import (
         persist_reviewed_name,
     )
 
@@ -145,15 +145,15 @@ def test_name_review_quarantines_strict_parser_failure() -> None:
     ]
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=gc,
         ),
         patch(
-            "imas_codex.standard_names.grammar_adapter.parse_canonical_name",
+            "iter_codex.standard_names.grammar_adapter.parse_canonical_name",
             side_effect=ValueError("strict parse failed"),
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation._parse_grammar",
+            "iter_codex.standard_names.graph_store.graph_foundation._parse_grammar",
             return_value={"grammar_parse_version": "current"},
         ),
     ):
@@ -180,7 +180,7 @@ def test_name_review_quarantines_strict_parser_failure() -> None:
 @pytest.mark.graph
 def test_refine_into_pending_placeholder_advances_to_drafted(_gc, _clean):
     """A refine converging onto a bare pending placeholder yields a drafted name."""
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
 
@@ -213,7 +213,7 @@ def test_refine_into_pending_placeholder_advances_to_drafted(_gc, _clean):
 @pytest.mark.graph
 def test_refine_into_derived_parent_placeholder_stays_pending(_gc, _clean):
     """A structural derived parent is not hijacked into the name review queue."""
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
 
@@ -236,7 +236,7 @@ def test_refine_into_derived_parent_placeholder_stays_pending(_gc, _clean):
 @pytest.mark.graph
 def test_refine_into_new_name_is_drafted(_gc, _clean):
     """The fresh-create path is unchanged — a brand-new successor is drafted."""
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
 
@@ -255,7 +255,7 @@ def test_refine_into_new_name_is_drafted(_gc, _clean):
 @pytest.mark.graph
 def test_refine_into_accepted_name_is_not_demoted(_gc, _clean):
     """Converging onto a live accepted identity is a typed refusal."""
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         RefinedNamePersistenceRefusal,
         RefinedNamePersistenceRefusalReason,
         persist_refined_name,
@@ -287,7 +287,7 @@ def test_refined_successor_inherits_predecessor_run_id(_gc, _clean):
     review pool cannot claim it and the drain reports ``no_eligible_work`` while
     the refined name is stranded ``drafted`` out of scope.
     """
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
 
@@ -319,7 +319,7 @@ def test_reconcile_reviewable_name_stage_exists_and_returns_count():
     """Fast import/return-shape guard (default tier, no live graph)."""
     from unittest.mock import MagicMock, patch
 
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_reviewable_name_stage,
     )
 
@@ -332,7 +332,7 @@ def test_reconcile_reviewable_name_stage_exists_and_returns_count():
 @pytest.mark.graph
 def test_reconcile_advances_stranded_pipeline_name(_gc, _clean):
     """A valid, source-backed name stuck at pending is advanced to drafted."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_reviewable_name_stage,
     )
 
@@ -350,7 +350,7 @@ def test_reconcile_advances_stranded_pipeline_name(_gc, _clean):
 @pytest.mark.graph
 def test_reconcile_skips_derived_parent(_gc, _clean):
     """A derived structural parent placeholder is left pending."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_reviewable_name_stage,
     )
 
@@ -367,7 +367,7 @@ def test_reconcile_skips_derived_parent(_gc, _clean):
 @pytest.mark.graph
 def test_reconcile_skips_quarantined(_gc, _clean):
     """A quarantined name is not sent to review — it is regenerated instead."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_reviewable_name_stage,
     )
 
@@ -390,7 +390,7 @@ def test_reconcile_skips_quarantined(_gc, _clean):
 @pytest.mark.graph
 def test_reconcile_is_idempotent(_gc, _clean):
     """A second pass advances nothing (already drafted); no double-write."""
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_reviewable_name_stage,
     )
 

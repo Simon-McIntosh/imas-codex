@@ -15,7 +15,7 @@ Output:
 
 Budget guard: aborts if cumulative spend exceeds BUDGET_HARD_STOP USD.
 
-All LLM calls go through :func:`imas_codex.discovery.base.llm.acall_llm_structured`
+All LLM calls go through :func:`iter_codex.discovery.base.llm.acall_llm_structured`
 per project policy.
 """
 
@@ -105,7 +105,7 @@ async def _probe_single_call(
     call_idx: int,
 ) -> CallOutcome:
     """Issue one structured LLM call; classify outcome."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.discovery.base.llm import acall_llm_structured
 
     t0 = time.monotonic()
     try:

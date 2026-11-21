@@ -11,8 +11,8 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.discovery.base import llm as llm_mod
-from imas_codex.standard_names import benchmark as bench
+from iter_codex.discovery.base import llm as llm_mod
+from iter_codex.standard_names import benchmark as bench
 
 
 def _endpoint_drop_error() -> BaseException:

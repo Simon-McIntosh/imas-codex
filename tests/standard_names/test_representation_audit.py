@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.audits import representation_artifact_check
+from iter_codex.standard_names.audits import representation_artifact_check
 
 # =========================================================================
 # Existing suffixes still flagged

@@ -37,13 +37,13 @@ class TestSearchStandardNames:
     def _patch_backing(self, return_value):
         """Patch the backing search function used by _search_standard_names."""
         return patch(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             return_value=return_value,
         )
 
     def test_basic_search_returns_formatted_results(self):
         """Backing results are formatted into a readable report."""
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing([_row()]):
             result = _search_standard_names("electron temperature", gc=MagicMock())
@@ -52,7 +52,7 @@ class TestSearchStandardNames:
 
     def test_empty_results(self):
         """Empty results produce informative message."""
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing([]):
             result = _search_standard_names("nonexistent quantity", gc=MagicMock())
@@ -61,14 +61,14 @@ class TestSearchStandardNames:
 
     def test_no_args_no_typeerror(self):
         """Search with only the query must not raise TypeError."""
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing([]):
             _search_standard_names("temperature", gc=MagicMock())
 
     def test_kind_filter_forwarded_to_backing(self):
         """Kind filter is forwarded to backing search function."""
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing([_row(kind="scalar")]) as mock_backing:
             result = _search_standard_names(
@@ -81,7 +81,7 @@ class TestSearchStandardNames:
 
     def test_name_stage_filter_forwarded_to_backing(self):
         """name_stage filter is forwarded to backing search function."""
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing(
             [_row(name="drafted_name", name_stage="drafted")]
@@ -96,7 +96,7 @@ class TestSearchStandardNames:
 
     def test_physics_domain_post_filter(self):
         """physics_domain is forwarded to the backing search implementation."""
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing(
             [
@@ -114,7 +114,7 @@ class TestSearchStandardNames:
 
     def test_physics_domain_default_none_no_filter(self):
         """When physics_domain is None, all results are returned."""
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing(
             [
@@ -129,7 +129,7 @@ class TestSearchStandardNames:
 
     def test_segment_filters_forwarded_to_backing(self):
         """Segment filter kwargs are collected and forwarded to backing."""
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing([_row()]) as mock_backing:
             _search_standard_names(
@@ -147,7 +147,7 @@ class TestSearchStandardNames:
 
     def test_result_format_no_grammar_fields(self):
         """Result format does not include grammar_* fields."""
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing([_row(score=0.92)]):
             result = _search_standard_names("electron temperature", gc=MagicMock())
@@ -162,11 +162,11 @@ class TestFetchStandardNames:
     """Test _fetch_standard_names tool."""
 
     def test_fetch_single(self):
-        from imas_codex.llm.sn_tools import _fetch_standard_names
+        from iter_codex.llm.sn_tools import _fetch_standard_names
 
         mock_gc = MagicMock()
         with patch(
-            "imas_codex.llm.sn_tools._fetch_sn_backing",
+            "iter_codex.llm.sn_tools._fetch_sn_backing",
             return_value=[
                 {
                     "name": "electron_temperature",
@@ -193,11 +193,11 @@ class TestFetchStandardNames:
         mock_backing.assert_called_once()
 
     def test_fetch_multiple_comma_separated(self):
-        from imas_codex.llm.sn_tools import _fetch_standard_names
+        from iter_codex.llm.sn_tools import _fetch_standard_names
 
         mock_gc = MagicMock()
         with patch(
-            "imas_codex.llm.sn_tools._fetch_sn_backing",
+            "iter_codex.llm.sn_tools._fetch_sn_backing",
             return_value=[
                 {
                     "name": "electron_temperature",
@@ -239,20 +239,20 @@ class TestFetchStandardNames:
         assert "plasma_current" in result
 
     def test_fetch_not_found(self):
-        from imas_codex.llm.sn_tools import _fetch_standard_names
+        from iter_codex.llm.sn_tools import _fetch_standard_names
 
         mock_gc = MagicMock()
-        with patch("imas_codex.llm.sn_tools._fetch_sn_backing", return_value=[]):
+        with patch("iter_codex.llm.sn_tools._fetch_sn_backing", return_value=[]):
             result = _fetch_standard_names("nonexistent_name", gc=mock_gc)
         assert "not found" in result.lower() or "No" in result
 
     def test_fetch_partial_not_found(self):
         """Shows not found message for missing names."""
-        from imas_codex.llm.sn_tools import _fetch_standard_names
+        from iter_codex.llm.sn_tools import _fetch_standard_names
 
         mock_gc = MagicMock()
         with patch(
-            "imas_codex.llm.sn_tools._fetch_sn_backing",
+            "iter_codex.llm.sn_tools._fetch_sn_backing",
             return_value=[
                 {
                     "name": "electron_temperature",
@@ -284,7 +284,7 @@ class TestListStandardNames:
     """Test _list_standard_names tool."""
 
     def test_list_all(self):
-        from imas_codex.llm.sn_tools import _list_standard_names
+        from iter_codex.llm.sn_tools import _list_standard_names
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(
@@ -316,7 +316,7 @@ class TestListStandardNames:
         Before this plan landed, the MCP wrapper forwarded ``tag=None``
         unconditionally, which the backing function never accepted.
         """
-        from imas_codex.llm.sn_tools import _list_standard_names
+        from iter_codex.llm.sn_tools import _list_standard_names
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
@@ -325,7 +325,7 @@ class TestListStandardNames:
 
     def test_list_with_physics_domain_filter(self):
         """physics_domain filter is pushed into the Cypher WHERE clause."""
-        from imas_codex.llm.sn_tools import _list_standard_names
+        from iter_codex.llm.sn_tools import _list_standard_names
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(
@@ -348,7 +348,7 @@ class TestListStandardNames:
         assert call.kwargs.get("physics_domain") == "transport"
 
     def test_list_empty_results(self):
-        from imas_codex.llm.sn_tools import _list_standard_names
+        from iter_codex.llm.sn_tools import _list_standard_names
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
@@ -358,7 +358,7 @@ class TestListStandardNames:
 
     def test_list_filter_info_in_header(self):
         """Filter params appear in header."""
-        from imas_codex.llm.sn_tools import _list_standard_names
+        from iter_codex.llm.sn_tools import _list_standard_names
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(
@@ -378,7 +378,7 @@ class TestListStandardNames:
 
     def test_list_physics_domain_in_header(self):
         """physics_domain filter shows in header."""
-        from imas_codex.llm.sn_tools import _list_standard_names
+        from iter_codex.llm.sn_tools import _list_standard_names
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(
@@ -398,7 +398,7 @@ class TestListStandardNames:
 
     def test_list_table_format(self):
         """Output is a markdown table."""
-        from imas_codex.llm.sn_tools import _list_standard_names
+        from iter_codex.llm.sn_tools import _list_standard_names
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(
@@ -423,7 +423,7 @@ class TestMCPToolRegistration:
 
     def test_tools_importable(self):
         """SN tools should be importable from sn_tools."""
-        from imas_codex.llm.sn_tools import (
+        from iter_codex.llm.sn_tools import (
             _fetch_standard_names,
             _list_standard_names,
             _search_standard_names,
@@ -437,7 +437,7 @@ class TestMCPToolRegistration:
         """search_standard_names accepts physics_domain (not tags)."""
         import inspect
 
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         sig = inspect.signature(_search_standard_names)
         params = set(sig.parameters.keys())
@@ -454,7 +454,7 @@ class TestMCPToolRegistration:
         """fetch_standard_names accepts expected kwargs."""
         import inspect
 
-        from imas_codex.llm.sn_tools import _fetch_standard_names
+        from iter_codex.llm.sn_tools import _fetch_standard_names
 
         sig = inspect.signature(_fetch_standard_names)
         params = set(sig.parameters.keys())
@@ -465,7 +465,7 @@ class TestMCPToolRegistration:
         """list_standard_names accepts physics_domain (not tag)."""
         import inspect
 
-        from imas_codex.llm.sn_tools import _list_standard_names
+        from iter_codex.llm.sn_tools import _list_standard_names
 
         sig = inspect.signature(_list_standard_names)
         params = set(sig.parameters.keys())
@@ -482,7 +482,7 @@ class TestMCPToolRegistration:
         # default parameters in the SN wrapper signatures.
         import inspect
 
-        from imas_codex.llm import server  # noqa: F401
+        from iter_codex.llm import server  # noqa: F401
 
         src = inspect.getsource(server)
         # Anchor checks to the SN tool definitions, not surrounding prose.
@@ -528,10 +528,10 @@ class TestSupersededExclusion:
         The backing function (search.search_standard_names) handles superseded
         exclusion in its Cypher. We verify the backing is called correctly.
         """
-        from imas_codex.llm.sn_tools import _search_standard_names
+        from iter_codex.llm.sn_tools import _search_standard_names
 
         with patch(
-            "imas_codex.llm.sn_tools._search_sn_backing",
+            "iter_codex.llm.sn_tools._search_sn_backing",
             return_value=[],
         ) as mock_backing:
             result = _search_standard_names("electron temperature", gc=MagicMock())
@@ -542,7 +542,7 @@ class TestSupersededExclusion:
 
     def test_list_excludes_superseded_by_default(self):
         """_list_standard_names must exclude superseded by default."""
-        from imas_codex.llm.sn_tools import _list_standard_names
+        from iter_codex.llm.sn_tools import _list_standard_names
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
@@ -552,7 +552,7 @@ class TestSupersededExclusion:
 
     def test_list_include_superseded_flag(self):
         """With include_superseded=True, no name_stage guard in Cypher."""
-        from imas_codex.llm.sn_tools import _list_standard_names
+        from iter_codex.llm.sn_tools import _list_standard_names
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])

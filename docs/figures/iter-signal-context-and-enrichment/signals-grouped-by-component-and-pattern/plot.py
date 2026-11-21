@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from imas_codex.plotting.style import (
+from iter_codex.plotting.style import (
     BASE_STYLE,
     CANVAS,
     REFERENCE,

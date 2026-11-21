@@ -1,7 +1,7 @@
 """Measure the per-family domain decision against the blind readers' labels.
 
 Two readings, both from the landed per-family decision
-(:func:`imas_codex.standard_names.domain_decision.decide_family_domain`):
+(:func:`iter_codex.standard_names.domain_decision.decide_family_domain`):
 
 * the labelled comparison — for the families and single names the two blind
   readers agree on, the share of member names the per-family decision files
@@ -26,12 +26,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from imas_codex.discovery.base.judgment import decide_batch
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.dd_domain_classifier import SERVICE_TAG
-from imas_codex.settings import get_model
-from imas_codex.standard_names import domain_decision as _dd
-from imas_codex.standard_names.domain_decision import (
+from iter_codex.discovery.base.judgment import decide_batch
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.dd_domain_classifier import SERVICE_TAG
+from iter_codex.settings import get_model
+from iter_codex.standard_names import domain_decision as _dd
+from iter_codex.standard_names.domain_decision import (
     CONFIDENCE_FLOOR,
     QUESTION,
     SEAT,
@@ -41,7 +41,7 @@ from imas_codex.standard_names.domain_decision import (
     family_candidate_domains,
     ids_domain_map,
 )
-from imas_codex.standard_names.families import fetch_domain_families
+from iter_codex.standard_names.families import fetch_domain_families
 
 
 async def _counted_decide_batch(*args: Any, **kwargs: Any) -> Any:
@@ -585,7 +585,7 @@ def _provenance(seat: str) -> dict[str, Any]:
     return {
         "revision": git("rev-parse", "HEAD"),
         "tree": str(ROOT),
-        "module": "imas_codex/standard_names/domain_decision.py",
+        "module": "iter_codex/standard_names/domain_decision.py",
         "seat": seat,
         "confidence_floor": CONFIDENCE_FLOOR,
         "generated_at": datetime.now(UTC).isoformat(),
@@ -650,7 +650,7 @@ def _derive_from_existing(path: Path, revision: str = "") -> int:
         {
             "revised_at": datetime.now(UTC).isoformat(),
             "revision": revision or payload.get("provenance", {}).get("revision", ""),
-            "module": "imas_codex/standard_names/domain_decision.py",
+            "module": "iter_codex/standard_names/domain_decision.py",
             "writes_to_graph": False,
             "graph_access": "read-only",
             "note": (

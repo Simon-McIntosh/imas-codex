@@ -12,8 +12,8 @@ from __future__ import annotations
 import pytest
 import yaml
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.export import _fetch_candidates, _write_manifest
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.export import _fetch_candidates, _write_manifest
 
 PREFIX = "__exptest__"
 APPROVED1 = f"{PREFIX}_approved1"

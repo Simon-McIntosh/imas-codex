@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 
 from click.testing import CliRunner
 
-from imas_codex.cli.graph import registry
+from iter_codex.cli.graph import registry
 
 
 def _version(

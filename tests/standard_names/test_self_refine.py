@@ -21,7 +21,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_extraction_and_enrichment as _owning_worker_extraction_and_enrichment,
 )
 
@@ -79,7 +79,7 @@ def _grammar_module(good_names: set[str]) -> MagicMock:
 @pytest.mark.asyncio
 async def test_self_refine_adopts_better_name() -> None:
     """An improved, grammatical suggestion is adopted (name + description)."""
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _self_refine_candidate,
     )
 
@@ -99,11 +99,11 @@ async def test_self_refine_adopts_better_name() -> None:
     with (
         patch.dict(sys.modules, {"imas_standard_names.grammar": grammar}),
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             side_effect=lambda name, *a, **k: f"[{name}]",
         ),
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
     ):
@@ -123,7 +123,7 @@ async def test_self_refine_adopts_better_name() -> None:
 @pytest.mark.asyncio
 async def test_self_refine_discards_ungrammatical_suggestion() -> None:
     """An ungrammatical 'improvement' is discarded; the original is kept."""
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _self_refine_candidate,
     )
 
@@ -140,11 +140,11 @@ async def test_self_refine_discards_ungrammatical_suggestion() -> None:
     with (
         patch.dict(sys.modules, {"imas_standard_names.grammar": grammar}),
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             side_effect=lambda name, *a, **k: f"[{name}]",
         ),
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
     ):
@@ -164,7 +164,7 @@ async def test_self_refine_discards_ungrammatical_suggestion() -> None:
 @pytest.mark.asyncio
 async def test_self_refine_no_op_when_unchanged() -> None:
     """changed=False echoes the original name and description unchanged."""
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _self_refine_candidate,
     )
 
@@ -177,11 +177,11 @@ async def test_self_refine_no_op_when_unchanged() -> None:
     with (
         patch.dict(sys.modules, {"imas_standard_names.grammar": grammar}),
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             side_effect=lambda name, *a, **k: f"[{name}]",
         ),
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
     ):
@@ -201,7 +201,7 @@ async def test_self_refine_no_op_when_unchanged() -> None:
 @pytest.mark.asyncio
 async def test_self_refine_keeps_original_on_llm_error() -> None:
     """An LLM/parse exception keeps the original candidate (never blanks it)."""
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _self_refine_candidate,
     )
 
@@ -214,11 +214,11 @@ async def test_self_refine_keeps_original_on_llm_error() -> None:
     with (
         patch.dict(sys.modules, {"imas_standard_names.grammar": grammar}),
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             side_effect=lambda name, *a, **k: f"[{name}]",
         ),
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
     ):
@@ -328,59 +328,59 @@ def _patch_compose_deps():
 
     patches = [
         patch(
-            "imas_codex.standard_names.context.build_compose_context",
+            "iter_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
         # Self-refine discards its cost, so it may only run on a locally
         # served route; the compose seat has to name one for the pass to be
         # reachable at all.
         patch(
-            "imas_codex.settings.get_model",
+            "iter_codex.settings.get_model",
             return_value="local/test-model",
         ),
         patch(
-            "imas_codex.llm.prompt_loader.render_prompt",
+            "iter_codex.llm.prompt_loader.render_prompt",
             side_effect=lambda name, *a, **k: "system" if "system" in name else "user",
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items",
             side_effect=lambda items: None,
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
             return_value=None,
         ),
         patch(
-            "imas_codex.standard_names.context.build_domain_vocabulary_preseed",
+            "iter_codex.standard_names.context.build_domain_vocabulary_preseed",
             return_value="",
         ),
         patch(
-            "imas_codex.standard_names.review.themes.extract_reviewer_themes",
+            "iter_codex.standard_names.review.themes.extract_reviewer_themes",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.example_loader.load_compose_examples",
+            "iter_codex.standard_names.example_loader.load_compose_examples",
             return_value=[],
         ),
-        patch("imas_codex.graph.client.GraphClient", return_value=mock_gc),
+        patch("iter_codex.graph.client.GraphClient", return_value=mock_gc),
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
+            "iter_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
             return_value=1,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
+            "iter_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
             side_effect=lambda items, **_kwargs: items,
         ),
         patch(
-            "imas_codex.standard_names.audits.run_audits",
+            "iter_codex.standard_names.audits.run_audits",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_common._auto_detect_physical_base_gaps",
+            "iter_codex.standard_names.worker_tasks.worker_common._auto_detect_physical_base_gaps",
             return_value=[],
         ),
     ]
@@ -393,8 +393,8 @@ def _patch_compose_deps():
 @pytest.mark.asyncio
 async def test_compose_batch_self_refine_off_is_noop(_patch_compose_deps) -> None:
     """With self-refine OFF (default), no self-refine call is made."""
-    from imas_codex.standard_names import workers
-    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+    from iter_codex.standard_names import workers
+    from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
         compose_batch,
     )
 
@@ -411,12 +411,12 @@ async def test_compose_batch_self_refine_off_is_noop(_patch_compose_deps) -> Non
         return a[0], a[1]
 
     with (
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+        patch("iter_codex.discovery.base.llm.acall_llm_structured", mock_llm),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
             return_value=1,
         ),
-        patch("imas_codex.settings.get_compose_self_refine", return_value=False),
+        patch("iter_codex.settings.get_compose_self_refine", return_value=False),
         patch.object(
             _owning_worker_extraction_and_enrichment,
             "_self_refine_candidate",
@@ -431,8 +431,8 @@ async def test_compose_batch_self_refine_off_is_noop(_patch_compose_deps) -> Non
 @pytest.mark.asyncio
 async def test_compose_batch_self_refine_on_invokes_pass(_patch_compose_deps) -> None:
     """With self-refine ON, the self-refine pass runs and its result is used."""
-    from imas_codex.standard_names import workers
-    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+    from iter_codex.standard_names import workers
+    from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
         compose_batch,
     )
 
@@ -456,19 +456,19 @@ async def test_compose_batch_self_refine_on_invokes_pass(_patch_compose_deps) ->
         return len(cands)
 
     with (
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+        patch("iter_codex.discovery.base.llm.acall_llm_structured", mock_llm),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+            "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
             return_value=1,
         ),
-        patch("imas_codex.settings.get_compose_self_refine", return_value=True),
+        patch("iter_codex.settings.get_compose_self_refine", return_value=True),
         patch.object(
             _owning_worker_extraction_and_enrichment,
             "_self_refine_candidate",
             spy_refine,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
+            "iter_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
             _capture_persist,
         ),
     ):

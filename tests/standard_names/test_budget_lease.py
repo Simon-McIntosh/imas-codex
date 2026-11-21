@@ -12,7 +12,7 @@ import threading
 import pytest
 from pydantic import BaseModel
 
-from imas_codex.standard_names.budget import (
+from iter_codex.standard_names.budget import (
     _CHAT_FRAMING_TOKEN_ALLOWANCE,
     _MEAN_CACHE_WRITE_INPUT_FRACTION,
     _MEAN_CACHED_READ_INPUT_FRACTION,
@@ -116,7 +116,7 @@ def test_catalog_lag_fails_closed_without_proven_expected_price():
 
 def test_catalog_entry_without_official_provenance_fails_closed(monkeypatch):
     """Numeric rates alone are not price authority for paid admission."""
-    from imas_codex import settings
+    from iter_codex import settings
 
     monkeypatch.setattr(
         settings,
@@ -141,7 +141,7 @@ def test_catalog_entry_without_official_provenance_fails_closed(monkeypatch):
 
 def test_expected_reservation_does_not_use_the_provider_policy_ceiling(monkeypatch):
     """Admission prices the catalog mean while the provider cap stays separate."""
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     def _policy_ceiling_must_not_price_admission(model: str) -> dict[str, float]:
         raise AssertionError(f"provider policy ceiling priced admission for {model}")
@@ -167,7 +167,7 @@ def test_request_bytes_are_converted_to_tokens_before_pricing():
     prose and JSON both encode multiple bytes per token.  The exposure is
     reconstructed here from the priced rate to pin the conversion itself.
     """
-    from imas_codex.settings import get_openrouter_pricing
+    from iter_codex.settings import get_openrouter_pricing
 
     route = "openrouter/anthropic/claude-sonnet-5.5"
     price = get_openrouter_pricing(route)
@@ -201,7 +201,7 @@ def test_admission_prices_the_typical_completion_not_the_published_maximum():
     reservation headroom while its cost limit stays unspent.  The tail is owned
     by the run cap and the reconciling charge path, not by admission.
     """
-    from imas_codex.discovery.base.llm import get_model_limits
+    from iter_codex.discovery.base.llm import get_model_limits
 
     route = "openrouter/anthropic/claude-sonnet-5.5"
     messages = [{"role": "user", "content": "y" * 38_000}]
@@ -238,7 +238,7 @@ def test_input_term_blends_the_published_cache_rates():
     one.  Pricing every token as fresh overstates the bill by the cache
     discount; ignoring writes understates it.
     """
-    from imas_codex.settings import get_openrouter_pricing
+    from iter_codex.settings import get_openrouter_pricing
 
     route = "openrouter/anthropic/claude-sonnet-5.5"
     catalog = get_openrouter_pricing(route)
@@ -282,7 +282,7 @@ def test_blended_rate_fails_closed_without_a_base_rate(bad_rate: float):
 
 def test_admission_never_prices_above_a_routes_published_allowance(monkeypatch):
     """A route whose published output is smaller than the estimate uses its own."""
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     route = "openrouter/anthropic/claude-sonnet-5.5"
     messages = [{"role": "user", "content": "prompt"}]
@@ -374,7 +374,7 @@ def test_oversized_request_is_refused_against_the_token_limit(monkeypatch):
     Comparing the byte length against a token limit refuses a legal request
     whose token count fits comfortably inside the route's context window.
     """
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     route = "openrouter/anthropic/claude-sonnet-5.5"
     limit = 40_000
@@ -414,7 +414,7 @@ def test_non_text_input_rejects_before_reservation():
 @pytest.mark.parametrize("error_type", ["structured", "provider_budget"])
 def test_billable_terminal_exception_is_charged_from_aggregate_telemetry(error_type):
     """Both terminal exception types preserve all completed retry spend."""
-    from imas_codex.discovery.base.llm import (
+    from iter_codex.discovery.base.llm import (
         LLMStructuredCallError,
         ProviderBudgetExhausted,
     )
@@ -758,7 +758,7 @@ def test_extend_reservation_returns_zero_when_pool_empty():
 
 def test_review_budget_reexport():
     """ReviewBudgetManager is re-exported as an alias for BudgetManager."""
-    from imas_codex.standard_names.review.budget import ReviewBudgetManager
+    from iter_codex.standard_names.review.budget import ReviewBudgetManager
 
     mgr = ReviewBudgetManager(total_budget=1.0)
     assert isinstance(mgr, BudgetManager)

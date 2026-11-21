@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.graph.dd_ids_enrichment import (
+from iter_codex.graph.dd_ids_enrichment import (
     IDSEnrichmentBatch,
     IDSEnrichmentResult,
     _compute_enrichment_hash,
@@ -216,7 +216,7 @@ class TestEnrichIDSNodes:
         )
 
         with patch(
-            "imas_codex.discovery.base.llm.call_llm_structured",
+            "iter_codex.discovery.base.llm.call_llm_structured",
             return_value=(mock_result, 0.01, 500),
         ):
             stats = enrich_ids_nodes(client, model="test-model")

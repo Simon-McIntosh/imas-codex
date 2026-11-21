@@ -22,13 +22,13 @@ class TestReferenceDataset:
     """Verify the reference dataset is valid and self-consistent."""
 
     def test_reference_not_empty(self):
-        from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
+        from iter_codex.standard_names.benchmark_reference import REFERENCE_NAMES
 
         assert len(REFERENCE_NAMES) >= 20, "Reference set should have >= 20 entries"
 
     def test_all_names_round_trip(self):
         """Every reference name must survive parse→compose round-trip."""
-        from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
+        from iter_codex.standard_names.benchmark_reference import REFERENCE_NAMES
 
         failures = []
         for path, entry in REFERENCE_NAMES.items():
@@ -44,7 +44,7 @@ class TestReferenceDataset:
         assert not failures, "Round-trip failures:\n" + "\n".join(failures)
 
     def test_all_entries_have_required_keys(self):
-        from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
+        from iter_codex.standard_names.benchmark_reference import REFERENCE_NAMES
 
         for path, entry in REFERENCE_NAMES.items():
             assert "name" in entry, f"Missing 'name' in {path}"
@@ -53,7 +53,7 @@ class TestReferenceDataset:
             assert isinstance(entry["fields"], dict), f"fields must be dict in {path}"
 
     def test_all_fields_have_physical_or_geometric_base(self):
-        from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
+        from iter_codex.standard_names.benchmark_reference import REFERENCE_NAMES
 
         for path, entry in REFERENCE_NAMES.items():
             fields = entry["fields"]
@@ -64,7 +64,7 @@ class TestReferenceDataset:
             )
 
     def test_paths_look_like_dd_paths(self):
-        from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
+        from iter_codex.standard_names.benchmark_reference import REFERENCE_NAMES
 
         for path in REFERENCE_NAMES:
             assert "/" in path, f"Path should contain '/': {path}"
@@ -80,7 +80,7 @@ class TestDataclasses:
     """Verify dataclass instantiation and basic behavior."""
 
     def test_benchmark_config_defaults(self):
-        from imas_codex.standard_names.benchmark import BenchmarkConfig
+        from iter_codex.standard_names.benchmark import BenchmarkConfig
 
         cfg = BenchmarkConfig(models=["model-a", "model-b"])
         assert cfg.source == "dd"
@@ -90,7 +90,7 @@ class TestDataclasses:
         assert cfg.ids_filter is None
 
     def test_benchmark_config_custom(self):
-        from imas_codex.standard_names.benchmark import BenchmarkConfig
+        from iter_codex.standard_names.benchmark import BenchmarkConfig
 
         cfg = BenchmarkConfig(
             models=["m1"],
@@ -106,7 +106,7 @@ class TestDataclasses:
         assert cfg.runs_per_model == 3
 
     def test_model_result_defaults(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(model="test-model")
         assert r.model == "test-model"
@@ -116,7 +116,7 @@ class TestDataclasses:
         assert r.names_per_minute == 0.0
 
     def test_benchmark_report_instantiation(self):
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,
@@ -145,7 +145,7 @@ class TestGrammarContext:
 
     def test_build_compose_context_keys(self):
         """build_compose_context() should return rich grammar context."""
-        from imas_codex.standard_names.context import build_compose_context
+        from iter_codex.standard_names.context import build_compose_context
 
         ctx = build_compose_context()
         # Rich grammar context keys
@@ -159,7 +159,7 @@ class TestGrammarContext:
 
     def test_all_values_non_empty(self):
         """Enum lists from build_compose_context should be non-empty strings."""
-        from imas_codex.standard_names.context import build_compose_context
+        from iter_codex.standard_names.context import build_compose_context
 
         ctx = build_compose_context()
         for key in (
@@ -187,11 +187,11 @@ class TestPromptParity:
         """_extract_candidates should include batch.context in output dicts."""
         from unittest.mock import patch
 
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             _extract_candidates,
         )
-        from imas_codex.standard_names.sources.base import ExtractionBatch
+        from iter_codex.standard_names.sources.base import ExtractionBatch
 
         fake_batch = ExtractionBatch(
             source="dd",
@@ -204,7 +204,7 @@ class TestPromptParity:
         config = BenchmarkConfig(models=["test"])
 
         with patch(
-            "imas_codex.standard_names.sources.dd.extract_dd_candidates",
+            "iter_codex.standard_names.sources.dd.extract_dd_candidates",
             return_value=[fake_batch],
         ):
             batches = _extract_candidates(config)
@@ -221,8 +221,8 @@ class TestPromptParity:
         """_run_model should construct [system, user] message structure."""
         from unittest.mock import AsyncMock, patch
 
-        from imas_codex.standard_names.benchmark import BenchmarkConfig, _run_model
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.benchmark import BenchmarkConfig, _run_model
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         config = BenchmarkConfig(models=["test"], temperature=0.0)
         batches = [
@@ -251,11 +251,11 @@ class TestPromptParity:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 side_effect=mock_llm,
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="rendered prompt",
             ),
         ):
@@ -283,7 +283,7 @@ class TestValidation:
     """Test the candidate validation logic."""
 
     def test_valid_candidate(self):
-        from imas_codex.standard_names.benchmark import validate_candidate
+        from iter_codex.standard_names.benchmark import validate_candidate
 
         candidate = {
             "standard_name": "electron_temperature",
@@ -296,7 +296,7 @@ class TestValidation:
         assert f_consistent is True
 
     def test_invalid_grammar(self):
-        from imas_codex.standard_names.benchmark import validate_candidate
+        from iter_codex.standard_names.benchmark import validate_candidate
 
         candidate = {
             "standard_name": "this_is_not_valid_!!!",
@@ -308,7 +308,7 @@ class TestValidation:
         assert f_consistent is False
 
     def test_valid_grammar_inconsistent_fields(self):
-        from imas_codex.standard_names.benchmark import validate_candidate
+        from iter_codex.standard_names.benchmark import validate_candidate
 
         candidate = {
             "standard_name": "electron_temperature",
@@ -321,7 +321,7 @@ class TestValidation:
         assert f_consistent is False
 
     def test_empty_candidate(self):
-        from imas_codex.standard_names.benchmark import validate_candidate
+        from iter_codex.standard_names.benchmark import validate_candidate
 
         g_valid, f_consistent = validate_candidate({})
         assert g_valid is False
@@ -337,7 +337,7 @@ class TestReferenceComparison:
     """Test reference set comparison logic."""
 
     def test_full_overlap(self):
-        from imas_codex.standard_names.benchmark import compare_to_reference
+        from iter_codex.standard_names.benchmark import compare_to_reference
 
         reference = {
             "path/a": {"name": "electron_temperature", "fields": {}},
@@ -353,7 +353,7 @@ class TestReferenceComparison:
         assert recall == 1.0
 
     def test_no_overlap(self):
-        from imas_codex.standard_names.benchmark import compare_to_reference
+        from iter_codex.standard_names.benchmark import compare_to_reference
 
         reference = {
             "path/a": {"name": "electron_temperature", "fields": {}},
@@ -367,7 +367,7 @@ class TestReferenceComparison:
         assert recall == 0.0
 
     def test_partial_overlap(self):
-        from imas_codex.standard_names.benchmark import compare_to_reference
+        from iter_codex.standard_names.benchmark import compare_to_reference
 
         reference = {
             "path/a": {"name": "electron_temperature", "fields": {}},
@@ -384,7 +384,7 @@ class TestReferenceComparison:
         assert recall == 0.5
 
     def test_empty_candidates(self):
-        from imas_codex.standard_names.benchmark import compare_to_reference
+        from iter_codex.standard_names.benchmark import compare_to_reference
 
         overlap, total, precision, recall = compare_to_reference(
             [], {"path/a": {"name": "x", "fields": {}}}
@@ -402,7 +402,7 @@ class TestJsonSerialization:
     """Test JSON round-trip for BenchmarkReport."""
 
     def test_json_round_trip(self):
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,
@@ -445,7 +445,7 @@ class TestJsonSerialization:
         assert parsed["extraction_count"] == 10
 
     def test_from_json(self):
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkProvenance,
             BenchmarkReport,
@@ -484,7 +484,7 @@ class TestJsonSerialization:
 
     def test_from_json_missing_provenance(self):
         """Legacy reports without provenance deserialize cleanly."""
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,
@@ -510,7 +510,7 @@ class TestRichTable:
     """Verify the Rich comparison table renders without error."""
 
     def test_render_empty_report(self):
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             render_comparison_table,
@@ -526,7 +526,7 @@ class TestRichTable:
         render_comparison_table(report)
 
     def test_render_with_results(self):
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,
@@ -559,7 +559,7 @@ class TestRichTable:
 
     def test_render_with_zero_candidates(self):
         """Model that produced zero candidates should show '—' not crash."""
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,
@@ -587,8 +587,8 @@ class TestBenchmarkRunner:
     @pytest.mark.asyncio
     async def test_run_benchmark_mocked(self):
         """Run benchmark with mocked extraction and LLM calls."""
-        from imas_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
+        from iter_codex.standard_names.models import (
             StandardNameCandidate,
             StandardNameComposeBatch,
         )
@@ -652,16 +652,16 @@ class TestBenchmarkRunner:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 return_value=(mock_response, 0.01, 200),
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="mocked prompt text",
             ),
             patch(
-                "imas_codex.standard_names.benchmark.score_with_reviewer",
+                "iter_codex.standard_names.benchmark.score_with_reviewer",
                 new_callable=AsyncMock,
                 return_value=(mock_reviews, 0.02),
             ),
@@ -683,8 +683,8 @@ class TestBenchmarkRunner:
     @pytest.mark.asyncio
     async def test_run_benchmark_multiple_models(self):
         """Run with multiple models and verify separate results."""
-        from imas_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
+        from iter_codex.standard_names.models import (
             StandardNameCandidate,
             StandardNameComposeBatch,
         )
@@ -724,16 +724,16 @@ class TestBenchmarkRunner:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 return_value=(mock_response, 0.005, 100),
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="prompt",
             ),
             patch(
-                "imas_codex.standard_names.benchmark.score_with_reviewer",
+                "iter_codex.standard_names.benchmark.score_with_reviewer",
                 new_callable=AsyncMock,
                 return_value=([{"name": "elongation", "total_score": 0.75}], 0.01),
             ),
@@ -751,7 +751,7 @@ class TestBenchmarkRunner:
     @pytest.mark.asyncio
     async def test_run_benchmark_llm_failure(self):
         """LLM call failure should be recorded, not crash."""
-        from imas_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
+        from iter_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
 
         config = BenchmarkConfig(
             models=["fail-model"], max_candidates=2, reviewer_model="mock-rev"
@@ -775,16 +775,16 @@ class TestBenchmarkRunner:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 side_effect=RuntimeError("LLM unavailable"),
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="prompt",
             ),
             patch(
-                "imas_codex.standard_names.benchmark.score_with_reviewer",
+                "iter_codex.standard_names.benchmark.score_with_reviewer",
                 new_callable=AsyncMock,
                 return_value=([], 0.0),
             ),
@@ -806,7 +806,7 @@ class TestCLICommand:
     """Verify the CLI benchmark command is registered and callable."""
 
     def test_command_exists(self):
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         cmd = sn.get_command(None, "bench")
         assert cmd is not None, "benchmark command should be registered"
@@ -814,7 +814,7 @@ class TestCLICommand:
     def test_command_help(self):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         runner = CliRunner()
         result = runner.invoke(sn, ["bench", "--help"])
@@ -826,7 +826,7 @@ class TestCLICommand:
 
     def test_command_defaults_from_config(self):
         """Benchmark loads models from pyproject.toml config when --models omitted."""
-        from imas_codex.settings import get_sn_benchmark_compose_models
+        from iter_codex.settings import get_sn_benchmark_compose_models
 
         models = get_sn_benchmark_compose_models()
         assert len(models) > 0, "Should have default compose models"
@@ -839,19 +839,19 @@ class TestReviewerConfig:
     """Test reviewer configuration and model result fields."""
 
     def test_reviewer_config_field(self):
-        from imas_codex.standard_names.benchmark import BenchmarkConfig
+        from iter_codex.standard_names.benchmark import BenchmarkConfig
 
         config = BenchmarkConfig(models=["test"], reviewer_model="test/model")
         assert config.reviewer_model == "test/model"
 
     def test_reviewer_config_default_none(self):
-        from imas_codex.standard_names.benchmark import BenchmarkConfig
+        from iter_codex.standard_names.benchmark import BenchmarkConfig
 
         config = BenchmarkConfig(models=["test"])
         assert config.reviewer_model is None
 
     def test_model_result_quality_fields(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(model="test")
         assert r.quality_scores == []
@@ -861,7 +861,7 @@ class TestReviewerConfig:
         assert r.avg_fields_populated == 0.0
 
     def test_model_result_with_quality(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(
             model="test",
@@ -887,7 +887,7 @@ class TestCacheTokenReporting:
 
     def test_llm_result_unpacking(self):
         """LLMResult supports 3-element tuple unpacking (backward compat)."""
-        from imas_codex.discovery.base.llm import LLMResult
+        from iter_codex.discovery.base.llm import LLMResult
 
         r = LLMResult(
             "parsed", 0.05, 500, cache_read_tokens=300, cache_creation_tokens=100
@@ -906,14 +906,14 @@ class TestCacheTokenReporting:
         assert getattr(mock_return, "cache_creation_tokens", 0) == 0
 
     def test_model_result_cache_defaults(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(model="test")
         assert r.cache_read_tokens == 0
         assert r.cache_creation_tokens == 0
 
     def test_model_result_with_cache(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(
             model="test",
@@ -953,7 +953,7 @@ class TestCacheTokenReporting:
 
     def test_render_table_with_cache(self):
         """Cache % column should appear and show correct values."""
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,
@@ -986,7 +986,7 @@ class TestCacheTokenReporting:
 
     def test_render_table_no_cache(self):
         """Cache % column shows '—' when no cache tokens."""
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,
@@ -1013,7 +1013,7 @@ class TestCacheTokenReporting:
         """Cache fields survive JSON serialization."""
         import json
 
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,
@@ -1045,7 +1045,7 @@ class TestReviewerModelCLI:
     def test_reviewer_model_in_help(self):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         runner = CliRunner()
         result = runner.invoke(sn, ["bench", "--help"])
@@ -1062,7 +1062,7 @@ class TestQualityReviewModel:
     """Test the 6-dimensional quality review models from models.py."""
 
     def test_valid_review(self):
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.models import (
             StandardNameQualityReview,
             StandardNameQualityScore,
         )
@@ -1087,7 +1087,7 @@ class TestQualityReviewModel:
     def test_dimension_max_20(self):
         from pydantic import ValidationError
 
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         with pytest.raises(ValidationError):
             StandardNameQualityScore(
@@ -1102,7 +1102,7 @@ class TestQualityReviewModel:
     def test_dimension_min_0(self):
         from pydantic import ValidationError
 
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         with pytest.raises(ValidationError):
             StandardNameQualityScore(
@@ -1115,7 +1115,7 @@ class TestQualityReviewModel:
             )
 
     def test_total_score_max_120(self):
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         # All dimensions at max = 120
         score = StandardNameQualityScore(
@@ -1130,7 +1130,7 @@ class TestQualityReviewModel:
         assert score.tier == "outstanding"
 
     def test_poor_tier_scores(self):
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         score = StandardNameQualityScore(
             grammar=5,
@@ -1144,7 +1144,7 @@ class TestQualityReviewModel:
         assert score.tier == "poor"
 
     def test_score_model_dump_has_six_dimensions(self):
-        from imas_codex.standard_names.models import StandardNameQualityScore
+        from iter_codex.standard_names.models import StandardNameQualityScore
 
         score = StandardNameQualityScore(
             grammar=15,
@@ -1160,7 +1160,7 @@ class TestQualityReviewModel:
 
     def test_review_batch_from_models(self):
         """StandardNameQualityReviewBatch from models.py works correctly."""
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.models import (
             StandardNameQualityReview,
             StandardNameQualityReviewBatch,
             StandardNameQualityScore,
@@ -1202,7 +1202,7 @@ class TestReviewerTemplate:
         (canonical_pattern, vocabulary_sections, etc.) in addition to bare
         grammar enum lists.
         """
-        from imas_codex.standard_names.context import build_compose_context
+        from iter_codex.standard_names.context import build_compose_context
 
         ctx = build_compose_context()
         grammar_enums = {
@@ -1223,7 +1223,7 @@ class TestReviewerTemplate:
         return {**ctx, **grammar_enums}
 
     def test_template_renders(self):
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         review_ctx = self._get_review_context()
         rendered = render_prompt(
@@ -1255,7 +1255,7 @@ class TestReviewerTemplate:
         assert "outstanding" in rendered
 
     def test_template_renders_empty_candidates(self):
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         review_ctx = self._get_review_context()
         rendered = render_prompt(
@@ -1280,31 +1280,31 @@ class TestReviewerCostAndTiming:
     """Test reviewer_cost and timing breakdown fields on ModelResult."""
 
     def test_reviewer_cost_default_zero(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(model="test")
         assert r.reviewer_cost == 0.0
 
     def test_compose_elapsed_default_zero(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(model="test")
         assert r.compose_elapsed_seconds == 0.0
 
     def test_review_elapsed_default_zero(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(model="test")
         assert r.review_elapsed_seconds == 0.0
 
     def test_reviewer_cost_field_set(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(model="test", reviewer_cost=0.42)
         assert r.reviewer_cost == 0.42
 
     def test_timing_fields_set(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(
             model="test",
@@ -1318,7 +1318,7 @@ class TestReviewerCostAndTiming:
         """reviewer_cost and timing fields survive JSON round-trip."""
         import json
 
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,
@@ -1349,7 +1349,7 @@ class TestReviewerCostAndTiming:
     @pytest.mark.asyncio
     async def test_run_benchmark_no_reviewer_raises(self):
         """BenchmarkConfig with reviewer_model=None raises ValueError."""
-        from imas_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
+        from iter_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
 
         config = BenchmarkConfig(
             models=["mock-model"],
@@ -1365,8 +1365,8 @@ class TestReviewerCostAndTiming:
         """compose_elapsed_seconds is set after _run_model completes."""
         from unittest.mock import AsyncMock, patch
 
-        from imas_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
-        from imas_codex.standard_names.models import StandardNameComposeBatch
+        from iter_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
+        from iter_codex.standard_names.models import StandardNameComposeBatch
 
         config = BenchmarkConfig(
             models=["mock-model"],
@@ -1394,16 +1394,16 @@ class TestReviewerCostAndTiming:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 return_value=(mock_response, 0.0, 0),
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="prompt",
             ),
             patch(
-                "imas_codex.standard_names.benchmark.score_with_reviewer",
+                "iter_codex.standard_names.benchmark.score_with_reviewer",
                 new_callable=AsyncMock,
                 return_value=([], 0.0),
             ),
@@ -1421,7 +1421,7 @@ class TestNamesOnlyCLI:
     def test_names_only_in_help(self):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         runner = CliRunner()
         result = runner.invoke(sn, ["bench", "--help"])
@@ -1431,7 +1431,7 @@ class TestNamesOnlyCLI:
 
     def test_reviewer_always_resolves(self):
         """Reviewer model is always resolved — never None at runtime."""
-        from imas_codex.standard_names.benchmark import BenchmarkConfig
+        from iter_codex.standard_names.benchmark import BenchmarkConfig
 
         # Simulate CLI logic: reviewer always resolved from config
         reviewer_model_from_cli = None
@@ -1447,7 +1447,7 @@ class TestNamesOnlyCLI:
 
     def test_names_only_default_true(self):
         """names_only defaults to True on BenchmarkConfig."""
-        from imas_codex.standard_names.benchmark import BenchmarkConfig
+        from iter_codex.standard_names.benchmark import BenchmarkConfig
 
         config = BenchmarkConfig(models=["test"], reviewer_model="r")
         assert config.names_only is True
@@ -1464,7 +1464,7 @@ class TestIncludeDocsCLI:
     def test_include_docs_in_help(self):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         runner = CliRunner()
         result = runner.invoke(sn, ["bench", "--help"])
@@ -1476,7 +1476,7 @@ class TestDocsFields:
     """Test docs fields on ModelResult."""
 
     def test_model_result_docs_fields_default(self):
-        from imas_codex.standard_names.benchmark import ModelResult
+        from iter_codex.standard_names.benchmark import ModelResult
 
         r = ModelResult(model="test")
         assert r.docs_quality_scores == []
@@ -1500,7 +1500,7 @@ class TestScoreWithReviewerDocs:
         """Verify docs review uses correct dimensions."""
         from unittest.mock import MagicMock
 
-        from imas_codex.standard_names.benchmark import score_with_reviewer
+        from iter_codex.standard_names.benchmark import score_with_reviewer
 
         # Build a mock docs review response
         mock_scores = MagicMock()
@@ -1532,20 +1532,20 @@ class TestScoreWithReviewerDocs:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 return_value=(mock_batch, 0.01, 500),
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="prompt",
             ),
             patch(
-                "imas_codex.standard_names.context.build_compose_context",
+                "iter_codex.standard_names.context.build_compose_context",
                 return_value={},
             ),
             patch(
-                "imas_codex.standard_names.context.fetch_review_neighbours",
+                "iter_codex.standard_names.context.fetch_review_neighbours",
                 return_value={
                     "vector_neighbours": [],
                     "same_base_neighbours": [],
@@ -1553,11 +1553,11 @@ class TestScoreWithReviewerDocs:
                 },
             ),
             patch(
-                "imas_codex.standard_names.example_loader.load_review_examples",
+                "iter_codex.standard_names.example_loader.load_review_examples",
                 return_value=[],
             ),
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
             ),
         ):
             reviews, cost = await score_with_reviewer(
@@ -1578,7 +1578,7 @@ class TestScoreWithReviewerDocs:
     @pytest.mark.asyncio
     async def test_score_with_reviewer_invalid_target(self):
         """Unknown target raises ValueError."""
-        from imas_codex.standard_names.benchmark import score_with_reviewer
+        from iter_codex.standard_names.benchmark import score_with_reviewer
 
         with pytest.raises(ValueError, match="Unknown review target"):
             await score_with_reviewer([], "model", target="invalid")
@@ -1589,7 +1589,7 @@ class TestGenerateDocsForCandidates:
 
     @pytest.mark.asyncio
     async def test_generate_docs_updates_candidates(self):
-        from imas_codex.standard_names.benchmark import generate_docs_for_candidates
+        from iter_codex.standard_names.benchmark import generate_docs_for_candidates
 
         mock_result = MagicMock()
         mock_result.description = "Generated description"
@@ -1605,12 +1605,12 @@ class TestGenerateDocsForCandidates:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 return_value=(mock_result, 0.005, 300),
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="prompt",
             ),
         ):
@@ -1626,7 +1626,7 @@ class TestGenerateDocsForCandidates:
 
     @pytest.mark.asyncio
     async def test_generate_docs_handles_failure(self):
-        from imas_codex.standard_names.benchmark import generate_docs_for_candidates
+        from iter_codex.standard_names.benchmark import generate_docs_for_candidates
 
         candidates = [
             {
@@ -1637,12 +1637,12 @@ class TestGenerateDocsForCandidates:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 side_effect=RuntimeError("LLM down"),
             ),
             patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
+                "iter_codex.llm.prompt_loader.render_prompt",
                 return_value="prompt",
             ),
         ):
@@ -1664,7 +1664,7 @@ class TestDescriptionReviewPrompt:
     """The description rubric prompts render against the real templates."""
 
     def test_system_prompt_renders_with_schema(self):
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         sys_prompt = render_prompt("sn/review_description_system", {})
         # Static rubric content present
@@ -1678,7 +1678,7 @@ class TestDescriptionReviewPrompt:
         assert "{{" not in sys_prompt
 
     def test_user_prompt_renders_fixture_item(self):
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         item = {
             "standard_name": "electron_temperature",
@@ -1701,8 +1701,8 @@ class TestScoreDescriptions:
 
     @pytest.mark.asyncio
     async def test_score_descriptions_parses_reviews(self):
-        from imas_codex.standard_names.benchmark import score_descriptions
-        from imas_codex.standard_names.models import (
+        from iter_codex.standard_names.benchmark import score_descriptions
+        from iter_codex.standard_names.models import (
             StandardNameQualityReviewDescription,
             StandardNameQualityReviewDescriptionBatch,
             StandardNameQualityScoreDescription,
@@ -1734,7 +1734,7 @@ class TestScoreDescriptions:
 
         with (
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new_callable=AsyncMock,
                 return_value=(batch, 0.003, 120),
             ),
@@ -1751,7 +1751,7 @@ class TestScoreDescriptions:
         assert r["quality_tier"] == "outstanding"
 
     def test_apply_reviewer_scores_metrics_descriptions(self):
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             ReviewerScores,
             _apply_reviewer_scores_metrics,
         )
@@ -1783,7 +1783,7 @@ class TestScoreDescriptions:
         assert rs.dim_averages["concision"] == pytest.approx(14.0)
 
     def test_apply_description_aggregate_mean_over_judges(self):
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             ModelResult,
             ReviewerScores,
             _apply_description_aggregate,
@@ -1826,7 +1826,7 @@ class TestRescoreDescriptions:
 
     @pytest.mark.asyncio
     async def test_rescore_merges_and_survives_round_trip(self, tmp_path):
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,
@@ -1877,7 +1877,7 @@ class TestRescoreDescriptions:
             )
 
         with patch(
-            "imas_codex.standard_names.benchmark.score_descriptions",
+            "iter_codex.standard_names.benchmark.score_descriptions",
             new=AsyncMock(side_effect=_fake_score),
         ):
             updated = await rescore_descriptions_report(loaded)
@@ -1895,7 +1895,7 @@ class TestRescoreDescriptions:
         rr = reloaded.results[0]
         assert len(rr.description_reviewer_results) == 2
         # Reconstructed as ReviewerScores, not raw dicts
-        from imas_codex.standard_names.benchmark import ReviewerScores
+        from iter_codex.standard_names.benchmark import ReviewerScores
 
         assert all(
             isinstance(j, ReviewerScores) for j in rr.description_reviewer_results
@@ -1904,7 +1904,7 @@ class TestRescoreDescriptions:
         assert rr.avg_description_score == pytest.approx(0.8)
 
     def test_desc_column_renders_in_main_table(self):
-        from imas_codex.standard_names.benchmark import (
+        from iter_codex.standard_names.benchmark import (
             BenchmarkConfig,
             BenchmarkReport,
             ModelResult,

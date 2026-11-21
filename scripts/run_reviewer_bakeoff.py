@@ -16,7 +16,7 @@ We also report false-accept (negative scored >= 0.5), false-reject
 complementary blind pair), and cost/call. The reasoning-effort sweep
 answers "can a cheap model at high effort match a pricey one at low?".
 
-Models come from ``[tool.imas-codex.sn-benchmark].reviewer-models``.
+Models come from ``[tool.iter-codex.sn-benchmark].reviewer-models``.
 This selects, it does NOT switch the production ``[sn-review.*]`` chain.
 
 Outputs (under ``--output``):
@@ -44,8 +44,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from imas_codex.discovery.base.llm import call_llm_structured
-from imas_codex.settings import get_sn_benchmark_reviewer_models
+from iter_codex.discovery.base.llm import call_llm_structured
+from iter_codex.settings import get_sn_benchmark_reviewer_models
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +147,7 @@ def _load_items(eval_path: Path) -> list[dict]:
 def _enrich(items: list[dict]) -> None:
     """Best-effort: pull description/unit from the graph for positives."""
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         with GraphClient() as gc:
             for it in items:

@@ -5,7 +5,7 @@
 
 **Reference:** Sauter & Medvedev, *CPC* **184** (2013) 293–302.
 
-See also: [COCOS module documentation](cocos.md) for the `imas_codex.cocos`
+See also: [COCOS module documentation](cocos.md) for the `iter_codex.cocos`
 API and [IMAS DD architecture](imas_dd.md) for graph schema details.
 
 ---

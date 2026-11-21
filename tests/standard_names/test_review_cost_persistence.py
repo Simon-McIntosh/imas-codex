@@ -25,7 +25,7 @@ from unittest.mock import patch
 
 def test_write_reviews_coalesces_none_cost_to_zero() -> None:
     """Review with llm_cost=None in the input dict → 0.0 in the Cypher batch."""
-    from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
+    from iter_codex.standard_names.graph_store.graph_catalog import write_reviews
 
     records = [
         {
@@ -49,7 +49,7 @@ def test_write_reviews_coalesces_none_cost_to_zero() -> None:
     ]
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     ) as MockGC:  # noqa: N806
         MockGC.return_value.__enter__.return_value.query.return_value = []
         write_reviews(records)
@@ -72,7 +72,7 @@ def test_write_reviews_coalesces_none_cost_to_zero() -> None:
 
 def test_write_reviews_preserves_zero_cost() -> None:
     """A cost of exactly 0.0 (cache hit) must remain 0.0, not become NULL."""
-    from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
+    from iter_codex.standard_names.graph_store.graph_catalog import write_reviews
 
     records = [
         {
@@ -98,7 +98,7 @@ def test_write_reviews_preserves_zero_cost() -> None:
     ]
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     ) as MockGC:  # noqa: N806
         MockGC.return_value.__enter__.return_value.query.return_value = []
         write_reviews(records)
@@ -118,7 +118,7 @@ async def test_quarantine_skip_passes_zero_cost() -> None:
     """The quarantine-skip codepath in review_name passes llm_cost=0.0."""
     from unittest.mock import MagicMock
 
-    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    from iter_codex.standard_names.worker_tasks.worker_review_names import (
         process_review_name_batch,
     )
 
@@ -143,7 +143,7 @@ async def test_quarantine_skip_passes_zero_cost() -> None:
     # persist_reviewed_name is imported inside the function body, so
     # patch it at the source module where it's defined.
     with patch(
-        "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name",
+        "iter_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name",
         side_effect=_fake_persist,
     ):
         result = await process_review_name_batch(items, mock_mgr, stop_event)
@@ -168,7 +168,7 @@ async def test_quarantine_skip_passes_zero_cost() -> None:
 
 def test_persist_reviewed_name_stamps_cost_on_review_node() -> None:
     """persist_reviewed_name passes llm_cost through to write_reviews."""
-    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+    from iter_codex.standard_names.graph_store.graph_review_persistence import (
         persist_reviewed_name,
     )
 
@@ -181,10 +181,10 @@ def test_persist_reviewed_name_stamps_cost_on_review_node() -> None:
     # Mock the graph query for the main transaction and write_reviews
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC,  # noqa: N806
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
+            "iter_codex.standard_names.graph_store.graph_catalog.write_reviews",
             side_effect=_fake_write_reviews,
         ),
     ):
@@ -220,7 +220,7 @@ def test_persist_reviewed_name_stamps_cost_on_review_node() -> None:
 
 def test_escalation_review_carries_cost() -> None:
     """Review records with cycle_index > 0 preserve their cost."""
-    from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
+    from iter_codex.standard_names.graph_store.graph_catalog import write_reviews
 
     records = [
         {
@@ -246,7 +246,7 @@ def test_escalation_review_carries_cost() -> None:
     ]
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     ) as MockGC:  # noqa: N806
         MockGC.return_value.__enter__.return_value.query.return_value = []
         write_reviews(records)

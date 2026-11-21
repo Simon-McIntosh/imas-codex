@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
-from imas_codex.units import dd_unit_exceptions
+from iter_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
+from iter_codex.units import dd_unit_exceptions
 
 
 def test_equivalence_table_is_unnecessary_for_dimensional_agreement(

@@ -70,15 +70,15 @@ COMPOSE_ATTEMPTS = 3
 #: The repair each cause is measured against, as the marker its stage carries.
 REPAIR_MARKERS = {
     "physical_scope_qualifier_lost": (
-        "imas_codex/llm/prompts/sn/generate_name_dd_names.md",
+        "iter_codex/llm/prompts/sn/generate_name_dd_names.md",
         "item.ancestor_context",
     ),
     "source_bindings_conflate_distinct_definitions": (
-        "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py",
+        "iter_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py",
         "stated operation mismatch",
     ),
     "boundary_forced_to_lcfs": (
-        "imas_codex/llm/prompts/sn/generate_name_system.md",
+        "iter_codex/llm/prompts/sn/generate_name_system.md",
         "effective_plasma_boundary",
     ),
 }
@@ -206,7 +206,7 @@ def admitted_sources(
     member_name: str, sources: list[dict[str, Any]]
 ) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     """Apply the repaired binding guard to one member's sources."""
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _is_attachment_consistent,
     )
 
@@ -240,12 +240,12 @@ async def compose_member(
     calls: dict[str, float],
 ) -> dict[str, Any]:
     """Run the naming stage for one member's sources."""
-    from imas_codex.discovery.base.llm import (
+    from iter_codex.discovery.base.llm import (
         LLMStructuredCallError,
         acall_llm_structured,
     )
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.models import StandardNameComposeBatch
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.models import StandardNameComposeBatch
 
     primary = sources[0]
     item: dict[str, Any] = {
@@ -319,7 +319,7 @@ async def compose_member(
         # recovery runs here; only an unrecoverable refusal is recorded.
         refused = getattr(error, "name", None)
         if refused and not candidate.operators:
-            from imas_codex.standard_names.grammar_adapter import (
+            from iter_codex.standard_names.grammar_adapter import (
                 adopt_canonical_segment_order,
             )
 
@@ -434,7 +434,7 @@ async def adjudicate(
     semaphore: asyncio.Semaphore,
     calls: dict[str, float],
 ) -> dict[str, Any]:
-    from imas_codex.discovery.base.llm import (
+    from iter_codex.discovery.base.llm import (
         LLMStructuredCallError,
         acall_llm_structured,
     )
@@ -693,13 +693,13 @@ async def _judge_phase(
 
 
 async def measure() -> dict[str, Any]:
-    from imas_codex.settings import get_model
-    from imas_codex.standard_names.context import build_compose_context
+    from iter_codex.settings import get_model
+    from iter_codex.standard_names.context import build_compose_context
 
     compose_model = get_model("sn-compose")
     judge_model = get_model("sn-prose-adjudicator")
     context = build_compose_context()
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     system_prompt = render_prompt("sn/generate_name_system", context)
 
@@ -996,7 +996,7 @@ def render_fragment(data: dict[str, Any]) -> str:
         '<html lang="en">',
         "<head>",
         '<meta charset="utf-8">',
-        '<meta name="docs-project" content="imas-codex">',
+        '<meta name="docs-project" content="iter-codex">',
         '<meta name="plan-slug" content="sn-audited-group-release">',
         '<meta name="reckon-type" content="evidence-fragment">',
         '<meta name="node-id" content="sagr-stage-repairs">',

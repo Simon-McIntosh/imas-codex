@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from imas_codex.standard_names.fanout.telemetry import write_fanout_node
+from iter_codex.standard_names.fanout.telemetry import write_fanout_node
 
 
 class _MockGraphClient:

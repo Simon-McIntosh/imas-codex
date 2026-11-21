@@ -15,9 +15,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
-from imas_codex.standard_names.fanout.config import FanoutSettings
-from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from iter_codex.standard_names.fanout.config import FanoutSettings
+from iter_codex.standard_names.worker_tasks.worker_refine_names import (
     process_refine_name_batch,
 )
 
@@ -90,12 +90,12 @@ class _FakeLLMResult:
 def patched(monkeypatch: pytest.MonkeyPatch):
     """Patch GraphClient + LLM + persist + claim release."""
     monkeypatch.setattr(
-        "imas_codex.graph.client.GraphClient", lambda *a, **kw: _NullGraphClient()
+        "iter_codex.graph.client.GraphClient", lambda *a, **kw: _NullGraphClient()
     )
 
     # Hybrid neighbours search returns nothing.
     monkeypatch.setattr(
-        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
+        "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
         lambda gc, path: [],
     )
 
@@ -103,13 +103,13 @@ def patched(monkeypatch: pytest.MonkeyPatch):
     async def _fake_llm(**kwargs):
         return _FakeLLMResult(_RefinedName("electron_temperature"))
 
-    monkeypatch.setattr("imas_codex.discovery.base.llm.acall_llm_structured", _fake_llm)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.acall_llm_structured", _fake_llm)
 
     # ``acall_llm_structured`` in workers is imported locally.  Patch
     # that namespace too because the worker uses ``from … import …``
     # at the top of the function body.
     # NOTE: it's imported inside the function, so monkeypatching
-    # ``imas_codex.discovery.base.llm`` is sufficient.
+    # ``iter_codex.discovery.base.llm`` is sufficient.
 
     persist_calls: list[dict[str, Any]] = []
     release_calls: list[dict[str, Any]] = []
@@ -131,11 +131,11 @@ def patched(monkeypatch: pytest.MonkeyPatch):
         return "exhausted" if collision_name else "reviewed"
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
+        "iter_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
         _persist,
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
+        "iter_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
         _stop,
     )
 
@@ -144,7 +144,7 @@ def patched(monkeypatch: pytest.MonkeyPatch):
         return None
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.budget.BudgetLease.charge_event",
+        "iter_codex.standard_names.budget.BudgetLease.charge_event",
         _charge_event,
     )
     return persist_calls, release_calls, charge_events
@@ -160,7 +160,7 @@ async def test_dup_guard_drops_candidate(
 
     # Dup guard reports an existing duplicate.
     monkeypatch.setattr(
-        "imas_codex.standard_names.canonical.find_name_key_duplicate",
+        "iter_codex.standard_names.canonical.find_name_key_duplicate",
         lambda gc, name, *, exclude=None: "Electron_Temperature",
     )
 
@@ -195,7 +195,7 @@ async def test_dup_guard_miss_proceeds_to_persist(
     persist_calls, _, _ = patched
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.canonical.find_name_key_duplicate",
+        "iter_codex.standard_names.canonical.find_name_key_duplicate",
         lambda gc, name, *, exclude=None: None,
     )
 
@@ -222,7 +222,7 @@ async def test_dup_guard_failure_proceeds_to_persist(
         raise RuntimeError("graph unavailable")
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.canonical.find_name_key_duplicate", _boom
+        "iter_codex.standard_names.canonical.find_name_key_duplicate", _boom
     )
 
     mgr = BudgetManager(total_budget=100.0)
@@ -243,26 +243,26 @@ async def test_refine_worker_records_fanout_telemetry(
     persist_calls, _, charge_events = patched
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.canonical.find_name_key_duplicate",
+        "iter_codex.standard_names.canonical.find_name_key_duplicate",
         lambda gc, name, *, exclude=None: None,
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.fanout.load_settings",
+        "iter_codex.standard_names.fanout.load_settings",
         lambda: FanoutSettings(enabled=True, sites={"refine_name": True}),
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.fanout.should_trigger_fanout",
+        "iter_codex.standard_names.fanout.should_trigger_fanout",
         lambda **kwargs: (True, "score below threshold"),
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.fanout.assign_arm",
+        "iter_codex.standard_names.fanout.assign_arm",
         lambda *args, **kwargs: "off",
     )
 
     async def _fake_run_fanout(**kwargs):
         return ""
 
-    monkeypatch.setattr("imas_codex.standard_names.fanout.run_fanout", _fake_run_fanout)
+    monkeypatch.setattr("iter_codex.standard_names.fanout.run_fanout", _fake_run_fanout)
 
     events: list[dict[str, Any]] = []
     mgr = BudgetManager(total_budget=100.0, run_id="test-run")

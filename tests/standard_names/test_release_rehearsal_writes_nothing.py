@@ -37,7 +37,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.standard_names.catalog_release import (
+from iter_codex.standard_names.catalog_release import (
     _review_preview_url,
     _write_and_verify_review_preview_link,
     body_with_exclusion_ledger_link,
@@ -223,7 +223,7 @@ def test_preview_read_back_mismatch_refuses():
         def read_pull_request_body(self, *, repo, number):
             return "unchanged body without the preview"
 
-    from imas_codex.standard_names.catalog_release import (
+    from iter_codex.standard_names.catalog_release import (
         ReviewPreviewLinkInvariantError,
     )
 

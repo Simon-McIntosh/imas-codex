@@ -22,14 +22,14 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from imas_codex.graph.dd_domain_classifier import (
+from iter_codex.graph.dd_domain_classifier import (
     CATEGORY_QUESTION,
     DOMAIN_QUESTION,
     _category_options,
     _domain_options,
 )
-from imas_codex.graph.dd_workers import DDBuildState, classify_worker
-from imas_codex.settings import get_model, get_sn_domain_tree_threshold
+from iter_codex.graph.dd_workers import DDBuildState, classify_worker
+from iter_codex.settings import get_model, get_sn_domain_tree_threshold
 
 PATH = "core_profiles/profiles_1d/electrons/temperature"
 
@@ -162,10 +162,10 @@ async def drive(decide: AsyncMock, chat: AsyncMock) -> FakeGraphClient:
     """Drive ``classify_worker`` with the GraphClient and both LLM endpoints stubbed."""
     fake = FakeGraphClient()
     state = DDBuildState(facility="dd")
-    with patch("imas_codex.graph.client.GraphClient", return_value=fake):
-        with patch("imas_codex.graph.dd_domain_classifier.decide_batch", new=decide):
+    with patch("iter_codex.graph.client.GraphClient", return_value=fake):
+        with patch("iter_codex.graph.dd_domain_classifier.decide_batch", new=decide):
             with patch(
-                "imas_codex.graph.dd_domain_classifier._classify_batch", new=chat
+                "iter_codex.graph.dd_domain_classifier._classify_batch", new=chat
             ):
                 await classify_worker(state)
     return fake
@@ -198,7 +198,7 @@ def probes_bracketing(bar: float) -> tuple[float, float]:
 def test_the_configured_threshold_is_read_from_the_seat_setting() -> None:
     """The bar the classifier routes on is the seat's setting, not a code constant."""
     pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
-    seat = tomllib.loads(pyproject.read_text())["tool"]["imas-codex"]["sn-domain-tree"]
+    seat = tomllib.loads(pyproject.read_text())["tool"]["iter-codex"]["sn-domain-tree"]
     assert get_sn_domain_tree_threshold() == pytest.approx(seat["threshold"])
 
 
@@ -290,7 +290,7 @@ async def test_the_threshold_setting_decides_the_routing(monkeypatch) -> None:
     )
 
     monkeypatch.setattr(
-        "imas_codex.settings.get_sn_domain_tree_threshold", lambda: probe * 0.5
+        "iter_codex.settings.get_sn_domain_tree_threshold", lambda: probe * 0.5
     )
     above = tree_stub(category=category, domain=domain, probability=probe)
     chat_above = chat_stub()

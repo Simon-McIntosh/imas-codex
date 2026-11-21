@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.tools.graph_search import _build_phrase_aware_query, _escape_lucene
+from iter_codex.tools.graph_search import _build_phrase_aware_query, _escape_lucene
 
 
 class TestEscapeLucene:

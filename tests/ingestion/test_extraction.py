@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.mdsplus.extraction import (
+from iter_codex.mdsplus.extraction import (
     _compute_parent_path,
     _resolve_shots,
     discover_tree,
@@ -17,7 +17,7 @@ from imas_codex.mdsplus.extraction import (
 
 _EXTRACT_TREE_SCRIPT = (
     Path(__file__).resolve().parents[2]
-    / "imas_codex"
+    / "iter_codex"
     / "remote"
     / "scripts"
     / "extract_tree.py"
@@ -56,8 +56,8 @@ class TestResolveShotsDynamic:
 class TestExtractTreeVersion:
     """Test extract_tree_version sends correct input to remote script."""
 
-    @patch("imas_codex.mdsplus.extraction.run_python_script")
-    @patch("imas_codex.mdsplus.extraction._load_mdsplus_config")
+    @patch("iter_codex.mdsplus.extraction.run_python_script")
+    @patch("iter_codex.mdsplus.extraction._load_mdsplus_config")
     def test_uses_extract_tree_script(self, mock_config, mock_run):
         mock_config.return_value = {
             "exclude_node_names": ["COMMENTS"],
@@ -78,8 +78,8 @@ class TestExtractTreeVersion:
         assert input_data["exclude_names"] == ["COMMENTS"]
         assert "node_usages" not in input_data
 
-    @patch("imas_codex.mdsplus.extraction.run_python_script")
-    @patch("imas_codex.mdsplus.extraction._load_mdsplus_config")
+    @patch("iter_codex.mdsplus.extraction.run_python_script")
+    @patch("iter_codex.mdsplus.extraction._load_mdsplus_config")
     def test_passes_node_usages(self, mock_config, mock_run):
         mock_config.return_value = {
             "exclude_node_names": [],
@@ -95,8 +95,8 @@ class TestExtractTreeVersion:
         input_data = call_args[1].get("input_data") or call_args[0][1]
         assert input_data["node_usages"] == ["SIGNAL", "NUMERIC"]
 
-    @patch("imas_codex.mdsplus.extraction.run_python_script")
-    @patch("imas_codex.mdsplus.extraction._load_mdsplus_config")
+    @patch("iter_codex.mdsplus.extraction.run_python_script")
+    @patch("iter_codex.mdsplus.extraction._load_mdsplus_config")
     def test_handles_error_in_version_data(self, mock_config, mock_run):
         mock_config.return_value = {
             "exclude_node_names": [],
@@ -111,8 +111,8 @@ class TestExtractTreeVersion:
 class TestDiscoverTree:
     """Test discover_tree (unified multi-shot extraction)."""
 
-    @patch("imas_codex.mdsplus.extraction.extract_tree_version")
-    @patch("imas_codex.mdsplus.extraction._resolve_shots")
+    @patch("iter_codex.mdsplus.extraction.extract_tree_version")
+    @patch("iter_codex.mdsplus.extraction._resolve_shots")
     def test_extracts_each_shot(self, mock_resolve, mock_extract):
         mock_resolve.return_value = [85000]
         mock_extract.return_value = {
@@ -138,7 +138,7 @@ class TestDiscoverTree:
         )
         assert "85000" in result["versions"]
 
-    @patch("imas_codex.mdsplus.extraction.extract_tree_version")
+    @patch("iter_codex.mdsplus.extraction.extract_tree_version")
     def test_multiple_shots(self, mock_extract):
         mock_extract.side_effect = [
             {
@@ -182,22 +182,22 @@ class TestBackwardCompat:
     """Verify backward-compatible aliases work."""
 
     def test_discover_static_tree_version_alias(self):
-        from imas_codex.mdsplus.extraction import discover_static_tree_version
+        from iter_codex.mdsplus.extraction import discover_static_tree_version
 
         assert discover_static_tree_version is extract_tree_version
 
     def test_discover_static_tree_alias(self):
-        from imas_codex.mdsplus.extraction import discover_static_tree
+        from iter_codex.mdsplus.extraction import discover_static_tree
 
         assert discover_static_tree is discover_tree
 
     def test_static_module_re_exports(self):
         # Verify these are the extraction module's functions
-        from imas_codex.mdsplus.extraction import (
+        from iter_codex.mdsplus.extraction import (
             discover_tree,
             extract_tree_version,
         )
-        from imas_codex.mdsplus.static import (
+        from iter_codex.mdsplus.static import (
             discover_static_tree,
             discover_static_tree_version,
             get_static_tree_config,
@@ -209,7 +209,7 @@ class TestBackwardCompat:
         assert discover_static_tree_version is extract_tree_version
 
     def test_mdsplus_init_exports(self):
-        from imas_codex.mdsplus import (
+        from iter_codex.mdsplus import (
             discover_static_tree,
             discover_tree,
             extract_tree_version,

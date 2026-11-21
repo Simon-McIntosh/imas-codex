@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 
-from imas_codex.standard_names.defaults import (
+from iter_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
 
@@ -337,7 +337,7 @@ class _DerivedParentTx:
 
 
 def test_pending_placeholder_repair_does_not_project_common_dd_prefix() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -372,7 +372,7 @@ def test_pending_placeholder_repair_does_not_project_common_dd_prefix() -> None:
 
 
 def test_single_child_parent_materialization_preserves_real_dd_source() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -415,7 +415,7 @@ def test_single_child_parent_materialization_preserves_real_dd_source() -> None:
 
 
 def test_legacy_accepted_null_docs_repair_uses_derived_source_when_needed() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -451,7 +451,7 @@ def test_legacy_qualifier_locus_parents_repair_scalar_safely(
     parent_id: str,
     edge_kinds: tuple[str, ...],
 ) -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -475,7 +475,7 @@ def test_legacy_qualifier_locus_parents_repair_scalar_safely(
 
 
 def test_legacy_heterogeneous_unit_parent_is_skipped() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -499,7 +499,7 @@ def test_legacy_heterogeneous_unit_parent_is_skipped() -> None:
 
 def test_identity_rejection_reaps_only_the_invalid_pending_parent() -> None:
     """The identity oracle reaps invalid scaffolds but preserves unresolved ones."""
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -540,27 +540,27 @@ def test_identity_rejection_reaps_only_the_invalid_pending_parent() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
             side_effect=[[], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
             side_effect=[[invalid, valid, no_unit, heterogeneous], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.parents.recompute_parent_kind",
+            "iter_codex.standard_names.parents.recompute_parent_kind",
             return_value="scalar",
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._validate_derived_parent_identity",
+            "iter_codex.standard_names.graph_store.graph_lineage._validate_derived_parent_identity",
             side_effect=validate,
         ) as identity_oracle,
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
+            "iter_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
             side_effect=delete,
         ) as delete_nodes,
     ):
@@ -585,10 +585,10 @@ def test_identity_rejection_reaps_only_the_invalid_pending_parent() -> None:
 
 def test_pending_single_child_shadow_is_retired_with_deletion_ledger() -> None:
     """A source-less shadow scaffold is retired instead of being materialized."""
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
-    from imas_codex.standard_names.parents import AdmissionResult
+    from iter_codex.standard_names.parents import AdmissionResult
 
     parent_id = "line_integrated_impurity_ion_velocity"
     candidate = {
@@ -628,19 +628,19 @@ def test_pending_single_child_shadow_is_retired_with_deletion_ledger() -> None:
     gc.query.side_effect = query
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
             side_effect=[[candidate], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
             side_effect=[[], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
             return_value=[parent_id],
         ),
         patch(
-            "imas_codex.standard_names.parents.is_admissible_parent_name",
+            "iter_codex.standard_names.parents.is_admissible_parent_name",
             return_value=AdmissionResult(
                 admit=False,
                 reason="suppressed: single-child shadow",
@@ -665,7 +665,7 @@ def test_pending_single_child_shadow_is_retired_with_deletion_ledger() -> None:
 
 
 def test_derived_parent_lifecycle_repair_is_idempotent() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -681,10 +681,10 @@ def test_derived_parent_lifecycle_repair_is_idempotent() -> None:
 
 
 def test_repaired_parent_is_claimable_for_generate_docs() -> None:
-    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    from iter_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_generate_docs_batch,
     )
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -697,11 +697,11 @@ def test_repaired_parent_is_claimable_for_generate_docs() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ),
         patch(
-            "imas_codex.standard_names.chain_history.name_chain_history",
+            "iter_codex.standard_names.chain_history.name_chain_history",
             return_value=[],
         ),
     ):
@@ -725,7 +725,7 @@ def test_nonderived_or_already_normalized_nodes_are_untouched(
     name_stage: str,
     docs_stage: str | None,
 ) -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -742,10 +742,10 @@ def test_nonderived_or_already_normalized_nodes_are_untouched(
 
 
 def test_inadmissible_accepted_derived_parent_is_deleted() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
-    from imas_codex.standard_names.parents import AdmissionResult
+    from iter_codex.standard_names.parents import AdmissionResult
 
     gc = MagicMock()
     # The childless-zombie reaper SELECT must find nothing here (the deletion
@@ -754,19 +754,19 @@ def test_inadmissible_accepted_derived_parent_is_deleted() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
             return_value=["pressure"],
         ),
         patch(
-            "imas_codex.standard_names.parents.is_admissible_parent_name",
+            "iter_codex.standard_names.parents.is_admissible_parent_name",
             return_value=AdmissionResult(
                 admit=False,
                 reason="bare base — no qualifier, locus, projection, operator, or mechanism",
@@ -774,7 +774,7 @@ def test_inadmissible_accepted_derived_parent_is_deleted() -> None:
             ),
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
+            "iter_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
             return_value=1,
         ) as delete_nodes,
     ):
@@ -786,7 +786,7 @@ def test_inadmissible_accepted_derived_parent_is_deleted() -> None:
 
 def test_childless_derived_placeholder_is_retired() -> None:
     """A derived placeholder without children is not a durable abstraction."""
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -806,19 +806,19 @@ def test_childless_derived_placeholder_is_retired() -> None:
     gc.query.side_effect = query
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
             side_effect=[[], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
             side_effect=[[], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
+            "iter_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
             side_effect=[0, 1],
         ) as delete_nodes,
     ):
@@ -842,7 +842,7 @@ def test_childless_derived_placeholder_is_retired() -> None:
 )
 def test_reaped_snapshot_candidate_is_not_rematerialized(snapshot: str) -> None:
     """A childless parent cannot return through an earlier candidate snapshot."""
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -888,23 +888,23 @@ def test_reaped_snapshot_candidate_is_not_rematerialized(snapshot: str) -> None:
     gc.query.side_effect = query
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
             side_effect=seedable_results,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
             side_effect=legacy_results,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
+            "iter_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
             side_effect=[0, 1],
         ) as delete_nodes,
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._materialize_derived_parent_rows",
+            "iter_codex.standard_names.graph_store.graph_lineage._materialize_derived_parent_rows",
             side_effect=AssertionError("reaped parent was rematerialized"),
         ) as materialize,
     ):
@@ -920,7 +920,7 @@ def test_reaped_snapshot_candidate_is_not_rematerialized(snapshot: str) -> None:
 
 def test_childless_parent_chain_is_reaped_to_fixpoint() -> None:
     """Deleting one shell must expose and reap every childless ancestor."""
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -966,23 +966,23 @@ def test_childless_parent_chain_is_reaped_to_fixpoint() -> None:
     gc.query.side_effect = query
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
             side_effect=[candidates, []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
             side_effect=[[], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
+            "iter_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
             side_effect=lambda _gc, ids: len(ids),
         ) as delete_nodes,
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._materialize_derived_parent_rows",
+            "iter_codex.standard_names.graph_store.graph_lineage._materialize_derived_parent_rows",
             side_effect=AssertionError("childless ancestor was rematerialized"),
         ) as materialize,
     ):
@@ -1001,7 +1001,7 @@ def test_childless_parent_chain_is_reaped_to_fixpoint() -> None:
 
 def test_semantically_valid_derived_parent_survives_cleanup() -> None:
     """A species-qualified state parent remains structurally admissible."""
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -1020,19 +1020,19 @@ def test_semantically_valid_derived_parent_survives_cleanup() -> None:
     gc.query.side_effect = query
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
             side_effect=[[], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
             side_effect=[[], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
             return_value=[parent_id],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
+            "iter_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
             return_value=0,
         ) as delete_nodes,
     ):
@@ -1044,7 +1044,7 @@ def test_semantically_valid_derived_parent_survives_cleanup() -> None:
 
 def test_cleanup_query_rechecks_pending_and_accepted_parents() -> None:
     """Admission cleanup covers both creation leaks and accepted residue."""
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         _query_derived_parents_for_admission_cleanup,
     )
 
@@ -1066,7 +1066,7 @@ def test_cleanup_query_rechecks_pending_and_accepted_parents() -> None:
 
 
 def test_accepted_docs_complete_parent_with_missing_unit_is_repaired() -> None:
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         normalize_derived_parent_lifecycle,
     )
 
@@ -1088,19 +1088,19 @@ def test_accepted_docs_complete_parent_with_missing_unit_is_repaired() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_seedable_derived_parents",
             side_effect=[[], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_legacy_repairable_derived_parents",
             side_effect=[[], [candidate]],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
+            "iter_codex.standard_names.graph_store.graph_lineage._query_derived_parents_for_admission_cleanup",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_lineage._materialize_derived_parent_rows",
+            "iter_codex.standard_names.graph_store.graph_lineage._materialize_derived_parent_rows",
             side_effect=[0, 0, 0, 1],
         ) as materialize,
     ):
@@ -1115,7 +1115,7 @@ def test_accepted_docs_complete_parent_with_missing_unit_is_repaired() -> None:
 
 
 def test_run_sn_pools_normalizes_after_parent_seeding() -> None:
-    from imas_codex.standard_names import loop
+    from iter_codex.standard_names import loop
 
     tree = ast.parse(inspect.getsource(loop.run_sn_pools))
     maintenance_calls = sorted(

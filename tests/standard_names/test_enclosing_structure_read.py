@@ -10,9 +10,9 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-import imas_codex.graph.client as graph_client
-from imas_codex.standard_names.worker_tasks import worker_review_names
-from imas_codex.standard_names.worker_tasks.worker_common import (
+import iter_codex.graph.client as graph_client
+from iter_codex.standard_names.worker_tasks import worker_review_names
+from iter_codex.standard_names.worker_tasks.worker_common import (
     _ANCESTOR_CONTEXT_QUERY,
     ancestor_statements,
 )

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.mdsplus.state import TreeDiscoveryState
+from iter_codex.discovery.mdsplus.state import TreeDiscoveryState
 
 
 class TestTreeDiscoveryState:
@@ -77,12 +77,12 @@ class TestBackwardCompatState:
     """Test backward-compatible alias."""
 
     def test_alias_exists_in_mdsplus_state(self):
-        from imas_codex.discovery.mdsplus.state import StaticDiscoveryState
+        from iter_codex.discovery.mdsplus.state import StaticDiscoveryState
 
         assert StaticDiscoveryState is TreeDiscoveryState
 
     def test_old_state_still_works(self):
-        from imas_codex.discovery.static.state import StaticDiscoveryState
+        from iter_codex.discovery.static.state import StaticDiscoveryState
 
         state = StaticDiscoveryState(
             facility="tcv",
@@ -96,7 +96,7 @@ class TestBackwardCompatState:
 
     def test_old_and_new_are_different_classes(self):
         """Old StaticDiscoveryState and new TreeDiscoveryState are different."""
-        from imas_codex.discovery.static.state import StaticDiscoveryState
+        from iter_codex.discovery.static.state import StaticDiscoveryState
 
         assert StaticDiscoveryState is not TreeDiscoveryState
 
@@ -105,12 +105,12 @@ class TestPipelineExports:
     """Test pipeline module exports."""
 
     def test_run_tree_discovery_importable(self):
-        from imas_codex.discovery.mdsplus.pipeline import run_tree_discovery
+        from iter_codex.discovery.mdsplus.pipeline import run_tree_discovery
 
         assert callable(run_tree_discovery)
 
     def test_backward_compat_alias(self):
-        from imas_codex.discovery.mdsplus.pipeline import (
+        from iter_codex.discovery.mdsplus.pipeline import (
             run_parallel_static_discovery,
             run_tree_discovery,
         )
@@ -118,7 +118,7 @@ class TestPipelineExports:
         assert run_parallel_static_discovery is run_tree_discovery
 
     def test_init_exports(self):
-        from imas_codex.discovery.mdsplus import (
+        from iter_codex.discovery.mdsplus import (
             TreeDiscoveryState,
             run_tree_discovery,
         )
@@ -130,7 +130,7 @@ class TestWorkerExports:
     """Test worker module exports."""
 
     def test_workers_importable(self):
-        from imas_codex.discovery.mdsplus.workers import (
+        from iter_codex.discovery.mdsplus.workers import (
             extract_worker,
             promote_worker,
             units_worker,
@@ -142,7 +142,7 @@ class TestWorkerExports:
 
     def test_no_enrich_worker(self):
         """New workers module should not export enrich_worker."""
-        import imas_codex.discovery.mdsplus.workers as w
+        import iter_codex.discovery.mdsplus.workers as w
 
         assert not hasattr(w, "enrich_worker")
 
@@ -151,7 +151,7 @@ class TestGraphOps:
     """Test graph_ops module."""
 
     def test_has_core_ops(self):
-        from imas_codex.discovery.mdsplus.graph_ops import (
+        from iter_codex.discovery.mdsplus.graph_ops import (
             claim_version_for_extraction,
             mark_version_extracted,
             seed_versions,
@@ -162,7 +162,7 @@ class TestGraphOps:
         assert callable(mark_version_extracted)
 
     def test_has_promote_function(self):
-        from imas_codex.discovery.mdsplus.graph_ops import (
+        from iter_codex.discovery.mdsplus.graph_ops import (
             promote_leaf_nodes_to_signals,
         )
 
@@ -170,8 +170,8 @@ class TestGraphOps:
 
     def test_static_shim_re_exports(self):
         """Static graph_ops shim re-exports from mdsplus."""
-        from imas_codex.discovery.mdsplus.graph_ops import seed_versions as sv1
-        from imas_codex.discovery.static.graph_ops import seed_versions as sv2
+        from iter_codex.discovery.mdsplus.graph_ops import seed_versions as sv1
+        from iter_codex.discovery.static.graph_ops import seed_versions as sv2
 
         assert sv1 is sv2
 
@@ -180,10 +180,10 @@ class TestPromoteWorker:
     """Test promote_worker behavior."""
 
     @pytest.mark.asyncio
-    @patch("imas_codex.discovery.mdsplus.graph_ops.promote_leaf_nodes_to_signals")
+    @patch("iter_codex.discovery.mdsplus.graph_ops.promote_leaf_nodes_to_signals")
     async def test_waits_for_extract_and_units(self, mock_promote):
         """Promote worker waits for extract+units to complete."""
-        from imas_codex.discovery.mdsplus.workers import promote_worker
+        from iter_codex.discovery.mdsplus.workers import promote_worker
 
         mock_promote.return_value = 42
         progress_calls = []

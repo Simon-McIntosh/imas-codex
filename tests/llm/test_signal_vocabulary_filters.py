@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.llm.search_tools import (
+from iter_codex.llm.search_tools import (
     VOCABULARY_QUANTITIES,
     VOCABULARY_ROLES,
     _search_signals,

@@ -6,7 +6,7 @@ _ROOT = Path(__file__).parents[2]
 
 
 def _schema(name: str) -> dict:
-    return yaml.safe_load((_ROOT / "imas_codex" / "schemas" / name).read_text())
+    return yaml.safe_load((_ROOT / "iter_codex" / "schemas" / name).read_text())
 
 
 def test_resolution_schema_has_typed_lifecycle_and_immutable_receipt() -> None:

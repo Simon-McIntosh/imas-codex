@@ -2,7 +2,7 @@
 
 import hashlib
 
-from imas_codex.discovery.signals import parallel
+from iter_codex.discovery.signals import parallel
 
 
 class _Graph:

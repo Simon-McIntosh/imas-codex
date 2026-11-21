@@ -1,6 +1,6 @@
 ---
 name: service-ops
-description: How to manage imas-codex services (Neo4j graph, embedding server, model endpoints, SSH tunnels). Use when starting, stopping, checking status, or troubleshooting services.
+description: How to manage iter-codex services (Neo4j graph, embedding server, model endpoints, SSH tunnels). Use when starting, stopping, checking status, or troubleshooting services.
 ---
 
 # Service Operations
@@ -8,16 +8,16 @@ description: How to manage imas-codex services (Neo4j graph, embedding server, m
 ## Neo4j Graph Database
 
 ```bash
-uv run imas-codex graph start       # Start (auto-detects SLURM/SSH/local)
-uv run imas-codex graph stop        # Stop
-uv run imas-codex graph status      # Check status
-uv run imas-codex graph shell       # Interactive Cypher shell
-uv run imas-codex graph profiles    # List all profiles and ports
-uv run imas-codex graph export      # Export graph archive
-uv run imas-codex graph load <f>    # Load archive
-uv run imas-codex graph pull        # Pull latest from GHCR
-uv run imas-codex graph backup      # Create neo4j-admin dump
-uv run imas-codex graph clear       # Clear graph (auto-backup first)
+uv run iter-codex graph start       # Start (auto-detects SLURM/SSH/local)
+uv run iter-codex graph stop        # Stop
+uv run iter-codex graph status      # Check status
+uv run iter-codex graph shell       # Interactive Cypher shell
+uv run iter-codex graph profiles    # List all profiles and ports
+uv run iter-codex graph export      # Export graph archive
+uv run iter-codex graph load <f>    # Load archive
+uv run iter-codex graph pull        # Pull latest from GHCR
+uv run iter-codex graph backup      # Create neo4j-admin dump
+uv run iter-codex graph clear       # Clear graph (auto-backup first)
 ```
 
 ### Ports by Location
@@ -38,14 +38,14 @@ uv run imas-codex graph clear       # Clear graph (auto-backup first)
 ## Embedding Server
 
 ```bash
-uv run imas-codex embed start         # Start via SLURM
-uv run imas-codex embed start -g 2    # Start with 2 GPUs
-uv run imas-codex embed start -f      # Foreground (debugging/inside SLURM batch)
-uv run imas-codex embed stop          # Stop SLURM job + cleanup rogues
-uv run imas-codex embed restart       # Stop + start
-uv run imas-codex embed status        # Health + SLURM job + node state
-uv run imas-codex embed logs          # View SLURM logs
-uv run imas-codex embed service install  # Install systemd service
+uv run iter-codex embed start         # Start via SLURM
+uv run iter-codex embed start -g 2    # Start with 2 GPUs
+uv run iter-codex embed start -f      # Foreground (debugging/inside SLURM batch)
+uv run iter-codex embed stop          # Stop SLURM job + cleanup rogues
+uv run iter-codex embed restart       # Stop + start
+uv run iter-codex embed status        # Health + SLURM job + node state
+uv run iter-codex embed logs          # View SLURM logs
+uv run iter-codex embed service install  # Install systemd service
 ```
 
 ### Embedding Configuration
@@ -60,9 +60,9 @@ uv run imas-codex embed service install  # Install systemd service
 | Symptom | Fix |
 |---------|-----|
 | `embed status` shows node draining | Ask admin to resume node |
-| Server healthy but no SLURM job | `imas-codex embed stop` kills rogues |
+| Server healthy but no SLURM job | `iter-codex embed stop` kills rogues |
 | Embedding calls timeout | Check tunnel: `lsof -i :18765` |
-| Rapid FAILED jobs | Check `imas-codex embed logs`; report a missing or stale node/root environment instead of rebuilding it |
+| Rapid FAILED jobs | Check `iter-codex embed logs`; report a missing or stale node/root environment instead of rebuilding it |
 
 ## Language-model endpoints
 
@@ -73,7 +73,7 @@ naming the seat. The `litellm` dependency is the client for provider requests.
 
 Local seats use the configured `api-base` or named `model-route` and the key
 named by `api-key-env`. Provider calls use `OPENROUTER_API_KEY_<SERVICE>`,
-falling back to `OPENROUTER_API_KEY_IMAS_CODEX`. Keep the `openrouter/` model
+falling back to `OPENROUTER_API_KEY_ITER_CODEX`. Keep the `openrouter/` model
 prefix for client prompt caching and response-cost accounting.
 
 Discovery checks the local router's models listing or the provider's key-info
@@ -85,30 +85,30 @@ and can incur charges. The router's hosting service owns its lifecycle.
 ## SSH Tunnels
 
 ```bash
-uv run imas-codex tunnel start iter   # Start SSH tunnel to remote host
-uv run imas-codex tunnel stop         # Stop tunnel
-uv run imas-codex tunnel status       # Show active tunnels
+uv run iter-codex tunnel start iter   # Start SSH tunnel to remote host
+uv run iter-codex tunnel stop         # Stop tunnel
+uv run iter-codex tunnel status       # Show active tunnels
 ```
 
 ## HPC Job Management
 
 ```bash
-uv run imas-codex hpc status          # Active SLURM allocations
-uv run imas-codex hpc shell           # Interactive compute shell
-uv run imas-codex hpc run <cmd>       # Execute on compute node
-uv run imas-codex hpc submit <script> # Submit batch job
-uv run imas-codex hpc attach <jobid>  # Attach to running job
-uv run imas-codex hpc cancel <jobid>  # Cancel job
-uv run imas-codex hpc info <jobid>    # Job details
+uv run iter-codex hpc status          # Active SLURM allocations
+uv run iter-codex hpc shell           # Interactive compute shell
+uv run iter-codex hpc run <cmd>       # Execute on compute node
+uv run iter-codex hpc submit <script> # Submit batch job
+uv run iter-codex hpc attach <jobid>  # Attach to running job
+uv run iter-codex hpc cancel <jobid>  # Cancel job
+uv run iter-codex hpc info <jobid>    # Job details
 ```
 
 ## MCP Server
 
 ```bash
-uv run imas-codex serve                                  # Full mode (all tools)
-uv run imas-codex serve --read-only                      # Search/read only
-uv run imas-codex serve --dd-only --transport streamable-http  # DD-only container
-uv run imas-codex serve --transport stdio                 # For MCP clients
+uv run iter-codex serve                                  # Full mode (all tools)
+uv run iter-codex serve --read-only                      # Search/read only
+uv run iter-codex serve --dd-only --transport streamable-http  # DD-only container
+uv run iter-codex serve --transport stdio                 # For MCP clients
 ```
 
 ## Critical Rules

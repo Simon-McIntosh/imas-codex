@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.graph_store.graph_audits import (
+from iter_codex.standard_names.graph_store.graph_audits import (
     reconcile_constraint_fit_artifacts,
 )
 
@@ -33,7 +33,7 @@ def test_reconcile_reports_changed_rows_and_then_no_changes() -> None:
 @pytest.fixture()
 def graph_client():
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()

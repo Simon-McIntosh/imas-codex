@@ -46,7 +46,7 @@ class TestParentSupportsUncertaintyIndex:
         so Rule 6 closes the gate unconditionally — including for dimensional
         scalars, which an earlier gate allowed.
         """
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -54,7 +54,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_allow_current(self):
         """Policy gate: a dimensional scalar (A) is blocked by Rule 6."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -62,7 +62,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_allow_ion_density(self):
         """Policy gate: a dimensional scalar (m^-3) is blocked by Rule 6."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -70,7 +70,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_process_term(self):
         """Name containing _due_to_ → denied (process attribution)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -81,7 +81,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_caused_by_pattern(self):
         """Name containing caused_by_ → denied (process attribution)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -92,7 +92,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_dimensionless_empty(self):
         """Empty unit string → denied (dimensionless)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -100,7 +100,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_unit_one(self):
         """Unit '1' → denied (explicitly dimensionless)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -108,7 +108,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_unit_none(self):
         """Unit None → denied (no unit = dimensionless)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -116,7 +116,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_unit_dash(self):
         """Unit '-' → denied (dimensionless dash convention)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -124,7 +124,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_status_suffix(self):
         """Name ending in _status → denied (categorical field)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -132,7 +132,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_type_suffix(self):
         """Name ending in _type → denied (categorical field)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -140,7 +140,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_index_suffix(self):
         """Name ending in _index with dimensionless unit → denied."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -148,7 +148,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_id_suffix(self):
         """Name ending in _id → denied (identifier field)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -156,7 +156,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_label_suffix(self):
         """Name ending in _label → denied (categorical label)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -164,7 +164,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_constant_prefix(self):
         """Name starting with constant_ → denied (data-type descriptor)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -172,7 +172,7 @@ class TestParentSupportsUncertaintyIndex:
 
     def test_deny_generic_prefix(self):
         """Name starting with generic_ → denied (data-type descriptor)."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 
@@ -189,7 +189,7 @@ class TestMintErrorSiblingsGate:
 
     def test_mint_skips_denied_parent(self):
         """Process-term parent → no uncertainty_index sibling produced."""
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         parse_mock, compose_mock = _make_isn_passthrough()
 
@@ -227,7 +227,7 @@ class TestMintErrorSiblingsGate:
         an earlier gate allowed.  upper/lower uncertainty siblings are still
         produced (not gated).
         """
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         parse_mock, compose_mock = _make_isn_passthrough()
 
@@ -260,7 +260,7 @@ class TestMintErrorSiblingsGate:
 
     def test_upper_lower_not_blocked_for_denied_parent(self):
         """Gate only applies to _error_index; upper/lower always pass through."""
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         parse_mock, compose_mock = _make_isn_passthrough()
 
@@ -297,7 +297,7 @@ class TestMintErrorSiblingsGate:
 
     def test_dimensionless_unit_blocks_index_only(self):
         """Dimensionless unit blocks uncertainty_index but not upper/lower."""
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         parse_mock, compose_mock = _make_isn_passthrough()
 
@@ -346,7 +346,7 @@ class TestUncertaintyIndexNeverLeaksViaErrorSiblings:
         """A current-density component must not produce uncertainty_index."""
         from unittest.mock import MagicMock, patch
 
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         def _parse(name):
             m = MagicMock()
@@ -382,7 +382,7 @@ class TestUncertaintyIndexNeverLeaksViaErrorSiblings:
         """A diamagnetic current-density component is blocked."""
         from unittest.mock import MagicMock, patch
 
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         def _parse(name):
             m = MagicMock()
@@ -416,7 +416,7 @@ class TestUncertaintyIndexNeverLeaksViaErrorSiblings:
 
     def test_geometry_dimension_prefix_blocked(self):
         """Rule 5 regression: length_of_* parents must not produce uncertainty_index."""
-        from imas_codex.standard_names.error_siblings import (
+        from iter_codex.standard_names.error_siblings import (
             _parent_supports_uncertainty_index,
         )
 

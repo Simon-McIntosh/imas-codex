@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from imas_codex.cli.sn import _auto_sync_grammar
+from iter_codex.cli.sn import _auto_sync_grammar
 
 
 @dataclass
@@ -66,13 +66,13 @@ def test_auto_sync_skips_when_in_sync():
     """When the graph's active grammar matches the installed ISN, sync is a no-op."""
     from imas_standard_names import __version__ as isn_version
 
-    from imas_codex.standard_names.grammar_sync import grammar_content_digest
+    from iter_codex.standard_names.grammar_sync import grammar_content_digest
 
     gc = _mock_gc(isn_version, content_digest=grammar_content_digest())
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=gc),
+        patch("iter_codex.graph.client.GraphClient", return_value=gc),
         patch(
-            "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+            "iter_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
         ) as mock_sync,
     ):
         _auto_sync_grammar(quiet=True)
@@ -86,9 +86,9 @@ def test_auto_sync_runs_when_digest_is_missing():
 
     gc = _mock_gc(isn_version)
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=gc),
+        patch("iter_codex.graph.client.GraphClient", return_value=gc),
         patch(
-            "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+            "iter_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
         ) as mock_sync,
     ):
         _auto_sync_grammar(quiet=True)
@@ -104,9 +104,9 @@ def test_auto_sync_runs_when_content_differs():
 
     gc = _mock_gc(isn_version, content_digest="sha256:stale")
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=gc),
+        patch("iter_codex.graph.client.GraphClient", return_value=gc),
         patch(
-            "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+            "iter_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
         ) as mock_sync,
     ):
         _auto_sync_grammar(quiet=True)
@@ -120,7 +120,7 @@ def test_auto_sync_degrades_gracefully_on_failure():
     def _boom(*_a, **_kw):
         raise ConnectionError("Neo4j unreachable")
 
-    with patch("imas_codex.graph.client.GraphClient", side_effect=_boom):
+    with patch("iter_codex.graph.client.GraphClient", side_effect=_boom):
         # Must NOT raise.
         _auto_sync_grammar(quiet=True)
 

@@ -14,7 +14,7 @@ skills:
   - schema-summary
 ---
 
-You are a knowledge graph specialist for the imas-codex fusion data graph.
+You are a knowledge graph specialist for the iter-codex fusion data graph.
 
 ## Capabilities
 

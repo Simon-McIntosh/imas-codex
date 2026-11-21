@@ -1,6 +1,6 @@
 # MDSplus Tree Architecture
 
-> **Schema**: `imas_codex/schemas/facility.yaml`
+> **Schema**: `iter_codex/schemas/facility.yaml`
 
 ## Overview
 
@@ -64,7 +64,7 @@ uv run ingest-mdsplus tcv results tcv_shot magnetics
 DataNodes are enriched via `agent enrich`:
 
 ```bash
-uv run imas-codex agent enrich --tree results --batch-size 50
+uv run iter-codex agent enrich --tree results --batch-size 50
 ```
 
 | Field | Source | Description |

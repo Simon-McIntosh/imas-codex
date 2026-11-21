@@ -19,7 +19,7 @@ class TestComputeRefinementHash:
 
     @pytest.fixture(autouse=True)
     def _import(self):
-        from imas_codex.graph.dd_enrichment import compute_refinement_hash
+        from iter_codex.graph.dd_enrichment import compute_refinement_hash
 
         self.hash_fn = compute_refinement_hash
 
@@ -73,7 +73,7 @@ class TestResetDictionaries:
 
     @pytest.fixture(autouse=True)
     def _import(self):
-        from imas_codex.graph.dd_graph_ops import (
+        from iter_codex.graph.dd_graph_ops import (
             _RESET_CLEAR_FIELDS,
             _RESET_SOURCE_STATUSES,
         )
@@ -137,21 +137,21 @@ class TestNodeLifecycle:
     """Verify category constants include geometry."""
 
     def test_embeddable_includes_geometry(self):
-        from imas_codex.core.node_categories import EMBEDDABLE_CATEGORIES
+        from iter_codex.core.node_categories import EMBEDDABLE_CATEGORIES
 
         assert "geometry" in EMBEDDABLE_CATEGORIES
         assert "quantity" in EMBEDDABLE_CATEGORIES
         assert "coordinate" not in EMBEDDABLE_CATEGORIES
 
     def test_enrichable_includes_coordinate_and_geometry(self):
-        from imas_codex.core.node_categories import ENRICHABLE_CATEGORIES
+        from iter_codex.core.node_categories import ENRICHABLE_CATEGORIES
 
         assert "geometry" in ENRICHABLE_CATEGORIES
         assert "quantity" in ENRICHABLE_CATEGORIES
         assert "coordinate" in ENRICHABLE_CATEGORIES
 
     def test_searchable_includes_coordinate_and_geometry(self):
-        from imas_codex.core.node_categories import SEARCHABLE_CATEGORIES
+        from iter_codex.core.node_categories import SEARCHABLE_CATEGORIES
 
         assert "geometry" in SEARCHABLE_CATEGORIES
         assert "quantity" in SEARCHABLE_CATEGORIES
@@ -167,7 +167,7 @@ class TestBuildRefinementMessages:
     """Tests for refinement message construction."""
 
     def test_returns_messages_list(self):
-        from imas_codex.graph.dd_enrichment import build_refinement_messages
+        from iter_codex.graph.dd_enrichment import build_refinement_messages
 
         contexts = [
             {

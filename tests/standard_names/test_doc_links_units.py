@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.doc_links import (
+from iter_codex.standard_names.doc_links import (
     _is_prose_bracket,
     find_prose_bracket_phrases,
 )

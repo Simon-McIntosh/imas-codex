@@ -8,8 +8,8 @@ pytest.importorskip("imas_standard_names")
 
 from imas_standard_names import compose, parse  # noqa: E402
 
-from imas_codex.llm.prompt_loader import render_prompt  # noqa: E402
-from imas_codex.standard_names.context import (  # noqa: E402
+from iter_codex.llm.prompt_loader import render_prompt  # noqa: E402
+from iter_codex.standard_names.context import (  # noqa: E402
     build_compose_context,
     clear_context_cache,
 )

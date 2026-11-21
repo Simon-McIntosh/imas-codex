@@ -13,7 +13,7 @@ Two graph→template orphans the compose prompts must not reintroduce:
 
 from __future__ import annotations
 
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 _PRIOR_DOC_MARKER = "PRIOR_DOC_MARKER_FOR_REGRESSION"
 

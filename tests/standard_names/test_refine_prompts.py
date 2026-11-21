@@ -1,6 +1,6 @@
 """Tests for refine_name_user.md and refine_docs_user.md prompt rendering.
 
-Uses ``render_prompt()`` from ``imas_codex.llm.prompt_loader`` — the same
+Uses ``render_prompt()`` from ``iter_codex.llm.prompt_loader`` — the same
 function used by workers — to verify that key sections are present and that
 chain history is rendered correctly.
 
@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names.context import build_compose_context
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.standard_names.context import build_compose_context
 
 # ---------------------------------------------------------------------------
 # Context builders

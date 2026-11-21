@@ -2,9 +2,9 @@
 
 from unittest.mock import Mock
 
-from imas_codex.discovery.signals.archive_pulses import import_pulses
-from imas_codex.discovery.signals.scanners import codac_uda as catalogue
-from imas_codex.graph.models import ArchiveEndpoint
+from iter_codex.discovery.signals.archive_pulses import import_pulses
+from iter_codex.discovery.signals.scanners import codac_uda as catalogue
+from iter_codex.graph.models import ArchiveEndpoint
 
 
 def archive():
@@ -40,7 +40,7 @@ def test_signal_scanner_delegates_archive_endpoint_write(monkeypatch):
     monkeypatch.setattr(catalogue, "GraphClient", Mock(return_value=manager))
     writer = Mock(return_value=1)
     monkeypatch.setattr(catalogue, "persist_archive_endpoints", writer, raising=False)
-    from imas_codex.discovery.signals import parallel
+    from iter_codex.discovery.signals import parallel
 
     monkeypatch.setattr(parallel, "persist_data_access", Mock())
     endpoint = archive()

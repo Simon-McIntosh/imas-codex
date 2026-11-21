@@ -118,7 +118,7 @@ class SpendRecorder:
         self._real = None
 
     def install(self) -> None:
-        from imas_codex.discovery.base import judgment
+        from iter_codex.discovery.base import judgment
 
         self._real = judgment.acall_decisions
         judgment.acall_decisions = self._call
@@ -126,7 +126,7 @@ class SpendRecorder:
     def restore(self) -> None:
         if self._real is None:
             return
-        from imas_codex.discovery.base import judgment
+        from iter_codex.discovery.base import judgment
 
         judgment.acall_decisions = self._real
         self._real = None
@@ -203,9 +203,9 @@ def _per_question_mean(rows: list[dict], key: str) -> dict[str, float]:
 
 def measure_signal_arms(passes: int) -> dict:
     """Score ``rrf`` and both rerank arms over ``passes`` passes."""
-    from imas_codex.embeddings.config import EncoderConfig
-    from imas_codex.embeddings.encoder import Encoder
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.embeddings.config import EncoderConfig
+    from iter_codex.embeddings.encoder import Encoder
+    from iter_codex.graph.client import GraphClient
 
     harness = _harness()
     gc = GraphClient()
@@ -281,7 +281,7 @@ def _load_docs_code_fixture() -> dict:
 
 def _retrieve_docs_code(query, kind, facility, gc, encoder) -> list[dict]:
     """Return the query's candidates in the search tool's own fused order."""
-    from imas_codex.llm import search_tools as st
+    from iter_codex.llm import search_tools as st
 
     captured: dict = {}
     orig_rerank = st.rerank_candidates
@@ -381,10 +381,10 @@ def _mean(values) -> float | None:
 
 def measure_docs_code() -> dict:
     """Reproduce section 4's docs-and-code figure from the vendored fixture."""
-    from imas_codex.embeddings.config import EncoderConfig
-    from imas_codex.embeddings.encoder import Encoder
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.llm import search_tools as st
+    from iter_codex.embeddings.config import EncoderConfig
+    from iter_codex.embeddings.encoder import Encoder
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.llm import search_tools as st
 
     spec = _load_docs_code_fixture()
     facility = spec["facility"]
@@ -473,10 +473,10 @@ def measure_embed_text() -> dict:
     """Score description-only against name+description+unit on the fixture."""
     import numpy as np
 
-    from imas_codex.embeddings.config import EncoderConfig
-    from imas_codex.embeddings.encoder import Encoder
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.llm.search_tools import _text_search_signals
+    from iter_codex.embeddings.config import EncoderConfig
+    from iter_codex.embeddings.encoder import Encoder
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.llm.search_tools import _text_search_signals
 
     harness = _harness()
     gc = GraphClient()

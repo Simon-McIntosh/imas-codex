@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from imas_codex.standard_names.promote import undo_approval
+from iter_codex.standard_names.promote import undo_approval
 
 
 class _UndoGraph:

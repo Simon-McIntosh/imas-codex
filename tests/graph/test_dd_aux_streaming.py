@@ -1,12 +1,12 @@
 from typing import Any, cast
 
-from imas_codex.graph.dd_identifier_enrichment import (
+from iter_codex.graph.dd_identifier_enrichment import (
     IdentifierEnrichmentBatch,
     IdentifierEnrichmentResult,
     embed_identifier_schemas,
     enrich_identifier_schemas,
 )
-from imas_codex.graph.dd_ids_enrichment import (
+from iter_codex.graph.dd_ids_enrichment import (
     IDSEnrichmentBatch,
     IDSEnrichmentResult,
     embed_ids_nodes,
@@ -96,7 +96,7 @@ def test_enrich_identifier_schemas_emits_items(monkeypatch):
     client = cast(Any, _FakeClient())
 
     monkeypatch.setattr(
-        "imas_codex.discovery.base.llm.call_llm_structured",
+        "iter_codex.discovery.base.llm.call_llm_structured",
         lambda **_kwargs: (
             IdentifierEnrichmentBatch(
                 results=[
@@ -112,11 +112,11 @@ def test_enrich_identifier_schemas_emits_items(monkeypatch):
         ),
     )
     monkeypatch.setattr(
-        "imas_codex.llm.prompt_loader.render_prompt",
+        "iter_codex.llm.prompt_loader.render_prompt",
         lambda *_args, **_kwargs: "prompt",
     )
     monkeypatch.setattr(
-        "imas_codex.settings.get_model",
+        "iter_codex.settings.get_model",
         lambda _section: "test-model",
     )
 
@@ -135,7 +135,7 @@ def test_enrich_ids_nodes_emits_items(monkeypatch):
     client = cast(Any, _FakeClient())
 
     monkeypatch.setattr(
-        "imas_codex.discovery.base.llm.call_llm_structured",
+        "iter_codex.discovery.base.llm.call_llm_structured",
         lambda **_kwargs: (
             IDSEnrichmentBatch(
                 results=[
@@ -151,11 +151,11 @@ def test_enrich_ids_nodes_emits_items(monkeypatch):
         ),
     )
     monkeypatch.setattr(
-        "imas_codex.llm.prompt_loader.render_prompt",
+        "iter_codex.llm.prompt_loader.render_prompt",
         lambda *_args, **_kwargs: "prompt",
     )
     monkeypatch.setattr(
-        "imas_codex.settings.get_model",
+        "iter_codex.settings.get_model",
         lambda _section: "test-model",
     )
 
@@ -173,10 +173,10 @@ def test_embed_identifier_schemas_emits_items(monkeypatch):
     emitted = []
     client = cast(Any, _FakeClient())
 
-    monkeypatch.setattr("imas_codex.settings.get_embedding_dimension", lambda: 1)
-    monkeypatch.setattr("imas_codex.settings.get_embedding_model", lambda: "embed")
+    monkeypatch.setattr("iter_codex.settings.get_embedding_dimension", lambda: 1)
+    monkeypatch.setattr("iter_codex.settings.get_embedding_model", lambda: "embed")
     monkeypatch.setattr(
-        "imas_codex.embeddings.encoder.Encoder",
+        "iter_codex.embeddings.encoder.Encoder",
         _FakeEncoder,
     )
 
@@ -195,10 +195,10 @@ def test_embed_ids_nodes_emits_items(monkeypatch):
     emitted = []
     client = cast(Any, _FakeClient())
 
-    monkeypatch.setattr("imas_codex.settings.get_embedding_dimension", lambda: 1)
-    monkeypatch.setattr("imas_codex.settings.get_embedding_model", lambda: "embed")
+    monkeypatch.setattr("iter_codex.settings.get_embedding_dimension", lambda: 1)
+    monkeypatch.setattr("iter_codex.settings.get_embedding_model", lambda: "embed")
     monkeypatch.setattr(
-        "imas_codex.embeddings.encoder.Encoder",
+        "iter_codex.embeddings.encoder.Encoder",
         _FakeEncoder,
     )
 

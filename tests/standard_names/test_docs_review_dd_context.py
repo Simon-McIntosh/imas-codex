@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+from iter_codex.standard_names.worker_tasks.worker_review_docs import (
     _enrich_docs_review_dd_context,
 )
 
@@ -26,7 +26,7 @@ def test_sourceless_name_attaches_no_dd_context_and_opens_no_graph(
         "source_paths": source_paths,
     }
 
-    with patch("imas_codex.graph.client.GraphClient") as client:
+    with patch("iter_codex.graph.client.GraphClient") as client:
         _enrich_docs_review_dd_context(item)
 
     client.assert_not_called()
@@ -40,9 +40,9 @@ def test_first_bound_source_still_supplies_the_dd_context() -> None:
     }
 
     with (
-        patch("imas_codex.graph.client.GraphClient"),
+        patch("iter_codex.graph.client.GraphClient"),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_generate_docs._enrich_dd_path_context"
+            "iter_codex.standard_names.worker_tasks.worker_generate_docs._enrich_dd_path_context"
         ) as enrich,
     ):
         _enrich_docs_review_dd_context(item)

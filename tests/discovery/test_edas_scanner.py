@@ -19,12 +19,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import yaml
 
-from imas_codex.discovery.signals.parallel import DataDiscoveryState, seed_worker
-from imas_codex.discovery.signals.scanners.base import ScanResult
-from imas_codex.discovery.signals.scanners.edas import EDASScanner, _normalise_dates
-from imas_codex.graph.models import DataAccess, FacilitySignal, SignalDataClass
-from imas_codex.remote.scripts.check_edas import main as check_main
-from imas_codex.remote.scripts.enumerate_edas import (
+from iter_codex.discovery.signals.parallel import DataDiscoveryState, seed_worker
+from iter_codex.discovery.signals.scanners.base import ScanResult
+from iter_codex.discovery.signals.scanners.edas import EDASScanner, _normalise_dates
+from iter_codex.graph.models import DataAccess, FacilitySignal, SignalDataClass
+from iter_codex.remote.scripts.check_edas import main as check_main
+from iter_codex.remote.scripts.enumerate_edas import (
     _lcdb_field_unit,
     _uddb_header_value,
     attempt_database,
@@ -33,7 +33,7 @@ from imas_codex.remote.scripts.enumerate_edas import (
     enumerate_uddb,
     main as enumerate_main,
 )
-from imas_codex.remote.scripts.read_equilibrium_file import resolve_eqdb_path
+from iter_codex.remote.scripts.read_equilibrium_file import resolve_eqdb_path
 
 # Two catalogue rows covering the two classes the scanner branches on:
 # a time series with a shot range and no PID, and a one-point row with a PID.
@@ -74,7 +74,7 @@ CONFIG = {
 def _equilibrium_config():
     root = Path(__file__).parents[2]
     facility = yaml.safe_load(
-        (root / "imas_codex/config/facilities/jt-60sa.yaml").read_text()
+        (root / "iter_codex/config/facilities/jt-60sa.yaml").read_text()
     )
     return root, facility["data_systems"]["edas"]
 
@@ -88,7 +88,7 @@ async def test_real_facility_payload_serializes_observation_dates():
         assert len(json.loads(json.dumps(payload))["database_routes"]) == 9
         return json.dumps(ENUMERATE_FIXTURE)
 
-    with patch("imas_codex.remote.executor.async_run_python_script", remote):
+    with patch("iter_codex.remote.executor.async_run_python_script", remote):
         result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
     assert "error" not in result.stats
     assert _normalise_dates([date(2026, 10, 8)]) == ["2026-10-08"]
@@ -113,7 +113,7 @@ async def test_equilibrium_access_methods_and_inventory_field_signals():
         assert len(example["sha256"]) == 64
 
     remote = AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE))
-    with patch("imas_codex.remote.executor.async_run_python_script", remote):
+    with patch("iter_codex.remote.executor.async_run_python_script", remote):
         result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
 
     assert result.data_access.id == "jt-60sa:edas:eddb"
@@ -163,7 +163,7 @@ async def test_equilibrium_access_methods_and_inventory_field_signals():
 async def test_eqdb_local_template_uses_requested_shot_and_time():
     _, config = _equilibrium_config()
     remote = AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE))
-    with patch("imas_codex.remote.executor.async_run_python_script", remote):
+    with patch("iter_codex.remote.executor.async_run_python_script", remote):
         result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
     access = result.data_accesses[0]
     example = config["equilibrium_examples"][0]
@@ -184,7 +184,7 @@ async def test_eqdb_local_template_uses_requested_shot_and_time():
             ssh_host="nakasvr26",
         )
     )
-    with patch("imas_codex.remote.executor.run_python_script", side_effect=fake_run):
+    with patch("iter_codex.remote.executor.run_python_script", side_effect=fake_run):
         exec(code, {})
     assert calls[0][0] == "read_equilibrium_file.py"
     assert calls[0][1] == {
@@ -211,7 +211,7 @@ async def test_eqdb_local_template_uses_requested_shot_and_time():
             ssh_host="nakasvr26",
         )
     )
-    with patch("imas_codex.remote.executor.run_python_script", side_effect=fake_run):
+    with patch("iter_codex.remote.executor.run_python_script", side_effect=fake_run):
         exec(code, {})
     assert calls[1][1] == {
         "format": "g_eqdsk",
@@ -242,7 +242,7 @@ async def test_equilibrium_check_reads_each_code_example_once():
     _, config = _equilibrium_config()
     scanner = EDASScanner()
     with patch(
-        "imas_codex.remote.executor.async_run_python_script",
+        "iter_codex.remote.executor.async_run_python_script",
         AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE)),
     ):
         scanned = await scanner.scan("jt-60sa", "nakasvr26", config)
@@ -271,7 +271,7 @@ async def test_equilibrium_check_reads_each_code_example_once():
             }
         )
 
-    with patch("imas_codex.remote.executor.async_run_python_script", fake_run):
+    with patch("iter_codex.remote.executor.async_run_python_script", fake_run):
         results = await scanner.check("jt-60sa", "nakasvr26", equilibrium, config)
     assert len(results) == len(equilibrium)
     assert all(item["valid"] for item in results)
@@ -284,7 +284,7 @@ async def test_equilibrium_check_refuses_changed_example_bytes():
     _, config = _equilibrium_config()
     scanner = EDASScanner()
     with patch(
-        "imas_codex.remote.executor.async_run_python_script",
+        "iter_codex.remote.executor.async_run_python_script",
         AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE)),
     ):
         scanned = await scanner.scan("jt-60sa", "nakasvr26", config)
@@ -301,7 +301,7 @@ async def test_equilibrium_check_refuses_changed_example_bytes():
         "sha256": "0" * 64,
     }
     with patch(
-        "imas_codex.remote.executor.async_run_python_script",
+        "iter_codex.remote.executor.async_run_python_script",
         AsyncMock(return_value=json.dumps(changed)),
     ):
         checked = await scanner.check("jt-60sa", "nakasvr26", [signal], config)
@@ -367,12 +367,12 @@ async def test_scanner_access_methods_share_the_existing_persistence_writer():
 
     with (
         patch(
-            "imas_codex.discovery.signals.scanners.base.get_scanner",
+            "iter_codex.discovery.signals.scanners.base.get_scanner",
             return_value=Scanner(),
         ),
-        patch("imas_codex.discovery.signals.parallel.GraphClient", return_value=graph),
+        patch("iter_codex.discovery.signals.parallel.GraphClient", return_value=graph),
         patch(
-            "imas_codex.discovery.signals.parallel.ingest_discovered_signals",
+            "iter_codex.discovery.signals.parallel.ingest_discovered_signals",
             side_effect=lambda rows: events.append("ingest") or len(rows),
         ),
     ):
@@ -385,7 +385,7 @@ class TestConfiguredDatabases:
     def test_facility_records_every_database_route_and_loader(self):
         root, config = _equilibrium_config()
         facility = yaml.safe_load(
-            (root / "imas_codex/config/facilities/jt-60sa.yaml").read_text()
+            (root / "iter_codex/config/facilities/jt-60sa.yaml").read_text()
         )
         routes = {route["name"]: route for route in config["database_routes"]}
         assert set(routes) == set(config["databases"])
@@ -438,7 +438,7 @@ class TestConfiguredDatabases:
         ]
         config = _equilibrium_config()[1]
         remote = AsyncMock(return_value=json.dumps({"signals": rows, "ncats": 2}))
-        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        with patch("iter_codex.remote.executor.async_run_python_script", remote):
             result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
 
         assert "error" not in result.stats
@@ -574,13 +574,13 @@ class TestConfiguredDatabases:
             sys.modules, "mbdbWrapper", SimpleNamespace(mbdbWrapper=CaseCatalogue)
         )
         monkeypatch.setattr(
-            "imas_codex.remote.scripts.enumerate_edas.Path.glob",
+            "iter_codex.remote.scripts.enumerate_edas.Path.glob",
             lambda self, pattern: [
                 Path("/analysis_DB/MBDB/owner/01/0123/012345/mbdb/data.t001.ldb")
             ],
         )
         monkeypatch.setattr(
-            "imas_codex.remote.scripts.enumerate_edas._mbdb_data_names",
+            "iter_codex.remote.scripts.enumerate_edas._mbdb_data_names",
             lambda lib: ([("PSI", "T")], 0),
         )
         rows, attempt = enumerate_mbdb({})
@@ -606,7 +606,7 @@ class TestConfiguredDatabases:
             "ncats": 0,
         }
         remote = AsyncMock(return_value=json.dumps(fixture))
-        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        with patch("iter_codex.remote.executor.async_run_python_script", remote):
             result = await EDASScanner().scan("jt-60sa", "nakasvr26", CONFIG)
         signal = result.signals[0]
         assert signal.id == "jt-60sa:general/mbdb_owner_12345_data.t001_psi"
@@ -616,7 +616,7 @@ class TestConfiguredDatabases:
         check_remote = AsyncMock(
             return_value=json.dumps({"results": [{"id": signal.id, "success": True}]})
         )
-        with patch("imas_codex.remote.executor.async_run_python_script", check_remote):
+        with patch("iter_codex.remote.executor.async_run_python_script", check_remote):
             checked = await EDASScanner().check(
                 "jt-60sa", "nakasvr26", [signal], CONFIG
             )
@@ -644,11 +644,11 @@ class TestConfiguredDatabases:
             SimpleNamespace(LcdbWrapper=AnalysisCatalogue, lib=object()),
         )
         monkeypatch.setattr(
-            "imas_codex.remote.scripts.enumerate_edas.os.scandir",
+            "iter_codex.remote.scripts.enumerate_edas.os.scandir",
             lambda path: [SimpleNamespace(path=f"{path}/owner", is_dir=lambda: True)],
         )
         monkeypatch.setattr(
-            "imas_codex.remote.scripts.enumerate_edas._lcdb_categories",
+            "iter_codex.remote.scripts.enumerate_edas._lcdb_categories",
             lambda lib, root, shot: (["ane.s001"], 0),
         )
         rows, attempt = enumerate_lcdb({"lcdb_root": "/analysis_DB/EDASDB"})
@@ -688,7 +688,7 @@ class TestConfiguredDatabases:
             SimpleNamespace(LcdbWrapper=AnalysisCatalogue, lib=object()),
         )
         monkeypatch.setattr(
-            "imas_codex.remote.scripts.enumerate_edas._lcdb_categories",
+            "iter_codex.remote.scripts.enumerate_edas._lcdb_categories",
             lambda lib, root, shot: (["ane.s001"], 0),
         )
         rows, _ = enumerate_lcdb({"lcdb_root": str(tmp_path)})
@@ -720,7 +720,7 @@ class TestConfiguredDatabases:
             "ncats": 0,
         }
         remote = AsyncMock(return_value=json.dumps(fixture))
-        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        with patch("iter_codex.remote.executor.async_run_python_script", remote):
             result = await EDASScanner().scan("jt-60sa", "nakasvr26", CONFIG)
         signal = result.signals[0]
         assert signal.id == "jt-60sa:general/lcdb_owner_ane.s001_nfit"
@@ -733,7 +733,7 @@ class TestConfiguredDatabases:
 
     def test_eddb_only_failure_is_reported_as_error(self, monkeypatch, capsys):
         monkeypatch.setattr(
-            "imas_codex.remote.scripts.enumerate_edas.enumerate_eddb",
+            "iter_codex.remote.scripts.enumerate_edas.enumerate_eddb",
             lambda *args: (
                 [],
                 [],
@@ -768,7 +768,7 @@ class TestConfiguredDatabases:
         assert plant_attempt["return_code"] == 301
         assert plant_attempt["header_return_code"] == 301
         with patch(
-            "imas_codex.remote.scripts.enumerate_edas.os.scandir",
+            "iter_codex.remote.scripts.enumerate_edas.os.scandir",
             side_effect=FileNotFoundError(2, "No such file or directory"),
         ):
             assert attempt_database("EQDB", "E101173", {})["return_code"] == 2
@@ -776,7 +776,7 @@ class TestConfiguredDatabases:
     def test_unlisted_database_routes_record_the_access_constraint(self, monkeypatch):
         _, config = _equilibrium_config()
         monkeypatch.setattr(
-            "imas_codex.remote.scripts.enumerate_edas.os.path.isfile",
+            "iter_codex.remote.scripts.enumerate_edas.os.path.isfile",
             lambda path: path == config["fledd_lib_path"],
         )
         for name in ("FSMD", "EASY"):
@@ -901,7 +901,7 @@ class TestConfiguredDatabases:
                 }
             )
 
-        with patch("imas_codex.remote.executor.async_run_python_script", remote_run):
+        with patch("iter_codex.remote.executor.async_run_python_script", remote_run):
             result = await EDASScanner().scan("jt-60sa", "nakasvr26", config)
 
         assert received["databases"] == ["EDDB", "UDDB"]
@@ -928,7 +928,7 @@ class TestConfiguredDatabases:
         remote = AsyncMock(
             return_value=json.dumps({"results": [{"id": signal.id, "success": True}]})
         )
-        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        with patch("iter_codex.remote.executor.async_run_python_script", remote):
             results = await EDASScanner().check(
                 "jt-60sa", "nakasvr26", [signal], CONFIG
             )
@@ -945,7 +945,7 @@ class TestEdasScanTypedSlots:
         scanner = EDASScanner()
         remote = AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE))
 
-        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        with patch("iter_codex.remote.executor.async_run_python_script", remote):
             result = await scanner.scan(
                 facility="jt-60sa",
                 ssh_host="nakasvr26",
@@ -969,7 +969,7 @@ class TestEdasScanTypedSlots:
         scanner = EDASScanner()
         remote = AsyncMock(return_value=json.dumps(ENUMERATE_FIXTURE))
 
-        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        with patch("iter_codex.remote.executor.async_run_python_script", remote):
             result = await scanner.scan(
                 facility="jt-60sa",
                 ssh_host="nakasvr26",
@@ -999,7 +999,7 @@ class TestEdasScanTypedSlots:
         }
         remote = AsyncMock(return_value=json.dumps(fixture))
 
-        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        with patch("iter_codex.remote.executor.async_run_python_script", remote):
             result = await scanner.scan(
                 facility="jt-60sa", ssh_host="nakasvr26", config=CONFIG
             )
@@ -1030,7 +1030,7 @@ class TestEdasCheckReadsSlot:
                 {"results": [{"id": signal.id, "success": True, "dtype": "f8"}]}
             )
 
-        with patch("imas_codex.remote.executor.async_run_python_script", fake_run):
+        with patch("iter_codex.remote.executor.async_run_python_script", fake_run):
             results = await scanner.check(
                 facility="jt-60sa",
                 ssh_host="nakasvr26",
@@ -1086,7 +1086,7 @@ class TestEdasPidKeyedGroup:
         scanner = EDASScanner()
         remote = AsyncMock(return_value=json.dumps(PID_KEYED_FIXTURE))
 
-        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        with patch("iter_codex.remote.executor.async_run_python_script", remote):
             result = await scanner.scan(
                 facility="jt-60sa", ssh_host="nakasvr26", config=CONFIG
             )
@@ -1106,7 +1106,7 @@ class TestEdasPidKeyedGroup:
         scanner = EDASScanner()
         remote = AsyncMock(return_value=json.dumps(PID_KEYED_FIXTURE))
 
-        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+        with patch("iter_codex.remote.executor.async_run_python_script", remote):
             result = await scanner.scan(
                 facility="jt-60sa", ssh_host="nakasvr26", config=CONFIG
             )
@@ -1142,7 +1142,7 @@ class TestEdasCheckReadsCategoryFromSourcePath:
                 {"results": [{"id": signal.id, "success": True, "dtype": "f8"}]}
             )
 
-        with patch("imas_codex.remote.executor.async_run_python_script", fake_run):
+        with patch("iter_codex.remote.executor.async_run_python_script", fake_run):
             await scanner.check(
                 facility="jt-60sa",
                 ssh_host="nakasvr26",
@@ -1172,7 +1172,7 @@ class TestEdasCheckReadsCategoryFromSourcePath:
                 {"results": [{"id": signal.id, "success": True, "dtype": "f8"}]}
             )
 
-        with patch("imas_codex.remote.executor.async_run_python_script", fake_run):
+        with patch("iter_codex.remote.executor.async_run_python_script", fake_run):
             await scanner.check(
                 facility="jt-60sa",
                 ssh_host="nakasvr26",

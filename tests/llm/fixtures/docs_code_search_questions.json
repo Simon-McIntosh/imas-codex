@@ -1,6 +1,6 @@
 {
   "facility": "jt-60sa",
-  "note": "Vendored from the search-rerank prototype's queries.json and labels.json (crew reports, imas-codex/search-rerank-prototype). Questions carry the query, each labelled candidate's id and its hand grade, and no candidate text: the ported docs-and-code measurement retrieves candidates live and scores them against these grades.",
+  "note": "Vendored from the search-rerank prototype's queries.json and labels.json (crew reports, iter-codex/search-rerank-prototype). Questions carry the query, each labelled candidate's id and its hand grade, and no candidate text: the ported docs-and-code measurement retrieves candidates live and scores them against these grades.",
   "k": 30,
   "questions": [
     {

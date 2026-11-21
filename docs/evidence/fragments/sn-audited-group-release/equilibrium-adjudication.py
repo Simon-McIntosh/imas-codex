@@ -139,8 +139,8 @@ def attach_families(rendered):
 
 def collect():
     assert not DATA.exists(), "Refuse to overwrite packet freeze"
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.source_reads import source_paths_projection
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.source_reads import source_paths_projection
 
     audit = sibling("blind-audit")
     gc = GraphClient()
@@ -321,8 +321,8 @@ def committed_field(key):
 
 def collect_pending_packets():
     """Supplement the frozen builder output with every enclosing statement."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _ANCESTOR_CONTEXT_QUERY,
         ancestor_statements,
     )
@@ -675,7 +675,7 @@ def collect_comparison():
     """Read historical judgments only after the independent verdict seal exists."""
     check(include_report=False)
     verdict_sha, frozen = committed_snapshot("verdicts-frozen")
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     audit = sibling("blind-audit")
     third_path = ROOT / "frontier-third-reader.json"

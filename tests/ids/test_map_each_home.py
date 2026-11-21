@@ -16,18 +16,18 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.ids.mapping import (
+from iter_codex.ids.mapping import (
     _target_type_from_section,
     build_target_assignments,
     validate_mappings,
 )
-from imas_codex.ids.models import (
+from iter_codex.ids.models import (
     SignalMappingBatch,
     SignalMappingEntry,
     TargetAssignment,
     TargetAssignmentBatch,
 )
-from imas_codex.ids.workers import (
+from iter_codex.ids.workers import (
     claim_sources_for_mapping,
     map_worker,
     record_mapping_verdict,
@@ -63,7 +63,7 @@ def _edge(
 
 class TestMapClaimPredicate:
     def test_claims_selected_edge_without_binding(self):
-        with patch("imas_codex.ids.workers.claim_batch", return_value=[]) as mock:
+        with patch("iter_codex.ids.workers.claim_batch", return_value=[]) as mock:
             claim_sources_for_mapping("jet", "magnetics")
         predicate = mock.call_args.kwargs["status_predicate"]
         assert "MAPPING_CANDIDATE" in predicate
@@ -75,7 +75,7 @@ class TestMapClaimPredicate:
     def test_bound_source_is_skipped_by_the_no_binding_clause(self):
         # The no-binding clause is what makes a second pass over the same IDS
         # skip a source already bound into it.
-        with patch("imas_codex.ids.workers.claim_batch", return_value=[]) as mock:
+        with patch("iter_codex.ids.workers.claim_batch", return_value=[]) as mock:
             claim_sources_for_mapping("jet", "magnetics")
         assert _NO_BINDING in mock.call_args.kwargs["status_predicate"]
 
@@ -156,7 +156,7 @@ class TestBuildTargetAssignments:
 class TestRecordMappingVerdict:
     def test_records_disposition_and_evidence_without_touching_status(self):
         gc = MagicMock()
-        with patch("imas_codex.ids.workers.GraphClient") as gc_cls:
+        with patch("iter_codex.ids.workers.GraphClient") as gc_cls:
             gc_cls.return_value.__enter__.return_value = gc
             record_mapping_verdict("jet:coil:1", "no_imas_equivalent", "not listed")
         query = gc.query.call_args.args[0]
@@ -208,14 +208,14 @@ class TestSectionGuard:
         gc = MagicMock()
         with (
             patch(
-                "imas_codex.ids.validation.validate_mapping",
+                "iter_codex.ids.validation.validate_mapping",
                 return_value=self._report(),
             ),
             patch(
-                "imas_codex.ids.validation.check_coverage_threshold",
+                "iter_codex.ids.validation.check_coverage_threshold",
                 return_value=[],
             ),
-            patch("imas_codex.ids.tools.get_sign_flip_paths", return_value=set()),
+            patch("iter_codex.ids.tools.get_sign_flip_paths", return_value=set()),
         ):
             result = validate_mappings(
                 "jet",
@@ -234,14 +234,14 @@ class TestSectionGuard:
         gc = MagicMock()
         with (
             patch(
-                "imas_codex.ids.validation.validate_mapping",
+                "iter_codex.ids.validation.validate_mapping",
                 return_value=self._report(),
             ),
             patch(
-                "imas_codex.ids.validation.check_coverage_threshold",
+                "iter_codex.ids.validation.check_coverage_threshold",
                 return_value=[],
             ),
-            patch("imas_codex.ids.tools.get_sign_flip_paths", return_value=set()),
+            patch("iter_codex.ids.tools.get_sign_flip_paths", return_value=set()),
         ):
             result = validate_mappings(
                 "jet",
@@ -256,7 +256,7 @@ class TestSectionGuard:
 
 class TestMapWorkerMapsFromSelectedEdges:
     def _run(self):
-        from imas_codex.ids.workers import MappingDiscoveryState
+        from iter_codex.ids.workers import MappingDiscoveryState
 
         state = MappingDiscoveryState(facility="jet", target_ids_list=["magnetics"])
         state.assign_phase = MagicMock()
@@ -279,14 +279,14 @@ class TestMapWorkerMapsFromSelectedEdges:
 
         with (
             patch(
-                "imas_codex.ids.workers.claim_sources_for_mapping", side_effect=_claim
+                "iter_codex.ids.workers.claim_sources_for_mapping", side_effect=_claim
             ),
-            patch("imas_codex.ids.workers.GraphClient") as gc_cls,
-            patch("imas_codex.ids.graph_ops.read_candidates", return_value=edges),
-            patch("imas_codex.ids.mapping._prepare_section_context", side_effect=_prep),
-            patch("imas_codex.ids.mapping._build_messages", return_value=[]),
+            patch("iter_codex.ids.workers.GraphClient") as gc_cls,
+            patch("iter_codex.ids.graph_ops.read_candidates", return_value=edges),
+            patch("iter_codex.ids.mapping._prepare_section_context", side_effect=_prep),
+            patch("iter_codex.ids.mapping._build_messages", return_value=[]),
             patch(
-                "imas_codex.ids.mapping._acall_llm",
+                "iter_codex.ids.mapping._acall_llm",
                 new=AsyncMock(
                     return_value=SignalMappingBatch(
                         ids_name="magnetics",
@@ -295,7 +295,7 @@ class TestMapWorkerMapsFromSelectedEdges:
                     )
                 ),
             ),
-            patch("imas_codex.ids.workers.refresh_mapping_status"),
+            patch("iter_codex.ids.workers.refresh_mapping_status"),
         ):
             gc_cls.return_value.__enter__.return_value = MagicMock()
             asyncio.run(map_worker(state))
@@ -313,7 +313,7 @@ class TestMapWorkerMapsEveryIdsOfOneSource:
     """One source selected in two IDSs is mapped once by each IDS's pass."""
 
     def _run(self):
-        from imas_codex.ids.workers import MappingDiscoveryState
+        from iter_codex.ids.workers import MappingDiscoveryState
 
         state = MappingDiscoveryState(
             facility="jet", target_ids_list=["magnetics", "summary"]
@@ -344,15 +344,15 @@ class TestMapWorkerMapsEveryIdsOfOneSource:
 
         with (
             patch(
-                "imas_codex.ids.workers.claim_sources_for_mapping", side_effect=_claim
+                "iter_codex.ids.workers.claim_sources_for_mapping", side_effect=_claim
             ),
-            patch("imas_codex.ids.workers.release_mapping_claims_batch") as released,
-            patch("imas_codex.ids.workers.GraphClient") as gc_cls,
-            patch("imas_codex.ids.graph_ops.read_candidates", return_value=edges),
-            patch("imas_codex.ids.mapping._prepare_section_context", side_effect=_prep),
-            patch("imas_codex.ids.mapping._build_messages", return_value=[]),
+            patch("iter_codex.ids.workers.release_mapping_claims_batch") as released,
+            patch("iter_codex.ids.workers.GraphClient") as gc_cls,
+            patch("iter_codex.ids.graph_ops.read_candidates", return_value=edges),
+            patch("iter_codex.ids.mapping._prepare_section_context", side_effect=_prep),
+            patch("iter_codex.ids.mapping._build_messages", return_value=[]),
             patch(
-                "imas_codex.ids.mapping._acall_llm",
+                "iter_codex.ids.mapping._acall_llm",
                 new=AsyncMock(
                     return_value=SignalMappingBatch(
                         ids_name="magnetics",
@@ -361,7 +361,7 @@ class TestMapWorkerMapsEveryIdsOfOneSource:
                     )
                 ),
             ),
-            patch("imas_codex.ids.workers.refresh_mapping_status") as refresh,
+            patch("iter_codex.ids.workers.refresh_mapping_status") as refresh,
         ):
             gc_cls.return_value.__enter__.return_value = MagicMock()
             asyncio.run(map_worker(state))
@@ -387,7 +387,7 @@ class TestMapWorkerMapsEveryIdsOfOneSource:
 
 class TestAssemblerSectionFilter:
     def test_sibling_section_sharing_a_name_prefix_is_not_matched(self):
-        from imas_codex.ids.assembler import IDSAssembler
+        from iter_codex.ids.assembler import IDSAssembler
 
         inst = object.__new__(IDSAssembler)
         inst.facility = "jet"
@@ -413,7 +413,7 @@ class TestAssemblerSectionFilter:
 
         with (
             patch(
-                "imas_codex.ids.assembler.select_nodes",
+                "iter_codex.ids.assembler.select_nodes",
                 return_value=[{"path": "pf_active/coil/element/coil:1"}],
             ),
         ):
@@ -429,7 +429,7 @@ class TestProgressAssignCost:
     def test_sections_row_reports_the_choose_targets_cost(self):
         from rich.console import Console
 
-        from imas_codex.ids.progress import MappingProgressDisplay
+        from iter_codex.ids.progress import MappingProgressDisplay
 
         display = MappingProgressDisplay(
             "jet",
@@ -454,8 +454,8 @@ def test_mapping_status_rule_against_the_live_graph():
     source the map stage marked ``mapped``. Removes every trace in a
     ``finally`` block, so the source and its edges leave no residue.
     """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.ids.workers import has_pending_validation_work
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.ids.workers import has_pending_validation_work
 
     marker = uuid.uuid4().hex[:12]
     facility = f"pytest-map-status-{marker}"
@@ -540,8 +540,8 @@ class TestValidateStageUsesTheSingleStatusOwner:
     """The validate stage writes status through the one owner, not a literal."""
 
     def _run(self, ids_name="magnetics"):
-        from imas_codex.ids.models import ValidatedMappingResult
-        from imas_codex.ids.workers import MappingDiscoveryState, validate_worker
+        from iter_codex.ids.models import ValidatedMappingResult
+        from iter_codex.ids.workers import MappingDiscoveryState, validate_worker
 
         state = MappingDiscoveryState(facility="jet", target_ids_list=[ids_name])
         state.persist = False
@@ -582,10 +582,10 @@ class TestValidateStageUsesTheSingleStatusOwner:
         )
 
         with (
-            patch("imas_codex.ids.mapping.adiscover_assembly", _no_assembly),
-            patch("imas_codex.ids.mapping.validate_mappings", return_value=validated),
-            patch("imas_codex.ids.workers.GraphClient") as gc_cls,
-            patch("imas_codex.ids.workers.refresh_mapping_status") as refresh,
+            patch("iter_codex.ids.mapping.adiscover_assembly", _no_assembly),
+            patch("iter_codex.ids.mapping.validate_mappings", return_value=validated),
+            patch("iter_codex.ids.workers.GraphClient") as gc_cls,
+            patch("iter_codex.ids.workers.refresh_mapping_status") as refresh,
         ):
             gc_cls.return_value = MagicMock()
             asyncio.run(validate_worker(state))
@@ -596,6 +596,6 @@ class TestValidateStageUsesTheSingleStatusOwner:
         refresh.assert_called_once_with("jet:s1", "magnetics")
 
     def test_no_stage_writes_a_status_literal(self):
-        from imas_codex.ids import workers
+        from iter_codex.ids import workers
 
         assert not hasattr(workers, "set_mapping_status")

@@ -21,11 +21,11 @@ class TestLlmHealthCheckLocalFreeEndpoint:
         mock_resp.__exit__ = MagicMock(return_value=False)
         return mock_resp
 
-    @patch("imas_codex.settings.get_model_config")
+    @patch("iter_codex.settings.get_model_config")
     @patch("urllib.request.urlopen")
     def test_probes_models_listing(self, mock_urlopen, mock_config):
         """The models listing of the seat's api-base is probed without completion."""
-        from imas_codex.discovery.base.services import llm_health_check
+        from iter_codex.discovery.base.services import llm_health_check
 
         mock_config.return_value = {"model": "local/x", "api_base": self.API_BASE}
         mock_urlopen.return_value = self._mock_models([{"id": "local/x"}])
@@ -37,10 +37,10 @@ class TestLlmHealthCheckLocalFreeEndpoint:
         assert req.full_url == f"{self.API_BASE}/models"
         assert mock_urlopen.call_args.kwargs["timeout"] == 10
 
-    @patch("imas_codex.settings.get_model_config")
+    @patch("iter_codex.settings.get_model_config")
     @patch("urllib.request.urlopen")
     def test_unreachable_endpoint_is_unhealthy(self, mock_urlopen, mock_config):
-        from imas_codex.discovery.base.services import llm_health_check
+        from iter_codex.discovery.base.services import llm_health_check
 
         mock_config.return_value = {"model": "local/x", "api_base": self.API_BASE}
         mock_urlopen.side_effect = urllib.error.URLError("Connection refused")
@@ -67,7 +67,7 @@ class TestDecisionsHealthCheck:
 
     @patch("urllib.request.urlopen")
     def test_authenticated_key_info_probe_is_healthy(self, mock_urlopen, monkeypatch):
-        from imas_codex.discovery.base.services import decisions_health_check
+        from iter_codex.discovery.base.services import decisions_health_check
 
         monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "sk-test")
         mock_urlopen.return_value = self._mock_key_info()
@@ -82,7 +82,7 @@ class TestDecisionsHealthCheck:
 
     @patch("urllib.request.urlopen")
     def test_refused_route_is_unhealthy(self, mock_urlopen, monkeypatch):
-        from imas_codex.discovery.base.services import decisions_health_check
+        from iter_codex.discovery.base.services import decisions_health_check
 
         monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "sk-test")
         mock_urlopen.side_effect = urllib.error.URLError("Connection refused")
@@ -94,7 +94,7 @@ class TestDecisionsHealthCheck:
 
     @patch("urllib.request.urlopen")
     def test_unauthorized_credential_is_unhealthy(self, mock_urlopen, monkeypatch):
-        from imas_codex.discovery.base.services import decisions_health_check
+        from iter_codex.discovery.base.services import decisions_health_check
 
         monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "sk-test")
         mock_urlopen.side_effect = urllib.error.HTTPError(
@@ -119,10 +119,10 @@ class TestLlmHealthCheckWithDecisions:
         mock_resp.__exit__ = MagicMock(return_value=False)
         return mock_resp
 
-    @patch("imas_codex.discovery.base.services.llm_health_check")
+    @patch("iter_codex.discovery.base.services.llm_health_check")
     @patch("urllib.request.urlopen")
     def test_healthy_when_both_reachable(self, mock_urlopen, mock_chat, monkeypatch):
-        from imas_codex.discovery.base.services import (
+        from iter_codex.discovery.base.services import (
             llm_health_check_with_decisions,
         )
 
@@ -144,12 +144,12 @@ class TestLlmHealthCheckWithDecisions:
         req = mock_urlopen.call_args[0][0]
         assert req.full_url == "https://openrouter.ai/api/v1/key"
 
-    @patch("imas_codex.discovery.base.services.llm_health_check")
+    @patch("iter_codex.discovery.base.services.llm_health_check")
     @patch("urllib.request.urlopen")
     def test_refused_decisions_probe_names_decisions(
         self, mock_urlopen, mock_chat, monkeypatch
     ):
-        from imas_codex.discovery.base.services import (
+        from iter_codex.discovery.base.services import (
             llm_health_check_with_decisions,
         )
 
@@ -163,13 +163,13 @@ class TestLlmHealthCheckWithDecisions:
         assert "decisions" in detail
         assert "refused" in detail
 
-    @patch("imas_codex.settings.get_model")
-    @patch("imas_codex.settings.get_model_config")
+    @patch("iter_codex.settings.get_model")
+    @patch("iter_codex.settings.get_model_config")
     @patch("urllib.request.urlopen")
     def test_refused_local_seat_names_score(
         self, mock_urlopen, mock_config, mock_model
     ):
-        from imas_codex.discovery.base.services import (
+        from iter_codex.discovery.base.services import (
             llm_health_check_with_decisions,
         )
 
@@ -192,7 +192,7 @@ class TestLlmHealthCheckWithDecisions:
     ],
 )
 def test_seat_health_uses_its_own_origin(model, expected_url, monkeypatch):
-    from imas_codex.discovery.base import llm, services
+    from iter_codex.discovery.base import llm, services
 
     monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "test-key")
     monkeypatch.setattr(
@@ -200,7 +200,7 @@ def test_seat_health_uses_its_own_origin(model, expected_url, monkeypatch):
     )
     with (
         patch(
-            "imas_codex.settings.get_model_config",
+            "iter_codex.settings.get_model_config",
             return_value={"model": model, "api_base": None},
         ),
         patch("urllib.request.urlopen", return_value=MagicMock()) as send,
@@ -214,12 +214,12 @@ def test_seat_health_uses_its_own_origin(model, expected_url, monkeypatch):
     "model", ["openrouter/example/chat", "typesafe/example-decision"]
 )
 def test_shared_provider_is_probed_once_per_poll(model, monkeypatch):
-    from imas_codex.discovery.base.services import llm_health_check_with_decisions
+    from iter_codex.discovery.base.services import llm_health_check_with_decisions
 
     monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "test-key")
     with (
         patch(
-            "imas_codex.settings.get_model_config",
+            "iter_codex.settings.get_model_config",
             return_value={"model": model, "api_base": None},
         ),
         patch("urllib.request.urlopen", return_value=MagicMock()) as send,
@@ -230,7 +230,7 @@ def test_shared_provider_is_probed_once_per_poll(model, monkeypatch):
 
 
 def test_distinct_provider_origins_each_get_one_probe(monkeypatch):
-    from imas_codex.discovery.base import llm, services
+    from iter_codex.discovery.base import llm, services
 
     monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "test-key")
     monkeypatch.setattr(
@@ -238,7 +238,7 @@ def test_distinct_provider_origins_each_get_one_probe(monkeypatch):
     )
     with (
         patch(
-            "imas_codex.settings.get_model_config",
+            "iter_codex.settings.get_model_config",
             return_value={"model": "openrouter/example/chat", "api_base": None},
         ),
         patch("urllib.request.urlopen", return_value=MagicMock()) as send,
@@ -251,14 +251,14 @@ def test_distinct_provider_origins_each_get_one_probe(monkeypatch):
 
 
 def test_local_router_and_provider_each_get_one_probe(monkeypatch):
-    from imas_codex.discovery.base.services import llm_health_check_with_decisions
+    from iter_codex.discovery.base.services import llm_health_check_with_decisions
 
     monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "test-key")
     reply = MagicMock()
     reply.__enter__.return_value.read.return_value = b'{"data":[{"id":"model"}]}'
     with (
         patch(
-            "imas_codex.settings.get_model_config",
+            "iter_codex.settings.get_model_config",
             return_value={
                 "model": "local/example",
                 "api_base": "http://router.test/v1",
@@ -274,12 +274,12 @@ def test_local_router_and_provider_each_get_one_probe(monkeypatch):
 
 
 def test_provider_health_uses_the_requested_service_key(monkeypatch):
-    from imas_codex.discovery.base.services import llm_health_check_with_decisions
+    from iter_codex.discovery.base.services import llm_health_check_with_decisions
 
     monkeypatch.setenv("OPENROUTER_API_KEY_STANDARD_NAMES", "test-service-key")
     with (
         patch(
-            "imas_codex.settings.get_model_config",
+            "iter_codex.settings.get_model_config",
             return_value={"model": "openrouter/example/chat", "api_base": None},
         ),
         patch("urllib.request.urlopen", return_value=MagicMock()) as send,

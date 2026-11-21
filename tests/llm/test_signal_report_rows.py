@@ -1,6 +1,6 @@
 """Signal search rows retain members while sharing family access instructions."""
 
-from imas_codex.llm.search_formatters import format_signals_report
+from iter_codex.llm.search_formatters import format_signals_report
 
 
 def _signal(

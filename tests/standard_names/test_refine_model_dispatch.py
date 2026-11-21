@@ -18,8 +18,8 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex import settings
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex import settings
+from iter_codex.standard_names.worker_tasks import (
     worker_refine_docs as _owning_worker_refine_docs,
     worker_refine_names as _owning_worker_refine_names,
 )
@@ -47,7 +47,7 @@ def test_refine_default_holds_the_seated_tier(monkeypatch: pytest.MonkeyPatch) -
     edit that leaves the fallback behind, which silently changes the model
     wherever the project configuration is absent.
     """
-    monkeypatch.delenv("IMAS_CODEX_SN_REFINE_MODEL", raising=False)
+    monkeypatch.delenv("ITER_CODEX_SN_REFINE_MODEL", raising=False)
     # Bypass any pyproject override — we want to verify the *default*
     # baked into settings.py protects against accidental downgrades.
     model = settings._MODEL_DEFAULTS["sn-refine"].lower()
@@ -65,9 +65,9 @@ def test_refine_default_holds_the_seated_tier(monkeypatch: pytest.MonkeyPatch) -
 def test_refine_env_override_independent_of_compose(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """``IMAS_CODEX_SN_REFINE_MODEL`` is honoured without leaking to compose."""
-    monkeypatch.setenv("IMAS_CODEX_SN_REFINE_MODEL", "openrouter/test/refine-only")
-    monkeypatch.setenv("IMAS_CODEX_SN_COMPOSE_MODEL", "openrouter/test/compose-only")
+    """``ITER_CODEX_SN_REFINE_MODEL`` is honoured without leaking to compose."""
+    monkeypatch.setenv("ITER_CODEX_SN_REFINE_MODEL", "openrouter/test/refine-only")
+    monkeypatch.setenv("ITER_CODEX_SN_COMPOSE_MODEL", "openrouter/test/compose-only")
     assert settings.get_model("sn-refine") == "openrouter/test/refine-only"
     assert settings.get_model("sn-compose") == "openrouter/test/compose-only"
 
@@ -81,8 +81,8 @@ def test_refine_does_not_alias_compose(monkeypatch: pytest.MonkeyPatch) -> None:
     Override only the refine env var and assert compose is unaffected
     (this is the property we care about — distinct dispatch keys).
     """
-    monkeypatch.setenv("IMAS_CODEX_SN_REFINE_MODEL", "openrouter/test/refine-canary")
-    monkeypatch.delenv("IMAS_CODEX_SN_COMPOSE_MODEL", raising=False)
+    monkeypatch.setenv("ITER_CODEX_SN_REFINE_MODEL", "openrouter/test/refine-canary")
+    monkeypatch.delenv("ITER_CODEX_SN_COMPOSE_MODEL", raising=False)
     refine = settings.get_model("sn-refine")
     compose = settings.get_model("sn-compose")
     assert refine == "openrouter/test/refine-canary"
@@ -104,7 +104,7 @@ def test_refine_name_worker_imports_refine_section() -> None:
     """
     import inspect
 
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     batch_src = inspect.getsource(_owning_worker_refine_names.process_refine_name_batch)
     assert "refine_model_for_attempt(" in batch_src, (
@@ -129,7 +129,7 @@ def test_refine_docs_worker_imports_refine_section() -> None:
     via ``get_model("sn-refine")`` (same contract as refine_name)."""
     import inspect
 
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     src = inspect.getsource(_owning_worker_refine_docs.process_refine_docs_batch)
     assert 'get_model("sn-refine")' in src

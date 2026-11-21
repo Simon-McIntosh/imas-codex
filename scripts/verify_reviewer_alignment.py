@@ -28,9 +28,9 @@ async def _call_single_reviewer(
     candidate_unit: str,
 ) -> dict:
     """Invoke one reviewer model on a single synthetic SN candidate."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.models import (
+    from iter_codex.discovery.base.llm import acall_llm_structured
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.models import (
         StandardNameQualityReviewNameOnlyBatch,
     )
 
@@ -100,7 +100,7 @@ async def _call_single_reviewer(
 
 
 async def main() -> None:
-    from imas_codex.settings import get_sn_review_names_models
+    from iter_codex.settings import get_sn_review_names_models
 
     models = get_sn_review_names_models()
     if not models:

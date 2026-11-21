@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from imas_codex.standard_names import source_refresh as sr
+from iter_codex.standard_names import source_refresh as sr
 
 SNAPSHOT_PATH = "equilibrium/time_slice/profiles_1d/psi"
 TERMINAL_PATH = "equilibrium/time_slice/profiles_1d/psi_axis"
@@ -104,7 +104,7 @@ def _steer_recorder(monkeypatch) -> list[str]:
         steered.append(kw["target"])
         return MagicMock(blocked=None)
 
-    monkeypatch.setattr("imas_codex.standard_names.edit.apply_edit", _record)
+    monkeypatch.setattr("iter_codex.standard_names.edit.apply_edit", _record)
     return steered
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.fanout.trigger import assign_arm
+from iter_codex.standard_names.fanout.trigger import assign_arm
 
 
 class TestAssignArm:

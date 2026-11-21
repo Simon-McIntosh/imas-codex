@@ -4,15 +4,15 @@ from contextlib import closing
 
 import pytest
 
-from imas_codex.discovery.signals.archive_grouping import ArchiveGrouping
-from imas_codex.discovery.signals.archive_grouping_graph import (
+from iter_codex.discovery.signals.archive_grouping import ArchiveGrouping
+from iter_codex.discovery.signals.archive_grouping_graph import (
     graph_group_counts,
     persist_archive_grouping,
 )
-from imas_codex.discovery.signals.variable_name_graph import snapshot_archive_signals
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import ArchiveFieldPattern, ControlNode, FacilitySignal
-from imas_codex.graph.schema import GraphSchema
+from iter_codex.discovery.signals.variable_name_graph import snapshot_archive_signals
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.models import ArchiveFieldPattern, ControlNode, FacilitySignal
+from iter_codex.graph.schema import GraphSchema
 
 pytestmark = pytest.mark.graph
 

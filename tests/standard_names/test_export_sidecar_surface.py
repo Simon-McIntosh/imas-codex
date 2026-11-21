@@ -16,8 +16,8 @@ from unittest.mock import MagicMock, patch
 
 import yaml
 
-from imas_codex.standard_names.catalog_import import check_catalog
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.catalog_import import check_catalog
+from iter_codex.standard_names.export import (
     _ENTRY_REVIEW_FIELDS,
     _SIDECAR_NAME_FIELDS,
     CATALOG_EDGE_MODEL_VERSION,
@@ -27,7 +27,7 @@ from imas_codex.standard_names.export import (
     _write_manifest,
     run_export,
 )
-from imas_codex.standard_names.publish import run_publish
+from iter_codex.standard_names.publish import run_publish
 from tests.standard_names.conftest import clean_source_audit_graph
 
 _COHORT: list[dict[str, Any]] = [
@@ -144,23 +144,23 @@ def test_missing_graph_status_refuses_sidecar_export(tmp_path: Path) -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.export._fetch_export_population",
+            "iter_codex.standard_names.export._fetch_export_population",
             return_value=population,
         ),
         patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=_EmptyGraphClient(),
         ),
         patch(
-            "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+            "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
             return_value=([], set()),
         ),
         patch(
-            "imas_codex.standard_names.export._get_codex_commit_sha",
+            "iter_codex.standard_names.export._get_codex_commit_sha",
             return_value="a" * 40,
         ),
         patch(
-            "imas_codex.standard_names.export._manifest_iso_timestamp",
+            "iter_codex.standard_names.export._manifest_iso_timestamp",
             return_value="2026-09-08T00:00:00Z",
         ),
     ):
@@ -345,7 +345,7 @@ class TestFoldBackReadsTheSidecar:
         client.__enter__.return_value = client
         client.__exit__.return_value = False
         client.query.return_value = rows
-        with patch("imas_codex.graph.client.GraphClient", return_value=client):
+        with patch("iter_codex.graph.client.GraphClient", return_value=client):
             return check_catalog(self._catalog(tmp_path))
 
     def test_kind_and_domain_come_off_the_sidecar_and_agree(

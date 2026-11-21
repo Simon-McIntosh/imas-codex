@@ -18,7 +18,7 @@ CATALOG_ROSTER_MARKER = "MARKER_CATALOG_ROSTER_ENTRY"
 
 @pytest.mark.parametrize("prompt_name", ["sn/review_names", "sn/review_docs"])
 def test_catalog_roster_reaches_rendered_prompt(prompt_name: str) -> None:
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     rendered = render_prompt(
         prompt_name,

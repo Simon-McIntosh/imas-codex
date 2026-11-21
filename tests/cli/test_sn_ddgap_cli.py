@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
-from imas_codex.standard_names.dd_gaps import (
+from iter_codex.cli.sn import sn
+from iter_codex.standard_names.dd_gaps import (
     DDGapRegistrySyncConflict,
     DDGapTransitionConflict,
 )
@@ -23,7 +23,7 @@ def test_human_flag_requires_path_kind_and_reason() -> None:
 
 def test_human_flag_dry_run_routes_through_instrument() -> None:
     with patch(
-        "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+        "iter_codex.standard_names.dd_gaps.write_dd_gaps",
         return_value={
             "reported": 1,
             "relationships": 1,
@@ -67,7 +67,7 @@ def test_registry_sync_cannot_mix_human_arguments() -> None:
 
 def test_registry_sync_reports_provenance_counts() -> None:
     with patch(
-        "imas_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
+        "iter_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
         return_value={
             "registry_entries": 34,
             "reported": 35,
@@ -88,7 +88,7 @@ def test_registry_sync_reports_exact_identity_reclassification() -> None:
     old_id = "dd_gap:spi/injector/*_gas/flow_rate:unit_defect"
     new_id = "dd_gap:spi/injector/*_gas/flow_rate:self_contradiction"
     with patch(
-        "imas_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
+        "iter_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
         return_value={
             "registry_entries": 34,
             "reported": 35,
@@ -110,7 +110,7 @@ def test_registry_sync_reports_exact_identity_reclassification() -> None:
 
 def test_registry_sync_mutation_requires_explicit_apply() -> None:
     with patch(
-        "imas_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
+        "iter_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
         return_value={
             "registry_entries": 34,
             "reported": 35,
@@ -128,7 +128,7 @@ def test_registry_sync_mutation_requires_explicit_apply() -> None:
 
 def test_registry_sync_surfaces_ambiguous_identity_as_operator_error() -> None:
     with patch(
-        "imas_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
+        "iter_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
         side_effect=DDGapRegistrySyncConflict("manual resolution required"),
     ):
         result = CliRunner().invoke(sn, ["ddgap", "--sync-registry", "--apply"])
@@ -150,10 +150,10 @@ def test_list_uses_exact_read_filters_and_does_not_call_writers() -> None:
     ]
     with (
         patch(
-            "imas_codex.standard_names.dd_gaps.list_dd_gaps", return_value=rows
+            "iter_codex.standard_names.dd_gaps.list_dd_gaps", return_value=rows
         ) as listing,
-        patch("imas_codex.standard_names.dd_gaps.write_dd_gaps") as write,
-        patch("imas_codex.standard_names.dd_gaps.transition_dd_gap") as transition,
+        patch("iter_codex.standard_names.dd_gaps.write_dd_gaps") as write,
+        patch("iter_codex.standard_names.dd_gaps.transition_dd_gap") as transition,
     ):
         result = CliRunner().invoke(
             sn,
@@ -231,10 +231,10 @@ def test_show_reports_exact_paths_and_is_read_only() -> None:
         ],
     }
     with (
-        patch("imas_codex.standard_names.dd_gaps.get_dd_gap", return_value=fact),
-        patch("imas_codex.standard_names.dd_gaps.write_dd_gaps") as write,
-        patch("imas_codex.standard_names.dd_gaps.transition_dd_gap") as transition,
-        patch("imas_codex.standard_names.dd_gaps.reconcile_dd_gaps") as reconcile,
+        patch("iter_codex.standard_names.dd_gaps.get_dd_gap", return_value=fact),
+        patch("iter_codex.standard_names.dd_gaps.write_dd_gaps") as write,
+        patch("iter_codex.standard_names.dd_gaps.transition_dd_gap") as transition,
+        patch("iter_codex.standard_names.dd_gaps.reconcile_dd_gaps") as reconcile,
     ):
         result = CliRunner().invoke(
             sn,
@@ -271,14 +271,14 @@ def test_show_reports_exact_paths_and_is_read_only() -> None:
 
 def test_show_surfaces_invalid_or_missing_exact_id() -> None:
     with patch(
-        "imas_codex.standard_names.dd_gaps.get_dd_gap",
+        "iter_codex.standard_names.dd_gaps.get_dd_gap",
         side_effect=ValueError("DD-gap id must use the exact form"),
     ):
         invalid = CliRunner().invoke(sn, ["ddgap", "--show", "not-an-id"])
     assert invalid.exit_code == 1
     assert "exact form" in invalid.output
 
-    with patch("imas_codex.standard_names.dd_gaps.get_dd_gap", return_value=None):
+    with patch("iter_codex.standard_names.dd_gaps.get_dd_gap", return_value=None):
         missing = CliRunner().invoke(
             sn, ["ddgap", "--show", "dd_gap:missing/path:unit_defect"]
         )
@@ -332,14 +332,14 @@ def test_human_transition_requires_reviewed_evidence_token() -> None:
 def test_human_transition_forwards_only_governed_disposition_fields() -> None:
     with (
         patch(
-            "imas_codex.standard_names.dd_gaps.transition_dd_gap",
+            "iter_codex.standard_names.dd_gaps.transition_dd_gap",
             return_value={
                 "id": "dd_gap:equilibrium/path:unit_defect",
                 "from_status": "triaged",
                 "status": "upstream_issue",
             },
         ) as transition,
-        patch("imas_codex.standard_names.dd_gaps.write_dd_gaps") as write,
+        patch("iter_codex.standard_names.dd_gaps.write_dd_gaps") as write,
     ):
         result = CliRunner().invoke(
             sn,
@@ -382,7 +382,7 @@ def test_human_transition_forwards_only_governed_disposition_fields() -> None:
 
 def test_stale_expected_state_is_a_clear_operator_failure() -> None:
     with patch(
-        "imas_codex.standard_names.dd_gaps.transition_dd_gap",
+        "iter_codex.standard_names.dd_gaps.transition_dd_gap",
         side_effect=DDGapTransitionConflict("expected 'flagged' but it changed"),
     ):
         result = CliRunner().invoke(
@@ -425,7 +425,7 @@ def test_release_reconcile_is_read_only_by_default(tmp_path: Path) -> None:
         "dry_run": True,
     }
     with patch(
-        "imas_codex.standard_names.dd_gaps.reconcile_dd_gaps",
+        "iter_codex.standard_names.dd_gaps.reconcile_dd_gaps",
         return_value=summary,
     ) as reconcile:
         result = CliRunner().invoke(
@@ -466,7 +466,7 @@ def test_release_reconcile_apply_and_conflict_reporting(tmp_path: Path) -> None:
         "dry_run": False,
     }
     with patch(
-        "imas_codex.standard_names.dd_gaps.reconcile_dd_gaps",
+        "iter_codex.standard_names.dd_gaps.reconcile_dd_gaps",
         return_value=summary,
     ) as reconcile:
         result = CliRunner().invoke(
@@ -498,7 +498,7 @@ def test_release_reconcile_apply_and_conflict_reporting(tmp_path: Path) -> None:
 def test_release_facts_reject_patterns_before_reconcile(tmp_path: Path) -> None:
     facts_path = tmp_path / "release-facts.json"
     facts_path.write_text(json.dumps({"*/pressure": {"unit": "Pa"}}))
-    with patch("imas_codex.standard_names.dd_gaps.reconcile_dd_gaps") as reconcile:
+    with patch("iter_codex.standard_names.dd_gaps.reconcile_dd_gaps") as reconcile:
         result = CliRunner().invoke(
             sn,
             [

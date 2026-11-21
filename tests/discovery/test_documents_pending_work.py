@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.discovery.documents import pipeline
+from iter_codex.discovery.documents import pipeline
 
 
 def test_true_when_images_are_pending_to_fetch(monkeypatch):

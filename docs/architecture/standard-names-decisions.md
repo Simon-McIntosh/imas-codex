@@ -94,7 +94,7 @@ catalog alongside legitimate first-class names.
 
 **Decision: two-clause deterministic gate + origin='derived' lifecycle**
 
-A new admission gate (`imas_codex/standard_names/parents.py`) runs at write
+A new admission gate (`iter_codex/standard_names/parents.py`) runs at write
 time before any parent placeholder is persisted. A name is admitted if Clause A
 (IR has a qualifier/operator/projection/locus/mechanism) OR Clause B (≥2
 distinct-axis projection children already in graph) holds. This replaces the

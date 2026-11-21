@@ -6,7 +6,7 @@ import sys
 
 from imas_standard_names.grammar.terms import select_conventions
 
-from imas_codex.standard_names.docs_gates import house_style_findings
+from iter_codex.standard_names.docs_gates import house_style_findings
 
 rows = json.load(open(sys.argv[1]))
 cov = collections.Counter()

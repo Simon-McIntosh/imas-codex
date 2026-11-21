@@ -7,15 +7,15 @@ import shutil
 
 import pytest
 
-from imas_codex.discovery.base.facility import get_facility, list_facilities
-from imas_codex.discovery.code.scanner import _get_pattern_categories
-from imas_codex.discovery.code.scorer import build_triage_state
-from imas_codex.discovery.paths import enrichment as path_enrichment
-from imas_codex.discovery.paths.enrichment import _build_enrich_patterns
-from imas_codex.discovery.paths.scorer import build_path_judgment_state
-from imas_codex.remote.scripts.discover_files import _batch_pattern_counts
-from imas_codex.remote.scripts.enrich_directories import count_category_matches
-from imas_codex.remote.scripts.enrich_files import batch_pattern_counts
+from iter_codex.discovery.base.facility import get_facility, list_facilities
+from iter_codex.discovery.code.scanner import _get_pattern_categories
+from iter_codex.discovery.code.scorer import build_triage_state
+from iter_codex.discovery.paths import enrichment as path_enrichment
+from iter_codex.discovery.paths.enrichment import _build_enrich_patterns
+from iter_codex.discovery.paths.scorer import build_path_judgment_state
+from iter_codex.remote.scripts.discover_files import _batch_pattern_counts
+from iter_codex.remote.scripts.enrich_directories import count_category_matches
+from iter_codex.remote.scripts.enrich_files import batch_pattern_counts
 
 
 @pytest.mark.parametrize("facility", sorted(list_facilities()))

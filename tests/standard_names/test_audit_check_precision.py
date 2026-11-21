@@ -1,6 +1,6 @@
 """Precision regressions for structure-aware post-generation audits."""
 
-from imas_codex.standard_names.audits import (
+from iter_codex.standard_names.audits import (
     cumulative_prefix_check,
     implicit_field_check,
     repeated_token_check,

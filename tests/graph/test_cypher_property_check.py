@@ -10,17 +10,17 @@ from typing import Any
 
 import yaml
 
-from imas_codex.graph.schema import GraphSchema
+from iter_codex.graph.schema import GraphSchema
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-STANDARD_NAME_SCHEMA = REPO_ROOT / "imas_codex" / "schemas" / "standard_name.yaml"
-FACILITY_SCHEMA = REPO_ROOT / "imas_codex" / "schemas" / "facility.yaml"
+STANDARD_NAME_SCHEMA = REPO_ROOT / "iter_codex" / "schemas" / "standard_name.yaml"
+FACILITY_SCHEMA = REPO_ROOT / "iter_codex" / "schemas" / "facility.yaml"
 
 
 def _graph_schema_paths() -> tuple[Path, ...]:
     """Return LinkML schemas that declare graph-node identifiers."""
     paths: list[Path] = []
-    for path in sorted((REPO_ROOT / "imas_codex" / "schemas").glob("*.yaml")):
+    for path in sorted((REPO_ROOT / "iter_codex" / "schemas").glob("*.yaml")):
         document = yaml.safe_load(path.read_text(encoding="utf-8"))
         classes = document.get("classes", {}) if isinstance(document, dict) else {}
         declares_node = any(
@@ -37,13 +37,13 @@ def _graph_schema_paths() -> tuple[Path, ...]:
 
 def _checker_module() -> ModuleType:
     try:
-        return importlib.import_module("imas_codex.graph.cypher_property_check")
+        return importlib.import_module("iter_codex.graph.cypher_property_check")
     except ModuleNotFoundError as exc:
-        if exc.name != "imas_codex.graph.cypher_property_check":
+        if exc.name != "iter_codex.graph.cypher_property_check":
             raise
         raise AssertionError(
             "repository Cypher-property checking is not implemented: "
-            "imas_codex.graph.cypher_property_check is missing"
+            "iter_codex.graph.cypher_property_check is missing"
         ) from None
 
 
@@ -133,7 +133,7 @@ def test_repository_cypher_literals_have_declared_properties() -> None:
         "can be trusted"
     )
 
-    report = _audit(checker, REPO_ROOT / "imas_codex", schemas=schemas)
+    report = _audit(checker, REPO_ROOT / "iter_codex", schemas=schemas)
 
     assert report.checked_properties > 0, (
         "a zero-violation result is not evidence unless properties were checked"
@@ -159,10 +159,10 @@ def test_inventory_allows_repairs_and_line_shifts_but_rejects_growth(
 ) -> None:
     checker = _checker_module()
     schema = GraphSchema(STANDARD_NAME_SCHEMA)
-    source_root = tmp_path / "imas_codex"
+    source_root = tmp_path / "iter_codex"
     source_root.mkdir()
     fixture = source_root / "query_fixture.py"
-    relative_path = "imas_codex/query_fixture.py"
+    relative_path = "iter_codex/query_fixture.py"
     label = "StandardNameReview"
     undeclared_property = "inventory_only_property"
 

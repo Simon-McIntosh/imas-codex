@@ -22,8 +22,8 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-from imas_codex.standard_names import worker_tasks
-from imas_codex.standard_names.workers import _WORKER_DEPENDENCIES
+from iter_codex.standard_names import worker_tasks
+from iter_codex.standard_names.workers import _WORKER_DEPENDENCIES
 
 _TASK_PACKAGE = Path(worker_tasks.__file__).parent
 
@@ -129,7 +129,7 @@ def test_every_requested_collaborator_resolves() -> None:
 
 def test_the_review_batch_resolves_its_name_definition_note() -> None:
     """The note builder the review batch asks for is reachable by name."""
-    from imas_codex.standard_names.worker_tasks import worker_review_docs
+    from iter_codex.standard_names.worker_tasks import worker_review_docs
 
     assert (
         "_name_definition_note" in worker_tasks._OWNERS_BY_MODULE["worker_review_docs"]

@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.discovery.wiki.pipeline import html_to_text
+from iter_codex.discovery.wiki.pipeline import html_to_text
 
 
 @pytest.mark.parametrize(
@@ -12,8 +12,8 @@ from imas_codex.discovery.wiki.pipeline import html_to_text
 def test_direct_ingest_reads_jev_cutoff(function_name: str, alias: str):
     from unittest.mock import MagicMock, patch
 
-    from imas_codex.discovery.wiki import pipeline
-    from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
+    from iter_codex.discovery.wiki import pipeline
+    from iter_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
 
     client = MagicMock()
     client.__enter__.return_value = client
@@ -118,7 +118,7 @@ class TestParseMetaField:
 
     def test_basic_field(self):
         """Should extract name/value from a simple META:FIELD line."""
-        from imas_codex.discovery.wiki.pipeline import _parse_meta_field
+        from iter_codex.discovery.wiki.pipeline import _parse_meta_field
 
         line = '%META:FIELD{name="Proposal" title="Proposal" value="magnetic sensor calibration"}%'
         result = _parse_meta_field(line)
@@ -127,21 +127,21 @@ class TestParseMetaField:
 
     def test_empty_value_skipped(self):
         """Fields with empty values should return empty string."""
-        from imas_codex.discovery.wiki.pipeline import _parse_meta_field
+        from iter_codex.discovery.wiki.pipeline import _parse_meta_field
 
         line = '%META:FIELD{name="Comment" title="Comment" value=""}%'
         assert _parse_meta_field(line) == ""
 
     def test_whitespace_only_value_skipped(self):
         """Fields with whitespace-only values should return empty string."""
-        from imas_codex.discovery.wiki.pipeline import _parse_meta_field
+        from iter_codex.discovery.wiki.pipeline import _parse_meta_field
 
         line = '%META:FIELD{name="Comment" title="Comment" value="   "}%'
         assert _parse_meta_field(line) == ""
 
     def test_url_encoded_value(self):
         """URL-encoded values (Japanese text, newlines) should be decoded."""
-        from imas_codex.discovery.wiki.pipeline import _parse_meta_field
+        from iter_codex.discovery.wiki.pipeline import _parse_meta_field
 
         line = '%META:FIELD{name="Text" title="Text" value="%E9%81%8B%E8%BB%A2%E6%97%A5%E8%AA%8C"}%'
         result = _parse_meta_field(line)
@@ -149,7 +149,7 @@ class TestParseMetaField:
 
     def test_newlines_converted_to_br(self):
         """Encoded newlines should become <br> tags."""
-        from imas_codex.discovery.wiki.pipeline import _parse_meta_field
+        from iter_codex.discovery.wiki.pipeline import _parse_meta_field
 
         line = '%META:FIELD{name="Text" title="Text" value="line1%0d%0aline2"}%'
         result = _parse_meta_field(line)
@@ -159,7 +159,7 @@ class TestParseMetaField:
 
     def test_system_meta_skipped(self):
         """TOPICINFO, TOPICPARENT, FORM, etc. should return empty string."""
-        from imas_codex.discovery.wiki.pipeline import _parse_meta_field
+        from iter_codex.discovery.wiki.pipeline import _parse_meta_field
 
         assert (
             _parse_meta_field('%META:TOPICINFO{author="admin" date="1234567890"}%')
@@ -175,7 +175,7 @@ class TestParseMetaField:
 
     def test_malformed_line(self):
         """Malformed lines should return empty string, not crash."""
-        from imas_codex.discovery.wiki.pipeline import _parse_meta_field
+        from iter_codex.discovery.wiki.pipeline import _parse_meta_field
 
         assert _parse_meta_field("%META:") == ""
         assert _parse_meta_field("%META:FIELD{}%") == ""
@@ -187,7 +187,7 @@ class TestTwikiMarkupToHtml:
 
     def test_meta_field_included(self):
         """META:FIELD values should appear in the HTML output."""
-        from imas_codex.discovery.wiki.pipeline import twiki_markup_to_html
+        from iter_codex.discovery.wiki.pipeline import twiki_markup_to_html
 
         markup = (
             '%META:TOPICINFO{author="admin" date="1234567890"}%\n'
@@ -204,7 +204,7 @@ class TestTwikiMarkupToHtml:
 
     def test_meta_field_empty_body(self):
         """Pages with only META:FIELD data (no body text) should still produce content."""
-        from imas_codex.discovery.wiki.pipeline import twiki_markup_to_html
+        from iter_codex.discovery.wiki.pipeline import twiki_markup_to_html
 
         markup = (
             '%META:TOPICINFO{author="user" date="1234567890"}%\n'
@@ -223,8 +223,8 @@ class TestTwikiMarkupToHtml:
 
     def test_form_values_survive_scoring_preview(self):
         """A filled report form must reach the text presented to the judge."""
-        from imas_codex.discovery.wiki.pipeline import twiki_markup_to_html
-        from imas_codex.discovery.wiki.prefetch import extract_text_from_html
+        from iter_codex.discovery.wiki.pipeline import twiki_markup_to_html
+        from iter_codex.discovery.wiki.prefetch import extract_text_from_html
 
         raw = (
             '%META:FORM{name="SystemDailyReportForm"}%\n'
@@ -238,7 +238,7 @@ class TestTwikiMarkupToHtml:
 
     def test_headings(self):
         """TWiki headings should convert to HTML headings."""
-        from imas_codex.discovery.wiki.pipeline import twiki_markup_to_html
+        from iter_codex.discovery.wiki.pipeline import twiki_markup_to_html
 
         markup = "---+ Main Heading\n---++ Sub Heading\nSome text"
         html = twiki_markup_to_html(markup)
@@ -248,7 +248,7 @@ class TestTwikiMarkupToHtml:
 
     def test_verbatim_blocks(self):
         """Verbatim blocks should become <pre> tags."""
-        from imas_codex.discovery.wiki.pipeline import twiki_markup_to_html
+        from iter_codex.discovery.wiki.pipeline import twiki_markup_to_html
 
         markup = "<verbatim>\ncode here\n</verbatim>"
         html = twiki_markup_to_html(markup)
@@ -275,19 +275,19 @@ class TestDynamicPageDetector:
     )
 
     def test_header_only_form_is_dynamic(self):
-        from imas_codex.discovery.wiki.pipeline import detect_dynamic_page
+        from iter_codex.discovery.wiki.pipeline import detect_dynamic_page
 
         assert detect_dynamic_page(self.HEADER_ONLY, ["EDDB"]) is True
 
     def test_header_only_without_database_is_not_dynamic(self):
-        from imas_codex.discovery.wiki.pipeline import detect_dynamic_page
+        from iter_codex.discovery.wiki.pipeline import detect_dynamic_page
 
         # Nothing to name in the stub and nothing to link, so the page is left
         # as it is rather than stubbed with an unnamed database.
         assert detect_dynamic_page(self.HEADER_ONLY, []) is False
 
     def test_table_with_data_rows_is_not_dynamic(self):
-        from imas_codex.discovery.wiki.pipeline import detect_dynamic_page
+        from iter_codex.discovery.wiki.pipeline import detect_dynamic_page
 
         assert detect_dynamic_page(self.DATA_ROWS, ["EDDB"]) is False
 
@@ -296,7 +296,7 @@ class TestDynamicPageStub:
     """The stub names the database(s) the page is rendered from."""
 
     def test_single_database(self):
-        from imas_codex.discovery.wiki.pipeline import dynamic_page_stub
+        from iter_codex.discovery.wiki.pipeline import dynamic_page_stub
 
         assert dynamic_page_stub(["EDDB"]) == (
             "Dynamic table rendered from the EDDB catalogue; "
@@ -304,7 +304,7 @@ class TestDynamicPageStub:
         )
 
     def test_multiple_databases(self):
-        from imas_codex.discovery.wiki.pipeline import dynamic_page_stub
+        from iter_codex.discovery.wiki.pipeline import dynamic_page_stub
 
         assert dynamic_page_stub(["PMDB", "EDDB"]) == (
             "Dynamic table rendered from the EDDB and PMDB catalogues; "
@@ -316,7 +316,7 @@ class TestExtractDatabaseLinks:
     """The ?db= parameters of the links that reach a topic name its database."""
 
     def test_handbook_links(self):
-        from imas_codex.discovery.wiki.pipeline import extract_database_links
+        from iter_codex.discovery.wiki.pipeline import extract_database_links
 
         text = (
             "| [[CategoryInformation?db=EDDB][Experiment database (EDDB)]] |\n"
@@ -329,7 +329,7 @@ class TestExtractDatabaseLinks:
         }
 
     def test_link_without_parameter_ignored(self):
-        from imas_codex.discovery.wiki.pipeline import extract_database_links
+        from iter_codex.discovery.wiki.pipeline import extract_database_links
 
         assert extract_database_links("[[SomeTopic][A topic without a database]]") == {}
 
@@ -340,7 +340,7 @@ class TestLinkChunksToEntitiesDatabaseMerge:
     def test_database_merge_emitted_with_source_map(self):
         from unittest.mock import MagicMock, patch
 
-        from imas_codex.discovery.wiki import pipeline as pl
+        from iter_codex.discovery.wiki import pipeline as pl
 
         gc = MagicMock()
         gc.query.return_value = [{"linked": 7}]
@@ -363,7 +363,7 @@ class TestLinkChunksToEntitiesDatabaseMerge:
     def test_database_merge_absent_from_scope_without_fronts(self):
         from unittest.mock import MagicMock, patch
 
-        from imas_codex.discovery.wiki import pipeline as pl
+        from iter_codex.discovery.wiki import pipeline as pl
 
         # A page with no fronts_database cannot produce the database merge: the
         # query's own guard is the filter, so it is emitted but matches nothing.
@@ -394,8 +394,8 @@ class TestIngestMarksDynamicPage:
     def _run(self, monkeypatch):
         from unittest.mock import MagicMock
 
-        from imas_codex.discovery.wiki import pipeline as pl
-        from imas_codex.discovery.wiki.scraper import WikiPage
+        from iter_codex.discovery.wiki import pipeline as pl
+        from iter_codex.discovery.wiki.scraper import WikiPage
 
         class _Vec(list):
             def tolist(self):
@@ -473,7 +473,7 @@ class TestMarkDynamicHandbookPages:
     def test_marks_page_and_embeds_stub_chunk(self, monkeypatch):
         from unittest.mock import MagicMock
 
-        from imas_codex.discovery.wiki import pipeline as pl
+        from iter_codex.discovery.wiki import pipeline as pl
 
         class _Vec(list):
             def tolist(self):
@@ -524,7 +524,7 @@ class TestIngestPagesSurfacesMarkerFailure:
     """A failing dynamic-page marker is raised out of the run, not logged away."""
 
     def test_raising_marker_is_surfaced(self, monkeypatch):
-        from imas_codex.discovery.wiki import pipeline as pl
+        from iter_codex.discovery.wiki import pipeline as pl
 
         def _boom(facility_id):
             raise RuntimeError("dynamic-page marking failed")
@@ -543,8 +543,8 @@ class TestDatabaseMergeGraph:
     """The fourth DOCUMENTS merge parses against the live graph, not a mock."""
 
     def test_database_merge_statement_parses(self):
-        from imas_codex.discovery.wiki import pipeline as pl
-        from imas_codex.graph import GraphClient
+        from iter_codex.discovery.wiki import pipeline as pl
+        from iter_codex.graph import GraphClient
 
         # EXPLAIN the statement the pipeline actually runs, not a copy of it, so a
         # change to the production Cypher is what this gate parses.
@@ -562,13 +562,13 @@ class TestPipelineInit:
 
     def test_import(self):
         """Pipeline should be importable."""
-        from imas_codex.discovery.wiki.pipeline import WikiIngestionPipeline
+        from iter_codex.discovery.wiki.pipeline import WikiIngestionPipeline
 
         assert WikiIngestionPipeline is not None
 
     def test_create_instance(self):
         """Pipeline should be instantiable without Neo4j."""
-        from imas_codex.discovery.wiki.pipeline import WikiIngestionPipeline
+        from iter_codex.discovery.wiki.pipeline import WikiIngestionPipeline
 
         # This may fail without Neo4j, which is expected
         # We just test that the class exists and has expected attributes
@@ -583,7 +583,7 @@ class TestPipelineIntegration:
     @pytest.fixture
     def pipeline(self):
         """Create pipeline instance."""
-        from imas_codex.discovery.wiki.pipeline import WikiIngestionPipeline
+        from iter_codex.discovery.wiki.pipeline import WikiIngestionPipeline
 
         try:
             p = WikiIngestionPipeline("tcv")
@@ -593,7 +593,7 @@ class TestPipelineIntegration:
 
     def test_ingest_page(self, pipeline):
         """Test ingesting a single page."""
-        from imas_codex.discovery.wiki.scraper import WikiPage
+        from iter_codex.discovery.wiki.scraper import WikiPage
 
         # Create a test page - just verify it can be constructed
         _page = WikiPage(
@@ -610,7 +610,7 @@ class TestIngestFromGraphFailureRouting:
     """ingest_from_graph routes unsupported failures to deferred, rest to failed."""
 
     def _pipeline(self):
-        from imas_codex.discovery.wiki.pipeline import DocumentPipeline
+        from iter_codex.discovery.wiki.pipeline import DocumentPipeline
 
         pipeline = object.__new__(DocumentPipeline)
         pipeline.facility_id = "jt-60sa"
@@ -631,7 +631,7 @@ class TestIngestFromGraphFailureRouting:
         import asyncio
         from unittest.mock import AsyncMock, patch
 
-        from imas_codex.discovery.wiki import pipeline as pl
+        from iter_codex.discovery.wiki import pipeline as pl
 
         pipeline = self._pipeline()
         with (
@@ -661,7 +661,7 @@ class TestIngestFromGraphFailureRouting:
         import asyncio
         from unittest.mock import AsyncMock, patch
 
-        from imas_codex.discovery.wiki import pipeline as pl
+        from iter_codex.discovery.wiki import pipeline as pl
 
         pipeline = self._pipeline()
         with (
@@ -687,7 +687,7 @@ class TestIngestFromGraphFailureRouting:
         import asyncio
         from unittest.mock import AsyncMock, patch
 
-        from imas_codex.discovery.wiki import pipeline as pl
+        from iter_codex.discovery.wiki import pipeline as pl
 
         pipeline = self._pipeline()
         with (

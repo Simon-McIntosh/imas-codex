@@ -14,8 +14,8 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.near_duplicates import build_worklist
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.near_duplicates import build_worklist
 
 HERE = Path(__file__).resolve().parent
 OUTPUT = HERE / "golden-synonym-candidates.json"

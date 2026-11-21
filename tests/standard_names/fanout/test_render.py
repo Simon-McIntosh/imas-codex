@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from imas_codex.standard_names.fanout.render import format_results
-from imas_codex.standard_names.fanout.schemas import FanoutHit, FanoutResult
+from iter_codex.standard_names.fanout.render import format_results
+from iter_codex.standard_names.fanout.schemas import FanoutHit, FanoutResult
 
 
 def _hit(label: str, score: float | None = 0.9) -> FanoutHit:

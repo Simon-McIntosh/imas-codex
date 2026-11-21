@@ -8,13 +8,13 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import _require_embed_ready, _run_sn_cmd, sn
+from iter_codex.cli.sn import _require_embed_ready, _run_sn_cmd, sn
 
 
 def test_require_embed_ready_allows_healthy_embed() -> None:
     """Healthy embedding service should not block ``sn run``."""
     with patch(
-        "imas_codex.discovery.base.services.embed_health_check",
+        "iter_codex.discovery.base.services.embed_health_check",
         return_value=(True, "iter"),
     ):
         _require_embed_ready("sn run")
@@ -23,7 +23,7 @@ def test_require_embed_ready_allows_healthy_embed() -> None:
 def test_require_embed_ready_raises_actionable_error() -> None:
     """Unhealthy embedding service should fail fast with recovery guidance."""
     with patch(
-        "imas_codex.discovery.base.services.embed_health_check",
+        "iter_codex.discovery.base.services.embed_health_check",
         return_value=(False, "server unavailable"),
     ):
         with pytest.raises(click.ClickException) as exc_info:
@@ -38,11 +38,11 @@ def test_require_embed_ready_raises_actionable_error() -> None:
 def test_run_sn_cmd_checks_embed_before_starting() -> None:
     """The pool orchestrator must preflight embed health before running."""
     with (
-        patch("imas_codex.cli.sn._require_embed_ready") as require_embed,
-        patch("imas_codex.cli.discover.common.use_rich_output", return_value=False),
-        patch("imas_codex.cli.discover.common.setup_logging", return_value=None),
+        patch("iter_codex.cli.sn._require_embed_ready") as require_embed,
+        patch("iter_codex.cli.discover.common.use_rich_output", return_value=False),
+        patch("iter_codex.cli.discover.common.setup_logging", return_value=None),
         patch(
-            "imas_codex.cli.discover.common.run_discovery",
+            "iter_codex.cli.discover.common.run_discovery",
             return_value={"summary": None},
         ),
     ):
@@ -60,9 +60,9 @@ def test_run_sn_cmd_checks_embed_before_starting() -> None:
 def test_run_sn_cmd_skips_embed_preflight_for_dry_run() -> None:
     """Dry runs should not require a live embedding service."""
     with (
-        patch("imas_codex.cli.sn._require_embed_ready") as require_embed,
+        patch("iter_codex.cli.sn._require_embed_ready") as require_embed,
         patch(
-            "imas_codex.standard_names.loop.preview_sn_pools",
+            "iter_codex.standard_names.loop.preview_sn_pools",
             return_value={
                 "source": "dd",
                 "domains": [],
@@ -89,11 +89,11 @@ def test_focus_run_preflights_before_graph_mutation() -> None:
     runner = CliRunner()
     with (
         patch(
-            "imas_codex.cli.sn._require_embed_ready",
+            "iter_codex.cli.sn._require_embed_ready",
             side_effect=click.ClickException("embed down"),
         ),
-        patch("imas_codex.graph.client.GraphClient") as graph_client,
-        patch("imas_codex.cli.sn._run_sn_cmd") as run_pools,
+        patch("iter_codex.graph.client.GraphClient") as graph_client,
+        patch("iter_codex.cli.sn._run_sn_cmd") as run_pools,
     ):
         result = runner.invoke(
             sn,
@@ -116,14 +116,14 @@ def test_signals_reset_preflights_before_reset_mutation() -> None:
     runner = CliRunner()
     with (
         patch(
-            "imas_codex.cli.sn._require_embed_ready",
+            "iter_codex.cli.sn._require_embed_ready",
             side_effect=click.ClickException("embed down"),
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog_reset.clear_standard_names"
+            "iter_codex.standard_names.graph_store.graph_catalog_reset.clear_standard_names"
         ) as clear_names,
         patch(
-            "imas_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names"
+            "iter_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names"
         ) as reset_names,
     ):
         result = runner.invoke(

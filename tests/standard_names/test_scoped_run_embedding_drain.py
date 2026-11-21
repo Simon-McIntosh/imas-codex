@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-_GO = "imas_codex.standard_names.graph_ops"
-_LOOP = "imas_codex.standard_names.loop"
+_GO = "iter_codex.standard_names.graph_ops"
+_LOOP = "iter_codex.standard_names.loop"
 
 
 @pytest.mark.asyncio
@@ -50,44 +50,44 @@ async def test_scoped_run_drains_newly_described_accepted_name() -> None:
 
     with (
         patch(f"{_LOOP}._build_pool_specs", return_value=[]),
-        patch("imas_codex.standard_names.pools.run_pools", side_effect=idle_run),
-        patch("imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"),
-        patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
+        patch("iter_codex.standard_names.pools.run_pools", side_effect=idle_run),
+        patch("iter_codex.standard_names.graph_store.graph_audits.create_sn_run_open"),
+        patch("iter_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+            "iter_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
+            "iter_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
             return_value={"total": 0, "names": [], "sources": []},
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_refinement.claim_embed_batch",
+            "iter_codex.standard_names.graph_store.graph_refinement.claim_embed_batch",
             claim,
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_refine_docs.process_embed_batch",
+            "iter_codex.standard_names.worker_tasks.worker_refine_docs.process_embed_batch",
             new=AsyncMock(side_effect=process),
         ) as process_mock,
         patch(
-            "imas_codex.standard_names.budget.BudgetManager.start",
+            "iter_codex.standard_names.budget.BudgetManager.start",
             new_callable=AsyncMock,
         ),
         patch(
-            "imas_codex.standard_names.budget.BudgetManager.drain_pending",
+            "iter_codex.standard_names.budget.BudgetManager.drain_pending",
             new_callable=AsyncMock,
             return_value=True,
         ),
         patch(
-            "imas_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
+            "iter_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
             return_value=0.0,
         ),
-        patch("imas_codex.graph.client.GraphClient", return_value=graph_context),
+        patch("iter_codex.graph.client.GraphClient", return_value=graph_context),
     ):
-        from imas_codex.standard_names.loop import run_sn_pools
+        from iter_codex.standard_names.loop import run_sn_pools
 
         summary = await run_sn_pools(
             cost_limit=5.0,
@@ -117,19 +117,19 @@ async def test_scoped_run_refuses_partial_embedding_drain() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_store.graph_refinement.claim_embed_batch",
+            "iter_codex.standard_names.graph_store.graph_refinement.claim_embed_batch",
             return_value=[item],
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_refinement.release_embed_claims",
+            "iter_codex.standard_names.graph_store.graph_refinement.release_embed_claims",
             release,
         ),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_refine_docs.process_embed_batch",
+            "iter_codex.standard_names.worker_tasks.worker_refine_docs.process_embed_batch",
             new=AsyncMock(return_value=0),
         ),
     ):
-        from imas_codex.standard_names.loop import (
+        from iter_codex.standard_names.loop import (
             _drain_scoped_standard_name_embeddings,
         )
 

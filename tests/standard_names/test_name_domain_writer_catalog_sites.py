@@ -1,10 +1,10 @@
 """The catalog-side writers set no domain of their own.
 
-Two modules in ``imas_codex.standard_names.graph_store`` used to set a
+Two modules in ``iter_codex.standard_names.graph_store`` used to set a
 ``StandardName``'s ``physics_domain`` directly: the promote-on-higher-rank
 promotion inside ``graph_catalog.write_standard_names``, and the successor
 provision inside ``graph_refinement.persist_refined_name``. Each now leaves the
-domain to :func:`imas_codex.standard_names.domain_decision.write_name_domain`,
+domain to :func:`iter_codex.standard_names.domain_decision.write_name_domain`,
 which sets ``physics_domain``, ``source_domains`` and the
 ``HAS_PHYSICS_DOMAIN`` edges together.
 
@@ -38,9 +38,9 @@ def test_write_standard_names_leaves_the_domain_to_the_one_writer(
     disposable_neo4j_empty: str,
 ) -> None:
     """The payload domain is ignored; the one writer sets all three."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         write_standard_names,
     )
 
@@ -115,12 +115,12 @@ def test_persist_refined_name_writes_the_domain_for_a_client_that_is_not_a_graph
     disposable_neo4j_empty: str,
 ) -> None:
     """A proxy client gets the domain written, not a skipped write."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
-    from imas_codex.standard_names.graph_store.graph_foundation import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from iter_codex.standard_names.graph_store.graph_foundation import (
         services_for_call,
     )
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
 
@@ -179,12 +179,12 @@ def test_persist_refined_name_refuses_an_unwritable_client_before_it_commits(
     disposable_neo4j_empty: str,
 ) -> None:
     """A client that cannot write the domain leaves no committed successor."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
-    from imas_codex.standard_names.graph_store.graph_foundation import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from iter_codex.standard_names.graph_store.graph_foundation import (
         services_for_call,
     )
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
 
@@ -222,9 +222,9 @@ def test_persist_refined_name_carries_the_stored_decision_through_the_writer(
     disposable_neo4j_empty: str,
 ) -> None:
     """A renamed successor's domain comes from the stored decision, with edges."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
 

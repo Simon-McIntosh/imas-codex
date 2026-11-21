@@ -7,7 +7,7 @@ An illustration of an architecture, not a census. Reading from the bottom:
 - the **knowledge graph** built on top of them by extract, transform and load, which
   itself becomes ITER infrastructure: durable, owned, and drawn with the ringed
   nodes of the ICP knowledge-map figures;
-- a **function layer** of read-only tools over the graph (Lucy tools, imas-codex
+- a **function layer** of read-only tools over the graph (Lucy tools, iter-codex
   tools), third-party connectors (Outlook, Jira, Confluence) to the left, and
   codegen to the right: Python the model writes and runs, for whatever the tools do
   not cover;
@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb
 from matplotlib.patches import FancyBboxPatch, Polygon
 
-from imas_codex.plotting.style import save_figure, use_style
+from iter_codex.plotting.style import save_figure, use_style
 
 ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
@@ -425,7 +425,7 @@ def draw_functions(c: Canvas) -> None:
         2,
         kinds={"ask Lucy": "frontier"},
     )
-    c.group(ix[0], y0, ix[1], y1, "imas-codex tools")
+    c.group(ix[0], y0, ix[1], y1, "iter-codex tools")
     grid(c, ix[0] + pad, ix[1] - pad, y1 - header, CODEX_TOOLS, 2)
     # codegen: Python the model writes and runs against the graph, where no tool fits
     c.card(rx[0], y0, rx[1], y1, "codegen", "Python", kind="frontier")

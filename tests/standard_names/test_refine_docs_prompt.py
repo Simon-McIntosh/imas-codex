@@ -22,7 +22,7 @@ import json
 
 import pytest
 
-from imas_codex.llm.prompt_loader import render_prompt
+from iter_codex.llm.prompt_loader import render_prompt
 
 # ---------------------------------------------------------------------------
 # Context builders
@@ -240,7 +240,7 @@ def test_omits_shared_wording_block_when_no_parts():
 
 def test_shared_parts_built_for_species_density():
     """The worker builds the family and population parts from the name."""
-    from imas_codex.standard_names.docs_gates import fixed_shared_parts
+    from iter_codex.standard_names.docs_gates import fixed_shared_parts
 
     # A family member's sentence is stored per family and needs no grammar
     # conventions to render: the species is already in the rendered sentence.

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.discovery.base import llm
+from iter_codex.discovery.base import llm
 
 MESSAGES = [{"role": "user", "content": "test"}]
 
@@ -17,7 +17,7 @@ class TestOpenRouterRouting:
 
     def test_explicit_key_routes_directly(self, monkeypatch):
         """An explicit provider credential still makes a direct request."""
-        monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX", raising=False)
+        monkeypatch.delenv("OPENROUTER_API_KEY_ITER_CODEX", raising=False)
 
         kwargs = llm._build_kwargs(
             model="anthropic/claude-sonnet-4.6",
@@ -34,7 +34,7 @@ class TestOpenRouterRouting:
 
     def test_cache_model_uses_service_credential(self, monkeypatch):
         """Cache-capable models use the configured provider credential."""
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "direct-or-key")
 
         kwargs = llm._build_kwargs(
             model="anthropic/claude-sonnet-4.6",
@@ -53,7 +53,7 @@ class TestOpenRouterRouting:
 
     def test_non_cache_model_uses_service_credential(self, monkeypatch):
         """Non-cache models use the same direct provider routing."""
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "direct-or-key")
 
         kwargs = llm._build_kwargs(
             model="openai/gpt-5.4",
@@ -86,7 +86,7 @@ class TestOpenRouterRouting:
 
     def test_standard_names_direct_request_carries_provider_rate_cap(self, monkeypatch):
         """Paid SN requests bind OpenRouter routing to the catalog ceiling."""
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "direct-or-key")
 
         kwargs = llm._build_kwargs(
             model="anthropic/claude-sonnet-4.6",
@@ -107,7 +107,7 @@ class TestOpenRouterRouting:
 
     def test_standard_names_custom_endpoint_rejects_before_provider(self, monkeypatch):
         """A route that cannot carry max_price is rejected before dispatch."""
-        monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX", raising=False)
+        monkeypatch.delenv("OPENROUTER_API_KEY_ITER_CODEX", raising=False)
 
         with pytest.raises(llm.ProviderPricingUnbounded):
             llm._build_kwargs(
@@ -126,7 +126,7 @@ class TestOpenRouterRouting:
         """A cataloged rate outside the text ceiling cannot dispatch."""
         import litellm
 
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "direct-or-key")
         monkeypatch.setattr(
             litellm,
             "get_model_info",
@@ -155,7 +155,7 @@ class TestOpenRouterRouting:
         """Every configured production seat dispatches directly under max_price."""
         import litellm
 
-        config = tomllib.loads(Path("pyproject.toml").read_text())["tool"]["imas-codex"]
+        config = tomllib.loads(Path("pyproject.toml").read_text())["tool"]["iter-codex"]
         seats = {
             name: section["model"]
             for name, section in config.items()
@@ -190,7 +190,7 @@ class TestOpenRouterRouting:
         assert paid_seats
         assert any("openai/" in model for model in paid_seats.values())
         assert any("x-ai/" in model for model in paid_seats.values())
-        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
+        monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "direct-or-key")
 
         def _catalog_lag(_model):
             raise RuntimeError("model is newer than bundled catalog")

@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 
-from imas_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
-from imas_codex.discovery.wiki.parallel import get_wiki_discovery_stats
-from imas_codex.discovery.wiki.progress import DocsItem, WikiProgressDisplay
+from iter_codex.discovery.wiki.graph_ops import CONTENT_INGEST_THRESHOLD
+from iter_codex.discovery.wiki.parallel import get_wiki_discovery_stats
+from iter_codex.discovery.wiki.progress import DocsItem, WikiProgressDisplay
 
 
 def test_pending_ingest_uses_content_cutoff(monkeypatch):
@@ -18,7 +18,7 @@ def test_pending_ingest_uses_content_cutoff(monkeypatch):
     client.query.side_effect = query
     graph = MagicMock()
     graph.return_value.__enter__.return_value = client
-    monkeypatch.setattr("imas_codex.discovery.wiki.parallel.GraphClient", graph)
+    monkeypatch.setattr("iter_codex.discovery.wiki.parallel.GraphClient", graph)
     stats = get_wiki_discovery_stats("jet")
     assert stats["pending_ingest"] == 1
 
@@ -53,7 +53,7 @@ def test_pending_document_ingest_uses_content_cutoff(monkeypatch):
     client.query.side_effect = query
     graph = MagicMock()
     graph.return_value.__enter__.return_value = client
-    monkeypatch.setattr("imas_codex.discovery.wiki.parallel.GraphClient", graph)
+    monkeypatch.setattr("iter_codex.discovery.wiki.parallel.GraphClient", graph)
 
     stats = get_wiki_discovery_stats("jet")
     assert stats["total_documents"] == 2

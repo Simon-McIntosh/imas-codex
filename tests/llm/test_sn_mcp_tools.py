@@ -25,7 +25,7 @@ def _registered_tool_names(server) -> set[str]:
 
 def test_dd_only_true_suppresses_standard_name_tools() -> None:
     """dd_only=True must hide ALL StandardName MCP tools."""
-    from imas_codex.llm.server import AgentsServer
+    from iter_codex.llm.server import AgentsServer
 
     server = AgentsServer(dd_only=True, include_standard_names=True)
     tools = _registered_tool_names(server)
@@ -46,7 +46,7 @@ def test_dd_only_true_suppresses_standard_name_tools() -> None:
 
 def test_dd_only_false_registers_sn_tools() -> None:
     """When dd_only=False, all 8 SN tools must be registered."""
-    from imas_codex.llm.server import AgentsServer
+    from iter_codex.llm.server import AgentsServer
 
     server = AgentsServer(dd_only=False, include_standard_names=True)
     tools = _registered_tool_names(server)
@@ -67,7 +67,7 @@ def test_dd_only_false_registers_sn_tools() -> None:
 
 def test_include_standard_names_false_suppresses_all() -> None:
     """include_standard_names=False also suppresses SN tools."""
-    from imas_codex.llm.server import AgentsServer
+    from iter_codex.llm.server import AgentsServer
 
     server = AgentsServer(dd_only=False, include_standard_names=False)
     tools = _registered_tool_names(server)
@@ -82,7 +82,7 @@ def test_include_standard_names_false_suppresses_all() -> None:
 
 def test_find_related_wrapper_formats_buckets() -> None:
     """_find_related_standard_names renders buckets in deterministic order."""
-    from imas_codex.llm import sn_tools
+    from iter_codex.llm import sn_tools
 
     fake_buckets = {
         "Grammar Family": [{"name": "electron_density", "description": "n_e"}],
@@ -99,7 +99,7 @@ def test_find_related_wrapper_formats_buckets() -> None:
 
 
 def test_find_related_wrapper_empty_buckets() -> None:
-    from imas_codex.llm import sn_tools
+    from iter_codex.llm import sn_tools
 
     gc = MagicMock()
     with patch.object(sn_tools, "_find_related_backing", return_value={}):
@@ -113,7 +113,7 @@ def test_find_related_wrapper_empty_buckets() -> None:
 
 
 def test_check_standard_names_formats_table() -> None:
-    from imas_codex.llm import sn_tools
+    from iter_codex.llm import sn_tools
 
     fake = [
         {"name": "good_name", "exists": True, "suggestion": "", "reason": ""},
@@ -133,7 +133,7 @@ def test_check_standard_names_formats_table() -> None:
 
 
 def test_check_standard_names_empty_input() -> None:
-    from imas_codex.llm import sn_tools
+    from iter_codex.llm import sn_tools
 
     gc = MagicMock()
     out = sn_tools._check_standard_names("   ", gc=gc)
@@ -146,7 +146,7 @@ def test_check_standard_names_empty_input() -> None:
 
 
 def test_get_summary_wrapper_renders_sections() -> None:
-    from imas_codex.llm import sn_tools
+    from iter_codex.llm import sn_tools
 
     summary = {
         "physical_base": "temperature",
@@ -184,7 +184,7 @@ def test_get_summary_wrapper_renders_sections() -> None:
 
 
 def test_get_summary_empty_family() -> None:
-    from imas_codex.llm import sn_tools
+    from iter_codex.llm import sn_tools
 
     gc = MagicMock()
     with patch.object(

@@ -28,7 +28,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.promote import (
+from iter_codex.standard_names.promote import (
     CONTRACT_MARKER,
     ApprovalChange,
     ApprovalOutcome,
@@ -49,7 +49,7 @@ from imas_codex.standard_names.promote import (
     undo_approval,
 )
 
-APPROVAL = "imas_codex.standard_names.promote"
+APPROVAL = "iter_codex.standard_names.promote"
 
 
 class RealTransportAttempted(BaseException):
@@ -200,7 +200,7 @@ def _fold_back_write_transport(responses):
                 return status, body
         return 404, {"message": f"unrouted {path}"}
 
-    return patch("imas_codex.graph.ghcr.github_api_call", fake_call)
+    return patch("iter_codex.graph.ghcr.github_api_call", fake_call)
 
 
 def _fold_additive_batch(repo: dict, *, contest_refused: bool) -> ApprovalReport:
@@ -271,7 +271,7 @@ class TestRefusalNoticeTransportGuard:
         """A positive receipt: the routed endpoint answers instead of escaping."""
         with _fold_back_write_transport([("/issues/7/comments", 201, {"id": 1})]):
             # Resolved inside the patch, as the refusal path resolves it.
-            from imas_codex.graph.ghcr import github_api_call
+            from iter_codex.graph.ghcr import github_api_call
 
             assert github_api_call(
                 "POST",
@@ -551,7 +551,7 @@ class TestFetchPrEvidence:
                     return status, body
             return 404, {"message": f"unrouted {path}"}
 
-        return patch("imas_codex.graph.ghcr.github_api_call", fake_call)
+        return patch("iter_codex.graph.ghcr.github_api_call", fake_call)
 
     def test_parses_body_comments_reviews_commits(self):
         responses = [
@@ -699,7 +699,7 @@ class TestTagFoldBack:
 
 class TestApprovalCliTag:
     def _resolved(self, merged_repo):
-        from imas_codex.standard_names.promote import ResolvedPr
+        from iter_codex.standard_names.promote import ResolvedPr
 
         return ResolvedPr(
             number=7,
@@ -713,7 +713,7 @@ class TestApprovalCliTag:
     def test_approval_creates_the_contract_tag(self, merged_repo):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         work, rc = merged_repo["work"], merged_repo["rc"]
         with (
@@ -740,7 +740,7 @@ class TestApprovalCliTag:
     def test_existing_rc_tag_does_not_block_approval(self, merged_repo):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         work, rc = merged_repo["work"], merged_repo["rc"]
         _git(["tag", "-a", rc, merged_repo["branch_first"], "-m", "RC cut"], work)
@@ -775,7 +775,7 @@ class TestApprovalCliTag:
     def test_approval_refuses_when_already_folded_back(self, merged_repo):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         work, rc, merge_commit = (
             merged_repo["work"],
@@ -813,8 +813,8 @@ class TestApprovalCliTag:
     def test_undo_removes_the_contract_tag(self, merged_repo):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
-        from imas_codex.standard_names.promote import UndoApprovalReport
+        from iter_codex.cli.sn import sn
+        from iter_codex.standard_names.promote import UndoApprovalReport
 
         work, rc, merge_commit = (
             merged_repo["work"],
@@ -855,8 +855,8 @@ class TestApprovalCliTag:
     def test_undo_restores_the_exact_rc_tag(self, merged_repo):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
-        from imas_codex.standard_names.promote import UndoApprovalReport
+        from iter_codex.cli.sn import sn
+        from iter_codex.standard_names.promote import UndoApprovalReport
 
         work, rc = merged_repo["work"], merged_repo["rc"]
         _git(["tag", "-a", rc, merged_repo["branch_first"], "-m", "RC cut"], work)
@@ -974,7 +974,7 @@ class TestLabelledVersionReceipt:
         assert rc in _git(["ls-remote", "--tags", "origin"], work)
 
     def test_undo_deletes_the_labelled_receipt_tag(self, labelled_merged_repo):
-        from imas_codex.standard_names.promote import delete_fold_back_tag
+        from iter_codex.standard_names.promote import delete_fold_back_tag
 
         work, merge_commit, rc = (
             labelled_merged_repo["work"],
@@ -1004,7 +1004,7 @@ class TestApprovalCliLabelledVersion:
     """The CLI must resolve a labelled batch RC end-to-end from the branch name."""
 
     def _resolved(self, repo):
-        from imas_codex.standard_names.promote import ResolvedPr
+        from iter_codex.standard_names.promote import ResolvedPr
 
         return ResolvedPr(
             number=7,
@@ -1020,7 +1020,7 @@ class TestApprovalCliLabelledVersion:
     ):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         work, rc = labelled_merged_repo["work"], labelled_merged_repo["rc"]
         # Frozen artifact for this labelled RC, in a temp reviews home.
@@ -1031,7 +1031,7 @@ class TestApprovalCliLabelledVersion:
             encoding="utf-8",
         )
         monkeypatch.setattr(
-            "imas_codex.standard_names.catalog_release.default_reviews_dir",
+            "iter_codex.standard_names.catalog_release.default_reviews_dir",
             lambda: reviews,
         )
         seen: dict = {}
@@ -1068,7 +1068,7 @@ class TestApprovalCliLabelledVersion:
     def test_second_fold_back_of_a_labelled_rc_is_refused(self, labelled_merged_repo):
         from click.testing import CliRunner
 
-        from imas_codex.cli.sn import sn
+        from iter_codex.cli.sn import sn
 
         work, rc, merge_commit = (
             labelled_merged_repo["work"],

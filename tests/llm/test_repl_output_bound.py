@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import re
 
-from imas_codex.llm import server as server_module
-from imas_codex.llm.server import AgentsServer
+from iter_codex.llm import server as server_module
+from iter_codex.llm.server import AgentsServer
 
 
 def _registered_repl():

@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names import provenance_lifecycle
-from imas_codex.standard_names.promote import mark_catalog_name_approved, run_approval
-from imas_codex.standard_names.provenance_lifecycle import (
+from iter_codex.standard_names import provenance_lifecycle
+from iter_codex.standard_names.promote import mark_catalog_name_approved, run_approval
+from iter_codex.standard_names.provenance_lifecycle import (
     bind_sources_exclusively,
     compact_unapproved_superseded,
     fetch_public_semantic_sources,
@@ -209,7 +209,7 @@ def test_guard_comparison_bindings_drops_null_identity() -> None:
 
 
 def test_retarget_rejects_a_partially_admitted_explicit_cohort() -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         AttachmentPairingGuardResult,
         AttachmentVerdict,
     )
@@ -222,7 +222,7 @@ def test_retarget_rejects_a_partially_admitted_explicit_cohort() -> None:
         "dd:invalid", "bad/path", "new", "drafted", "geometry mismatch"
     )
     with patch(
-        "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+        "iter_codex.standard_names.attachment_audit.guard_source_pairings",
         return_value=AttachmentPairingGuardResult(("dd:valid",), (verdict,)),
     ) as guard:
         with pytest.raises(ValueError, match="attachment rejected"):
@@ -276,14 +276,14 @@ def test_exclusive_bind_can_bypass_guard_only_for_recovery_replay() -> None:
 
 
 def test_exclusive_bind_mutates_only_sources_admitted_by_guard() -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         AttachmentPairingGuardResult,
     )
 
     gc = MagicMock()
     gc.query.return_value = [{"bound": 1}]
     with patch(
-        "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+        "iter_codex.standard_names.attachment_audit.guard_source_pairings",
         return_value=AttachmentPairingGuardResult(("dd:valid",), ()),
     ) as guard:
         bound = bind_sources_exclusively(gc, "target_name", ["dd:invalid", "dd:valid"])
@@ -418,7 +418,7 @@ def test_retarget_conflicting_manifest_cannot_claim_an_unrecorded_postcondition(
 
 @pytest.mark.graph
 def test_retarget_query_compiles_in_transaction(graph_client) -> None:
-    from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+    from iter_codex.standard_names.cascade import _TransactionQueryAdapter
 
     with graph_client.session() as session:
         transaction = session.begin_transaction()
@@ -708,7 +708,7 @@ def test_rename_mirror_refresh_separates_updates_from_matches() -> None:
 
 @pytest.mark.graph
 def test_rename_mirror_refresh_compiles_in_transaction(graph_client) -> None:
-    from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+    from iter_codex.standard_names.cascade import _TransactionQueryAdapter
 
     with graph_client.session() as session:
         transaction = session.begin_transaction()

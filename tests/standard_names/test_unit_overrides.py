@@ -1,15 +1,15 @@
 """Tests for DD unit override engine.
 
-See ``imas_codex/standard_names/unit_overrides.py`` and
-``imas_codex/standard_names/config/unit_overrides.yaml``.
+See ``iter_codex/standard_names/unit_overrides.py`` and
+``iter_codex/standard_names/config/unit_overrides.yaml``.
 """
 
 from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
-from imas_codex.standard_names.unit_overrides import (
+from iter_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
+from iter_codex.standard_names.unit_overrides import (
     _glob_match,
     resolve_unit,
 )

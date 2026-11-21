@@ -13,7 +13,7 @@ import pytest
 # of the package without touching the working tree.
 PACKAGE_ROOT = Path(
     os.environ.get("SN_STANDARD_NAMES_ROOT")
-    or Path(__file__).resolve().parents[2] / "imas_codex/standard_names"
+    or Path(__file__).resolve().parents[2] / "iter_codex/standard_names"
 )
 PACKAGES = ("graph_store", "worker_tasks")
 
@@ -27,7 +27,7 @@ def _sibling_module(node: ast.ImportFrom, stem: str) -> str | None:
     """Return the top-level sibling module *node* imports from, if any."""
     if node.level == 0:
         parts = (node.module or "").split(".")
-        if len(parts) == 3 and parts[:2] == ["imas_codex", "standard_names"]:
+        if len(parts) == 3 and parts[:2] == ["iter_codex", "standard_names"]:
             target = parts[2]
         else:
             return None
@@ -90,7 +90,7 @@ def test_package_imports_only_shared_module(package: str, module_path: Path) -> 
     }
     tree = ast.parse(module_path.read_text(encoding="utf-8"), str(module_path))
     forbidden: list[tuple[int, str]] = []
-    prefix = f"imas_codex.standard_names.{package}"
+    prefix = f"iter_codex.standard_names.{package}"
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -133,7 +133,7 @@ def test_package_imports_only_shared_module(package: str, module_path: Path) -> 
 
 def test_unwired_graph_services_refuse(monkeypatch: pytest.MonkeyPatch) -> None:
     """A standalone domain import reports missing wiring at first use."""
-    from imas_codex.standard_names.graph_store import graph_audits, graph_foundation
+    from iter_codex.standard_names.graph_store import graph_audits, graph_foundation
 
     monkeypatch.setattr(graph_foundation, "_services", None)
     with pytest.raises(RuntimeError, match="Graph services are not wired"):
@@ -144,7 +144,7 @@ def test_unwired_graph_services_refuse(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_stranded_docs_predicate_is_complete() -> None:
     """The Cypher constant needs no entrypoint rewrite to become valid."""
-    from imas_codex.standard_names.graph_store import graph_audits
+    from iter_codex.standard_names.graph_store import graph_audits
 
     predicate = graph_audits.PROMOTE_STRANDED_DOCS_WHERE
     assert "{docs_review_eligibility_where}" not in predicate

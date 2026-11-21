@@ -5,9 +5,9 @@ import json
 import subprocess
 from unittest.mock import patch
 
-from imas_codex.discovery.base import reachability
-from imas_codex.discovery.code import scanner, workers
-from imas_codex.discovery.code.state import FileDiscoveryState
+from iter_codex.discovery.base import reachability
+from iter_codex.discovery.code import scanner, workers
+from iter_codex.discovery.code.state import FileDiscoveryState
 
 
 class ScanClaims:
@@ -55,21 +55,21 @@ def run_scan(monkeypatch, output):
     state = FileDiscoveryState(facility="sample")
     claims = ScanClaims(state)
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.claim_paths_for_file_scan", claims.claim
+        "iter_codex.discovery.code.graph_ops.claim_paths_for_file_scan", claims.claim
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.mark_path_file_scanned", claims.mark
+        "iter_codex.discovery.code.graph_ops.mark_path_file_scanned", claims.mark
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.release_path_file_scan_claim",
+        "iter_codex.discovery.code.graph_ops.release_path_file_scan_claim",
         claims.release,
     )
-    monkeypatch.setattr("imas_codex.graph.GraphClient", FacilityGraph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", FacilityGraph)
     monkeypatch.setattr(scanner, "_get_pattern_categories", lambda _facility: {})
     with (
-        patch("imas_codex.discovery.base.facility.get_facility", return_value={}),
+        patch("iter_codex.discovery.base.facility.get_facility", return_value={}),
         patch(
-            "imas_codex.remote.executor.run_python_script",
+            "iter_codex.remote.executor.run_python_script",
             side_effect=output if isinstance(output, Exception) else None,
             return_value=output,
         ),
@@ -153,23 +153,23 @@ def run_retrying_scan(monkeypatch, outcomes, monitor=None, on_progress=None):
         waits.append(seconds)
 
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.claim_paths_for_file_scan", claims.claim
+        "iter_codex.discovery.code.graph_ops.claim_paths_for_file_scan", claims.claim
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.mark_path_file_scanned", claims.mark
+        "iter_codex.discovery.code.graph_ops.mark_path_file_scanned", claims.mark
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.release_path_file_scan_claim",
+        "iter_codex.discovery.code.graph_ops.release_path_file_scan_claim",
         claims.release,
     )
-    monkeypatch.setattr("imas_codex.graph.GraphClient", FacilityGraph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", FacilityGraph)
     monkeypatch.setattr(scanner, "_get_pattern_categories", lambda _facility: {})
     monkeypatch.setattr(reachability, "sleep_unless_stopped", record_wait)
     monkeypatch.setattr(workers, "sleep_unless_stopped", record_wait)
     with (
-        patch("imas_codex.discovery.base.facility.get_facility", return_value={}),
+        patch("iter_codex.discovery.base.facility.get_facility", return_value={}),
         patch(
-            "imas_codex.remote.executor.run_python_script", side_effect=outcomes
+            "iter_codex.remote.executor.run_python_script", side_effect=outcomes
         ) as remote,
     ):
         asyncio.run(workers.scan_worker(state, on_progress=on_progress, batch_size=2))

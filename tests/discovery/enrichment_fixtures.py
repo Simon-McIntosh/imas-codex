@@ -3,7 +3,7 @@
 import json
 import re
 
-from imas_codex.discovery.signals.enrichment import DescriptionReview
+from iter_codex.discovery.signals.enrichment import DescriptionReview
 
 
 def with_description_review(draft_call):

@@ -26,7 +26,7 @@ class TestExtractImageRefs:
         page_url: str = "https://wiki.example.com/wiki/TestPage",
         page_title: str = "Test",
     ):
-        from imas_codex.discovery.wiki.workers import _extract_image_refs
+        from iter_codex.discovery.wiki.workers import _extract_image_refs
 
         return _extract_image_refs(html, page_url, page_title)
 
@@ -160,7 +160,7 @@ class TestExtractImageRefs:
 
     def test_max_images_per_page(self):
         """No more than _MAX_IMAGES_PER_PAGE should be returned."""
-        from imas_codex.discovery.wiki.workers import _MAX_IMAGES_PER_PAGE
+        from iter_codex.discovery.wiki.workers import _MAX_IMAGES_PER_PAGE
 
         img_tags = "\n".join(
             f'<img src="/images/img_{i}.png" width="100" height="100">'
@@ -202,7 +202,7 @@ class TestFetchImageBytes:
     @pytest.mark.asyncio
     async def test_direct_http_success(self):
         """Direct HTTP fetch should return bytes on 200."""
-        from imas_codex.discovery.wiki.workers import _fetch_image_bytes
+        from iter_codex.discovery.wiki.workers import _fetch_image_bytes
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -221,7 +221,7 @@ class TestFetchImageBytes:
     @pytest.mark.asyncio
     async def test_direct_http_failure(self):
         """Direct HTTP fetch should return None on non-200."""
-        from imas_codex.discovery.wiki.workers import _fetch_image_bytes
+        from iter_codex.discovery.wiki.workers import _fetch_image_bytes
 
         mock_response = MagicMock()
         mock_response.status_code = 404
@@ -240,7 +240,7 @@ class TestFetchImageBytes:
     @pytest.mark.asyncio
     async def test_ssh_proxy_fetch(self):
         """SSH proxy fetch should use subprocess curl."""
-        from imas_codex.discovery.wiki.workers import _fetch_image_bytes
+        from iter_codex.discovery.wiki.workers import _fetch_image_bytes
 
         image_bytes = b"\x89PNG" + b"\x00" * 1000
 
@@ -260,7 +260,7 @@ class TestFetchImageBytes:
     @pytest.mark.asyncio
     async def test_session_auth_fetch(self):
         """Session-based fetch should use the provided session."""
-        from imas_codex.discovery.wiki.workers import _fetch_image_bytes
+        from iter_codex.discovery.wiki.workers import _fetch_image_bytes
 
         # The function creates a fresh requests.Session internally and copies
         # cookies from the provided session. We mock requests.Session to
@@ -286,7 +286,7 @@ class TestFetchImageBytes:
     @pytest.mark.asyncio
     async def test_exception_returns_none(self):
         """Network exceptions should return None, not propagate."""
-        from imas_codex.discovery.wiki.workers import _fetch_image_bytes
+        from iter_codex.discovery.wiki.workers import _fetch_image_bytes
 
         with patch("httpx.AsyncClient") as mock_client_cls:
             mock_client = AsyncMock()
@@ -310,7 +310,7 @@ class TestExtractAndPersistImages:
     @pytest.mark.asyncio
     async def test_no_images_returns_zero(self):
         """HTML with no images should return 0."""
-        from imas_codex.discovery.wiki.workers import _extract_and_persist_images
+        from iter_codex.discovery.wiki.workers import _extract_and_persist_images
 
         result = await _extract_and_persist_images(
             html="<html><body><p>No images</p></body></html>",
@@ -324,7 +324,7 @@ class TestExtractAndPersistImages:
     @pytest.mark.asyncio
     async def test_images_persisted_to_graph(self):
         """Images should be persisted as Image nodes with proper relationships."""
-        from imas_codex.discovery.wiki.workers import _extract_and_persist_images
+        from iter_codex.discovery.wiki.workers import _extract_and_persist_images
 
         html = """
         <html><body>
@@ -339,20 +339,20 @@ class TestExtractAndPersistImages:
         # Mock image download and processing
         with (
             patch(
-                "imas_codex.discovery.wiki.workers._fetch_image_bytes",
+                "iter_codex.discovery.wiki.workers._fetch_image_bytes",
                 new_callable=AsyncMock,
                 return_value=b"\x89PNG" + b"\x00" * 1000,
             ),
             patch(
-                "imas_codex.discovery.wiki.image.downsample_image",
+                "iter_codex.discovery.wiki.image.downsample_image",
                 return_value=("base64data", 300, 200, 500, 400),
             ),
             patch(
-                "imas_codex.discovery.wiki.image.make_image_id",
+                "iter_codex.discovery.wiki.image.make_image_id",
                 return_value="tcv:abc123",
             ),
             patch(
-                "imas_codex.discovery.wiki.workers.GraphClient",
+                "iter_codex.discovery.wiki.workers.GraphClient",
                 return_value=mock_gc,
             ),
         ):
@@ -370,7 +370,7 @@ class TestExtractAndPersistImages:
     @pytest.mark.asyncio
     async def test_unfetchable_images_become_failed_nodes(self):
         """Images that can't be downloaded should still create metadata-only nodes."""
-        from imas_codex.discovery.wiki.workers import _extract_and_persist_images
+        from iter_codex.discovery.wiki.workers import _extract_and_persist_images
 
         html = '<html><body><img src="https://wiki.example.com/img/blocked.png" width="500" height="400"></body></html>'
 
@@ -380,16 +380,16 @@ class TestExtractAndPersistImages:
 
         with (
             patch(
-                "imas_codex.discovery.wiki.workers._fetch_image_bytes",
+                "iter_codex.discovery.wiki.workers._fetch_image_bytes",
                 new_callable=AsyncMock,
                 return_value=None,
             ),
             patch(
-                "imas_codex.discovery.wiki.image.make_image_id",
+                "iter_codex.discovery.wiki.image.make_image_id",
                 return_value="tcv:blocked123",
             ),
             patch(
-                "imas_codex.discovery.wiki.workers.GraphClient",
+                "iter_codex.discovery.wiki.workers.GraphClient",
                 return_value=mock_gc,
             ),
         ):
@@ -423,7 +423,7 @@ class TestIngestImageDocument:
     @pytest.mark.asyncio
     async def test_successful_ingestion(self):
         """Successful image document should create Image node with HAS_IMAGE."""
-        from imas_codex.discovery.wiki.workers import _ingest_image_document
+        from iter_codex.discovery.wiki.workers import _ingest_image_document
 
         mock_gc = MagicMock()
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
@@ -431,20 +431,20 @@ class TestIngestImageDocument:
 
         with (
             patch(
-                "imas_codex.discovery.wiki.workers._fetch_image_bytes",
+                "iter_codex.discovery.wiki.workers._fetch_image_bytes",
                 new_callable=AsyncMock,
                 return_value=b"\x89PNG" + b"\x00" * 1000,
             ),
             patch(
-                "imas_codex.discovery.wiki.image.downsample_image",
+                "iter_codex.discovery.wiki.image.downsample_image",
                 return_value=("b64data", 300, 200, 600, 400),
             ),
             patch(
-                "imas_codex.discovery.wiki.image.make_image_id",
+                "iter_codex.discovery.wiki.image.make_image_id",
                 return_value="tcv:img_hash",
             ),
             patch(
-                "imas_codex.discovery.wiki.workers.GraphClient",
+                "iter_codex.discovery.wiki.workers.GraphClient",
                 return_value=mock_gc,
             ),
         ):
@@ -460,10 +460,10 @@ class TestIngestImageDocument:
     @pytest.mark.asyncio
     async def test_too_small_image_skipped(self):
         """Images with fewer than 512 bytes should be skipped."""
-        from imas_codex.discovery.wiki.workers import _ingest_image_document
+        from iter_codex.discovery.wiki.workers import _ingest_image_document
 
         with patch(
-            "imas_codex.discovery.wiki.workers._fetch_image_bytes",
+            "iter_codex.discovery.wiki.workers._fetch_image_bytes",
             new_callable=AsyncMock,
             return_value=b"\x89PNG" + b"\x00" * 100,  # Only ~104 bytes
         ):
@@ -488,7 +488,7 @@ class TestPersistDocumentFigures:
     @pytest.mark.asyncio
     async def test_empty_list(self):
         """Empty image list should return 0."""
-        from imas_codex.discovery.wiki.workers import _persist_document_figures
+        from iter_codex.discovery.wiki.workers import _persist_document_figures
 
         result = await _persist_document_figures(
             [],
@@ -501,7 +501,7 @@ class TestPersistDocumentFigures:
     @pytest.mark.asyncio
     async def test_small_images_filtered(self):
         """Images smaller than 2048 bytes should be filtered out."""
-        from imas_codex.discovery.wiki.workers import _persist_document_figures
+        from iter_codex.discovery.wiki.workers import _persist_document_figures
 
         images = [{"image_bytes": b"\x00" * 100, "page_num": 1}]
         result = await _persist_document_figures(
@@ -515,7 +515,7 @@ class TestPersistDocumentFigures:
     @pytest.mark.asyncio
     async def test_successful_persistence(self):
         """Valid images should be persisted as Image nodes."""
-        from imas_codex.discovery.wiki.workers import _persist_document_figures
+        from iter_codex.discovery.wiki.workers import _persist_document_figures
 
         images = [
             {
@@ -531,11 +531,11 @@ class TestPersistDocumentFigures:
 
         with (
             patch(
-                "imas_codex.discovery.base.image.downsample_image",
+                "iter_codex.discovery.base.image.downsample_image",
                 return_value=("b64img", 200, 150, 400, 300),
             ),
             patch(
-                "imas_codex.graph.GraphClient",
+                "iter_codex.graph.GraphClient",
                 return_value=mock_gc,
             ),
         ):
@@ -557,10 +557,10 @@ class TestPersistDocumentFigures:
 class TestDocumentIngestFailureClassification:
     """The ingest failure path defers unsupported input and fails the rest."""
 
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_failed")
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_failed")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_deferred")
     def test_deferrable_error_defers_with_reason(self, mock_defer, mock_failed):
-        from imas_codex.discovery.wiki.graph_ops import (
+        from iter_codex.discovery.wiki.graph_ops import (
             mark_document_failed_or_deferred,
         )
 
@@ -572,10 +572,10 @@ class TestDocumentIngestFailureClassification:
         mock_defer.assert_called_once_with("doc:1", "unsupported image format (WMF)")
         mock_failed.assert_not_called()
 
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_failed")
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_failed")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_deferred")
     def test_dead_link_defers(self, mock_defer, mock_failed):
-        from imas_codex.discovery.wiki.graph_ops import (
+        from iter_codex.discovery.wiki.graph_ops import (
             mark_document_failed_or_deferred,
         )
 
@@ -587,10 +587,10 @@ class TestDocumentIngestFailureClassification:
         mock_defer.assert_called_once_with("doc:3", "dead link")
         mock_failed.assert_not_called()
 
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_failed")
-    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_failed")
+    @patch("iter_codex.discovery.wiki.graph_ops.mark_document_deferred")
     def test_unclassified_error_marks_failed(self, mock_defer, mock_failed):
-        from imas_codex.discovery.wiki.graph_ops import (
+        from iter_codex.discovery.wiki.graph_ops import (
             mark_document_failed_or_deferred,
         )
 

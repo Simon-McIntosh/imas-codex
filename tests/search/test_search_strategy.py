@@ -4,9 +4,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.models.constants import SearchMode
-from imas_codex.search.document_store import Document, DocumentMetadata
-from imas_codex.search.search_strategy import (
+from iter_codex.models.constants import SearchMode
+from iter_codex.search.document_store import Document, DocumentMetadata
+from iter_codex.search.search_strategy import (
     HybridSearchStrategy,
     LexicalSearchStrategy,
     SearchConfig,
@@ -133,7 +133,7 @@ class TestSearchMatch:
 
     def test_to_hit_with_units(self):
         """to_hit handles units correctly."""
-        from imas_codex.search.document_store import Units
+        from iter_codex.search.document_store import Units
 
         metadata = DocumentMetadata(
             path_id="test/path",
@@ -394,13 +394,13 @@ class TestPhysicsAbbreviations:
 
     def test_abbreviation_count(self):
         """At least 35 abbreviation entries."""
-        from imas_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
+        from iter_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
 
         assert len(PHYSICS_ABBREVIATIONS) >= 35
 
     def test_new_abbreviations_recognized(self):
         """New abbreviations should be in the dict."""
-        from imas_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
+        from iter_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
 
         new_keys = [
             "b0",
@@ -430,7 +430,7 @@ class TestPhysicsAbbreviations:
 
     def test_b0_expansion(self):
         """B0 should expand to vacuum toroidal field terms."""
-        from imas_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
+        from iter_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
 
         expansions = PHYSICS_ABBREVIATIONS["b0"]
         assert "vacuum toroidal field" in expansions
@@ -438,14 +438,14 @@ class TestPhysicsAbbreviations:
 
     def test_nbi_expansion(self):
         """NBI should expand to neutral beam injection terms."""
-        from imas_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
+        from iter_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
 
         expansions = PHYSICS_ABBREVIATIONS["nbi"]
         assert "neutral beam injection" in expansions
 
     def test_no_duplicate_keys(self):
         """Verify no duplicate keys in dict (Python handles this, but check count)."""
-        from imas_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
+        from iter_codex.tools.query_analysis import PHYSICS_ABBREVIATIONS
 
         # All values should be lists
         for key, val in PHYSICS_ABBREVIATIONS.items():

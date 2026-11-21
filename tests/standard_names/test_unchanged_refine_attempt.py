@@ -26,15 +26,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-GC_PATH = "imas_codex.graph.client.GraphClient"
-LLM_PATH = "imas_codex.discovery.base.llm.acall_llm_structured"
+GC_PATH = "iter_codex.graph.client.GraphClient"
+LLM_PATH = "iter_codex.discovery.base.llm.acall_llm_structured"
 PERSIST_PATH = (
-    "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name"
+    "iter_codex.standard_names.graph_store.graph_refinement.persist_refined_name"
 )
-RESUBMIT_PATH = "imas_codex.standard_names.graph_store.graph_claim_release.resubmit_pinned_rename_for_review"
-PROMPT_PATH = "imas_codex.llm.prompt_loader.render_prompt"
-NEIGHBOURS_PATH = "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours"
-MODEL_PATH = "imas_codex.settings.get_model"
+RESUBMIT_PATH = "iter_codex.standard_names.graph_store.graph_claim_release.resubmit_pinned_rename_for_review"
+PROMPT_PATH = "iter_codex.llm.prompt_loader.render_prompt"
+NEIGHBOURS_PATH = "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours"
+MODEL_PATH = "iter_codex.settings.get_model"
 
 
 class RotationCounter:
@@ -134,7 +134,7 @@ class TestUnchangedResubmissionReturnsTheRotation:
 
     @pytest.mark.asyncio
     async def test_counter_is_left_where_the_claim_found_it(self) -> None:
-        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        from iter_codex.standard_names.worker_tasks.worker_refine_names import (
             process_refine_name_batch,
         )
 
@@ -159,7 +159,7 @@ class TestUnchangedResubmissionReturnsTheRotation:
     @pytest.mark.asyncio
     async def test_a_claim_this_pool_no_longer_holds_is_not_rewritten(self) -> None:
         """The return is fenced on the claim it was charged under."""
-        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        from iter_codex.standard_names.worker_tasks.worker_refine_names import (
             process_refine_name_batch,
         )
 
@@ -179,8 +179,8 @@ class TestRewrittenRefineKeepsItsCharge:
 
     @pytest.mark.asyncio
     async def test_a_different_spelling_keeps_the_charged_rotation(self) -> None:
-        from imas_codex.standard_names.models import RefinedName
-        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        from iter_codex.standard_names.models import RefinedName
+        from iter_codex.standard_names.worker_tasks.worker_refine_names import (
             process_refine_name_batch,
         )
 

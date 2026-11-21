@@ -22,8 +22,8 @@ import re
 
 import pytest
 
-from imas_codex.discovery.signals import parallel
-from imas_codex.graph import GraphClient
+from iter_codex.discovery.signals import parallel
+from iter_codex.graph import GraphClient
 from tests.recording_graph_client import RecordingGraphClient
 
 

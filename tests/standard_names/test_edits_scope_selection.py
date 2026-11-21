@@ -28,9 +28,9 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.cli.sn import _compute_pool_progress
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.cli.sn import _compute_pool_progress
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_cost_and_claims as _owning_graph_cost_and_claims,
 )
 
@@ -197,7 +197,7 @@ def test_review_claim_seed_carries_exactly_the_edits_predicate(
     transaction = _RecordingTransaction()
     graph = _RecordingGraph(transaction)
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=graph,
     ):
         _owning_graph_cost_and_claims.claim_review_name_batch(

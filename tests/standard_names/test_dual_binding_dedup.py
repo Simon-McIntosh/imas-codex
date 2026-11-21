@@ -9,9 +9,9 @@ from collections.abc import Iterator
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import retire_ineligible_standard_name_sources
-from imas_codex.standard_names.graph_store.graph_supersession import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_ops import retire_ineligible_standard_name_sources
+from iter_codex.standard_names.graph_store.graph_supersession import (
     deduplicate_scalar_selected_sources,
 )
 

@@ -10,12 +10,12 @@ reads every rotated seat back through the project's own model accessor, so a
 seat that drifts off its assigned model fails here rather than at the first
 pipeline call that consumes it.
 
-The scalar seats are read with :func:`imas_codex.settings.get_model`, the docs
-reviewer chain with :func:`imas_codex.settings.get_sn_review_docs_models`, the
+The scalar seats are read with :func:`iter_codex.settings.get_model`, the docs
+reviewer chain with :func:`iter_codex.settings.get_sn_review_docs_models`, the
 production names profile with
-:func:`imas_codex.settings.get_sn_review_profile_models`, and the top-level
+:func:`iter_codex.settings.get_sn_review_profile_models`, and the top-level
 names reviewer chain with
-:func:`imas_codex.settings.get_model_source_models`, which is the source the
+:func:`iter_codex.settings.get_model_source_models`, which is the source the
 pipeline consults for the reviewer chain the active profile does not override.
 """
 
@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex import settings
+from iter_codex import settings
 
 # Scalar seats the rotation moved, and the GPT-6 model each must resolve to.
 _ROTATED_SCALAR_SEATS = {

@@ -125,8 +125,8 @@ def collect(count):
     standing = {r["id"] for r in first["comparison"] if r["label_verdict"] == "stands"}
     packets = [p for p in first["packets"] if p["id"] in standing]
     judgments = [j for j in first["judgments"] if j["id"] in standing]
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.source_reads import source_paths_projection
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.source_reads import source_paths_projection
 
     audit = audit_module()
     ids = order[:count]
@@ -351,7 +351,7 @@ def recorded_calls():
 
 
 def spending_rates(audit):
-    from imas_codex.settings import get_openrouter_pricing
+    from iter_codex.settings import get_openrouter_pricing
 
     rates = {}
     for reader in (*audit.READERS, audit.third_reader()):
@@ -409,7 +409,7 @@ def budget_account(records, packets, system, rates):
 
 async def read_corrected(*, pilot_only, through=0):
     """Use frozen packets and the audit call owner; reserve one call at a time."""
-    from imas_codex.discovery.base import llm
+    from iter_codex.discovery.base import llm
 
     data = frozen_record()
     audit = audit_module()
@@ -1013,7 +1013,7 @@ def render_page(data):
     lines = [
         '<!doctype html><html lang="en"><head><meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width,initial-scale=1">',
-        '<meta name="docs-project" content="imas-codex">',
+        '<meta name="docs-project" content="iter-codex">',
         '<meta name="reckon-type" content="evidence-fragment">',
         '<meta name="plan-slug" content="sn-audited-group-release">',
         "<title>Audit readers calibrated against source-only labels</title>",

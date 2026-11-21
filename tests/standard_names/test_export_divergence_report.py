@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.export import detect_divergence
+from iter_codex.standard_names.export import detect_divergence
 
 
 def _make_candidate(

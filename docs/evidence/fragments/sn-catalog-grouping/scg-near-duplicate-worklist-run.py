@@ -6,10 +6,10 @@ import asyncio
 import json
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_model
-from imas_codex.standard_names.near_duplicates import build_worklist, judge_worklist
-from imas_codex.standard_names.sources_manifest import load_sources_file
+from iter_codex.graph.client import GraphClient
+from iter_codex.settings import get_model
+from iter_codex.standard_names.near_duplicates import build_worklist, judge_worklist
+from iter_codex.standard_names.sources_manifest import load_sources_file
 
 ROOT = Path(__file__).resolve().parents[4]
 HERE = Path(__file__).resolve().parent
@@ -17,7 +17,7 @@ RUN = Path(
     "/home/ITER/mcintos/.config/reckon/crew/runs/"
     "r-20261013T050740598849-scg-near-duplicate-worklist"
 )
-SOURCES = ROOT / "imas_codex/standard_names/manifests/west_production_dd_paths.yaml"
+SOURCES = ROOT / "iter_codex/standard_names/manifests/west_production_dd_paths.yaml"
 PROGRESS = RUN / "worklist-segment-values-progress.json"
 PREVIOUS = RUN / "worklist-progress.json"
 

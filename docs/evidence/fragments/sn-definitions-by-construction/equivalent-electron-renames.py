@@ -12,9 +12,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-from imas_codex.standard_names.source_reads import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.grammar_adapter import parse_canonical_name
+from iter_codex.standard_names.source_reads import (
     count_live_names_without_source,
     read_source_paths_by_name,
 )
@@ -506,7 +506,7 @@ def assert_writer_free(
         text=True,
     )
     for line in processes.stdout.splitlines():
-        if re.search(r"imas-codex\s+sn\s+(run|edit)\b", line):
+        if re.search(r"iter-codex\s+sn\s+(run|edit)\b", line):
             raise RuntimeError(f"graph writer process is active: {line.strip()}")
 
 
@@ -542,7 +542,7 @@ def rename_and_review_name(
         )
     staged = subprocess.run(
         [
-            "imas-codex",
+            "iter-codex",
             "sn",
             "edit",
             old_id,
@@ -572,7 +572,7 @@ def rename_and_review_name(
 
     reviewed = subprocess.run(
         [
-            "imas-codex",
+            "iter-codex",
             "sn",
             "run",
             "--only",

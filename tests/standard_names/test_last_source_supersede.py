@@ -14,12 +14,12 @@ import types
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.provenance_lifecycle import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.provenance_lifecycle import (
     retarget_standard_name_sources,
 )
-from imas_codex.standard_names.provenance_rebuild import bind_recovery_sources
-from imas_codex.standard_names.source_invariant import find_sourceless_live_names
+from iter_codex.standard_names.provenance_rebuild import bind_recovery_sources
+from iter_codex.standard_names.source_invariant import find_sourceless_live_names
 
 pytestmark = pytest.mark.graph
 
@@ -181,7 +181,7 @@ def test_compose_bind_supersedes_the_drained_holder(
     disposable_neo4j_uri: str,
 ) -> None:
     """A compose bind that moves an extracted source drains its former holder."""
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         mark_sources_composed,
     )
 
@@ -243,7 +243,7 @@ class _Services(types.SimpleNamespace):
     """Collaborators the claimed-binding writers reach through ``services``."""
 
     def __getattr__(self, name: str):
-        from imas_codex.standard_names.graph_store import (
+        from iter_codex.standard_names.graph_store import (
             graph_audits,
             graph_source_bindings,
         )
@@ -255,7 +255,7 @@ class _Services(types.SimpleNamespace):
 
 
 def _services():
-    from imas_codex.standard_names.graph_store import graph_foundation
+    from iter_codex.standard_names.graph_store import graph_foundation
 
     return _Services(
         GraphClient=GraphClient,
@@ -269,7 +269,7 @@ def test_attached_source_moves_and_supersedes_the_drained_holder(
     disposable_neo4j_uri: str,
 ) -> None:
     """An attach that moves an extracted source drains its former holder."""
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         mark_sources_attached,
     )
 
@@ -297,7 +297,7 @@ def test_staged_candidate_produces_the_source_before_the_holder_is_superseded(
     binding has to exist first: otherwise a later rich write that fails leaves
     the former holder superseded towards a candidate that produces nothing.
     """
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         stage_claimed_generated_candidates,
     )
 
@@ -325,7 +325,7 @@ def test_claimed_lock_reports_the_binding_it_released(
     disposable_neo4j_uri: str,
 ) -> None:
     """The released-out plumbing reports each provisional edge it removed."""
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         _lock_claimed_name_bindings,
     )
 
@@ -334,7 +334,7 @@ def test_claimed_lock_reports_the_binding_it_released(
     with GraphClient() as gc:
         with gc.session() as session:
             tx = session.begin_transaction()
-            from imas_codex.standard_names.graph_store import graph_foundation
+            from iter_codex.standard_names.graph_store import graph_foundation
 
             handle = graph_foundation._TransactionQuery(tx)
             _lock_claimed_name_bindings(
@@ -365,10 +365,10 @@ def test_refined_name_moves_the_predecessors_source(
     Driving ``persist_refined_name`` directly keeps this case measuring the
     refine writer rather than the retarget primitive it is built on.
     """
-    from imas_codex.standard_names.graph_store.graph_refinement import (
+    from iter_codex.standard_names.graph_store.graph_refinement import (
         persist_refined_name,
     )
-    from imas_codex.standard_names.kind_derivation import derive_kind
+    from iter_codex.standard_names.kind_derivation import derive_kind
 
     _seed()
     with GraphClient() as gc:
@@ -389,7 +389,7 @@ def test_refined_name_moves_the_predecessors_source(
 
 def _refuse_receipt_writes(monkeypatch: pytest.MonkeyPatch) -> None:
     """Make the supersession receipt writer fail where the writer calls it."""
-    from imas_codex.standard_names import source_invariant
+    from iter_codex.standard_names import source_invariant
 
     def _refuse(*args: object, **kwargs: object) -> list[str]:
         raise RuntimeError("receipt writer refused")
@@ -416,7 +416,7 @@ def test_failed_receipt_rolls_back_the_move_and_the_supersession(
     produces the former holder and that holder is still live and unsourced-
     free, rather than superseded towards a successor with no record of why.
     """
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         mark_sources_composed,
     )
 
@@ -492,7 +492,7 @@ def test_duck_typed_client_leaves_the_move_committed_when_the_receipt_fails(
     leaves the source moved and the former holder superseded with no
     ``StandardNameChange``: the receipt is not atomic on this path.
     """
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         mark_sources_composed,
     )
 

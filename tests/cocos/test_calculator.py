@@ -5,7 +5,7 @@ Reference: Sauter & Medvedev, CPC 184 (2013) 293-302
 
 import pytest
 
-from imas_codex.cocos import (
+from iter_codex.cocos import (
     VALID_COCOS,
     COCOSParameters,
     ValidationResult,
@@ -15,7 +15,7 @@ from imas_codex.cocos import (
     validate_cocos_consistency,
     validate_cocos_from_data,
 )
-from imas_codex.cocos.calculator import KNOWN_CODE_COCOS
+from iter_codex.cocos.calculator import KNOWN_CODE_COCOS
 
 
 class TestValidCOCOS:

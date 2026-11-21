@@ -1,7 +1,7 @@
 """Cross-IDS cluster siblings reach the mapping prompt."""
 
-from imas_codex.ids.candidates import CLUSTER_ARM
-from imas_codex.ids.mapping import _cluster_context
+from iter_codex.ids.candidates import CLUSTER_ARM
+from iter_codex.ids.mapping import _cluster_context
 
 
 def test_cluster_siblings_are_listed_apart_from_retrieval_hits():

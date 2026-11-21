@@ -146,7 +146,7 @@ name. Rubric dimensions:
 
 ## Build / reuse
 
-- **Extends** `imas_codex/standard_names/benchmark.py` — compose loop, model
+- **Extends** `iter_codex/standard_names/benchmark.py` — compose loop, model
   iteration, `BenchmarkReport` structure, `[sn-benchmark]` config
   (`compose-models` list → the 6-model matrix).
 - **Adds:** the physics-correctness judge function + rubric prompt

@@ -4,8 +4,8 @@ from uuid import uuid4
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.ids.slot_context import _text_search_documents
+from iter_codex.graph.client import GraphClient
+from iter_codex.ids.slot_context import _text_search_documents
 
 
 class _TransactionGraph:

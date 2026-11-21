@@ -8,8 +8,8 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_claim_release as _owning_graph_claim_release,
 )
 

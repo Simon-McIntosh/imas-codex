@@ -33,7 +33,7 @@ from unittest.mock import patch
 import pytest
 from neo4j.time import DateTime
 
-from imas_codex.standard_names import edit
+from iter_codex.standard_names import edit
 from tests.standard_names.test_tombstone_supersede import (
     _Graph,
     _run,

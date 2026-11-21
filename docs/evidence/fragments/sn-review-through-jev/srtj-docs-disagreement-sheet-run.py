@@ -29,8 +29,8 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
 
 HERE = Path(__file__).resolve().parent
 COHORT = HERE / "srtj-cohort"
@@ -42,7 +42,7 @@ INCUMBENT_PIECES = (
 )
 ARCHIVE = (
     Path.home()
-    / ".local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
+    / ".local/share/iter-codex/exports/iter-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
 )
 
 SHEET = HERE / "srtj-docs-disagreement-sheet.json"

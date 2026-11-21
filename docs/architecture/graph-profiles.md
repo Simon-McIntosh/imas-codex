@@ -4,11 +4,11 @@ Graph operation has two independent selectors. They must not be confused:
 
 | Concept | Authority | How to change it | Example |
 |---------|-----------|------------------|---------|
-| **Data identity** | Active `neo4j/` symlink | `imas-codex graph switch NAME` | `codex` (all facilities + IMAS DD) |
-| **Server location** | `location` config | `IMAS_CODEX_GRAPH_LOCATION` | `titan` (SLURM compute location) |
+| **Data identity** | Active `neo4j/` symlink | `iter-codex graph switch NAME` | `codex` (all facilities + IMAS DD) |
+| **Server location** | `location` config | `ITER_CODEX_GRAPH_LOCATION` | `titan` (SLURM compute location) |
 
 The graph name comes from the symlink target, not from an environment
-variable. `IMAS_CODEX_GRAPH_LOCATION` selects where Neo4j runs and the port
+variable. `ITER_CODEX_GRAPH_LOCATION` selects where Neo4j runs and the port
 slot it uses; it never selects or repoints the data directory.
 
 ## Configuration
@@ -16,10 +16,10 @@ slot it uses; it never selects or repoints the data directory.
 All graph settings live in `pyproject.toml`:
 
 ```toml
-[tool.imas-codex.graph]
-location = "titan"      # Where it runs (override: IMAS_CODEX_GRAPH_LOCATION=local)
+[tool.iter-codex.graph]
+location = "titan"      # Where it runs (override: ITER_CODEX_GRAPH_LOCATION=local)
 username = "neo4j"
-password = "imas-codex"
+password = "iter-codex"
 
 # Port slots — position = port offset
 # iter=0 (7687/7474), tcv=1 (7688/7475), jt-60sa=2 (7689/7476), ...
@@ -31,15 +31,15 @@ locations = ["iter", "tcv", "jt-60sa", "jet", "west", "mast-u", "asdex-u", "east
 ### Data identity (what data)
 
 Each graph data directory lives at
-`~/.local/share/imas-codex/.neo4j/<name>/`. The active
-`~/.local/share/imas-codex/neo4j` symlink points to exactly one of them:
+`~/.local/share/iter-codex/.neo4j/<name>/`. The active
+`~/.local/share/iter-codex/neo4j` symlink points to exactly one of them:
 
 - `"codex"` — the main graph with all facilities + IMAS data dictionary
 - `"tcv"` — a single-facility graph
 - `"sandbox"` — any arbitrary name for experimentation
 
-Use `imas-codex graph list` to inspect the available directories and
-`imas-codex graph switch NAME` to stop Neo4j when needed, repoint the symlink,
+Use `iter-codex graph list` to inspect the available directories and
+`iter-codex graph switch NAME` to stop Neo4j when needed, repoint the symlink,
 and restart it. `load ARCHIVE TARGET` and `clear TARGET` require `TARGET` to
 match this active name and refuse before side effects when it does not.
 
@@ -72,7 +72,7 @@ By default, each location's name doubles as its SSH alias (e.g. location
 the SSH alias differs from the location name:
 
 ```toml
-[tool.imas-codex.graph.hosts]
+[tool.iter-codex.graph.hosts]
 # Only needed when SSH alias ≠ location name:
 # custom-location = "my-ssh-alias"
 ```
@@ -111,13 +111,13 @@ Direct (on the host):    bolt = 7687 + offset
 Tunneled (remote):       bolt = 17687 + offset
 ```
 
-Override with env var: `IMAS_CODEX_TUNNEL_BOLT_ITER=17687`
+Override with env var: `ITER_CODEX_TUNNEL_BOLT_ITER=17687`
 
 Manual tunnel management:
 ```bash
-imas-codex tunnel start iter         # Start tunnel
-imas-codex tunnel status             # Show active tunnels
-imas-codex tunnel stop iter          # Stop tunnel
+iter-codex tunnel start iter         # Start tunnel
+iter-codex tunnel status             # Show active tunnels
+iter-codex tunnel stop iter          # Stop tunnel
 ```
 
 ## Configuration Scenarios
@@ -125,7 +125,7 @@ imas-codex tunnel stop iter          # Stop tunnel
 ### 1. Configured service location
 
 ```toml
-[tool.imas-codex.graph]
+[tool.iter-codex.graph]
 location = "titan"   # Runs as a SLURM service on the configured compute location
 ```
 
@@ -138,21 +138,21 @@ elsewhere, it establishes a tunnel.
 Switching changes the symlink, not the location or ports:
 
 ```bash
-imas-codex graph switch tcv
-imas-codex graph status
+iter-codex graph switch tcv
+iter-codex graph status
 ```
 
 ### 3. Local Development
 
 ```toml
-[tool.imas-codex.graph]
+[tool.iter-codex.graph]
 name = "codex"
 location = "local"    # No SSH, direct localhost access
 ```
 
 Or via env var:
 ```bash
-export IMAS_CODEX_GRAPH_LOCATION=local
+export ITER_CODEX_GRAPH_LOCATION=local
 ```
 
 ### 4. Multiple locations
@@ -166,25 +166,25 @@ the host and port slot only:
 #   tcv:    17688/17475
 #   jt-60sa: 17689/17476
 
-IMAS_CODEX_GRAPH_LOCATION=iter imas-codex graph status  # iter ports
-IMAS_CODEX_GRAPH_LOCATION=tcv  imas-codex graph status  # tcv ports
+ITER_CODEX_GRAPH_LOCATION=iter iter-codex graph status  # iter ports
+ITER_CODEX_GRAPH_LOCATION=tcv  iter-codex graph status  # tcv ports
 ```
 
 ## Data Directory Convention
 
 | Object | Directory |
 |--------|-----------|
-| `codex` graph | `~/.local/share/imas-codex/.neo4j/codex/` |
-| `tcv` graph | `~/.local/share/imas-codex/.neo4j/tcv/` |
-| `sandbox` graph | `~/.local/share/imas-codex/.neo4j/sandbox/` |
-| Active selector | `~/.local/share/imas-codex/neo4j` symlink |
+| `codex` graph | `~/.local/share/iter-codex/.neo4j/codex/` |
+| `tcv` graph | `~/.local/share/iter-codex/.neo4j/tcv/` |
+| `sandbox` graph | `~/.local/share/iter-codex/.neo4j/sandbox/` |
+| Active selector | `~/.local/share/iter-codex/neo4j` symlink |
 
 ## Quick Reference
 
 | Env Var | Purpose |
 |---------|---------|
-| `IMAS_CODEX_GRAPH_LOCATION` | Override where Neo4j runs |
-| `IMAS_CODEX_TUNNEL_BOLT_ITER` | Override tunnel port |
+| `ITER_CODEX_GRAPH_LOCATION` | Override where Neo4j runs |
+| `ITER_CODEX_TUNNEL_BOLT_ITER` | Override tunnel port |
 | `NEO4J_URI` | Override URI completely |
 
 | CLI Command | Purpose |
@@ -204,6 +204,6 @@ IMAS_CODEX_GRAPH_LOCATION=tcv  imas-codex graph status  # tcv ports
 | `graph push` | Push graph to GHCR |
 | `graph pull` | Fetch + load from GHCR |
 
-`IMAS_CODEX_GRAPH` is not a data selector and is not read by
+`ITER_CODEX_GRAPH` is not a data selector and is not read by
 `resolve_neo4j()`. Use `graph switch NAME` whenever the active data identity
 must change.

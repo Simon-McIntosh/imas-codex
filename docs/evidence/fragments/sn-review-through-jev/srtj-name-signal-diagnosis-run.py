@@ -80,7 +80,7 @@ def _prototype():
 
 
 def _question_table(checks):
-    from imas_codex.standard_names.review.jev_review import name_question_table
+    from iter_codex.standard_names.review.jev_review import name_question_table
 
     return name_question_table(checks)
 
@@ -153,7 +153,7 @@ def _build_rows(fixture, context, answers, checks, table, accepted_dimension):
 
 
 def _bootstrap(labels, scores, groups, scores_b=None):
-    from imas_codex.discovery.base.evaluation import bootstrap_interval
+    from iter_codex.discovery.base.evaluation import bootstrap_interval
 
     return bootstrap_interval(
         labels,
@@ -273,7 +273,7 @@ def _aggregate_report(rows, score_by_name):
 
 
 def _quorum_comparison(rows, score_by_name):
-    from imas_codex.discovery.base.evaluation import bootstrap_interval, paired_auc
+    from iter_codex.discovery.base.evaluation import bootstrap_interval, paired_auc
 
     matched = [
         row
@@ -564,8 +564,8 @@ def main():
     )
     args = parser.parse_args()
 
-    from imas_codex.standard_names.review.checks import load_review_checks
-    from imas_codex.standard_names.review.jev_review import NAME_AXIS
+    from iter_codex.standard_names.review.checks import load_review_checks
+    from iter_codex.standard_names.review.jev_review import NAME_AXIS
 
     prototype = _prototype()
     fixture = prototype.load_labelled_fixture(FIXTURE)

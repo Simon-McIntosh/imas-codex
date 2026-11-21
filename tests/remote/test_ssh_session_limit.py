@@ -9,8 +9,8 @@ from time import sleep
 
 import pytest
 
-from imas_codex.remote import executor, ssh_worker, tools
-from imas_codex.remote.ssh_worker import (
+from iter_codex.remote import executor, ssh_worker, tools
+from iter_codex.remote.ssh_worker import (
     SSHWorker,
     SSHWorkerPool,
     acquire_host_session,
@@ -23,7 +23,7 @@ def test_limited_host_serializes_calls_and_unlimited_host_overlaps(monkeypatch):
     monkeypatch.setattr(executor, "is_local_host", lambda host: False)
     monkeypatch.setattr(executor, "_ensure_ssh_healthy_once", lambda host: None)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda facility: (
             {"ssh_host": facility, "ssh_max_sessions": 1}
             if facility == "limited"
@@ -176,7 +176,7 @@ async def test_open_pool_owns_one_session_and_handles_per_call_scripts(monkeypat
 
 
 def test_facility_declares_one_session():
-    from imas_codex.discovery.base.facility import (
+    from iter_codex.discovery.base.facility import (
         get_facility,
         validate_facility_config,
     )

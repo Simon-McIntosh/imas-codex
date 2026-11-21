@@ -12,8 +12,8 @@ from urllib.parse import urlsplit
 
 import pytest
 
-from imas_codex.config.discovery_config import get_exclusion_config_for_facility
-from imas_codex.discovery.base.facility import get_facility
+from iter_codex.config.discovery_config import get_exclusion_config_for_facility
+from iter_codex.discovery.base.facility import get_facility
 
 # Data-access directories that must each be seeded as their own discovery root.
 # The parent /analysis/src is deliberately never named: a seed of the parent

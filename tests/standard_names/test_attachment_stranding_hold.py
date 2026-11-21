@@ -15,12 +15,12 @@ from collections.abc import Iterator
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.attachment_audit import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.attachment_audit import (
     _DETACH_QUERY,
     reconcile_attachment_consistency,
 )
-from imas_codex.standard_names.source_invariant import (
+from iter_codex.standard_names.source_invariant import (
     MissingStandardNameSource,
     require_producing_sources,
 )
@@ -38,12 +38,12 @@ _ACCEPTED_PATH = "coil/geometry/arcs_of_circle/z"
 
 @pytest.fixture(scope="module")
 def disposable_neo4j() -> Iterator[tuple[str, str]]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    uri = os.environ.get("ITER_CODEX_TEST_NEO4J_URI")
     if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.skip("ITER_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("ITER_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
         pytest.fail("stranding hold requires a disposable graph")
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+    password = os.environ.get("ITER_CODEX_TEST_NEO4J_PASSWORD", "")
     auth = ("neo4j", password) if password else None
     print(f"GRAPH_ENDPOINT={uri}")
     with GraphDatabase.driver(uri, auth=auth) as driver:

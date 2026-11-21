@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 9cfbd74ce2b0bca45d64aa83ff2f41777459348e, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.graph.temp_neo4j.
+# Names the tree no longer defines: iter_codex.graph.temp_neo4j.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Gather the evidence for one live tip of the momentum-diffusivity lineage.
@@ -30,7 +30,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 
-from imas_codex.graph.client import GraphClient  # noqa: E402
+from iter_codex.graph.client import GraphClient  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 STEM = Path(__file__).stem
@@ -235,7 +235,7 @@ LOOP = ["control_loop_a", "control_loop_b"]
 
 
 def disposable_control(classify) -> dict:
-    from imas_codex.graph import temp_neo4j
+    from iter_codex.graph import temp_neo4j
 
     def port():
         with socket.socket() as sock:
@@ -431,7 +431,7 @@ def main() -> int:
             "spend_usd": 0.0,
             "reuse": {
                 "lineage_reader": str(CENSUS.relative_to(ROOT)),
-                "cycle_owner": "imas_codex.standard_names.catalog_ordering"
+                "cycle_owner": "iter_codex.standard_names.catalog_ordering"
                 "_find_cyclic_components",
             },
         }

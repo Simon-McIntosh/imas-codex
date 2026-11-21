@@ -6,7 +6,7 @@ superseded by an earlier slice's rename) and gives each one a defined outcome:
 an edit that settles it, a rename with its successor's definition, or a
 recorded reason it cannot be settled here.
 
-Stored text changes only through ``imas-codex sn edit``; this script never
+Stored text changes only through ``iter-codex sn edit``; this script never
 writes the graph. It is re-runnable and every figure is read from the graph,
 the pass's own progress file, and the per-call cost ledger.
 
@@ -29,8 +29,8 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.source_reads import count_live_names_without_source
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.source_reads import count_live_names_without_source
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[3]

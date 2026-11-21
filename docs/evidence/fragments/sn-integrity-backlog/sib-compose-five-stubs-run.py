@@ -106,7 +106,7 @@ def _sources(gc) -> list[dict]:
 
 
 def _sourceless_live_drafts(gc) -> dict:
-    from imas_codex.standard_names.source_invariant import (
+    from iter_codex.standard_names.source_invariant import (
         find_sourceless_live_names,
     )
 
@@ -144,7 +144,7 @@ def _latest_run_started_at(gc) -> str | None:
 
 
 def state() -> dict:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         stubs = _stubs(gc)
@@ -168,7 +168,7 @@ def state() -> dict:
 
 
 def readback(since: str) -> dict:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         stubs = _stubs(gc)
@@ -250,7 +250,7 @@ def compose(
         "uv",
         "run",
         "--no-sync",
-        "imas-codex",
+        "iter-codex",
         "sn",
         "run",
         "--focus",

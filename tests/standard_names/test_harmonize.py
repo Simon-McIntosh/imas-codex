@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from imas_codex.standard_names.harmonize import (
+from iter_codex.standard_names.harmonize import (
     build_worklist,
     doc_sig,
     drift,
@@ -156,7 +156,7 @@ class TestSelectAnchor:
         assert anchor == "parent_id"
 
     def test_parent_placeholder_falls_back_to_member(self):
-        from imas_codex.standard_names.defaults import (
+        from iter_codex.standard_names.defaults import (
             DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
         )
 
@@ -267,7 +267,7 @@ class TestSelectAnchor:
         assert select_anchor(None, None, None, members) == "aaa_short"
 
     def test_deferred_when_all_placeholder(self):
-        from imas_codex.standard_names.defaults import (
+        from iter_codex.standard_names.defaults import (
             DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
         )
 
@@ -315,7 +315,7 @@ class TestBuildWorklist:
         parentless query is asserted to equal the shared enumeration's own
         text, so restoring a duplicate implementation fails here.
         """
-        from imas_codex.standard_names.harmonize import (
+        from iter_codex.standard_names.harmonize import (
             _PARENTLESS_MEMBER_FILTER,
             pattern_family_rows_query,
         )
@@ -561,7 +561,7 @@ class TestBuildWorklist:
         ]
 
     def test_deferred_when_no_anchor(self):
-        from imas_codex.standard_names.defaults import (
+        from iter_codex.standard_names.defaults import (
             DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
         )
 
@@ -607,10 +607,10 @@ def test_shared_part_census_counts_one_wording_per_family():
 
     from imas_standard_names.grammar.terms import select_conventions
 
-    from imas_codex.standard_names.context import conventions_context_for
-    from imas_codex.standard_names.docs_gates import shared_part_sentences
-    from imas_codex.standard_names.harmonize import shared_part_form_counts
-    from imas_codex.standard_names.worker_tasks import (
+    from iter_codex.standard_names.context import conventions_context_for
+    from iter_codex.standard_names.docs_gates import shared_part_sentences
+    from iter_codex.standard_names.harmonize import shared_part_form_counts
+    from iter_codex.standard_names.worker_tasks import (
         worker_generate_docs as owning_worker,
     )
 

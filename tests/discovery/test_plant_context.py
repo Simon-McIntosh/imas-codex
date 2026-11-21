@@ -6,18 +6,18 @@ import json
 import pytest
 from openpyxl import Workbook
 
-from imas_codex.discovery.signals.plant_context import (
+from iter_codex.discovery.signals.plant_context import (
     PlantContextBundle,
     SpreadsheetLayout,
     extract_signal_rows,
     match_signal_row,
 )
-from imas_codex.discovery.signals.plant_context_graph import (
+from iter_codex.discovery.signals.plant_context_graph import (
     assert_context_archive_matches,
     context_statements,
     snapshot_pilot_signals,
 )
-from imas_codex.graph.models import (
+from iter_codex.graph.models import (
     PlantContextDocument,
     PlantContextMatch,
     PlantSignalRow,

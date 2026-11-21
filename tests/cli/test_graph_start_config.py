@@ -6,8 +6,8 @@ from types import SimpleNamespace
 import click
 import pytest
 
-from imas_codex.cli.graph.data import graph_export
-from imas_codex.cli.graph.server import graph_start
+from iter_codex.cli.graph.data import graph_export
+from iter_codex.cli.graph.server import graph_start
 
 
 def test_export_restart_surfaces_compute_configuration_error(tmp_path, monkeypatch):
@@ -37,13 +37,13 @@ def test_export_restart_surfaces_compute_configuration_error(tmp_path, monkeypat
     def fail_restart(**_kwargs) -> None:
         raise click.ClickException("No compute config in iter_private.yaml.")
 
-    monkeypatch.setattr("imas_codex.graph.profiles.resolve_neo4j", lambda: profile)
+    monkeypatch.setattr("iter_codex.graph.profiles.resolve_neo4j", lambda: profile)
     monkeypatch.setattr(
-        "imas_codex.graph.remote.is_remote_location", lambda _host: False
+        "iter_codex.graph.remote.is_remote_location", lambda _host: False
     )
-    monkeypatch.setattr("imas_codex.graph.ghcr.require_apptainer", lambda: None)
+    monkeypatch.setattr("iter_codex.graph.ghcr.require_apptainer", lambda: None)
     monkeypatch.setattr(
-        "imas_codex.cli.graph.data.get_git_info",
+        "iter_codex.cli.graph.data.get_git_info",
         lambda: {
             "commit": "0123456789abcdef0123456789abcdef01234567",
             "commit_short": "0123456",
@@ -51,15 +51,15 @@ def test_export_restart_surfaces_compute_configuration_error(tmp_path, monkeypat
         },
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.data._measure_live_graph_scope",
+        "iter_codex.cli.graph.data._measure_live_graph_scope",
         lambda: {"nodes": 1, "relationships": 0, "labels": {"Graph": 1}},
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.data.Neo4jOperation", RunningGraphOperation
+        "iter_codex.cli.graph.data.Neo4jOperation", RunningGraphOperation
     )
-    monkeypatch.setattr("imas_codex.cli.graph.data._run_neo4j_dump", create_dump)
+    monkeypatch.setattr("iter_codex.cli.graph.data._run_neo4j_dump", create_dump)
     monkeypatch.setattr(
-        "imas_codex.cli.graph.server.graph_start.callback", fail_restart
+        "iter_codex.cli.graph.server.graph_start.callback", fail_restart
     )
 
     with pytest.raises(click.ClickException, match="No compute config"):
@@ -96,28 +96,28 @@ def test_graph_start_does_not_read_embedding_compute_config(monkeypatch):
         submitted.update(job_name=job_name, command=command, **kwargs)
         return job
 
-    monkeypatch.setattr("imas_codex.graph.profiles.resolve_neo4j", lambda: profile)
-    monkeypatch.setattr("imas_codex.graph.profiles.get_graph_location", lambda: "cpu")
+    monkeypatch.setattr("iter_codex.graph.profiles.resolve_neo4j", lambda: profile)
+    monkeypatch.setattr("iter_codex.graph.profiles.get_graph_location", lambda: "cpu")
     monkeypatch.setattr(
-        "imas_codex.remote.locations.resolve_location",
+        "iter_codex.remote.locations.resolve_location",
         lambda location: graph_location,
     )
     monkeypatch.setattr(
-        "imas_codex.settings.get_embedding_location",
+        "iter_codex.settings.get_embedding_location",
         lambda: pytest.fail("graph start read embedding configuration"),
     )
-    monkeypatch.setattr("imas_codex.cli.services._get_neo4j_job", lambda: None)
+    monkeypatch.setattr("iter_codex.cli.services._get_neo4j_job", lambda: None)
     monkeypatch.setattr(
-        "imas_codex.cli.services._neo4j_service_command", lambda: "neo4j console"
+        "iter_codex.cli.services._neo4j_service_command", lambda: "neo4j console"
     )
     monkeypatch.setattr(
-        "imas_codex.cli.services._neo4j_pre_launch", lambda: "prepare graph"
+        "iter_codex.cli.services._neo4j_pre_launch", lambda: "prepare graph"
     )
-    monkeypatch.setattr("imas_codex.cli.services._ensure_service_job", ensure_graph_job)
-    monkeypatch.setattr("imas_codex.cli.services._graph_port", lambda: 7687)
-    monkeypatch.setattr("imas_codex.cli.services._graph_http_port", lambda: 7474)
+    monkeypatch.setattr("iter_codex.cli.services._ensure_service_job", ensure_graph_job)
+    monkeypatch.setattr("iter_codex.cli.services._graph_port", lambda: 7687)
+    monkeypatch.setattr("iter_codex.cli.services._graph_http_port", lambda: 7474)
     monkeypatch.setattr(
-        "imas_codex.cli.graph.server.is_neo4j_running", lambda _port: True
+        "iter_codex.cli.graph.server.is_neo4j_running", lambda _port: True
     )
 
     graph_start.callback(

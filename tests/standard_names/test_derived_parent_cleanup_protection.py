@@ -7,8 +7,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names import graph_ops, protection, provenance_lifecycle
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops, protection, provenance_lifecycle
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
     graph_lineage as _owning_graph_lineage,
 )

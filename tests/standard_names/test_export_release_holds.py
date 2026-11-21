@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     _RELEASE_IDENTITY_HOLDS,
     _classify_export_population,
     run_export,
@@ -89,26 +89,26 @@ def _candidate(name: str) -> dict:
 def _run_fixture_export(staging_dir: Path, population: list[dict]):
     with (
         patch(
-            "imas_codex.standard_names.export._fetch_export_population",
+            "iter_codex.standard_names.export._fetch_export_population",
             return_value=population,
         ),
         patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
             return_value=_ReadOnlyGraphClient(),
         ),
         patch(
-            "imas_codex.standard_names.export._validate_entry",
+            "iter_codex.standard_names.export._validate_entry",
             side_effect=lambda entry: entry,
         ),
         patch(
-            "imas_codex.standard_names.export._fetch_deprecation_stubs",
+            "iter_codex.standard_names.export._fetch_deprecation_stubs",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+            "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
             return_value=([], set()),
         ),
-        patch("imas_codex.standard_names.export._write_domain_yaml"),
+        patch("iter_codex.standard_names.export._write_domain_yaml"),
     ):
         return run_export(
             staging_dir,

@@ -13,12 +13,12 @@ from datetime import UTC, datetime
 
 import pytest
 
-from imas_codex.graph.models import (
+from iter_codex.graph.models import (
     DDResolutionField,
     DDResolutionStatus,
     DDResolutionValueKind,
 )
-from imas_codex.standard_names.dd_resolutions import (
+from iter_codex.standard_names.dd_resolutions import (
     TARGET_LOAD_RESOLUTION_PATHS,
     DDResolutionGraphPortConflict,
     DDResolutionManifest,
@@ -126,9 +126,9 @@ def test_live_target_load_cohort_has_exact_edges_and_units(_target_load_graph) -
 
     This is the regression gate for the rename-unit-authority agreement: if
     either wall path's resolution or corrected unit disappears, the rename
-    derivation in imas_codex.standard_names.edit will refuse again.
+    derivation in iter_codex.standard_names.edit will refuse again.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as graph:
         rows = graph.query(

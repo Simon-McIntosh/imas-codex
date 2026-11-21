@@ -1,7 +1,7 @@
 """Parametric stage-transition coverage for every persist function.
 
 Asserts the documented stage-transition table from AGENTS.md holds for all
-persist functions in imas_codex.standard_names.graph_ops.
+persist functions in iter_codex.standard_names.graph_ops.
 
 Stage table (from AGENTS.md)::
 
@@ -23,19 +23,19 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
 )
 from tests.standard_names.conftest import answer_domain_state as _answer_domain_state
 
 # ─── Module paths ─────────────────────────────────────────────────────────────
 
-_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_GC_PATH = "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
 _WRITE_REVIEWS_PATH = (
-    "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
+    "iter_codex.standard_names.graph_store.graph_catalog.write_reviews"
 )
 
-# ─── Production defaults (must match imas_codex/standard_names/defaults.py) ──
+# ─── Production defaults (must match iter_codex/standard_names/defaults.py) ──
 
 _MIN_SCORE: float = 0.75
 _ROTATION_CAP: int = 3
@@ -200,8 +200,8 @@ def test_review_stage_decision(
     The mock supplies the current chain depth; the function computes the
     target stage; we assert it matches the documented value.
     """
-    from imas_codex.standard_names.graph_store import resolve_owned_name
-    from imas_codex.standard_names.review import holds
+    from iter_codex.standard_names.graph_store import resolve_owned_name
+    from iter_codex.standard_names.review import holds
 
     fn = resolve_owned_name(fn_name)
 
@@ -258,7 +258,7 @@ def test_review_stage_decision(
 
 def test_review_stage_token_mismatch_is_noop() -> None:
     """An empty claim read returns an empty string without writing."""
-    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+    from iter_codex.standard_names.graph_store.graph_review_persistence import (
         persist_reviewed_name,
     )
 
@@ -290,7 +290,7 @@ class TestComposeNameStageDrafted:
 
     def test_name_stage_drafted(self) -> None:
         """Cypher SET includes name_stage = 'drafted'."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _finalize_generated_name_stage,
         )
 
@@ -305,7 +305,7 @@ class TestComposeNameStageDrafted:
 
     def test_docs_stage_pending(self) -> None:
         """Cypher SET includes docs_stage = 'pending'."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _finalize_generated_name_stage,
         )
 
@@ -320,7 +320,7 @@ class TestComposeNameStageDrafted:
 
     def test_chain_length_zero(self) -> None:
         """Cypher initializes missing chain length without resetting it."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _finalize_generated_name_stage,
         )
 
@@ -335,7 +335,7 @@ class TestComposeNameStageDrafted:
 
     def test_single_transaction_committed(self) -> None:
         """All stage updates land in a single committed transaction."""
-        from imas_codex.standard_names.graph_store.graph_catalog import (
+        from iter_codex.standard_names.graph_store.graph_catalog import (
             _finalize_generated_name_stage,
         )
 
@@ -363,7 +363,7 @@ class TestGenerateDocsPendingToDrafted:
 
     def test_returns_drafted_on_success(self) -> None:
         """Returns 'drafted' when the token + name_stage='accepted' gate passes."""
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             persist_generated_docs,
         )
 
@@ -381,7 +381,7 @@ class TestGenerateDocsPendingToDrafted:
 
     def test_cypher_gates_on_name_stage_accepted(self) -> None:
         """WHERE clause in Cypher requires name_stage = 'accepted' (cross-pipeline gate)."""
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             persist_generated_docs,
         )
 
@@ -400,7 +400,7 @@ class TestGenerateDocsPendingToDrafted:
 
     def test_cypher_sets_docs_stage_drafted(self) -> None:
         """Cypher SET includes docs_stage = 'drafted'."""
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             persist_generated_docs,
         )
 
@@ -423,7 +423,7 @@ class TestGenerateDocsPendingToDrafted:
         This is the cross-pipeline enforcement: generate_docs only runs after
         name review is complete.
         """
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             persist_generated_docs,
         )
 
@@ -474,7 +474,7 @@ class TestRefineNameStageMachine:
         tx_run_return: list[dict[str, Any]] | None = None,
         old_chain_length: int = 1,
     ) -> tuple[dict[str, Any], MagicMock]:
-        from imas_codex.standard_names.graph_store.graph_refinement import (
+        from iter_codex.standard_names.graph_store.graph_refinement import (
             persist_refined_name,
         )
 
@@ -577,7 +577,7 @@ class TestRefineDocsStageMachine:
         self,
         tx_run_return: list[dict[str, Any]] | None = None,
     ) -> tuple[dict[str, Any], MagicMock]:
-        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        from iter_codex.standard_names.graph_store.graph_docs_persistence import (
             persist_refined_docs,
         )
 

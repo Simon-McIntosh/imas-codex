@@ -1,8 +1,8 @@
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from imas_codex.discovery.base.progress import WorkerStats
-from imas_codex.graph import dd_progress
+from iter_codex.discovery.base.progress import WorkerStats
+from iter_codex.graph import dd_progress
 
 
 def _state() -> SimpleNamespace:
@@ -47,7 +47,7 @@ def test_graph_refresh_overwrites_processed_with_graph_count(monkeypatch) -> Non
     state.embed_stats.processed = 999
 
     monkeypatch.setattr(
-        "imas_codex.graph.dd_graph_ops.count_imas_nodes_by_status",
+        "iter_codex.graph.dd_graph_ops.count_imas_nodes_by_status",
         lambda **kwargs: (
             {"built": 5, "refined": 3, "embedded": 7, "total": 15}
             if kwargs.get("node_categories") == dd_progress.ENRICHABLE_CATEGORIES
@@ -55,7 +55,7 @@ def test_graph_refresh_overwrites_processed_with_graph_count(monkeypatch) -> Non
         ),
     )
 
-    with patch("imas_codex.graph.client.GraphClient") as mock_gc:
+    with patch("iter_codex.graph.client.GraphClient") as mock_gc:
         mock_gc.return_value.__enter__ = lambda s: s
         mock_gc.return_value.__exit__ = lambda *a: None
         mock_gc.return_value.query.return_value = [

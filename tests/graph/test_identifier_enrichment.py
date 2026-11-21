@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.graph.dd_identifier_enrichment import (
+from iter_codex.graph.dd_identifier_enrichment import (
     IdentifierEnrichmentBatch,
     IdentifierEnrichmentResult,
     _compute_enrichment_hash,

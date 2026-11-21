@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 
-from imas_codex.tools.graph_search import (
+from iter_codex.tools.graph_search import (
     GraphClustersTool,
     GraphListTool,
     GraphOverviewTool,
@@ -440,7 +440,7 @@ class TestCliSearchDDVersion:
         """CLI --version flag should produce INTRODUCED_IN filter, not node property."""
         import inspect
 
-        import imas_codex.cli.imas_dd as imas_dd_module
+        import iter_codex.cli.imas_dd as imas_dd_module
 
         source = inspect.getsource(imas_dd_module)
         assert "INTRODUCED_IN" in source
@@ -457,7 +457,7 @@ class TestErrorFieldContext:
 
     def test_search_hit_has_error_fields_attribute(self):
         """SearchHit model must have error_fields field."""
-        from imas_codex.search.search_strategy import SearchHit
+        from iter_codex.search.search_strategy import SearchHit
 
         hit = SearchHit(
             path="equilibrium/time_slice/profiles_1d/psi",
@@ -474,7 +474,7 @@ class TestErrorFieldContext:
 
     def test_search_hit_error_fields_default_none(self):
         """SearchHit error_fields defaults to None."""
-        from imas_codex.search.search_strategy import SearchHit
+        from iter_codex.search.search_strategy import SearchHit
 
         hit = SearchHit(
             path="equilibrium/time_slice/profiles_1d/psi",
@@ -488,7 +488,7 @@ class TestErrorFieldContext:
 
     def test_ids_node_has_error_fields_attribute(self):
         """IdsNode model must have error_fields field."""
-        from imas_codex.core.data_model import IdsNode
+        from iter_codex.core.data_model import IdsNode
 
         node = IdsNode(
             path="equilibrium/time_slice/profiles_1d/psi",
@@ -506,7 +506,7 @@ class TestErrorFieldContext:
         """search_dd_paths enrichment query must fetch HAS_ERROR."""
         import inspect
 
-        from imas_codex.tools.graph_search import GraphSearchTool
+        from iter_codex.tools.graph_search import GraphSearchTool
 
         source = inspect.getsource(GraphSearchTool.search_dd_paths)
         assert "HAS_ERROR" in source
@@ -519,7 +519,7 @@ class TestErrorFieldContext:
         """fetch_dd_paths enrichment query must fetch HAS_ERROR."""
         import inspect
 
-        from imas_codex.tools.graph_search import GraphPathTool
+        from iter_codex.tools.graph_search import GraphPathTool
 
         source = inspect.getsource(GraphPathTool.fetch_dd_paths)
         assert "HAS_ERROR" in source
@@ -539,7 +539,7 @@ class TestClusterReranking:
         """search_dd_paths enrichment must fetch IN_CLUSTER labels."""
         import inspect
 
-        from imas_codex.tools.graph_search import GraphSearchTool
+        from iter_codex.tools.graph_search import GraphSearchTool
 
         source = inspect.getsource(GraphSearchTool.search_dd_paths)
         assert "IN_CLUSTER" in source

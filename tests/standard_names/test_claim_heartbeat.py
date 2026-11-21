@@ -17,12 +17,12 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import graph_ops
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
 )
-from imas_codex.standard_names.graph_store.graph_audits import refresh_name_claims
-from imas_codex.standard_names.graph_store.graph_foundation import (
+from iter_codex.standard_names.graph_store.graph_audits import refresh_name_claims
+from iter_codex.standard_names.graph_store.graph_foundation import (
     _CLAIM_TIMEOUT_SECONDS,
 )
 

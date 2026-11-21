@@ -2,11 +2,11 @@
 
 from unittest.mock import Mock
 
-from imas_codex.ids.slot_context import build_slot_context
+from iter_codex.ids.slot_context import build_slot_context
 
 
 def _search_fixture(monkeypatch):
-    from imas_codex.ids import slot_context
+    from iter_codex.ids import slot_context
 
     hits = {
         "code": [
@@ -86,7 +86,7 @@ def _context(encoder):
 
 def test_four_kinds_have_origins_and_shared_judgment_changes_order(monkeypatch):
     slot_context, encoder = _search_fixture(monkeypatch)
-    from imas_codex.discovery.base import judgment
+    from iter_codex.discovery.base import judgment
 
     monkeypatch.setattr(judgment, "decisions_key_present", lambda: True)
 
@@ -118,7 +118,7 @@ def test_four_kinds_have_origins_and_shared_judgment_changes_order(monkeypatch):
 
 def test_empty_kind_is_omitted(monkeypatch):
     slot_context, encoder = _search_fixture(monkeypatch)
-    from imas_codex.discovery.base import judgment
+    from iter_codex.discovery.base import judgment
 
     monkeypatch.setattr(slot_context, "_vector_search_documents", lambda *a: ([], {}))
     monkeypatch.setattr(judgment, "decisions_key_present", lambda: False)
@@ -129,7 +129,7 @@ def test_empty_kind_is_omitted(monkeypatch):
 
 def test_no_key_keeps_retrieval_order(monkeypatch):
     slot_context, encoder = _search_fixture(monkeypatch)
-    from imas_codex.discovery.base import judgment
+    from iter_codex.discovery.base import judgment
 
     monkeypatch.setattr(judgment, "decisions_key_present", lambda: False)
     monkeypatch.setattr(
@@ -147,7 +147,7 @@ def test_no_key_keeps_retrieval_order(monkeypatch):
 
 def test_lexical_hits_survive_empty_vector_indexes(monkeypatch):
     slot_context, encoder = _search_fixture(monkeypatch)
-    from imas_codex.discovery.base import judgment
+    from iter_codex.discovery.base import judgment
 
     monkeypatch.setattr(judgment, "decisions_key_present", lambda: False)
     monkeypatch.setattr(slot_context, "_vector_search_code_chunks", lambda *a: ([], {}))

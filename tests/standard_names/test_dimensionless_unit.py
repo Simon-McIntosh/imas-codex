@@ -39,14 +39,14 @@ def _make_row(**overrides):
 
 def _run_enrich(items, row):
     """Run _enrich_batch_items with a mocked GraphClient returning *row*."""
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _enrich_batch_items,
     )
 
     mock_gc = MagicMock()
     mock_gc.query.return_value = [row]
 
-    with patch("imas_codex.graph.client.GraphClient") as MockGC:
+    with patch("iter_codex.graph.client.GraphClient") as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -54,7 +54,7 @@ def _run_enrich(items, row):
 
 
 def _assert_numeric_fallback_audited_absent() -> None:
-    from imas_codex.standard_names.legacy_authority import (
+    from iter_codex.standard_names.legacy_authority import (
         ShadowAuditStatus,
         find_shadow_authorities,
     )

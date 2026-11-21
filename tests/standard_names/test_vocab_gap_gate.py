@@ -23,7 +23,7 @@ class TestVocabGapClassification:
     @pytest.fixture(autouse=True)
     def _clear_caches(self):
         """Clear lru_cache between tests so mock data takes effect."""
-        from imas_codex.standard_names.segments import clear_grammar_caches
+        from iter_codex.standard_names.segments import clear_grammar_caches
 
         # Clear ALL grammar caches — a mocked SEGMENT_TOKEN_MAP must not leak
         # cached results into sibling test modules, and the module owns the list
@@ -41,7 +41,7 @@ class TestVocabGapClassification:
 
         with (
             patch(
-                "imas_codex.standard_names.segments.SEGMENT_TOKEN_MAP",
+                "iter_codex.standard_names.segments.SEGMENT_TOKEN_MAP",
                 segment_token_map,
                 create=True,
             ),
@@ -61,11 +61,11 @@ class TestVocabGapClassification:
                 },
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+                "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=mock_gc_instance,
             ),
         ):
-            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+            from iter_codex.standard_names.graph_store.graph_catalog_reset import (
                 write_vocab_gaps,
             )
 

@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.signals.parallel import (
+from iter_codex.discovery.signals.parallel import (
     build_device_xml_context_query,
     fetch_tree_context,
     get_data_discovery_stats,
@@ -48,7 +48,7 @@ class TestFetchTreeContext:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             ctx = fetch_tree_context(["tcv:results/top/ip"])
@@ -79,7 +79,7 @@ class TestFetchTreeContext:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             ctx = fetch_tree_context(["tcv:results/top/ip"])
@@ -108,7 +108,7 @@ class TestFetchTreeContext:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             ctx = fetch_tree_context(["tcv:magnetics/top/ip"])
@@ -137,7 +137,7 @@ class TestFetchTreeContext:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             ctx = fetch_tree_context(["tcv:results/top/ip"])
@@ -154,7 +154,7 @@ class TestFetchTreeContext:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             ctx = fetch_tree_context(["tcv:results/top/ip"])
@@ -191,7 +191,7 @@ class TestFetchTreeContext:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             ctx = fetch_tree_context(["tcv:results/top/ip", "tcv:results/top/q95"])
@@ -226,10 +226,10 @@ class TestClaimSignalsSourceNode:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
-            from imas_codex.discovery.signals.parallel import (
+            from iter_codex.discovery.signals.parallel import (
                 claim_signals_for_enrichment,
             )
 
@@ -265,7 +265,7 @@ class TestScannerScopeMapping:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             assert has_pending_enrich_work("jet", ["device_xml", "ppf"]) is True
@@ -305,7 +305,7 @@ class TestScannerScopeMapping:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient",
+            "iter_codex.discovery.signals.parallel.GraphClient",
             return_value=mock_gc,
         ):
             stats = get_data_discovery_stats("jet", ["device_xml", "ppf"])
@@ -397,7 +397,7 @@ class TestEnrichmentTemplateContent:
 
     def test_template_has_data_node_docs(self):
         """Template documents parent_node, siblings, tdi, applicability."""
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         template_path = PROMPTS_DIR / "signals" / "enrichment.md"
         content = template_path.read_text()

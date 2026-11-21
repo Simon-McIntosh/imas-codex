@@ -9,13 +9,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_claim_release as _owning_graph_claim_release,
     graph_cost_and_claims as _owning_graph_cost_and_claims,
     resolve_owned_name,
 )
-from imas_codex.standard_names.models import DDGapEvidence
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.models import DDGapEvidence
+from iter_codex.standard_names.worker_tasks import (
     worker_review_docs as _owning_worker_review_docs,
     worker_review_names as _owning_worker_review_names,
 )
@@ -40,7 +40,7 @@ def _evidence(path: str = PATH, *, reference_path: str | None = None) -> DDGapEv
 
 
 def test_compose_sanitizer_keeps_only_exact_claimed_dd_evidence() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _sanitize_compose_result_sources,
     )
 
@@ -58,7 +58,7 @@ def test_compose_sanitizer_keeps_only_exact_claimed_dd_evidence() -> None:
 
 
 def test_compose_sanitizer_resolves_multiple_dispositions_by_fixed_priority() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _sanitize_compose_result_sources,
     )
 
@@ -80,7 +80,7 @@ def test_compose_sanitizer_resolves_multiple_dispositions_by_fixed_priority() ->
 
 
 def test_reference_evidence_must_also_be_in_claimed_batch() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _sanitize_dd_gap_evidence,
     )
 
@@ -98,12 +98,12 @@ def test_reference_evidence_must_also_be_in_claimed_batch() -> None:
 
 
 def test_persisted_evidence_injects_writer_and_dd_version() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _persist_dd_gap_evidence,
     )
 
     with patch(
-        "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+        "iter_codex.standard_names.dd_gaps.write_dd_gaps",
         return_value={"reported": 1},
     ) as write:
         reported = _persist_dd_gap_evidence(
@@ -123,12 +123,12 @@ def test_persisted_evidence_injects_writer_and_dd_version() -> None:
 
 
 def test_evidence_writer_failure_isolated_from_pipeline_result() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _persist_dd_gap_evidence,
     )
 
     with patch(
-        "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+        "iter_codex.standard_names.dd_gaps.write_dd_gaps",
         side_effect=RuntimeError("graph unavailable"),
     ):
         assert (
@@ -143,11 +143,11 @@ def test_evidence_writer_failure_isolated_from_pipeline_result() -> None:
 
 
 def test_no_evidence_performs_no_graph_write() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_common import (
+    from iter_codex.standard_names.worker_tasks.worker_common import (
         _persist_dd_gap_evidence,
     )
 
-    with patch("imas_codex.standard_names.dd_gaps.write_dd_gaps") as write:
+    with patch("iter_codex.standard_names.dd_gaps.write_dd_gaps") as write:
         assert (
             _persist_dd_gap_evidence(
                 [],
@@ -161,7 +161,7 @@ def test_no_evidence_performs_no_graph_write() -> None:
 
 
 def test_unit_injection_reports_only_physical_scalar_edge_conflicts() -> None:
-    from imas_codex.standard_names.sources.dd import (
+    from iter_codex.standard_names.sources.dd import (
         _unit_declaration_conflict_reports,
     )
 
@@ -195,12 +195,12 @@ def test_unit_injection_reports_only_physical_scalar_edge_conflicts() -> None:
 
 
 def test_unit_injection_writer_failure_does_not_block_extraction() -> None:
-    from imas_codex.standard_names.sources.dd import (
+    from iter_codex.standard_names.sources.dd import (
         _persist_unit_declaration_conflicts,
     )
 
     with patch(
-        "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+        "iter_codex.standard_names.dd_gaps.write_dd_gaps",
         side_effect=RuntimeError("graph unavailable"),
     ):
         assert (
@@ -213,7 +213,7 @@ def test_unit_injection_writer_failure_does_not_block_extraction() -> None:
 
 
 def test_attachment_evidence_uses_fetched_unit_property_and_relationship() -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         _attachment_dd_gap_evidence,
     )
 
@@ -237,7 +237,7 @@ def test_attachment_evidence_uses_fetched_unit_property_and_relationship() -> No
 
 
 def test_attachment_evidence_reports_multiple_unit_edges_deterministically() -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         _attachment_dd_gap_evidence,
     )
 
@@ -258,7 +258,7 @@ def test_attachment_evidence_reports_multiple_unit_edges_deterministically() -> 
 
 @pytest.mark.asyncio
 async def test_review_quorum_collects_evidence_without_changing_score() -> None:
-    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    from iter_codex.standard_names.worker_tasks.worker_review_names import (
         _run_rd_quorum_cycles,
     )
 
@@ -294,7 +294,7 @@ async def test_review_quorum_collects_evidence_without_changing_score() -> None:
 
 
 def test_attachment_reconcile_dry_run_never_writes_evidence() -> None:
-    from imas_codex.standard_names.attachment_audit import (
+    from iter_codex.standard_names.attachment_audit import (
         reconcile_attachment_consistency,
     )
 
@@ -314,7 +314,7 @@ def test_attachment_reconcile_dry_run_never_writes_evidence() -> None:
         }
     ]
 
-    with patch("imas_codex.standard_names.dd_gaps.write_dd_gaps") as write:
+    with patch("iter_codex.standard_names.dd_gaps.write_dd_gaps") as write:
         result = reconcile_attachment_consistency(gc, dry_run=True)
 
     assert result.dd_gap_evidence
@@ -322,7 +322,7 @@ def test_attachment_reconcile_dry_run_never_writes_evidence() -> None:
 
 
 def test_targeted_extraction_dry_run_has_no_graph_writers() -> None:
-    from imas_codex.standard_names.sources.dd import extract_specific_paths
+    from iter_codex.standard_names.sources.dd import extract_specific_paths
 
     gc = MagicMock()
     gc.query.side_effect = [
@@ -333,16 +333,16 @@ def test_targeted_extraction_dry_run_has_no_graph_writers() -> None:
     gc.__exit__.return_value = False
 
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=gc),
+        patch("iter_codex.graph.client.GraphClient", return_value=gc),
         patch(
-            "imas_codex.standard_names.sources.dd._persist_unit_declaration_conflicts"
+            "iter_codex.standard_names.sources.dd._persist_unit_declaration_conflicts"
         ) as persist_conflicts,
         patch(
-            "imas_codex.standard_names.sources.dd._apply_unit_overrides",
+            "iter_codex.standard_names.sources.dd._apply_unit_overrides",
             side_effect=lambda rows, **_: rows,
         ) as apply_units,
         patch(
-            "imas_codex.standard_names.sources.dd._qualify_sources", return_value=[]
+            "iter_codex.standard_names.sources.dd._qualify_sources", return_value=[]
         ) as qualify,
     ):
         assert extract_specific_paths([PATH], write_side_effects=False) == []
@@ -357,7 +357,7 @@ def test_targeted_extraction_dry_run_has_no_graph_writers() -> None:
 def test_extraction_refuses_multiple_unit_edges_deterministically(
     extractor: str, edge_units: list[str]
 ) -> None:
-    from imas_codex.standard_names.sources.dd import (
+    from iter_codex.standard_names.sources.dd import (
         extract_dd_candidates,
         extract_specific_paths,
     )
@@ -378,18 +378,18 @@ def test_extraction_refuses_multiple_unit_edges_deterministically(
     gc.__exit__.return_value = False
 
     with (
-        patch("imas_codex.graph.client.GraphClient", return_value=gc),
+        patch("iter_codex.graph.client.GraphClient", return_value=gc),
         patch(
-            "imas_codex.standard_names.sources.dd.report_extract_breakdown",
+            "iter_codex.standard_names.sources.dd.report_extract_breakdown",
             side_effect=RuntimeError("not needed"),
         ),
         patch(
-            "imas_codex.standard_names.sources.dd._apply_unit_overrides",
+            "iter_codex.standard_names.sources.dd._apply_unit_overrides",
             side_effect=lambda rows, **_: rows,
         ) as apply_units,
-        patch("imas_codex.standard_names.sources.dd._qualify_sources", return_value=[]),
+        patch("iter_codex.standard_names.sources.dd._qualify_sources", return_value=[]),
         patch(
-            "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+            "iter_codex.standard_names.dd_gaps.write_dd_gaps",
             return_value={"reported": 1},
         ) as write,
     ):
@@ -492,35 +492,35 @@ async def test_review_writer_requires_successful_owned_transition(
     with ExitStack() as stack:
         llm = stack.enter_context(
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new=AsyncMock(return_value=(llm_result, 0.01, 100)),
             )
         )
         # Evidence authorization depends on the owned transition, not embeddings.
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.audits.semantic_similarity_check",
+                "iter_codex.standard_names.audits.semantic_similarity_check",
                 return_value=(None, []),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.settings.get_sn_review_names_models",
+                "iter_codex.settings.get_sn_review_names_models",
                 return_value=["reviewer"],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.settings.get_sn_review_docs_models",
+                "iter_codex.settings.get_sn_review_docs_models",
                 return_value=["reviewer"],
             )
         )
         stack.enter_context(
-            patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt")
+            patch("iter_codex.llm.prompt_loader.render_prompt", return_value="prompt")
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.context.fetch_review_neighbours",
+                "iter_codex.standard_names.context.fetch_review_neighbours",
                 return_value={
                     "vector_neighbours": [],
                     "same_base_neighbours": [],
@@ -530,38 +530,38 @@ async def test_review_writer_requires_successful_owned_transition(
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.context._build_enum_lists", return_value={}
+                "iter_codex.standard_names.context._build_enum_lists", return_value={}
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.context.build_compose_context",
+                "iter_codex.standard_names.context.build_compose_context",
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.example_loader.load_review_examples",
+                "iter_codex.standard_names.example_loader.load_review_examples",
                 return_value=[],
             )
         )
         persist = stack.enter_context(
             patch(
-                f"imas_codex.standard_names.graph_store.graph_review_persistence.{persist_name}",
+                f"iter_codex.standard_names.graph_store.graph_review_persistence.{persist_name}",
                 return_value=transition,
             )
         )
         stack.enter_context(
-            patch("imas_codex.standard_names.graph_store.graph_catalog.write_reviews")
+            patch("iter_codex.standard_names.graph_store.graph_catalog.write_reviews")
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog.update_review_aggregates"
+                "iter_codex.standard_names.graph_store.graph_catalog.update_review_aggregates"
             )
         )
         write = stack.enter_context(
             patch(
-                "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+                "iter_codex.standard_names.dd_gaps.write_dd_gaps",
                 return_value={"reported": 1},
             )
         )
@@ -626,7 +626,7 @@ def _compose_response(disposition: str) -> object:
 async def test_compose_evidence_follows_each_committed_disposition(
     disposition: str, claim_won: bool
 ) -> None:
-    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+    from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
         process_generate_name_batch,
     )
 
@@ -650,101 +650,101 @@ async def test_compose_evidence_follows_each_committed_disposition(
     with ExitStack() as stack:
         stack.enter_context(
             patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
+                "iter_codex.discovery.base.llm.acall_llm_structured",
                 new=AsyncMock(return_value=_compose_response(disposition)),
             )
         )
         stack.enter_context(
-            patch("imas_codex.settings.get_model", return_value="model")
+            patch("iter_codex.settings.get_model", return_value="model")
         )
         stack.enter_context(
-            patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt")
+            patch("iter_codex.llm.prompt_loader.render_prompt", return_value="prompt")
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.context.build_compose_context",
+                "iter_codex.standard_names.context.build_compose_context",
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.context.build_domain_vocabulary_preseed",
+                "iter_codex.standard_names.context.build_domain_vocabulary_preseed",
                 return_value="",
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items"
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items"
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context"
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context"
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_common._compute_token_reuse_hits",
+                "iter_codex.standard_names.worker_tasks.worker_common._compute_token_reuse_hits",
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_common._active_editorial_gap_guidance",
+                "iter_codex.standard_names.worker_tasks.worker_common._active_editorial_gap_guidance",
                 return_value=("", False),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
+                "iter_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
                 return_value=batch,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_common.is_well_formed_candidate",
+                "iter_codex.standard_names.worker_tasks.worker_common.is_well_formed_candidate",
                 return_value=(True, None),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_common.is_non_nameable_coordinate",
+                "iter_codex.standard_names.worker_tasks.worker_common.is_non_nameable_coordinate",
                 return_value=(False, None),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._is_attachment_consistent",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._is_attachment_consistent",
                 return_value=(True, ""),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_common._auto_detect_physical_base_gaps",
+                "iter_codex.standard_names.worker_tasks.worker_common._auto_detect_physical_base_gaps",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.example_loader.load_compose_examples",
+                "iter_codex.standard_names.example_loader.load_compose_examples",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
+                "iter_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
                 return_value=winner_ids,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._process_attachments_core",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._process_attachments_core",
                 return_value={
                     "accepted": int(claim_won),
                     "rejected": int(not claim_won),
@@ -754,7 +754,7 @@ async def test_compose_evidence_follows_each_committed_disposition(
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._consume_claimed_vocab_gaps",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._consume_claimed_vocab_gaps",
                 return_value=(
                     [
                         {
@@ -770,14 +770,14 @@ async def test_compose_evidence_follows_each_committed_disposition(
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._persist_claimed_skips",
+                "iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._persist_claimed_skips",
                 return_value=winner_ids,
             )
         )
-        stack.enter_context(patch("imas_codex.graph.client.GraphClient"))
+        stack.enter_context(patch("iter_codex.graph.client.GraphClient"))
         write = stack.enter_context(
             patch(
-                "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+                "iter_codex.standard_names.dd_gaps.write_dd_gaps",
                 return_value={"reported": 1},
             )
         )

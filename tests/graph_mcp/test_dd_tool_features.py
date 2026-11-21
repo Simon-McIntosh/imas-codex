@@ -23,7 +23,7 @@ pytestmark = pytest.mark.graph_mcp
 
 class TestCocosFields:
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphStructureTool
+        from iter_codex.tools.graph_search import GraphStructureTool
 
         return GraphStructureTool(graph_client)
 
@@ -90,7 +90,7 @@ class TestCocosFields:
 
 class TestVersionContextBulk:
     def _make_tool(self, graph_client):
-        from imas_codex.tools.version_tool import VersionTool
+        from iter_codex.tools.version_tool import VersionTool
 
         return VersionTool(graph_client)
 
@@ -164,7 +164,7 @@ class TestVersionContextBulk:
 
 class TestOverviewUnitStats:
     def _make_tool(self, graph_client):
-        from imas_codex.tools.graph_search import GraphOverviewTool
+        from iter_codex.tools.graph_search import GraphOverviewTool
 
         return GraphOverviewTool(graph_client)
 
@@ -184,7 +184,7 @@ class TestLifecycleFiltering:
     @pytest.mark.asyncio
     async def test_list_paths_lifecycle_active(self, graph_client):
         """lifecycle_filter='active' excludes non-active paths."""
-        from imas_codex.tools.graph_search import GraphListTool
+        from iter_codex.tools.graph_search import GraphListTool
 
         tool = GraphListTool(graph_client)
         result = await tool.list_dd_paths("core_profiles", lifecycle_filter="active")
@@ -194,7 +194,7 @@ class TestLifecycleFiltering:
     @pytest.mark.asyncio
     async def test_list_paths_lifecycle_alpha(self, graph_client):
         """lifecycle_filter='alpha' returns only alpha paths."""
-        from imas_codex.tools.graph_search import GraphListTool
+        from iter_codex.tools.graph_search import GraphListTool
 
         tool = GraphListTool(graph_client)
         result = await tool.list_dd_paths("core_profiles", lifecycle_filter="alpha")
@@ -205,7 +205,7 @@ class TestLifecycleFiltering:
     @pytest.mark.asyncio
     async def test_lifecycle_filter_reduces_results(self, graph_client):
         """Filtering by lifecycle returns fewer results than unfiltered."""
-        from imas_codex.tools.graph_search import GraphListTool
+        from iter_codex.tools.graph_search import GraphListTool
 
         tool = GraphListTool(graph_client)
         all_result = await tool.list_dd_paths("equilibrium")
@@ -225,7 +225,7 @@ class TestLifecycleFiltering:
 class TestMigrationSummary:
     def test_summary_only(self, graph_client):
         """summary_only=True returns a compact Migration Summary."""
-        from imas_codex.tools.migration_guide import generate_migration_guide
+        from iter_codex.tools.migration_guide import generate_migration_guide
 
         result = generate_migration_guide(
             graph_client,
@@ -240,7 +240,7 @@ class TestMigrationSummary:
 
     def test_summary_vs_full_both_work(self, graph_client):
         """Both summary and full guide return non-empty strings; summary is shorter."""
-        from imas_codex.tools.migration_guide import generate_migration_guide
+        from iter_codex.tools.migration_guide import generate_migration_guide
 
         summary = generate_migration_guide(
             graph_client, "3.39.0", "4.0.0", summary_only=True
@@ -263,7 +263,7 @@ class TestSearchParamUnification:
     @pytest.mark.asyncio
     async def test_list_paths_physics_domain(self, graph_client):
         """physics_domain filter returns only paths with matching domain."""
-        from imas_codex.tools.graph_search import GraphListTool
+        from iter_codex.tools.graph_search import GraphListTool
 
         tool = GraphListTool(graph_client)
         result = await tool.list_dd_paths("equilibrium", physics_domain="equilibrium")
@@ -273,7 +273,7 @@ class TestSearchParamUnification:
     @pytest.mark.asyncio
     async def test_list_paths_physics_domain_no_match(self, graph_client):
         """physics_domain with no match returns zero paths."""
-        from imas_codex.tools.graph_search import GraphListTool
+        from iter_codex.tools.graph_search import GraphListTool
 
         tool = GraphListTool(graph_client)
         result = await tool.list_dd_paths(
@@ -285,7 +285,7 @@ class TestSearchParamUnification:
     @pytest.mark.asyncio
     async def test_list_paths_node_type_dynamic(self, graph_client):
         """node_type='dynamic' filters to dynamic paths only."""
-        from imas_codex.tools.graph_search import GraphListTool
+        from iter_codex.tools.graph_search import GraphListTool
 
         tool = GraphListTool(graph_client)
         dyn_result = await tool.list_dd_paths("equilibrium", node_type="dynamic")
@@ -299,7 +299,7 @@ class TestSearchParamUnification:
     @pytest.mark.asyncio
     async def test_fetch_with_children(self, graph_client):
         """include_children=True populates children_preview for structure nodes."""
-        from imas_codex.tools.graph_search import GraphPathTool
+        from iter_codex.tools.graph_search import GraphPathTool
 
         tool = GraphPathTool(graph_client)
         result = await tool.fetch_dd_paths(
@@ -317,7 +317,7 @@ class TestSearchParamUnification:
     @pytest.mark.asyncio
     async def test_fetch_without_children(self, graph_client):
         """include_children=False leaves children_preview as None."""
-        from imas_codex.tools.graph_search import GraphPathTool
+        from iter_codex.tools.graph_search import GraphPathTool
 
         tool = GraphPathTool(graph_client)
         result = await tool.fetch_dd_paths(

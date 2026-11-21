@@ -46,7 +46,7 @@ def _make_gc(*, cocos_label: str | None = None) -> MagicMock:
 
 def test_cocos_parameter_lookup_uses_schema_relationship():
     """Convention parameters are read through the schema-owned relationship."""
-    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    from iter_codex.standard_names.worker_tasks.worker_review_names import (
         _DOCS_GEN_COCOS_PARAMS_QUERY,
     )
 
@@ -57,7 +57,7 @@ def test_cocos_parameter_lookup_uses_schema_relationship():
 
 def test_cocos_label_injected():
     """When SN has cocos_transformation_type, it appears on item."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -69,7 +69,7 @@ def test_cocos_label_injected():
 
 def test_cocos_guidance_rendered_with_params():
     """When cocos_params are provided, guidance is rendered."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -91,7 +91,7 @@ def test_cocos_guidance_rendered_with_params():
 
 def test_no_cocos_when_label_null():
     """When SN has no cocos_transformation_type, cocos_label is not set."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -104,7 +104,7 @@ def test_no_cocos_when_label_null():
 
 def test_no_cocos_guidance_without_params():
     """When cocos_params not provided, only label is set (no guidance)."""
-    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+    from iter_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
     )
 
@@ -117,7 +117,7 @@ def test_no_cocos_guidance_without_params():
 
 def test_docs_prompt_renders_cocos_section():
     """The generate_docs_user prompt includes COCOS section when label present."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     context = {
         "item": {
@@ -140,7 +140,7 @@ def test_docs_prompt_renders_cocos_section():
 
 def test_docs_prompt_omits_cocos_when_absent():
     """The generate_docs_user prompt has no COCOS section when label absent."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     context = {
         "item": {

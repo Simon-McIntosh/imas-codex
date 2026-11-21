@@ -25,12 +25,12 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.discovery.base import judgment
-from imas_codex.discovery.base.progress import WorkerStats
-from imas_codex.discovery.base.supervision import PipelinePhase
-from imas_codex.standard_names.context import conventions_context_for
-from imas_codex.standard_names.review import pipeline as pl
-from imas_codex.standard_names.review.judge_stage import (
+from iter_codex.discovery.base import judgment
+from iter_codex.discovery.base.progress import WorkerStats
+from iter_codex.discovery.base.supervision import PipelinePhase
+from iter_codex.standard_names.context import conventions_context_for
+from iter_codex.standard_names.review import pipeline as pl
+from iter_codex.standard_names.review.judge_stage import (
     _CONCEPT_FORMS,
     FORBIDDEN,
     QUESTION_NAME,
@@ -130,7 +130,7 @@ def _state(batch: dict, *, skip_audit: bool = False):
 
 async def _run_enrich(monkeypatch, names, *, skip_audit: bool = False) -> dict:
     """Drive the enrich worker, neutralising the context lookups it also does."""
-    from imas_codex.standard_names.review import enrichment
+    from iter_codex.standard_names.review import enrichment
 
     monkeypatch.setattr(
         enrichment, "build_neighborhood_context", lambda *a, **k: [], raising=True

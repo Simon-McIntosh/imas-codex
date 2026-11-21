@@ -2,7 +2,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 45bd92fae0baca43b894c5a5ad9ffef484744168, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.graph_ops._normalize_bare_doc_links.
+# Names the tree no longer defines: iter_codex.standard_names.graph_ops._normalize_bare_doc_links.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Apply the bare-link normaliser to the live catalogue once, under control.
@@ -35,12 +35,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.docs_gates import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.docs_gates import (
     DocumentationGateOutcome,
     score_documentation,
 )
-from imas_codex.standard_names.graph_ops import _normalize_bare_doc_links
+from iter_codex.standard_names.graph_ops import _normalize_bare_doc_links
 
 RESTORE_SCHEMA = "imas-codex/sn-review-through-jev/srtj-docs-bracket-apply-restore/1"
 APPLY_SCHEMA = "imas-codex/sn-review-through-jev/srtj-docs-bracket-apply/1"

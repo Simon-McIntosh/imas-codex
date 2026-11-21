@@ -14,7 +14,7 @@ not smuggle in a second accepted spelling.
 
 import pytest
 
-from imas_codex.standard_names.models import GrammarSegments
+from iter_codex.standard_names.models import GrammarSegments
 
 
 @pytest.mark.parametrize(

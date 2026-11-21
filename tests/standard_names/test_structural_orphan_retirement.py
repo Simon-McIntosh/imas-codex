@@ -11,8 +11,8 @@ from pathlib import Path
 import pytest
 from neo4j import GraphDatabase
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import retire_signed_provenance_orphans
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_ops import retire_signed_provenance_orphans
 
 _AUTHORITY_PATH = (
     Path(__file__).parents[2]
@@ -42,12 +42,12 @@ def _authority() -> tuple[dict[str, object], str, list[dict[str, object]]]:
 
 @pytest.fixture(scope="module")
 def disposable_neo4j() -> Iterator[tuple[str, str]]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    uri = os.environ.get("ITER_CODEX_TEST_NEO4J_URI")
     if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.skip("ITER_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("ITER_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
         pytest.fail("signed orphan retirement requires a disposable graph")
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+    password = os.environ.get("ITER_CODEX_TEST_NEO4J_PASSWORD", "")
     auth = ("neo4j", password) if password else None
     print(f"GRAPH_ENDPOINT={uri}")
     with GraphDatabase.driver(uri, auth=auth) as driver:

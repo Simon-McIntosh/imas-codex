@@ -6,7 +6,7 @@ one pass per IDS group. This driver invokes the CLI as a subprocess (the CLI
 itself must not be piped or redirected from a shell), captures the combined
 output, and writes a pass log whose first line is the literal command and whose
 last line is ``EXIT=<code>``. The CLI's own DEBUG log under
-``~/.local/share/imas-codex/logs/`` is cited beside each pass log.
+``~/.local/share/iter-codex/logs/`` is cited beside each pass log.
 
 ``run_pass`` is the single pass implementation; the sibling readback driver
 imports it rather than carrying a second copy of the same subprocess handling.
@@ -45,7 +45,7 @@ def run_pass(
     terminated once its classify phase has written, skipping the graph-wide
     re-embed and cluster phases a reset triggers.
     """
-    cmd = [str(VENV / "bin" / "imas-codex"), "imas", "dd", "build"]
+    cmd = [str(VENV / "bin" / "iter-codex"), "imas", "dd", "build"]
     if reset:
         cmd += ["--reset-to", "embedded"]
     if dry:

@@ -11,9 +11,9 @@ from typing import Any
 
 import pytest
 
-from imas_codex.graph.models import RepairMutationKind
-from imas_codex.standard_names import signed_manifest as operator
-from imas_codex.standard_names.signed_manifest import SignedManifestConflict
+from iter_codex.graph.models import RepairMutationKind
+from iter_codex.standard_names import signed_manifest as operator
+from iter_codex.standard_names.signed_manifest import SignedManifestConflict
 
 CHILD = "surface_area_of_flux_surface"
 PARENT = "area_of_flux_surface"

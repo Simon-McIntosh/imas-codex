@@ -4,15 +4,15 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names import docs_holdout_eval
-from imas_codex.standard_names.benchmark_reference import load_docs_holdout
-from imas_codex.standard_names.docs_gates import (
+from iter_codex.standard_names import docs_holdout_eval
+from iter_codex.standard_names.benchmark_reference import load_docs_holdout
+from iter_codex.standard_names.docs_gates import (
     DOCUMENTATION_GATE_NAMES,
     DocumentationGateOutcome,
     DocumentationGateResult,
     DocumentationGateScore,
 )
-from imas_codex.standard_names.docs_holdout_eval import (
+from iter_codex.standard_names.docs_holdout_eval import (
     HoldoutCostCeilingExceeded,
     evaluate_docs_holdout,
 )

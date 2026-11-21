@@ -1,7 +1,7 @@
 """AST guard that every model-seat reference names a live section.
 
 A seat passed only as a default parameter is invisible to a call-shape search,
-so the instrument is a syntax-tree walk over ``imas_codex``. It asserts that
+so the instrument is a syntax-tree walk over ``iter_codex``. It asserts that
 every string literal bound to a model-seat position — the first argument of
 ``get_model`` / ``get_model_config``, the first argument of the health checks,
 a ``section=`` or ``model_section=`` keyword, a ``section`` or ``model_section``
@@ -11,14 +11,14 @@ is a member of ``settings.MODEL_SECTIONS``.
 ``get_reasoning_effort`` reads ``reasoning-effort`` from a configuration section
 that need not carry a single ``model`` (``sn-review`` owns a reviewer chain and
 ``sn-fanout`` a proposer model), so its section argument is validated against
-``MODEL_SECTIONS`` or any live top-level ``[tool.imas-codex.*]`` section. A
+``MODEL_SECTIONS`` or any live top-level ``[tool.iter-codex.*]`` section. A
 retired seat (removed from ``MODEL_SECTIONS`` and ``pyproject.toml``) satisfies
 neither and is still caught.
 
 Retiring a seat therefore turns every stale reference into a collection-time
 failure instead of a runtime ``Unknown model section`` at the first call.
 
-The scan root is overridable with ``IMAS_CODEX_SEAT_SCAN_ROOT`` so the same
+The scan root is overridable with ``ITER_CODEX_SEAT_SCAN_ROOT`` so the same
 test can run against a scratch copy of the package to prove it fails on a
 planted dead seat.
 """
@@ -29,8 +29,8 @@ import ast
 import os
 from pathlib import Path
 
-import imas_codex
-from imas_codex import settings
+import iter_codex
+from iter_codex import settings
 
 # Functions whose first positional argument is a model seat.
 _SEAT_FIRST_ARG = frozenset({"get_model", "get_model_config", "get_reasoning_effort"})
@@ -41,16 +41,16 @@ _SEAT_KEYWORDS = frozenset({"section", "model_section"})
 # Parameter / field names that carry a model seat.
 _SEAT_PARAM_NAMES = frozenset({"section", "model_section"})
 
-_DEFAULT_SCAN_ROOT = Path(imas_codex.__file__).parent
+_DEFAULT_SCAN_ROOT = Path(iter_codex.__file__).parent
 
 
 def _scan_root() -> Path:
-    override = os.environ.get("IMAS_CODEX_SEAT_SCAN_ROOT")
+    override = os.environ.get("ITER_CODEX_SEAT_SCAN_ROOT")
     return Path(override) if override else _DEFAULT_SCAN_ROOT
 
 
 def _live_config_sections() -> frozenset[str]:
-    """Top-level ``[tool.imas-codex.*]`` section names that actually exist."""
+    """Top-level ``[tool.iter-codex.*]`` section names that actually exist."""
     settings._load_pyproject_settings.cache_clear()
     return frozenset(settings._load_pyproject_settings())
 
@@ -69,7 +69,7 @@ def _string_constants(node: ast.Call) -> list[tuple[str, str, str]]:
 
     ``kind`` is ``"seat"`` for a reference that must name a member of
     ``MODEL_SECTIONS`` and ``"reasoning"`` for a ``get_reasoning_effort``
-    section, which may name any live ``[tool.imas-codex.*]`` section.
+    section, which may name any live ``[tool.iter-codex.*]`` section.
     """
     found: list[tuple[str, str, str]] = []
     name = _called_name(node)

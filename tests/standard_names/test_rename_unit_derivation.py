@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names import edit
+from iter_codex.standard_names import edit
 
 
 def test_rename_successor_uses_unanimous_dd_source_unit() -> None:

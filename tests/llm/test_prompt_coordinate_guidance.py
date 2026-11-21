@@ -12,8 +12,8 @@ import pytest
 @pytest.fixture()
 def rendered_compose_system() -> str:
     """Render sn/generate_name_system with full grammar context."""
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.context import (
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.context import (
         build_compose_context,
         clear_context_cache,
     )
@@ -26,7 +26,7 @@ def rendered_compose_system() -> str:
 @pytest.fixture()
 def rendered_enrich_system() -> str:
     """Render sn/generate_docs_system (static — no dynamic context needed)."""
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     return render_prompt("sn/generate_docs_system", {})
 
@@ -34,8 +34,8 @@ def rendered_enrich_system() -> str:
 @pytest.fixture()
 def rendered_review_system() -> str:
     """Render the name reviewer with the same closed grammar context."""
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.context import build_compose_context
+    from iter_codex.llm.prompt_loader import render_prompt
+    from iter_codex.standard_names.context import build_compose_context
 
     return render_prompt("sn/review_names_system", build_compose_context())
 

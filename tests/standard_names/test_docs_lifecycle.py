@@ -32,20 +32,20 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.chain_history import docs_chain_history
-from imas_codex.standard_names.defaults import (
+from iter_codex.standard_names.chain_history import docs_chain_history
+from iter_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DEFAULT_REFINE_ROTATIONS,
 )
-from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+from iter_codex.standard_names.graph_store.graph_docs_persistence import (
     claim_generate_docs_batch,
     persist_generated_docs,
     persist_refined_docs,
 )
-from imas_codex.standard_names.graph_store.graph_review_persistence import (
+from iter_codex.standard_names.graph_store.graph_review_persistence import (
     persist_reviewed_docs,
 )
-from imas_codex.standard_names.orphan_sweep import _orphan_sweep_tick
+from iter_codex.standard_names.orphan_sweep import _orphan_sweep_tick
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -63,7 +63,7 @@ _TEST_ID_PREFIX = "dlc_test__"
 def _gc():
     """Function-scoped real GraphClient; skip if Neo4j is unreachable."""
     try:
-        from imas_codex.graph.client import GraphClient
+        from iter_codex.graph.client import GraphClient
 
         client = GraphClient()
         client.get_stats()
@@ -457,8 +457,8 @@ def test_docs_escalation_at_final_attempt(
     _gc, _clean, mock_llm, _docs_resolution_authority
 ):
     """process_refine_docs_batch uses DEFAULT_ESCALATION_MODEL at docs_chain_length=2."""
-    from imas_codex.standard_names.models import RefinedDocs
-    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+    from iter_codex.standard_names.models import RefinedDocs
+    from iter_codex.standard_names.worker_tasks.worker_refine_docs import (
         process_refine_docs_batch,
     )
 
@@ -509,7 +509,7 @@ def test_docs_escalation_at_final_attempt(
     stop_event = asyncio.Event()
 
     with patch(
-        "imas_codex.llm.prompt_loader.render_prompt",
+        "iter_codex.llm.prompt_loader.render_prompt",
         side_effect=lambda name, *a, **k: (
             "You are refining documentation based on reviewer feedback."
             if "system" in name

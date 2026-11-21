@@ -68,7 +68,7 @@ _LOGS = os.path.join(_RUNS, "logs")
 INVOCATIONS = {
     "radial_separatrix_distance": {
         "dry_run": (
-            "uv run --no-sync imas-codex sn edit "
+            "uv run --no-sync iter-codex sn edit "
             "radial_separatrix_distance_at_outboard_midplane "
             "--hint '<keep the body; the appended locus sentence must be the "
             "merged single-midplane definition (max major radius)>' "
@@ -76,7 +76,7 @@ INVOCATIONS = {
             "--reason '<lead single-midplane ruling 2026-10-22>' --dry-run"
         ),
         "edit_stage": (
-            "uv run --no-sync imas-codex sn edit "
+            "uv run --no-sync iter-codex sn edit "
             "radial_separatrix_distance_at_outboard_midplane "
             "--hint '<keep the existing body unchanged: the opening sentence, "
             "the defining equation for the mapped separatrix separation, its "
@@ -98,7 +98,7 @@ INVOCATIONS = {
         ),
         "edit_run_id": "sn-edit-20261022T180859Z",
         "docs_review": (
-            "uv run --no-sync imas-codex sn run --docs-only "
+            "uv run --no-sync iter-codex sn run --docs-only "
             "--scope-run-id sn-edit-20261022T180859Z --cost-limit 0.60 "
             "--skip-global-maintenance"
         ),
@@ -107,7 +107,7 @@ INVOCATIONS = {
     },
     "radial_coordinate": {
         "dry_run": (
-            "uv run --no-sync imas-codex sn edit "
+            "uv run --no-sync iter-codex sn edit "
             "radial_coordinate_at_outboard_midplane "
             "--hint '<keep the body; add, in physics terms, that the "
             "magnetic-axis height coincides with the surface maximum-R point "
@@ -116,7 +116,7 @@ INVOCATIONS = {
             "--reason '<lead single-midplane ruling 2026-10-22>' --dry-run"
         ),
         "edit_stage": (
-            "uv run --no-sync imas-codex sn edit "
+            "uv run --no-sync iter-codex sn edit "
             "radial_coordinate_at_outboard_midplane "
             "--hint '<keep the existing body: the opening definition, the "
             "cylindrical R = sqrt(x^2+y^2) relation and the right-handed frame "
@@ -143,7 +143,7 @@ INVOCATIONS = {
         ),
         "edit_run_id": "sn-edit-20261022T180925Z",
         "docs_review": (
-            "uv run --no-sync imas-codex sn run --docs-only "
+            "uv run --no-sync iter-codex sn run --docs-only "
             "--scope-run-id sn-edit-20261022T180925Z --cost-limit 0.46 "
             "--time 8 --skip-global-maintenance"
         ),
@@ -177,7 +177,7 @@ LOCUS_DEFINITION_CHECK = {
     "names_a_second_height": False,
     "names_the_midplane_identifier": False,
     "method": (
-        "locus_definition_sentence() (imas_codex/standard_names/docs_gates.py) "
+        "locus_definition_sentence() (iter_codex/standard_names/docs_gates.py) "
         "was called for the outboard_midplane concept the writer appends, "
         "obtained through select_conventions(name).concepts; the rendered string "
         "was then searched for the terms the superseded definition used."
@@ -252,7 +252,7 @@ def _load_json(path: str):
 
 
 def locus_sentence(name: str) -> str:
-    from imas_codex.standard_names.docs_gates import locus_definition_sentence
+    from iter_codex.standard_names.docs_gates import locus_definition_sentence
     from imas_standard_names.grammar.terms import select_conventions
 
     applied = select_conventions(name)
@@ -264,7 +264,7 @@ def locus_sentence(name: str) -> str:
 
 def snapshot() -> dict:
     """Read both names' lifecycle, scores and documentation from the graph."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         rows = list(
@@ -337,7 +337,7 @@ def comments() -> dict:
 
 def _graph_comments() -> dict:
     """Docs-axis reviewer comments read live from the graph."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         rows = list(

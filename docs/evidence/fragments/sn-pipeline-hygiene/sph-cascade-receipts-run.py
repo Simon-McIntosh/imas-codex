@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at c401944d5ded206db2832bd1106f5020b33afd8d, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.review.cascade_calibration.
+# Names the tree no longer defines: iter_codex.standard_names.review.cascade_calibration.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Inventory surviving calibration inputs and their bounded graph provenance."""
@@ -12,8 +12,8 @@ import json
 import lzma
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.review import cascade_calibration as calibration
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.review import cascade_calibration as calibration
 
 ROOT = Path(__file__).resolve().parents[4]
 EVIDENCE = ROOT / "docs/evidence/fragments/sn-review-through-jev"

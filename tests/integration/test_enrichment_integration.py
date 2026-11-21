@@ -14,7 +14,7 @@ import pytest
 
 def _make_graph_client():
     """Create a GraphClient using default auto-routing resolution."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     return GraphClient()
 
@@ -38,7 +38,7 @@ class TestFetchEnrichmentLive:
     """Test fetch_dd_paths identifier schemas + version history on live data."""
 
     def _make_tool(self, client):
-        from imas_codex.tools.graph_search import GraphPathTool
+        from iter_codex.tools.graph_search import GraphPathTool
 
         return GraphPathTool(client)
 
@@ -117,7 +117,7 @@ class TestClustersListingModeLive:
     """Test search_dd_clusters IDS listing mode on live data."""
 
     def _make_tool(self, client):
-        from imas_codex.tools.graph_search import GraphClustersTool
+        from iter_codex.tools.graph_search import GraphClustersTool
 
         return GraphClustersTool(client)
 
@@ -168,7 +168,7 @@ class TestVersionContextLive:
 
     @pytest.fixture
     def version_tool(self, live_client):
-        from imas_codex.tools.version_tool import VersionTool
+        from iter_codex.tools.version_tool import VersionTool
 
         return VersionTool(live_client)
 
@@ -211,7 +211,7 @@ class TestToolsDelegationLive:
     """Test Tools class delegation of new methods on live graph."""
 
     def _make_tools(self, client):
-        from imas_codex.tools import Tools
+        from iter_codex.tools import Tools
 
         return Tools(graph_client=client)
 

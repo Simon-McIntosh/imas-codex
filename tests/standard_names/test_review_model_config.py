@@ -19,7 +19,7 @@ import pytest
 
 def _patch_sn_review(monkeypatch, review_dict: dict):
     """Install an isolated default-profile sn-review configuration."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
         if name == "sn-review":
@@ -28,7 +28,7 @@ def _patch_sn_review(monkeypatch, review_dict: dict):
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)
     settings_mod._load_pyproject_settings.cache_clear()
-    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
+    monkeypatch.delenv("ITER_CODEX_SN_REVIEW_PROFILE", raising=False)
 
 
 # ---------------------------------------------------------------------------
@@ -38,7 +38,7 @@ def _patch_sn_review(monkeypatch, review_dict: dict):
 
 def test_names_models_list_length_1_disabled_quorum(monkeypatch):
     """1 model → quorum disabled, returns list of len 1."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(
         monkeypatch, {"names": {"models": ["openrouter/anthropic/claude-opus-4.6"]}}
@@ -50,7 +50,7 @@ def test_names_models_list_length_1_disabled_quorum(monkeypatch):
 
 def test_names_models_list_length_2_no_escalator(monkeypatch):
     """2 models → blind pair with no escalator, returns list of len 2."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(
         monkeypatch,
@@ -69,7 +69,7 @@ def test_names_models_list_length_2_no_escalator(monkeypatch):
 
 def test_names_models_list_length_3_full_quorum(monkeypatch):
     """3 models → full RD-quorum, returns list of len 3."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(
         monkeypatch,
@@ -89,7 +89,7 @@ def test_names_models_list_length_3_full_quorum(monkeypatch):
 
 def test_names_models_rejects_empty_list(monkeypatch):
     """0 models → ValueError."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(monkeypatch, {"names": {"models": []}})
     with pytest.raises(ValueError, match="at least 1 entry"):
@@ -98,7 +98,7 @@ def test_names_models_rejects_empty_list(monkeypatch):
 
 def test_names_models_rejects_over_three(monkeypatch):
     """4+ models → ValueError."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(
         monkeypatch,
@@ -115,7 +115,7 @@ def test_names_models_rejects_over_three(monkeypatch):
 
 def test_docs_models_independent_from_names(monkeypatch):
     """names and docs axes use separate model lists — no cross-contamination."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(
         monkeypatch,
@@ -148,7 +148,7 @@ def test_docs_models_independent_from_names(monkeypatch):
 
 def test_max_cycles_default_three(monkeypatch):
     """No max-cycles config → default is 3."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(monkeypatch, {})
     assert settings_mod.get_sn_review_max_cycles() == 3
@@ -156,7 +156,7 @@ def test_max_cycles_default_three(monkeypatch):
 
 def test_max_cycles_override(monkeypatch):
     """max-cycles in config is respected."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(monkeypatch, {"max-cycles": 2})
     assert settings_mod.get_sn_review_max_cycles() == 2
@@ -164,7 +164,7 @@ def test_max_cycles_override(monkeypatch):
 
 def test_disagreement_threshold_default(monkeypatch):
     """No config → default threshold is 0.15."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(monkeypatch, {})
     assert settings_mod.get_sn_review_disagreement_threshold() == pytest.approx(0.15)
@@ -172,7 +172,7 @@ def test_disagreement_threshold_default(monkeypatch):
 
 def test_disagreement_threshold_override(monkeypatch):
     """disagreement-threshold in config is respected."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(monkeypatch, {"disagreement-threshold": 0.25})
     assert settings_mod.get_sn_review_disagreement_threshold() == pytest.approx(0.25)
@@ -185,7 +185,7 @@ def test_disagreement_threshold_override(monkeypatch):
 
 def test_names_models_rejects_empty_string_entry(monkeypatch):
     """Whitespace-only string entries in models list → ValueError on validation."""
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     # Whitespace-only strings pass the `if m` filter but fail the strip check
     _patch_sn_review(monkeypatch, {"names": {"models": ["  "]}})
@@ -202,7 +202,7 @@ def test_names_models_warns_on_missing_openrouter_prefix(monkeypatch, caplog):
     """A model without 'openrouter/' prefix logs a warning but does not raise."""
     import logging
 
-    from imas_codex import settings as settings_mod
+    from iter_codex import settings as settings_mod
 
     _patch_sn_review(monkeypatch, {"names": {"models": ["anthropic/claude-opus-4.6"]}})
     with caplog.at_level(logging.WARNING):

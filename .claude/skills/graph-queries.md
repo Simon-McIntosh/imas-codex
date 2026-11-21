@@ -1,6 +1,6 @@
 # Graph Query Patterns
 
-Common Cypher patterns for the imas-codex Neo4j knowledge graph.
+Common Cypher patterns for the iter-codex Neo4j knowledge graph.
 
 ## Node Counts
 ```cypher

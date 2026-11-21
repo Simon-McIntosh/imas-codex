@@ -6,7 +6,7 @@ import textwrap
 
 import pytest
 
-from imas_codex.standard_names.sources_manifest import (
+from iter_codex.standard_names.sources_manifest import (
     SourcesManifestError,
     expand_focus_tokens,
     is_sources_file,

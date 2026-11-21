@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
     graph_lineage as _owning_graph_lineage,
 )
@@ -15,7 +15,7 @@ class TestGetSourceNameMapping:
 
     def test_returns_mapping(self, monkeypatch):
         """Verify mapping structure from graph query."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         mock_results = [
             {
@@ -59,7 +59,7 @@ class TestGetSourceNameMapping:
 
     def test_prefers_accepted_over_drafted(self, monkeypatch):
         """When a source has multiple names, prefer the accepted one."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         mock_results = [
             {
@@ -97,7 +97,7 @@ class TestGetSourceNameMapping:
 
     def test_empty_graph(self, monkeypatch):
         """Empty graph returns empty mapping."""
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         class MockGC:
             def query(self, *args, **kwargs):
@@ -118,7 +118,7 @@ class TestComposePromptPreviousName:
 
     def test_renders_previous_name(self):
         """Previous name section appears in rendered prompt."""
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         context = {
             "items": [
@@ -144,7 +144,7 @@ class TestComposePromptPreviousName:
 
     def test_accepted_warning(self):
         """Accepted names get a warning in the prompt."""
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         context = {
             "items": [
@@ -170,7 +170,7 @@ class TestComposePromptPreviousName:
 
     def test_no_previous_name(self):
         """Without previous_name, section is absent."""
-        from imas_codex.llm.prompt_loader import render_prompt
+        from iter_codex.llm.prompt_loader import render_prompt
 
         context = {
             "items": [

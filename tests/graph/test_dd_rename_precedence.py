@@ -11,7 +11,7 @@ wrong node.
 
 from __future__ import annotations
 
-from imas_codex.graph.build_dd import collect_renamed_to_mappings
+from iter_codex.graph.build_dd import collect_renamed_to_mappings
 
 
 def test_stale_packaged_entry_does_not_shadow_the_dd_annotation():

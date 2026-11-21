@@ -1,6 +1,6 @@
 # Container Setup
 
-This document describes how to build, run, and deploy the IMAS Codex containers.
+This document describes how to build, run, and deploy the ITER Codex containers.
 
 ## Neo4j Knowledge Graph
 
@@ -28,7 +28,7 @@ Apptainer (formerly Singularity) is ideal for environments where Docker isn't av
 ./scripts/setup_neo4j_apptainer.sh --system
 
 # Start the service
-sudo systemctl start imas-codex-neo4j.service
+sudo systemctl start iter-codex-neo4j.service
 
 # Verify it's running
 curl -s http://localhost:7474
@@ -39,31 +39,31 @@ curl -s http://localhost:7474
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `NEO4J_VERSION` | `2026.01.4-community` | Neo4j Docker image tag |
-| `NEO4J_PASSWORD` | `imas-codex` | Neo4j password |
-| `NEO4J_DATA_DIR` | `~/.local/share/imas-codex/neo4j` | Data directory |
+| `NEO4J_PASSWORD` | `iter-codex` | Neo4j password |
+| `NEO4J_DATA_DIR` | `~/.local/share/iter-codex/neo4j` | Data directory |
 | `NEO4J_SIF_DIR` | `~/apptainer` | Container image location |
 
 **Service management:**
 
 ```bash
 # Check status
-sudo systemctl status imas-codex-neo4j.service
+sudo systemctl status iter-codex-neo4j.service
 
 # Stop/Start/Restart
-sudo systemctl stop imas-codex-neo4j.service
-sudo systemctl start imas-codex-neo4j.service
-sudo systemctl restart imas-codex-neo4j.service
+sudo systemctl stop iter-codex-neo4j.service
+sudo systemctl start iter-codex-neo4j.service
+sudo systemctl restart iter-codex-neo4j.service
 
 # View logs
-cat ~/.local/share/imas-codex/neo4j/logs/neo4j.log | tail -50
+cat ~/.local/share/iter-codex/neo4j/logs/neo4j.log | tail -50
 
 # Browser UI: http://localhost:7474
-# Credentials: neo4j / imas-codex
+# Credentials: neo4j / iter-codex
 ```
 
 ---
 
-## IMAS Codex Server
+## ITER Codex Server
 
 ## Quick Start
 
@@ -74,7 +74,7 @@ cat ~/.local/share/imas-codex/neo4j/logs/neo4j.log | tail -50
 docker-compose up -d
 
 # View logs
-docker-compose logs -f imas-codex
+docker-compose logs -f iter-codex
 
 # Stop the container
 docker-compose down
@@ -84,14 +84,14 @@ docker-compose down
 
 ```bash
 # Build the image
-docker build -t imas-codex .
+docker build -t iter-codex .
 
 # Run the container
 docker run -d \
-  --name imas-codex \
+  --name iter-codex \
   -p 8000:8000 \
   -v ./index:/app/index:ro \
-  imas-codex
+  iter-codex
 ```
 
 ## GitHub Container Registry
@@ -102,16 +102,16 @@ The container is automatically built and pushed to GitHub Container Registry on 
 
 ```bash
 # Pull the latest image
-docker pull ghcr.io/iterorganization/imas-codex:latest
+docker pull ghcr.io/iterorganization/iter-codex:latest
 
 # Pull a specific version
-docker pull ghcr.io/iterorganization/imas-codex:v1.0.0
+docker pull ghcr.io/iterorganization/iter-codex:v1.0.0
 
 # Run the pulled image
 docker run -d \
-  --name imas-codex \
+  --name iter-codex \
   -p 8000:8000 \
-  ghcr.io/iterorganization/imas-codex:latest
+  ghcr.io/iterorganization/iter-codex:latest
 ```
 
 ## Available Tags
@@ -149,7 +149,7 @@ curl -f http://localhost:8000/health
 # Example health response
 {
   "status": "healthy",
-  "service": "imas-codex-server",
+  "service": "iter-codex-server",
   "version": "4.0.1.dev164",
   "index_stats": {
     "total_paths": 15420,
@@ -189,7 +189,7 @@ healthcheck:
 docker-compose --profile production up -d
 ```
 
-This will start both the IMAS Codex Server and an Nginx reverse proxy.
+This will start both the ITER Codex Server and an Nginx reverse proxy.
 
 ### Kubernetes Deployment
 
@@ -197,20 +197,20 @@ This will start both the IMAS Codex Server and an Nginx reverse proxy.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: imas-codex
+  name: iter-codex
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: imas-codex
+      app: iter-codex
   template:
     metadata:
       labels:
-        app: imas-codex
+        app: iter-codex
     spec:
       containers:
-        - name: imas-codex
-          image: ghcr.io/iterorganization/imas-codex:latest
+        - name: iter-codex
+          image: ghcr.io/iterorganization/iter-codex:latest
           ports:
             - containerPort: 8000
           env:
@@ -240,10 +240,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: imas-codex-service
+  name: iter-codex-service
 spec:
   selector:
-    app: imas-codex
+    app: iter-codex
   ports:
     - protocol: TCP
       port: 80
@@ -257,14 +257,14 @@ spec:
 
 ```bash
 # Build the image
-docker build -t imas-codex:dev .
+docker build -t iter-codex:dev .
 
 # Run with development settings
 docker run -it --rm \
   -p 8000:8000 \
   -v $(pwd):/app \
   -e PYTHONPATH=/app \
-  imas-codex:dev
+  iter-codex:dev
 ```
 
 ### Debugging
@@ -274,11 +274,11 @@ docker run -it --rm \
 docker run -it --rm \
   -p 8000:8000 \
   -v $(pwd):/app \
-  ghcr.io/iterorganization/imas-codex:latest \
+  ghcr.io/iterorganization/iter-codex:latest \
   /bin/bash
 
 # View logs
-docker logs -f imas-codex
+docker logs -f iter-codex
 ```
 
 ## Troubleshooting
@@ -289,7 +289,7 @@ docker logs -f imas-codex
 
    - Check that port 8000 is available
    - Verify index files are properly mounted
-   - Check logs: `docker-compose logs imas-codex`
+   - Check logs: `docker-compose logs iter-codex`
 
 2. **Index files not found**
 
@@ -306,11 +306,11 @@ docker logs -f imas-codex
 ```bash
 # Run with increased memory
 docker run -d \
-  --name imas-codex \
+  --name iter-codex \
   --memory=2g \
   --cpus=2 \
   -p 8000:8000 \
-  ghcr.io/iterorganization/imas-codex:latest
+  ghcr.io/iterorganization/iter-codex:latest
 ```
 
 ## CI/CD Pipeline
@@ -350,15 +350,15 @@ The following repository secrets are used by the CI workflows:
 ```bash
 # Build with graph from GHCR
 export GHCR_TOKEN=$(gh auth token)
-docker build --secret id=GHCR_TOKEN,env=GHCR_TOKEN -t imas-codex .
+docker build --secret id=GHCR_TOKEN,env=GHCR_TOKEN -t iter-codex .
 
 # Build with a specific graph package (e.g., TCV facility)
 docker build --secret id=GHCR_TOKEN,env=GHCR_TOKEN \
-  --build-arg GRAPH_PACKAGE=imas-codex-graph-tcv -t imas-codex .
+  --build-arg GRAPH_PACKAGE=iter-codex-graph-tcv -t iter-codex .
 
 # Build with minimal IDS for faster iteration
 docker build --secret id=GHCR_TOKEN,env=GHCR_TOKEN \
-  --build-arg IDS_FILTER="equilibrium" -t imas-codex:test .
+  --build-arg IDS_FILTER="equilibrium" -t iter-codex:test .
 ```
 
 ## Security

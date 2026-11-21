@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn
+from iter_codex.cli.sn import sn
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -55,7 +55,7 @@ def _mock_gc_tx():
 def _patch_graph_ops_gc(mock_gc):
     """Patch GraphClient as used inside graph_ops module."""
     return patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -96,10 +96,10 @@ def _invoke_focus(*focus_args: str, extra_args: list[str] | None = None):
     cmd_args = ["run", "--skip-clear-gate"] + list(focus_args) + (extra_args or [])
 
     with (
-        patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd),
-        patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
+        patch("iter_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd),
+        patch("iter_codex.graph.client.GraphClient", return_value=gc_mock),
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+            "iter_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
             side_effect=_fake_merge,
         ),
     ):
@@ -158,7 +158,7 @@ class TestFocusFlagCliValidation:
         def _fake_loop_cmd(**kwargs):
             captured.update(kwargs)
 
-        with patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd):
+        with patch("iter_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd):
             result = runner.invoke(
                 sn,
                 ["run", "--skip-clear-gate", "--dry-run"],
@@ -184,7 +184,7 @@ class TestScopeRunIdFiltersClaims:
 
     def test_scope_run_id_adds_where_clause(self):
         """When scope_run_id is set, the seed Cypher contains run_id filter."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             _claim_sn_atomic,
         )
 
@@ -230,7 +230,7 @@ class TestScopeRunIdFiltersClaims:
 
     def test_no_scope_run_id_no_where_clause(self):
         """When scope_run_id is None, the seed Cypher has no run_id filter."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             _claim_sn_atomic,
         )
 
@@ -271,7 +271,7 @@ class TestScopeRunIdFiltersClaims:
 
     def test_scope_run_id_propagates_to_expand_branches(self):
         """scope_run_id filter appears in the expand Cypher when cluster is set."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             _claim_sn_atomic,
         )
 
@@ -323,7 +323,7 @@ class TestScopeRunIdFiltersClaims:
 
     def test_exact_docs_review_claim_forwards_scope_to_seed_and_expansion(self):
         """An admitted docs row cannot expand into an unrelated drafted row."""
-        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        from iter_codex.standard_names.graph_store.graph_review_persistence import (
             claim_review_docs_batch,
         )
 
@@ -342,11 +342,11 @@ class TestScopeRunIdFiltersClaims:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
+                "iter_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
                 side_effect=_claim,
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_claim_release._verify_docs_claim_winners",
+                "iter_codex.standard_names.graph_store.graph_claim_release._verify_docs_claim_winners",
                 side_effect=lambda items, **_kwargs: items,
             ),
         ):
@@ -370,7 +370,7 @@ class TestScopeRunIdFiltersGenerateNameClaims:
 
     def test_scope_run_id_adds_sns_where_clause(self):
         """When scope_run_id is set, seed Cypher includes sns.run_id filter."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_generate_name_batch,
         )
 
@@ -393,7 +393,7 @@ class TestScopeRunIdFiltersGenerateNameClaims:
 
     def test_no_scope_run_id_no_sns_where_clause(self):
         """When scope_run_id is None, no sns.run_id filter in seed Cypher."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_generate_name_batch,
         )
 
@@ -427,11 +427,11 @@ class TestFocusRoutingSeedsAndStamps:
         )
 
         with (
-            patch("imas_codex.cli.sn._run_sn_cmd"),
-            patch("imas_codex.cli.sn._auto_sync_grammar"),
-            patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
+            patch("iter_codex.cli.sn._run_sn_cmd"),
+            patch("iter_codex.cli.sn._auto_sync_grammar"),
+            patch("iter_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+                "iter_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
                 return_value=1,
             ),
         ):
@@ -467,11 +467,11 @@ class TestFocusRoutingSeedsAndStamps:
             return len(sources)
 
         with (
-            patch("imas_codex.cli.sn._run_sn_cmd"),
-            patch("imas_codex.cli.sn._auto_sync_grammar"),
-            patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
+            patch("iter_codex.cli.sn._run_sn_cmd"),
+            patch("iter_codex.cli.sn._auto_sync_grammar"),
+            patch("iter_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+                "iter_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
                 side_effect=_fake_merge,
             ),
         ):
@@ -509,12 +509,12 @@ class TestFocusRoutingSeedsAndStamps:
 
         with (
             patch(
-                "imas_codex.cli.sn._run_sn_cmd",
+                "iter_codex.cli.sn._run_sn_cmd",
                 side_effect=lambda **kw: captured_loop.update(kw),
             ),
-            patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
+            patch("iter_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+                "iter_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
                 return_value=1,
             ),
         ):
@@ -593,7 +593,7 @@ class TestBackwardCompatNoFocus:
         def _fake_loop_cmd(**kwargs):
             captured.update(kwargs)
 
-        with patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd):
+        with patch("iter_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd):
             result = runner.invoke(
                 sn,
                 ["run", "--skip-clear-gate", "--dry-run"],
@@ -609,7 +609,7 @@ class TestBackwardCompatNoFocus:
 
     def test_claim_sn_atomic_no_scope_default(self):
         """_claim_sn_atomic defaults to scope_run_id=None — no run_id filter."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             _claim_sn_atomic,
         )
 
@@ -630,7 +630,7 @@ class TestBackwardCompatNoFocus:
 
     def test_claim_generate_name_batch_no_scope_default(self):
         """claim_generate_name_batch defaults to scope_run_id=None — no SNS filter."""
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_generate_name_batch,
         )
 

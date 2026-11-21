@@ -196,7 +196,7 @@ def _jsonable(value: Any) -> Any:
 
 def export_gate() -> dict[str, Any]:
     """Run the export gate and read its blocking set and sourceless drafts."""
-    from imas_codex.standard_names.export import run_export
+    from iter_codex.standard_names.export import run_export
 
     with tempfile.TemporaryDirectory(prefix="sib-flush-gate-") as staging:
         report = run_export(Path(staging), gate_only=True)
@@ -213,8 +213,8 @@ def export_gate() -> dict[str, Any]:
 
 
 def measure(zero_spend: bool) -> dict[str, Any]:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 
     census = load_census()
     with GraphClient() as gc:

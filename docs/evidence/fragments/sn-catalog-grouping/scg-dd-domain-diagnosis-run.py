@@ -9,13 +9,13 @@ import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.dd_domain_classifier import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.dd_domain_classifier import (
     classify_tier1_llm,
     gather_classification_context,
 )
-from imas_codex.settings import get_model
-from imas_codex.standard_names.domain_ranking import select_primary_domain
+from iter_codex.settings import get_model
+from iter_codex.standard_names.domain_ranking import select_primary_domain
 
 HERE = Path(__file__).resolve().parent
 LABELS = HERE / "scg-domain-label-sheet.json"

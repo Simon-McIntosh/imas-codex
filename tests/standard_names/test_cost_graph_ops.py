@@ -20,7 +20,7 @@ import pytest
 def _mock_gc_ctx():
     """Return a (patcher, mock_gc) that patches GraphClient as context manager."""
     patcher = patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     )
     MockGC = patcher.start()
     mock_gc = MagicMock()
@@ -42,7 +42,7 @@ class TestCreateSNRunOpen:
     def test_creates_with_started_status(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 create_sn_run_open,
             )
 
@@ -78,7 +78,7 @@ class TestFinalizeSNRun:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = [{"id": _RUN_ID}]
         try:
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 finalize_sn_run,
             )
 
@@ -116,7 +116,7 @@ class TestFinalizeSNRun:
         try:
             import logging
 
-            from imas_codex.standard_names.graph_store.graph_audits import (
+            from iter_codex.standard_names.graph_store.graph_audits import (
                 finalize_sn_run,
             )
 
@@ -142,7 +142,7 @@ class TestRecordLLMCost:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 record_llm_cost,
             )
 
@@ -178,7 +178,7 @@ class TestRecordLLMCost:
         # First call succeeds, second raises ConstraintError
         mock_gc.query.side_effect = [[], ConstraintError("duplicate")]
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 record_llm_cost,
             )
 
@@ -211,7 +211,7 @@ class TestRecordLLMCost:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.side_effect = RuntimeError("boom")
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 record_llm_cost,
             )
 
@@ -233,7 +233,7 @@ class TestRecordLLMCost:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 record_llm_cost,
             )
 
@@ -259,7 +259,7 @@ class TestRecordLLMCost:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 record_llm_cost,
             )
 
@@ -290,7 +290,7 @@ class TestAggregateSpendForRun:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = [{"total": 1.5}]
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 aggregate_spend_for_run,
             )
 
@@ -307,7 +307,7 @@ class TestAggregateSpendForRun:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = [{"total": 0.0}]
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 aggregate_spend_for_run,
             )
 
@@ -329,7 +329,7 @@ class TestAggregateSpendPerPhase:
             {"phase": "generate", "total": 1.23},
         ]
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 aggregate_spend_per_phase,
             )
 
@@ -399,7 +399,7 @@ def _module_services(graph) -> MagicMock:
 class TestAggregateCallsPerPhase:
     def test_counts_by_phase_for_the_named_run(self):
         graph = _SeededCostRows(_SEEDED_COST_ROWS)
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             aggregate_calls_per_phase,
         )
 
@@ -411,7 +411,7 @@ class TestAggregateCallsPerPhase:
 
     def test_binds_the_run_id_it_counts(self):
         graph = _SeededCostRows(_SEEDED_COST_ROWS)
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             aggregate_calls_per_phase,
         )
 
@@ -425,7 +425,7 @@ class TestAggregateCallsPerPhase:
 
     def test_run_without_rows_returns_empty_mapping(self):
         graph = _SeededCostRows([row for row in _SEEDED_COST_ROWS if row[0] != _RUN_ID])
-        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
             aggregate_calls_per_phase,
         )
 
@@ -440,7 +440,7 @@ class TestAggregateCallsPerPhaseForwarder:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.side_effect = graph.query
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 aggregate_calls_per_phase,
             )
 
@@ -457,7 +457,7 @@ class TestAggregateCallsPerPhaseForwarder:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.side_effect = graph.query
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 aggregate_calls_per_phase,
             )
 
@@ -480,7 +480,7 @@ class TestAggregateSpendPerName:
             {"sn_id": "b", "apportioned": 0.50},
         ]
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 aggregate_spend_per_name,
             )
 
@@ -499,7 +499,7 @@ class TestAggregateSpendPerName:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 aggregate_spend_per_name,
             )
 
@@ -545,7 +545,7 @@ class TestUpdateSNPerPhaseCosts:
             [{"id": "plasma_current"}],
         ]
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 update_sn_per_phase_costs,
             )
 
@@ -581,7 +581,7 @@ class TestUpdateSNPerPhaseCosts:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
-            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            from iter_codex.standard_names.graph_store.graph_cost_and_claims import (
                 update_sn_per_phase_costs,
             )
 

@@ -1,14 +1,14 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at 617c05def8d455eeff9d97920cfa6ca879bae5e8, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.workers._collect_nearby_name_comparators, imas_codex.standard_names.workers._rerank_comparators_for_compose.
+# Names the tree no longer defines: iter_codex.standard_names.workers._collect_nearby_name_comparators, iter_codex.standard_names.workers._rerank_comparators_for_compose.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Held-out batch acceptance of the comparator rerank, off (arm A) vs on (arm B).
 
 The measure composes and reviews a held-out batch twice through the harness with
 ``BenchmarkConfig.comparator_block`` on: arm A leaves the compose rerank switch
-(``IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS``) unset so the nearby-name
+(``ITER_CODEX_SN_COMPOSE_RERANK_COMPARATORS``) unset so the nearby-name
 comparator block reaches the prompt in embedding order, arm B sets it so the
 block is reranked. Compose and review run on the locally served seat in both
 arms, so only arm B's rerank spends.
@@ -21,14 +21,14 @@ unit and never recomposes a recorded one.
 
 First-pass review acceptance is the share of *scored* composed names the
 reviewer scores at or above the repository's acceptance threshold
-(``DEFAULT_MIN_SCORE`` = 0.85, ``imas_codex/standard_names/defaults.py``). A
+(``DEFAULT_MIN_SCORE`` = 0.85, ``iter_codex/standard_names/defaults.py``). A
 candidate the reviewer returned no score for is recorded with ``scored`` false
 and counted separately; it is not a rejection and is excluded from the rate. The
 positive control renders the harness compose prompt under both switch settings
 and requires at least one batch to hash differently between arms; if none does,
 the two arms are the same run and the driver stops. Acceptance rates, the paired
 difference over the sources present in both arms and the bootstrap interval
-(``imas_codex.discovery.base.evaluation.bootstrap_interval``) are written to the
+(``iter_codex.discovery.base.evaluation.bootstrap_interval``) are written to the
 results JSON. Read-only elsewhere: the harness composes and scores without
 writing the graph.
 
@@ -54,7 +54,7 @@ from typing import Any
 SEED = 20261015
 #: Sources drawn so the harness admits about 120 of them (measured: 160 -> 120).
 N_ITEMS = 160
-SWITCH_ENV = "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS"
+SWITCH_ENV = "ITER_CODEX_SN_COMPOSE_RERANK_COMPARATORS"
 COMPOSE_SEAT = "local/deepseek-v4.1-flash"
 REVIEWER_SEAT = "local/deepseek-v4.1-flash"
 LABEL_SHEET = Path(__file__).resolve().parent / "ssog-rerank-label-sheet.json"
@@ -160,7 +160,7 @@ def previous_draw_paths() -> list[str]:
 def render_harness_messages(
     batch: dict[str, Any], context: dict, nearby: list | None
 ) -> list[dict]:
-    from imas_codex.llm.prompt_loader import render_prompt
+    from iter_codex.llm.prompt_loader import render_prompt
 
     items = batch.get("items", [])
     existing = set(batch.get("existing_names", []))
@@ -184,8 +184,8 @@ def render_harness_messages(
 
 async def positive_control_batch(batch: dict, context: dict) -> dict[str, Any]:
     """Render one batch's harness prompt off and on; report whether hashes differ."""
-    from imas_codex.standard_names.benchmark import _rendered_messages_hash
-    from imas_codex.standard_names.workers import (
+    from iter_codex.standard_names.benchmark import _rendered_messages_hash
+    from iter_codex.standard_names.workers import (
         _collect_nearby_name_comparators,
         _rerank_comparators_for_compose,
     )
@@ -244,7 +244,7 @@ async def run_arm_batch(
     batch: dict, source_paths: list[str], switch: str | None, out_path: Path
 ) -> list[dict[str, Any]]:
     """Compose and review one batch through the harness under one switch setting."""
-    from imas_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
+    from iter_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
 
     _set_switch(switch)
     config = BenchmarkConfig(
@@ -274,7 +274,7 @@ def _acceptance_rows(report: Any) -> dict[str, Any]:
     candidate the reviewer returned no score for carries ``scored`` false and is
     excluded from the rate: it is a reviewer omission, not a rejection.
     """
-    from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+    from iter_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 
     records: list[dict[str, Any]] = []
     cost = 0.0
@@ -349,7 +349,7 @@ def acceptance_interval(
     population carrying a single label class has no defined AUC and is reported
     as ``None`` rather than raising.
     """
-    from imas_codex.discovery.base.evaluation import bootstrap_interval
+    from iter_codex.discovery.base.evaluation import bootstrap_interval
 
     labels = [1.0 if a or b else 0.0 for a, b in zip(accept_a, accept_b, strict=True)]
     interval = bootstrap_interval(
@@ -492,8 +492,8 @@ async def drain_arm(
 
 
 async def _amain(args: argparse.Namespace) -> int:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.context import build_compose_context
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.context import build_compose_context
 
     out = Path(args.out)
     context = build_compose_context()
@@ -529,7 +529,7 @@ async def _amain(args: argparse.Namespace) -> int:
         return 0
 
     # 2. Extract once; both arms and the control share the same batches.
-    from imas_codex.standard_names.benchmark import BenchmarkConfig, _extract_candidates
+    from iter_codex.standard_names.benchmark import BenchmarkConfig, _extract_candidates
 
     extract_cfg = BenchmarkConfig(
         models=[COMPOSE_SEAT],

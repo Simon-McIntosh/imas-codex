@@ -1,6 +1,6 @@
 """The decisions-key skips in the pool rerank and the candidate stage.
 
-With ``OPENROUTER_API_KEY_IMAS_CODEX`` unset no Jev decisions transport is
+With ``OPENROUTER_API_KEY_ITER_CODEX`` unset no Jev decisions transport is
 built for either the generic pool rerank or the candidate stage's routing and
 judgment. ``rerank_pool`` returns the embedding order, a note naming the missing
 variable and a zero cost; the candidate stage logs one warning for the stage and
@@ -15,8 +15,8 @@ import logging
 
 import pytest
 
-from imas_codex.discovery.base import judgment
-from imas_codex.ids import candidates as cand
+from iter_codex.discovery.base import judgment
+from iter_codex.ids import candidates as cand
 
 MODEL = "typesafe/jev-1.13"
 SERVICE = "facility-discovery"
@@ -39,7 +39,7 @@ QUESTIONS = {
 @pytest.fixture(autouse=True)
 def _no_decisions_key(monkeypatch):
     """Remove the decisions key and start each test with a fresh warning latch."""
-    monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEY_ITER_CODEX", raising=False)
     monkeypatch.setattr(cand, "_key_absence_warned", False)
 
 
@@ -91,7 +91,7 @@ async def test_rerank_pool_skips_without_the_decisions_key(monkeypatch):
 
     assert [candidate["path"] for candidate in ordered] == ["f0", "f1", "f2"]
     assert calls == []
-    assert note is not None and "OPENROUTER_API_KEY_IMAS_CODEX" in note
+    assert note is not None and "OPENROUTER_API_KEY_ITER_CODEX" in note
     assert cost == 0.0
 
 
@@ -118,6 +118,6 @@ def test_candidate_stage_leaves_every_source_unjudged(monkeypatch, caplog):
     warnings = [
         record
         for record in caplog.records
-        if "OPENROUTER_API_KEY_IMAS_CODEX" in record.getMessage()
+        if "OPENROUTER_API_KEY_ITER_CODEX" in record.getMessage()
     ]
     assert len(warnings) == 1

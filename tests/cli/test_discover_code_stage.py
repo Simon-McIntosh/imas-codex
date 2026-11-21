@@ -10,17 +10,17 @@ from types import SimpleNamespace
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.discover import discover
-from imas_codex.cli.discover.code import CodeStageOptions, run_code_stage
+from iter_codex.cli.discover import discover
+from iter_codex.cli.discover.code import CodeStageOptions, run_code_stage
 
-_CODE_MODULE = importlib.import_module("imas_codex.cli.discover.code")
+_CODE_MODULE = importlib.import_module("iter_codex.cli.discover.code")
 FACILITY = "tcv"
 
 
 @pytest.fixture(autouse=True)
 def bare_discover_stage(monkeypatch, tmp_path):
-    from imas_codex.cli import logging as cli_logging
-    from imas_codex.cli.discover import sequence
+    from iter_codex.cli import logging as cli_logging
+    from iter_codex.cli.discover import sequence
 
     monkeypatch.setattr(
         sequence,
@@ -31,7 +31,7 @@ def bare_discover_stage(monkeypatch, tmp_path):
     )
     monkeypatch.setattr(sequence, "_remaining_count", lambda *args: None)
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: {}
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: {}
     )
     monkeypatch.setattr(cli_logging, "configure_cli_logging", lambda *a, **k: None)
     monkeypatch.setattr(
@@ -43,26 +43,26 @@ def bare_discover_stage(monkeypatch, tmp_path):
 def stage_env(monkeypatch):
     calls = []
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility",
+        "iter_codex.discovery.base.facility.get_facility",
         lambda name: {"ssh_host": "facility.example.org"},
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.ensure_remote_environment", lambda _: None
+        "iter_codex.cli.discover.common.ensure_remote_environment", lambda _: None
     )
-    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("iter_codex.cli.discover.common.use_rich_output", lambda: False)
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.setup_logging", lambda *a, **k: None
+        "iter_codex.cli.discover.common.setup_logging", lambda *a, **k: None
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.make_log_print",
+        "iter_codex.cli.discover.common.make_log_print",
         lambda *a, **k: lambda *args: None,
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.DiscoveryConfig",
+        "iter_codex.cli.discover.common.DiscoveryConfig",
         lambda **kwargs: SimpleNamespace(**kwargs),
     )
-    monkeypatch.setattr("imas_codex.settings.get_path_scan_threshold", lambda: 0.37)
-    monkeypatch.setattr("imas_codex.settings.get_discovery_threshold", lambda: 0.9)
+    monkeypatch.setattr("iter_codex.settings.get_path_scan_threshold", lambda: 0.37)
+    monkeypatch.setattr("iter_codex.settings.get_discovery_threshold", lambda: 0.9)
 
     async def fake_engine(**kwargs):
         calls.append(kwargs)
@@ -72,11 +72,11 @@ def stage_env(monkeypatch):
         return asyncio.run(async_main(asyncio.Event(), None))
 
     monkeypatch.setattr(
-        "imas_codex.discovery.code.parallel.run_parallel_code_discovery",
+        "iter_codex.discovery.code.parallel.run_parallel_code_discovery",
         fake_engine,
     )
     monkeypatch.setattr(
-        "imas_codex.cli.discover.common.run_discovery", fake_run_discovery
+        "iter_codex.cli.discover.common.run_discovery", fake_run_discovery
     )
     return calls
 

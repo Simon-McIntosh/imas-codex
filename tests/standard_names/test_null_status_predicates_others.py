@@ -13,9 +13,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.discovery.code import workers
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import attachment_audit
+from iter_codex.discovery.code import workers
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names import attachment_audit
 
 pytestmark = pytest.mark.graph
 
@@ -42,7 +42,7 @@ def test_migration_moves_a_status_less_source_with_its_cohort(
     client: GraphClient,
 ) -> None:
     """A source with no status is not a stale tombstone; it migrates."""
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         retarget_standard_name_sources,
     )
 
@@ -85,7 +85,7 @@ def test_reset_refuses_a_source_whose_status_the_manifest_cannot_name(
     client: GraphClient,
 ) -> None:
     """The manifest declares the status it expects, so null is excluded loudly."""
-    from imas_codex.standard_names.provenance_lifecycle import (
+    from iter_codex.standard_names.provenance_lifecycle import (
         reset_standard_name_sources,
     )
 
@@ -127,7 +127,7 @@ def test_structural_candidate_reads_a_status_less_source_as_not_stale(
     client: GraphClient,
 ) -> None:
     """A structural source with no status is no tombstone, so it is reseedable."""
-    from imas_codex.standard_names.graph_store import graph_parent_lifecycle
+    from iter_codex.standard_names.graph_store import graph_parent_lifecycle
 
     parent = "null_status_structural_parent"
     client.query(
@@ -157,7 +157,7 @@ def test_seeding_rebinds_a_status_less_structural_source(
     client: GraphClient,
 ) -> None:
     """Seeding is withheld only by a proven stale tombstone."""
-    from imas_codex.standard_names.graph_store import graph_parent_lifecycle
+    from iter_codex.standard_names.graph_store import graph_parent_lifecycle
 
     parent = "null_status_seed_parent"
     client.query(
@@ -194,7 +194,7 @@ def test_seeding_rebinds_a_status_less_structural_source(
 
 def test_compose_hint_refuses_a_source_with_no_status(client: GraphClient) -> None:
     """Only a source proven to sit at extracted may take a compose steer."""
-    from imas_codex.standard_names.graph_store import graph_source_bindings
+    from iter_codex.standard_names.graph_store import graph_source_bindings
 
     client.query(
         """
@@ -245,7 +245,7 @@ def test_attachment_audit_counts_a_status_less_producer_as_live(
 
 def test_dismissal_accepts_a_hold_with_no_status(client: GraphClient) -> None:
     """A hold with no status has not been dismissed, so it can be dismissed."""
-    from imas_codex.standard_names.review import holds
+    from iter_codex.standard_names.review import holds
 
     client.query(
         """

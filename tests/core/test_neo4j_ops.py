@@ -1,4 +1,4 @@
-"""Unit tests for imas_codex.graph.neo4j_ops module.
+"""Unit tests for iter_codex.graph.neo4j_ops module.
 
 Tests for Neo4j operation infrastructure extracted from graph_cli.py.
 All subprocess calls and filesystem access are mocked.
@@ -12,7 +12,7 @@ from types import SimpleNamespace
 import click
 import pytest
 
-from imas_codex.graph.neo4j_ops import (
+from iter_codex.graph.neo4j_ops import (
     RECOVERY_DIR,
     backup_graph_dump,
     check_stale_neo4j_process,
@@ -81,7 +81,7 @@ class TestWriteDataPresenceMarker:
 
         # Point RECOVERY_DIR to temp
         monkeypatch.setattr(
-            "imas_codex.graph.neo4j_ops.RECOVERY_DIR",
+            "iter_codex.graph.neo4j_ops.RECOVERY_DIR",
             tmp_path / "recovery",
         )
 
@@ -104,11 +104,11 @@ class TestBackupGraphDump:
         output = tmp_path / "backups" / "test.dump"
 
         monkeypatch.setattr(
-            "imas_codex.graph.profiles.resolve_neo4j",
+            "iter_codex.graph.profiles.resolve_neo4j",
             lambda: profile,
         )
         monkeypatch.setattr(
-            "imas_codex.graph.profiles.BACKUPS_DIR",
+            "iter_codex.graph.profiles.BACKUPS_DIR",
             output.parent,
         )
 
@@ -116,7 +116,7 @@ class TestBackupGraphDump:
             (dumps_dir / "neo4j.dump").write_bytes(b"recoverable graph dump")
 
         monkeypatch.setattr(
-            "imas_codex.graph.neo4j_ops.run_neo4j_dump",
+            "iter_codex.graph.neo4j_ops.run_neo4j_dump",
             create_dump,
         )
 
@@ -132,11 +132,11 @@ class TestBackupGraphDump:
         output = tmp_path / "backups" / "test.dump"
 
         monkeypatch.setattr(
-            "imas_codex.graph.profiles.resolve_neo4j",
+            "iter_codex.graph.profiles.resolve_neo4j",
             lambda: profile,
         )
         monkeypatch.setattr(
-            "imas_codex.graph.profiles.BACKUPS_DIR",
+            "iter_codex.graph.profiles.BACKUPS_DIR",
             output.parent,
         )
 
@@ -144,7 +144,7 @@ class TestBackupGraphDump:
             (dumps_dir / "neo4j.dump").touch()
 
         monkeypatch.setattr(
-            "imas_codex.graph.neo4j_ops.run_neo4j_dump",
+            "iter_codex.graph.neo4j_ops.run_neo4j_dump",
             create_empty_dump,
         )
 

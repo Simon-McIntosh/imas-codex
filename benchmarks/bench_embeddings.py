@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import os
 
-os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = "local"
+os.environ["ITER_CODEX_EMBEDDING_LOCATION"] = "local"
 
-from imas_codex.embeddings.encoder import Encoder  # noqa: E402
+from iter_codex.embeddings.encoder import Encoder  # noqa: E402
 
 SAMPLE_TEXTS = [
     "electron temperature profile",

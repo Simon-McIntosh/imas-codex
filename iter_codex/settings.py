@@ -1,0 +1,2116 @@
+"""Project settings loaded from pyproject.toml [tool.iter-codex] section.
+
+Configuration is organized into subsections:
+  [tool.iter-codex]                — general settings
+  [tool.iter-codex.graph]          — Neo4j graph URI, username, password
+  [tool.iter-codex.data-dictionary] — DD version, include-ggd, include-error-fields
+  [tool.iter-codex.embedding]      — embedding model, dimension, location
+  [tool.iter-codex.discovery-triage] — model for path and code-file triage
+  [tool.iter-codex.discovery-score]  — model for path, code, wiki and document scoring
+  [tool.iter-codex.discovery-describe] — model for signal and static enrichment
+  [tool.iter-codex.discovery-vision] — model for wiki and document image scoring
+  [tool.iter-codex.cluster-labels] — model and batch-size for cluster labelling
+  [tool.iter-codex.ids-mapping]    — model for IDS mapping and metadata enrichment
+  [tool.iter-codex.dd-enrichment]  — model for DD path enrichment/refinement
+  [tool.iter-codex.agent]          — agent models for planning/exploration tasks
+  [tool.iter-codex.compaction]     — compaction models for summarization tasks
+  [tool.iter-codex.model-routes]   — named model endpoint addresses
+  [tool.iter-codex.sn-review]       — shared disagreement threshold and max-cycles
+  [tool.iter-codex.sn-review.names] — name-axis reviewer model chain (primary/secondary/escalator)
+  [tool.iter-codex.sn-review.docs]  — docs-axis reviewer model chain (primary/secondary/escalator)
+  [tool.iter-codex.sn-benchmark]   — SN benchmark compose-models and reviewer-model
+
+All settings support environment variable overrides (ITER_CODEX_* prefix / NEO4J_*).
+"""
+
+import importlib.resources
+import os
+from collections.abc import Sequence
+from contextvars import ContextVar, Token
+from dataclasses import dataclass
+from functools import cache
+from pathlib import Path
+from typing import Any
+
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib  # type: ignore[import-not-found]
+
+
+@cache
+def _load_pyproject_settings() -> dict:
+    """Load settings from pyproject.toml [tool.iter-codex] section.
+
+    Returns:
+        Dictionary of settings from pyproject.toml, empty dict if not found.
+    """
+    try:
+        # Try package resources first (installed package)
+        files = importlib.resources.files("iter_codex")
+        pyproject_path = files.joinpath("..", "pyproject.toml")
+
+        # If package resource doesn't exist, try filesystem
+        if not pyproject_path.is_file():  # type: ignore[union-attr]
+            from pathlib import Path
+
+            # Walk up to find pyproject.toml (for development)
+            current = Path(__file__).resolve().parent
+            while current != current.parent:
+                candidate = current / "pyproject.toml"
+                if candidate.exists():
+                    pyproject_path = candidate
+                    break
+                current = current.parent
+            else:
+                return {}
+
+        # Read and parse the TOML file
+        if hasattr(pyproject_path, "read_text"):
+            content = pyproject_path.read_text()  # type: ignore[union-attr]
+        else:
+            from pathlib import Path
+
+            content = Path(pyproject_path).read_text()  # type: ignore[arg-type]
+
+        data = tomllib.loads(content)
+        return data.get("tool", {}).get("iter-codex", {})
+    except Exception:
+        return {}
+
+
+def _get_section(section: str) -> dict:
+    """Get a subsection from [tool.iter-codex.{section}]."""
+    return _load_pyproject_settings().get(section, {})
+
+
+def get_openrouter_pricing(model: str) -> dict[str, Any]:
+    """Return the centrally cataloged OpenRouter pricing for *model*.
+
+    Token rates are normalized to USD per million tokens. ``request`` and
+    ``image`` are fixed per-request and per-image charges; a route that
+    declares neither charges neither, so both default to a numeric zero that
+    the arithmetic consumers in :mod:`iter_codex.discovery.base.llm` and
+    :mod:`iter_codex.standard_names.budget` can price directly. Optional
+    overrides apply at or above their ``min_input_tokens`` threshold.
+    ``max_input_tokens`` carries the route's verified input allowance, read
+    from the endpoint ``source`` names, for a route whose seat predates the
+    LiteLLM catalog. An empty mapping means the project has no explicit
+    checked-in pricing entry.
+    """
+    catalog = _get_section("llm").get("openrouter-pricing", {})
+    raw = catalog.get(model)
+    if not isinstance(raw, dict):
+        return {}
+    overrides = [
+        {
+            "min_input_tokens": item.get("min-input-tokens"),
+            "prompt": item.get("prompt"),
+            "completion": item.get("completion"),
+            "cache_read": item.get("cache-read", raw.get("cache-read")),
+            "cache_write": item.get("cache-write", raw.get("cache-write")),
+            "request": item.get("request", raw.get("request", 0.0)),
+            "image": item.get("image", raw.get("image", 0.0)),
+        }
+        for item in raw.get("overrides", [])
+        if isinstance(item, dict)
+    ]
+    return {
+        "prompt": raw.get("prompt"),
+        "completion": raw.get("completion"),
+        "request": raw.get("request", 0.0),
+        "image": raw.get("image", 0.0),
+        "cache_read": raw.get("cache-read"),
+        "cache_write": raw.get("cache-write"),
+        "cache_write_ttl": raw.get("cache-write-ttl"),
+        "max_input_tokens": raw.get("max-input-tokens"),
+        "image_unit": raw.get("image-unit"),
+        "canonical_slug": raw.get("canonical-slug"),
+        "provider": raw.get("provider"),
+        "provider_selector": raw.get("provider-selector"),
+        "source": raw.get("source"),
+        "verified_at": raw.get("verified-at"),
+        "endpoints_source": raw.get("endpoints-source"),
+        "retrieved_at": raw.get("retrieved-at"),
+        "model_payload_sha256": raw.get("model-payload-sha256"),
+        "endpoints_payload_sha256": raw.get("endpoints-payload-sha256"),
+        "canonical_projection_sha256": raw.get("canonical-projection-sha256"),
+        "model_payload_json": raw.get("model-payload-json"),
+        "endpoints_payload_json": raw.get("endpoints-payload-json"),
+        "other_charged_dimensions": raw.get("other-charged-dimensions"),
+        "overrides": overrides,
+    }
+
+
+# ─── Valid model sections ───────────────────────────────────────────────────
+
+MODEL_SECTIONS = frozenset(
+    {
+        "embedding",
+        "discovery-triage",
+        "discovery-score",
+        "discovery-describe",
+        "discovery-vision",
+        "discovery-relevance",
+        "mapping-candidates",
+        "sn-judge",
+        "cluster-labels",
+        "ids-mapping",
+        "agent",
+        "compaction",
+        "reasoning",
+        "dd-enrichment",
+        "sn-compose",
+        "sn-docs",
+        "sn-refine",
+        "sn-escalation",
+        "sn-parent-enrich",
+        "sn-classifier",
+        "sn-domain-tree",
+        "sn-prose-adjudicator",
+        "sn-release-notes",
+    }
+)
+
+# Default model per section (fallback when not configured)
+_MODEL_DEFAULTS: dict[str, str] = {
+    "embedding": "Qwen/Qwen3-Embedding-0.6B",
+    # Discovery function seats. Each discovery call site names the seat for the
+    # work it does, so a model can be chosen per function. The four text/vision
+    # seats and IDS mapping default to the local lane; cluster labelling keeps
+    # the OpenRouter model. Active models live in pyproject.toml.
+    "discovery-triage": "local/deepseek-v4.1-flash",
+    "discovery-score": "local/deepseek-v4.1-flash",
+    "discovery-describe": "local/deepseek-v4.1-flash",
+    "discovery-vision": "local/deepseek-v4.1-flash",
+    # Code-relevance judgements through the OpenRouter decisions endpoint,
+    # which takes its own request/response shape and is called directly by
+    # the decisions call layer rather than through the chat-routing path.
+    "discovery-relevance": "typesafe/jev-1.14",
+    # Pair judgment and IDS routing over a retrieved DD shortlist, through the
+    # same decisions endpoint. Its own seat so the candidate stage's model
+    # changes independently of the code-relevance seat.
+    "mapping-candidates": "typesafe/jev-1.14",
+    # Standard-name judgements through the same decisions endpoint. Its own
+    # seat so the standard-names stage's model changes independently of the
+    # discovery and mapping seats.
+    "sn-judge": "typesafe/jev-1.14",
+    "cluster-labels": "openrouter/openai/gpt-6.1-sol",
+    "ids-mapping": "local/deepseek-v4.1-flash",
+    "agent": "openrouter/anthropic/claude-sonnet-5.5",
+    "compaction": "openrouter/anthropic/claude-haiku-5.5",
+    "reasoning": "openrouter/anthropic/claude-sonnet-5.5",
+    "dd-enrichment": "openrouter/anthropic/claude-sonnet-5.5",
+    "sn-compose": "local/deepseek-v4.1-flash",
+    "sn-docs": "openrouter/openai/gpt-6.1-sol",
+    # Refinement must synthesize a corrected candidate from reviewer feedback,
+    # so it uses compose-tier capability rather than a lightweight classifier.
+    "sn-refine": "openrouter/openai/gpt-6-luna",
+    # Final refine attempt at chain cap (name + docs). The three defaults hold
+    # the vendor separation the seat exists for: Anthropic here, OpenAI for
+    # refine, the local DeepSeek router for compose, so escalation breaks a
+    # failure loop with an independent perspective. Active model in
+    # [tool.iter-codex.sn-escalation].
+    "sn-escalation": "openrouter/anthropic/claude-sonnet-5.5",
+    # Derived-parent description synthesis (generalises over a parent's
+    # already-accepted children).  Compose-tier task — a concise
+    # description, not long-form physics prose — so it defaults to the
+    # cheap/fast compose model; the downstream generate_docs (sn-docs)
+    # rewrites the full documentation later.  Override in pyproject.toml.
+    "sn-parent-enrich": "local/deepseek-v4.1-flash",
+    # Physics-domain classifier for DD paths (SN names inherit the domain).
+    # Owns a seat rather than borrowing a generic one so the model choice is
+    # attributable to the SN pipeline.
+    "sn-classifier": "openrouter/openai/gpt-6-luna",
+    # The two-level category-then-domain Choice over the physics-domain
+    # guidance, which decides a domain from a probability distribution rather
+    # than from free text. It runs through the decisions endpoint, so it holds
+    # its own seat: the tree and the chat classifier below it change models
+    # independently of one another. Active model in
+    # [tool.iter-codex.sn-domain-tree].
+    "sn-domain-tree": "typesafe/jev-1.14",
+    # Adjudicates banned-prose grep flags on refined docs at the campaign
+    # convergence gate; quorum-independent. Active model in
+    # [tool.iter-codex.sn-prose-adjudicator].
+    "sn-prose-adjudicator": "openrouter/openai/gpt-6-luna",
+    # PR-description synthesis for catalog review PRs: grounds on the release
+    # message, the frozen batch artifact, and the per-domain catalog diff to
+    # write a concise human summary. Summarisation task — language tier.
+    "sn-release-notes": "openrouter/anthropic/claude-sonnet-5.5",
+}
+
+# Environment variable names per section
+_MODEL_ENV_VARS: dict[str, str] = {
+    "embedding": "ITER_CODEX_EMBEDDING_MODEL",
+    "discovery-triage": "ITER_CODEX_DISCOVERY_TRIAGE_MODEL",
+    "discovery-score": "ITER_CODEX_DISCOVERY_SCORE_MODEL",
+    "discovery-describe": "ITER_CODEX_DISCOVERY_DESCRIBE_MODEL",
+    "discovery-vision": "ITER_CODEX_DISCOVERY_VISION_MODEL",
+    "cluster-labels": "ITER_CODEX_CLUSTER_LABELS_MODEL",
+    "ids-mapping": "ITER_CODEX_IDS_MAPPING_MODEL",
+    "agent": "ITER_CODEX_AGENT_MODEL",
+    "compaction": "ITER_CODEX_COMPACTION_MODEL",
+    "reasoning": "ITER_CODEX_REASONING_MODEL",
+    "dd-enrichment": "ITER_CODEX_DD_ENRICHMENT_MODEL",
+    "sn-compose": "ITER_CODEX_SN_COMPOSE_MODEL",
+    "sn-docs": "ITER_CODEX_SN_DOCS_MODEL",
+    "sn-refine": "ITER_CODEX_SN_REFINE_MODEL",
+    "sn-escalation": "ITER_CODEX_SN_ESCALATION_MODEL",
+    "sn-parent-enrich": "ITER_CODEX_SN_PARENT_ENRICH_MODEL",
+    "sn-classifier": "ITER_CODEX_SN_CLASSIFIER_MODEL",
+    "sn-prose-adjudicator": "ITER_CODEX_SN_PROSE_ADJUDICATOR_MODEL",
+    "sn-release-notes": "ITER_CODEX_SN_RELEASE_NOTES_MODEL",
+}
+
+
+def get_model(section: str) -> str:
+    """Get the configured model for a pyproject.toml section.
+
+    Accepted sections match [tool.iter-codex.*], e.g. the discovery function
+    seats (discovery-triage, discovery-score, discovery-describe,
+    discovery-vision), cluster-labels, ids-mapping, agent, compaction, embedding.
+
+    Priority: env var → [tool.iter-codex.{section}].model → default.
+
+    Args:
+        section: One of the MODEL_SECTIONS keys.
+
+    Returns:
+        Model identifier string (e.g. 'openrouter/google/gemini-3.8-flash').
+
+    Raises:
+        ValueError: If section is not a valid model section.
+    """
+    if section not in MODEL_SECTIONS:
+        raise ValueError(
+            f"Unknown model section '{section}'. "
+            f"Valid sections: {', '.join(sorted(MODEL_SECTIONS))}"
+        )
+    env_var = _MODEL_ENV_VARS.get(section)
+    model = (os.getenv(env_var) if env_var else None) or _get_section(section).get(
+        "model", _MODEL_DEFAULTS[section]
+    )
+    if section != "embedding":
+        _validate_model_identifier(model, section)
+    return model
+
+
+def _validate_model_identifier(model: str, owner: str) -> None:
+    """Refuse a seat whose model does not identify a supported route."""
+    prefixes = ("openrouter/", "typesafe/", *_LOCAL_ENDPOINT_PREFIXES)
+    if not isinstance(model, str) or not any(
+        model.startswith(prefix) and model.removeprefix(prefix).strip()
+        for prefix in prefixes
+    ):
+        raise ValueError(f"Model seat {owner!r} has no recognised route for {model!r}")
+
+
+def _resolve_model_route(config: dict[str, Any], owner: str) -> str | None:
+    """Resolve one optional named model route to its configured API base."""
+    route_name = config.get("model-route")
+    direct_api_base = config.get("api-base")
+    if route_name is None:
+        return direct_api_base or None
+    if direct_api_base:
+        raise ValueError(f"{owner} cannot define both 'model-route' and 'api-base'")
+    if not isinstance(route_name, str) or not route_name.strip():
+        raise ValueError(f"{owner} has an invalid model route name")
+    route = _get_section("model-routes").get(route_name)
+    if not isinstance(route, dict):
+        raise ValueError(f"Unknown model route {route_name!r} referenced by {owner}")
+    api_base = route.get("api-base")
+    if not isinstance(api_base, str) or not api_base.strip():
+        raise ValueError(
+            f"Model route {route_name!r} referenced by {owner} must define "
+            "a non-blank 'api-base'"
+        )
+    return api_base
+
+
+def get_model_config(section: str) -> dict[str, str | None]:
+    """Get full model configuration including optional endpoint overrides.
+
+    Returns a dict with keys ``model``, ``api_base``, and ``api_key_env``.
+    When ``model-route`` or ``api-base`` is set in the pyproject.toml section,
+    it overrides the default OpenRouter routing — enabling local or self-hosted
+    model endpoints. Named routes resolve from ``[tool.iter-codex.model-routes]``.
+
+    Example pyproject.toml::
+
+        [tool.iter-codex.sn-compose]
+        model = "local/deepseek-v4.1-flash"
+        model-route = "ambix-local"
+        api-key-env = "AMBIX_API_KEY"
+
+    Environment variable overrides (highest priority):
+        - ``ITER_CODEX_{SECTION}_API_BASE``  (e.g. ``ITER_CODEX_SN_COMPOSE_API_BASE``)
+
+    The section's route, credential variable and endpoint class describe the
+    endpoint serving the model the section names. When the model environment
+    variable names a model from another provider, for example an
+    ``openrouter/`` model in place of a ``local/`` one, none of the three
+    applies: the model takes direct OpenRouter routing and its own pricing, unless
+    the API-base variable names an endpoint explicitly. Keeping them would send
+    the model to an endpoint that does not serve it, and would book a paid call
+    under a free endpoint class.
+    """
+    model = get_model(section)
+    cfg = _get_section(section)
+
+    configured_model = cfg.get("model", _MODEL_DEFAULTS.get(section, model))
+    serves_model = _provider(model) == _provider(configured_model)
+
+    # api-base: env override → named/direct pyproject route → None
+    env_key = f"ITER_CODEX_{section.upper().replace('-', '_')}_API_BASE"
+    configured_api_base = _resolve_model_route(cfg, f"[tool.iter-codex.{section}]")
+    api_base = os.getenv(env_key) or (configured_api_base if serves_model else None)
+
+    # api-key-env names the credential environment variable; the LLM layer
+    # reads that secret later. This setting itself comes only from pyproject.
+    api_key_env = (cfg.get("api-key-env") or None) if serves_model else None
+    endpoint_class = (cfg.get("endpoint-class") or None) if serves_model else None
+
+    if model.startswith(_LOCAL_ENDPOINT_PREFIXES) and not api_base:
+        raise ValueError(f"Model seat {section!r} has no endpoint for {model!r}")
+
+    return {
+        "model": model,
+        "api_base": api_base,
+        "api_key_env": api_key_env,
+        "endpoint_class": endpoint_class,
+    }
+
+
+def _provider(model: str) -> str:
+    """Return a model identifier's provider prefix, the text before its first slash."""
+    return model.split("/", 1)[0]
+
+
+# ─── Model endpoint registry ──────────────────────────────────────────────
+# Maps model identifiers to their endpoint overrides.  Populated by
+# ``register_model_endpoints()`` at startup; queried by ``_build_kwargs()``
+# in the LLM layer to route calls to local/self-hosted endpoints.
+
+_MODEL_ENDPOINTS: dict[str, dict[str, str | None]] = {}
+
+
+# Model-id prefixes that denote a locally-served endpoint. Only these are
+# safe to bind to a section's ``api-base`` when they appear in a mixed
+# ``models`` LIST — the openrouter/-prefixed entries in the same list must
+# keep direct OpenRouter routing.
+_LOCAL_ENDPOINT_PREFIXES = ("local/", "hosted_vllm/", "ollama/")
+
+
+def register_model_endpoints() -> None:
+    """Scan the config tree and register model→endpoint overrides.
+
+    Called once at import time; queried by ``_build_kwargs()`` so any caller
+    (pools, benches, one-off tools) can resolve a local endpoint without
+    knowing which section a model came from. Two passes:
+
+    1. Model sections (``MODEL_SECTIONS``): a section with ``model-route`` or
+       ``api-base`` binds its singular ``model`` to that endpoint.
+    2. Any ``[tool.iter-codex.*]`` subsection carrying a ``model-route`` or
+       ``api-base`` and a ``models`` list (e.g. review quorums): only the
+       locally-served entries (``local/``, ``hosted_vllm/``, ``ollama/``)
+       bind to the endpoint; openrouter/-prefixed entries keep direct OpenRouter routing.
+    """
+    for section in MODEL_SECTIONS:
+        try:
+            cfg = get_model_config(section)
+        except ValueError:
+            continue
+        if cfg.get("api_base"):
+            model_id = cfg["model"]
+            _MODEL_ENDPOINTS[model_id] = {
+                "api_base": cfg["api_base"],
+                "api_key_env": cfg.get("api_key_env"),
+                "endpoint_class": cfg.get("endpoint_class"),
+            }
+
+    def _walk(node: dict) -> None:
+        models = node.get("models")
+        proposer_model = node.get("proposer-model")
+        model_ids = (
+            models
+            if isinstance(models, list)
+            else [proposer_model]
+            if isinstance(proposer_model, str)
+            else []
+        )
+        api_base = (
+            _resolve_model_route(node, "configured local model") if model_ids else None
+        )
+        if api_base:
+            for model_id in model_ids:
+                if isinstance(model_id, str) and model_id.startswith(
+                    _LOCAL_ENDPOINT_PREFIXES
+                ):
+                    _MODEL_ENDPOINTS.setdefault(
+                        model_id,
+                        {
+                            "api_base": api_base,
+                            "api_key_env": node.get("api-key-env"),
+                            "endpoint_class": node.get("endpoint-class"),
+                        },
+                    )
+        for value in node.values():
+            if isinstance(value, dict):
+                _walk(value)
+
+    _walk(_load_pyproject_settings())
+
+
+def get_model_endpoint(model: str) -> dict[str, str | None] | None:
+    """Look up endpoint overrides for a model identifier.
+
+    Returns ``None`` if the model has no per-section endpoint override
+    (i.e. it should use the direct OpenRouter routing).
+    """
+    return _MODEL_ENDPOINTS.get(model)
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedModelSource:
+    """One model and endpoint selected from a registered source identity."""
+
+    source_id: str
+    model: str
+    api_base: str | None
+    api_key_env: str | None
+    endpoint_class: str | None
+
+
+def _unique_models(values: Any, source_id: str) -> tuple[str, ...]:
+    if isinstance(values, str | bytes) or not isinstance(values, Sequence):
+        raise ValueError(f"Model source {source_id!r} must be a finite sequence")
+    models = tuple(values)
+    if (
+        not models
+        or any(not isinstance(model, str) or not model.strip() for model in models)
+        or len(models) != len(set(models))
+    ):
+        raise ValueError(
+            f"Model source {source_id!r} must contain distinct non-blank models"
+        )
+    return models
+
+
+def get_model_source_models(source_id: str) -> tuple[str, ...]:
+    """Return the finite configured model set owned by *source_id*.
+
+    A source identifies where model choice comes from; it is deliberately
+    separate from the pipeline seat that describes what a route does.
+    """
+    prefix, separator, name = source_id.partition(":")
+    if not separator or not prefix or not name:
+        raise ValueError(f"Invalid model source identity {source_id!r}")
+    if prefix == "section":
+        if name not in MODEL_SECTIONS:
+            raise ValueError(f"Unknown model section source {source_id!r}")
+        return _unique_models([get_model(name)], source_id)
+    if prefix == "sn-review":
+        if name == "docs":
+            return _unique_models(get_sn_review_docs_models(), source_id)
+        if name == "names":
+            names = _get_section("sn-review").get("names", {})
+            values = list(
+                _unique_models(
+                    names.get("models", _SN_REVIEW_DEFAULTS["names-models"]),
+                    f"{source_id}:top-level",
+                )
+            )
+            profiles = names.get("profiles", {})
+            if not isinstance(profiles, dict):
+                raise ValueError("[sn-review.names].profiles must be a mapping")
+            for profile in profiles.values():
+                if not isinstance(profile, dict):
+                    raise ValueError("Reviewer profiles must be mappings")
+                values.extend(
+                    _unique_models(profile.get("models", ()), f"{source_id}:profile")
+                )
+            return tuple(dict.fromkeys(values))
+    if prefix == "sn-benchmark":
+        if name == "candidates":
+            values = get_sn_benchmark_candidate_models()
+        elif name == "compose":
+            values = get_sn_benchmark_compose_models()
+        elif name == "reviewers":
+            values = get_sn_benchmark_reviewer_models()
+        elif name == "judges":
+            values = [
+                *_unique_models(
+                    [get_sn_benchmark_reviewer_model()],
+                    "sn-benchmark:judge",
+                ),
+                *_unique_models(
+                    get_sn_benchmark_reviewer_models(),
+                    "sn-benchmark:reviewers",
+                ),
+            ]
+            return tuple(dict.fromkeys(values))
+        elif name == "refine":
+            values = [
+                *_unique_models([get_model("sn-refine")], "section:sn-refine"),
+                *_unique_models(
+                    get_sn_benchmark_candidate_models(),
+                    "sn-benchmark:candidates",
+                ),
+            ]
+            return tuple(dict.fromkeys(values))
+        else:
+            raise ValueError(f"Unknown benchmark model source {source_id!r}")
+        checked = _unique_models(values, source_id)
+        return tuple(dict.fromkeys(checked))
+    if source_id == "sn-fanout:proposer":
+        return _unique_models(
+            [_get_section("sn-fanout").get("proposer-model")], source_id
+        )
+    raise ValueError(f"Unknown model source identity {source_id!r}")
+
+
+def resolve_model_source(
+    source_id: str, *, candidate_model: str | None = None
+) -> ResolvedModelSource:
+    """Resolve a registered source without borrowing endpoint configuration."""
+    models = get_model_source_models(source_id)
+    if candidate_model is None:
+        if len(models) != 1:
+            raise ValueError(
+                f"Model source {source_id!r} requires an explicit configured candidate"
+            )
+        model = models[0]
+    elif candidate_model not in models:
+        raise ValueError(
+            f"Candidate model {candidate_model!r} is outside source {source_id!r}"
+        )
+    else:
+        model = candidate_model
+
+    api_base: str | None = None
+    api_key_env: str | None = None
+    endpoint_class: str | None = None
+    prefix, _, name = source_id.partition(":")
+    if prefix == "section":
+        config = get_model_config(name)
+        api_base = config["api_base"]
+        api_key_env = config["api_key_env"]
+        endpoint_class = config["endpoint_class"]
+    elif source_id in {"sn-review:names", "sn-fanout:proposer"} and model.startswith(
+        _LOCAL_ENDPOINT_PREFIXES
+    ):
+        config = (
+            _get_section("sn-review").get("names", {})
+            if source_id == "sn-review:names"
+            else _get_section("sn-fanout")
+        )
+        api_base = _resolve_model_route(config, f"[tool.iter-codex.{source_id}]")
+        api_key_env = config.get("api-key-env")
+        endpoint_class = config.get("endpoint-class")
+    _validate_model_identifier(model, source_id)
+    if model.startswith(_LOCAL_ENDPOINT_PREFIXES):
+        if not api_base or not api_key_env or endpoint_class != "local-free":
+            raise ValueError(
+                f"Model seat {source_id!r}: local model {model!r} lacks a complete local-free endpoint contract"
+            )
+    elif any((api_base, api_key_env, endpoint_class)):
+        raise ValueError(
+            f"OpenRouter model {model!r} cannot inherit a custom endpoint contract"
+        )
+    return ResolvedModelSource(source_id, model, api_base, api_key_env, endpoint_class)
+
+
+# Populate at import time
+register_model_endpoints()
+
+
+# ─── Embedding settings ────────────────────────────────────────────────────
+
+EMBED_BASE_PORT = 18765
+
+
+def _get_location_offset(location: str) -> int:
+    """Get the port offset for a location from the ``locations`` list.
+
+    Reads ``[tool.iter-codex].locations`` — the same list used by graph
+    profiles.  Position in the list is the offset.
+    """
+    locations = _load_pyproject_settings().get("locations", [])
+    if isinstance(locations, list):
+        offsets = {name: i for i, name in enumerate(locations)}
+    else:
+        offsets = {k: int(v) for k, v in locations.items()}
+    return offsets.get(location, 0)
+
+
+def get_embedding_model() -> str:
+    """Get the embedding model name.
+
+    Convenience wrapper around get_model("embedding").
+    """
+    return get_model("embedding")
+
+
+def get_embedding_dimension() -> int:
+    """Get the target embedding dimension (Matryoshka projection).
+
+    All vectors in the graph, indexes, and caches use this dimension.
+
+    Priority: ITER_CODEX_EMBEDDING_DIMENSION env → [embedding].dimension → 256.
+    """
+    if env := os.getenv("ITER_CODEX_EMBEDDING_DIMENSION"):
+        return int(env)
+    dim = _get_section("embedding").get("dimension")
+    return int(dim) if dim is not None else 256
+
+
+def get_embedding_location() -> str:
+    """Get the embedding location — a facility name or ``"local"``.
+
+    When set to a facility name (e.g. ``"iter"``), embeddings are served
+    via an HTTP server running at that facility (reached via SSH tunnel
+    from a workstation, or directly when on-site).  ``"local"`` loads
+    the model in-process.
+
+    Priority: ITER_CODEX_EMBEDDING_LOCATION env → ITER_CODEX_EMBEDDING_BACKEND env
+              → [embedding].location → [embedding].backend → 'local'.
+    """
+    if env := os.getenv("ITER_CODEX_EMBEDDING_LOCATION"):
+        return env.lower()
+    # Legacy env var
+    if env := os.getenv("ITER_CODEX_EMBEDDING_BACKEND"):
+        return env.lower()
+    section = _get_section("embedding")
+    location = section.get("location") or section.get("backend")
+    return str(location).lower() if location else "local"
+
+
+def is_embedding_remote() -> bool:
+    """True when embedding location targets a remote facility (not in-process)."""
+    return get_embedding_location() != "local"
+
+
+def get_embed_remote_url() -> str | None:
+    """Get the remote embedding server URL.
+
+    Delegates to :func:`resolve_service_url` from the shared locations
+    module for unified local/SLURM/remote resolution.
+
+    Override: ``ITER_CODEX_EMBED_REMOTE_URL`` env var.
+    """
+    if env := os.getenv("ITER_CODEX_EMBED_REMOTE_URL"):
+        return env or None
+
+    location = get_embedding_location()
+    if location == "local":
+        return None
+
+    from iter_codex.remote.locations import resolve_service_url
+
+    port = get_embed_server_port()
+    return resolve_service_url(location, port, service_job_name="codex-embed")
+
+
+def get_embed_server_port() -> int:
+    """Get the embedding server port.
+
+    Derived from the embedding location's facility offset:
+    ``embed_port = 18765 + facility_offset``.
+    For compute locations (e.g. ``"titan"``), uses the parent facility's offset.
+
+    Priority: ITER_CODEX_EMBED_PORT env → convention offset → 18765.
+    """
+    if env := os.getenv("ITER_CODEX_EMBED_PORT"):
+        return int(env)
+    location = get_embedding_location()
+    if location == "local":
+        return EMBED_BASE_PORT
+    from iter_codex.remote.locations import get_port_offset
+
+    return EMBED_BASE_PORT + get_port_offset(location)
+
+
+def get_embed_scheduler() -> str:
+    """Get the embed server job scheduler.
+
+    Derived from the location — compute locations (e.g. ``"titan"``)
+    automatically resolve to ``"slurm"``.  Direct facility locations
+    and ``"local"`` resolve to ``"none"``.
+
+    Priority: ITER_CODEX_EMBED_SCHEDULER env → location resolution → "none".
+    """
+    if env := os.getenv("ITER_CODEX_EMBED_SCHEDULER"):
+        return env.lower()
+    location = get_embedding_location()
+    if location == "local":
+        return "none"
+    from iter_codex.remote.locations import resolve_location
+
+    return resolve_location(location).scheduler
+
+
+def get_embed_host() -> str | None:
+    """Get the hostname where the embedding server runs.
+
+    Reads the host from the resolved remote URL, so SLURM service-node
+    discovery has a single owner (:func:`resolve_service_url`).  Returns
+    None when the resolved URL is loopback (the server runs on this node)
+    or when no remote URL is configured.
+
+    Override: ITER_CODEX_EMBED_HOST env var (escape hatch).
+    """
+    if env := os.getenv("ITER_CODEX_EMBED_HOST"):
+        return env or None
+    from urllib.parse import urlsplit
+
+    url = get_embed_remote_url()
+    if not url:
+        return None
+    host = urlsplit(url).hostname
+    if host in (None, "localhost", "127.0.0.1"):
+        return None
+    return host
+
+
+# ─── vLLM inference server settings ────────────────────────────────────────
+
+VLLM_PORT = 18800
+
+
+def get_vllm_port() -> int:
+    """Get the vLLM inference server port (imas-ambix).
+
+    Override: ``ITER_CODEX_VLLM_PORT`` env var.
+    """
+    if env := os.getenv("ITER_CODEX_VLLM_PORT"):
+        return int(env)
+    return VLLM_PORT
+
+
+# ─── docs-server settings ──────────────────────────────────────────────────
+
+DOCS_SERVER_BASE_PORT = 8765
+
+
+def get_docs_server_location() -> str:
+    """Get the docs-server location — a facility name or ``"local"``.
+
+    The docs-server is a host-wide static HTML/JSON state server
+    (``~/docs-server/serve.py``) that fronts every project's
+    ``docs/plans-html/`` under one port and exposes ``/state/...`` endpoints
+    that humans (via browser) and agents (via filesystem) share.
+
+    Priority: ITER_CODEX_DOCS_LOCATION env → [docs-server].location → 'iter'.
+    """
+    if env := os.getenv("ITER_CODEX_DOCS_LOCATION"):
+        return env.lower()
+    location = _get_section("docs-server").get("location")
+    return str(location).lower() if location else "iter"
+
+
+def get_docs_server_port() -> int:
+    """Get the docs-server port.
+
+    Runs on the login node (no SLURM allocation, no facility offset);
+    forwarded same-port via ``iter-codex tunnel start <host> --docs``.
+
+    Priority: ITER_CODEX_DOCS_PORT env → [docs-server].port → 8765.
+    """
+    if env := os.getenv("ITER_CODEX_DOCS_PORT"):
+        return int(env)
+    port = _get_section("docs-server").get("port")
+    if port:
+        return int(port)
+    return DOCS_SERVER_BASE_PORT
+
+
+# ─── clipboard relay settings ─────────────────────────────────────────────
+# wsl-clip-server: Python HTTP server on WSL that extracts Windows clipboard
+# content (image or text) via powershell.exe and serves it over a reverse SSH
+# tunnel so iter can call `curl localhost:2490/paste`.
+# Also accepts POST /copy to write text back to the Windows clipboard.
+
+WSL_CLIP_BASE_PORT = 2490
+
+
+def get_wsl_clip_port() -> int:
+    """Get the wsl-clip-server port (image + text clipboard, via powershell.exe).
+
+    Priority: ITER_CODEX_WSL_CLIP_PORT env → [wsl-clip].port → 2490.
+    """
+    if env := os.getenv("ITER_CODEX_WSL_CLIP_PORT"):
+        return int(env)
+    port = _get_section("wsl-clip").get("port")
+    if port:
+        return int(port)
+    return WSL_CLIP_BASE_PORT
+
+
+# ─── ssh-back reverse tunnel settings ──────────────────────────────────────
+# The client runs an sshd that the login node reaches through a reverse
+# forward, so work on the login node can read the client's own configuration
+# and logs when diagnosing a connection fault from the side that sees it.
+# Bound on the remote loopback only, never routable from another host.
+
+WSL_SSH_BASE_PORT = 2222
+
+# The port the client's own sshd listens on, which is what the remote port
+# above must be forwarded to. The two are different numbers and forwarding the
+# remote port to itself is silent: the remote sshd accepts the connection on
+# its listener before the channel to the client is opened, so a dead local
+# target presents as a connection that opens and then sends no banner, which
+# reads like an sshd that is down rather than a forward aimed at nothing.
+WSL_SSHD_LOCAL_PORT = 22
+
+
+def get_wsl_ssh_port() -> int:
+    """Get the port the login node uses to reach the client's sshd.
+
+    Priority: ITER_CODEX_WSL_SSH_PORT env → [wsl-ssh].port → 2222.
+    """
+    if env := os.getenv("ITER_CODEX_WSL_SSH_PORT"):
+        return int(env)
+    port = _get_section("wsl-ssh").get("port")
+    if port:
+        return int(port)
+    return WSL_SSH_BASE_PORT
+
+
+def get_wsl_sshd_local_port() -> int:
+    """Get the port the client's own sshd listens on locally.
+
+    Priority: ITER_CODEX_WSL_SSHD_LOCAL_PORT env → [wsl-ssh].sshd_port → 22.
+    """
+    if env := os.getenv("ITER_CODEX_WSL_SSHD_LOCAL_PORT"):
+        return int(env)
+    port = _get_section("wsl-ssh").get("sshd_port")
+    if port:
+        return int(port)
+    return WSL_SSHD_LOCAL_PORT
+
+
+# ─── ink display server settings ───────────────────────────────────────────
+
+INK_DISPLAY_BASE_PORT = 8766
+
+
+def get_ink_display_location() -> str:
+    """Get the ink display server location — a facility name or ``"local"``.
+
+    The ink display server (``uv run efit-ink serve``) runs on the login node
+    and serves the most recently pushed Altair chart at port 8766.
+
+    Priority: ITER_CODEX_INK_PORT env → [ink-display].location → 'iter'.
+    """
+    if env := os.getenv("ITER_CODEX_INK_LOCATION"):
+        return env.lower()
+    location = _get_section("ink-display").get("location")
+    return str(location).lower() if location else "iter"
+
+
+def get_ink_display_port() -> int:
+    """Get the ink display server port.
+
+    Runs on the login node; forwarded same-port via
+    ``iter-codex tunnel start <host> --ink``.
+
+    Priority: ITER_CODEX_INK_PORT env → [ink-display].port → 8766.
+    """
+    if env := os.getenv("ITER_CODEX_INK_PORT"):
+        return int(env)
+    port = _get_section("ink-display").get("port")
+    if port:
+        return int(port)
+    return INK_DISPLAY_BASE_PORT
+
+
+# ─── Discovery settings ─────────────────────────────────────────────────────
+
+
+def get_discovery_threshold() -> float:
+    """Get the legacy discovery threshold used by non-path pipelines.
+
+    Priority: ITER_CODEX_DISCOVERY_THRESHOLD env → [discovery].threshold → 0.90.
+    """
+    if env := os.getenv("ITER_CODEX_DISCOVERY_THRESHOLD"):
+        return float(env)
+    return float(_get_section("discovery").get("threshold", 0.90))
+
+
+def get_path_scan_threshold() -> float:
+    """Get the calibrated path facet gate for code and data scanning."""
+    if env := os.getenv("ITER_CODEX_PATH_SCAN_THRESHOLD"):
+        return float(env)
+    return float(_get_section("discovery").get("path-scan-threshold", 0.30))
+
+
+def get_triage_threshold() -> float:
+    """Get the minimum triage composite for enrichment/scoring.
+
+    Derived from the discovery threshold minus a configurable offset.
+    Always lower than the ingestion threshold — files must pass this
+    cheap gate before full LLM scoring.
+
+    ``triage_threshold = discovery_threshold - triage_offset``
+
+    Priority: ITER_CODEX_TRIAGE_THRESHOLD env → computed from offset → 0.75.
+    """
+    if env := os.getenv("ITER_CODEX_TRIAGE_THRESHOLD"):
+        return float(env)
+    offset = float(_get_section("discovery").get("triage-offset", 0.15))
+    return get_discovery_threshold() - offset
+
+
+def get_code_triage_threshold() -> float:
+    """Get the minimum Jev relevance for a code file to pass triage.
+
+    Code triage asks a decisions model (Jev) for typed judgements and takes
+    the largest of the four scope probabilities as the file's relevance. A
+    file passes when its relevance reaches this threshold.
+
+    Priority: ITER_CODEX_CODE_TRIAGE_THRESHOLD env →
+    [discovery].code-triage-threshold → 0.4.
+    """
+    if env := os.getenv("ITER_CODEX_CODE_TRIAGE_THRESHOLD"):
+        return float(env)
+    return float(_get_section("discovery").get("code-triage-threshold", 0.4))
+
+
+def get_code_ingest_threshold() -> float:
+    """Get the minimum content-arm Jev relevance for a code file to be ingested.
+
+    The ingest claim admits a scored file whose content-arm relevance reaches
+    this threshold, and claims the highest relevance first.
+
+    Priority: ITER_CODEX_CODE_INGEST_THRESHOLD env →
+    [discovery].code-ingest-threshold → 0.5.
+    """
+    if env := os.getenv("ITER_CODEX_CODE_INGEST_THRESHOLD"):
+        return float(env)
+    return float(_get_section("discovery").get("code-ingest-threshold", 0.5))
+
+
+def get_wiki_ingest_threshold() -> float:
+    """Get the minimum relevance score for wiki content ingestion.
+
+    Priority: ITER_CODEX_WIKI_INGEST_THRESHOLD env →
+    [discovery].wiki-ingest-threshold → 0.16.
+    """
+    if env := os.getenv("ITER_CODEX_WIKI_INGEST_THRESHOLD"):
+        return float(env)
+    return float(_get_section("discovery").get("wiki-ingest-threshold", 0.16))
+
+
+def get_code_facet_admission_threshold() -> float:
+    """Get the minimum content-arm facet value that admits a code file.
+
+    A content-stage file is admitted to ingestion when its composite reaches
+    :func:`get_code_ingest_threshold`, or when its strongest facet
+    (``score_data_access``, ``score_signal_processing``,
+    ``score_machine_description`` or ``score_imas_mapping``) reaches this
+    threshold.  A file whose composite is below the ingest gate can still
+    carry the machine description or signal processing a mapper needs.
+
+    Priority: ITER_CODEX_CODE_FACET_ADMISSION_THRESHOLD env →
+    [discovery].code-facet-admission-threshold → 0.85.
+    """
+    if env := os.getenv("ITER_CODEX_CODE_FACET_ADMISSION_THRESHOLD"):
+        return float(env)
+    return float(_get_section("discovery").get("code-facet-admission-threshold", 0.85))
+
+
+@dataclass(frozen=True, slots=True)
+class RouteThresholds:
+    """Thresholds that route a judged source between select, escalate and reject.
+
+    ``select_threshold`` unset (``None``) disables the selected route and
+    ``floor_threshold`` unset rejects no source. A source is selected when a
+    select threshold is set and any candidate's same_quantity reaches it — every
+    candidate at or above the threshold is selected, not only the best. It is
+    rejected only when a floor is set and no score reaches it. ``shortlist_size``
+    caps the Jev-ordered shortlist the route carries.
+    """
+
+    select_threshold: float | None
+    floor_threshold: float | None
+    shortlist_size: int
+
+
+def get_mapping_route_thresholds() -> RouteThresholds:
+    """Get the candidate-stage routing thresholds.
+
+    Reads ``[tool.iter-codex.discovery]`` keys ``map-select-threshold``,
+    ``map-floor-threshold`` and ``map-shortlist-size``. The select threshold and
+    floor default to unset (``None``): the selected route never rose above about
+    0.63 precision at any threshold, so it is disabled until set, and no source
+    is rejected by default. The shortlist defaults to 5, the size at which Jev's
+    reranked top held every recoverable hit.
+    """
+    section = _get_section("discovery")
+
+    def _optional_float(key: str) -> float | None:
+        value = section.get(key)
+        return None if value is None else float(value)
+
+    return RouteThresholds(
+        select_threshold=_optional_float("map-select-threshold"),
+        floor_threshold=_optional_float("map-floor-threshold"),
+        shortlist_size=int(section.get("map-shortlist-size", 5)),
+    )
+
+
+# ─── Log settings ──────────────────────────────────────────────────────────
+
+
+def get_log_location() -> str:
+    """Get the log location — where CLI commands run and write logs.
+
+    When set to a facility name (e.g. ``"iter"``), MCP log tools fetch
+    logs via SSH from that host's ``~/.local/share/iter-codex/logs/``.
+    ``"local"`` reads from the local filesystem (default).
+
+    Priority: ITER_CODEX_LOG_LOCATION env → [logs].location → 'local'.
+    """
+    if env := os.getenv("ITER_CODEX_LOG_LOCATION"):
+        return env.lower()
+    location = _get_section("logs").get("location")
+    return str(location).lower() if location else "local"
+
+
+# ─── Model accessors ───────────────────────────────────────────────────────
+# All callers should use get_model(<section>), naming the function seat that
+# matches the work (e.g. get_model("discovery-triage")). The embedding model is
+# accessed via get_embedding_model() for consistency with the other embedding
+# accessors (dimension, backend, etc.).
+
+
+# ─── Graph settings (Neo4j) ────────────────────────────────────────────────
+# Resolved via named graph profiles.  See iter_codex.graph.profiles for
+# the full resolution chain (profiles → convention).
+
+
+def get_graph_profile():  # type: ignore[return]
+    """Get the fully resolved :class:`Neo4jProfile` for the active graph.
+
+    This is the canonical entry point — all other ``get_graph_*()``
+    accessors delegate here.
+    """
+    from iter_codex.graph.profiles import resolve_neo4j
+
+    return resolve_neo4j()
+
+
+def get_graph_uri() -> str:
+    """Get the Neo4j bolt URI for the active graph profile."""
+    return get_graph_profile().uri
+
+
+def get_graph_username() -> str:
+    """Get the Neo4j username for the active graph profile."""
+    return get_graph_profile().username
+
+
+def get_graph_password() -> str:
+    """Get the Neo4j password for the active graph profile."""
+    return get_graph_profile().password
+
+
+def get_graph_name() -> str:
+    """Get the active graph identity name (e.g. ``"codex"``, ``"tcv"``)."""
+    return get_graph_profile().name
+
+
+def get_graph_location() -> str:
+    """Get the active graph location (e.g. ``"iter"``, ``"local"``)."""
+    return get_graph_profile().location
+
+
+def get_neo4j_version() -> str:
+    """Get the Neo4j Docker image tag (e.g. ``"2026.01.4-community"``).
+
+    Priority: NEO4J_VERSION env → [graph].neo4j-version → default.
+    """
+    if env := os.getenv("NEO4J_VERSION"):
+        return env
+    return _get_section("graph").get("neo4j-version", "2026.01.4-community")
+
+
+def get_neo4j_image_path() -> Path:
+    """Get the local Apptainer SIF image path for Neo4j."""
+    return Path.home() / "apptainer" / f"neo4j_{get_neo4j_version()}.sif"
+
+
+def get_neo4j_image_shell() -> str:
+    """Get the shell-expandable Apptainer SIF image path for Neo4j.
+
+    Uses ``$HOME`` so the path resolves correctly on remote nodes.
+    """
+    return f'"$HOME/apptainer/neo4j_{get_neo4j_version()}.sif"'
+
+
+# ─── Data dictionary settings ──────────────────────────────────────────────
+
+
+def get_dd_version() -> str:
+    """Get the default data dictionary version.
+
+    Priority: IMAS_DD_VERSION env → [data-dictionary].version → '4.1.0'.
+    """
+    if env := os.getenv("IMAS_DD_VERSION"):
+        return env
+    return _get_section("data-dictionary").get("version", "4.1.0")
+
+
+def get_include_ggd() -> bool:
+    """Get whether to include GGD (Grid Geometry Description) paths.
+
+    Priority: ITER_CODEX_INCLUDE_GGD env → [data-dictionary].include-ggd → True.
+    """
+    if env := os.getenv("ITER_CODEX_INCLUDE_GGD"):
+        return _parse_bool(env)
+    val = _get_section("data-dictionary").get("include-ggd")
+    if val is not None:
+        return _parse_bool(val)
+    return True
+
+
+def get_include_error_fields() -> bool:
+    """Get whether to include error fields (_error_upper, _error_lower, etc.).
+
+    Priority: ITER_CODEX_INCLUDE_ERROR_FIELDS env → [data-dictionary].include-error-fields → False.
+    """
+    if env := os.getenv("ITER_CODEX_INCLUDE_ERROR_FIELDS"):
+        return _parse_bool(env)
+    val = _get_section("data-dictionary").get("include-error-fields")
+    if val is not None:
+        return _parse_bool(val)
+    return False
+
+
+# ─── General settings ──────────────────────────────────────────────────────
+
+
+def get_labeling_batch_size() -> int:
+    """Get batch size for cluster labeling.
+
+    Priority: ITER_CODEX_LABELING_BATCH_SIZE env → [cluster-labels].batch-size → 50.
+    """
+    if env := os.getenv("ITER_CODEX_LABELING_BATCH_SIZE"):
+        return int(env)
+    if (val := _get_section("cluster-labels").get("batch-size")) is not None:
+        return int(val)
+    return 50
+
+
+def _parse_bool(value: str | bool) -> bool:
+    """Parse a boolean value from string or bool."""
+    if isinstance(value, bool):
+        return value
+    return value.lower() in ("true", "1", "yes")
+
+
+# ─── Native model dimensions (for validation only) ─────────────────────────
+
+MODEL_NATIVE_DIMENSIONS: dict[str, int] = {
+    "Qwen/Qwen3-Embedding-0.6B": 1024,
+    "qwen/qwen3-embedding-0.6b": 1024,
+    "Qwen/Qwen3-Embedding-4B": 2560,
+    "qwen/qwen3-embedding-4b": 2560,
+    "Qwen/Qwen3-Embedding-8B": 4096,
+    "qwen/qwen3-embedding-8b": 4096,
+}
+
+MODEL_DIMENSIONS = MODEL_NATIVE_DIMENSIONS
+
+
+# ─── Module-level constants ────────────────────────────────────────────────
+
+LABELING_BATCH_SIZE = get_labeling_batch_size()
+INCLUDE_GGD = get_include_ggd()
+INCLUDE_ERROR_FIELDS = get_include_error_fields()
+EMBEDDING_DIMENSION = get_embedding_dimension()
+
+
+# ─── SN example-injection and retry tunables ───────────────────────────────
+
+_SN_DEFAULTS: dict[str, Any] = {
+    "example-target-scores": [1.0, 0.8, 0.65, 0.4],
+    "example-tolerance": 0.05,
+    "example-per-bucket": 1,
+    "retry-attempts": 1,
+    "retry-k-expansion": 12,
+    "refine-rotations": 3,
+}
+
+
+def get_sn_example_target_scores() -> tuple[float, ...]:
+    """Score thresholds for selecting exemplar StandardName nodes.
+
+    Each target defines a bucket; the example loader picks the closest
+    reviewed StandardName whose ``reviewer_score`` falls within
+    ``target ± tolerance``.
+
+    Priority: ITER_CODEX_SN_EXAMPLE_TARGET_SCORES env (comma-separated)
+              → [sn].example-target-scores → ``(1.0, 0.8, 0.65, 0.4)``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_EXAMPLE_TARGET_SCORES"):
+        return tuple(float(v) for v in env.split(",") if v.strip())
+    section = _get_section("sn")
+    raw = section.get("example-target-scores", _SN_DEFAULTS["example-target-scores"])
+    return tuple(float(v) for v in raw)
+
+
+def get_sn_example_tolerance() -> float:
+    """Tolerance band around each target score for example selection.
+
+    Priority: ITER_CODEX_SN_EXAMPLE_TOLERANCE env
+              → [sn].example-tolerance → ``0.05``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_EXAMPLE_TOLERANCE"):
+        return float(env)
+    section = _get_section("sn")
+    return float(section.get("example-tolerance", _SN_DEFAULTS["example-tolerance"]))
+
+
+def get_sn_example_per_bucket() -> int:
+    """Maximum number of examples per score bucket.
+
+    Priority: ITER_CODEX_SN_EXAMPLE_PER_BUCKET env
+              → [sn].example-per-bucket → ``1``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_EXAMPLE_PER_BUCKET"):
+        return int(env)
+    section = _get_section("sn")
+    return int(section.get("example-per-bucket", _SN_DEFAULTS["example-per-bucket"]))
+
+
+def get_sn_retry_attempts() -> int:
+    """Max retry attempts on grammar/validation failure during compose.
+
+    Priority: ITER_CODEX_SN_RETRY_ATTEMPTS env
+              → [sn].retry-attempts → ``1``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_RETRY_ATTEMPTS"):
+        return int(env)
+    section = _get_section("sn")
+    return int(section.get("retry-attempts", _SN_DEFAULTS["retry-attempts"]))
+
+
+def get_sn_refine_rotations() -> int:
+    """Refinement rotations a single name or documentation record may spend.
+
+    One rotation is one claimed refinement attempt. On the name axis the
+    budget is charged whether or not the attempt produces a persisted
+    successor, and the last rotation runs on the escalation seat; on the docs
+    axis every attempt rewrites in place, so a rotation is also a revision.
+    Reaching the cap without clearing review is terminal (``exhausted``),
+    recoverable through ``sn rescore`` or ``sn edit``.
+
+    Priority: ITER_CODEX_SN_REFINE_ROTATIONS env
+              → [sn].refine-rotations → ``3``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_REFINE_ROTATIONS"):
+        return int(env)
+    section = _get_section("sn")
+    return int(section.get("refine-rotations", _SN_DEFAULTS["refine-rotations"]))
+
+
+def get_sn_retry_k_expansion() -> int:
+    """Hybrid-search k expansion factor used on compose retry.
+
+    On retry, the compose worker re-enriches items with an expanded
+    hybrid DD search using ``search_k=retry_k_expansion``.
+
+    Priority: ITER_CODEX_SN_RETRY_K_EXPANSION env
+              → [sn].retry-k-expansion → ``12``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_RETRY_K_EXPANSION"):
+        return int(env)
+    section = _get_section("sn")
+    return int(section.get("retry-k-expansion", _SN_DEFAULTS["retry-k-expansion"]))
+
+
+def get_sn_desc_name_similarity_threshold() -> float:
+    """Cosine-similarity gate threshold for desc-name alignment on derived parents.
+
+    Below this value the item is routed to REFINE_DOCS instead of completing
+    name review — the description is considered misaligned with the name.
+
+    Priority: ITER_CODEX_SN_DESC_NAME_SIM_THRESHOLD env
+              → [sn].desc-name-similarity-threshold → ``0.55``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_DESC_NAME_SIM_THRESHOLD"):
+        return float(env)
+    section = _get_section("sn")
+    return float(section.get("desc-name-similarity-threshold", 0.55))
+
+
+def get_sn_dedup_threshold() -> float:
+    """Cosine bar for the in-pipeline component-token reuse check.
+
+    A candidate-new grammar token (a ``vocab_gap`` the compose LLM emitted)
+    scoring at/above this against a registered same-segment token is fed back
+    into the next compose attempt as advisory context — the agent reuses the
+    registered token or re-emits the gap (recorded as distinct-confirmed).
+    Advisory only: it adds a retry trigger, never a hard reject. Set the value
+    above 1.0 (e.g. 1.01) to disable the check entirely (no hit can ever fire).
+
+    Priority: ITER_CODEX_SN_DEDUP_THRESHOLD env
+              → [sn-compose].dedup-similarity-threshold → ``0.85``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_DEDUP_THRESHOLD"):
+        return float(env)
+    section = _get_section("sn-compose")
+    return float(section.get("dedup-similarity-threshold", 0.85))
+
+
+def get_sn_domain_tree_threshold() -> float:
+    """Confidence bar below which a DD path is re-judged by chat.
+
+    The two-level category-then-domain tree returns a probability; a path
+    scoring below this is handed to the chat classifier reading the same
+    guidance. The bar is the one the tree benchmark calibrated on its held-out
+    rows, so it lives in the seat section rather than as a classifier constant.
+
+    Priority: ITER_CODEX_SN_DOMAIN_TREE_THRESHOLD env
+              → [sn-domain-tree].threshold → ``0.9``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_DOMAIN_TREE_THRESHOLD"):
+        return float(env)
+    section = _get_section("sn-domain-tree")
+    return float(section.get("threshold", 0.9))
+
+
+def get_sn_staging_dir() -> Path:
+    """Default staging directory for sn export/preview/publish.
+
+    Resolution order: ``ITER_CODEX_SN_STAGING`` env var →
+    ``[tool.iter-codex.sn].staging-dir`` config → ``~/.cache/iter-codex/staging``.
+    """
+    env = os.environ.get("ITER_CODEX_SN_STAGING")
+    if env:
+        return Path(env).expanduser()
+    cfg = _get_section("sn").get("staging-dir", "~/.cache/iter-codex/staging")
+    return Path(cfg).expanduser()
+
+
+def get_sn_group_release_bar() -> Path | None:
+    """Override path for the group-release bar ruling, or None for the default.
+
+    Resolution order: ``ITER_CODEX_SN_GROUP_RELEASE_BAR`` env var →
+    ``[tool.iter-codex.sn].group-release-bar`` config → ``None``. ``None`` is
+    not an unruled bar: the cut then reads the ruling committed beside the
+    package (``iter_codex/standard_names/release_bar.json``), so a checkout
+    reads the same bar on every host. These keys exist for a ruling being
+    tried before it lands; a document found at the resulting path that carries
+    no numeric ``max_defect_rate`` still refuses with ``release_bar_not_ruled``.
+    """
+    env = os.environ.get("ITER_CODEX_SN_GROUP_RELEASE_BAR")
+    if env:
+        return Path(env).expanduser()
+    cfg = _get_section("sn").get("group-release-bar")
+    return Path(cfg).expanduser() if cfg else None
+
+
+def get_sn_group_audit_dir() -> Path:
+    """Directory holding one audit record per physics-domain group.
+
+    Resolution order: ``ITER_CODEX_SN_GROUP_AUDIT_DIR`` env var →
+    ``[tool.iter-codex.sn].group-audit-dir`` config →
+    ``~/.cache/iter-codex/group-audit``. A group with no record there is
+    refused as never measured, so the default names a place to write rather
+    than a measurement to assume.
+    """
+    env = os.environ.get("ITER_CODEX_SN_GROUP_AUDIT_DIR")
+    if env:
+        return Path(env).expanduser()
+    cfg = _get_section("sn").get("group-audit-dir", "~/.cache/iter-codex/group-audit")
+    return Path(cfg).expanduser()
+
+
+def get_sn_isnc_dir() -> Path | None:
+    """Path to ISNC (imas-standard-names-catalog) git checkout.
+
+    Resolution order: ``ITER_CODEX_SN_ISNC`` env var →
+    ``[tool.iter-codex.sn].isnc-dir`` config → sibling auto-discovery → None.
+
+    Auto-discovery scans sibling directories of the project root for
+    directories matching ``*standard-names-catalog*``. An exact match on
+    ``imas-standard-names-catalog`` wins. Multiple ambiguous matches
+    return None (with a logged warning).
+    """
+    import logging
+
+    env = os.environ.get("ITER_CODEX_SN_ISNC")
+    if env:
+        p = Path(env).expanduser()
+        return p if p.is_dir() else None
+
+    cfg = _get_section("sn").get("isnc-dir", "")
+    if cfg:
+        p = Path(cfg).expanduser()
+        return p if p.is_dir() else None
+
+    # Auto-discover from sibling directories of the project root
+    project_root = Path(__file__).resolve().parent.parent
+    parent = project_root.parent
+    if not parent.is_dir():
+        return None
+
+    exact = parent / "imas-standard-names-catalog"
+    if exact.is_dir():
+        return exact
+
+    candidates = [
+        d
+        for d in parent.iterdir()
+        if d.is_dir() and "standard-names-catalog" in d.name and d != project_root
+    ]
+    if len(candidates) == 1:
+        return candidates[0]
+    if len(candidates) > 1:
+        logger = logging.getLogger(__name__)
+        logger.warning(
+            "Multiple ISNC candidates found: %s. Set ITER_CODEX_SN_ISNC or "
+            "[tool.iter-codex.sn].isnc-dir to resolve.",
+            ", ".join(str(c) for c in candidates),
+        )
+    return None
+
+
+def get_compose_concurrency() -> int:
+    """Maximum concurrent LLM requests for the SN compose worker.
+
+    Sized from the 2026-04-24 OpenRouter rate-limit probe: Anthropic
+    Opus/Sonnet/Haiku all handled N=32 concurrent requests with zero 429s.
+    The default of 24 applies 75 % headroom against the measured floor
+    (0.75 × 32 = 24).  See ``docs/ops/openrouter-rate-ceilings.md``.
+
+    Priority: ITER_CODEX_SN_COMPOSE_MAX_CONCURRENCY env
+              → [sn-compose].max-concurrency → ``24``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_COMPOSE_MAX_CONCURRENCY"):
+        return int(env)
+    return int(_get_section("sn-compose").get("max-concurrency", 24))
+
+
+def get_compose_self_refine() -> bool:
+    """Whether the compose worker runs a free local self-refine pass.
+
+    When enabled, the locally-served compose model critiques its own
+    freshly-composed name + description against the grammar diagnostics
+    and the compose rubric and emits an improved candidate (improve-or-
+    no-op; the original is kept if the rewrite fails grammar). The pass
+    runs on the same local GPU endpoint as compose, so it adds free
+    latency but no paid cost. Default off — gated on measurement.
+
+    Priority: ITER_CODEX_SN_COMPOSE_SELF_REFINE env
+              → [sn-compose].self-refine → ``False``.
+    """
+    if env := os.getenv("ITER_CODEX_SN_COMPOSE_SELF_REFINE"):
+        return _parse_bool(env)
+    val = _get_section("sn-compose").get("self-refine")
+    if val is not None:
+        return _parse_bool(val)
+    return False
+
+
+# Map ``pool_name → (config-key, env-var-suffix)``. Six entries — one per
+# pool wired in ``iter_codex/standard_names/loop.py::_build_pool_specs``.
+_POOL_REPLICA_KEYS: dict[str, tuple[str, str]] = {
+    "generate_name": ("generate-name-replicas", "GENERATE_NAME"),
+    "review_name": ("review-name-replicas", "REVIEW_NAME"),
+    "refine_name": ("refine-name-replicas", "REFINE_NAME"),
+    "generate_docs": ("generate-docs-replicas", "GENERATE_DOCS"),
+    "review_docs": ("review-docs-replicas", "REVIEW_DOCS"),
+    "refine_docs": ("refine-docs-replicas", "REFINE_DOCS"),
+    "enrich_parents": ("enrich-parents-replicas", "ENRICH_PARENTS"),
+}
+
+
+def get_pool_replicas(pool_name: str) -> int:
+    """Concurrent replica count for one of the six SN pools.
+
+    Priority: ITER_CODEX_SN_POOLS_<POOL>_REPLICAS env →
+              [sn-pools].<pool>-replicas → fallback formula.
+
+    The fallback formula derives sensible defaults from
+    ``[sn-compose].max-concurrency`` so legacy ``pyproject.toml``
+    files without a ``[sn-pools]`` section keep working:
+
+        generate_*  → compose_concurrency
+        review_*    → max(compose_concurrency // 2, 16)
+        refine_*    → max(compose_concurrency // 4, 8)
+    """
+    try:
+        key, env_suffix = _POOL_REPLICA_KEYS[pool_name]
+    except KeyError as exc:
+        raise ValueError(f"Unknown SN pool name: {pool_name!r}") from exc
+
+    env_var = f"ITER_CODEX_SN_POOLS_{env_suffix}_REPLICAS"
+    if env := os.getenv(env_var):
+        return int(env)
+
+    section = _get_section("sn-pools")
+    if key in section:
+        return int(section[key])
+
+    # Backwards-compatible derivation from ``[sn-compose].max-concurrency``.
+    compose = get_compose_concurrency()
+    if pool_name.startswith("generate_"):
+        return compose
+    if pool_name.startswith("review_"):
+        return max(compose // 2, 16)
+    return max(compose // 4, 8)
+
+
+# ─── SN review settings ────────────────────────────────────────────────────
+
+_SN_REVIEW_DEFAULTS: dict[str, Any] = {
+    "names-models": [
+        "local/deepseek-v4.1-flash",
+        "openrouter/anthropic/claude-haiku-5.5",
+        "openrouter/openai/gpt-6.1-sol",
+    ],
+    "docs-models": [
+        "openrouter/anthropic/claude-sonnet-5.5",
+        "openrouter/x-ai/grok-4.7",
+        "openrouter/openai/gpt-6.1-sol",
+    ],
+    "disagreement-threshold": 0.15,
+    "max-cycles": 3,
+    "reasoning-effort": "medium",
+    "escalation-reasoning-effort": "high",
+    "panel-audit-rate": 0.05,
+}
+
+
+def _validate_review_models(models: list[str], axis: str) -> list[str]:
+    """Validate a review model list for the given axis.
+
+    Args:
+        models: Raw list of model strings from config.
+        axis: Axis name ("names" or "docs") used in error messages.
+
+    Returns:
+        Validated list of model strings.
+
+    Raises:
+        ValueError: If the list length is 0 or >3, or any entry is empty.
+    """
+    import logging as _logging
+
+    if len(models) == 0:
+        raise ValueError(
+            f"[sn-review.{axis}].models must have at least 1 entry; got 0. "
+            f"Set 1 model to disable quorum, 2 for blind pair, 3 for full RD-quorum."
+        )
+    if len(models) > 3:
+        raise ValueError(
+            f"[sn-review.{axis}].models accepts at most 3 entries "
+            f"(primary, secondary, escalator); got {len(models)}."
+        )
+    validated: list[str] = []
+    for m in models:
+        if not isinstance(m, str) or not m.strip():
+            raise ValueError(
+                f"[sn-review.{axis}].models entries must be non-empty strings; "
+                f"got {m!r}."
+            )
+        if not m.startswith("openrouter/"):
+            _logging.getLogger(__name__).warning(
+                "[sn-review.%s].models entry %r does not have the 'openrouter/' prefix; "
+                "prompt caching will not be available for this model.",
+                axis,
+                m,
+            )
+        validated.append(m)
+    return validated
+
+
+_VALID_REVIEWER_PROFILES: frozenset[str] = frozenset(
+    {"default", "quality-cost-balanced", "opus-only"}
+)
+
+
+_BOUND_REVIEW_PROFILE: ContextVar[str | None] = ContextVar(
+    "sn_review_profile", default=None
+)
+
+
+def bind_sn_review_profile(profile: str) -> Token[str | None]:
+    """Bind *profile* for the current context and return its release token.
+
+    A caller that resolves a profile (the ``sn`` CLI resolving
+    ``--reviewer-profile``) binds it here rather than exporting it, so the
+    choice reaches the reviewer accessors through the context the run already
+    carries — asyncio tasks and ``to_thread`` workers inherit it — without
+    mutating the process for anything that runs afterwards. Release the token
+    with :func:`release_sn_review_profile` when the invocation ends.
+    """
+    return _BOUND_REVIEW_PROFILE.set(profile)
+
+
+def release_sn_review_profile(token: Token[str | None]) -> None:
+    """Undo one :func:`bind_sn_review_profile` binding."""
+    _BOUND_REVIEW_PROFILE.reset(token)
+
+
+def get_sn_review_active_profile() -> str:
+    """Return the active reviewer profile name.
+
+    Resolution order:
+      1. A profile bound by :func:`bind_sn_review_profile`.
+      2. ``ITER_CODEX_SN_REVIEW_PROFILE`` environment variable.
+      3. Hard-coded default: ``"default"``.
+
+    Valid profile names: ``"default"``, ``"quality-cost-balanced"``,
+    ``"opus-only"``. (Reviewer floor is Sonnet 4.6 — no Haiku profiles.)
+
+    Returns:
+        Profile name string (not validated here — validation happens in
+        :func:`get_sn_review_profile_models`).
+    """
+    import os as _os
+
+    bound = _BOUND_REVIEW_PROFILE.get()
+    if bound is not None:
+        return bound
+    return _os.environ.get("ITER_CODEX_SN_REVIEW_PROFILE", "default")
+
+
+def get_sn_review_profile_models(profile: str) -> list[str]:
+    """Return the ordered reviewer-model chain for *profile*.
+
+    Reads from ``[tool.iter-codex.sn-review.names.profiles.<profile>].models``.
+    For ``"default"``, falls back to the top-level ``[sn-review.names].models``
+    key when no ``profiles`` section is present (backward-compat).
+
+    Length semantics (same as :func:`get_sn_review_names_models`):
+      * 1 model  → quorum disabled
+      * 2 models → blind pair, no escalator
+      * 3 models → full RD-quorum: primary, secondary, escalator
+      * 4+       → rejected (``ValueError``)
+
+    Args:
+        profile: Profile name — one of ``"default"``,
+            ``"quality-cost-balanced"``, ``"opus-only"``.
+
+    Raises:
+        ValueError: If *profile* is not in :data:`_VALID_REVIEWER_PROFILES`
+            or the model list fails validation.
+    """
+    names_section = _get_section("sn-review").get("names", {})
+    profiles = names_section.get("profiles", {})
+
+    if profile in profiles:
+        raw = profiles[profile].get("models", [])
+        return _validate_review_models(
+            [str(m) for m in raw if m], f"names.profiles.{profile}"
+        )
+    if profile == "default":
+        # Backward-compat: no profiles section → read top-level models key.
+        raw = names_section.get("models", _SN_REVIEW_DEFAULTS["names-models"])
+        return _validate_review_models([str(m) for m in raw if m], "names")
+    raise ValueError(
+        f"Unknown reviewer profile {profile!r}. "
+        f"Valid profiles: {sorted(_VALID_REVIEWER_PROFILES)}. "
+        f"Configure under [tool.iter-codex.sn-review.names.profiles]."
+    )
+
+
+def get_sn_review_profile_threshold(profile: str) -> float:
+    """Return the disagreement threshold for *profile*.
+
+    Reads from
+    ``[tool.iter-codex.sn-review.names.profiles.<profile>].disagreement-threshold``.
+    For ``"default"``, falls back to ``[sn-review].disagreement-threshold``
+    when no ``profiles`` section is present (backward-compat).
+
+    Args:
+        profile: Profile name.
+
+    Raises:
+        ValueError: If *profile* is not in :data:`_VALID_REVIEWER_PROFILES`.
+    """
+    names_section = _get_section("sn-review").get("names", {})
+    profiles = names_section.get("profiles", {})
+    review_section = _get_section("sn-review")
+
+    if profile in profiles:
+        return float(
+            profiles[profile].get(
+                "disagreement-threshold",
+                _SN_REVIEW_DEFAULTS["disagreement-threshold"],
+            )
+        )
+    if profile == "default":
+        # Backward-compat: no profiles section → read shared review setting.
+        return float(
+            review_section.get(
+                "disagreement-threshold",
+                _SN_REVIEW_DEFAULTS["disagreement-threshold"],
+            )
+        )
+    raise ValueError(
+        f"Unknown reviewer profile {profile!r}. "
+        f"Valid profiles: {sorted(_VALID_REVIEWER_PROFILES)}."
+    )
+
+
+def get_sn_review_names_models() -> list[str]:
+    """Return the ordered reviewer-model chain for the names review axis.
+
+    Delegates to :func:`get_sn_review_profile_models` using the active
+    profile (see :func:`get_sn_review_active_profile`).  When no profile
+    is active and no ``profiles`` section exists in config, falls back to
+    the top-level ``[sn-review.names].models`` key (backward-compat).
+
+    Length semantics:
+      * 1 model  → quorum disabled (single reviewer, mirrors legacy behaviour)
+      * 2 models → blind primary + blind secondary, no escalator
+      * 3 models → full RD-quorum: [0] primary (blind), [1] secondary (blind),
+                   [2] escalator (sees both reviews, authoritative)
+      * 4+       → rejected at config load time (``ValueError``)
+
+    Raises:
+        ValueError: If list is empty or has more than 3 entries.
+    """
+    return get_sn_review_profile_models(get_sn_review_active_profile())
+
+
+def get_sn_review_docs_models() -> list[str]:
+    """Return the ordered reviewer-model chain for the docs review axis.
+
+    Same length semantics as :func:`get_sn_review_names_models`.
+    Reads from ``[sn-review.docs].models`` (docs axis has no profile system;
+    use ``--models`` CLI override for ad-hoc docs model changes).
+
+    Priority: ``[sn-review.docs].models`` in pyproject.toml → default
+    (a single canonical model).
+
+    Raises:
+        ValueError: If list is empty or has more than 3 entries.
+    """
+    section = _get_section("sn-review").get("docs", {})
+    raw = section.get("models", _SN_REVIEW_DEFAULTS["docs-models"])
+    return _validate_review_models([str(m) for m in raw if m], "docs")
+
+
+def get_sn_review_max_cycles() -> int:
+    """Get the maximum number of RD-quorum review cycles.
+
+    1 → primary only, 2 → blind pair (no escalator), 3 → full quorum.
+
+    Priority: ``[sn-review].max-cycles`` → ``3``.
+    """
+    section = _get_section("sn-review")
+    return int(section.get("max-cycles", _SN_REVIEW_DEFAULTS["max-cycles"]))
+
+
+def get_sn_review_panel_audit_rate() -> float:
+    """Fraction of decided items that also run the paid panel as an audit.
+
+    Reads ``[sn-review].panel-audit-rate``. ``0`` disables the audit and
+    ``1`` audits every decided item. The rate only selects which items the
+    audit covers; it never turns the panel into the decider.
+    """
+    section = _get_section("sn-review")
+    rate = float(
+        section.get("panel-audit-rate", _SN_REVIEW_DEFAULTS["panel-audit-rate"])
+    )
+    if not 0.0 <= rate <= 1.0:
+        raise ValueError("[sn-review].panel-audit-rate must be in [0, 1]")
+    return rate
+
+
+def get_sn_review_disagreement_threshold() -> float:
+    """Get the spread threshold that flags review disagreement.
+
+    Delegates to :func:`get_sn_review_profile_threshold` using the active
+    profile (see :func:`get_sn_review_active_profile`).  Falls back to the
+    top-level ``[sn-review].disagreement-threshold`` key when no profile is
+    active (backward-compat).
+
+    When N >= 2 reviewers are configured, ``review_disagreement`` is
+    set ``true`` if ``max(scores) - min(scores) >= threshold``.
+    """
+    return get_sn_review_profile_threshold(get_sn_review_active_profile())
+
+
+def get_sn_review_reasoning_effort() -> str | None:
+    """Reasoning effort for the BASE SN reviewer cycles (primary + secondary).
+
+    Reads ``[tool.iter-codex.sn-review].reasoning-effort`` (shared across both
+    axes). Defaults to ``"medium"``: review is a bounded judge-against-schema
+    task and is the cost-dominant phase (N reviewers x cycles per name), so it
+    does not warrant the ``max`` budget the GENERATE task needs. Lower effort
+    can also improve rule/prompt-following (less second-guessing). The
+    disagreement tie-breaker escalates separately — see
+    :func:`get_sn_review_escalation_reasoning_effort`. Set ``"none"`` / empty
+    for the provider default (no explicit reasoning budget).
+    """
+    return get_reasoning_effort("sn-review", _SN_REVIEW_DEFAULTS["reasoning-effort"])
+
+
+def get_sn_review_escalation_reasoning_effort() -> str | None:
+    """Reasoning effort for the SN review ESCALATOR cycle (the tie-breaker).
+
+    Reads ``[tool.iter-codex.sn-review].escalation-reasoning-effort``. Defaults
+    to ``"high"``: the escalator only fires on a flagged disagreement between
+    the base reviewers, so it is rare and a higher budget on just those
+    contested items is cheap. If the escalator turns out to fire too often
+    (watch ``resolution_method='authoritative_escalation'`` frequency), prefer
+    raising the base effort or the disagreement threshold over leaning on this.
+    """
+    val = _get_section("sn-review").get(
+        "escalation-reasoning-effort",
+        _SN_REVIEW_DEFAULTS["escalation-reasoning-effort"],
+    )
+    if val in (None, "", "none"):
+        return None
+    return str(val)
+
+
+def get_reasoning_effort(section: str, default: str | None = None) -> str | None:
+    """Reasoning effort (low|medium|high) for LLM calls in *section*.
+
+    Reads ``[tool.iter-codex.<section>].reasoning-effort``; returns ``None``
+    (provider default — no explicit reasoning budget) when unset or ``"none"``.
+    Gives judgment-heavy SN stages (review, name composition) an explicit
+    reasoning budget — the 2026-06-09 bake-off showed high effort materially
+    lifts discrimination/quality at trivial extra cost. Threaded into
+    ``call_llm_structured`` via OpenRouter's native ``reasoning:{effort}``.
+    """
+    val = _get_section(section).get("reasoning-effort", default)
+    if val in (None, "", "none"):
+        return None
+    return str(val)
+
+
+# ─── SN benchmark settings ─────────────────────────────────────────────────
+
+_SN_BENCHMARK_DEFAULTS = {
+    "compose-models": [
+        "openrouter/anthropic/claude-opus-5.5",
+        "openrouter/anthropic/claude-sonnet-5.5",
+        "openrouter/anthropic/claude-haiku-5.5",
+        "openrouter/openai/gpt-6.1-sol",
+        "openrouter/openai/gpt-6.1-terra",
+        "openrouter/openai/gpt-6-luna",
+        "openrouter/x-ai/grok-4.7",
+        "openrouter/google/gemini-4-hydrogen",
+        "openrouter/google/gemini-4-carbon",
+        "openrouter/google/gemini-3.5-flash-lite",
+        "openrouter/qwen/qwen3.7-plus",
+        "openrouter/xiaomi/mimo-v2.6-pro",
+        "openrouter/moonshotai/kimi-k3.1-pro",
+        "openrouter/deepseek/deepseek-v4.1-flash",
+        "openrouter/meta-llama/llama-4-maverick",
+    ],
+    "reviewer-model": "openrouter/anthropic/claude-opus-5.5",
+    "reviewer-models": [
+        "openrouter/google/gemini-4-hydrogen",
+        "openrouter/openai/gpt-6.1-sol",
+        "openrouter/x-ai/grok-4.7",
+        "openrouter/google/gemini-4-carbon",
+        "openrouter/anthropic/claude-sonnet-5.5",
+        "openrouter/anthropic/claude-opus-5.5",
+    ],
+    "candidate-models": [
+        "openrouter/x-ai/grok-4.7",
+        "openrouter/google/gemini-4-hydrogen",
+        "openrouter/google/gemini-4-carbon",
+        "openrouter/openai/gpt-6.1-terra",
+        "openrouter/anthropic/claude-sonnet-5.5",
+    ],
+}
+
+
+def get_sn_benchmark_compose_models() -> list[str]:
+    """Get list of models for SN benchmark composition.
+
+    Priority: [sn-benchmark].compose-models in pyproject.toml → defaults.
+    """
+    section = _get_section("sn-benchmark")
+    return section.get("compose-models", _SN_BENCHMARK_DEFAULTS["compose-models"])
+
+
+def get_sn_benchmark_candidate_models() -> list[str]:
+    """Candidate models evaluated across pipeline seats by ``sn bench --role``.
+
+    Priority: ``[sn-benchmark].candidate-models`` in pyproject.toml → defaults.
+    The per-seat default bench slate is these candidates plus the seat's live
+    production model (its own ``[sn-*]`` config) as the incumbent — so the
+    slate is managed in pyproject, never hardcoded in the CLI.
+    """
+    section = _get_section("sn-benchmark")
+    return section.get("candidate-models", _SN_BENCHMARK_DEFAULTS["candidate-models"])
+
+
+def get_sn_benchmark_reviewer_model() -> str:
+    """Reviewer model for SN benchmark scoring.
+
+    Priority: ``[sn-benchmark].reviewer-model`` →
+    ``[sn-review.names].models[0]`` → default.
+    """
+    section = _get_section("sn-benchmark")
+    try:
+        review_models = get_sn_review_names_models()
+        fallback = (
+            review_models[0]
+            if review_models
+            else _SN_BENCHMARK_DEFAULTS["reviewer-model"]
+        )
+    except (ValueError, IndexError):
+        fallback = _SN_BENCHMARK_DEFAULTS["reviewer-model"]
+    return section.get("reviewer-model", fallback)
+
+
+def get_sn_benchmark_reviewer_models() -> list[str]:
+    """Reviewer model list for SN benchmark multi-reviewer matrix.
+
+    Priority: ``[sn-benchmark].reviewer-models`` → defaults.
+    """
+    section = _get_section("sn-benchmark")
+    return section.get("reviewer-models", _SN_BENCHMARK_DEFAULTS["reviewer-models"])
+
+
+# ─── Adaptive concurrency governor (AIMD backpressure on 429s) ──────────────
+#
+# A process-global ceiling on concurrent in-flight LLM calls that pulls back on
+# provider rate-limits and recovers gradually. Defaults are chosen so the
+# governor is a no-op under healthy load. All values are env-overridable only
+# (no pyproject section) so throughput tuning needs no config-file edit.
+
+_RATE_GOVERNOR_DEFAULTS = {
+    "enabled": True,
+    "max-ceiling": 128,
+    # A single 429 must not cripple throughput: an 8-slot floor is still a large
+    # pullback from 128 while leaving useful concurrency to recover from.
+    "min-ceiling": 8,
+    "decrease-factor": 0.5,
+    "cooldown": 5.0,
+    "settle": 1.0,
+}
+
+
+def get_rate_governor_enabled() -> bool:
+    """Whether the global AIMD concurrency governor is active.
+
+    Priority: ITER_CODEX_RATE_GOVERNOR env → ``True``. Accepts the usual
+    truthy/falsey spellings (``0/false/no/off`` disable it).
+    """
+    if (env := os.getenv("ITER_CODEX_RATE_GOVERNOR")) is not None:
+        return env.strip().lower() not in ("0", "false", "no", "off", "")
+    return bool(_RATE_GOVERNOR_DEFAULTS["enabled"])
+
+
+def get_rate_governor_max_ceiling() -> int:
+    """Upper bound on concurrent in-flight LLM calls (governor starts here).
+
+    Priority: ITER_CODEX_RATE_GOVERNOR_MAX_CEILING env → ``128``.
+    """
+    if env := os.getenv("ITER_CODEX_RATE_GOVERNOR_MAX_CEILING"):
+        return int(env)
+    return int(_RATE_GOVERNOR_DEFAULTS["max-ceiling"])
+
+
+def get_rate_governor_min_ceiling() -> int:
+    """Lower bound the multiplicative decrease can never breach.
+
+    Priority: ITER_CODEX_RATE_GOVERNOR_MIN_CEILING env → ``8``.
+    """
+    if env := os.getenv("ITER_CODEX_RATE_GOVERNOR_MIN_CEILING"):
+        return int(env)
+    return int(_RATE_GOVERNOR_DEFAULTS["min-ceiling"])
+
+
+def get_rate_governor_decrease_factor() -> float:
+    """Multiplier applied to the ceiling on each observed rate-limit.
+
+    Priority: ITER_CODEX_RATE_GOVERNOR_DECREASE_FACTOR env → ``0.5``.
+    """
+    if env := os.getenv("ITER_CODEX_RATE_GOVERNOR_DECREASE_FACTOR"):
+        return float(env)
+    return float(_RATE_GOVERNOR_DEFAULTS["decrease-factor"])
+
+
+def get_rate_governor_cooldown() -> float:
+    """Seconds after a rate-limit during which additive increases are suppressed.
+
+    Priority: ITER_CODEX_RATE_GOVERNOR_COOLDOWN env → ``5.0``.
+    """
+    if env := os.getenv("ITER_CODEX_RATE_GOVERNOR_COOLDOWN"):
+        return float(env)
+    return float(_RATE_GOVERNOR_DEFAULTS["cooldown"])
+
+
+def get_rate_governor_settle() -> float:
+    """Minimum seconds between additive ceiling increases (gates bursty ramp-up).
+
+    Priority: ITER_CODEX_RATE_GOVERNOR_SETTLE env → ``1.0``.
+    """
+    if env := os.getenv("ITER_CODEX_RATE_GOVERNOR_SETTLE"):
+        return float(env)
+    return float(_RATE_GOVERNOR_DEFAULTS["settle"])
+
+
+def get_llm_heartbeat_interval() -> float:
+    """Base (fast) seconds between LLM-activity heartbeat log lines (0 disables).
+
+    The heartbeat is a lazily-started background task that periodically logs
+    in-flight/started/completed/failed counts, spend, seconds-since-last
+    completion, and the governor ceiling — so a long campaign is observable and
+    a stall (in-flight work with no completions) surfaces as a WARNING.
+
+    This is the *fast* interval used for the opening ramp and after any material
+    change; the cadence then backs off geometrically toward
+    :func:`get_llm_heartbeat_max_interval` as the run settles. Every line
+    advertises when the next beat is due.
+
+    Priority: ITER_CODEX_LLM_HEARTBEAT_INTERVAL env → ``15.0``.
+    """
+    if (env := os.getenv("ITER_CODEX_LLM_HEARTBEAT_INTERVAL")) is not None:
+        return float(env)
+    return 15.0
+
+
+def get_llm_heartbeat_max_interval() -> float:
+    """Cap (settled) seconds between heartbeat lines once the run is steady.
+
+    The adaptive cadence backs off from :func:`get_llm_heartbeat_interval`
+    toward this ceiling while nothing material changes. The default matches the
+    stall-detection window, so even a fully settled fleet still beats at least
+    once per stall window.
+
+    Priority: ITER_CODEX_LLM_HEARTBEAT_MAX_INTERVAL env → ``120.0``.
+    """
+    if (env := os.getenv("ITER_CODEX_LLM_HEARTBEAT_MAX_INTERVAL")) is not None:
+        return float(env)
+    return 120.0
+
+
+def get_llm_heartbeat_fast_beats() -> int:
+    """Number of base-interval beats fired on start / after a material change.
+
+    The opening ramp (and every re-densification after a burst, failure,
+    ceiling move, or stall) emits this many fast beats before the geometric
+    backoff toward the cap begins.
+
+    Priority: ITER_CODEX_LLM_HEARTBEAT_FAST_BEATS env → ``3``.
+    """
+    if (env := os.getenv("ITER_CODEX_LLM_HEARTBEAT_FAST_BEATS")) is not None:
+        return max(1, int(env))
+    return 3
+
+
+def get_llm_heartbeat_backoff_factor() -> float:
+    """Multiplier applied to the interval on each quiet beat during backoff.
+
+    Priority: ITER_CODEX_LLM_HEARTBEAT_BACKOFF_FACTOR env → ``2.0`` (clamped to
+    ≥ 1.0 so the cadence never runs faster than the base interval).
+    """
+    if (env := os.getenv("ITER_CODEX_LLM_HEARTBEAT_BACKOFF_FACTOR")) is not None:
+        return max(1.0, float(env))
+    return 2.0

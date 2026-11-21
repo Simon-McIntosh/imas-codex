@@ -4,9 +4,9 @@ import argparse
 import json
 from pathlib import Path
 
-from imas_codex.discovery.signals.controls_metadata import import_controls_metadata
-from imas_codex.embeddings.encoder import Encoder
-from imas_codex.graph.client import GraphClient
+from iter_codex.discovery.signals.controls_metadata import import_controls_metadata
+from iter_codex.embeddings.encoder import Encoder
+from iter_codex.graph.client import GraphClient
 
 
 def main():

@@ -13,13 +13,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.ingestion.chunkers import Chunk, chunk_code, chunk_text
-from imas_codex.ingestion.extractors.mdsplus import (
+from iter_codex.ingestion.chunkers import Chunk, chunk_code, chunk_text
+from iter_codex.ingestion.extractors.mdsplus import (
     MDSplusReference,
     extract_mdsplus_paths,
     normalize_mdsplus_path,
 )
-from imas_codex.ingestion.readers.remote import (
+from iter_codex.ingestion.readers.remote import (
     EXTENSION_TO_LANGUAGE,
     TEXT_SPLITTER_LANGUAGES,
     detect_language,
@@ -482,7 +482,7 @@ class TestSplitAndExtract:
 
     def test_python_code_extract_ids_and_paths(self):
         """Extract IDS references and MDSplus paths from Python code."""
-        from imas_codex.ingestion.pipeline import _split_and_extract
+        from iter_codex.ingestion.pipeline import _split_and_extract
 
         code = '''
 import imas
@@ -507,7 +507,7 @@ def write_equilibrium(shot):
 
     def test_fortran_code_extract(self):
         """Extract from Fortran code."""
-        from imas_codex.ingestion.pipeline import _split_and_extract
+        from iter_codex.ingestion.pipeline import _split_and_extract
 
         code = """subroutine read_data(shot)
     integer, intent(in) :: shot
@@ -522,7 +522,7 @@ end subroutine
 
     def test_matlab_code_extract(self):
         """Extract from MATLAB code."""
-        from imas_codex.ingestion.pipeline import _split_and_extract
+        from iter_codex.ingestion.pipeline import _split_and_extract
 
         code = """function ip = get_ip(shot)
     mdsopen('tcv_shot', shot);
@@ -540,7 +540,7 @@ end
 
     def test_idl_code_extract(self):
         """Extract from IDL code."""
-        from imas_codex.ingestion.pipeline import _split_and_extract
+        from iter_codex.ingestion.pipeline import _split_and_extract
 
         code = """pro get_ip, shot
 mds$open, 'tcv_shot', shot
@@ -554,7 +554,7 @@ end
 
     def test_tdi_code_uses_text_splitter(self):
         """TDI .fun files use text splitter."""
-        from imas_codex.ingestion.pipeline import _split_and_extract
+        from iter_codex.ingestion.pipeline import _split_and_extract
 
         code = """public fun tcv_ip(as_is _shot)
 {
@@ -568,7 +568,7 @@ end
 
     def test_fallback_to_text_splitter_on_parse_error(self):
         """If tree-sitter fails, should fall back to text splitter."""
-        from imas_codex.ingestion.pipeline import _split_and_extract
+        from iter_codex.ingestion.pipeline import _split_and_extract
 
         # Badly formatted code that might confuse tree-sitter
         code = "not valid python at all {{{}}}"
@@ -591,7 +591,7 @@ class TestCodeEvidenceLinking:
 
     def test_link_resolves_data_references(self):
         """link_code_evidence_to_signals resolves DataReference → SignalNode."""
-        from imas_codex.discovery.code.graph_ops import link_code_evidence_to_signals
+        from iter_codex.discovery.code.graph_ops import link_code_evidence_to_signals
 
         mock_gc = MagicMock()
         # Step 1: Resolve DataReference → SignalNode returns resolved count
@@ -601,7 +601,7 @@ class TestCodeEvidenceLinking:
             [],  # Step 3: mark evidence_linked
         ]
 
-        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+        with patch("iter_codex.discovery.code.graph_ops.GraphClient") as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -614,7 +614,7 @@ class TestCodeEvidenceLinking:
 
     def test_link_sets_code_evidence_count(self):
         """Linked signals get code_evidence_count and has_code_evidence=true."""
-        from imas_codex.discovery.code.graph_ops import link_code_evidence_to_signals
+        from iter_codex.discovery.code.graph_ops import link_code_evidence_to_signals
 
         mock_gc = MagicMock()
         mock_gc.query.side_effect = [
@@ -623,7 +623,7 @@ class TestCodeEvidenceLinking:
             [],
         ]
 
-        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+        with patch("iter_codex.discovery.code.graph_ops.GraphClient") as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -639,7 +639,7 @@ class TestCodeEvidenceLinking:
 
     def test_link_marks_files_evidence_linked(self):
         """After linking, CodeFiles are marked evidence_linked=true."""
-        from imas_codex.discovery.code.graph_ops import link_code_evidence_to_signals
+        from iter_codex.discovery.code.graph_ops import link_code_evidence_to_signals
 
         mock_gc = MagicMock()
         mock_gc.query.side_effect = [
@@ -648,7 +648,7 @@ class TestCodeEvidenceLinking:
             [],
         ]
 
-        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+        with patch("iter_codex.discovery.code.graph_ops.GraphClient") as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -661,12 +661,12 @@ class TestCodeEvidenceLinking:
 
     def test_has_pending_link_work(self):
         """has_pending_link_work checks for unlinked ingested files."""
-        from imas_codex.discovery.code.graph_ops import has_pending_link_work
+        from iter_codex.discovery.code.graph_ops import has_pending_link_work
 
         mock_gc = MagicMock()
         mock_gc.query.return_value = [{"has_work": True}]
 
-        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+        with patch("iter_codex.discovery.code.graph_ops.GraphClient") as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -1004,7 +1004,7 @@ class TestDataAccessTemplateGeneration:
 
     def test_persist_data_access_templates(self):
         """Persist templates to graph."""
-        from imas_codex.discovery.code.graph_ops import link_code_evidence_to_signals
+        from iter_codex.discovery.code.graph_ops import link_code_evidence_to_signals
 
         # We can't test actual graph persistence without a live graph,
         # but we can verify the template data is well-formed for UNWIND
@@ -1017,7 +1017,7 @@ class TestDataAccessTemplateGeneration:
 
     def test_graph_ops_templates_match_test_fixtures(self):
         """Templates in graph_ops._DATA_ACCESS_TEMPLATES match test fixtures."""
-        from imas_codex.discovery.code.graph_ops import _DATA_ACCESS_TEMPLATES
+        from iter_codex.discovery.code.graph_ops import _DATA_ACCESS_TEMPLATES
 
         tcv_templates = _DATA_ACCESS_TEMPLATES.get("tcv", [])
         assert len(tcv_templates) == len(TCV_DATA_ACCESS_TEMPLATES)
@@ -1027,18 +1027,18 @@ class TestDataAccessTemplateGeneration:
 
     def test_persist_function_exists(self):
         """persist_data_access_templates is importable."""
-        from imas_codex.discovery.code.graph_ops import persist_data_access_templates
+        from iter_codex.discovery.code.graph_ops import persist_data_access_templates
 
         assert callable(persist_data_access_templates)
 
     def test_persist_returns_dict_with_mock(self):
         """persist_data_access_templates returns created/linked counts."""
-        from imas_codex.discovery.code.graph_ops import persist_data_access_templates
+        from iter_codex.discovery.code.graph_ops import persist_data_access_templates
 
         mock_gc = MagicMock()
         mock_gc.query.return_value = [{"created": 6}]
 
-        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+        with patch("iter_codex.discovery.code.graph_ops.GraphClient") as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -1049,20 +1049,20 @@ class TestDataAccessTemplateGeneration:
 
     def test_persist_unknown_facility_returns_zero(self):
         """Unknown facility returns zero counts without graph calls."""
-        from imas_codex.discovery.code.graph_ops import persist_data_access_templates
+        from iter_codex.discovery.code.graph_ops import persist_data_access_templates
 
         result = persist_data_access_templates("nonexistent_facility")
         assert result["created"] == 0
 
     def test_link_signals_function_exists(self):
         """link_signals_to_data_access is importable."""
-        from imas_codex.discovery.code.graph_ops import link_signals_to_data_access
+        from iter_codex.discovery.code.graph_ops import link_signals_to_data_access
 
         assert callable(link_signals_to_data_access)
 
     def test_link_signals_returns_linked_count(self):
         """link_signals_to_data_access returns linked count."""
-        from imas_codex.discovery.code.graph_ops import link_signals_to_data_access
+        from iter_codex.discovery.code.graph_ops import link_signals_to_data_access
 
         mock_gc = MagicMock()
         mock_gc.query.side_effect = [
@@ -1070,7 +1070,7 @@ class TestDataAccessTemplateGeneration:
             [{"linked": 50}],  # MDSplus signals
         ]
 
-        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+        with patch("iter_codex.discovery.code.graph_ops.GraphClient") as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -1113,7 +1113,7 @@ class TestStaticTreeRouting:
 
     def test_multiple_independent_trees(self):
         """Multiple independent trees each route independently."""
-        from imas_codex.discovery.signals.parallel import _resolve_check_tree
+        from iter_codex.discovery.signals.parallel import _resolve_check_tree
 
         for tree in ["static", "vsystem", "heating"]:
             signal = {
@@ -1136,7 +1136,7 @@ class TestStaticTreeRouting:
 
     def test_static_tree_all_versions_returned(self):
         """Static tree returns all 8 TCV versions."""
-        from imas_codex.discovery.signals.parallel import _resolve_check_tree
+        from iter_codex.discovery.signals.parallel import _resolve_check_tree
 
         signal = {
             "data_source_name": "static",
@@ -1155,7 +1155,7 @@ class TestStaticTreeRouting:
 
     def test_tree_traversal_uses_node_path_as_accessor(self):
         """tree_traversal signals use full data_source_path as accessor."""
-        from imas_codex.discovery.signals.parallel import _resolve_check_tree
+        from iter_codex.discovery.signals.parallel import _resolve_check_tree
 
         signal = {
             "data_source_name": "results",
@@ -1174,7 +1174,7 @@ class TestStaticTreeRouting:
 
     def test_non_tree_traversal_preserves_accessor(self):
         """Non-tree_traversal signals preserve their original accessor."""
-        from imas_codex.discovery.signals.parallel import _resolve_check_tree
+        from iter_codex.discovery.signals.parallel import _resolve_check_tree
 
         signal = {
             "data_source_name": "results",
@@ -1203,7 +1203,7 @@ class TestCodeEvidenceShotPrioritization:
 
     def test_known_shots_can_be_used_as_check_shots(self):
         """Known shots from code should be usable as check_shots."""
-        from imas_codex.discovery.signals.parallel import _resolve_check_tree
+        from iter_codex.discovery.signals.parallel import _resolve_check_tree
 
         known_shots = [48952, 55608, 55759, 56016, 58499, 60797]
 
@@ -1372,7 +1372,7 @@ class TestFileDiscoveryState:
 
     def test_state_initialization(self):
         """State initializes with all phases."""
-        from imas_codex.discovery.code.state import FileDiscoveryState
+        from iter_codex.discovery.code.state import FileDiscoveryState
 
         state = FileDiscoveryState(
             facility="tcv",
@@ -1387,7 +1387,7 @@ class TestFileDiscoveryState:
 
     def test_budget_exhausted(self):
         """Budget exhausted when costs exceed limit."""
-        from imas_codex.discovery.code.state import FileDiscoveryState
+        from iter_codex.discovery.code.state import FileDiscoveryState
 
         state = FileDiscoveryState(
             facility="tcv",
@@ -1402,7 +1402,7 @@ class TestFileDiscoveryState:
         """should_stop respects deadline."""
         import time
 
-        from imas_codex.discovery.code.state import FileDiscoveryState
+        from iter_codex.discovery.code.state import FileDiscoveryState
 
         state = FileDiscoveryState(
             facility="tcv",
@@ -1465,12 +1465,12 @@ class TestPathPrefixScan:
     """
 
     def test_claim_query_includes_prefix_predicate_when_given(self):
-        from imas_codex.discovery.code.graph_ops import claim_paths_for_file_scan
+        from iter_codex.discovery.code.graph_ops import claim_paths_for_file_scan
 
         mock_gc = MagicMock()
         mock_gc.query.side_effect = [[], []]
 
-        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+        with patch("iter_codex.discovery.code.graph_ops.GraphClient") as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -1484,12 +1484,12 @@ class TestPathPrefixScan:
         assert kwargs["prefixes"] == ["/analysis/src/SAselene"]
 
     def test_claim_query_omits_prefix_predicate_without_prefixes(self):
-        from imas_codex.discovery.code.graph_ops import claim_paths_for_file_scan
+        from iter_codex.discovery.code.graph_ops import claim_paths_for_file_scan
 
         mock_gc = MagicMock()
         mock_gc.query.side_effect = [[], []]
 
-        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+        with patch("iter_codex.discovery.code.graph_ops.GraphClient") as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -1500,12 +1500,12 @@ class TestPathPrefixScan:
         assert not ({"prefixes", "scope_prefixes"} & set(kwargs))
 
     def test_has_pending_scan_work_carries_prefix_predicate(self):
-        from imas_codex.discovery.code.graph_ops import has_pending_scan_work
+        from iter_codex.discovery.code.graph_ops import has_pending_scan_work
 
         mock_gc = MagicMock()
         mock_gc.query.return_value = [{"has_work": True}]
 
-        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+        with patch("iter_codex.discovery.code.graph_ops.GraphClient") as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -1521,10 +1521,10 @@ class TestPathPrefixScan:
         assert kwargs["prefixes"] == ["/analysis/src/SAeqread"]
 
     def test_scan_facility_files_forwards_prefixes(self):
-        from imas_codex.discovery.code.scanner import scan_facility_files
+        from iter_codex.discovery.code.scanner import scan_facility_files
 
         with patch(
-            "imas_codex.discovery.code.graph_ops.claim_paths_for_file_scan",
+            "iter_codex.discovery.code.graph_ops.claim_paths_for_file_scan",
             return_value=[],
         ) as claim:
             stats = scan_facility_files(
@@ -1539,46 +1539,46 @@ class TestPathPrefixScan:
 
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover import discover, sequence
+        from iter_codex.cli.discover import discover, sequence
 
         def fake_run_discovery(_config, async_main):
             return asyncio.run(async_main(asyncio.Event(), None))
 
         with (
             patch(
-                "imas_codex.cli.discover.sequence.evaluate_stage",
+                "iter_codex.cli.discover.sequence.evaluate_stage",
                 side_effect=lambda stage, facility, config: sequence.StageOutcome(
                     stage.name, stage.domain, sequence.RUNNABLE, "ready"
                 ),
             ),
             patch(
-                "imas_codex.cli.discover.sequence._remaining_count",
+                "iter_codex.cli.discover.sequence._remaining_count",
                 return_value=None,
             ),
-            patch("imas_codex.cli.logging.configure_cli_logging"),
+            patch("iter_codex.cli.logging.configure_cli_logging"),
             patch(
-                "imas_codex.cli.logging.get_log_file",
+                "iter_codex.cli.logging.get_log_file",
                 return_value=tmp_path / "discover.log",
             ),
             patch(
-                "imas_codex.discovery.base.facility.get_facility",
+                "iter_codex.discovery.base.facility.get_facility",
                 return_value={"ssh_host": "jt-60sa"},
             ),
-            patch("imas_codex.cli.discover.common.ensure_remote_environment"),
-            patch("imas_codex.cli.discover.common.use_rich_output", return_value=False),
-            patch("imas_codex.cli.discover.common.setup_logging"),
+            patch("iter_codex.cli.discover.common.ensure_remote_environment"),
+            patch("iter_codex.cli.discover.common.use_rich_output", return_value=False),
+            patch("iter_codex.cli.discover.common.setup_logging"),
             patch(
-                "imas_codex.cli.discover.common.make_log_print",
+                "iter_codex.cli.discover.common.make_log_print",
                 return_value=lambda *a, **k: None,
             ),
-            patch("imas_codex.cli.discover.common.DiscoveryConfig"),
+            patch("iter_codex.cli.discover.common.DiscoveryConfig"),
             patch(
-                "imas_codex.cli.discover.common.run_discovery",
+                "iter_codex.cli.discover.common.run_discovery",
                 side_effect=fake_run_discovery,
             ),
-            patch("imas_codex.settings.get_discovery_threshold", return_value=0.9),
+            patch("iter_codex.settings.get_discovery_threshold", return_value=0.9),
             patch(
-                "imas_codex.discovery.code.parallel.run_parallel_code_discovery",
+                "iter_codex.discovery.code.parallel.run_parallel_code_discovery",
                 new_callable=AsyncMock,
                 return_value={},
             ) as run_parallel,
@@ -1615,50 +1615,50 @@ class TestPathPrefixScan:
 
         from click.testing import CliRunner
 
-        from imas_codex.cli.discover import discover, sequence
+        from iter_codex.cli.discover import discover, sequence
 
         def fake_run_discovery(_config, async_main):
             return asyncio.run(async_main(asyncio.Event(), None))
 
         with (
             patch(
-                "imas_codex.cli.discover.sequence.evaluate_stage",
+                "iter_codex.cli.discover.sequence.evaluate_stage",
                 side_effect=lambda stage, facility, config: sequence.StageOutcome(
                     stage.name, stage.domain, sequence.RUNNABLE, "ready"
                 ),
             ),
             patch(
-                "imas_codex.cli.discover.sequence._remaining_count",
+                "iter_codex.cli.discover.sequence._remaining_count",
                 return_value=None,
             ),
-            patch("imas_codex.cli.logging.configure_cli_logging"),
+            patch("iter_codex.cli.logging.configure_cli_logging"),
             patch(
-                "imas_codex.cli.logging.get_log_file",
+                "iter_codex.cli.logging.get_log_file",
                 return_value=tmp_path / "discover.log",
             ),
             patch(
-                "imas_codex.discovery.base.facility.get_facility",
+                "iter_codex.discovery.base.facility.get_facility",
                 return_value={"ssh_host": "jt-60sa"},
             ),
-            patch("imas_codex.cli.discover.common.ensure_remote_environment"),
-            patch("imas_codex.cli.discover.common.use_rich_output", return_value=False),
-            patch("imas_codex.cli.discover.common.setup_logging"),
+            patch("iter_codex.cli.discover.common.ensure_remote_environment"),
+            patch("iter_codex.cli.discover.common.use_rich_output", return_value=False),
+            patch("iter_codex.cli.discover.common.setup_logging"),
             patch(
-                "imas_codex.cli.discover.common.make_log_print",
+                "iter_codex.cli.discover.common.make_log_print",
                 return_value=lambda *a, **k: None,
             ),
-            patch("imas_codex.cli.discover.common.DiscoveryConfig"),
+            patch("iter_codex.cli.discover.common.DiscoveryConfig"),
             patch(
-                "imas_codex.cli.discover.common.run_discovery",
+                "iter_codex.cli.discover.common.run_discovery",
                 side_effect=fake_run_discovery,
             ),
-            patch("imas_codex.settings.get_discovery_threshold", return_value=0.9),
+            patch("iter_codex.settings.get_discovery_threshold", return_value=0.9),
             patch(
-                "imas_codex.discovery.base.reset.reset_to_status",
+                "iter_codex.discovery.base.reset.reset_to_status",
                 return_value=3,
             ) as reset,
             patch(
-                "imas_codex.discovery.code.parallel.run_parallel_code_discovery",
+                "iter_codex.discovery.code.parallel.run_parallel_code_discovery",
                 new_callable=AsyncMock,
                 return_value={},
             ),
@@ -1688,7 +1688,7 @@ class TestPathPrefixScan:
         so the scan must pass the facility ``remote_environment`` interpreter
         and setup commands to the executor rather than the default.
         """
-        from imas_codex.discovery.code import scanner
+        from iter_codex.discovery.code import scanner
 
         config = {
             "ssh_host": "jt-60sa",
@@ -1699,11 +1699,11 @@ class TestPathPrefixScan:
         }
         with (
             patch(
-                "imas_codex.discovery.base.facility.get_facility",
+                "iter_codex.discovery.base.facility.get_facility",
                 return_value=config,
             ),
             patch(
-                "imas_codex.remote.executor.run_python_script",
+                "iter_codex.remote.executor.run_python_script",
                 return_value="[]",
             ) as run_script,
         ):
@@ -1726,10 +1726,10 @@ class TestCodeProgressEmbedPredicate:
     """The progress query must use the shared embed-worker predicate."""
 
     def test_progress_query_embeds_shared_fragment(self):
-        from imas_codex.discovery.base.embed_worker import (
+        from iter_codex.discovery.base.embed_worker import (
             pending_embed_predicate,
         )
-        from imas_codex.discovery.code.parallel import get_code_discovery_stats
+        from iter_codex.discovery.code.parallel import get_code_discovery_stats
 
         captured = []
 
@@ -1749,7 +1749,7 @@ class TestCodeProgressEmbedPredicate:
         ctx.__enter__ = MagicMock(return_value=gc)
         ctx.__exit__ = MagicMock(return_value=False)
 
-        with patch("imas_codex.discovery.code.parallel.GraphClient", return_value=ctx):
+        with patch("iter_codex.discovery.code.parallel.GraphClient", return_value=ctx):
             stats = get_code_discovery_stats(
                 "jt-60sa", min_relevance=0.5, min_ingest_relevance=0.5
             )

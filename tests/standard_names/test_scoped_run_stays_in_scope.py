@@ -27,15 +27,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import _run_sn_cmd, sn
-from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
-from imas_codex.standard_names.graph_store import (
+from iter_codex.cli.sn import _run_sn_cmd, sn
+from iter_codex.standard_names.attachment_audit import AttachmentAuditResult
+from iter_codex.standard_names.graph_store import (
     owner_module_path as _owner_module_path,
 )
-from imas_codex.standard_names.pipeline import resolve_scope_maintenance
+from iter_codex.standard_names.pipeline import resolve_scope_maintenance
 
 _FOCUS_PATH = "equilibrium/time_slice/profiles_1d/psi"
-_LOOP = "imas_codex.standard_names.loop"
+_LOOP = "iter_codex.standard_names.loop"
 
 # ---------------------------------------------------------------------------
 # The policy, judged on its own
@@ -110,23 +110,23 @@ def _invoke_sn_run(args: list[str]):
     """Drive ``sn run`` with the discovery harness and service probes stubbed."""
     pools = AsyncMock(return_value=MagicMock(stop_reason="completed"))
     with (
-        patch("imas_codex.cli.sn._require_embed_ready"),
-        patch("imas_codex.cli.sn._require_terminal_drain"),
+        patch("iter_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.cli.sn._require_terminal_drain"),
         patch(
-            "imas_codex.cli.sn._configured_local_compose_required",
+            "iter_codex.cli.sn._configured_local_compose_required",
             return_value=False,
         ),
-        patch("imas_codex.cli.sn._auto_sync_grammar"),
-        patch("imas_codex.cli.sn._note_pipeline_version_drift"),
-        patch("imas_codex.cli.discover.common.use_rich_output", return_value=False),
-        patch("imas_codex.cli.discover.common.setup_logging"),
+        patch("iter_codex.cli.sn._auto_sync_grammar"),
+        patch("iter_codex.cli.sn._note_pipeline_version_drift"),
+        patch("iter_codex.cli.discover.common.use_rich_output", return_value=False),
+        patch("iter_codex.cli.discover.common.setup_logging"),
         patch(
-            "imas_codex.cli.discover.common.run_discovery",
+            "iter_codex.cli.discover.common.run_discovery",
             side_effect=_drive_run_discovery,
         ),
-        patch("imas_codex.standard_names.loop.run_sn_pools", new=pools),
+        patch("iter_codex.standard_names.loop.run_sn_pools", new=pools),
         patch(
-            "imas_codex.standard_names.loop.summary_table",
+            "iter_codex.standard_names.loop.summary_table",
             return_value={"stop_reason": "completed"},
         ),
     ):
@@ -177,19 +177,19 @@ def _call_run_sn_cmd(**overrides: Any):
     kwargs.update(overrides)
     with (
         patch(
-            "imas_codex.cli.sn._configured_local_compose_required",
+            "iter_codex.cli.sn._configured_local_compose_required",
             return_value=False,
         ),
-        patch("imas_codex.cli.sn._require_terminal_drain"),
-        patch("imas_codex.cli.discover.common.use_rich_output", return_value=False),
-        patch("imas_codex.cli.discover.common.setup_logging"),
+        patch("iter_codex.cli.sn._require_terminal_drain"),
+        patch("iter_codex.cli.discover.common.use_rich_output", return_value=False),
+        patch("iter_codex.cli.discover.common.setup_logging"),
         patch(
-            "imas_codex.cli.discover.common.run_discovery",
+            "iter_codex.cli.discover.common.run_discovery",
             side_effect=_drive_run_discovery,
         ),
-        patch("imas_codex.standard_names.loop.run_sn_pools", new=pools),
+        patch("iter_codex.standard_names.loop.run_sn_pools", new=pools),
         patch(
-            "imas_codex.standard_names.loop.summary_table",
+            "iter_codex.standard_names.loop.summary_table",
             return_value={"stop_reason": "completed"},
         ),
     ):
@@ -266,28 +266,28 @@ def _call_run_sn_cmd_to_the_loop(
     error: BaseException | None = None
     with (
         patch(
-            "imas_codex.cli.sn._configured_local_compose_required",
+            "iter_codex.cli.sn._configured_local_compose_required",
             return_value=False,
         ),
-        patch("imas_codex.cli.sn._require_terminal_drain"),
-        patch("imas_codex.cli.discover.common.use_rich_output", return_value=False),
-        patch("imas_codex.cli.discover.common.setup_logging"),
+        patch("iter_codex.cli.sn._require_terminal_drain"),
+        patch("iter_codex.cli.discover.common.use_rich_output", return_value=False),
+        patch("iter_codex.cli.discover.common.setup_logging"),
         patch(
-            "imas_codex.cli.discover.common.run_discovery",
+            "iter_codex.cli.discover.common.run_discovery",
             side_effect=_drive_run_discovery,
         ),
         patch(
-            "imas_codex.standard_names.loop.summary_table",
+            "iter_codex.standard_names.loop.summary_table",
             return_value={"stop_reason": "completed"},
         ),
-        patch("imas_codex.graph.client.GraphClient", return_value=graph_context),
+        patch("iter_codex.graph.client.GraphClient", return_value=graph_context),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_scope."
+            "iter_codex.standard_names.graph_store.graph_claim_scope."
             "scope_exact_standard_names",
             side_effect=_bind,
         ),
         patch(
-            "imas_codex.standard_names.loop.RunSummary",
+            "iter_codex.standard_names.loop.RunSummary",
             new=_raise_after_guard,
         ),
     ):
@@ -340,23 +340,23 @@ def _graph_context() -> tuple[MagicMock, MagicMock]:
 def test_focused_scoped_run_leaves_other_runs_stamps_alone() -> None:
     graph_context, graph = _graph_context()
     with (
-        patch("imas_codex.cli.sn._require_embed_ready"),
-        patch("imas_codex.graph.client.GraphClient", return_value=graph_context),
+        patch("iter_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.graph.client.GraphClient", return_value=graph_context),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_scope."
+            "iter_codex.standard_names.graph_store.graph_claim_scope."
             "partition_focus_by_accepted",
             return_value=([_FOCUS_PATH], []),
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_source_bindings."
+            "iter_codex.standard_names.graph_store.graph_source_bindings."
             "merge_standard_name_sources",
             return_value=1,
         ),
         patch(
-            "imas_codex.standard_names.graph_store.graph_claim_scope.scope_focus_names"
+            "iter_codex.standard_names.graph_store.graph_claim_scope.scope_focus_names"
         ),
-        patch("imas_codex.settings.get_dd_version", return_value="4.0.0"),
-        patch("imas_codex.cli.sn._run_sn_cmd", return_value={}) as run_cmd,
+        patch("iter_codex.settings.get_dd_version", return_value="4.0.0"),
+        patch("iter_codex.cli.sn._run_sn_cmd", return_value={}) as run_cmd,
     ):
         result = CliRunner().invoke(sn, ["run", "--focus", _FOCUS_PATH, "--quiet"])
 
@@ -441,20 +441,20 @@ def _silence_other_maintenance(stack: ExitStack) -> dict[str, MagicMock]:
     }
     mocks["reconcile_attachment_consistency"] = stack.enter_context(
         patch(
-            "imas_codex.standard_names.attachment_audit."
+            "iter_codex.standard_names.attachment_audit."
             "reconcile_attachment_consistency",
             return_value=AttachmentAuditResult(),
         )
     )
     mocks["run_orphan_sweep_loop"] = stack.enter_context(
         patch(
-            "imas_codex.standard_names.orphan_sweep.run_orphan_sweep_loop",
+            "iter_codex.standard_names.orphan_sweep.run_orphan_sweep_loop",
             new_callable=AsyncMock,
         )
     )
     mocks["embed_description_worker"] = stack.enter_context(
         patch(
-            "imas_codex.discovery.base.embed_worker.embed_description_worker",
+            "iter_codex.discovery.base.embed_worker.embed_description_worker",
             new_callable=AsyncMock,
         )
     )
@@ -468,15 +468,15 @@ async def _run_scoped_pools(scope_run_id: str) -> Any:
     silenced, so the run's reach over the planted names is exactly the
     maintenance decision under test.
     """
-    from imas_codex.standard_names.budget import BudgetManager
-    from imas_codex.standard_names.loop import run_sn_pools
+    from iter_codex.standard_names.budget import BudgetManager
+    from iter_codex.standard_names.loop import run_sn_pools
 
     policy = resolve_scope_maintenance(scope_run_id=scope_run_id)
     with ExitStack() as stack:
         _silence_other_maintenance(stack)
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.pools.run_pools",
+                "iter_codex.standard_names.pools.run_pools",
                 new_callable=AsyncMock,
                 return_value={},
             )
@@ -484,40 +484,40 @@ async def _run_scoped_pools(scope_run_id: str) -> Any:
         stack.enter_context(patch(f"{_LOOP}._build_pool_specs", return_value=[]))
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_parent_lifecycle."
+                "iter_codex.standard_names.graph_store.graph_parent_lifecycle."
                 "scoped_terminal_residue",
                 return_value={"total": 0, "names": [], "sources": []},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.ledger.find_provenance_orphans",
+                "iter_codex.standard_names.ledger.find_provenance_orphans",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.audits."
+                "iter_codex.standard_names.audits."
                 "find_flux_surface_reduction_violations",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.audits.find_removed_dd_sources",
+                "iter_codex.standard_names.audits.find_removed_dd_sources",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings."
+                "iter_codex.standard_names.graph_store.graph_source_bindings."
                 "persist_outcome_snapshot",
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_source_bindings."
+                "iter_codex.standard_names.graph_store.graph_source_bindings."
                 "reset_persist_outcomes"
             )
         )
@@ -608,8 +608,8 @@ def _digest(gc: Any, sn_id: str) -> str:
 def test_scoped_run_leaves_a_planted_out_of_scope_name_unchanged(
     disposable_neo4j_empty: str, request: pytest.FixtureRequest
 ) -> None:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_standard_name_sources,
     )
 
@@ -645,8 +645,8 @@ def test_focus_stamp_clear_is_bounded_by_the_named_sources(
     disposable_neo4j_empty: str,
 ) -> None:
     """The one write a focus run makes before seeding stays inside its paths."""
-    from imas_codex.cli.sn import FOCUS_STAMP_CLEAR_CYPHER
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.cli.sn import FOCUS_STAMP_CLEAR_CYPHER
+    from iter_codex.graph.client import GraphClient
 
     token = uuid.uuid4().hex[:8]
     inside = f"dd:{_FOCUS_PATH}"
@@ -691,8 +691,8 @@ def test_edits_scope_binds_only_the_pending_successors(
     disposable_neo4j_empty: str,
 ) -> None:
     """The run scope an edits-only launch mints covers exactly its own names."""
-    from imas_codex.cli.sn import _bind_pending_edit_scope
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.cli.sn import _bind_pending_edit_scope
+    from iter_codex.graph.client import GraphClient
 
     token = uuid.uuid4().hex[:8]
     pending_id = f"pending_edit_{token}"

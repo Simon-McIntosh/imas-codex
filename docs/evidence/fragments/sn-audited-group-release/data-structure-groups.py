@@ -23,7 +23,7 @@ structure names a group:
 * ``distribution`` / ``distributions`` -> ``distribution_quantities``;
 * ``model`` in a transport IDS -> ``transport_coefficients``;
 * every other structure -> the domain the Data Dictionary's own IDS-level map
-  gives its IDS (``imas_codex/definitions/physics/ids_domains.json``), which is
+  gives its IDS (``iter_codex/definitions/physics/ids_domains.json``), which is
   the group the DD's top-level structure already carries in the catalog.
 
 A name with DD sources reads the union of its sources' groups. A name with no
@@ -72,10 +72,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from imas_codex.core.physics_categorization import PhysicsDomainCategorizer
-from imas_codex.core.physics_domain import PhysicsDomain
-from imas_codex.standard_names.domain_audit import LIVE_NAME_STAGES
-from imas_codex.standard_names.families import detect_families
+from iter_codex.core.physics_categorization import PhysicsDomainCategorizer
+from iter_codex.core.physics_domain import PhysicsDomain
+from iter_codex.standard_names.domain_audit import LIVE_NAME_STAGES
+from iter_codex.standard_names.families import detect_families
 
 FRAGMENTS = Path(__file__).resolve().parent
 OUT_JSON = FRAGMENTS / "data-structure-groups.json"
@@ -1009,7 +1009,7 @@ def _page_head(node: str, payload: dict[str, Any]) -> list[str]:
     transport = payload["transport"]
     out = [
         '<!doctype html><html lang="en"><head><meta charset="utf-8">',
-        '<meta name="docs-project" content="imas-codex">',
+        '<meta name="docs-project" content="iter-codex">',
         '<meta name="reckon-type" content="evidence-fragment">',
         '<meta name="plan-slug" content="sn-audited-group-release">',
         '<meta name="node-id" content="' + node + '">',
@@ -1362,7 +1362,7 @@ def render_landing(payload: dict[str, Any]) -> str:
     listed = transport["listed"]
     out = [
         '<!doctype html><html lang="en"><head><meta charset="utf-8">',
-        '<meta name="docs-project" content="imas-codex">',
+        '<meta name="docs-project" content="iter-codex">',
         '<meta name="reckon-type" content="evidence-fragment">',
         '<meta name="plan-slug" content="sn-audited-group-release">',
         '<meta name="node-id" content="' + node + '">',
@@ -1795,7 +1795,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         live = build(gc)

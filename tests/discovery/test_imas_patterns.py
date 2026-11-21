@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.discovery.base.imas_patterns import (
+from iter_codex.discovery.base.imas_patterns import (
     build_imas_pattern,
     build_imas_rg_pattern,
     extract_ids_names,

@@ -1,7 +1,7 @@
 """AST-level naming alignment: the public surface spells out ``standard_name``.
 
 Public functions, classes, and module attributes in
-``imas_codex/standard_names/`` and ``imas_codex/llm/`` must not use the
+``iter_codex/standard_names/`` and ``iter_codex/llm/`` must not use the
 abbreviation ``sn``/``sns`` outside the retain-list below.
 
 Internal/private patterns retained verbatim:
@@ -54,22 +54,22 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # Public modules under audit. The "sn" token is allowed in import paths
 # (e.g. ``standard_names``) but not in defined names within these modules.
 AUDITED_MODULES: tuple[Path, ...] = (
-    Path("imas_codex/standard_names/search.py"),
-    Path("imas_codex/standard_names/graph_ops.py"),
-    Path("imas_codex/standard_names/workers.py"),
-    Path("imas_codex/standard_names/review/audits.py"),
-    Path("imas_codex/standard_names/review/enrichment.py"),
-    Path("imas_codex/llm/sn_tools.py"),
+    Path("iter_codex/standard_names/search.py"),
+    Path("iter_codex/standard_names/graph_ops.py"),
+    Path("iter_codex/standard_names/workers.py"),
+    Path("iter_codex/standard_names/review/audits.py"),
+    Path("iter_codex/standard_names/review/enrichment.py"),
+    Path("iter_codex/llm/sn_tools.py"),
     *(
         path.relative_to(REPO_ROOT)
         for path in sorted(
-            (REPO_ROOT / "imas_codex/standard_names/graph_store").glob("*.py")
+            (REPO_ROOT / "iter_codex/standard_names/graph_store").glob("*.py")
         )
     ),
     *(
         path.relative_to(REPO_ROOT)
         for path in sorted(
-            (REPO_ROOT / "imas_codex/standard_names/worker_tasks").glob("*.py")
+            (REPO_ROOT / "iter_codex/standard_names/worker_tasks").glob("*.py")
         )
     ),
 )

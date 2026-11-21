@@ -39,9 +39,9 @@ from collections import Counter, defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
-from imas_codex.standard_names.review.audits import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
+from iter_codex.standard_names.review.audits import (
     run_documentation_gate_checks,
     run_house_style_checks,
     run_link_integrity,
@@ -53,7 +53,7 @@ KEY = HERE / "srtj-docs-disagreement-key.json"
 LABELS = HERE / "srtj-docs-disagreement-labels.json"
 ARCHIVE = (
     Path.home()
-    / ".local/share/imas-codex/exports/imas-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
+    / ".local/share/iter-codex/exports/iter-codex-graph-dev-af50a71-20261018T114748Z.tar.gz"
 )
 OUT = HERE / "srtj-docs-lint-replay.json"
 
@@ -492,20 +492,20 @@ def main() -> int:
 
         payload["cap_sites"] = {
             "cap_function": (
-                "imas_codex/standard_names/review/pipeline.py:1963 "
+                "iter_codex/standard_names/review/pipeline.py:1963 "
                 "_cap_docs_scores_for_lint_errors"
             ),
             "cap_selector": (
-                "imas_codex/standard_names/review/pipeline.py:1817 "
+                "iter_codex/standard_names/review/pipeline.py:1817 "
                 "_extract_error_lint_ids -- reads lint_findings with severity == "
                 "'error' only"
             ),
             "cap_call_site": (
-                "imas_codex/standard_names/review/pipeline.py:2184 (only when "
+                "iter_codex/standard_names/review/pipeline.py:2184 (only when "
                 "target == 'docs')"
             ),
             "incumbent_docs_path": (
-                "imas_codex/standard_names/workers.py:11150 process_review_docs_batch "
+                "iter_codex/standard_names/workers.py:11150 process_review_docs_batch "
                 "-> prepare_docs_review_request (workers.py:10712). No audit report and "
                 "no _cap_docs_scores_for_lint_errors reference anywhere in workers.py, "
                 "so this path applies no error-severity lint cap. It applies its own "
@@ -513,13 +513,13 @@ def main() -> int:
                 "contradiction notes."
             ),
             "jev_docs_audit": (
-                "imas_codex/standard_names/review/cascade.py:519 _docs_judgment -> "
+                "iter_codex/standard_names/review/cascade.py:519 _docs_judgment -> "
                 "jev_review.build_docs_audit_report (jev_review.py:623) -> "
                 "run_link_integrity with known_ids = {item} union siblings "
                 "(cascade.py:535)."
             ),
             "link_integrity_reads": (
-                "imas_codex/standard_names/review/audits.py:406 run_link_integrity "
+                "iter_codex/standard_names/review/audits.py:406 run_link_integrity "
                 "reads name['links'], the structured link list, never the "
                 "documentation text."
             ),

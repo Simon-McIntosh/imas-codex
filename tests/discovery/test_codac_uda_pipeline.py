@@ -4,9 +4,9 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
-from imas_codex.discovery.signals import parallel
-from imas_codex.discovery.signals.scanners import codac_uda as catalogue
-from imas_codex.graph.models import FacilitySignal
+from iter_codex.discovery.signals import parallel
+from iter_codex.discovery.signals.scanners import codac_uda as catalogue
+from iter_codex.graph.models import FacilitySignal
 
 
 @pytest.fixture
@@ -62,7 +62,7 @@ async def test_seed_reports_only_acknowledged_archive_signals(
         ),
     )
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.scanners.base.get_scanner",
+        "iter_codex.discovery.signals.scanners.base.get_scanner",
         lambda name: catalogue.CodacUDAScanner(),
     )
     await parallel.seed_worker(state)
@@ -106,7 +106,7 @@ async def test_check_worker_routes_archive_signal_to_registered_scanner(
     monkeypatch.setattr(parallel, "carry_forward_recorded_checks", lambda *args: 0)
     monkeypatch.setattr(parallel, "mark_signals_checked", marked)
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.scanners.base.get_scanner", lambda name: scanner
+        "iter_codex.discovery.signals.scanners.base.get_scanner", lambda name: scanner
     )
     await parallel.check_worker(state)
     scanner.check.assert_awaited_once()

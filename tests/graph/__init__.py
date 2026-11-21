@@ -9,6 +9,6 @@ the live tests explicitly with:
 
 Connection resolves via:
     1. Environment variables (NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD)
-    2. pyproject.toml [tool.imas-codex.graph] section
-    3. Built-in defaults (bolt://localhost:7687, neo4j, imas-codex)
+    2. pyproject.toml [tool.iter-codex.graph] section
+    3. Built-in defaults (bolt://localhost:7687, neo4j, iter-codex)
 """

@@ -17,9 +17,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.discovery.base.progress import WorkerStats
-from imas_codex.discovery.base.supervision import PipelinePhase
-from imas_codex.standard_names.progress import StandardNameProgressDisplay
+from iter_codex.discovery.base.progress import WorkerStats
+from iter_codex.discovery.base.supervision import PipelinePhase
+from iter_codex.standard_names.progress import StandardNameProgressDisplay
 
 # ---------------------------------------------------------------------------
 # Minimal engine-state stub (mirrors StandardNameBuildState fields used
@@ -158,5 +158,5 @@ class TestResourcesSectionAfterFix:
         # Direct class dict check — override would hide the parent method
         assert "_build_resources_section" not in StandardNameProgressDisplay.__dict__, (
             "Broken _build_resources_section override is back — remove it from "
-            "imas_codex/standard_names/progress.py"
+            "iter_codex/standard_names/progress.py"
         )

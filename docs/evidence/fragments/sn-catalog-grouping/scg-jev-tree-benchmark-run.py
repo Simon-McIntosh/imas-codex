@@ -28,22 +28,22 @@ from pathlib import Path
 
 import numpy as np
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.dd_domain_classifier import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.dd_domain_classifier import (
     apply_path_domain_override,
     build_category_question,
     build_domain_question,
     decide_domain_tree,
     gather_classification_context,
 )
-from imas_codex.settings import get_model
-from imas_codex.standard_names.domain_ranking import select_primary_domain
+from iter_codex.settings import get_model
+from iter_codex.standard_names.domain_ranking import select_primary_domain
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 LABELS = HERE / "scg-domain-label-sheet.json"
 BASELINE = HERE / "scg-classifier-vocabulary-results.json"
-GOLD_SET = ROOT / "imas_codex/definitions/physics/domain_gold_set.json"
+GOLD_SET = ROOT / "iter_codex/definitions/physics/domain_gold_set.json"
 RESULTS = HERE / "scg-jev-tree-benchmark-results.json"
 SPEND_CEILING_USD = 4.00
 CHUNK = 20
@@ -390,8 +390,8 @@ async def _run_gold() -> dict:
     exercises the two-level Choice, so the pair measures the same routing the
     validation rule does. Both go through the benchmark's own entry point.
     """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.benchmark_roles import run_classifier_bench
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names.benchmark_roles import run_classifier_bench
 
     gold = json.loads(GOLD_SET.read_text())
     out: dict[str, dict] = {}

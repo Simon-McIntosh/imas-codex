@@ -14,7 +14,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_foundation as foundation,
     graph_source_bindings as bindings,
 )
@@ -141,7 +141,7 @@ def _services(graph: RefusalGraph, written: list[str]) -> SimpleNamespace:
 
 
 def _persist(graph: RefusalGraph, written: list[str]):
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         persist_generated_name_winners,
     )
 
@@ -223,7 +223,7 @@ def test_a_winner_the_writer_accepted_but_did_not_finalize_still_raises():
         for name, path in ACCEPTED + [(REFUSED, REFUSED_PATH)]
     ]
 
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         persist_generated_name_winners,
     )
 

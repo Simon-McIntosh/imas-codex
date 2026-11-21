@@ -28,7 +28,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import (
+from iter_codex.standard_names.export import (
     _fetch_export_population,
     _has_producing_source,
     run_export,
@@ -82,7 +82,7 @@ def _run_fixture_export(staging_dir: Path, population: list[dict]):
     with ExitStack() as stack:
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_export_population",
+                "iter_codex.standard_names.export._fetch_export_population",
                 return_value=population,
             )
         )
@@ -90,31 +90,31 @@ def _run_fixture_export(staging_dir: Path, population: list[dict]):
         # audit's pre-population refusal is exercised on a planted graph.
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
+                "iter_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
                 return_value=_CapturingGraphClient(),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._validate_entry",
+                "iter_codex.standard_names.export._validate_entry",
                 side_effect=lambda entry: entry,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_deprecation_stubs",
+                "iter_codex.standard_names.export._fetch_deprecation_stubs",
                 return_value=[],
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+                "iter_codex.standard_names.export._fetch_ordering_edges_for_domain",
                 return_value=([], set()),
             )
         )
@@ -194,7 +194,7 @@ def test_refusal_disappears_when_the_predicate_is_reverted(tmp_path: Path) -> No
     above is passing for some other reason and proves nothing about the gate.
     """
     with patch(
-        "imas_codex.standard_names.export._has_producing_source",
+        "iter_codex.standard_names.export._has_producing_source",
         return_value=True,
     ):
         report = _run_fixture_export(tmp_path, _population())
@@ -245,7 +245,7 @@ def test_keyless_refusal_disappears_with_the_key_presence_form(
         )
 
     with patch(
-        "imas_codex.standard_names.export._has_producing_source",
+        "iter_codex.standard_names.export._has_producing_source",
         side_effect=key_presence_form,
     ):
         report = _run_fixture_export(tmp_path, [_candidate("keyless_candidate")])
@@ -314,7 +314,7 @@ def test_population_query_projects_live_child_evidence() -> None:
     the source text, so the assertion is about the query the gate sends.
     """
     client = _CapturingGraphClient()
-    with patch("imas_codex.graph.client.GraphClient", return_value=client):
+    with patch("iter_codex.graph.client.GraphClient", return_value=client):
         _fetch_export_population(require_docs_review=False)
 
     assert client.queries, "the population fetch sent no query"

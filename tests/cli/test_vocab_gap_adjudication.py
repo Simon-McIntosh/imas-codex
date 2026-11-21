@@ -7,7 +7,7 @@ from click.testing import CliRunner
 
 
 def test_vocab_adjudicate_defaults_to_dry_run(tmp_path: Path) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     artifact = tmp_path / "decisions.json"
     artifact.write_text("{}")
@@ -23,11 +23,11 @@ def test_vocab_adjudicate_defaults_to_dry_run(tmp_path: Path) -> None:
     }
     with (
         patch(
-            "imas_codex.standard_names.vocab_adjudication.load_vocab_gap_adjudications",
+            "iter_codex.standard_names.vocab_adjudication.load_vocab_gap_adjudications",
             return_value=batch,
         ) as load,
         patch(
-            "imas_codex.standard_names.vocab_adjudication.apply_vocab_gap_adjudications",
+            "iter_codex.standard_names.vocab_adjudication.apply_vocab_gap_adjudications",
             return_value=result_payload,
         ) as apply,
     ):
@@ -49,7 +49,7 @@ def test_vocab_adjudicate_defaults_to_dry_run(tmp_path: Path) -> None:
 
 
 def test_vocab_adjudicate_apply_is_explicit(tmp_path: Path) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     artifact = tmp_path / "decisions.json"
     artifact.write_text("{}")
@@ -64,11 +64,11 @@ def test_vocab_adjudicate_apply_is_explicit(tmp_path: Path) -> None:
     }
     with (
         patch(
-            "imas_codex.standard_names.vocab_adjudication.load_vocab_gap_adjudications",
+            "iter_codex.standard_names.vocab_adjudication.load_vocab_gap_adjudications",
             return_value=MagicMock(),
         ),
         patch(
-            "imas_codex.standard_names.vocab_adjudication.apply_vocab_gap_adjudications",
+            "iter_codex.standard_names.vocab_adjudication.apply_vocab_gap_adjudications",
             return_value=payload,
         ) as apply,
     ):
@@ -89,7 +89,7 @@ def test_vocab_adjudicate_apply_is_explicit(tmp_path: Path) -> None:
 
 
 def test_vocab_adjudicate_reset_requires_a_reason() -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     result = CliRunner().invoke(
         sn,
@@ -108,7 +108,7 @@ def test_vocab_adjudicate_reset_requires_a_reason() -> None:
 def test_vocab_adjudicate_resolves_history_to_explicit_receipt(
     tmp_path: Path,
 ) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     artifact = tmp_path / "decisions.json"
     artifact.write_text("{}")
@@ -129,11 +129,11 @@ def test_vocab_adjudicate_resolves_history_to_explicit_receipt(
     }
     with (
         patch(
-            "imas_codex.standard_names.vocab_adjudication.load_vocab_gap_adjudications",
+            "iter_codex.standard_names.vocab_adjudication.load_vocab_gap_adjudications",
             return_value=MagicMock(),
         ),
         patch(
-            "imas_codex.standard_names.vocab_adjudication.apply_vocab_gap_adjudications",
+            "iter_codex.standard_names.vocab_adjudication.apply_vocab_gap_adjudications",
             return_value=payload,
         ) as apply,
     ):
@@ -158,7 +158,7 @@ def test_vocab_adjudicate_resolves_history_to_explicit_receipt(
 
 
 def test_vocab_adjudicate_resolution_requires_receipt(tmp_path: Path) -> None:
-    from imas_codex.cli.sn import sn
+    from iter_codex.cli.sn import sn
 
     artifact = tmp_path / "decisions.json"
     artifact.write_text("{}")

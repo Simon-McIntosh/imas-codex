@@ -32,9 +32,9 @@ from pathlib import Path
 import pint
 import pytest
 
-import imas_codex.units as units
-from imas_codex.ids.tools import analyze_units
-from imas_codex.units import (
+import iter_codex.units as units
+from iter_codex.ids.tools import analyze_units
+from iter_codex.units import (
     normalize_unit_symbol,
     unit_registry,
     units_are_equivalent,

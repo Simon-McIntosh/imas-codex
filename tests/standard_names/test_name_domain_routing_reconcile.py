@@ -1,7 +1,7 @@
 """A catalog-path name gets its domain from exactly one writer application.
 
 Both halves of the graph-store split route every ``StandardName`` domain write
-through :func:`imas_codex.standard_names.domain_decision.write_name_domain`.
+through :func:`iter_codex.standard_names.domain_decision.write_name_domain`.
 The catalog write path delegates to that writer from its structural tail pass,
 which is the only place on the path that sets ``physics_domain``,
 ``source_domains`` or a ``HAS_PHYSICS_DOMAIN`` edge.
@@ -166,10 +166,10 @@ def test_the_detector_ignores_a_read(cypher: str) -> None:
 def test_catalog_write_applies_the_domain_writer_exactly_once(
     disposable_neo4j_empty: str,
 ) -> None:
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
-    from imas_codex.standard_names.graph_store import graph_lineage
-    from imas_codex.standard_names.graph_store.graph_catalog import (
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from iter_codex.standard_names.graph_store import graph_lineage
+    from iter_codex.standard_names.graph_store.graph_catalog import (
         write_standard_names,
     )
 

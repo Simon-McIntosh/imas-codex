@@ -14,7 +14,7 @@ import pytest
 
 # The package namespace exposes the ``paths`` click command; import the module
 # itself so the internal discovery function can be called directly.
-paths_cli = importlib.import_module("imas_codex.cli.discover.paths")
+paths_cli = importlib.import_module("iter_codex.cli.discover.paths")
 
 
 class _StopAtReset(Exception):
@@ -42,23 +42,23 @@ def _capture_reset(root_filter):
 
     with (
         patch(
-            "imas_codex.discovery.get_discovery_stats",
+            "iter_codex.discovery.get_discovery_stats",
             return_value={"total": 0},
         ),
         patch(
-            "imas_codex.cli.discover.common.use_rich_output",
+            "iter_codex.cli.discover.common.use_rich_output",
             return_value=False,
         ),
         patch(
-            "imas_codex.cli.discover.common.setup_logging",
+            "iter_codex.cli.discover.common.setup_logging",
             return_value=None,
         ),
         patch(
-            "imas_codex.cli.discover.common.make_log_print",
+            "iter_codex.cli.discover.common.make_log_print",
             return_value=lambda *a, **k: None,
         ),
         patch(
-            "imas_codex.discovery.base.reset.reset_to_status",
+            "iter_codex.discovery.base.reset.reset_to_status",
             side_effect=fake_reset,
         ),
         pytest.raises(_StopAtReset),
@@ -85,7 +85,7 @@ def test_reset_is_root_scoped_when_root_given():
 
 def test_reset_matches_root_and_descendants():
     """The scope matches paths under the root; the reset owns the clause text."""
-    from imas_codex.graph.query_builder import render_path_prefix_clause
+    from iter_codex.graph.query_builder import render_path_prefix_clause
 
     captured = _capture_reset(["/analysis/src"])
     assert captured["path_prefixes"] == ["/analysis/src"]

@@ -16,8 +16,8 @@ import sys
 
 import matplotlib.pyplot as plt
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.plotting.style import save_figure
+from iter_codex.graph.client import GraphClient
+from iter_codex.plotting.style import save_figure
 
 # Color palette for limiter epochs
 EPOCH_COLORS = [

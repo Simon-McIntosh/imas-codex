@@ -18,7 +18,7 @@ Requires a live Neo4j with a completed DD build.
 
 import pytest
 
-from imas_codex.graph.build_dd import _strip_dd_indices
+from iter_codex.graph.build_dd import _strip_dd_indices
 
 pytestmark = pytest.mark.graph
 
@@ -31,7 +31,7 @@ class TestDDVersions:
         if not label_counts.get("DDVersion"):
             pytest.skip("No DDVersion nodes in graph")
 
-        from imas_codex.graph.build_dd import get_all_dd_versions
+        from iter_codex.graph.build_dd import get_all_dd_versions
 
         expected = set(get_all_dd_versions())
         result = graph_client.query(
@@ -64,7 +64,7 @@ class TestDDVersions:
         if not label_counts.get("DDVersion"):
             pytest.skip("No DDVersion nodes in graph")
 
-        from imas_codex import dd_version as expected_version
+        from iter_codex import dd_version as expected_version
 
         result = graph_client.query(
             "MATCH (v:DDVersion {is_current: true}) RETURN v.id AS version"
@@ -193,7 +193,7 @@ class TestIDSCompleteness:
 
         import imas
 
-        from imas_codex import dd_version
+        from iter_codex import dd_version
 
         factory = imas.IDSFactory(dd_version)
         expected_ids = set(factory.ids_names())
@@ -343,7 +343,7 @@ class TestEmbeddingCompleteness:
         if not label_counts.get("IMASNode"):
             pytest.skip("No IMASNode nodes in graph")
 
-        from imas_codex.core.node_categories import EMBEDDABLE_CATEGORIES
+        from iter_codex.core.node_categories import EMBEDDABLE_CATEGORIES
 
         result = graph_client.query(
             "MATCH (p:IMASNode) "
@@ -688,7 +688,7 @@ class TestClusterLabels:
     def test_all_clusters_labeled(self, graph_client, label_counts):
         """Every IMASSemanticCluster should have a non-empty label.
 
-        Clusters created after the last ``imas-codex imas clusters label`` run
+        Clusters created after the last ``iter-codex imas clusters label`` run
         will have a NULL label.  We allow up to 20 % unlabeled to account for
         in-flight graph state; run the labelling pipeline to bring this to 0.
         """
@@ -705,7 +705,7 @@ class TestClusterLabels:
         max_allowed = max(1, int(total * 0.20))
         assert count <= max_allowed, (
             f"{count}/{total} clusters without labels (max allowed: {max_allowed}). "
-            f"Run `imas-codex imas clusters label` to generate."
+            f"Run `iter-codex imas clusters label` to generate."
         )
 
     def test_all_clusters_have_descriptions(self, graph_client, label_counts):
@@ -727,7 +727,7 @@ class TestClusterLabels:
         max_allowed = max(1, int(total * 0.20))
         assert count <= max_allowed, (
             f"{count}/{total} clusters without descriptions (max allowed: {max_allowed}). "
-            f"Run `imas-codex imas clusters label` to generate."
+            f"Run `iter-codex imas clusters label` to generate."
         )
 
     def test_cluster_labels_unique_within_scope(self, graph_client, label_counts):
@@ -859,7 +859,7 @@ class TestClusterEmbeddings:
         count = row["with_embed"]
         assert count == total, (
             f"Only {count}/{total} labeled clusters have label embeddings. "
-            f"Run `imas-codex imas clusters embed` to generate."
+            f"Run `iter-codex imas clusters embed` to generate."
         )
 
     def test_clusters_have_description_embeddings(self, graph_client, label_counts):
@@ -878,7 +878,7 @@ class TestClusterEmbeddings:
         count = row["with_embed"]
         assert count == total, (
             f"Only {count}/{total} described clusters have description embeddings. "
-            f"Run `imas-codex imas clusters embed` to generate."
+            f"Run `iter-codex imas clusters embed` to generate."
         )
 
     def test_cluster_embedding_dimensions_consistent(self, graph_client, label_counts):
@@ -1162,7 +1162,7 @@ class TestLifecycleMetadata:
         # written by the lifecycle reconciler for paths absent from the current
         # DD (retained, not deleted) — the most common status in a multi-version
         # build, per the schema.
-        from imas_codex.graph.dd_models import LifecycleStatus
+        from iter_codex.graph.dd_models import LifecycleStatus
 
         valid = {s.value for s in LifecycleStatus}
         invalid = statuses - valid
@@ -1381,21 +1381,21 @@ class TestUnitNormalization:
     """Tests for pint-normalized unit comparison."""
 
     def test_cosmetic_unit_change_filtered(self):
-        from imas_codex.graph.build_dd import _units_changed
+        from iter_codex.graph.build_dd import _units_changed
 
         changed, subtype = _units_changed("A/m^2", "A.m^-2")
         assert not changed
         assert subtype == "cosmetic"
 
     def test_sentinel_resolved(self):
-        from imas_codex.graph.build_dd import _units_changed
+        from iter_codex.graph.build_dd import _units_changed
 
         changed, subtype = _units_changed("as_parent_level_2", "m^-3")
         assert changed
         assert subtype == "sentinel_resolved"
 
     def test_dim_equivalent(self):
-        from imas_codex.graph.build_dd import _units_changed
+        from iter_codex.graph.build_dd import _units_changed
 
         # J.m^-3 and Pa are both pressure
         changed, subtype = _units_changed("J.m^-3", "Pa")
@@ -1403,27 +1403,27 @@ class TestUnitNormalization:
         assert subtype == "dim_equivalent"
 
     def test_dim_incompatible(self):
-        from imas_codex.graph.build_dd import _units_changed
+        from iter_codex.graph.build_dd import _units_changed
 
         changed, subtype = _units_changed("W", "Wb")
         assert changed
         assert subtype == "dim_incompatible"
 
     def test_empty_units_not_changed(self):
-        from imas_codex.graph.build_dd import _units_changed
+        from iter_codex.graph.build_dd import _units_changed
 
         changed, subtype = _units_changed("", "")
         assert not changed
 
     def test_both_sentinels_not_changed(self):
-        from imas_codex.graph.build_dd import _units_changed
+        from iter_codex.graph.build_dd import _units_changed
 
         changed, subtype = _units_changed("as_parent", "as_parent")
         assert not changed
         assert subtype == "cosmetic"
 
     def test_same_real_units_not_changed(self):
-        from imas_codex.graph.build_dd import _units_changed
+        from iter_codex.graph.build_dd import _units_changed
 
         changed, subtype = _units_changed("m/s", "m.s^-1")
         assert not changed
@@ -1434,12 +1434,12 @@ class TestBreakingLevel:
     """Tests for breaking change classification."""
 
     def test_path_removed_is_breaking(self):
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         assert _classify_breaking_level("path_removed", {}) == "breaking"
 
     def test_doc_wording_is_informational(self):
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         assert (
             _classify_breaking_level("documentation", {"semantic_type": "none"})
@@ -1447,7 +1447,7 @@ class TestBreakingLevel:
         )
 
     def test_sign_convention_doc_is_breaking(self):
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         assert (
             _classify_breaking_level(
@@ -1457,12 +1457,12 @@ class TestBreakingLevel:
         )
 
     def test_path_renamed_is_breaking(self):
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         assert _classify_breaking_level("path_renamed", {}) == "breaking"
 
     def test_coordinate_convention_doc_is_advisory(self):
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         assert (
             _classify_breaking_level(
@@ -1472,7 +1472,7 @@ class TestBreakingLevel:
         )
 
     def test_dim_incompatible_unit_is_breaking(self):
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         assert (
             _classify_breaking_level(
@@ -1482,7 +1482,7 @@ class TestBreakingLevel:
         )
 
     def test_dim_equivalent_unit_is_advisory(self):
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         assert (
             _classify_breaking_level("units", {"unit_change_subtype": "dim_equivalent"})
@@ -1490,7 +1490,7 @@ class TestBreakingLevel:
         )
 
     def test_sentinel_resolved_unit_is_informational(self):
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         assert (
             _classify_breaking_level(
@@ -1500,18 +1500,18 @@ class TestBreakingLevel:
         )
 
     def test_data_type_is_breaking(self):
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         assert _classify_breaking_level("data_type", {}) == "breaking"
 
     def test_path_added_is_informational(self):
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         assert _classify_breaking_level("path_added", {}) == "informational"
 
     def test_data_format_change_doc_is_breaking(self):
         """Documentation changes with data_format_change semantic are breaking."""
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         level = _classify_breaking_level(
             "documentation", {"semantic_type": "data_format_change"}
@@ -1520,14 +1520,14 @@ class TestBreakingLevel:
 
     def test_convention_change_type_is_breaking(self):
         """convention_change change type should be classified as breaking."""
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         level = _classify_breaking_level("convention_change", {})
         assert level == "breaking"
 
     def test_maxoccur_changed_is_advisory(self):
         """maxoccur_changed should be classified as advisory."""
-        from imas_codex.graph.build_dd import _classify_breaking_level
+        from iter_codex.graph.build_dd import _classify_breaking_level
 
         level = _classify_breaking_level("maxoccur_changed", {})
         assert level == "advisory"
@@ -1537,7 +1537,7 @@ class TestDetectRenames:
     """Tests for rename detection via NBC metadata."""
 
     def test_nbc_rename_detected(self):
-        from imas_codex.graph.build_dd import _detect_renames
+        from iter_codex.graph.build_dd import _detect_renames
 
         added = {"ids/new_path"}
         removed = {"ids/old_path"}
@@ -1551,7 +1551,7 @@ class TestDetectRenames:
         assert renames[0]["source"] == "nbc_metadata"
 
     def test_no_rename_without_metadata(self):
-        from imas_codex.graph.build_dd import _detect_renames
+        from iter_codex.graph.build_dd import _detect_renames
 
         added = {"ids/new_path"}
         removed = {"ids/old_path"}
@@ -1560,7 +1560,7 @@ class TestDetectRenames:
         assert len(renames) == 0
 
     def test_no_rename_if_previous_not_in_removed(self):
-        from imas_codex.graph.build_dd import _detect_renames
+        from iter_codex.graph.build_dd import _detect_renames
 
         added = {"ids/new_path"}
         removed = set()
@@ -1575,7 +1575,7 @@ class TestComputeVersionChanges:
     """Tests for compute_version_changes with lifecycle and unit features."""
 
     def test_path_added_event(self):
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         result = compute_version_changes({}, {"ids/a": {"units": "m"}})
         assert "ids/a" in result["changed"]
@@ -1583,7 +1583,7 @@ class TestComputeVersionChanges:
         assert any(e["field"] == "path_added" for e in events)
 
     def test_path_removed_event(self):
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         result = compute_version_changes({"ids/a": {"units": "m"}}, {})
         assert "ids/a" in result["changed"]
@@ -1591,7 +1591,7 @@ class TestComputeVersionChanges:
         assert any(e["field"] == "path_removed" for e in events)
 
     def test_rename_generates_path_renamed_event(self):
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/old_path": {"units": "m"}}
         new = {
@@ -1612,7 +1612,7 @@ class TestComputeVersionChanges:
         assert len(added_events) == 0
 
     def test_cosmetic_unit_change_not_in_changes(self):
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/a": {"units": "A/m^2"}}
         new = {"ids/a": {"units": "A.m^-2"}}
@@ -1620,7 +1620,7 @@ class TestComputeVersionChanges:
         assert "ids/a" not in result["changed"]
 
     def test_real_unit_change_has_breaking_level(self):
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/a": {"units": "W"}}
         new = {"ids/a": {"units": "Wb"}}
@@ -1632,7 +1632,7 @@ class TestComputeVersionChanges:
         assert unit_changes[0]["unit_change_subtype"] == "dim_incompatible"
 
     def test_coordinates_field_compared(self):
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/a": {"coordinates": ["1...N"]}}
         new = {"ids/a": {"coordinates": ["1...3"]}}
@@ -1695,7 +1695,7 @@ class TestComputeVersionChanges:
 
     def test_sign_convention_doc_change_is_breaking(self):
         """Documentation changes introducing sign convention keywords must be breaking."""
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/connections": {"documentation": "Matrix elements are 1 or 0."}}
         new = {
@@ -1716,7 +1716,7 @@ class TestComputeVersionChanges:
 
     def test_coordinate_convention_doc_change_is_advisory(self):
         """Documentation changes introducing coordinate convention keywords must be advisory."""
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/phi": {"documentation": "Toroidal angle"}}
         new = {
@@ -1733,7 +1733,7 @@ class TestComputeVersionChanges:
 
     def test_plain_doc_change_is_informational(self):
         """Documentation changes without convention keywords remain informational."""
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/a": {"documentation": "Temperature"}}
         new = {"ids/a": {"documentation": "Temperature of the electrons"}}
@@ -1745,7 +1745,7 @@ class TestComputeVersionChanges:
 
     def test_data_format_doc_change_is_breaking(self):
         """Documentation changes with data format keywords must be breaking."""
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/matrix": {"documentation": "Connection matrix"}}
         new = {
@@ -1762,7 +1762,7 @@ class TestComputeVersionChanges:
 
     def test_maxoccur_change_detected(self):
         """Changes in maxoccur should be detected."""
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/circuit": {"maxoccur": 76, "documentation": "Circuit matrix"}}
         new = {"ids/circuit": {"maxoccur": 38, "documentation": "Circuit matrix"}}
@@ -1778,7 +1778,7 @@ class TestComputeVersionChanges:
 
     def test_maxoccur_none_to_value(self):
         """maxoccur going from None to a value is a change."""
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/a": {"maxoccur": None}}
         new = {"ids/a": {"maxoccur": 10}}
@@ -1793,7 +1793,7 @@ class TestComputeVersionChanges:
 
     def test_maxoccur_same_value_no_change(self):
         """maxoccur with same value should not produce a change."""
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/a": {"maxoccur": 10}}
         new = {"ids/a": {"maxoccur": 10}}
@@ -1806,7 +1806,7 @@ class TestComputeVersionChanges:
 
     def test_ndim_change_detected(self):
         """Changes in ndim should be detected as structure_changed."""
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/a": {"ndim": "1"}}
         new = {"ids/a": {"ndim": "2"}}
@@ -1818,7 +1818,7 @@ class TestComputeVersionChanges:
 
     def test_identifier_enum_name_change_detected(self):
         """Changes in identifier_enum_name should be detected."""
-        from imas_codex.graph.build_dd import compute_version_changes
+        from iter_codex.graph.build_dd import compute_version_changes
 
         old = {"ids/a": {"identifier_enum_name": "old_enum"}}
         new = {"ids/a": {"identifier_enum_name": "new_enum"}}

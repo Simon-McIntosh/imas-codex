@@ -25,7 +25,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.signals.parallel import detect_signal_sources
+from iter_codex.discovery.signals.parallel import detect_signal_sources
 
 
 def _mock_gc(results):
@@ -61,7 +61,7 @@ class TestOneMemberSources:
         gc = _mock_gc(results)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient", return_value=gc
+            "iter_codex.discovery.signals.parallel.GraphClient", return_value=gc
         ):
             groups, members = detect_signal_sources("tcv", min_instances=3)
 
@@ -90,7 +90,7 @@ class TestOneMemberSources:
         gc = _mock_gc(results)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient", return_value=gc
+            "iter_codex.discovery.signals.parallel.GraphClient", return_value=gc
         ):
             groups, members = detect_signal_sources("tcv", min_instances=3)
 
@@ -106,7 +106,7 @@ class TestOneMemberSources:
         gc = _mock_gc(results)
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient", return_value=gc
+            "iter_codex.discovery.signals.parallel.GraphClient", return_value=gc
         ):
             groups, members = detect_signal_sources("tcv", min_instances=3)
 
@@ -122,7 +122,7 @@ class TestOneMemberSources:
         gc = _mock_gc([])
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient", return_value=gc
+            "iter_codex.discovery.signals.parallel.GraphClient", return_value=gc
         ):
             assert detect_signal_sources("tcv", min_instances=3) == (0, 0)
 
@@ -135,7 +135,7 @@ class TestOneMemberSources:
         gc = _mock_gc([])
 
         with patch(
-            "imas_codex.discovery.signals.parallel.GraphClient", return_value=gc
+            "iter_codex.discovery.signals.parallel.GraphClient", return_value=gc
         ):
             assert detect_signal_sources("tcv", min_instances=3) == (0, 0)
 
@@ -153,12 +153,12 @@ def test_singleton_sources_round_trip():
     pattern when they carry no source. That guard excludes signals already
     MEMBER_OF a source, so a channel-like signal grouping would once have
     skipped is now enriched individually."""
-    from imas_codex.discovery.signals.parallel import (
+    from iter_codex.discovery.signals.parallel import (
         claim_signals_for_enrichment,
         propagate_source_enrichment,
     )
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.ids.workers import claim_sources_for_candidates
+    from iter_codex.graph.client import GraphClient
+    from iter_codex.ids.workers import claim_sources_for_candidates
 
     marker = uuid.uuid4().hex[:12]
     facility = f"pytest-singleton-{marker}"

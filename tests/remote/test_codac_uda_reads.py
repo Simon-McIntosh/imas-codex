@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from imas_codex.remote.scripts import codac_uda as reader
+from iter_codex.remote.scripts import codac_uda as reader
 
 
 class FakeClient:

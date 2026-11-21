@@ -17,8 +17,8 @@ from unittest.mock import patch
 
 INSIDE = "/analysis/src/SAeqread"
 OUTSIDE = "/analysis/src/other"
-GRAPH_OPS = "imas_codex.discovery.code.graph_ops.GraphClient"
-GRAPH_GRAPH = "imas_codex.graph.GraphClient"
+GRAPH_OPS = "iter_codex.discovery.code.graph_ops.GraphClient"
+GRAPH_GRAPH = "iter_codex.graph.GraphClient"
 FACILITY = "jt-60sa"
 
 
@@ -178,7 +178,7 @@ class StaleJudgmentGraph(StubGraphClient):
 
 def test_stale_name_claim_checks_model_and_claims_unjudged_first(monkeypatch):
     """A current judgment cannot consume a slot ahead of an old one."""
-    from imas_codex.discovery.code.graph_ops import claim_files_for_triage
+    from iter_codex.discovery.code.graph_ops import claim_files_for_triage
 
     current = _code_file(
         INSIDE + "/current.f", "skipped", relevance_stage="name", relevance_model="seat"
@@ -190,9 +190,9 @@ def test_stale_name_claim_checks_model_and_claims_unjudged_first(monkeypatch):
     outside = _code_file(OUTSIDE + "/outside.f", "discovered")
     graph = StaleJudgmentGraph([current, stale, fresh, outside])
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.GraphClient", lambda: graph
+        "iter_codex.discovery.code.graph_ops.GraphClient", lambda: graph
     )
-    monkeypatch.setattr("imas_codex.settings.get_model", lambda _: "seat")
+    monkeypatch.setattr("iter_codex.settings.get_model", lambda _: "seat")
 
     claimed = claim_files_for_triage(FACILITY, limit=2, path_prefixes=[INSIDE])
 
@@ -202,7 +202,7 @@ def test_stale_name_claim_checks_model_and_claims_unjudged_first(monkeypatch):
 
 
 def test_stale_content_claim_and_pending_check_share_model_selection(monkeypatch):
-    from imas_codex.discovery.code.graph_ops import (
+    from iter_codex.discovery.code.graph_ops import (
         claim_files_for_scoring,
         has_pending_score_work,
     )
@@ -224,9 +224,9 @@ def test_stale_content_claim_and_pending_check_share_model_selection(monkeypatch
     fresh = _code_file(INSIDE + "/fresh.f", "triaged", is_enriched=True)
     graph = StaleJudgmentGraph([current, stale, fresh])
     monkeypatch.setattr(
-        "imas_codex.discovery.code.graph_ops.GraphClient", lambda: graph
+        "iter_codex.discovery.code.graph_ops.GraphClient", lambda: graph
     )
-    monkeypatch.setattr("imas_codex.settings.get_model", lambda _: "seat")
+    monkeypatch.setattr("iter_codex.settings.get_model", lambda _: "seat")
 
     assert has_pending_score_work(FACILITY, path_prefixes=[INSIDE]) is True
     claimed = claim_files_for_scoring(FACILITY, limit=2, path_prefixes=[INSIDE])
@@ -247,7 +247,7 @@ def _call(fn, target, rows, **kwargs):
 
 class TestClaimsHonourPrefix:
     def test_triage_claim_ignores_files_outside_the_prefix(self):
-        from imas_codex.discovery.code.graph_ops import claim_files_for_triage
+        from iter_codex.discovery.code.graph_ops import claim_files_for_triage
 
         rows = [
             _code_file(INSIDE + "/a.f", "discovered"),
@@ -259,7 +259,7 @@ class TestClaimsHonourPrefix:
         assert [f["path"] for f in files] == [INSIDE + "/a.f"]
 
     def test_triage_claim_unscoped_takes_every_file(self):
-        from imas_codex.discovery.code.graph_ops import claim_files_for_triage
+        from iter_codex.discovery.code.graph_ops import claim_files_for_triage
 
         rows = [
             _code_file(INSIDE + "/a.f", "discovered"),
@@ -269,7 +269,7 @@ class TestClaimsHonourPrefix:
         assert {f["path"] for f in files} == {INSIDE + "/a.f", OUTSIDE + "/b.f"}
 
     def test_enrich_claim_ignores_files_outside_the_prefix(self):
-        from imas_codex.discovery.code.graph_ops import claim_files_for_enrichment
+        from iter_codex.discovery.code.graph_ops import claim_files_for_enrichment
 
         rows = [
             _code_file(INSIDE + "/a.f", "triaged", score_composite=0.8),
@@ -286,7 +286,7 @@ class TestClaimsHonourPrefix:
         assert [f["path"] for f in files] == [INSIDE + "/a.f"]
 
     def test_score_claim_ignores_files_outside_the_prefix(self):
-        from imas_codex.discovery.code.graph_ops import claim_files_for_scoring
+        from iter_codex.discovery.code.graph_ops import claim_files_for_scoring
 
         rows = [
             _code_file(INSIDE + "/a.f", "triaged", is_enriched=True),
@@ -298,7 +298,7 @@ class TestClaimsHonourPrefix:
         assert [f["path"] for f in files] == [INSIDE + "/a.f"]
 
     def test_ingest_claim_ignores_files_outside_the_prefix(self):
-        from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
+        from iter_codex.discovery.code.workers import _claim_code_files_for_ingestion
 
         rows = [
             _code_file(INSIDE + "/a.f", "scored", score_composite=0.9, line_count=5),
@@ -317,7 +317,7 @@ class TestClaimsHonourPrefix:
 
 class TestHasWorkPredicatesHonourPrefix:
     def test_triage_predicate_ignores_outside_work(self):
-        from imas_codex.discovery.code.graph_ops import has_pending_triage_work
+        from iter_codex.discovery.code.graph_ops import has_pending_triage_work
 
         rows = [_code_file(OUTSIDE + "/b.f", "discovered")]
         assert (
@@ -327,7 +327,7 @@ class TestHasWorkPredicatesHonourPrefix:
         assert _call(has_pending_triage_work, GRAPH_OPS, rows) is True
 
     def test_enrich_predicate_ignores_outside_work(self):
-        from imas_codex.discovery.code.graph_ops import has_pending_enrich_work
+        from iter_codex.discovery.code.graph_ops import has_pending_enrich_work
 
         rows = [_code_file(OUTSIDE + "/b.f", "triaged", score_composite=0.8)]
         assert (
@@ -345,7 +345,7 @@ class TestHasWorkPredicatesHonourPrefix:
         )
 
     def test_score_predicate_ignores_outside_work(self):
-        from imas_codex.discovery.code.graph_ops import has_pending_score_work
+        from iter_codex.discovery.code.graph_ops import has_pending_score_work
 
         rows = [_code_file(OUTSIDE + "/b.f", "triaged", is_enriched=True)]
         assert (
@@ -355,7 +355,7 @@ class TestHasWorkPredicatesHonourPrefix:
         assert _call(has_pending_score_work, GRAPH_OPS, rows) is True
 
     def test_code_predicate_ignores_outside_work(self):
-        from imas_codex.discovery.code.graph_ops import has_pending_code_work
+        from iter_codex.discovery.code.graph_ops import has_pending_code_work
 
         rows = [_code_file(OUTSIDE + "/b.f", "scored", score_composite=0.95)]
         assert (
@@ -371,7 +371,7 @@ class TestHasWorkPredicatesHonourPrefix:
         assert _call(has_pending_code_work, GRAPH_OPS, rows, min_relevance=0.5) is True
 
     def test_link_predicate_ignores_outside_work(self):
-        from imas_codex.discovery.code.graph_ops import has_pending_link_work
+        from iter_codex.discovery.code.graph_ops import has_pending_link_work
 
         rows = [_code_file(OUTSIDE + "/b.f", "ingested")]
         assert (

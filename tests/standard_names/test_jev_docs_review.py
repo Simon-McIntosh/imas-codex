@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.context import conventions_context_for
-from imas_codex.standard_names.docs_gates import HouseStyleFindingClass
-from imas_codex.standard_names.review import jev_review
-from imas_codex.standard_names.review.audits import AuditReport, LintFinding
-from imas_codex.standard_names.review.checks import load_review_checks
+from iter_codex.standard_names.context import conventions_context_for
+from iter_codex.standard_names.docs_gates import HouseStyleFindingClass
+from iter_codex.standard_names.review import jev_review
+from iter_codex.standard_names.review.audits import AuditReport, LintFinding
+from iter_codex.standard_names.review.checks import load_review_checks
 
 
 @pytest.mark.parametrize(

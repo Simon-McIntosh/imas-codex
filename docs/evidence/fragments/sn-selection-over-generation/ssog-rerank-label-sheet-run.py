@@ -1,7 +1,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at e5aa326f89de7b349f736709087de785a7963623, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.workers._collect_nearby_name_comparators.
+# Names the tree no longer defines: iter_codex.standard_names.workers._collect_nearby_name_comparators.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Build the comparator label sheet: both orders per item, for coordinator grading.
@@ -9,7 +9,7 @@
 For each drawn DD source this records the comparator block twice — the
 embedding-ordered top ``TOP_K`` from :func:`_collect_nearby_name_comparators`
 and the reranked top ``TOP_K`` from
-:func:`imas_codex.standard_names.context.rerank_name_comparators` — and emits
+:func:`iter_codex.standard_names.context.rerank_name_comparators` — and emits
 one JSON row per item carrying the union of the two top-list views with an
 empty ``grade`` field the coordinator fills. The driver only reads: the
 embedding search reads the graph, the rerank spends on the judge seat, and
@@ -166,10 +166,10 @@ async def build_row(
     reorders that same pool. Both orders are recorded by rank, and the candidate
     list is the union of the two top-*top_k* views with an empty ``grade``.
     """
-    from imas_codex.standard_names.workers import _collect_nearby_name_comparators
+    from iter_codex.standard_names.workers import _collect_nearby_name_comparators
 
     if rerank is None:
-        from imas_codex.standard_names.context import rerank_name_comparators
+        from iter_codex.standard_names.context import rerank_name_comparators
 
         rerank = rerank_name_comparators
 
@@ -264,7 +264,7 @@ def _run(sheet: dict[str, Any], out: Path) -> None:
 
 
 async def _amain(args: argparse.Namespace) -> int:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
         population = load_population(gc)

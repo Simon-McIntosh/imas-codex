@@ -269,7 +269,7 @@ def mock_graph_client():
     mock_gc.__exit__ = MagicMock(return_value=False)
     mock_gc.query = MagicMock(return_value=[])
 
-    with patch("imas_codex.discovery.wiki.graph_ops.GraphClient", return_value=mock_gc):
+    with patch("iter_codex.discovery.wiki.graph_ops.GraphClient", return_value=mock_gc):
         yield mock_gc
 
 
@@ -308,7 +308,7 @@ def mock_graph_ops():
 
     for func_name in funcs:
         p = patch(
-            f"imas_codex.discovery.wiki.graph_ops.{func_name}",
+            f"iter_codex.discovery.wiki.graph_ops.{func_name}",
             return_value=[] if "claim" in func_name else 0,
         )
         mock_func = p.start()

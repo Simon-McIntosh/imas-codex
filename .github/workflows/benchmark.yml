@@ -37,7 +37,7 @@ jobs:
           - 7474:7474
           - 7687:7687
         env:
-          NEO4J_AUTH: neo4j/imas-codex
+          NEO4J_AUTH: neo4j/iter-codex
           NEO4J_PLUGINS: '["apoc"]'
           NEO4J_server_memory_heap_initial__size: 512m
           NEO4J_server_memory_heap_max__size: 1G
@@ -125,7 +125,7 @@ jobs:
         id: graph-tag
         run: |
           REGISTRY="${{ github.event.inputs.registry || 'ghcr.io/iterorganization' }}"
-          PACKAGE="imas-codex-graph"
+          PACKAGE="iter-codex-graph"
           REQUESTED="${{ github.event.inputs.graph_tag || 'latest' }}"
 
           if [ "$REQUESTED" != "latest" ]; then
@@ -152,7 +152,7 @@ jobs:
       - name: Pull graph dump from GHCR
         run: |
           REGISTRY="${{ steps.graph-tag.outputs.registry }}"
-          PACKAGE="imas-codex-graph"
+          PACKAGE="iter-codex-graph"
           TAG="${{ steps.graph-tag.outputs.tag }}"
           echo "Pulling: ${REGISTRY}/${PACKAGE}:${TAG}"
           mkdir -p /tmp/graph-dump
@@ -223,36 +223,36 @@ jobs:
       - name: Reset Neo4j password
         run: |
           NEO4J_CONTAINER=$(docker ps -q --filter "ancestor=neo4j:2026.01.4-community" | head -1)
-          docker exec "${NEO4J_CONTAINER}" neo4j-admin dbms set-initial-password imas-codex 2>/dev/null || true
+          docker exec "${NEO4J_CONTAINER}" neo4j-admin dbms set-initial-password iter-codex 2>/dev/null || true
 
       - name: Verify graph loaded
         run: |
           NEO4J_CONTAINER=$(docker ps -q --filter "ancestor=neo4j:2026.01.4-community" | head -1)
           docker exec "${NEO4J_CONTAINER}" cypher-shell \
-            -u neo4j -p imas-codex \
+            -u neo4j -p iter-codex \
             "MATCH (n) RETURN count(n) AS nodes, labels(n)[0] AS label ORDER BY nodes DESC LIMIT 10"
 
       - name: Create vector and fulltext indexes
         run: |
-          # Dimension must match pyproject.toml [tool.imas-codex.embedding] dimension
+          # Dimension must match pyproject.toml [tool.iter-codex.embedding] dimension
           DIM=256
           NEO4J_CONTAINER=$(docker ps -q --filter "ancestor=neo4j:2026.01.4-community" | head -1)
 
           # Drop any stale vector indexes from the dump (may have wrong dimension)
           echo "Dropping stale vector indexes..."
           docker exec "${NEO4J_CONTAINER}" cypher-shell \
-            -u neo4j -p imas-codex \
+            -u neo4j -p iter-codex \
             "SHOW INDEXES YIELD name, type WHERE type = 'VECTOR' RETURN name" \
             --format plain 2>/dev/null | tail -n +2 | tr -d ' "' | while read -r IDX; do
               [ -z "$IDX" ] && continue
               echo "  Dropping $IDX"
               docker exec "${NEO4J_CONTAINER}" cypher-shell \
-                -u neo4j -p imas-codex "DROP INDEX $IDX IF EXISTS" 2>/dev/null || true
+                -u neo4j -p iter-codex "DROP INDEX $IDX IF EXISTS" 2>/dev/null || true
             done
 
           echo "Creating vector indexes with dimension $DIM..."
 
-          # Vector indexes — matches schema declarations in imas_codex/schemas/
+          # Vector indexes — matches schema declarations in iter_codex/schemas/
           declare -A VECTOR_INDEXES=(
             ["ids_embedding"]="IDS:embedding"
             ["imas_node_embedding"]="IMASNode:embedding"
@@ -275,7 +275,7 @@ jobs:
             IFS=':' read -r LABEL PROP <<< "${VECTOR_INDEXES[$IDX_NAME]}"
             echo "  Creating $IDX_NAME on $LABEL.$PROP (dim=$DIM)"
             docker exec "${NEO4J_CONTAINER}" cypher-shell \
-              -u neo4j -p imas-codex \
+              -u neo4j -p iter-codex \
               "CREATE VECTOR INDEX $IDX_NAME IF NOT EXISTS
                FOR (n:$LABEL) ON (n.$PROP)
                OPTIONS {indexConfig: {\`vector.dimensions\`: $DIM, \`vector.similarity_function\`: 'cosine'}}" \
@@ -285,7 +285,7 @@ jobs:
           # Fulltext indexes
           echo "Creating fulltext indexes..."
           docker exec "${NEO4J_CONTAINER}" cypher-shell \
-            -u neo4j -p imas-codex \
+            -u neo4j -p iter-codex \
             "CREATE FULLTEXT INDEX imas_node_text IF NOT EXISTS FOR (n:IMASNode) ON EACH [n.path, n.description, n.documentation]" \
             2>/dev/null || echo "  Warning: imas_node_text already exists"
 
@@ -295,18 +295,18 @@ jobs:
 
           # Verify indexes
           docker exec "${NEO4J_CONTAINER}" cypher-shell \
-            -u neo4j -p imas-codex \
+            -u neo4j -p iter-codex \
             "SHOW INDEXES YIELD name, type, state WHERE type IN ['VECTOR', 'FULLTEXT'] RETURN name, type, state ORDER BY name"
 
       - name: Run bounded graph search regression
         env:
           NEO4J_URI: bolt://localhost:7687
           NEO4J_USERNAME: neo4j
-          NEO4J_PASSWORD: imas-codex
-          IMAS_CODEX_GRAPH_LOCATION: local
-          IMAS_CODEX_BENCHMARK_EMBEDDING_LOCATION: local
-          IMAS_CODEX_BENCHMARK_EMBEDDING_MODEL: Qwen/Qwen3-Embedding-0.6B
-          IMAS_CODEX_EMBEDDING_DIMENSION: "256"
+          NEO4J_PASSWORD: iter-codex
+          ITER_CODEX_GRAPH_LOCATION: local
+          ITER_CODEX_BENCHMARK_EMBEDDING_LOCATION: local
+          ITER_CODEX_BENCHMARK_EMBEDDING_MODEL: Qwen/Qwen3-Embedding-0.6B
+          ITER_CODEX_EMBEDDING_DIMENSION: "256"
         run: |
           mkdir -p .artifacts
           uv run pytest \
@@ -322,11 +322,11 @@ jobs:
         env:
           NEO4J_URI: bolt://localhost:7687
           NEO4J_USERNAME: neo4j
-          NEO4J_PASSWORD: imas-codex
-          IMAS_CODEX_GRAPH_LOCATION: local
-          IMAS_CODEX_BENCHMARK_EMBEDDING_LOCATION: local
-          IMAS_CODEX_BENCHMARK_EMBEDDING_MODEL: Qwen/Qwen3-Embedding-0.6B
-          IMAS_CODEX_EMBEDDING_DIMENSION: "256"
+          NEO4J_PASSWORD: iter-codex
+          ITER_CODEX_GRAPH_LOCATION: local
+          ITER_CODEX_BENCHMARK_EMBEDDING_LOCATION: local
+          ITER_CODEX_BENCHMARK_EMBEDDING_MODEL: Qwen/Qwen3-Embedding-0.6B
+          ITER_CODEX_EMBEDDING_DIMENSION: "256"
         run: |
           uv run pytest \
             tests/search/test_search_benchmarks.py \
@@ -364,9 +364,9 @@ jobs:
         env:
           NEO4J_URI: bolt://localhost:7687
           NEO4J_USERNAME: neo4j
-          NEO4J_PASSWORD: imas-codex
-          IMAS_CODEX_EMBEDDING_LOCATION: local
-          IMAS_CODEX_GRAPH_LOCATION: local
+          NEO4J_PASSWORD: iter-codex
+          ITER_CODEX_EMBEDDING_LOCATION: local
+          ITER_CODEX_GRAPH_LOCATION: local
         run: |
           FILTER="${{ github.event.inputs.benchmark_filter }}"
           if [ -n "$FILTER" ]; then

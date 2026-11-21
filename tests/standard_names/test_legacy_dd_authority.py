@@ -6,8 +6,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
-from imas_codex.standard_names.unit_overrides import OverrideRule
+from iter_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
+from iter_codex.standard_names.unit_overrides import OverrideRule
 
 _ACTIVE_DIRECTION_PATH = "camera_ir/channel/camera/direction/x"
 
@@ -28,7 +28,7 @@ def _replace_legacy_carriers(
 
 
 def test_shipped_carriers_have_zero_shadow_authority() -> None:
-    authority = import_module("imas_codex.standard_names.legacy_authority")
+    authority = import_module("iter_codex.standard_names.legacy_authority")
 
     audit = authority.assert_zero_audited_shadow_authorities()
 
@@ -59,7 +59,7 @@ def test_shipped_carriers_have_zero_shadow_authority() -> None:
 
 
 def test_public_shadow_audit_has_no_applicability_flag() -> None:
-    authority = import_module("imas_codex.standard_names.legacy_authority")
+    authority = import_module("iter_codex.standard_names.legacy_authority")
 
     assert set(signature(authority.find_shadow_authorities).parameters) == {
         "manifest",
@@ -71,7 +71,7 @@ def test_public_shadow_audit_has_no_applicability_flag() -> None:
 
 
 def test_shadow_guard_names_residual_carrier_and_row() -> None:
-    authority = import_module("imas_codex.standard_names.legacy_authority")
+    authority = import_module("iter_codex.standard_names.legacy_authority")
     manifest = load_dd_resolution_manifest()
     duplicate = manifest.resolutions[0]
     double_authority = SimpleNamespace(
@@ -90,7 +90,7 @@ def test_shadow_guard_names_residual_carrier_and_row() -> None:
 def test_shadow_audit_flags_disagreeing_extraction_skip(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    authority = import_module("imas_codex.standard_names.legacy_authority")
+    authority = import_module("iter_codex.standard_names.legacy_authority")
     _replace_legacy_carriers(
         monkeypatch,
         authority,
@@ -123,7 +123,7 @@ def test_shadow_audit_flags_disagreeing_extraction_skip(
 def test_shadow_audit_flags_disagreeing_extraction_override(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    authority = import_module("imas_codex.standard_names.legacy_authority")
+    authority = import_module("iter_codex.standard_names.legacy_authority")
     _replace_legacy_carriers(
         monkeypatch,
         authority,
@@ -156,7 +156,7 @@ def test_shadow_audit_flags_disagreeing_extraction_override(
 def test_shadow_audit_flags_disagreeing_comparator_suppression(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    authority = import_module("imas_codex.standard_names.legacy_authority")
+    authority = import_module("iter_codex.standard_names.legacy_authority")
     _replace_legacy_carriers(
         monkeypatch,
         authority,
@@ -187,7 +187,7 @@ def test_shadow_audit_flags_disagreeing_comparator_suppression(
 def test_shadow_audit_flags_disagreeing_graph_correction(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    authority = import_module("imas_codex.standard_names.legacy_authority")
+    authority = import_module("iter_codex.standard_names.legacy_authority")
     _replace_legacy_carriers(
         monkeypatch,
         authority,

@@ -8,10 +8,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.models.constants import SearchMode
-from imas_codex.search.document_store import Document, DocumentMetadata, DocumentStore
-from imas_codex.search.engines.lexical_engine import LexicalSearchEngine
-from imas_codex.search.search_strategy import SearchConfig
+from iter_codex.models.constants import SearchMode
+from iter_codex.search.document_store import Document, DocumentMetadata, DocumentStore
+from iter_codex.search.engines.lexical_engine import LexicalSearchEngine
+from iter_codex.search.search_strategy import SearchConfig
 
 
 def create_mock_document(

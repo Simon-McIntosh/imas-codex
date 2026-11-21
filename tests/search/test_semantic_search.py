@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from imas_codex.search.document_store import Document, DocumentMetadata
-from imas_codex.search.semantic_search import (
+from iter_codex.search.document_store import Document, DocumentMetadata
+from iter_codex.search.semantic_search import (
     SemanticSearch,
     SemanticSearchConfig,
     SemanticSearchResult,

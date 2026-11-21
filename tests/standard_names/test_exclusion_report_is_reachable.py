@@ -19,7 +19,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.standard_names.catalog_release import (
+from iter_codex.standard_names.catalog_release import (
     ExportReportLinkError,
     body_with_export_report_link,
     export_report_blob_url,

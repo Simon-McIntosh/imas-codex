@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.standard_names.campaign import (
+from iter_codex.standard_names.campaign import (
     CAMPAIGN_MANIFEST_KIND,
     CAMPAIGN_MANIFEST_SCHEMA_VERSION,
     CampaignSelection,
@@ -28,7 +28,7 @@ jsonschema = pytest.importorskip("jsonschema")
 
 SCHEMA_PATH = (
     Path(__file__).resolve().parents[2]
-    / "imas_codex"
+    / "iter_codex"
     / "standard_names"
     / "config"
     / "campaign_manifest.schema.json"
@@ -185,7 +185,7 @@ class TestDefaultPath:
 
     def test_default_lives_under_the_user_data_dir(self):
         default = default_campaign_manifest_path()
-        assert default.is_relative_to(Path.home() / ".local" / "share" / "imas-codex")
+        assert default.is_relative_to(Path.home() / ".local" / "share" / "iter-codex")
         assert default.suffix == ".json"
 
     def test_default_is_not_the_bare_working_directory_name(self):

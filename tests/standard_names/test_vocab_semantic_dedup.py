@@ -12,8 +12,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from imas_codex.standard_names import vocab_semantic_dedup as vsd
-from imas_codex.standard_names.vocab_semantic_dedup import (
+from iter_codex.standard_names import vocab_semantic_dedup as vsd
+from iter_codex.standard_names.vocab_semantic_dedup import (
     DUPLICATE_THRESHOLD,
     TokenNeighbour,
     nearest_registered_token,

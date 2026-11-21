@@ -29,8 +29,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.models import (
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.models import (
     GeneratedDocs,
     RefinedDocs,
     StandardNameQualityCommentsDocs,
@@ -40,7 +40,7 @@ from imas_codex.standard_names.models import (
     StandardNameQualityScoreDocs,
     StandardNameQualityScoreNameOnly,
 )
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.worker_tasks import (
     worker_generate_docs as _owning_worker_generate_docs,
     worker_refine_docs as _owning_worker_refine_docs,
     worker_review_docs as _owning_worker_review_docs,
@@ -137,7 +137,7 @@ def _make_acall(response_obj: Any):
 @pytest.mark.asyncio
 async def test_generate_docs_releases_lease_on_happy_path():
     """process_generate_docs_batch must return unused budget to the pool."""
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     mgr = BudgetManager(total_budget=_INITIAL_BUDGET)
     item = _stub_item()
@@ -153,11 +153,11 @@ async def test_generate_docs_releases_lease_on_happy_path():
 
     with (
         patch(
-            "imas_codex.settings.get_model",
+            "iter_codex.settings.get_model",
             return_value="test-language-model",
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_make_acall(fake_response),
         ),
         patch.object(workers, "_asyncio", create=True, new=MagicMock()),
@@ -194,7 +194,7 @@ async def _fake_to_thread(fn, *args, **kwargs):
 @pytest.mark.asyncio
 async def test_review_name_releases_lease_on_happy_path():
     """process_review_name_batch must return unused budget to the pool."""
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     mgr = BudgetManager(total_budget=_INITIAL_BUDGET)
     item = _stub_item()
@@ -202,15 +202,15 @@ async def test_review_name_releases_lease_on_happy_path():
 
     with (
         patch(
-            "imas_codex.settings.get_model",
+            "iter_codex.settings.get_model",
             return_value="test-language-model",
         ),
         patch(
-            "imas_codex.settings.get_sn_review_names_models",
+            "iter_codex.settings.get_sn_review_names_models",
             return_value=["test-review-model"],
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_make_acall(_stub_review_name_response()),
         ),
         patch(
@@ -231,7 +231,7 @@ async def test_review_name_releases_lease_on_happy_path():
 @pytest.mark.asyncio
 async def test_review_docs_releases_lease_on_happy_path():
     """process_review_docs_batch must return unused budget to the pool."""
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     mgr = BudgetManager(total_budget=_INITIAL_BUDGET)
     item = _stub_item()
@@ -239,19 +239,19 @@ async def test_review_docs_releases_lease_on_happy_path():
 
     with (
         patch(
-            "imas_codex.settings.get_model",
+            "iter_codex.settings.get_model",
             return_value="test-language-model",
         ),
         patch(
-            "imas_codex.settings.get_sn_review_docs_models",
+            "iter_codex.settings.get_sn_review_docs_models",
             return_value=["test-review-model"],
         ),
         patch(
-            "imas_codex.settings.get_sn_review_names_models",
+            "iter_codex.settings.get_sn_review_names_models",
             return_value=["test-review-model"],
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_make_acall(_stub_review_docs_response()),
         ),
         patch(
@@ -272,7 +272,7 @@ async def test_review_docs_releases_lease_on_happy_path():
 @pytest.mark.asyncio
 async def test_refine_docs_releases_lease_on_happy_path():
     """process_refine_docs_batch must return unused budget to the pool."""
-    from imas_codex.standard_names import workers
+    from iter_codex.standard_names import workers
 
     mgr = BudgetManager(total_budget=_INITIAL_BUDGET)
     item = _stub_item()
@@ -288,15 +288,15 @@ async def test_refine_docs_releases_lease_on_happy_path():
 
     with (
         patch(
-            "imas_codex.settings.get_model",
+            "iter_codex.settings.get_model",
             return_value="test-language-model",
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_make_acall(fake_response),
         ),
         patch(
-            "imas_codex.graph.client.GraphClient",
+            "iter_codex.graph.client.GraphClient",
         ),
         patch(
             "asyncio.to_thread",

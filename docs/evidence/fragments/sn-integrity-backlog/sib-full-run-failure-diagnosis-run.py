@@ -2,7 +2,7 @@
 # frozen-record: this script no longer runs as committed. Its committed reading
 # is the record of the revision it ran at, not a reading this tree can
 # regenerate. Ran at a92a3d58c454e959ba494d7e13abdf0fb03d9380, the last revision this file changed in.
-# Names the tree no longer defines: imas_codex.standard_names.worker_tasks.worker_compose_batches._acall_retrying_transport_faults.
+# Names the tree no longer defines: iter_codex.standard_names.worker_tasks.worker_compose_batches._acall_retrying_transport_faults.
 # The format is deliberate: it is a record, not a description of a
 # defect still to repair.
 """Capture and diagnose terminal DD composition sources without graph writes."""
@@ -29,7 +29,7 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
+from iter_codex.graph.client import GraphClient
 
 RECORD_ID = Path(__file__).stem.removesuffix("-run")
 TREE = Path(__file__).resolve().parents[4]
@@ -153,7 +153,7 @@ def revision(tree: Path) -> str:
 
 
 def capture(destination: Path, log_path: Path) -> None:
-    import imas_codex.graph.client as client
+    import iter_codex.graph.client as client
 
     tree = Path(__file__).resolve().parents[4]
     snapshot = {
@@ -200,7 +200,7 @@ def capture(destination: Path, log_path: Path) -> None:
 
 
 def supplement(snapshot_path: Path, destination: Path) -> None:
-    from imas_codex.standard_names.attachment_audit import guard_source_pairings
+    from iter_codex.standard_names.attachment_audit import guard_source_pairings
 
     snapshot = json.loads(snapshot_path.read_text())
     sources = snapshot["queries"]["sources"]["rows"]
@@ -396,9 +396,9 @@ def cite(relative: str, needle: str) -> str:
 
 
 def mechanism_references() -> dict:
-    store = "imas_codex/standard_names/graph_store/graph_source_bindings.py"
+    store = "iter_codex/standard_names/graph_store/graph_source_bindings.py"
     worker = (
-        "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py"
+        "iter_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py"
     )
     return {
         "binding_writer": cite(store, "THEN 'standard-name binding collision:"),
@@ -406,41 +406,41 @@ def mechanism_references() -> dict:
         "binding_guard": cite(store, "END AS lifecycle_bindable"),
         "binding_entry": cite(store, "def _lock_claimed_name_bindings("),
         "attachment_entry": cite(
-            "imas_codex/standard_names/attachment_audit.py",
+            "iter_codex/standard_names/attachment_audit.py",
             "def guard_source_pairings(",
         ),
         "vector_guard": cite(worker, "def _vector_fields_conflict("),
         "vector_refusal": cite(worker, 'f"distinct-vector conflict:'),
         "unit_refusal": cite(worker, 'f"unit dimensionality mismatch:'),
         "missing_source_refusal": cite(
-            "imas_codex/standard_names/attachment_audit.py",
+            "iter_codex/standard_names/attachment_audit.py",
             'reason="missing semantic source:',
         ),
         "cap_writer": cite(
-            "imas_codex/standard_names/orphan_sweep.py",
+            "iter_codex/standard_names/orphan_sweep.py",
             "THEN 'compose claim-attempt cap reached'",
         ),
         "claim_seed": cite(
-            "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+            "iter_codex/standard_names/graph_store/graph_cost_and_claims.py",
             "MATCH (sns)-[:FROM_DD_PATH]->(imas0:IMASNode)",
         ),
         "pending_count": cite(
-            "imas_codex/standard_names/graph_store/graph_parent_lifecycle.py",
+            "iter_codex/standard_names/graph_store/graph_parent_lifecycle.py",
             "RETURN count(s) AS generate_name",
         ),
         "stall": cite(
-            "imas_codex/standard_names/pools.py", '"run_pools: no forward progress'
+            "iter_codex/standard_names/pools.py", '"run_pools: no forward progress'
         ),
         "exit": cite(
-            "imas_codex/cli/sn.py",
+            "iter_codex/cli/sn.py",
             'raise SystemExit(4 if stop_reason == "provider_budget_exhausted" else 1)',
         ),
         "candidate_isolation": cite(
-            "imas_codex/standard_names/worker_tasks/worker_compose_batches.py",
+            "iter_codex/standard_names/worker_tasks/worker_compose_batches.py",
             "except Exception as compose_exc:",
         ),
         "transport_retry": cite(
-            "imas_codex/standard_names/worker_tasks/worker_compose_batches.py",
+            "iter_codex/standard_names/worker_tasks/worker_compose_batches.py",
             "async def _acall_retrying_transport_faults(",
         ),
         "explicit_retry": cite(store, "def retry_failed_sources("),
@@ -451,7 +451,7 @@ async def transport_controls() -> dict:
     import httpx
     import openai
 
-    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+    from iter_codex.standard_names.worker_tasks.worker_compose_batches import (
         _acall_retrying_transport_faults,
     )
 
@@ -675,7 +675,7 @@ def report(snapshot_path: Path, context_path: Path, log_path: Path) -> None:
     assert context["claimability"][0]["pending"] == 104
     assert context["claimability"][0]["dd_link_control"] > 0
     assert context["claimability"][0]["seed_candidates"] == 0
-    from imas_codex.cli.sn import _require_terminal_drain
+    from iter_codex.cli.sn import _require_terminal_drain
 
     _require_terminal_drain("no_eligible_work")
     try:
@@ -691,7 +691,7 @@ def report(snapshot_path: Path, context_path: Path, log_path: Path) -> None:
         mutation_refused = True
     else:
         raise AssertionError("Diagnostic query wrapper admitted a mutation")
-    from imas_codex.standard_names.segments import classify_gap
+    from iter_codex.standard_names.segments import classify_gap
 
     gap_records = {g["id"]: g for s in sources for g in s["gaps"]}
     gap_classes = {
@@ -753,11 +753,11 @@ def report(snapshot_path: Path, context_path: Path, log_path: Path) -> None:
     }
     imported_modules = {}
     for module_name in (
-        "imas_codex.graph.client",
-        "imas_codex.standard_names.attachment_audit",
-        "imas_codex.standard_names.worker_tasks.worker_compose_batches",
-        "imas_codex.standard_names.segments",
-        "imas_codex.cli.sn",
+        "iter_codex.graph.client",
+        "iter_codex.standard_names.attachment_audit",
+        "iter_codex.standard_names.worker_tasks.worker_compose_batches",
+        "iter_codex.standard_names.segments",
+        "iter_codex.cli.sn",
     ):
         module = importlib.import_module(module_name)
         module_path = Path(module.__file__).resolve()

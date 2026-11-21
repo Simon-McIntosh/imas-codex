@@ -19,7 +19,7 @@ when an exact named variable is absent or ambiguous.
 
 This block is the single source of the pattern: the server tool
 `get_signal_load_recipe` returns the same text, and a test fails if the two
-disagree. Change it in `imas_codex/remote/archive_access.py`, not here.
+disagree. Change it in `iter_codex/remote/archive_access.py`, not here.
 
 <!-- recipe:access-pattern:start -->
 Access pattern, in order.
@@ -28,7 +28,7 @@ Access pattern, in order.
    categories with id, name, archive, kind and pulse_count; pass a returned
    category id to the same tool to list its pulses with id, name, archive,
    status, start_ns, end_ns and description. From a shell, find_categories and
-   list_pulses in imas_codex.remote.archive_access return the same rows. Times
+   list_pulses in iter_codex.remote.archive_access return the same rows. Times
    are absolute Unix epoch nanoseconds. A null end_ns is an open pulse and
    needs an explicit end when it is read.
 2. Resolve the exact signal. The server's search_signals(facility, query=...)
@@ -37,7 +37,7 @@ Access pattern, in order.
    designation is a literal case-insensitive substring of a category name or
    description, never a wildcard or semantic match.
 3. Load arrays with the package, not with the server:
-   imas_codex.remote.codac_uda.ArchiveSignalLoader.load(signal_id, start=...,
+   iter_codex.remote.codac_uda.ArchiveSignalLoader.load(signal_id, start=...,
    end=...) over an absolute window, or load(signal_id, pulse_id=...) over a
    closed pulse. An exact native selector with no graph identity is read through
    ArchiveReader.read(selector, ...); keep the requested selector instead of
@@ -81,7 +81,7 @@ receipts and arrays in the private output directory authorized for the session.
 Set `ARCHIVE_REQUEST` to the private request JSON path and `ARCHIVE_OUTPUT` to
 that output directory. Set `ARCHIVE_CONFIG` to a standalone private YAML when
 needed; on this workstation it is normally
-`~/.cache/imas-codex-codac-uda/catalogue-private-config.yaml`. Do not print its
+`~/.cache/iter-codex-codac-uda/catalogue-private-config.yaml`. Do not print its
 contents. Keep any private script outside tracked paths.
 
 Run live graph and archive work on a compute partition (`rigel` or `all_debug`).
@@ -110,8 +110,8 @@ import json
 import os
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.remote.archive_access import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.remote.archive_access import (
     find_categories, find_signals, list_pulses,
 )
 
@@ -175,7 +175,7 @@ successful measurement.
 
 ```python
 import numpy as np
-from imas_codex.remote.codac_uda import ArchiveReader, ArchiveSignalLoader
+from iter_codex.remote.codac_uda import ArchiveReader, ArchiveSignalLoader
 
 # The normal factory reads merged public/private ITER facility configuration.
 # If the session instead supplies a private standalone YAML config, resolve it
@@ -258,7 +258,7 @@ from pathlib import Path
 import numpy as np
 import yaml
 
-from imas_codex.remote.codac_uda import ArchiveReader
+from iter_codex.remote.codac_uda import ArchiveReader
 
 # The private configuration names the endpoints and the excluded operator
 # archive; it is never tracked and never printed.

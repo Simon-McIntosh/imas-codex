@@ -18,7 +18,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.ids.models import (
+from iter_codex.ids.models import (
     AssemblyConfig,
     AssemblyPattern,
     EscalationFlag,
@@ -112,7 +112,7 @@ class TestSystemPromptSplit:
     """Verify prompt split: static system + dynamic user."""
 
     def test_system_prompts_have_no_template_vars(self):
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         for name in [
             "signal_mapping_system.md",
@@ -123,7 +123,7 @@ class TestSystemPromptSplit:
             assert "{{ " not in content, f"{name} contains Jinja2 variables"
 
     def test_user_prompts_have_template_vars(self):
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         for name in [
             "signal_mapping.md",
@@ -134,7 +134,7 @@ class TestSystemPromptSplit:
             assert "{{ " in content, f"{name} should contain template variables"
 
     def test_system_prompts_contain_instructions(self):
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         sig = (PROMPTS_DIR / "mapping" / "signal_mapping_system.md").read_text()
         assert "Task" in sig
@@ -154,7 +154,7 @@ class TestSystemPromptSplit:
         assert "array_per_node" in asm
 
     def test_user_prompts_have_context_sections(self):
-        from imas_codex.llm.prompt_loader import PROMPTS_DIR
+        from iter_codex.llm.prompt_loader import PROMPTS_DIR
 
         sig = (PROMPTS_DIR / "mapping" / "signal_mapping.md").read_text()
         assert "{{ facility }}" in sig
@@ -180,7 +180,7 @@ class TestBuildMessages:
     """Verify _build_messages creates correct message pairs."""
 
     def test_returns_system_and_user(self):
-        from imas_codex.ids.mapping import _build_messages
+        from iter_codex.ids.mapping import _build_messages
 
         messages = _build_messages(
             "signal_mapping_system",
@@ -192,7 +192,7 @@ class TestBuildMessages:
         assert messages[1]["content"] == "User context goes here"
 
     def test_system_content_is_from_template(self):
-        from imas_codex.ids.mapping import _build_messages
+        from iter_codex.ids.mapping import _build_messages
 
         messages = _build_messages("signal_mapping_system", "user prompt")
         system_content = messages[0]["content"]
@@ -201,7 +201,7 @@ class TestBuildMessages:
 
     def test_system_prompt_identical_across_calls(self):
         """Same system template renders identically — enables cache hits."""
-        from imas_codex.ids.mapping import _build_messages
+        from iter_codex.ids.mapping import _build_messages
 
         m1 = _build_messages("signal_mapping_system", "context A")
         m2 = _build_messages("signal_mapping_system", "context B")
@@ -210,7 +210,7 @@ class TestBuildMessages:
         assert m1[1]["content"] != m2[1]["content"]  # different user
 
     def test_different_system_templates_differ(self):
-        from imas_codex.ids.mapping import _build_messages
+        from iter_codex.ids.mapping import _build_messages
 
         m1 = _build_messages("signal_mapping_system", "x")
         m2 = _build_messages("target_assignment_system", "x")
@@ -218,14 +218,14 @@ class TestBuildMessages:
         assert m1[0]["content"] != m2[0]["content"]
 
     def test_target_assignment_system_prompt(self):
-        from imas_codex.ids.mapping import _build_messages
+        from iter_codex.ids.mapping import _build_messages
 
         messages = _build_messages("target_assignment_system", "user prompt")
         assert "IMAS mapping expert" in messages[0]["content"]
         assert "TargetChoiceBatch" in messages[0]["content"]
 
     def test_assembly_system_prompt(self):
-        from imas_codex.ids.mapping import _build_messages
+        from iter_codex.ids.mapping import _build_messages
 
         messages = _build_messages("assembly_system", "user prompt")
         assert "assembly expert" in messages[0]["content"]
@@ -241,7 +241,7 @@ class TestPromptRenderingWithContext:
     """Test that prompts render correctly with realistic data."""
 
     def test_target_assignment_renders_all_sections(self):
-        from imas_codex.ids.mapping import _render_prompt
+        from iter_codex.ids.mapping import _render_prompt
 
         rendered = _render_prompt(
             "target_assignment",
@@ -260,7 +260,7 @@ class TestPromptRenderingWithContext:
         assert "tcv" in rendered
 
     def test_target_assignment_omits_cross_facility_when_empty(self):
-        from imas_codex.ids.mapping import _render_prompt
+        from iter_codex.ids.mapping import _render_prompt
 
         rendered = _render_prompt(
             "target_assignment",
@@ -273,7 +273,7 @@ class TestPromptRenderingWithContext:
         assert "Cross-Facility" not in rendered
 
     def test_signal_mapping_renders_with_all_context(self):
-        from imas_codex.ids.mapping import _render_prompt
+        from iter_codex.ids.mapping import _render_prompt
 
         rendered = _render_prompt(
             "signal_mapping",
@@ -304,7 +304,7 @@ class TestPromptRenderingWithContext:
         assert "read_jet.py" in rendered
 
     def test_signal_mapping_omits_optional_sections_when_empty(self):
-        from imas_codex.ids.mapping import _render_prompt
+        from iter_codex.ids.mapping import _render_prompt
 
         rendered = _render_prompt(
             "signal_mapping",
@@ -332,7 +332,7 @@ class TestPromptRenderingWithContext:
         assert "Semantic Match Matrix" not in rendered
 
     def test_assembly_renders_with_context(self):
-        from imas_codex.ids.mapping import _render_prompt
+        from iter_codex.ids.mapping import _render_prompt
 
         rendered = _render_prompt(
             "assembly",
@@ -357,12 +357,12 @@ class TestPromptRenderingWithContext:
 
 class TestFormatWikiContext:
     def test_empty(self):
-        from imas_codex.ids.mapping import _format_wiki_context
+        from iter_codex.ids.mapping import _format_wiki_context
 
         assert _format_wiki_context([]) == ""
 
     def test_single_item(self):
-        from imas_codex.ids.mapping import _format_wiki_context
+        from iter_codex.ids.mapping import _format_wiki_context
 
         items = [
             {
@@ -377,7 +377,7 @@ class TestFormatWikiContext:
         assert "pf_active IDS" in result
 
     def test_long_text_truncated(self):
-        from imas_codex.ids.mapping import _format_wiki_context
+        from iter_codex.ids.mapping import _format_wiki_context
 
         items = [
             {
@@ -392,7 +392,7 @@ class TestFormatWikiContext:
         assert "x" * 500 + "..." in result
 
     def test_no_title(self):
-        from imas_codex.ids.mapping import _format_wiki_context
+        from iter_codex.ids.mapping import _format_wiki_context
 
         items = [{"text": "just text", "score_imas_relevance": 0.3}]
         result = _format_wiki_context(items)
@@ -401,12 +401,12 @@ class TestFormatWikiContext:
 
 class TestFormatCodeContext:
     def test_empty(self):
-        from imas_codex.ids.mapping import _format_code_context
+        from iter_codex.ids.mapping import _format_code_context
 
         assert _format_code_context([]) == ""
 
     def test_single_item(self):
-        from imas_codex.ids.mapping import _format_code_context
+        from iter_codex.ids.mapping import _format_code_context
 
         items = [
             {
@@ -423,7 +423,7 @@ class TestFormatCodeContext:
         assert "```python" in result
 
     def test_no_function_name(self):
-        from imas_codex.ids.mapping import _format_code_context
+        from iter_codex.ids.mapping import _format_code_context
 
         items = [
             {
@@ -438,7 +438,7 @@ class TestFormatCodeContext:
         assert "::" not in result.split("\n")[0]
 
     def test_long_text_truncated(self):
-        from imas_codex.ids.mapping import _format_code_context
+        from iter_codex.ids.mapping import _format_code_context
 
         items = [
             {
@@ -454,12 +454,12 @@ class TestFormatCodeContext:
 
 class TestFormatSemanticMatchMatrix:
     def test_empty_matrix(self):
-        from imas_codex.ids.mapping import _format_semantic_match_matrix
+        from iter_codex.ids.mapping import _format_semantic_match_matrix
 
         assert _format_semantic_match_matrix({}, "src1") == ""
 
     def test_source_not_in_matrix(self):
-        from imas_codex.ids.mapping import _format_semantic_match_matrix
+        from iter_codex.ids.mapping import _format_semantic_match_matrix
 
         matrix = {
             "other_src": [{"content_type": "imas", "target_id": "a/b", "score": 0.9}]
@@ -467,7 +467,7 @@ class TestFormatSemanticMatchMatrix:
         assert _format_semantic_match_matrix(matrix, "src1") == ""
 
     def test_formats_matches_by_type(self):
-        from imas_codex.ids.mapping import _format_semantic_match_matrix
+        from iter_codex.ids.mapping import _format_semantic_match_matrix
 
         matrix = {
             "src1": [
@@ -666,7 +666,7 @@ class TestTargetAssignmentBatchWithUnassigned:
 
 class TestClassifyManyToOne:
     def test_single_source_returns_legitimate(self, mock_gc):
-        from imas_codex.ids.validation import (
+        from iter_codex.ids.validation import (
             DuplicateTargetClassification,
             _classify_many_to_one,
         )
@@ -676,7 +676,7 @@ class TestClassifyManyToOne:
         assert result == DuplicateTargetClassification.LEGITIMATE_OTHER
 
     def test_same_prefix_returns_epoch_variants(self, mock_gc):
-        from imas_codex.ids.validation import (
+        from iter_codex.ids.validation import (
             DuplicateTargetClassification,
             _classify_many_to_one,
         )
@@ -703,7 +703,7 @@ class TestClassifyManyToOne:
         assert result == DuplicateTargetClassification.EPOCH_VARIANTS
 
     def test_same_domain_returns_processing_stages(self, mock_gc):
-        from imas_codex.ids.validation import (
+        from iter_codex.ids.validation import (
             DuplicateTargetClassification,
             _classify_many_to_one,
         )
@@ -730,7 +730,7 @@ class TestClassifyManyToOne:
         assert result == DuplicateTargetClassification.PROCESSING_STAGES
 
     def test_different_domains_returns_erroneous(self, mock_gc):
-        from imas_codex.ids.validation import (
+        from iter_codex.ids.validation import (
             DuplicateTargetClassification,
             _classify_many_to_one,
         )
@@ -756,9 +756,9 @@ class TestClassifyManyToOne:
 
 class TestCheckCoverageThreshold:
     def test_good_coverage_no_escalations(self, mock_gc):
-        from imas_codex.ids.validation import check_coverage_threshold
+        from iter_codex.ids.validation import check_coverage_threshold
 
-        with patch("imas_codex.ids.validation.compute_coverage") as mock_cov:
+        with patch("iter_codex.ids.validation.compute_coverage") as mock_cov:
             mock_cov.return_value = MagicMock(
                 mapped_fields=50, total_leaf_fields=100, percentage=50.0
             )
@@ -766,9 +766,9 @@ class TestCheckCoverageThreshold:
             assert result == []
 
     def test_low_coverage_warning(self, mock_gc):
-        from imas_codex.ids.validation import check_coverage_threshold
+        from iter_codex.ids.validation import check_coverage_threshold
 
-        with patch("imas_codex.ids.validation.compute_coverage") as mock_cov:
+        with patch("iter_codex.ids.validation.compute_coverage") as mock_cov:
             mock_cov.return_value = MagicMock(
                 mapped_fields=3, total_leaf_fields=100, percentage=3.0
             )
@@ -777,9 +777,9 @@ class TestCheckCoverageThreshold:
             assert result[0].severity == EscalationSeverity.WARNING
 
     def test_critical_low_coverage_error(self, mock_gc):
-        from imas_codex.ids.validation import check_coverage_threshold
+        from iter_codex.ids.validation import check_coverage_threshold
 
-        with patch("imas_codex.ids.validation.compute_coverage") as mock_cov:
+        with patch("iter_codex.ids.validation.compute_coverage") as mock_cov:
             mock_cov.return_value = MagicMock(
                 mapped_fields=0, total_leaf_fields=200, percentage=0.0
             )
@@ -796,10 +796,10 @@ class TestCheckCoverageThreshold:
 class TestChooseTargetsUsesSystemPrompt:
     """Verify choose_targets sends system+user messages for one shortlist."""
 
-    @patch("imas_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping._call_llm")
     def test_messages_have_system_role(self, mock_call_llm):
-        from imas_codex.ids.mapping import PipelineCost, choose_targets
-        from imas_codex.ids.models import TargetChoice, TargetChoiceBatch
+        from iter_codex.ids.mapping import PipelineCost, choose_targets
+        from iter_codex.ids.models import TargetChoice, TargetChoiceBatch
 
         mock_call_llm.return_value = TargetChoiceBatch(
             choices=[
@@ -833,10 +833,10 @@ class TestChooseTargetsUsesSystemPrompt:
 class TestMapSignalsUsesSystemPrompt:
     """Verify map_signals sends system+user messages with stable system content."""
 
-    @patch("imas_codex.ids.mapping.fetch_source_code_refs")
-    @patch("imas_codex.ids.mapping._call_llm")
-    @patch("imas_codex.ids.mapping.fetch_imas_fields")
-    @patch("imas_codex.ids.mapping.fetch_imas_subtree")
+    @patch("iter_codex.ids.mapping.fetch_source_code_refs")
+    @patch("iter_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping.fetch_imas_fields")
+    @patch("iter_codex.ids.mapping.fetch_imas_subtree")
     def test_system_content_identical_across_sections(
         self,
         mock_subtree,
@@ -847,7 +847,7 @@ class TestMapSignalsUsesSystemPrompt:
         sample_groups,
         sample_subtree,
     ):
-        from imas_codex.ids.mapping import PipelineCost, map_signals
+        from iter_codex.ids.mapping import PipelineCost, map_signals
 
         batch = SignalMappingBatch(
             ids_name="pf_active",
@@ -901,13 +901,13 @@ class TestMapSignalsUsesSystemPrompt:
         assert call1_msgs[1]["content"] != call2_msgs[1]["content"]
 
     @patch(
-        "imas_codex.tools.version_tool.VersionTool.get_dd_version_context",
+        "iter_codex.tools.version_tool.VersionTool.get_dd_version_context",
         new_callable=AsyncMock,
     )
-    @patch("imas_codex.ids.mapping.fetch_source_code_refs")
-    @patch("imas_codex.ids.mapping._call_llm")
-    @patch("imas_codex.ids.mapping.fetch_imas_fields")
-    @patch("imas_codex.ids.mapping.fetch_imas_subtree")
+    @patch("iter_codex.ids.mapping.fetch_source_code_refs")
+    @patch("iter_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping.fetch_imas_fields")
+    @patch("iter_codex.ids.mapping.fetch_imas_subtree")
     def test_user_prompt_includes_version_not_found_and_no_change_context(
         self,
         mock_subtree,
@@ -919,7 +919,7 @@ class TestMapSignalsUsesSystemPrompt:
         sample_groups,
         sample_subtree,
     ):
-        from imas_codex.ids.mapping import PipelineCost, map_signals
+        from iter_codex.ids.mapping import PipelineCost, map_signals
 
         mock_fields.return_value = sample_subtree[1:]
         mock_subtree.return_value = sample_subtree[1:]
@@ -972,9 +972,9 @@ class TestMapSignalsUsesSystemPrompt:
 class TestDiscoverAssemblyUsesSystemPrompt:
     """Verify discover_assembly sends system+user messages."""
 
-    @patch("imas_codex.ids.mapping.fetch_imas_fields")
-    @patch("imas_codex.ids.mapping.fetch_imas_subtree")
-    @patch("imas_codex.ids.mapping._call_llm")
+    @patch("iter_codex.ids.mapping.fetch_imas_fields")
+    @patch("iter_codex.ids.mapping.fetch_imas_subtree")
+    @patch("iter_codex.ids.mapping._call_llm")
     def test_messages_have_system_role(
         self,
         mock_call_llm,
@@ -984,7 +984,7 @@ class TestDiscoverAssemblyUsesSystemPrompt:
         sample_groups,
         sample_subtree,
     ):
-        from imas_codex.ids.mapping import PipelineCost, discover_assembly
+        from iter_codex.ids.mapping import PipelineCost, discover_assembly
 
         mock_subtree.return_value = sample_subtree
         mock_fields.return_value = sample_subtree
@@ -1047,7 +1047,7 @@ class TestDiscoverAssemblyUsesSystemPrompt:
 
 class TestDuplicateTargetClassification:
     def test_all_values(self):
-        from imas_codex.ids.validation import DuplicateTargetClassification
+        from iter_codex.ids.validation import DuplicateTargetClassification
 
         values = set(DuplicateTargetClassification)
         expected = {

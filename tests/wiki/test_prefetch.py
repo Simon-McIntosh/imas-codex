@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.wiki.prefetch import (
+from iter_codex.discovery.wiki.prefetch import (
     extract_text_from_html,
     fetch_page_content,
 )

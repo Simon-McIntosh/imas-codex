@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.standard_names.derivation import derive_edges
+from iter_codex.standard_names.derivation import derive_edges
 
 
 class TestComponentFallback:

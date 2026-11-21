@@ -12,9 +12,9 @@ import textwrap
 
 import pytest
 
-from imas_codex.standard_names.review import jev_review
-from imas_codex.standard_names.review.audits import AuditReport, LintFinding
-from imas_codex.standard_names.review.checks import (
+from iter_codex.standard_names.review import jev_review
+from iter_codex.standard_names.review.audits import AuditReport, LintFinding
+from iter_codex.standard_names.review.checks import (
     JevQuestion,
     JevQuestionKind,
     ReviewCheck,

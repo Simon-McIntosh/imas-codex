@@ -6,7 +6,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
 
-from imas_codex.discovery.code.workers import _claim_code_files_for_ingestion
+from iter_codex.discovery.code.workers import _claim_code_files_for_ingestion
 
 
 class ClaimGraph:
@@ -109,7 +109,7 @@ class ClaimGraph:
 
 def test_two_concurrent_claims_take_each_file_once():
     graph = ClaimGraph()
-    with patch("imas_codex.graph.GraphClient", return_value=graph):
+    with patch("iter_codex.graph.GraphClient", return_value=graph):
         with ThreadPoolExecutor(max_workers=2, thread_name_prefix="claim") as pool:
             futures = [
                 pool.submit(_claim_code_files_for_ingestion, "test", limit=4)
@@ -121,9 +121,9 @@ def test_two_concurrent_claims_take_each_file_once():
 
 
 def test_live_claim_is_renewed_past_timeout():
-    from imas_codex.discovery.base import claims as claim_settings
-    from imas_codex.discovery.code import workers
-    from imas_codex.discovery.code.state import FileDiscoveryState
+    from iter_codex.discovery.base import claims as claim_settings
+    from iter_codex.discovery.code import workers
+    from iter_codex.discovery.code.state import FileDiscoveryState
 
     async def check():
         graph = ClaimGraph(count=1, timeout=0.2)
@@ -143,7 +143,7 @@ def test_live_claim_is_renewed_past_timeout():
             }
 
         with (
-            patch("imas_codex.graph.GraphClient", return_value=graph),
+            patch("iter_codex.graph.GraphClient", return_value=graph),
             patch.object(claim_settings, "DEFAULT_CLAIM_TIMEOUT_SECONDS", 0.2),
             patch.object(workers, "_settle_unclaimable_files", return_value=0),
             patch.object(
@@ -151,7 +151,7 @@ def test_live_claim_is_renewed_past_timeout():
             ),
             patch.object(workers, "_mark_files_ingested", return_value=1),
             patch(
-                "imas_codex.ingestion.pipeline.ingest_files", side_effect=ingest_files
+                "iter_codex.ingestion.pipeline.ingest_files", side_effect=ingest_files
             ),
         ):
             worker = asyncio.create_task(workers.code_worker(state, batch_size=1))
@@ -167,9 +167,9 @@ def test_live_claim_is_renewed_past_timeout():
 
 
 def test_ingested_file_does_not_invalidate_remaining_claim(caplog):
-    from imas_codex.discovery.base import claims as claim_settings
-    from imas_codex.discovery.code import workers
-    from imas_codex.discovery.code.state import FileDiscoveryState
+    from iter_codex.discovery.base import claims as claim_settings
+    from iter_codex.discovery.code import workers
+    from iter_codex.discovery.code.state import FileDiscoveryState
 
     async def check():
         graph = ClaimGraph(count=2, timeout=0.2)
@@ -190,14 +190,14 @@ def test_ingested_file_does_not_invalidate_remaining_claim(caplog):
             }
 
         with (
-            patch("imas_codex.graph.GraphClient", return_value=graph),
+            patch("iter_codex.graph.GraphClient", return_value=graph),
             patch.object(claim_settings, "DEFAULT_CLAIM_TIMEOUT_SECONDS", 0.15),
             patch.object(workers, "_settle_unclaimable_files", return_value=0),
             patch.object(
                 workers, "_filter_duplicates", side_effect=lambda files: files
             ),
             patch(
-                "imas_codex.ingestion.pipeline.ingest_files", side_effect=ingest_files
+                "iter_codex.ingestion.pipeline.ingest_files", side_effect=ingest_files
             ),
         ):
             await asyncio.wait_for(workers.code_worker(state, batch_size=2), timeout=2)
@@ -208,9 +208,9 @@ def test_ingested_file_does_not_invalidate_remaining_claim(caplog):
 
 
 def test_lost_claim_does_not_downgrade_ingested_file(caplog):
-    from imas_codex.discovery.base import claims as claim_settings
-    from imas_codex.discovery.code import workers
-    from imas_codex.discovery.code.state import FileDiscoveryState
+    from iter_codex.discovery.base import claims as claim_settings
+    from iter_codex.discovery.code import workers
+    from iter_codex.discovery.code.state import FileDiscoveryState
 
     async def check():
         graph = ClaimGraph(count=2, timeout=0.2)
@@ -224,14 +224,14 @@ def test_lost_claim_does_not_downgrade_ingested_file(caplog):
             return {"files": 2, "outcomes": {}}
 
         with (
-            patch("imas_codex.graph.GraphClient", return_value=graph),
+            patch("iter_codex.graph.GraphClient", return_value=graph),
             patch.object(claim_settings, "DEFAULT_CLAIM_TIMEOUT_SECONDS", 0.15),
             patch.object(workers, "_settle_unclaimable_files", return_value=0),
             patch.object(
                 workers, "_filter_duplicates", side_effect=lambda files: files
             ),
             patch(
-                "imas_codex.ingestion.pipeline.ingest_files", side_effect=ingest_files
+                "iter_codex.ingestion.pipeline.ingest_files", side_effect=ingest_files
             ),
         ):
             await asyncio.wait_for(workers.code_worker(state, batch_size=2), timeout=2)

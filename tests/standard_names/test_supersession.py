@@ -17,14 +17,14 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from imas_codex.standard_names.attachment_audit import AttachmentPairingGuardResult
-from imas_codex.standard_names.graph_store.graph_refinement import persist_refined_name
-from imas_codex.standard_names.graph_store.graph_supersession import (
+from iter_codex.standard_names.attachment_audit import AttachmentPairingGuardResult
+from iter_codex.standard_names.graph_store.graph_refinement import persist_refined_name
+from iter_codex.standard_names.graph_store.graph_supersession import (
     supersede_prior_source_names,
 )
 
 # graph_ops binds GraphClient at module import time, so patch that namespace.
-_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_GC_PATH = "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 
 class TestSupersedePriorSourceNamesRecording:
@@ -85,11 +85,11 @@ class TestSupersedePriorSourceNamesRecording:
         with (
             patch(_GC_PATH, return_value=_GC()),
             patch(
-                "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+                "iter_codex.standard_names.attachment_audit.guard_source_pairings",
                 return_value=AttachmentPairingGuardResult(("dd:some/dd/path",), ()),
             ),
             patch(
-                "imas_codex.standard_names.provenance_lifecycle."
+                "iter_codex.standard_names.provenance_lifecycle."
                 "retarget_standard_name_sources",
                 return_value=1,
             ),

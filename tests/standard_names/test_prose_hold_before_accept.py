@@ -5,21 +5,21 @@ from __future__ import annotations
 import asyncio
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names import prose_adjudicator, workers
-from imas_codex.standard_names.campaign import measure_batch
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names import prose_adjudicator, workers
+from iter_codex.standard_names.campaign import measure_batch
+from iter_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_review_persistence as _owning_graph_review_persistence,
 )
-from imas_codex.standard_names.prose_policy import banned_prose_findings
-from imas_codex.standard_names.review import holds
-from imas_codex.standard_names.worker_tasks import (
+from iter_codex.standard_names.prose_policy import banned_prose_findings
+from iter_codex.standard_names.review import holds
+from iter_codex.standard_names.worker_tasks import (
     worker_common as _owning_worker_common,
     worker_review_docs as _owning_worker_review_docs,
     worker_review_names as _owning_worker_review_names,
 )
 
-SEAT = "imas_codex.standard_names.review.name_definition_seat.judge_name_definitions"
+SEAT = "iter_codex.standard_names.review.name_definition_seat.judge_name_definitions"
 
 
 async def _PASSING_SEAT(items, **_kwargs):
@@ -42,7 +42,7 @@ async def _PASSING_SEAT(items, **_kwargs):
 def _review(
     documentation: str, *, genuine_banned: bool = True, seat_raises: bool = False
 ) -> tuple[str, dict, list[dict]]:
-    import imas_codex.standard_names.graph_ops as graph_ops
+    import iter_codex.standard_names.graph_ops as graph_ops
 
     item = {
         "id": "magnetic_field",
@@ -126,8 +126,8 @@ def _review(
         ),
         patch.object(prose_adjudicator, "_adjudicate_one", adjudicate),
         patch(SEAT, unavailable_seat if seat_raises else _PASSING_SEAT),
-        patch("imas_codex.settings.get_model", return_value="test/model"),
-        patch("imas_codex.settings.get_reasoning_effort", return_value="low"),
+        patch("iter_codex.settings.get_model", return_value="test/model"),
+        patch("iter_codex.settings.get_reasoning_effort", return_value="low"),
     ):
         processed = asyncio.run(
             _owning_worker_review_docs.process_review_docs_batch(

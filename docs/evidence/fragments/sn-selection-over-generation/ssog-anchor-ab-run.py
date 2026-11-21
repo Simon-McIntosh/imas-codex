@@ -27,10 +27,10 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
-from imas_codex.standard_names.families import fetch_pattern_families
-from imas_codex.standard_names.harmonize import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
+from iter_codex.standard_names.families import fetch_pattern_families
+from iter_codex.standard_names.harmonize import (
     plan_family_applies,
     report_family_rows,
 )
@@ -279,14 +279,14 @@ def self_check_containment(receipt_path: Path) -> dict:
 def code_identity() -> dict[str, str]:
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     listing = subprocess.check_output(
-        ["git", "ls-tree", "-r", "HEAD", "imas_codex"], text=True
+        ["git", "ls-tree", "-r", "HEAD", "iter_codex"], text=True
     )
     digest = hashlib.sha256(listing.encode()).hexdigest()
-    from imas_codex.standard_names import harmonize
+    from iter_codex.standard_names import harmonize
 
     return {
         "git_head": head,
-        "tree_digest_imas_codex": digest,
+        "tree_digest_iter_codex": digest,
         "module_file": str(Path(harmonize.__file__).resolve()),
         "cwd": str(Path.cwd().resolve()),
     }
@@ -337,7 +337,7 @@ def run_apply(
     command = [
         "uv",
         "run",
-        "imas-codex",
+        "iter-codex",
         "sn",
         "harmonize",
         "--family",
@@ -354,7 +354,7 @@ def run_apply(
         UV_PROJECT_ENVIRONMENT=PROJECT_VENV,
         PYTHONPATH=str(Path.cwd()),
     )
-    from imas_codex.standard_names import harmonize
+    from iter_codex.standard_names import harmonize
 
     with log_path.open("w") as stream:
         stream.write(
@@ -485,7 +485,7 @@ def run_arm(seed: str, arm: str) -> dict:
             print(f"isolation: {data['isolation']}", flush=True)
 
             if arm == "jev":
-                from imas_codex.standard_names.harmonize import _record_family_anchor
+                from iter_codex.standard_names.harmonize import _record_family_anchor
 
                 _record_family_anchor(gc, row["members"], target_anchor)
             plan = plan_family_applies(gc, seeds=[seed])

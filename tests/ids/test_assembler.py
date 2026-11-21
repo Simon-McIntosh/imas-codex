@@ -6,13 +6,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.ids.assembler import (
+from iter_codex.ids.assembler import (
     IDSAssembler,
     _coil_index_from_path,
     _resolve_epoch_id,
     list_recipes,
 )
-from imas_codex.ids.transforms import set_nested
+from iter_codex.ids.transforms import set_nested
 
 # ---------------------------------------------------------------------------
 # Unit tests for helper functions
@@ -66,7 +66,7 @@ class TestListRecipes:
         ]
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
         mock_gc.__exit__ = MagicMock(return_value=False)
-        with patch("imas_codex.ids.assembler.GraphClient", return_value=mock_gc):
+        with patch("iter_codex.ids.assembler.GraphClient", return_value=mock_gc):
             recipes = list_recipes()
         assert len(recipes) >= 1
         assert any(r["ids_name"] == "pf_active" for r in recipes)
@@ -82,7 +82,7 @@ class TestListRecipes:
         ]
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
         mock_gc.__exit__ = MagicMock(return_value=False)
-        with patch("imas_codex.ids.assembler.GraphClient", return_value=mock_gc):
+        with patch("iter_codex.ids.assembler.GraphClient", return_value=mock_gc):
             recipes = list_recipes("jet")
         assert len(recipes) >= 1
         assert all(r["facility"] == "jet" for r in recipes)
@@ -92,7 +92,7 @@ class TestListRecipes:
         mock_gc.query.return_value = []
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
         mock_gc.__exit__ = MagicMock(return_value=False)
-        with patch("imas_codex.ids.assembler.GraphClient", return_value=mock_gc):
+        with patch("iter_codex.ids.assembler.GraphClient", return_value=mock_gc):
             recipes = list_recipes("nonexistent")
         assert recipes == []
 
@@ -107,7 +107,7 @@ class TestListRecipes:
         ]
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
         mock_gc.__exit__ = MagicMock(return_value=False)
-        with patch("imas_codex.ids.assembler.GraphClient", return_value=mock_gc):
+        with patch("iter_codex.ids.assembler.GraphClient", return_value=mock_gc):
             recipes = list_recipes("jet")
         for r in recipes:
             assert r["source"] == "graph"
@@ -118,22 +118,22 @@ class TestGraphMappingRequired:
 
     def test_missing_mapping_raises(self):
         with (
-            patch("imas_codex.ids.assembler.GraphClient"),
-            patch("imas_codex.ids.assembler.load_mapping", return_value=None),
+            patch("iter_codex.ids.assembler.GraphClient"),
+            patch("iter_codex.ids.assembler.load_mapping", return_value=None),
         ):
             with pytest.raises(FileNotFoundError):
                 IDSAssembler("jet", "nonexistent_ids")
 
     def test_recipe_property(self):
         """The recipe property returns mapping metadata."""
-        from imas_codex.ids.graph_ops import Mapping
+        from iter_codex.ids.graph_ops import Mapping
 
         mapping = Mapping(
             id="jet:pf_active",
             facility_id="jet",
             ids_name="pf_active",
             dd_version="4.1.1",
-            provider="imas-codex",
+            provider="iter-codex",
             static_config={},
             sections=[],
             bindings=[],
@@ -142,8 +142,8 @@ class TestGraphMappingRequired:
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
         mock_gc.__exit__ = MagicMock(return_value=False)
         with (
-            patch("imas_codex.ids.assembler.load_mapping", return_value=mapping),
-            patch("imas_codex.ids.assembler.GraphClient", return_value=mock_gc),
+            patch("iter_codex.ids.assembler.load_mapping", return_value=mapping),
+            patch("iter_codex.ids.assembler.GraphClient", return_value=mock_gc),
         ):
             assembler = IDSAssembler("jet", "pf_active")
         assert assembler.recipe["ids_name"] == "pf_active"
@@ -155,14 +155,14 @@ class TestGraphDrivenSummary:
 
     def test_summary_uses_graph_mode(self):
         """When graph mapping exists, summary queries section nodes."""
-        from imas_codex.ids.graph_ops import Mapping, SignalMapping
+        from iter_codex.ids.graph_ops import Mapping, SignalMapping
 
         mapping = Mapping(
             id="jet:magnetics",
             facility_id="jet",
             ids_name="magnetics",
             dd_version="4.1.1",
-            provider="imas-codex",
+            provider="iter-codex",
             static_config={"ids_properties.homogeneous_time": 0},
             sections=[
                 {
@@ -198,9 +198,9 @@ class TestGraphDrivenSummary:
         mock_gc.__exit__ = MagicMock(return_value=False)
 
         with (
-            patch("imas_codex.ids.assembler.load_mapping", return_value=mapping),
+            patch("iter_codex.ids.assembler.load_mapping", return_value=mapping),
             patch(
-                "imas_codex.ids.assembler.GraphClient",
+                "iter_codex.ids.assembler.GraphClient",
                 return_value=mock_gc,
             ),
         ):
@@ -229,7 +229,7 @@ def _has_jet_pf_active_mapping() -> bool:
 @pytest.mark.integration
 @pytest.mark.skipif(
     not _has_jet_pf_active_mapping(),
-    reason="No IMASMapping for jet/pf_active — run 'imas-codex imas map run jet pf_active' first",
+    reason="No IMASMapping for jet/pf_active — run 'iter-codex imas map run jet pf_active' first",
 )
 class TestAssemblerIntegration:
     """Integration tests that require a running Neo4j graph with JET data."""
@@ -267,7 +267,7 @@ class TestAssemblerIntegration:
 
         assert len(pf.coil) == 22
         assert pf.ids_properties.homogeneous_time == 0
-        assert "imas-codex" in str(pf.ids_properties.provider)
+        assert "iter-codex" in str(pf.ids_properties.provider)
 
     def test_summary(self):
         assembler = IDSAssembler("jet", "pf_active")

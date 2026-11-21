@@ -9,7 +9,7 @@ class TestGraphCLIPackageRegistration:
     """Verify all graph subcommands register correctly."""
 
     def test_all_graph_commands_registered(self):
-        from imas_codex.cli.graph import graph
+        from iter_codex.cli.graph import graph
 
         cmds = sorted(graph.commands.keys())
         expected = sorted(
@@ -37,7 +37,7 @@ class TestGraphCLIPackageRegistration:
         assert cmds == expected
 
     def test_server_commands_importable(self):
-        from imas_codex.cli.graph.server import (
+        from iter_codex.cli.graph.server import (
             graph_profiles,
             graph_shell,
             graph_start,
@@ -57,7 +57,7 @@ class TestGraphCLIPackageRegistration:
         )
 
     def test_data_commands_importable(self):
-        from imas_codex.cli.graph.data import (
+        from iter_codex.cli.graph.data import (
             graph_clear,
             graph_export,
             graph_facility_group,
@@ -85,7 +85,7 @@ class TestGraphCLIPackageRegistration:
     def test_destructive_commands_expose_target_argument(self):
         from click import Argument
 
-        from imas_codex.cli.graph.data import graph_clear, graph_load
+        from iter_codex.cli.graph.data import graph_clear, graph_load
 
         clear_arguments = [
             param.name for param in graph_clear.params if isinstance(param, Argument)
@@ -98,7 +98,7 @@ class TestGraphCLIPackageRegistration:
         assert load_arguments == ["archive", "target"]
 
     def test_registry_commands_importable(self):
-        from imas_codex.cli.graph.registry import (
+        from iter_codex.cli.graph.registry import (
             graph_fetch,
             graph_prune,
             graph_pull,
@@ -114,7 +114,7 @@ class TestGraphCLIPackageRegistration:
     def test_graph_help_text(self):
         from click.testing import CliRunner
 
-        from imas_codex.cli.graph import graph
+        from iter_codex.cli.graph import graph
 
         runner = CliRunner()
         result = runner.invoke(graph, ["--help"])
@@ -125,7 +125,7 @@ class TestGraphCLIPackageRegistration:
         assert "Maintenance:" in result.output
 
     def test_facility_subgroup_has_commands(self):
-        from imas_codex.cli.graph.data import graph_facility_group
+        from iter_codex.cli.graph.data import graph_facility_group
 
         cmds = sorted(graph_facility_group.commands.keys())
         assert cmds == ["add", "list", "remove"]

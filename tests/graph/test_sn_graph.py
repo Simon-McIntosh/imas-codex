@@ -30,7 +30,7 @@ pytestmark = pytest.mark.graph
 
 def _connect_and_count_accepted():
     """Return (GraphClient, accepted_count) or raise on connection failure."""
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = GraphClient()
     rows = gc.query(

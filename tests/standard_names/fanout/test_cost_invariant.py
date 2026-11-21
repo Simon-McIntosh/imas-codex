@@ -19,10 +19,10 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
-from imas_codex.standard_names.fanout import dispatcher
-from imas_codex.standard_names.fanout.config import FanoutSettings
-from imas_codex.standard_names.fanout.schemas import (
+from iter_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from iter_codex.standard_names.fanout import dispatcher
+from iter_codex.standard_names.fanout.config import FanoutSettings
+from iter_codex.standard_names.fanout.schemas import (
     CandidateContext,
     FanoutPlan,
     FanoutScope,
@@ -53,7 +53,7 @@ def _patch_llm(monkeypatch, ret):
             raise ret
         return ret
 
-    monkeypatch.setattr("imas_codex.discovery.base.llm.acall_llm_structured", _fake)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.acall_llm_structured", _fake)
 
 
 def _settings():
@@ -80,7 +80,7 @@ async def test_original_reservation_snapshot(monkeypatch: pytest.MonkeyPatch) ->
     )
     _patch_llm(monkeypatch, _FakeLLMResult(plan, cost=0.0042))
     monkeypatch.setattr(
-        "imas_codex.standard_names.search.search_standard_names_vector",
+        "iter_codex.standard_names.search.search_standard_names_vector",
         lambda *a, **kw: [
             {
                 "id": "electron_temperature",
@@ -175,7 +175,7 @@ async def test_off_arm_does_not_extend_reservation(
     async def _explode(**kwargs):
         raise AssertionError("LLM must not be called on off arm")
 
-    monkeypatch.setattr("imas_codex.discovery.base.llm.acall_llm_structured", _explode)
+    monkeypatch.setattr("iter_codex.discovery.base.llm.acall_llm_structured", _explode)
 
     mgr = BudgetManager(total_budget=10.0)
     lease = mgr.reserve(0.20)

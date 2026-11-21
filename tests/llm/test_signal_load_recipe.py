@@ -11,9 +11,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from imas_codex.llm.server import AgentsServer
-from imas_codex.remote import codac_uda as service
-from imas_codex.remote.archive_access import (
+from iter_codex.llm.server import AgentsServer
+from iter_codex.remote import codac_uda as service
+from iter_codex.remote.archive_access import (
     LOAD_RECIPE_ACCESS,
     LOAD_RECIPE_EXAMPLE,
     SIGNAL_LOAD_RECIPE,
@@ -55,7 +55,7 @@ def test_tool_text_and_skill_carry_the_same_access_pattern():
 
 def test_recipe_states_the_three_things_a_load_needs_beyond_the_server():
     first_paragraph = load_recipe_text().split("\n\n")[1]
-    assert "imas-codex package" in first_paragraph
+    assert "iter-codex package" in first_paragraph
     assert "m-uda-client" in first_paragraph
     assert "private host configuration" in first_paragraph
 
@@ -73,7 +73,7 @@ def test_recipe_text_carries_only_invented_identities():
     private = (
         Path.home()
         / ".cache"
-        / "imas-codex-codac-uda"
+        / "iter-codex-codac-uda"
         / "catalogue-private-config.yaml"
     )
     if not private.exists():
@@ -204,9 +204,9 @@ def test_read_only_server_serves_the_recipe_outside_the_checkout(tmp_path):
     from fastmcp import Client
     from fastmcp.client.transports import StdioTransport
 
-    import imas_codex
+    import iter_codex
 
-    package_root = Path(imas_codex.__file__).resolve().parent.parent
+    package_root = Path(iter_codex.__file__).resolve().parent.parent
     environment = os.environ.copy()
     environment["PYTHONPATH"] = os.pathsep.join(
         [str(package_root), *filter(None, [environment.get("PYTHONPATH")])]
@@ -216,7 +216,7 @@ def test_read_only_server_serves_the_recipe_outside_the_checkout(tmp_path):
         command=sys.executable,
         args=[
             "-c",
-            "from imas_codex.cli import main; main()",
+            "from iter_codex.cli import main; main()",
             "serve",
             "--read-only",
             "--no-embed",
@@ -239,5 +239,5 @@ def test_read_only_server_serves_the_recipe_outside_the_checkout(tmp_path):
         item.text for item in result.content if getattr(item, "type", "") == "text"
     )
     assert text.strip() == load_recipe_text().strip()
-    assert not (tmp_path / "imas_codex").exists(), "client ran outside the checkout"
+    assert not (tmp_path / "iter_codex").exists(), "client ran outside the checkout"
     assert SIGNAL_LOAD_RECIPE.startswith(text[:40])

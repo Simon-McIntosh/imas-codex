@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.graph.cypher_property_check import audit_standard_name_touch
+from iter_codex.graph.cypher_property_check import audit_standard_name_touch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-_STANDARD_NAMES_ROOT = REPO_ROOT / "imas_codex" / "standard_names"
+_STANDARD_NAMES_ROOT = REPO_ROOT / "iter_codex" / "standard_names"
 
 # These are observed omissions by package-relative file. Keep an entry when a
 # file reaches zero so an unrecorded improvement fails until its debt is
@@ -51,7 +51,7 @@ _SURVIVING_FINDINGS = {
 
 _EXPECTED_FINDINGS = Counter(path for path, _properties in _SURVIVING_FINDINGS)
 
-_GATED_PATH = REPO_ROOT / "imas_codex" / "standard_names" / "graph_ops.py"
+_GATED_PATH = REPO_ROOT / "iter_codex" / "standard_names" / "graph_ops.py"
 
 
 def _finding_counts(findings: tuple) -> Counter[str]:

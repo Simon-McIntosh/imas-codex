@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from imas_codex.standard_names.doc_links import (
+from iter_codex.standard_names.doc_links import (
     find_name_links,
     find_self_links,
     link_judgement_state,

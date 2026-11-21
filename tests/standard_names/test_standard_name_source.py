@@ -11,12 +11,12 @@ class TestStandardNameSourceSchema:
     """Verify schema generates correct models."""
 
     def test_source_importable(self):
-        from imas_codex.graph.models import StandardNameSource
+        from iter_codex.graph.models import StandardNameSource
 
         assert StandardNameSource is not None
 
     def test_status_enum_importable(self):
-        from imas_codex.graph.models import StandardNameSourceStatus
+        from iter_codex.graph.models import StandardNameSourceStatus
 
         members = set(StandardNameSourceStatus.__members__.keys())
         assert members == {
@@ -32,12 +32,12 @@ class TestStandardNameSourceSchema:
 
     def test_source_type_enum_distinct(self):
         """StandardNameSourceType (enum) != StandardNameSource (class)."""
-        from imas_codex.graph.models import StandardNameSource, StandardNameSourceType
+        from iter_codex.graph.models import StandardNameSource, StandardNameSourceType
 
         assert StandardNameSource is not StandardNameSourceType
 
     def test_source_has_expected_fields(self):
-        from imas_codex.graph.models import StandardNameSource
+        from iter_codex.graph.models import StandardNameSource
 
         fields = set(StandardNameSource.model_fields.keys())
         expected = {
@@ -75,7 +75,7 @@ class TestStandardNameSourceSchema:
         assert expected.issubset(fields), f"Missing fields: {expected - fields}"
 
     def test_status_enum_values(self):
-        from imas_codex.graph.models import StandardNameSourceStatus
+        from iter_codex.graph.models import StandardNameSourceStatus
 
         assert StandardNameSourceStatus.extracted.value == "extracted"
         assert StandardNameSourceStatus.composed.value == "composed"
@@ -85,7 +85,7 @@ class TestStandardNameSourceSchema:
         assert StandardNameSourceStatus.stale.value == "stale"
 
     def test_source_type_enum_has_dd_and_signals(self):
-        from imas_codex.graph.models import StandardNameSourceType
+        from iter_codex.graph.models import StandardNameSourceType
 
         members = set(StandardNameSourceType.__members__.keys())
         assert "dd" in members
@@ -128,7 +128,7 @@ class TestMergeStandardNameSources:
 
         mock_ctx.query.side_effect = _query
         patcher = patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         )
         mock_gc_cls = patcher.start()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
@@ -136,7 +136,7 @@ class TestMergeStandardNameSources:
         return patcher, mock_ctx
 
     def test_rejects_invalid_source_type(self):
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -146,7 +146,7 @@ class TestMergeStandardNameSources:
             )
 
     def test_rejects_reference_source_type(self):
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -162,7 +162,7 @@ class TestMergeStandardNameSources:
             )
 
     def test_empty_sources_returns_zero(self):
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -170,7 +170,7 @@ class TestMergeStandardNameSources:
 
     def test_accepts_dd_source_type(self):
         """dd is a valid pipeline source type (doesn't raise)."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -196,7 +196,7 @@ class TestMergeStandardNameSources:
 
     def test_accepts_signals_source_type(self):
         """signals is a valid pipeline source type."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -220,7 +220,7 @@ class TestMergeStandardNameSources:
 
     def test_mixed_invalid_type_raises(self):
         """A batch with even one invalid source_type should raise."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -234,7 +234,7 @@ class TestMergeStandardNameSources:
 
     def test_returns_affected_count(self):
         """Return value matches the 'affected' field from the Cypher result."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -282,7 +282,7 @@ class TestMergeStandardNameSources:
 
         mock_ctx.query.side_effect = _query
         patcher = patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         )
         mock_gc_cls = patcher.start()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
@@ -293,7 +293,7 @@ class TestMergeStandardNameSources:
         """Re-seeding an already-pinned source needs no dd_version and must not
         re-snapshot — `sn run --focus`/`--edits` rebuilds source dicts without a
         version, and that path must merge cleanly rather than raise."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -319,7 +319,7 @@ class TestMergeStandardNameSources:
 
     def test_reseed_version_mismatch_raises(self):
         """A supplied version that disagrees with the stored pin still raises."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -345,7 +345,7 @@ class TestMergeStandardNameSources:
     def test_new_source_without_version_raises(self):
         """A genuinely new dd source (no existing pinned node) still must supply
         an exact version — inferring latest remains refused."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -371,7 +371,7 @@ class TestMergeStandardNameSources:
     def test_new_source_pinned_from_default_version(self):
         """A batch default pins a genuinely-new source that carries no per-source
         version — an explicit declaration, not 'latest' inference."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -399,7 +399,7 @@ class TestMergeStandardNameSources:
         """A re-seed keeps its stored pin even when a batch default (the current
         version) differs — the default pins only genuinely-new sources, so an
         older-pinned source is not falsely re-pinned to current."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             merge_standard_name_sources,
         )
 
@@ -433,7 +433,7 @@ class TestMarkSourcesFailed:
         mock_ctx = MagicMock()
         mock_ctx.query.return_value = return_value
         patcher = patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         )
         mock_gc_cls = patcher.start()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
@@ -441,7 +441,7 @@ class TestMarkSourcesFailed:
         return patcher, mock_ctx
 
     def test_returns_affected_count(self):
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             mark_sources_failed,
         )
 
@@ -460,7 +460,7 @@ class TestMarkSourcesFailed:
 
     def test_query_uses_token_and_error(self):
         """The Cypher query receives token and error as parameters."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             mark_sources_failed,
         )
 
@@ -479,7 +479,7 @@ class TestMarkSourcesFailed:
 
     def test_max_attempts_forwarded(self):
         """max_attempts parameter is forwarded to the query."""
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             mark_sources_failed,
         )
 
@@ -492,7 +492,7 @@ class TestMarkSourcesFailed:
             patcher.stop()
 
     def test_empty_result_returns_zero(self):
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             mark_sources_failed,
         )
 
@@ -508,21 +508,21 @@ class TestMarkSourcesStale:
     """Test stale marking."""
 
     def test_empty_list_returns_zero(self):
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             mark_sources_stale,
         )
 
         assert mark_sources_stale([]) == 0
 
     def test_calls_graph_for_non_empty(self):
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             mark_sources_stale,
         )
 
         mock_ctx = MagicMock()
         mock_ctx.query.return_value = [{"affected": 2}]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -531,14 +531,14 @@ class TestMarkSourcesStale:
             mock_ctx.query.assert_called_once()
 
     def test_returns_affected_count(self):
-        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        from iter_codex.standard_names.graph_store.graph_source_bindings import (
             mark_sources_stale,
         )
 
         mock_ctx = MagicMock()
         mock_ctx.query.return_value = [{"affected": 5}]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -550,7 +550,7 @@ class TestGetStandardNameSourceStats:
     """Test stats function."""
 
     def test_returns_dict(self):
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             get_standard_name_source_stats,
         )
 
@@ -560,7 +560,7 @@ class TestGetStandardNameSourceStats:
             {"status": "composed", "count": 50},
         ]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -568,14 +568,14 @@ class TestGetStandardNameSourceStats:
             assert result == {"extracted": 100, "composed": 50}
 
     def test_with_source_type_filter(self):
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             get_standard_name_source_stats,
         )
 
         mock_ctx = MagicMock()
         mock_ctx.query.return_value = [{"status": "extracted", "count": 30}]
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -583,14 +583,14 @@ class TestGetStandardNameSourceStats:
             assert result == {"extracted": 30}
 
     def test_empty_graph_returns_empty_dict(self):
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             get_standard_name_source_stats,
         )
 
         mock_ctx = MagicMock()
         mock_ctx.query.return_value = []
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -599,14 +599,14 @@ class TestGetStandardNameSourceStats:
 
     def test_source_type_filter_forwarded(self):
         """source_type kwarg should be forwarded to the query."""
-        from imas_codex.standard_names.graph_store.graph_audits import (
+        from iter_codex.standard_names.graph_store.graph_audits import (
             get_standard_name_source_stats,
         )
 
         mock_ctx = MagicMock()
         mock_ctx.query.return_value = []
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as mock_gc_cls:
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)

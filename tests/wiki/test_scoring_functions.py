@@ -20,7 +20,7 @@ class TestExtractTextFromBytes:
     """Tests for _extract_text_from_bytes — document text extraction."""
 
     def _extract(self, content: bytes, document_type: str) -> str:
-        from imas_codex.discovery.wiki.scoring import _extract_text_from_bytes
+        from iter_codex.discovery.wiki.scoring import _extract_text_from_bytes
 
         return _extract_text_from_bytes(content, document_type)
 
@@ -99,7 +99,7 @@ class TestScorePagesHeuristic:
     """Tests for _score_pages_heuristic — keyword-based fallback scoring."""
 
     def _score(self, pages, data_access_patterns=None):
-        from imas_codex.discovery.wiki.scoring import _score_pages_heuristic
+        from iter_codex.discovery.wiki.scoring import _score_pages_heuristic
 
         return _score_pages_heuristic(pages, data_access_patterns)
 
@@ -235,7 +235,7 @@ class TestFetchHtmlDispatch:
     @pytest.mark.asyncio
     async def test_confluence_dispatch(self):
         """auth_type='session' with confluence_client should use Confluence REST API."""
-        from imas_codex.discovery.wiki.scoring import _fetch_html
+        from iter_codex.discovery.wiki.scoring import _fetch_html
 
         mock_confluence = MagicMock()
         mock_page = MagicMock()
@@ -256,7 +256,7 @@ class TestFetchHtmlDispatch:
     @pytest.mark.asyncio
     async def test_ssh_dispatch(self):
         """No auth + ssh_host should use SSH curl."""
-        from imas_codex.discovery.wiki.scoring import _fetch_html
+        from iter_codex.discovery.wiki.scoring import _fetch_html
 
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(
@@ -274,7 +274,7 @@ class TestFetchHtmlDispatch:
     @pytest.mark.asyncio
     async def test_keycloak_dispatch(self):
         """auth_type='keycloak' should use keycloak_client."""
-        from imas_codex.discovery.wiki.scoring import _fetch_html
+        from iter_codex.discovery.wiki.scoring import _fetch_html
 
         mock_client = AsyncMock()
         mock_response = MagicMock()
@@ -293,7 +293,7 @@ class TestFetchHtmlDispatch:
     @pytest.mark.asyncio
     async def test_basic_auth_dispatch(self):
         """auth_type='basic' should use basic_auth_client."""
-        from imas_codex.discovery.wiki.scoring import _fetch_html
+        from iter_codex.discovery.wiki.scoring import _fetch_html
 
         mock_client = AsyncMock()
         mock_response = MagicMock()
@@ -312,10 +312,10 @@ class TestFetchHtmlDispatch:
     @pytest.mark.asyncio
     async def test_direct_http_fallback(self):
         """No auth, no SSH should use direct HTTP fetch."""
-        from imas_codex.discovery.wiki.scoring import _fetch_html
+        from iter_codex.discovery.wiki.scoring import _fetch_html
 
         with patch(
-            "imas_codex.discovery.wiki.prefetch.fetch_page_content",
+            "iter_codex.discovery.wiki.prefetch.fetch_page_content",
             new_callable=AsyncMock,
             return_value=("<html>Direct content</html>", None),
         ):
@@ -329,7 +329,7 @@ class TestFetchHtmlDispatch:
     @pytest.mark.asyncio
     async def test_ssh_fetch_failure(self):
         """SSH fetch failure should return empty string."""
-        from imas_codex.discovery.wiki.scoring import _fetch_html
+        from iter_codex.discovery.wiki.scoring import _fetch_html
 
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(returncode=1, stdout=b"")
@@ -344,7 +344,7 @@ class TestFetchHtmlDispatch:
     @pytest.mark.asyncio
     async def test_keycloak_without_client(self):
         """Keycloak auth without client should return empty string."""
-        from imas_codex.discovery.wiki.scoring import _fetch_html
+        from iter_codex.discovery.wiki.scoring import _fetch_html
 
         result = await _fetch_html(
             url="https://wiki.example.com/page",
@@ -366,10 +366,10 @@ class TestFetchAndSummarize:
     @pytest.mark.asyncio
     async def test_extracts_text_from_html(self):
         """Should extract clean text from HTML content."""
-        from imas_codex.discovery.wiki.scoring import _fetch_and_summarize
+        from iter_codex.discovery.wiki.scoring import _fetch_and_summarize
 
         with patch(
-            "imas_codex.discovery.wiki.scoring._fetch_html",
+            "iter_codex.discovery.wiki.scoring._fetch_html",
             new_callable=AsyncMock,
             return_value="<html><body><p>Electron temperature profile measured by Thomson scattering.</p></body></html>",
         ):
@@ -383,10 +383,10 @@ class TestFetchAndSummarize:
     @pytest.mark.asyncio
     async def test_empty_html_returns_empty(self):
         """Empty HTML should return empty string."""
-        from imas_codex.discovery.wiki.scoring import _fetch_and_summarize
+        from iter_codex.discovery.wiki.scoring import _fetch_and_summarize
 
         with patch(
-            "imas_codex.discovery.wiki.scoring._fetch_html",
+            "iter_codex.discovery.wiki.scoring._fetch_html",
             new_callable=AsyncMock,
             return_value="",
         ):
@@ -399,14 +399,14 @@ class TestFetchAndSummarize:
     @pytest.mark.asyncio
     async def test_max_chars_respected(self):
         """Output should be limited to max_chars."""
-        from imas_codex.discovery.wiki.scoring import _fetch_and_summarize
+        from iter_codex.discovery.wiki.scoring import _fetch_and_summarize
 
         long_content = (
             "<html><body>" + "<p>A paragraph of text. </p>" * 100 + "</body></html>"
         )
 
         with patch(
-            "imas_codex.discovery.wiki.scoring._fetch_html",
+            "iter_codex.discovery.wiki.scoring._fetch_html",
             new_callable=AsyncMock,
             return_value=long_content,
         ):
@@ -427,12 +427,12 @@ class TestBatchSshReadFiles:
     """Tests for batch_ssh_read_files — batched SSH file reading."""
 
     def test_empty_list(self):
-        from imas_codex.discovery.wiki.scoring import batch_ssh_read_files
+        from iter_codex.discovery.wiki.scoring import batch_ssh_read_files
 
         assert batch_ssh_read_files([]) == {}
 
     def test_single_file(self):
-        from imas_codex.discovery.wiki.scoring import batch_ssh_read_files
+        from iter_codex.discovery.wiki.scoring import batch_ssh_read_files
 
         url = "ssh://host1/data/Main/Page.txt"
 
@@ -464,7 +464,7 @@ class TestBatchSshReadFiles:
         assert "ClearAllForwardings=yes" in args
 
     def test_multiple_files_same_host(self):
-        from imas_codex.discovery.wiki.scoring import batch_ssh_read_files
+        from iter_codex.discovery.wiki.scoring import batch_ssh_read_files
 
         urls = [
             "ssh://host1/data/Main/PageA.txt",
@@ -504,7 +504,7 @@ class TestBatchSshReadFiles:
     def test_ssh_timeout_returns_empty(self):
         import subprocess
 
-        from imas_codex.discovery.wiki.scoring import batch_ssh_read_files
+        from iter_codex.discovery.wiki.scoring import batch_ssh_read_files
 
         with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("ssh", 30)):
             result = batch_ssh_read_files(["ssh://host1/data/Page.txt"])
@@ -512,7 +512,7 @@ class TestBatchSshReadFiles:
         assert result == {"ssh://host1/data/Page.txt": ""}
 
     def test_ssh_failure_returns_empty(self):
-        from imas_codex.discovery.wiki.scoring import batch_ssh_read_files
+        from iter_codex.discovery.wiki.scoring import batch_ssh_read_files
 
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(returncode=255, stdout=b"")
@@ -527,15 +527,15 @@ class TestFetchHtmlSshUrl:
     @pytest.mark.asyncio
     async def test_ssh_url_reads_file_and_converts(self):
         """ssh:// URL should read file via SSH and convert markup to HTML."""
-        from imas_codex.discovery.wiki.scoring import _fetch_html
+        from iter_codex.discovery.wiki.scoring import _fetch_html
 
         with (
             patch(
-                "imas_codex.discovery.wiki.adapters.fetch_twiki_raw_content",
+                "iter_codex.discovery.wiki.adapters.fetch_twiki_raw_content",
                 return_value="---+ Test Page\nSome content",
             ),
             patch(
-                "imas_codex.discovery.wiki.pipeline.twiki_markup_to_html",
+                "iter_codex.discovery.wiki.pipeline.twiki_markup_to_html",
                 return_value="<h1>Test Page</h1><p>Some content</p>",
             ),
         ):
@@ -548,10 +548,10 @@ class TestFetchHtmlSshUrl:
     @pytest.mark.asyncio
     async def test_ssh_url_empty_file_returns_empty(self):
         """ssh:// URL with empty file should return empty string."""
-        from imas_codex.discovery.wiki.scoring import _fetch_html
+        from iter_codex.discovery.wiki.scoring import _fetch_html
 
         with patch(
-            "imas_codex.discovery.wiki.adapters.fetch_twiki_raw_content",
+            "iter_codex.discovery.wiki.adapters.fetch_twiki_raw_content",
             return_value="short",
         ):
             result = await _fetch_html(

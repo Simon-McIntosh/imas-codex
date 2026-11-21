@@ -15,8 +15,8 @@ lineage, so names mode cannot fall behind full mode again.
 
 from __future__ import annotations
 
-from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names.context import build_compose_context
+from iter_codex.llm.prompt_loader import render_prompt
+from iter_codex.standard_names.context import build_compose_context
 
 #: An equilibrium member: the leaf states the geometric property, and the
 #: enclosing ``equilibrium/time_slice/boundary`` structure is the only place

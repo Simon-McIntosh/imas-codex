@@ -21,8 +21,8 @@ import asyncio
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.pools import PoolSpec, run_pools
+from iter_codex.standard_names.budget import BudgetManager
+from iter_codex.standard_names.pools import PoolSpec, run_pools
 
 # ---------------------------------------------------------------------------
 # Budget: MIN_VIABLE_TURN and near_exhausted must stay removed
@@ -32,7 +32,7 @@ from imas_codex.standard_names.pools import PoolSpec, run_pools
 class TestMinViableTurnRemoved:
     def test_min_viable_turn_constant_removed(self) -> None:
         """MIN_VIABLE_TURN must no longer exist in the budget module."""
-        import imas_codex.standard_names.budget as budget_mod
+        import iter_codex.standard_names.budget as budget_mod
 
         assert not hasattr(budget_mod, "MIN_VIABLE_TURN")
 
@@ -205,7 +205,7 @@ class TestIdleExhaustionWatchdog:
     @pytest.mark.asyncio
     async def test_pending_stall_waits_for_in_flight_batch(self) -> None:
         """A live batch may still turn a pending backlog into progress."""
-        from imas_codex.standard_names.pools import _idle_exhaustion_watchdog
+        from iter_codex.standard_names.pools import _idle_exhaustion_watchdog
 
         stop_event = asyncio.Event()
         idle_exhausted = asyncio.Event()
@@ -521,7 +521,7 @@ def test_scoped_terminal_residue_reports_transient_claims() -> None:
     """A refining claim remains terminally visible despite zero pending work."""
     from unittest.mock import MagicMock, patch
 
-    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+    from iter_codex.standard_names.graph_store.graph_parent_lifecycle import (
         scoped_terminal_residue,
     )
 
@@ -546,7 +546,7 @@ def test_scoped_terminal_residue_reports_transient_claims() -> None:
     ]
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=gc,
     ):
         residue = scoped_terminal_residue(scope_run_id="bounded-run")
@@ -624,7 +624,7 @@ class TestBudgetSaturationWatchdog:
         idle pool to be saturated too, so it never fired and the run spun
         for hours.  Scoping the gate to live pools fixes this.
         """
-        from imas_codex.standard_names.pools import _budget_saturation_watchdog
+        from iter_codex.standard_names.pools import _budget_saturation_watchdog
 
         mgr = BudgetManager(total_budget=10.0)
         # Idle free pool: no pending work, counter frozen at 0 (never reserves).
@@ -659,7 +659,7 @@ class TestBudgetSaturationWatchdog:
         """The gate must NOT fire while a live pool is still unsaturated —
         e.g. a free local-GPU compose pool that keeps reserving successfully
         (counter resets to 0).  Killing it would waste affordable work."""
-        from imas_codex.standard_names.pools import _budget_saturation_watchdog
+        from iter_codex.standard_names.pools import _budget_saturation_watchdog
 
         mgr = BudgetManager(total_budget=10.0)
         productive_pool = _make_idle_spec("generate_name", pending=5)  # not saturated

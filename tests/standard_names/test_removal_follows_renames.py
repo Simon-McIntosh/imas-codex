@@ -26,7 +26,7 @@ _PREFIX = "test_removal_follows_renames__"
 
 @pytest.fixture()
 def _gc(disposable_neo4j_uri: str):
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     client = GraphClient(
         uri=disposable_neo4j_uri,
@@ -95,7 +95,7 @@ def _seed_removed_source(
 
 
 def _reconcile(source_type: str = "dd") -> dict:
-    from imas_codex.standard_names.graph_store.graph_audits import (
+    from iter_codex.standard_names.graph_store.graph_audits import (
         reconcile_standard_name_sources,
     )
 
@@ -324,7 +324,7 @@ def test_a_signal_source_draining_a_name_leaves_it_live(_gc, _clean):
 
 def test_dead_end_revival_reads_the_source_nodes_type():
     """A worker outcome omits the batch type; the source node owns it."""
-    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    from iter_codex.standard_names.graph_store.graph_source_bindings import (
         _lock_claimed_name_bindings,
     )
 
@@ -350,7 +350,7 @@ def test_dead_end_revival_reads_the_source_nodes_type():
     ]
 
     with patch(
-        "imas_codex.standard_names.graph_store.graph_source_bindings."
+        "iter_codex.standard_names.graph_store.graph_source_bindings."
         "_guard_existing_target_pairings",
         return_value={},
     ):

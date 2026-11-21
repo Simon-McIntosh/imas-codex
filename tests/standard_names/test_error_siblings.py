@@ -26,7 +26,7 @@ class TestMintErrorSiblings:
         uncertainty_index_of_* for all parents.  Only upper and lower uncertainty
         siblings are produced.
         """
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         siblings = mint_error_siblings(
             "plasma_current",
@@ -51,7 +51,7 @@ class TestMintErrorSiblings:
 
     def test_error_sibling_shares_parent_unit(self):
         """Each sibling inherits the parent's unit."""
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         siblings = mint_error_siblings(
             "pressure",
@@ -70,7 +70,7 @@ class TestMintErrorSiblings:
 
     def test_error_sibling_has_from_dd_path_to_error_node(self):
         """Each sibling's source_id points to the error IMASNode, not the parent."""
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         error_id = "core_profiles/profiles_1d/electrons/temperature_error_upper"
         siblings = mint_error_siblings(
@@ -89,7 +89,7 @@ class TestMintErrorSiblings:
 
     def test_parent_compose_fails_skips_siblings_cleanly(self):
         """If parent name is empty or None, no siblings are minted (silent skip)."""
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         # Parent name that will fail ISN validation (gibberish)
         siblings = mint_error_siblings(
@@ -113,7 +113,7 @@ class TestMintErrorSiblings:
         The policy gate blocks uncertainty_index_of_* for all parents, so
         only upper and lower uncertainty siblings are produced.
         """
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         siblings = mint_error_siblings(
             "plasma_current",
@@ -138,7 +138,7 @@ class TestMintErrorSiblings:
 
     def test_error_sibling_provenance_fields(self):
         """Error siblings have deterministic provenance markers."""
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         siblings = mint_error_siblings(
             "pressure",
@@ -162,7 +162,7 @@ class TestMintErrorSiblings:
 
     def test_error_sibling_inherits_physics_domain(self):
         """Error siblings inherit the parent's physics_domain."""
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         siblings = mint_error_siblings(
             "pressure",
@@ -178,7 +178,7 @@ class TestMintErrorSiblings:
 
     def test_error_sibling_inherits_cocos(self):
         """Error siblings inherit the parent's COCOS metadata."""
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         siblings = mint_error_siblings(
             "plasma_current",
@@ -195,7 +195,7 @@ class TestMintErrorSiblings:
 
     def test_unknown_suffix_is_skipped(self):
         """An error_node_id with an unexpected suffix is silently skipped."""
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         siblings = mint_error_siblings(
             "pressure",
@@ -216,7 +216,7 @@ class TestMintErrorSiblings:
         Rule 6 blocks all uncertainty_index_of_* creation and passing only
         _error_index returns an empty list.
         """
-        from imas_codex.standard_names.error_siblings import mint_error_siblings
+        from iter_codex.standard_names.error_siblings import mint_error_siblings
 
         siblings = mint_error_siblings(
             "pressure",
@@ -243,22 +243,22 @@ class TestDetectErrorSuffix:
     """Tests for the suffix detection helper."""
 
     def test_error_upper(self):
-        from imas_codex.standard_names.error_siblings import _detect_error_suffix
+        from iter_codex.standard_names.error_siblings import _detect_error_suffix
 
         assert _detect_error_suffix("foo/bar_error_upper") == "_error_upper"
 
     def test_error_lower(self):
-        from imas_codex.standard_names.error_siblings import _detect_error_suffix
+        from iter_codex.standard_names.error_siblings import _detect_error_suffix
 
         assert _detect_error_suffix("foo/bar_error_lower") == "_error_lower"
 
     def test_error_index(self):
-        from imas_codex.standard_names.error_siblings import _detect_error_suffix
+        from iter_codex.standard_names.error_siblings import _detect_error_suffix
 
         assert _detect_error_suffix("foo/bar_error_index") == "_error_index"
 
     def test_no_error_suffix(self):
-        from imas_codex.standard_names.error_siblings import _detect_error_suffix
+        from iter_codex.standard_names.error_siblings import _detect_error_suffix
 
         assert _detect_error_suffix("foo/bar") is None
 
@@ -273,7 +273,7 @@ class TestReconcileErrorSiblings:
 
     def test_reconcile_orphans_error_siblings(self):
         """When the parent StandardName is deleted, error siblings are quarantined."""
-        from imas_codex.standard_names.graph_ops import reconcile_error_siblings
+        from iter_codex.standard_names.graph_ops import reconcile_error_siblings
 
         mock_gc = MagicMock()
 
@@ -290,7 +290,7 @@ class TestReconcileErrorSiblings:
         )
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
@@ -311,7 +311,7 @@ class TestReconcileErrorSiblings:
 
     def test_reconcile_no_orphans(self):
         """When all parents exist, no siblings are marked stale."""
-        from imas_codex.standard_names.graph_ops import reconcile_error_siblings
+        from iter_codex.standard_names.graph_ops import reconcile_error_siblings
 
         mock_gc = MagicMock()
 
@@ -325,7 +325,7 @@ class TestReconcileErrorSiblings:
         )
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
@@ -336,13 +336,13 @@ class TestReconcileErrorSiblings:
 
     def test_reconcile_empty_graph(self):
         """When no error siblings exist, reconcile is a no-op."""
-        from imas_codex.standard_names.graph_ops import reconcile_error_siblings
+        from iter_codex.standard_names.graph_ops import reconcile_error_siblings
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)

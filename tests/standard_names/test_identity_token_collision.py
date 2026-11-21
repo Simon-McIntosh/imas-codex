@@ -8,7 +8,7 @@ collision is still reported.
 
 from __future__ import annotations
 
-from imas_codex.standard_names.export import _identity_token_collision_gate
+from iter_codex.standard_names.export import _identity_token_collision_gate
 
 
 def _gate(names: list[str]):

@@ -11,9 +11,9 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.discovery.signals import parallel
-from imas_codex.discovery.signals.enrichment import EnrichmentOptions
-from imas_codex.discovery.signals.models import (
+from iter_codex.discovery.signals import parallel
+from iter_codex.discovery.signals.enrichment import EnrichmentOptions
+from iter_codex.discovery.signals.models import (
     SignalEnrichmentBatch,
     SignalEnrichmentResult,
 )
@@ -95,11 +95,11 @@ async def test_interleaved_batch_keeps_each_description_on_its_signal():
         patch.object(parallel, "propagate_source_enrichment", return_value=0),
         patch.object(parallel, "release_signal_claim") as release,
         patch(
-            "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+            "iter_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=with_description_review(llm),
         ),
     ):
@@ -141,7 +141,7 @@ async def test_repeated_prompt_number_cannot_write_onto_two_signals(recovery):
 
     with (
         patch(
-            "imas_codex.discovery.signals.enrichment.get_enrichment_options",
+            "iter_codex.discovery.signals.enrichment.get_enrichment_options",
             return_value=EnrichmentOptions(recovery_attempts=int(recovery)),
         ),
         patch.object(parallel, "claim_signals_for_enrichment", side_effect=claim),
@@ -156,11 +156,11 @@ async def test_repeated_prompt_number_cannot_write_onto_two_signals(recovery):
         patch.object(parallel, "propagate_source_enrichment", return_value=0),
         patch.object(parallel, "release_signal_claim") as release,
         patch(
-            "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+            "iter_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=with_description_review(llm),
         ),
     ):
@@ -208,11 +208,11 @@ async def test_reset_signal_without_a_name_is_enriched():
         patch.object(parallel, "propagate_source_enrichment", return_value=0),
         patch.object(parallel, "release_signal_claim"),
         patch(
-            "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+            "iter_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=with_description_review(llm),
         ),
     ):
@@ -242,15 +242,15 @@ def test_full_run_waits_for_its_checks():
     with (
         patch.object(parallel, "has_pending_check_work", return_value=True),
         patch(
-            "imas_codex.discovery.mdsplus.graph_ops.has_pending_extract_work_facility",
+            "iter_codex.discovery.mdsplus.graph_ops.has_pending_extract_work_facility",
             return_value=False,
         ),
         patch(
-            "imas_codex.discovery.mdsplus.graph_ops.has_pending_units_work_facility",
+            "iter_codex.discovery.mdsplus.graph_ops.has_pending_units_work_facility",
             return_value=False,
         ),
         patch(
-            "imas_codex.discovery.mdsplus.graph_ops.has_pending_promote_work_facility",
+            "iter_codex.discovery.mdsplus.graph_ops.has_pending_promote_work_facility",
             return_value=False,
         ),
     ):

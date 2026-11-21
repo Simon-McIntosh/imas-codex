@@ -7,7 +7,7 @@ statements of one version, and the hand-verified pin bumps this compares are
 the reason the comparison is a test rather than a convention.
 
 The snapshot is written and rotated by
-:mod:`imas_codex.standard_names.grammar_sync`; this test reads it. The pin is
+:mod:`iter_codex.standard_names.grammar_sync`; this test reads it. The pin is
 read through the default-tier pin-agreement test so both tiers compare
 against one extraction rather than two.
 """
@@ -33,7 +33,7 @@ def active_snapshot_version(graph_client) -> str:
     active nodes, a node without a ``version``) is asserted separately: a
     silently empty result would otherwise read as a passing comparison.
     """
-    from imas_codex.standard_names import grammar_sync
+    from iter_codex.standard_names import grammar_sync
 
     rows: list[dict[str, Any]] = graph_client.query(
         "MATCH (v:ISNGrammarVersion {active: true}) "

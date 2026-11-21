@@ -1,0 +1,644 @@
+"""Neo4j connection profiles for server access and graph switching.
+
+Two orthogonal concerns, each with its own authority:
+
+- **location** (pyproject.toml) — where Neo4j physically runs.  Locations
+  correspond to SSH aliases (``"iter"``, ``"tcv"``) or ``"local"``.
+  Each location has a fixed port slot.  This is deploy-time config.
+
+- **identity** (on-disk ``.neo4j/`` store) — which graph data directory
+  to use.  Each graph lives in a named directory in
+  ``~/.local/share/iter-codex/.neo4j/<name>/``.  The ``neo4j/`` symlink
+  points to the active graph.  Switching graphs means repointing the
+  symlink and restarting Neo4j.  Graph identity (name + facilities)
+  is stored in the database (``(:GraphMeta)`` node).
+
+Port convention (both bolt and HTTP offset together)::
+
+    iter   → bolt 7687, http 7474  (slot 0, Neo4j defaults)
+    tcv    → bolt 7688, http 7475  (slot 1)
+    jt-60sa → bolt 7689, http 7476  (slot 2)
+    jet    → bolt 7690, http 7477  (slot 3)
+    ...
+
+When connecting to a **remote** location, auto-tunnels are established with
+a +10 000 offset to prevent port clashes::
+
+    Direct (on the host):    bolt = 7687 + offset
+    Tunneled (remote):       bolt = 17687 + offset
+
+Port offsets derive from ``[tool.iter-codex].locations`` (shared with embed
+server).  Neo4j-specific settings live in ``[tool.iter-codex.graph]``::
+
+    location = "iter"     # where Neo4j runs  (override: ITER_CODEX_GRAPH_LOCATION)
+    username = "neo4j"
+    password = "iter-codex"
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+from dataclasses import dataclass
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+# Cache for resolved URIs — avoids repeated tunnel checks and log spam.
+# Key: (host, bolt_port), Value: resolved URI string.
+_resolved_uri_cache: dict[tuple[str | None, int], str] = {}
+
+# ─── Port convention ────────────────────────────────────────────────────────
+# Port offsets and host defaults are managed at the top level of pyproject.toml:
+#   [tool.iter-codex].locations  — list of locations (index = port offset)
+#   [tool.iter-codex.hosts]      — SSH alias overrides (optional)
+
+BOLT_BASE_PORT = 7687
+HTTP_BASE_PORT = 7474
+
+DEFAULT_LOCATION = "iter"
+DEFAULT_USERNAME = "neo4j"
+DEFAULT_PASSWORD = "iter-codex"
+
+# Re-export from dirs for backward compatibility of import paths.
+# Canonical source is iter_codex.graph.dirs.
+from iter_codex.graph.dirs import ACTIVE_LINK, DATA_BASE_DIR  # noqa: E402, F401
+
+BACKUPS_DIR = DATA_BASE_DIR / "backups"
+
+
+def _get_all_offsets() -> dict[str, int]:
+    """Return location→port-offset map from pyproject.toml ``[tool.iter-codex].locations``.
+
+    Locations is a list where position encodes the port slot::
+
+        locations = ["iter", "tcv", "jt-60sa", ...]  # iter=0, tcv=1, ...
+    """
+    from iter_codex.settings import _load_pyproject_settings
+
+    configured = _load_pyproject_settings().get("locations", [])
+    if isinstance(configured, list):
+        return {name: i for i, name in enumerate(configured)}
+    # Backward compat: dict form (name = offset)
+    return {k: int(v) for k, v in configured.items()}
+
+
+def _get_all_hosts() -> dict[str, str]:
+    """Return location→SSH-alias map.
+
+    Explicit entries from ``[tool.iter-codex.hosts]`` override, but any
+    location in ``[tool.iter-codex].locations`` implicitly uses its own
+    name as SSH alias.
+    """
+    from iter_codex.settings import _get_section, _load_pyproject_settings
+
+    # Primary: shared top-level hosts section
+    explicit = _load_pyproject_settings().get("hosts", {})
+    # Backward compat: check [graph.hosts] as fallback
+    if not explicit:
+        explicit = _get_section("graph").get("hosts", {})
+    # Every location implicitly has host == name; explicit entries override
+    hosts = {name: name for name in _get_all_offsets()}
+    hosts.update(explicit)
+    return hosts
+
+
+# ─── Neo4jProfile ───────────────────────────────────────────────────────────
+
+
+@dataclass(frozen=True)
+class Neo4jProfile:
+    """Resolved connection parameters for a Neo4j instance.
+
+    Separates two concerns:
+    - **Server access** (location, host, uri, ports) — from pyproject.toml
+    - **Data identity** (name, data_dir) — from the active ``.neo4j/`` symlink
+
+    Attributes:
+        name:      Graph data identity (e.g. ``"codex"``, ``"dev"``).
+                   Read from ``.meta.json`` in the active graph directory.
+        location:  Where Neo4j physically runs — location name from
+                   the ``locations`` list, or ``"local"``.
+        host:      SSH alias for the location (often same as location).
+        uri:       Bolt URI (e.g. ``"bolt://localhost:7687"``).
+        username:  Neo4j username.
+        password:  Neo4j password.
+        bolt_port: Bolt protocol port *at the host*.
+        http_port: HTTP API port (health checks, browser).
+        data_dir:  On-disk data directory (``neo4j/`` symlink).
+    """
+
+    name: str
+    location: str
+    host: str | None
+    uri: str
+    username: str
+    password: str
+    bolt_port: int
+    http_port: int
+    data_dir: Path
+
+
+# ─── Tunnel conflict detection ──────────────────────────────────────────────
+
+
+def is_port_bound_by_tunnel(port: int = 7687) -> bool:
+    """Check if a port is bound by an SSH tunnel (not a local Neo4j).
+
+    This detects the case where an SSH tunnel is forwarding a remote Neo4j
+    to localhost, which would conflict with starting a local Neo4j instance.
+    """
+    from iter_codex.remote.tunnel import is_port_bound_by_ssh
+
+    return is_port_bound_by_ssh(port)
+
+
+def check_graph_conflict(bolt_port: int = 7687) -> str | None:
+    """Check for conflicting graph configurations.
+
+    Returns an error message if a conflict is detected, None otherwise.
+    """
+    if is_port_bound_by_tunnel(bolt_port):
+        return (
+            f"Port {bolt_port} is bound by an SSH tunnel.\n"
+            "Starting a local Neo4j would create two separate graphs.\n"
+            "\n"
+            "To use the remote graph via tunnel:\n"
+            "  - Don't start local Neo4j\n"
+            "  - Ensure SSH tunnel is active: ssh -f -N iter\n"
+            "\n"
+            "To use a local graph instead:\n"
+            "  - Kill the SSH tunnel: ssh -O exit iter\n"
+            "  - Then start local Neo4j"
+        )
+    return None
+
+
+# ─── Location helpers ───────────────────────────────────────────────────────
+
+
+def get_graph_location() -> str:
+    """Return where Neo4j runs (the location, not the graph name).
+
+    This returns the raw location string from config (e.g. ``"titan"``).
+    Use :func:`resolve_location` to get full metadata (facility, scheduler).
+
+    Priority:
+        1. ``ITER_CODEX_GRAPH_LOCATION`` environment variable
+        2. ``[tool.iter-codex.graph].location`` in pyproject.toml
+        3. ``DEFAULT_LOCATION`` (``"iter"``)
+    """
+    if env := os.getenv("ITER_CODEX_GRAPH_LOCATION"):
+        return env
+
+    from iter_codex.settings import _get_section
+
+    graph_section = _get_section("graph")
+
+    if location := graph_section.get("location"):
+        return location
+
+    return DEFAULT_LOCATION
+
+
+def get_location_offset(location: str) -> int:
+    """Get the port offset for a location (its index in the locations list).
+
+    For compute locations (e.g. ``"titan"``), uses the parent facility's
+    offset since compute nodes share the facility's port slots.
+    """
+    from iter_codex.remote.locations import get_port_offset
+
+    return get_port_offset(location)
+
+
+# ─── Resolution ─────────────────────────────────────────────────────────────
+
+
+def _get_service_job_name(location: str | None = None) -> str:
+    """Read ``service_job_name`` from the resolved location.
+
+    Delegates to :mod:`iter_codex.remote.locations` for compute location
+    metadata.  Falls back to ``"codex-neo4j"`` if not configured.
+    """
+    if location is None:
+        location = get_graph_location()
+    try:
+        from iter_codex.remote.locations import resolve_location
+
+        info = resolve_location(location)
+        return info.service_job_name
+    except Exception:
+        return "codex-neo4j"
+
+
+def get_active_graph_name() -> str:
+    """Return the name of the currently active graph.
+
+    Reads from the active ``.neo4j/`` symlink target directory name.
+    Falls back to ``"uninitialized"`` if no active graph is configured.
+
+    Returns:
+        Graph name string.
+    """
+    from iter_codex.graph.dirs import get_active_graph
+
+    active = get_active_graph()
+    if active is not None:
+        return active.name
+    return "uninitialized"
+
+
+def _resolve_uri(host: str | None, bolt_port: int) -> str:
+    """Resolve the bolt URI based on host locality, with auto-tunneling.
+
+    Results are cached per (host, bolt_port) pair. On cache hit, verifies
+    the tunnel is still alive for tunneled URIs. If the tunnel has died,
+    invalidates the cache and re-establishes via ``ensure_tunnel``.
+
+    1. If host is None / "local" / matches local machine → direct localhost
+    2. If not local → check ``ITER_CODEX_TUNNEL_BOLT_{HOST}`` env for override
+    3. If no override → auto-tunnel with +10000 offset
+    """
+    cache_key = (host, bolt_port)
+    if cache_key in _resolved_uri_cache:
+        cached_uri = _resolved_uri_cache[cache_key]
+
+        # For tunneled URIs, verify the tunnel is still alive
+        from iter_codex.remote.tunnel import TUNNEL_OFFSET, is_tunnel_active
+
+        tunnel_port = bolt_port + TUNNEL_OFFSET
+        if f":{tunnel_port}" in cached_uri and not is_tunnel_active(tunnel_port):
+            logger.warning(
+                "Cached tunnel URI stale (port %d dead), re-establishing...",
+                tunnel_port,
+            )
+            del _resolved_uri_cache[cache_key]
+            # Fall through to re-resolve
+        else:
+            return cached_uri
+
+    uri = _resolve_uri_uncached(host, bolt_port)
+    _resolved_uri_cache[cache_key] = uri
+    return uri
+
+
+def _resolve_uri_uncached(host: str | None, bolt_port: int) -> str:
+    """Uncached URI resolution — called once per (host, bolt_port) pair.
+
+    SLURM service-node discovery is delegated to the shared owner in
+    ``iter_codex.remote.locations``, so the graph and embedding paths cannot
+    diverge.  Remote mode still handles auto-tunneling directly since bolt
+    needs the ``bolt://`` protocol and tunnel offset.
+    """
+    from iter_codex.remote.locations import resolve_location
+
+    location = get_graph_location()
+    info = resolve_location(location)
+
+    from iter_codex.remote.executor import is_local_host
+
+    local = host is None or host == "local" or is_local_host(host)
+
+    # ── Mode 1: local, no scheduler ────────────────────────────────────
+    if local and info.scheduler != "slurm":
+        return f"bolt://localhost:{bolt_port}"
+
+    # ── Mode 2: SLURM-scheduled service ────────────────────────────────
+    # Discovery decides reachability here, not the hostname.  The shared owner
+    # in ``locations`` answers for every node inside the cluster, so the graph
+    # and embedding paths cannot diverge; a compute node is served there even
+    # though its hostname matches no ``login_nodes`` pattern, whereas gating on
+    # ``local`` sent it down the remote branch where the tunnel it cannot open
+    # left a loopback address that never answers.
+    if info.scheduler == "slurm":
+        from iter_codex.remote.locations import _service_url_for_slurm
+
+        slurm_url = _service_url_for_slurm(
+            info,
+            bolt_port,
+            protocol="bolt",
+            service_job_name=info.service_job_name,
+            local=local,
+        )
+        if slurm_url is not None:
+            logger.info("SLURM: Neo4j resolved to %s", slurm_url)
+            return slurm_url
+        # Undiscoverable from outside the cluster — fall through to the remote
+        # branch, which tunnels rather than guessing an address.
+
+    # ── Mode 3: remote ─────────────────────────────────────────────────
+    # Check tunnel port override
+    env_key = f"ITER_CODEX_TUNNEL_BOLT_{host.upper().replace('-', '_')}"
+    if tunnel_port := os.getenv(env_key):
+        logger.debug(
+            "Using tunnel port override %s=%s for remote host %s",
+            env_key,
+            tunnel_port,
+            host,
+        )
+        return f"bolt://localhost:{tunnel_port}"
+
+    # Auto-tunnel: remote_port + TUNNEL_OFFSET
+    from iter_codex.remote.tunnel import (
+        TUNNEL_OFFSET,
+        ensure_tunnel,
+        resolve_remote_bind,
+    )
+
+    tunnel_port_int = bolt_port + TUNNEL_OFFSET
+
+    remote_bind = resolve_remote_bind(
+        host, info.scheduler, service_job_name=info.service_job_name
+    )
+
+    ok = ensure_tunnel(
+        port=bolt_port,
+        ssh_host=host,
+        tunnel_port=tunnel_port_int,
+        remote_bind=remote_bind,
+    )
+    if ok:
+        logger.info(
+            "Auto-tunnel: %s:%d → localhost:%d", host, bolt_port, tunnel_port_int
+        )
+        return f"bolt://localhost:{tunnel_port_int}"
+
+    # Tunnel failed — return the tunnel port URI anyway so the caller gets
+    # a clean connection error instead of hitting a wrong Neo4j instance on
+    # the default port with mismatched credentials (AuthenticationRateLimit).
+    logger.warning(
+        "Auto-tunnel to %s:%d failed. Returning tunnel URI bolt://localhost:%d "
+        "(connection will fail until tunnel recovers)",
+        host,
+        bolt_port,
+        tunnel_port_int,
+    )
+    return f"bolt://localhost:{tunnel_port_int}"
+
+
+def resolve_neo4j(
+    *,
+    auto_tunnel: bool = True,
+) -> Neo4jProfile:
+    """Resolve Neo4j connection profile for the active graph.
+
+    Server access (location → ports, host, URI) comes from pyproject.toml.
+    Data identity (name, data_dir) comes from the active ``.neo4j/``
+    symlink and its ``.meta.json``.
+
+    Args:
+        auto_tunnel: When True (default), automatically start an SSH tunnel
+            if the location is remote.  Set to False when only port/host
+            metadata is needed (e.g. tunnel CLI) to avoid side-effects.
+
+    Returns:
+        Fully resolved :class:`Neo4jProfile`.
+    """
+    name = get_active_graph_name()
+
+    from iter_codex.settings import _get_section
+
+    graph_section = _get_section("graph")
+
+    # Server access — all from pyproject.toml [graph] section
+    username = graph_section.get("username", DEFAULT_USERNAME)
+    password = graph_section.get("password", DEFAULT_PASSWORD)
+    location = get_graph_location()
+
+    # Env var escape hatches (always win). NEO4J_URI names the address
+    # outright, so it is applied before any location resolution: an operator
+    # who set it never pays for an unreadable location file, and never has a
+    # resolved address overridden behind their back. The ports still follow the
+    # location convention so service management keeps the right slots; when the
+    # location cannot be read the offset comes from the locations list alone,
+    # which needs no file, so the override costs nothing. The host is left None
+    # because it describes a location this URI bypasses.
+    if env_uri := os.getenv("NEO4J_URI"):
+        try:
+            bolt_port = _convention_bolt_port(location)
+            http_port = _convention_http_port(location)
+        except Exception:
+            offset = _get_all_offsets().get(location, 0)
+            bolt_port = BOLT_BASE_PORT + offset
+            http_port = HTTP_BASE_PORT + offset
+        return Neo4jProfile(
+            name=name,
+            location=location,
+            host=None,
+            uri=env_uri,
+            username=os.getenv("NEO4J_USERNAME", username),
+            password=os.getenv("NEO4J_PASSWORD", password),
+            bolt_port=bolt_port,
+            http_port=http_port,
+            data_dir=ACTIVE_LINK,
+        )
+
+    from iter_codex.remote.locations import resolve_location
+
+    loc_info = resolve_location(location)
+
+    bolt_port = _convention_bolt_port(location)
+    http_port = _convention_http_port(location)
+    host = loc_info.ssh_host if loc_info.ssh_host != "local" else None
+
+    # Location-aware URI resolution (with optional auto-tunneling)
+    if auto_tunnel:
+        uri = _resolve_uri(host, bolt_port)
+    else:
+        uri = f"bolt://localhost:{bolt_port}"
+
+    # Non-URI env escape hatches (always win)
+    if env_user := os.getenv("NEO4J_USERNAME"):
+        username = env_user
+    if env_pass := os.getenv("NEO4J_PASSWORD"):
+        password = env_pass
+
+    return Neo4jProfile(
+        name=name,
+        location=location,
+        host=host,
+        uri=uri,
+        username=username,
+        password=password,
+        bolt_port=bolt_port,
+        http_port=http_port,
+        data_dir=ACTIVE_LINK,
+    )
+
+
+# ─── Convention helpers ─────────────────────────────────────────────────────
+
+
+def _convention_bolt_port(location: str) -> int:
+    """Bolt port for a location.
+
+    For compute locations (e.g. ``"titan"``), uses the parent facility's
+    offset since compute nodes share the facility's port slots.
+    """
+    from iter_codex.remote.locations import get_port_offset
+
+    return BOLT_BASE_PORT + get_port_offset(location)
+
+
+def _convention_http_port(location: str) -> int:
+    """HTTP port for a location.
+
+    For compute locations (e.g. ``"titan"``), uses the parent facility's
+    offset since compute nodes share the facility's port slots.
+    """
+    from iter_codex.remote.locations import get_port_offset
+
+    return HTTP_BASE_PORT + get_port_offset(location)
+
+
+def list_profiles() -> list[Neo4jProfile]:
+    """List Neo4j profiles for all known locations.
+
+    Returns one profile per location defined in pyproject.toml.
+    Constructs profiles directly (no auto-tunneling, no side-effects).
+    """
+    from iter_codex.settings import _get_section
+
+    graph_section = _get_section("graph")
+    username = graph_section.get("username", DEFAULT_USERNAME)
+    password = graph_section.get("password", DEFAULT_PASSWORD)
+    hosts = _get_all_hosts()
+    name = get_active_graph_name()
+
+    result = []
+    for location in sorted(_get_all_offsets().keys()):
+        bolt_port = _convention_bolt_port(location)
+        http_port = _convention_http_port(location)
+        host = hosts.get(location)
+        result.append(
+            Neo4jProfile(
+                name=name,
+                location=location,
+                host=host,
+                uri=f"bolt://localhost:{bolt_port}",
+                username=username,
+                password=password,
+                bolt_port=bolt_port,
+                http_port=http_port,
+                data_dir=ACTIVE_LINK,
+            )
+        )
+    return result
+
+
+def invalidate_uri_cache() -> None:
+    """Clear the resolved URI cache.
+
+    Call this when a tunnel has been re-established or when connection
+    parameters have changed, so the next ``resolve_neo4j()`` call
+    re-resolves the URI from scratch.
+    """
+    _resolved_uri_cache.clear()
+
+
+def reconnect_tunnel() -> bool:
+    """Force re-establishment of the graph tunnel.
+
+    If a systemd tunnel service is active for this host, defers to systemd
+    and just invalidates the URI cache — avoids ad-hoc tunnel conflicts.
+
+    Otherwise, invalidates the URI cache, stops any stale tunnel processes,
+    waits for port release, and creates a fresh tunnel via ``ensure_tunnel()``.
+
+    Returns:
+        True if the tunnel is active after reconnection.
+    """
+    import time
+
+    from iter_codex.remote.tunnel import (
+        TUNNEL_OFFSET,
+        ensure_tunnel,
+        is_systemd_tunnel_active,
+        is_tunnel_active,
+        resolve_remote_bind,
+        stop_tunnel,
+    )
+
+    profile = resolve_neo4j(auto_tunnel=False)
+    if not profile.host:
+        return True  # Local graph, no tunnel needed
+
+    # If we're local to the host (e.g. on the same SLURM cluster),
+    # no tunnel is needed — just clear cache so URI re-resolves.
+    from iter_codex.remote.executor import is_local_host
+
+    if is_local_host(profile.host):
+        invalidate_uri_cache()
+        return True
+
+    tunnel_port = profile.bolt_port + TUNNEL_OFFSET
+
+    # If a systemd tunnel service is managing this host, don't create
+    # ad-hoc tunnels — they conflict with the service's autossh.
+    # Invalidate cache and wait for autossh to recover the tunnel.
+    if is_systemd_tunnel_active(profile.host):
+        logger.info(
+            "Systemd tunnel service active for %s, waiting for recovery",
+            profile.host,
+        )
+        invalidate_uri_cache()
+        for _ in range(30):
+            if is_tunnel_active(tunnel_port):
+                logger.info("Systemd tunnel recovered on port %d", tunnel_port)
+                return True
+            time.sleep(0.5)
+        logger.warning("Systemd tunnel did not recover port %d in 15s", tunnel_port)
+        return is_tunnel_active(tunnel_port)
+
+    # Clear cache so next resolve picks up the new tunnel
+    invalidate_uri_cache()
+
+    # Kill stale tunnel
+    stop_tunnel(profile.host)
+
+    tunnel_port = profile.bolt_port + TUNNEL_OFFSET
+
+    # Wait for port to be released after killing old tunnel.
+    # Without this, ensure_tunnel() sees the port as "active" (fast path)
+    # or the new SSH fails to bind (ExitOnForwardFailure).
+    for _ in range(10):
+        if not is_tunnel_active(tunnel_port):
+            break
+        time.sleep(0.5)
+    else:
+        logger.warning(
+            "Port %d still bound after stopping tunnel — may conflict",
+            tunnel_port,
+        )
+
+    # Determine remote bind (compute node for SLURM, login node otherwise)
+    from iter_codex.remote.locations import resolve_location
+
+    loc_info = resolve_location(get_graph_location())
+
+    remote_bind = resolve_remote_bind(
+        profile.host,
+        loc_info.scheduler,
+        service_job_name=loc_info.service_job_name,
+    )
+
+    # Re-establish
+    ok = ensure_tunnel(
+        port=profile.bolt_port,
+        ssh_host=profile.host,
+        tunnel_port=tunnel_port,
+        remote_bind=remote_bind,
+    )
+    if ok:
+        logger.info(
+            "Tunnel reconnected: %s:%d → localhost:%d",
+            profile.host,
+            profile.bolt_port,
+            tunnel_port,
+        )
+    else:
+        logger.error(
+            "Tunnel reconnection failed: %s:%d", profile.host, profile.bolt_port
+        )
+    return ok

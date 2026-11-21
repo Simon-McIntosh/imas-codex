@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.provenance_lifecycle import (
+from iter_codex.standard_names.provenance_lifecycle import (
     reset_standard_name_sources,
     retarget_standard_name_sources,
 )

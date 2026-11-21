@@ -1,6 +1,6 @@
 # Keyring & Credential Management
 
-Credentials for wiki authentication (ITER Confluence, TCV Wiki, JET wikis) are stored in the system keyring via the `imas_codex.discovery.wiki.auth.CredentialManager`.
+Credentials for wiki authentication (ITER Confluence, TCV Wiki, JET wikis) are stored in the system keyring via the `iter_codex.discovery.wiki.auth.CredentialManager`.
 
 ## Architecture
 
@@ -17,7 +17,7 @@ Credentials for wiki authentication (ITER Confluence, TCV Wiki, JET wikis) are s
 └──────────────────────────────────────────────────────────────┘
 ```
 
-Credentials are stored as JSON under the keyring service `imas-codex/<site>` with username `credentials`:
+Credentials are stored as JSON under the keyring service `iter-codex/<site>` with username `credentials`:
 
 ```json
 {"username": "myuser", "password": "mypass"}
@@ -29,23 +29,23 @@ Each facility is an independent keyring entry. Session cookies are stored separa
 
 ```bash
 # Store credentials (interactive prompt for password)
-imas-codex credentials set iter
-imas-codex credentials set tcv -u myuser
+iter-codex credentials set iter
+iter-codex credentials set tcv -u myuser
 
 # Check if credentials exist
-imas-codex credentials get iter
-imas-codex credentials get tcv
+iter-codex credentials get iter
+iter-codex credentials get tcv
 
 # List all configured credential services
-imas-codex credentials list
-imas-codex credentials list iter          # Single facility
+iter-codex credentials list
+iter-codex credentials list iter          # Single facility
 
 # Delete stored credentials
-imas-codex credentials delete iter
-imas-codex credentials delete tcv --yes   # Skip confirmation
+iter-codex credentials delete iter
+iter-codex credentials delete tcv --yes   # Skip confirmation
 
 # Keyring backend status and troubleshooting
-imas-codex credentials status
+iter-codex credentials status
 ```
 
 ## Keyring Backends
@@ -83,16 +83,16 @@ This is fully transparent — no user action required.
 
 ```bash
 # SSH to compute node and check
-ssh titan 'cd ~/Code/imas-codex && uv run imas-codex credentials status'
+ssh titan 'cd ~/Code/imas-codex && uv run iter-codex credentials status'
 # Expected output:
 #   Keyring available: True
 #   Backend: Keyring
 #   ✓ Keyring is working!
 
-ssh titan 'cd ~/Code/imas-codex && uv run imas-codex credentials list'
+ssh titan 'cd ~/Code/imas-codex && uv run iter-codex credentials list'
 # Should show ✓ stored for iter, tcv, jet
 
-ssh titan 'cd ~/Code/imas-codex && uv run imas-codex credentials get iter'
+ssh titan 'cd ~/Code/imas-codex && uv run iter-codex credentials get iter'
 # Should show username and masked password
 ```
 
@@ -116,31 +116,31 @@ The `tunnel` CLI also supports D-Bus forwarding:
 
 ```bash
 # Forward D-Bus socket alongside other tunnels
-imas-codex tunnel start iter --keyring
+iter-codex tunnel start iter --keyring
 
 # Check D-Bus forward status
-imas-codex tunnel status
+iter-codex tunnel status
 # Shows: D-Bus keyring forward: /run/user/<uid>/dbus-forward.sock
 ```
 
 ## Adding a New Facility
 
-Adding a new facility does **not** require any keyring reset. Each facility stores credentials under its own independent service name (`imas-codex/<facility>`).
+Adding a new facility does **not** require any keyring reset. Each facility stores credentials under its own independent service name (`iter-codex/<facility>`).
 
 To add credentials for a new facility:
 
 ```bash
 # Store credentials
-imas-codex credentials set <new-facility>
+iter-codex credentials set <new-facility>
 
 # Verify
-imas-codex credentials get <new-facility>
-imas-codex credentials list <new-facility>
+iter-codex credentials get <new-facility>
+iter-codex credentials list <new-facility>
 ```
 
 The new facility's credentials are immediately available on the login node and (via auto D-Bus forwarding) on any compute nodes in the same cluster.
 
-If the new facility has a `credential_service` configured in its wiki site config (in `imas_codex/config/facilities/<facility>.yaml`), the credentials CLI will auto-resolve the facility name to the service name.
+If the new facility has a `credential_service` configured in its wiki site config (in `iter_codex/config/facilities/<facility>.yaml`), the credentials CLI will auto-resolve the facility name to the service name.
 
 ## Troubleshooting
 
@@ -184,7 +184,7 @@ ssh -o BatchMode=yes <login_node> echo ok
 **Step 2 — Check login node hostname in config:**
 ```bash
 # From compute node
-imas-codex config private show iter | grep login_node
+iter-codex config private show iter | grep login_node
 # Should show: hostname: <login_node_fqdn>
 ```
 
@@ -249,9 +249,9 @@ On WSL, GNOME Keyring may prompt for an unlock password. If you don't know the p
 rm -rf ~/.local/share/keyrings/*
 
 # Re-store credentials
-imas-codex credentials set iter
-imas-codex credentials set tcv
-imas-codex credentials set jet
+iter-codex credentials set iter
+iter-codex credentials set tcv
+iter-codex credentials set jet
 ```
 
 ### Environment variable fallback
@@ -275,10 +275,10 @@ These are checked after keyring in the credential lookup chain.
 
 | Facility | Keyring Service | Legacy Name (auto-migrated) |
 |----------|----------------|-----------------------------|
-| iter | `imas-codex/iter` | `imas-codex/iter-confluence` |
-| tcv | `imas-codex/tcv` | `imas-codex/tcv-wiki` |
-| jet | `imas-codex/jet` | `imas-codex/jet-wiki` |
-| jt-60sa | `imas-codex/jt-60sa` | `imas-codex/jt-60sa-wiki` |
+| iter | `iter-codex/iter` | `iter-codex/iter-confluence` |
+| tcv | `iter-codex/tcv` | `iter-codex/tcv-wiki` |
+| jet | `iter-codex/jet` | `iter-codex/jet-wiki` |
+| jt-60sa | `iter-codex/jt-60sa` | `iter-codex/jt-60sa-wiki` |
 
 Legacy names are auto-migrated on first access — the old entry is copied to the new name and deleted.
 

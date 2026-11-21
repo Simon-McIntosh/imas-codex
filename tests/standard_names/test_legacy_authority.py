@@ -2,7 +2,7 @@
 
 from inspect import signature
 
-from imas_codex.standard_names import legacy_authority
+from iter_codex.standard_names import legacy_authority
 
 
 def test_numeric_missing_unit_fallback_is_audited_absent() -> None:

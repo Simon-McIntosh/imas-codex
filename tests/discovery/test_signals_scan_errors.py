@@ -7,39 +7,39 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.cli.discover.signals import SignalsStageOptions, run_signals_stage
-from imas_codex.discovery.signals.scanners.base import ScanResult
+from iter_codex.cli.discover.signals import SignalsStageOptions, run_signals_stage
+from iter_codex.discovery.signals.scanners.base import ScanResult
 
 
 @pytest.mark.parametrize("scan_only", [True, False])
 def test_scanner_failures_reach_stage_receipt(
     monkeypatch: pytest.MonkeyPatch, scan_only: bool
 ) -> None:
-    from imas_codex.cli.discover import common
-    from imas_codex.discovery.signals import parallel
+    from iter_codex.cli.discover import common
+    from iter_codex.discovery.signals import parallel
 
     config = {"ssh_host": "facility-host", "data_systems": {"edas": {}, "ppf": {}}}
     monkeypatch.setattr(
-        "imas_codex.discovery.base.facility.get_facility", lambda facility: config
+        "iter_codex.discovery.base.facility.get_facility", lambda facility: config
     )
     monkeypatch.setattr(common, "ensure_remote_environment", lambda config: None)
     monkeypatch.setattr(common, "use_rich_output", lambda: False)
     monkeypatch.setattr(common, "setup_logging", lambda *args: None)
     monkeypatch.setattr(common, "make_log_print", lambda *args: lambda message: None)
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.scanners.base.get_scanners_for_facility",
+        "iter_codex.discovery.signals.scanners.base.get_scanners_for_facility",
         lambda facility: [MagicMock(scanner_type=name) for name in ("edas", "ppf")],
     )
     monkeypatch.setattr(parallel, "reset_transient_signals", lambda facility: None)
     monkeypatch.setattr(parallel, "detect_signal_sources", lambda facility: (0, 0))
     monkeypatch.setattr(parallel, "get_data_discovery_stats", lambda *args: {})
     monkeypatch.setattr(
-        "imas_codex.discovery.mdsplus.graph_ops.get_version_counts",
+        "iter_codex.discovery.mdsplus.graph_ops.get_version_counts",
         lambda facility: {},
     )
     graph = MagicMock()
     graph.__enter__.return_value = graph
-    monkeypatch.setattr("imas_codex.graph.GraphClient", lambda: graph)
+    monkeypatch.setattr("iter_codex.graph.GraphClient", lambda: graph)
 
     class Scanner:
         def __init__(self, failure: str):
@@ -52,7 +52,7 @@ def test_scanner_failures_reach_stage_receipt(
 
     scanners = {"edas": Scanner("returned"), "ppf": Scanner("raised")}
     monkeypatch.setattr(
-        "imas_codex.discovery.signals.scanners.base.get_scanner",
+        "iter_codex.discovery.signals.scanners.base.get_scanner",
         scanners.__getitem__,
     )
 

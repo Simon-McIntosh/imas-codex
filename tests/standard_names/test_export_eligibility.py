@@ -9,7 +9,7 @@ that governs every other name.
 
 from __future__ import annotations
 
-from imas_codex.standard_names.export import _classify_export_population
+from iter_codex.standard_names.export import _classify_export_population
 
 
 def _derived_parent(name: str, **overrides) -> dict:

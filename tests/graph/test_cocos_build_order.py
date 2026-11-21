@@ -6,7 +6,7 @@ the cleanup step does not wipe labels produced by backfill.
 
 from unittest.mock import MagicMock
 
-from imas_codex.graph.build_dd import _backfill_cocos_labels
+from iter_codex.graph.build_dd import _backfill_cocos_labels
 
 # Minimal version_data that satisfies the function's structure requirements.
 # One 3.x version with a labeled path, one 4.x version with the same path

@@ -19,7 +19,7 @@ class TestGetDocumentTypeFromFilename:
     """Tests for _get_document_type_from_filename utility."""
 
     def _get_type(self, filename: str) -> str:
-        from imas_codex.discovery.wiki.adapters import _get_document_type_from_filename
+        from iter_codex.discovery.wiki.adapters import _get_document_type_from_filename
 
         return _get_document_type_from_filename(filename)
 
@@ -78,19 +78,19 @@ class TestGetAdapterFactory:
     """Tests for get_adapter — adapter factory based on site_type."""
 
     def _get_adapter(self, site_type: str, **kwargs):
-        from imas_codex.discovery.wiki.adapters import get_adapter
+        from iter_codex.discovery.wiki.adapters import get_adapter
 
         return get_adapter(site_type, **kwargs)
 
     def test_mediawiki(self):
-        from imas_codex.discovery.wiki.adapters import MediaWikiAdapter
+        from iter_codex.discovery.wiki.adapters import MediaWikiAdapter
 
         adapter = self._get_adapter("mediawiki", ssh_host="remote")
         assert isinstance(adapter, MediaWikiAdapter)
         assert adapter.ssh_host == "remote"
 
     def test_mediawiki_with_session(self):
-        from imas_codex.discovery.wiki.adapters import MediaWikiAdapter
+        from iter_codex.discovery.wiki.adapters import MediaWikiAdapter
 
         session = MagicMock()
         adapter = self._get_adapter("mediawiki", session=session)
@@ -98,13 +98,13 @@ class TestGetAdapterFactory:
         assert adapter.session is session
 
     def test_twiki(self):
-        from imas_codex.discovery.wiki.adapters import TWikiAdapter
+        from iter_codex.discovery.wiki.adapters import TWikiAdapter
 
         adapter = self._get_adapter("twiki", ssh_host="twiki-host")
         assert isinstance(adapter, TWikiAdapter)
 
     def test_twiki_static(self):
-        from imas_codex.discovery.wiki.adapters import TWikiStaticAdapter
+        from iter_codex.discovery.wiki.adapters import TWikiStaticAdapter
 
         adapter = self._get_adapter(
             "twiki_static", base_url="https://example.com/twiki", ssh_host="host"
@@ -120,13 +120,13 @@ class TestGetAdapterFactory:
             self._get_adapter("twiki_raw", ssh_host="host")
 
     def test_twiki_raw_valid(self):
-        from imas_codex.discovery.wiki.adapters import TWikiRawAdapter
+        from iter_codex.discovery.wiki.adapters import TWikiRawAdapter
 
         adapter = self._get_adapter("twiki_raw", ssh_host="host", data_path="/data")
         assert isinstance(adapter, TWikiRawAdapter)
 
     def test_static_html(self):
-        from imas_codex.discovery.wiki.adapters import StaticHtmlAdapter
+        from iter_codex.discovery.wiki.adapters import StaticHtmlAdapter
 
         adapter = self._get_adapter(
             "static_html", base_url="https://example.com", max_depth=5
@@ -134,7 +134,7 @@ class TestGetAdapterFactory:
         assert isinstance(adapter, StaticHtmlAdapter)
 
     def test_confluence(self):
-        from imas_codex.discovery.wiki.adapters import ConfluenceAdapter
+        from iter_codex.discovery.wiki.adapters import ConfluenceAdapter
 
         adapter = self._get_adapter(
             "confluence", api_token="token123", space_key="IMASDD"
@@ -155,7 +155,7 @@ class TestExtractPageLinks:
     """Tests for MediaWikiAdapter._extract_page_links HTML parsing."""
 
     def _extract(self, html: str, base_url: str = "https://wiki.example.com/wiki"):
-        from imas_codex.discovery.wiki.adapters import MediaWikiAdapter
+        from iter_codex.discovery.wiki.adapters import MediaWikiAdapter
 
         adapter = MediaWikiAdapter()
         return adapter._extract_page_links(html, base_url)
@@ -237,7 +237,7 @@ class TestMediaWikiAdapterDispatch:
 
     def test_no_auth_returns_empty(self):
         """Adapter with no SSH, client, or session returns empty list."""
-        from imas_codex.discovery.wiki.adapters import MediaWikiAdapter
+        from iter_codex.discovery.wiki.adapters import MediaWikiAdapter
 
         adapter = MediaWikiAdapter()
         pages = adapter.bulk_discover_pages("tcv", "https://wiki.example.com")
@@ -245,7 +245,7 @@ class TestMediaWikiAdapterDispatch:
 
     def test_session_dispatch(self):
         """Session-based adapter should use API discovery."""
-        from imas_codex.discovery.wiki.adapters import MediaWikiAdapter
+        from iter_codex.discovery.wiki.adapters import MediaWikiAdapter
 
         session = MagicMock()
         response = MagicMock()
@@ -268,7 +268,7 @@ class TestStaticHtmlAdapterConstruction:
     """Tests for StaticHtmlAdapter defaults."""
 
     def test_defaults(self):
-        from imas_codex.discovery.wiki.adapters import StaticHtmlAdapter
+        from iter_codex.discovery.wiki.adapters import StaticHtmlAdapter
 
         adapter = StaticHtmlAdapter(base_url="https://example.com")
         assert adapter._max_depth == 3
@@ -276,7 +276,7 @@ class TestStaticHtmlAdapterConstruction:
         assert adapter._exclude_prefixes == []
 
     def test_custom_config(self):
-        from imas_codex.discovery.wiki.adapters import StaticHtmlAdapter
+        from iter_codex.discovery.wiki.adapters import StaticHtmlAdapter
 
         adapter = StaticHtmlAdapter(
             base_url="https://example.com",
@@ -298,7 +298,7 @@ class TestDiscoveryDataclasses:
     """Tests for DiscoveredPage and DiscoveredDocument construction."""
 
     def test_discovered_page(self):
-        from imas_codex.discovery.wiki.adapters import DiscoveredPage
+        from iter_codex.discovery.wiki.adapters import DiscoveredPage
 
         page = DiscoveredPage(name="TestPage", url="https://wiki.example.com/TestPage")
         assert page.name == "TestPage"
@@ -306,13 +306,13 @@ class TestDiscoveryDataclasses:
         assert page.namespace is None
 
     def test_discovered_page_with_namespace(self):
-        from imas_codex.discovery.wiki.adapters import DiscoveredPage
+        from iter_codex.discovery.wiki.adapters import DiscoveredPage
 
         page = DiscoveredPage(name="Test", url=None, namespace="Main")
         assert page.namespace == "Main"
 
     def test_discovered_document(self):
-        from imas_codex.discovery.wiki.adapters import DiscoveredDocument
+        from iter_codex.discovery.wiki.adapters import DiscoveredDocument
 
         document = DiscoveredDocument(
             filename="report.pdf",
@@ -328,7 +328,7 @@ class TestDiscoveryDataclasses:
         assert len(document.linked_pages) == 2
 
     def test_discovered_document_defaults(self):
-        from imas_codex.discovery.wiki.adapters import DiscoveredDocument
+        from iter_codex.discovery.wiki.adapters import DiscoveredDocument
 
         document = DiscoveredDocument(
             filename="file.xlsx",

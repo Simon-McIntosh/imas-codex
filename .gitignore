@@ -5,15 +5,15 @@ __pycache__/
 *.so
 
 # Generated files (built by hatch build hook or build scripts)
-imas_codex/graph/models.py
-imas_codex/graph/schema_context_data.py
-imas_codex/config/models.py
+iter_codex/graph/models.py
+iter_codex/graph/schema_context_data.py
+iter_codex/config/models.py
 agents/schema-reference.md
 
 # Generated index files
 # Ignore all files in resources directory but keep the directory structure
-imas_codex/resources/*
-!imas_codex/resources/.gitkeep
+iter_codex/resources/*
+!iter_codex/resources/.gitkeep
 
 # Distribution / packaging
 dist/
@@ -74,13 +74,13 @@ poetry.lock
 # Private facility files (sensitive data - never commit)
 # These files contain hostnames, IPs, paths, tool versions etc.
 # Pattern: <facility>_private.yaml (e.g., epfl_private.yaml)
-imas_codex/config/facilities/*_private.yaml
+iter_codex/config/facilities/*_private.yaml
 
 # Log files
 *.log
 .env
 .asv/
-imas_codex/database/imas_fts.db
+iter_codex/database/imas_fts.db
 
 # Documentation data
 docs-data/
@@ -89,7 +89,7 @@ docs/TOOL_IMPROVEMENT_PLAN.md
 
 # Temporary files
 *.tmp
-imas_codex/graph/dd_models.py
+iter_codex/graph/dd_models.py
 .aider*
 *.tar.gz
 # MCP configs: .mcp.json (Claude Code), .vscode/mcp.json (VS Code) — both tracked
@@ -107,7 +107,7 @@ sn_benchmark_*.json
 sn_bench_*.json
 
 # Campaign manifests — generated run outputs, not provenance records. These
-# default to ~/.local/share/imas-codex/campaigns/ (outside the tree); this
+# default to ~/.local/share/iter-codex/campaigns/ (outside the tree); this
 # pattern is the safety net for an explicit --campaign-manifest relative path
 # and for manifests older runs left in the working directory. A manifest
 # describes the graph at one instant and names predicates later work may

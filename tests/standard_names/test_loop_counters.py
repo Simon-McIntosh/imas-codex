@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-from imas_codex.standard_names.loop import RunSummary
+from iter_codex.standard_names.loop import RunSummary
 
 
 @dataclass

@@ -15,7 +15,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.review.projection import (
+from iter_codex.standard_names.review.projection import (
     CanonicalReview,
     project_canonical_review,
 )

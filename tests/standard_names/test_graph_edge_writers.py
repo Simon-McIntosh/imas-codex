@@ -24,8 +24,8 @@ import pytest
 from neo4j import GraphDatabase
 from neo4j.exceptions import ClientError
 
-from imas_codex.graph.client import GraphClient as RealGraphClient
-from imas_codex.standard_names.graph_store import (
+from iter_codex.graph.client import GraphClient as RealGraphClient
+from iter_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
     graph_lineage as _owning_graph_lineage,
 )
@@ -84,22 +84,22 @@ def _make_mock_gc(name_domains: dict[str, list[str]] | None = None) -> MagicMock
 def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
     """Invoke ``write_standard_names`` with a mocked GraphClient."""
     with patch(
-        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
     ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
         # Patch protection and segment edges to keep tests focused
         with (
             patch(
-                "imas_codex.standard_names.protection.filter_protected",
+                "iter_codex.standard_names.protection.filter_protected",
                 side_effect=lambda n, **kw: (n, []),
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
+                "iter_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                 return_value=[],
             ),
         ):
-            from imas_codex.standard_names.graph_store.graph_catalog import (
+            from iter_codex.standard_names.graph_store.graph_catalog import (
                 write_standard_names,
             )
 
@@ -406,7 +406,7 @@ class TestEndpointAuthority:
             assert all(not endpoint_merge.search(cypher) for cypher in relation_writes)
 
     def test_missing_admitted_parent_uses_full_materializer_before_edge(self) -> None:
-        from imas_codex.standard_names.graph_store.graph_lineage import (
+        from iter_codex.standard_names.graph_store.graph_lineage import (
             _write_standard_name_edges,
         )
 
@@ -470,8 +470,8 @@ class TestEndpointAuthority:
         assert "MERGE (src:StandardName" not in parent_write
 
     def test_rejected_intermediate_cannot_emit_locus_or_mint_identity(self) -> None:
-        from imas_codex.standard_names.derivation import DerivedEdge
-        from imas_codex.standard_names.graph_store.graph_lineage import (
+        from iter_codex.standard_names.derivation import DerivedEdge
+        from iter_codex.standard_names.graph_store.graph_lineage import (
             _write_standard_name_edges,
         )
 
@@ -496,11 +496,11 @@ class TestEndpointAuthority:
         }
         with (
             patch(
-                "imas_codex.standard_names.derivation.derive_edges",
+                "iter_codex.standard_names.derivation.derive_edges",
                 side_effect=lambda name: edges.get(name, []),
             ),
             patch(
-                "imas_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
+                "iter_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
                 return_value=[],
             ),
         ):
@@ -515,7 +515,7 @@ class TestEndpointAuthority:
     def test_failure_before_edge_persistence_leaves_no_partial_endpoint_write(
         self,
     ) -> None:
-        from imas_codex.standard_names.graph_store.graph_lineage import (
+        from iter_codex.standard_names.graph_store.graph_lineage import (
             _write_standard_name_edges,
         )
 
@@ -547,7 +547,7 @@ class TestEndpointAuthority:
     def test_structural_rederive_materializes_null_stage_parent_before_reconcile(
         self,
     ) -> None:
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         graph = MagicMock()
         graph.__enter__.return_value = graph
@@ -639,7 +639,7 @@ def test_bootstrap_transaction_rolls_back_partial_parent(
     would make its own verification read two nodes and measure that neighbour
     rather than this write.
     """
-    from imas_codex.standard_names.graph_store.graph_lineage import (
+    from iter_codex.standard_names.graph_store.graph_lineage import (
         _materialize_derived_parent_rows,
     )
     from tests.standard_names.conftest import neo4j_test_password

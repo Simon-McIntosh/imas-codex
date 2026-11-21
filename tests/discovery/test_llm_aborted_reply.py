@@ -14,7 +14,7 @@ from typing import Any
 import pytest
 from pydantic import BaseModel
 
-from imas_codex.discovery.base import llm
+from iter_codex.discovery.base import llm
 
 LOCAL_MODEL = "local/deepseek-v4.1-flash"
 LOCAL_ENDPOINT = "http://local.example.test/v1"
@@ -41,7 +41,7 @@ def _response(content: str | None, finish_reason: str | None) -> Any:
 
 
 def _register_local_endpoint(monkeypatch) -> None:
-    from imas_codex import settings
+    from iter_codex import settings
 
     monkeypatch.setattr(
         settings,

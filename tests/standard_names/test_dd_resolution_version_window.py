@@ -5,7 +5,7 @@ dimensionless sentinel (``1``) for a quantity whose ``measured`` twin is
 ``m^-3`` — a self-contradiction ``dd_unit_exceptions.yaml`` flags
 ``correct_in_graph``. A reviewed :class:`DDResolutionRecord` bridges the
 defect for exactly one ``dd_version`` label. The DD version most callers
-request comes from :func:`imas_codex.settings.get_dd_version`, whose stale
+request comes from :func:`iter_codex.settings.get_dd_version`, whose stale
 literal default (``settings.py``) and any DD extraction that pinned a
 ``dd_version`` before the project's dictionary bump can both diverge from the
 label the reviewed record carries, even though the underlying DD declaration
@@ -24,8 +24,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
-from imas_codex.standard_names.dd_resolutions import (
+from iter_codex.graph.models import DDResolutionField, DDResolutionValueKind
+from iter_codex.standard_names.dd_resolutions import (
     DDResolutionAmbiguity,
     DDResolutionManifest,
     DDResolutionRecord,

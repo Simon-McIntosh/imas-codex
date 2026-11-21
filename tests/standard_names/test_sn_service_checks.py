@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import click
 import pytest
 
-from imas_codex.cli.sn import (
+from iter_codex.cli.sn import (
     _check_local_llm,
     _check_openrouter,
     _require_local_compose_ready,
@@ -60,7 +60,7 @@ class TestCheckLocalLLM:
     def _run(self, urlopen_effect, key: str | None = "sk-test"):
         env = {"TEST_GPU_KEY": key} if key else {}
         with (
-            patch("imas_codex.settings.get_model_config", return_value=_COMPOSE_CFG),
+            patch("iter_codex.settings.get_model_config", return_value=_COMPOSE_CFG),
             patch.dict("os.environ", env, clear=False),
             patch("urllib.request.urlopen") as urlopen,
         ):
@@ -117,7 +117,7 @@ class TestCheckLocalLLM:
 
     def test_no_api_base_is_not_configured(self) -> None:
         cfg = {"model": "openrouter/x", "api_base": None, "api_key_env": None}
-        with patch("imas_codex.settings.get_model_config", return_value=cfg):
+        with patch("iter_codex.settings.get_model_config", return_value=cfg):
             healthy, detail = _check_local_llm()
         assert healthy is False
         assert detail == "not configured"
@@ -186,7 +186,7 @@ class TestCheckOpenRouter:
     """OpenRouter key probe classification."""
 
     def _run(self, urlopen_effect, key: str | None = "sk-or-test"):
-        env_patch = {"OPENROUTER_API_KEY_IMAS_CODEX": key} if key else {}
+        env_patch = {"OPENROUTER_API_KEY_ITER_CODEX": key} if key else {}
         with (
             patch.dict("os.environ", env_patch, clear=False),
             patch("urllib.request.urlopen") as urlopen,
@@ -194,7 +194,7 @@ class TestCheckOpenRouter:
             if key is None:
                 import os
 
-                os.environ.pop("OPENROUTER_API_KEY_IMAS_CODEX", None)
+                os.environ.pop("OPENROUTER_API_KEY_ITER_CODEX", None)
             if isinstance(urlopen_effect, Exception):
                 urlopen.side_effect = urlopen_effect
             else:
@@ -263,7 +263,7 @@ def test_run_capability_identifies_local_compose_dependency(
 def test_generation_registers_local_compose_as_critical() -> None:
     """The Rich monitor gates generation on the configured local endpoint."""
     with patch(
-        "imas_codex.cli.sn._configured_local_compose_required", return_value=True
+        "iter_codex.cli.sn._configured_local_compose_required", return_value=True
     ):
         checks = _sn_llm_service_checks(
             use_rich=True,
@@ -288,7 +288,7 @@ def test_non_generation_routes_do_not_probe_local_compose(
 ) -> None:
     """Review, docs, maintenance, and previews stay independent of Ambix."""
     with patch(
-        "imas_codex.cli.sn._configured_local_compose_required",
+        "iter_codex.cli.sn._configured_local_compose_required",
         side_effect=AssertionError("local compose route inspected"),
     ):
         checks = _sn_llm_service_checks(
@@ -304,15 +304,15 @@ def test_failed_local_readiness_blocks_without_paid_fallback() -> None:
     """A local outage fails closed before any OpenRouter route is considered."""
     with (
         patch(
-            "imas_codex.cli.sn._configured_local_compose_required",
+            "iter_codex.cli.sn._configured_local_compose_required",
             return_value=True,
         ),
         patch(
-            "imas_codex.cli.sn._check_local_llm",
+            "iter_codex.cli.sn._check_local_llm",
             return_value=(False, "down"),
         ),
         patch(
-            "imas_codex.cli.sn._check_openrouter",
+            "iter_codex.cli.sn._check_openrouter",
             side_effect=AssertionError("paid fallback attempted"),
         ) as paid_fallback,
         pytest.raises(click.ClickException, match="no paid provider fallback"),
@@ -342,21 +342,21 @@ def test_initial_local_readiness_blocks_generation_until_stopped() -> None:
         return asyncio.run(async_main(stop_event, monitor))
 
     with (
-        patch("imas_codex.cli.sn._require_embed_ready"),
+        patch("iter_codex.cli.sn._require_embed_ready"),
         patch(
-            "imas_codex.cli.sn._configured_local_compose_required",
+            "iter_codex.cli.sn._configured_local_compose_required",
             return_value=True,
         ),
-        patch("imas_codex.cli.sn._check_openrouter", new=paid_fallback),
-        patch("imas_codex.cli.discover.common.use_rich_output", return_value=True),
-        patch("imas_codex.cli.discover.common.setup_logging"),
+        patch("iter_codex.cli.sn._check_openrouter", new=paid_fallback),
+        patch("iter_codex.cli.discover.common.use_rich_output", return_value=True),
+        patch("iter_codex.cli.discover.common.setup_logging"),
         patch(
-            "imas_codex.cli.discover.common.run_discovery", side_effect=run_discovery
+            "iter_codex.cli.discover.common.run_discovery", side_effect=run_discovery
         ),
         patch(
-            "imas_codex.standard_names.display.SN6PoolDisplay", return_value=MagicMock()
+            "iter_codex.standard_names.display.SN6PoolDisplay", return_value=MagicMock()
         ),
-        patch("imas_codex.standard_names.loop.run_sn_pools", new=run_pools),
+        patch("iter_codex.standard_names.loop.run_sn_pools", new=run_pools),
     ):
         result = _run_sn_cmd(
             cost_limit=1.0,

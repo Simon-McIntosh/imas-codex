@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.tunnel import (
+from iter_codex.cli.tunnel import (
     _LISTENER_GRACE_SECONDS,
     SERVICE_MANIFEST_PREFIX,
     _build_foreground_tunnel_command,
@@ -31,7 +31,7 @@ from imas_codex.cli.tunnel import (
     _terminate_tunnel_process,
     tunnel,
 )
-from imas_codex.remote.tunnel import (
+from iter_codex.remote.tunnel import (
     SSH_TUNNEL_OPTS,
     _local_forward_port,
     _ssh_forwarded_local_ports,
@@ -43,7 +43,7 @@ from imas_codex.remote.tunnel import (
 class TestTunnelServiceHelpers:
     def test_foreground_tunnel_binds_forward_to_ipv4_loopback(self):
         with patch(
-            "imas_codex.cli.tunnel.shutil.which", return_value="/usr/bin/autossh"
+            "iter_codex.cli.tunnel.shutil.which", return_value="/usr/bin/autossh"
         ):
             command, _env = _build_foreground_tunnel_command(
                 "iter",
@@ -64,7 +64,7 @@ class TestTunnelServiceHelpers:
         shared options would be inert rather than an override.
         """
         with patch(
-            "imas_codex.cli.tunnel.shutil.which", return_value="/usr/bin/autossh"
+            "iter_codex.cli.tunnel.shutil.which", return_value="/usr/bin/autossh"
         ):
             command, _env = _build_foreground_tunnel_command(
                 "iter",
@@ -82,7 +82,7 @@ class TestTunnelServiceHelpers:
         Treating it as a failure would restart the tunnel — and drop every
         forward sharing the connection — whenever the remote is briefly away.
         """
-        with patch("imas_codex.cli.tunnel._probe_reverse_ssh_forward") as probe:
+        with patch("iter_codex.cli.tunnel._probe_reverse_ssh_forward") as probe:
             probe.return_value = "unreachable"
             assert _reverse_forward_answers("iter", "wsl-ssh", 2222)
             probe.return_value = "up"
@@ -101,7 +101,7 @@ class TestTunnelServiceHelpers:
         """
         completed = MagicMock(returncode=0)
         with patch(
-            "imas_codex.cli.tunnel.subprocess.run", return_value=completed
+            "iter_codex.cli.tunnel.subprocess.run", return_value=completed
         ) as run:
             _probe_reverse_ssh_forward("iter", 2222)
 
@@ -119,7 +119,7 @@ class TestTunnelServiceHelpers:
             subprocess.TimeoutExpired("ssh", 5),
         ]
 
-        with patch("imas_codex.cli.tunnel.os.killpg") as killpg:
+        with patch("iter_codex.cli.tunnel.os.killpg") as killpg:
             _terminate_tunnel_process(child)
 
         assert killpg.call_count == 2
@@ -129,7 +129,7 @@ class TestTunnelServiceHelpers:
             args=[], returncode=0, stdout="ok\n", stderr=""
         )
         with patch(
-            "imas_codex.cli.tunnel.subprocess.run", return_value=completed
+            "iter_codex.cli.tunnel.subprocess.run", return_value=completed
         ) as run:
             assert _is_remote_clipboard_active("iter", 2490)
 
@@ -142,12 +142,12 @@ class TestTunnelServiceHelpers:
         completed = subprocess.CompletedProcess(
             args=[], returncode=7, stdout="", stderr="connection refused"
         )
-        with patch("imas_codex.cli.tunnel.subprocess.run", return_value=completed):
+        with patch("iter_codex.cli.tunnel.subprocess.run", return_value=completed):
             assert not _is_remote_clipboard_active("iter", 2490)
 
     def test_build_systemd_service_content_uses_runtime_service_runner(self):
         with patch(
-            "imas_codex.cli.tunnel.shutil.which",
+            "iter_codex.cli.tunnel.shutil.which",
             side_effect=lambda cmd: (
                 "/usr/bin/uv" if cmd == "uv" else "/usr/bin/autossh"
             ),
@@ -166,12 +166,12 @@ class TestTunnelServiceHelpers:
         assert "Wants=wsl-clip-server.service" in content
 
     def test_installed_service_supports_subset_request(self, tmp_path):
-        service_file = tmp_path / "imas-codex-tunnel-iter.service"
+        service_file = tmp_path / "iter-codex-tunnel-iter.service"
         service_file.write_text(
-            "ExecStart=/usr/bin/uv run --project /repo imas-codex tunnel service-run iter\n"
+            "ExecStart=/usr/bin/uv run --project /repo iter-codex tunnel service-run iter\n"
         )
 
-        with patch("imas_codex.cli.tunnel._service_file", return_value=service_file):
+        with patch("iter_codex.cli.tunnel._service_file", return_value=service_file):
             assert _installed_service_supports_request(
                 "iter",
                 neo4j_only=True,
@@ -184,12 +184,12 @@ class TestTunnelServiceHelpers:
             )
 
     def test_installed_service_rejects_missing_service_flags(self, tmp_path):
-        service_file = tmp_path / "imas-codex-tunnel-iter.service"
+        service_file = tmp_path / "iter-codex-tunnel-iter.service"
         service_file.write_text(
-            "ExecStart=/usr/bin/uv run --project /repo imas-codex tunnel service-run iter --neo4j\n"
+            "ExecStart=/usr/bin/uv run --project /repo iter-codex tunnel service-run iter --neo4j\n"
         )
 
-        with patch("imas_codex.cli.tunnel._service_file", return_value=service_file):
+        with patch("iter_codex.cli.tunnel._service_file", return_value=service_file):
             assert _installed_service_supports_request(
                 "iter",
                 neo4j_only=True,
@@ -222,9 +222,9 @@ class TestTunnelServiceHelpers:
         sshd that is down.
         """
         with (
-            patch("imas_codex.cli.tunnel._discover_compute_node", return_value=None),
-            patch("imas_codex.cli.tunnel._discover_vllm_node", return_value=None),
-            patch("imas_codex.cli.tunnel._clive_ports", return_value=[]),
+            patch("iter_codex.cli.tunnel._discover_compute_node", return_value=None),
+            patch("iter_codex.cli.tunnel._discover_vllm_node", return_value=None),
+            patch("iter_codex.cli.tunnel._clive_ports", return_value=[]),
         ):
             ports = _get_tunnel_ports(
                 "iter",
@@ -237,12 +237,12 @@ class TestTunnelServiceHelpers:
         assert reverse_ssh == [(2222, 22, "wsl-ssh", "localhost", "R")]
 
     def test_installed_service_rejects_docs_when_absent(self, tmp_path):
-        service_file = tmp_path / "imas-codex-tunnel-iter.service"
+        service_file = tmp_path / "iter-codex-tunnel-iter.service"
         service_file.write_text(
-            "ExecStart=/usr/bin/uv run --project /repo imas-codex tunnel service-run iter --vllm\n"
+            "ExecStart=/usr/bin/uv run --project /repo iter-codex tunnel service-run iter --vllm\n"
         )
 
-        with patch("imas_codex.cli.tunnel._service_file", return_value=service_file):
+        with patch("iter_codex.cli.tunnel._service_file", return_value=service_file):
             assert not _installed_service_supports_request(
                 "iter",
                 neo4j_only=False,
@@ -252,7 +252,7 @@ class TestTunnelServiceHelpers:
 
     def test_build_systemd_service_content_emits_manifest(self):
         with patch(
-            "imas_codex.cli.tunnel.shutil.which",
+            "iter_codex.cli.tunnel.shutil.which",
             side_effect=lambda cmd: (
                 "/usr/bin/uv" if cmd == "uv" else "/usr/bin/autossh"
             ),
@@ -281,7 +281,7 @@ class TestTunnelServiceHelpers:
         text = (
             f"{SERVICE_MANIFEST_PREFIX}neo4j docs\n"
             "[Unit]\n"
-            "ExecStart=/usr/bin/uv run --project /repo imas-codex "
+            "ExecStart=/usr/bin/uv run --project /repo iter-codex "
             "tunnel service-run iter --neo4j --docs\n"
         )
         assert _service_selected_services(text) == {"neo4j", "docs"}
@@ -290,12 +290,12 @@ class TestTunnelServiceHelpers:
         # A unit installed before SERVICE_MANIFEST_PREFIX existed (no manifest
         # line, no flags) must NOT claim docs support — otherwise `tunnel start
         # --docs` silently starts a stale unit that doesn't forward 8765.
-        service_file = tmp_path / "imas-codex-tunnel-iter.service"
+        service_file = tmp_path / "iter-codex-tunnel-iter.service"
         service_file.write_text(
-            "ExecStart=/usr/bin/uv run --project /repo imas-codex tunnel service-run iter\n"
+            "ExecStart=/usr/bin/uv run --project /repo iter-codex tunnel service-run iter\n"
         )
 
-        with patch("imas_codex.cli.tunnel._service_file", return_value=service_file):
+        with patch("iter_codex.cli.tunnel._service_file", return_value=service_file):
             # Pre-docs services still claimed (back-compat).
             assert _installed_service_supports_request(
                 "iter",
@@ -330,10 +330,10 @@ class TestReverseNodes:
     def test_all_expands_to_known_nodes_minus_the_primary(self):
         with (
             patch(
-                "imas_codex.cli.tunnel._ssh_client_config",
+                "iter_codex.cli.tunnel._ssh_client_config",
                 return_value=self.SSH_CONFIG,
             ),
-            patch("imas_codex.cli.tunnel._known_login_nodes", return_value=self.NODES),
+            patch("iter_codex.cli.tunnel._known_login_nodes", return_value=self.NODES),
         ):
             nodes = _resolve_reverse_nodes("iter", ["all"])
 
@@ -350,7 +350,7 @@ class TestReverseNodes:
 
     def test_named_node_is_deduplicated_and_needs_no_jump_when_direct(self):
         config = {"hostname": "98dci4-srv-1006.iter.org", "proxyjump": "none"}
-        with patch("imas_codex.cli.tunnel._ssh_client_config", return_value=config):
+        with patch("iter_codex.cli.tunnel._ssh_client_config", return_value=config):
             nodes = _resolve_reverse_nodes(
                 "iter", ["98dci4-srv-1003", "98dci4-srv-1003.iter.org"]
             )
@@ -358,7 +358,7 @@ class TestReverseNodes:
         assert nodes == [("98dci4-srv-1003.iter.org", ("98dci4-srv-1003.iter.org",))]
 
     def test_no_nodes_requested_resolves_nothing(self):
-        with patch("imas_codex.cli.tunnel._ssh_client_config") as config:
+        with patch("iter_codex.cli.tunnel._ssh_client_config") as config:
             assert _resolve_reverse_nodes("iter", []) == []
         config.assert_not_called()
 
@@ -384,7 +384,7 @@ class TestReverseNodes:
     def test_tunnel_command_ends_with_the_node_destination(self):
         target = ("-o", "ProxyJump=gw", "-l", "me", "node.example")
         with patch(
-            "imas_codex.cli.tunnel.shutil.which", return_value="/usr/bin/autossh"
+            "iter_codex.cli.tunnel.shutil.which", return_value="/usr/bin/autossh"
         ):
             command, _env = _build_foreground_tunnel_command(
                 target, [(2490, 2490, "wsl-clip", "localhost", "R")]
@@ -393,7 +393,7 @@ class TestReverseNodes:
         assert command[-5:] == list(target)
 
     def test_service_unit_passes_reverse_nodes_to_the_supervisor(self):
-        with patch("imas_codex.cli.tunnel.shutil.which", return_value="/usr/bin/uv"):
+        with patch("iter_codex.cli.tunnel.shutil.which", return_value="/usr/bin/uv"):
             content = _build_systemd_service_content(
                 "iter", False, False, False, reverse_nodes=("all",)
             )
@@ -410,16 +410,16 @@ class TestTunnelStart:
 
         with (
             patch(
-                "imas_codex.cli.tunnel._installed_service_supports_request",
+                "iter_codex.cli.tunnel._installed_service_supports_request",
                 return_value=True,
             ),
-            patch("imas_codex.cli.tunnel._run_systemctl_user") as mock_systemctl,
+            patch("iter_codex.cli.tunnel._run_systemctl_user") as mock_systemctl,
         ):
             result = runner.invoke(tunnel, ["start", "iter"])
 
         assert result.exit_code == 0
         assert "Starting systemd tunnel service for iter" in result.output
-        mock_systemctl.assert_called_once_with(["start", "imas-codex-tunnel-iter"])
+        mock_systemctl.assert_called_once_with(["start", "iter-codex-tunnel-iter"])
 
 
 class TestComputeNodeDiscovery:
@@ -440,7 +440,7 @@ class TestComputeNodeDiscovery:
 
             return Result()
 
-        with patch("imas_codex.remote.tunnel.subprocess.run", side_effect=_run):
+        with patch("iter_codex.remote.tunnel.subprocess.run", side_effect=_run):
             node = discover_compute_node_local("codex-neo4j")
 
         assert node == "98dci4-gpu-0002"
@@ -612,7 +612,7 @@ class TestReclaimDroppedSession:
     def test_a_login_node_runs_the_same_script_over_ssh(self):
         completed = subprocess.CompletedProcess([], 0, ":2490 wsl-clip not bound\n", "")
         with patch(
-            "imas_codex.cli.tunnel.subprocess.run", return_value=completed
+            "iter_codex.cli.tunnel.subprocess.run", return_value=completed
         ) as run:
             status, lines = _reclaim_reverse_forwards("iter", _FORWARDS)
 
@@ -633,7 +633,7 @@ class TestReclaimDroppedSession:
         completed = subprocess.CompletedProcess(
             [], 255, "", "ssh: connect to host iter port 22: timed out\n"
         )
-        with patch("imas_codex.cli.tunnel.subprocess.run", return_value=completed):
+        with patch("iter_codex.cli.tunnel.subprocess.run", return_value=completed):
             status, lines = _reclaim_reverse_forwards("iter", _FORWARDS)
 
         assert status is None
@@ -649,10 +649,10 @@ class TestReclaimDroppedSession:
         ]
         with (
             patch(
-                "imas_codex.cli.tunnel._reclaim_reverse_forwards",
+                "iter_codex.cli.tunnel._reclaim_reverse_forwards",
                 return_value=(0, [":2490 freed"]),
             ) as reclaim,
-            patch("imas_codex.cli.tunnel.click.echo") as echo,
+            patch("iter_codex.cli.tunnel.click.echo") as echo,
         ):
             _end_dropped_session("98dci4-srv-1001", "target", ports)
 
@@ -663,7 +663,7 @@ class TestReclaimDroppedSession:
 
     def test_reclaim_command_reports_and_fails_on_an_unfreed_hold(self):
         with patch(
-            "imas_codex.cli.tunnel._reclaim_reverse_forwards",
+            "iter_codex.cli.tunnel._reclaim_reverse_forwards",
             return_value=(1, [":2490 still held by session-7.scope"]),
         ) as reclaim:
             result = CliRunner().invoke(tunnel, ["reclaim", "--dry-run"])
@@ -701,29 +701,29 @@ class TestListenerGraceWindow:
         }
         try:
             with (
-                patch("imas_codex.cli.tunnel._get_tunnel_ports", return_value=ports),
-                patch("imas_codex.cli.tunnel._resolve_reverse_nodes", return_value=[]),
+                patch("iter_codex.cli.tunnel._get_tunnel_ports", return_value=ports),
+                patch("iter_codex.cli.tunnel._resolve_reverse_nodes", return_value=[]),
                 patch(
-                    "imas_codex.cli.tunnel._build_foreground_tunnel_command",
+                    "iter_codex.cli.tunnel._build_foreground_tunnel_command",
                     return_value=(["autossh"], {}),
                 ),
                 patch(
-                    "imas_codex.cli.tunnel.subprocess.Popen", return_value=child
+                    "iter_codex.cli.tunnel.subprocess.Popen", return_value=child
                 ) as popen,
-                patch("imas_codex.cli.tunnel._terminate_tunnel_process"),
-                patch("imas_codex.remote.tunnel.is_tunnel_active", return_value=False),
+                patch("iter_codex.cli.tunnel._terminate_tunnel_process"),
+                patch("iter_codex.remote.tunnel.is_tunnel_active", return_value=False),
                 patch(
-                    "imas_codex.cli.tunnel._reverse_forward_answers", return_value=False
+                    "iter_codex.cli.tunnel._reverse_forward_answers", return_value=False
                 ),
-                patch("imas_codex.cli.tunnel._end_dropped_session"),
+                patch("iter_codex.cli.tunnel._end_dropped_session"),
                 patch(
-                    "imas_codex.cli.tunnel.time.sleep",
+                    "iter_codex.cli.tunnel.time.sleep",
                     side_effect=stop_after_a_few_sleeps,
                 ),
                 patch(
-                    "imas_codex.cli.tunnel.time.monotonic", side_effect=monotonic_values
+                    "iter_codex.cli.tunnel.time.monotonic", side_effect=monotonic_values
                 ),
-                patch("imas_codex.cli.tunnel.click.echo") as echo,
+                patch("iter_codex.cli.tunnel.click.echo") as echo,
             ):
                 _run_service_supervisor("iter", False, False, False)
         finally:
@@ -758,8 +758,8 @@ class TestLocalModelLane:
         document = tmp_path / "endpoints.tunnel.json"
         reply = subprocess.CompletedProcess([], 0, stdout=_ENDPOINTS, stderr="")
         with (
-            patch("imas_codex.cli.tunnel.CLIVE_TUNNEL_DOCUMENT", document),
-            patch("imas_codex.cli.tunnel.subprocess.run", return_value=reply),
+            patch("iter_codex.cli.tunnel.CLIVE_TUNNEL_DOCUMENT", document),
+            patch("iter_codex.cli.tunnel.subprocess.run", return_value=reply),
         ):
             ports = _clive_ports("iter")
             labels = _clive_local_ports()
@@ -780,15 +780,15 @@ class TestLocalModelLane:
         document.write_text("previous")
         reply = subprocess.CompletedProcess([], 1, stdout="", stderr="no such file")
         with (
-            patch("imas_codex.cli.tunnel.CLIVE_TUNNEL_DOCUMENT", document),
-            patch("imas_codex.cli.tunnel.subprocess.run", return_value=reply),
+            patch("iter_codex.cli.tunnel.CLIVE_TUNNEL_DOCUMENT", document),
+            patch("iter_codex.cli.tunnel.subprocess.run", return_value=reply),
         ):
             assert _clive_ports("iter") == []
         assert document.read_text() == "previous"
 
     def test_clive_only_selects_just_the_lane(self):
         lane = [(18802, 28802, "clive-router", "gpu-0003", "L")]
-        with patch("imas_codex.cli.tunnel._clive_ports", return_value=lane):
+        with patch("iter_codex.cli.tunnel._clive_ports", return_value=lane):
             ports = _get_tunnel_ports(
                 "iter", neo4j=False, embed=False, clive=True, emit_status=False
             )
@@ -796,7 +796,7 @@ class TestLocalModelLane:
 
     def test_service_unit_carries_the_clive_flag_and_manifest(self):
         with patch(
-            "imas_codex.cli.tunnel.shutil.which",
+            "iter_codex.cli.tunnel.shutil.which",
             side_effect=lambda cmd: (
                 "/usr/bin/uv" if cmd == "uv" else "/usr/bin/autossh"
             ),

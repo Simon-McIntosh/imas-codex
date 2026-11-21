@@ -29,8 +29,8 @@ import re
 
 import pytest
 
-from imas_codex.discovery.base import judgment, reset as base_reset
-from imas_codex.discovery.signals import parallel
+from iter_codex.discovery.base import judgment, reset as base_reset
+from iter_codex.discovery.signals import parallel
 from tests.discovery.enrichment_fixtures import with_description_review
 
 _STATUS_IN_RE = re.compile(r"s\.status IN \[([^\]]*)\]")
@@ -417,7 +417,7 @@ async def test_enrichment_does_not_judge_an_underspecified_signal():
     """
     from unittest.mock import patch
 
-    from imas_codex.discovery.signals.models import (
+    from iter_codex.discovery.signals.models import (
         SignalEnrichmentBatch,
         SignalEnrichmentResult,
     )
@@ -474,11 +474,11 @@ async def test_enrichment_does_not_judge_an_underspecified_signal():
         patch.object(parallel, "release_signal_claim"),
         patch.object(parallel, "judge_and_store_signal_roles", side_effect=judge),
         patch(
-            "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+            "iter_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
         patch(
-            "imas_codex.discovery.base.llm.acall_llm_structured",
+            "iter_codex.discovery.base.llm.acall_llm_structured",
             side_effect=with_description_review(llm),
         ),
     ):

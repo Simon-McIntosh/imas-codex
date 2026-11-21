@@ -4,9 +4,9 @@ from collections.abc import Callable
 
 import pytest
 
-from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
-from imas_codex.standard_names import dd_resolutions
-from imas_codex.standard_names.dd_resolutions import (
+from iter_codex.graph.models import DDResolutionField, DDResolutionValueKind
+from iter_codex.standard_names import dd_resolutions
+from iter_codex.standard_names.dd_resolutions import (
     DDResolutionManifestInvalid,
     DDResolutionStale,
     DDResolutionValue,
@@ -129,7 +129,7 @@ def test_prior_version_bridge_is_converged_without_being_applied() -> None:
 
 
 def test_attachment_refuses_published_value_on_active_graph_bridge(monkeypatch) -> None:
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _is_attachment_consistent,
     )
     from tests.standard_names.dd_resolution_test_data import (
@@ -150,7 +150,7 @@ def test_attachment_refuses_published_value_on_active_graph_bridge(monkeypatch) 
 
 
 def test_source_refresh_persists_published_bridge_provenance(monkeypatch) -> None:
-    from imas_codex.standard_names.source_refresh import stamp_source_snapshots
+    from iter_codex.standard_names.source_refresh import stamp_source_snapshots
     from tests.standard_names.dd_resolution_test_data import (
         SYNTHETIC_ACTIVE_DIRECTION_ROW,
         load_synthetic_resolution_authority,
@@ -214,9 +214,9 @@ def test_source_refresh_persists_published_bridge_provenance(monkeypatch) -> Non
 def test_consumer_boundaries_call_typed_authority(
     monkeypatch, _resolution_authority
 ) -> None:
-    from imas_codex.standard_names import release_notes, source_refresh
-    from imas_codex.standard_names.sources import dd as dd_source
-    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    from iter_codex.standard_names import release_notes, source_refresh
+    from iter_codex.standard_names.sources import dd as dd_source
+    from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _is_attachment_consistent,
     )
 
@@ -270,7 +270,7 @@ def test_consumer_boundaries_call_typed_authority(
 
 
 def test_public_consumer_refuses_graph_authority_failure(monkeypatch) -> None:
-    from imas_codex.standard_names.sources import dd as dd_source
+    from iter_codex.standard_names.sources import dd as dd_source
 
     def unavailable():
         raise DDResolutionManifestInvalid("graph authority unavailable")

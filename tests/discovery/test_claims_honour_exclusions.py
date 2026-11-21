@@ -18,20 +18,20 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.config.discovery_config import ExclusionConfig
+from iter_codex.config.discovery_config import ExclusionConfig
 
 FACILITY = "jt-60sa"
 EXCLUDED_PREFIX = "/work/scratch/jt60sa"
 OUTSIDE_PREFIX = "/analysis/src/SAeqread"
 SCOPE_PREFIX = "/analysis/src"
 
-DOC_CFG = "imas_codex.config.discovery_config.get_exclusion_config_for_facility"
-GRAPH_OPS = "imas_codex.discovery.code.graph_ops.GraphClient"
-GRAPH_GRAPH = "imas_codex.graph.GraphClient"
+DOC_CFG = "iter_codex.config.discovery_config.get_exclusion_config_for_facility"
+GRAPH_OPS = "iter_codex.discovery.code.graph_ops.GraphClient"
+GRAPH_GRAPH = "iter_codex.graph.GraphClient"
 
-PATHS = "imas_codex.discovery.paths.parallel"
-CODE_OPS = "imas_codex.discovery.code.graph_ops"
-CODE_WORKERS = "imas_codex.discovery.code.workers"
+PATHS = "iter_codex.discovery.paths.parallel"
+CODE_OPS = "iter_codex.discovery.code.graph_ops"
+CODE_WORKERS = "iter_codex.discovery.code.workers"
 
 CLAIM_CASES = [
     (PATHS, "claim_paths_for_scanning", GRAPH_GRAPH, {"limit": 10}),
@@ -203,7 +203,7 @@ def test_predicate_ignores_excluded_row(module, name, target, extra):
 
 
 def test_scoped_claim_binds_scope_and_exclusion_separately():
-    from imas_codex.discovery.paths.parallel import claim_paths_for_scanning
+    from iter_codex.discovery.paths.parallel import claim_paths_for_scanning
 
     recorder = RecordingStub([_path(OUTSIDE_PREFIX + "/b")])
     with (
@@ -218,7 +218,7 @@ def test_scoped_claim_binds_scope_and_exclusion_separately():
 
 
 def test_claim_excludes_exactly_the_path_prefix_family():
-    from imas_codex.discovery.code.graph_ops import claim_files_for_triage
+    from iter_codex.discovery.code.graph_ops import claim_files_for_triage
 
     cfg = _exclusion_config([EXCLUDED_PREFIX])
     samples = [

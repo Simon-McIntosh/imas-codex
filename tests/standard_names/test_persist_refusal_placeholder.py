@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_store.graph_catalog import (
+from iter_codex.graph.client import GraphClient
+from iter_codex.standard_names.graph_store.graph_catalog import (
     persist_generated_name_winners,
 )
 from tests.standard_names.test_persist_refusal_per_source import (
@@ -136,7 +136,7 @@ def test_refused_winner_keeps_producer_for_protected_name(graph, protection):
 
 
 def test_placeholder_retirement_rolls_back_with_batch(graph, monkeypatch):
-    from imas_codex.standard_names import provenance_lifecycle
+    from iter_codex.standard_names import provenance_lifecycle
 
     retire = provenance_lifecycle.retire_unrecoverable_provenance_orphans
 
@@ -171,7 +171,7 @@ def test_placeholder_retirement_rolls_back_with_batch(graph, monkeypatch):
     ],
 )
 def test_grammar_refusal_records_writer_reason_without_leaving_placeholder(graph, name):
-    from imas_codex.standard_names.graph_store import graph_catalog, graph_foundation
+    from iter_codex.standard_names.graph_store import graph_catalog, graph_foundation
 
     services = _services(graph, [])
     services.GraphClient = GraphClient

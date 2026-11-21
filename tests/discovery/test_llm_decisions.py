@@ -1,4 +1,4 @@
-"""Tests for the decisions call layer in imas_codex.discovery.base.llm.
+"""Tests for the decisions call layer in iter_codex.discovery.base.llm.
 
 The decisions endpoint is driven through the module's HTTP seam
 (``_post_decisions`` / ``_apost_decisions``) with a fake transport, so no
@@ -14,7 +14,7 @@ import json
 
 import pytest
 
-from imas_codex.discovery.base import llm
+from iter_codex.discovery.base import llm
 
 QUESTIONS = {
     "loads_diagnostic_data": {
@@ -79,7 +79,7 @@ def _payload(answers: dict | None = None, cost: float = COST) -> dict:
 
 @pytest.fixture(autouse=True)
 def _api_key(monkeypatch):
-    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+    monkeypatch.setenv("OPENROUTER_API_KEY_ITER_CODEX", "test-key")
 
 
 def test_success_returns_answers_and_cost(monkeypatch):
@@ -101,7 +101,7 @@ def test_success_returns_answers_and_cost(monkeypatch):
     # Request contract: the key rides as a bearer token and the service tag as
     # X-Title, the model and questions are forwarded verbatim.
     assert captured["headers"]["Authorization"] == "Bearer test-key"
-    assert captured["headers"]["X-Title"] == f"imas-codex:{SERVICE}"
+    assert captured["headers"]["X-Title"] == f"iter-codex:{SERVICE}"
     assert captured["body"]["model"] == MODEL
     assert captured["body"]["questions"] == QUESTIONS
     assert captured["body"]["state"] == {"file": {"path": "geteddb.c"}}

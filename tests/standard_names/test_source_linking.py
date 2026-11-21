@@ -11,11 +11,11 @@ from __future__ import annotations
 import logging
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names.graph_store.graph_source_bindings import (
+from iter_codex.standard_names.graph_store.graph_source_bindings import (
     mark_sources_attached,
     mark_sources_composed,
 )
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from iter_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _update_sources_after_attach,
     _update_sources_after_compose,
 )
@@ -78,7 +78,7 @@ class TestWorkerHelpers:
     def test_compose_without_fence_does_not_open_graph(self) -> None:
         log = logging.getLogger("test")
         adapter = logging.LoggerAdapter(log, {})
-        with patch("imas_codex.graph.client.GraphClient") as MockGC:  # noqa: N806
+        with patch("iter_codex.graph.client.GraphClient") as MockGC:  # noqa: N806
             _update_sources_after_compose(self._fake_candidates(), "dd", adapter)
 
         assert not MockGC.called
@@ -95,7 +95,7 @@ class TestWorkerHelpers:
         attachments = [
             A("equilibrium/time_slice/global_quantities/ip", "plasma_current")
         ]
-        with patch("imas_codex.graph.client.GraphClient") as MockGC:  # noqa: N806
+        with patch("iter_codex.graph.client.GraphClient") as MockGC:  # noqa: N806
             _update_sources_after_attach(attachments, "dd", adapter)
 
         assert not MockGC.called
@@ -103,7 +103,7 @@ class TestWorkerHelpers:
     def test_compose_warns_when_fence_is_missing(self, caplog) -> None:
         log = logging.getLogger("test_linking")
         adapter = logging.LoggerAdapter(log, {})
-        with patch("imas_codex.graph.client.GraphClient") as MockGC:  # noqa: N806
+        with patch("iter_codex.graph.client.GraphClient") as MockGC:  # noqa: N806
             with caplog.at_level(logging.WARNING, logger="test_linking"):
                 _update_sources_after_compose(self._fake_candidates(), "dd", adapter)
 
@@ -116,7 +116,7 @@ class TestGraphOpsHelpers:
 
     def test_mark_sources_composed_cypher_invariants(self) -> None:
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:  # noqa: N806
             MockGC.return_value.__enter__.return_value.query.return_value = [
                 {"affected": 2}
@@ -136,7 +136,7 @@ class TestGraphOpsHelpers:
 
     def test_mark_sources_attached_cypher_invariants(self) -> None:
         with patch(
-            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            "iter_codex.standard_names.graph_store.graph_foundation.GraphClient"
         ) as MockGC:  # noqa: N806
             MockGC.return_value.__enter__.return_value.query.return_value = [
                 {"affected": 1}
@@ -181,7 +181,7 @@ def test_update_sources_rejects_unfenced_error_siblings():
             "model": "deterministic:dd_error_modifier",
         },
     ]
-    with patch("imas_codex.graph.client.GraphClient") as mock_gc:
+    with patch("iter_codex.graph.client.GraphClient") as mock_gc:
         _update_sources_after_compose(candidates, "dd", wlog)
 
     assert not mock_gc.called
@@ -198,7 +198,7 @@ def test_update_sources_all_error_siblings_no_query():
         }
         for base in ("elongation", "triangularity")
     ]
-    with patch("imas_codex.graph.client.GraphClient") as mock_gc:
+    with patch("iter_codex.graph.client.GraphClient") as mock_gc:
         _update_sources_after_compose(candidates, "dd", wlog)
     assert not mock_gc.return_value.__enter__.return_value.query.called, (
         "No source linking query should run when batch is empty after filtering"

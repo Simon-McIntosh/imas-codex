@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from imas_codex.standard_names.benchmark import ModelResult, apply_physics_metrics
-from imas_codex.standard_names.physics_judge import PhysicsVerdict
+from iter_codex.standard_names.benchmark import ModelResult, apply_physics_metrics
+from iter_codex.standard_names.physics_judge import PhysicsVerdict
 
 
 def test_apply_physics_metrics():

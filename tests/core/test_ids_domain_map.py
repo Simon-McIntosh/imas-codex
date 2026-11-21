@@ -1,6 +1,6 @@
 """Pins the shipped IDS-to-physics-domain map.
 
-``imas_codex/definitions/physics/ids_domains.json`` is read at DD build time:
+``iter_codex/definitions/physics/ids_domains.json`` is read at DD build time:
 each IDS node and each IMASNode takes its default ``physics_domain`` from it, so
 a silent drift in one row reclassifies every path beneath that IDS. These tests
 read the shipped file and pin the entries set by review, the domain vocabulary,
@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.core.data_model import PhysicsDomain
-from imas_codex.definitions.physics import IDS_DOMAINS_FILE
+from iter_codex.core.data_model import PhysicsDomain
+from iter_codex.definitions.physics import IDS_DOMAINS_FILE
 
 # IDS names whose domain was set by review, and the domain each must carry.
 # Kept as a literal table so a change to the map is visible as a change here.

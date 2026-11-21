@@ -9,8 +9,8 @@ from copy import deepcopy
 
 import pytest
 
-from imas_codex.discovery.base.evaluation import load_labelled_fixture
-from imas_codex.standard_names.judgment_goldens import (
+from iter_codex.discovery.base.evaluation import load_labelled_fixture
+from iter_codex.standard_names.judgment_goldens import (
     OUTPUT,
     _finish,
     _row,

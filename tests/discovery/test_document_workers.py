@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.discovery.base.image import mark_images_scored, score_images_batch
+from iter_codex.discovery.base.image import mark_images_scored, score_images_batch
 
 
 def test_shared_vision_response_contains_only_caption_ocr_and_diagram():
@@ -24,7 +24,7 @@ def test_shared_vision_response_contains_only_caption_ocr_and_diagram():
         }
         raise ReachedVision
 
-    with patch("imas_codex.discovery.base.llm.acall_llm_structured", capture_vision):
+    with patch("iter_codex.discovery.base.llm.acall_llm_structured", capture_vision):
         with pytest.raises(ReachedVision):
             asyncio.run(
                 score_images_batch(
@@ -38,7 +38,7 @@ def test_shared_vision_response_contains_only_caption_ocr_and_diagram():
 def test_document_image_persistence_keeps_judgment_and_drops_image_bytes():
     client = MagicMock()
     client.__enter__.return_value = client
-    with patch("imas_codex.graph.GraphClient", return_value=client):
+    with patch("iter_codex.graph.GraphClient", return_value=client):
         count = mark_images_scored(
             "tcv",
             [

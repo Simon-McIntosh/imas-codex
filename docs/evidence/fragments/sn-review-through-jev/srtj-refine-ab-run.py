@@ -164,7 +164,7 @@ def golden_units() -> set[str]:
 
 def ancestor_items(cases: list[dict], gc) -> list[dict]:
     """One review item per case, enriched the way production enriches them."""
-    from imas_codex.standard_names.review.pipeline import (
+    from iter_codex.standard_names.review.pipeline import (
         _fetch_review_dd_context,
         _fetch_review_derived_children,
     )
@@ -317,10 +317,10 @@ def case_dd_source(case: dict, by_name: dict[str, dict]) -> dict | None:
 
 
 async def build_cohort(gc) -> dict:
-    from imas_codex.settings import get_model
-    from imas_codex.standard_names.benchmark_roles import load_refine_corpus
-    from imas_codex.standard_names.review.checks import load_review_checks
-    from imas_codex.standard_names.review.jev_review import NAME_AXIS, review_names
+    from iter_codex.settings import get_model
+    from iter_codex.standard_names.benchmark_roles import load_refine_corpus
+    from iter_codex.standard_names.review.checks import load_review_checks
+    from iter_codex.standard_names.review.jev_review import NAME_AXIS, review_names
 
     population = load_refine_corpus(sample=100000, seed=SEED)
     excluded = golden_units()
@@ -401,12 +401,12 @@ def rescore_arms(already_spent: float) -> dict:
     are read from the stored results because they record what the run did, not
     what the receipts contain.
     """
-    from imas_codex.discovery.base.llm import ensure_model_prefix
-    from imas_codex.settings import get_model
+    from iter_codex.discovery.base.llm import ensure_model_prefix
+    from iter_codex.settings import get_model
 
     effort = None
     try:
-        from imas_codex.settings import get_reasoning_effort
+        from iter_codex.settings import get_reasoning_effort
 
         effort = get_reasoning_effort("sn-refine")
     except Exception:
@@ -482,19 +482,19 @@ def append_receipt(row: dict) -> None:
 
 
 async def run_arms(cohort: list[dict], gc, already_spent: float) -> dict:
-    from imas_codex.discovery.base.llm import acall_llm_structured, ensure_model_prefix
-    from imas_codex.llm.prompt_loader import load_prompt_config, render_prompt
-    from imas_codex.settings import get_model
-    from imas_codex.standard_names.benchmark import _resolve_name
-    from imas_codex.standard_names.benchmark_roles import build_refine_prompt_context
-    from imas_codex.standard_names.context import build_compose_context
-    from imas_codex.standard_names.example_loader import load_compose_examples
-    from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-    from imas_codex.standard_names.models import RefinedName
+    from iter_codex.discovery.base.llm import acall_llm_structured, ensure_model_prefix
+    from iter_codex.llm.prompt_loader import load_prompt_config, render_prompt
+    from iter_codex.settings import get_model
+    from iter_codex.standard_names.benchmark import _resolve_name
+    from iter_codex.standard_names.benchmark_roles import build_refine_prompt_context
+    from iter_codex.standard_names.context import build_compose_context
+    from iter_codex.standard_names.example_loader import load_compose_examples
+    from iter_codex.standard_names.grammar_adapter import parse_canonical_name
+    from iter_codex.standard_names.models import RefinedName
 
     effort = None
     try:
-        from imas_codex.settings import get_reasoning_effort
+        from iter_codex.settings import get_reasoning_effort
 
         effort = get_reasoning_effort("sn-refine")
     except Exception:
@@ -897,7 +897,7 @@ def check_key() -> int:
     credits an arm for a case whose output the row does not carry would let a
     later reader attribute an output to the arm that did not produce it.
     """
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = GraphClient()
     cohort, _cohort_info = resume_cohort()
@@ -987,7 +987,7 @@ def resume_cohort() -> tuple[list[dict], dict]:
     same seed and its critique compared against the stored run, which proves the
     retried prompt is the prompt the earlier call was given.
     """
-    from imas_codex.standard_names.benchmark_roles import load_refine_corpus
+    from iter_codex.standard_names.benchmark_roles import load_refine_corpus
 
     stored = json.loads(RESULTS.read_text(encoding="utf-8"))
     corpus = {c["sn_id"]: c for c in load_refine_corpus(sample=100000, seed=SEED)}
@@ -1012,7 +1012,7 @@ def resume_cohort() -> tuple[list[dict], dict]:
 
 
 async def main(resume: bool = False, rescore: bool = False) -> int:
-    from imas_codex.graph.client import GraphClient
+    from iter_codex.graph.client import GraphClient
 
     gc = GraphClient()
     if resume or rescore:

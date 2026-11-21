@@ -10,12 +10,12 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from imas_codex.graph.dd_lifecycle import (
+from iter_codex.graph.dd_lifecycle import (
     LIFECYCLE_REMOVED,
     dd_path_index,
     reconcile_node_lifecycle,
 )
-from imas_codex.standard_names.graph_store import (
+from iter_codex.standard_names.graph_store import (
     graph_audits as _owning_graph_audits,
     graph_claim_scope as _owning_graph_claim_scope,
 )
@@ -71,7 +71,7 @@ class TestExtractionGate:
     def test_dd_extractor_where_clause_gates_removed(self):
         import inspect
 
-        from imas_codex.standard_names.sources import dd as dd_mod
+        from iter_codex.standard_names.sources import dd as dd_mod
 
         src = inspect.getsource(dd_mod.extract_dd_candidates)
         assert "coalesce(n.lifecycle_status, '') <> 'removed'" in src
@@ -79,7 +79,7 @@ class TestExtractionGate:
     def test_graph_ops_candidates_gate_removed(self):
         import inspect
 
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         src = inspect.getsource(_owning_graph_claim_scope.get_extraction_candidates_dd)
         assert "coalesce(n.lifecycle_status, '') <> 'removed'" in src
@@ -87,7 +87,7 @@ class TestExtractionGate:
     def test_domain_seed_sweep_gates_removed(self):
         import inspect
 
-        from imas_codex.standard_names import loop
+        from iter_codex.standard_names import loop
 
         src = inspect.getsource(loop._list_physics_domains_with_extractable_paths)
         assert "coalesce(n.lifecycle_status, '') <> 'removed'" in src
@@ -101,7 +101,7 @@ class TestReconcileSourcesGate:
         # compose queue on every sn run.
         import inspect
 
-        from imas_codex.standard_names import graph_ops
+        from iter_codex.standard_names import graph_ops
 
         src = inspect.getsource(_owning_graph_audits.reconcile_standard_name_sources)
         upstream_present = (

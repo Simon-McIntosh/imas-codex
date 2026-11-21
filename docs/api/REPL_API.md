@@ -1,4 +1,4 @@
-# IMAS Codex REPL API
+# ITER Codex REPL API
 
 Public API for the MCP Python REPL (`python()` tool).
 

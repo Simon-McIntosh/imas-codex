@@ -1,9 +1,9 @@
-# Architecture Boundary: imas-codex ↔ imas-standard-names
+# Architecture Boundary: iter-codex ↔ imas-standard-names
 
 ## Principle
 
 **imas-standard-names** (ISN) owns grammar, vocabulary, and validation.
-**imas-codex** owns the generation pipeline, evaluation, and graph persistence.
+**iter-codex** owns the generation pipeline, evaluation, and graph persistence.
 
 ## What ISN Provides (Import Boundary)
 
@@ -29,9 +29,9 @@ from the returned dict — no private ISN imports.
 
 - **Pipeline orchestration**: 6-phase DAG (extract → compose → review → validate → consolidate → persist)
 - **LLM evaluation**: 6-dimensional scoring (grammar, semantic, documentation, convention, completeness, compliance)
-- **Review criteria**: `imas_codex/llm/config/sn_review_criteria.yaml`
+- **Review criteria**: `iter_codex/llm/config/sn_review_criteria.yaml`
 - **Graph persistence**: StandardName nodes, relationships, validation issues
-- **Collision avoidance**: Vector search for similar existing names (`imas_codex/standard_names/search.py`)
+- **Collision avoidance**: Vector search for similar existing names (`iter_codex/standard_names/search.py`)
 - **Prompt infrastructure**: Shared fragments via `{% include %}`, prompt configs via `load_prompt_config()`
 
 ## Three-Layer Validation
@@ -56,7 +56,7 @@ The only hard rejection is an unparseable name (grammar round-trip fails in
 `validation_issues` (list) and `validation_layer_summary` (JSON), and are
 shown to the LLM reviewer as context.
 
-**Implementation**: `_validate_via_isn()` in `imas_codex/standard_names/workers.py` runs
+**Implementation**: `_validate_via_isn()` in `iter_codex/standard_names/workers.py` runs
 all three layers in sequence and returns `(issues, layer_summary)`.
 
 ## Scoring Architecture
@@ -65,7 +65,7 @@ all three layers in sequence and returns `(issues, layer_summary)`.
 - Aggregate normalized to 0–1: `sum / 120.0` (via `StandardNameQualityScore.score` property)
 - Tiers: outstanding ≥0.85, good ≥0.60, inadequate ≥0.40, poor <0.40
 - The `reviewer_score` stored in the graph is a float 0–1
-- Scoring criteria defined in `imas_codex/llm/config/sn_review_criteria.yaml`
+- Scoring criteria defined in `iter_codex/llm/config/sn_review_criteria.yaml`
 - Verdict rules: accept (≥0.60, no zero dimensions), reject (<0.40 or any zero), revise (otherwise)
 
 ## Prompt Infrastructure
@@ -84,7 +84,7 @@ all three layers in sequence and returns `(issues, layer_summary)`.
 
 ## ISN Vocabulary Co-evolution (Phase 9 — pending)
 
-The admission gate in `imas_codex/standard_names/parents.py` surfaces bare-base
+The admission gate in `iter_codex/standard_names/parents.py` surfaces bare-base
 parent names that fail Clause A (no IR anchors) and Clause B (no projection
 children). These are candidates for ISN-side mandatory-locus or mandatory-qualifier
 rules — e.g., a validator that requires `elongation` to appear only with an

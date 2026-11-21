@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.ids.mapping import classify_error_signals
+from iter_codex.ids.mapping import classify_error_signals
 
 
 def _classify(description: str, group_key: str = "jt-60sa:src") -> str:

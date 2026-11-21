@@ -25,7 +25,7 @@ class TestConstantNodeTypeExtraction:
         """
         import inspect
 
-        from imas_codex.standard_names.sources.dd import extract_dd_candidates
+        from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
         src = inspect.getsource(extract_dd_candidates)
         # node_category must be the gate, not node_type
@@ -41,7 +41,7 @@ class TestConstantNodeTypeExtraction:
         """Legacy graph_ops extraction also accepts constant node_type."""
         import inspect
 
-        from imas_codex.standard_names.graph_store.graph_claim_scope import (
+        from iter_codex.standard_names.graph_store.graph_claim_scope import (
             get_extraction_candidates_dd,
         )
 
@@ -52,8 +52,8 @@ class TestConstantNodeTypeExtraction:
 
     def test_gyrokinetics_constant_paths_qualify_as_eligible(self):
         """Gyrokinetics paths (constant node_type) pass the DD qualifier."""
-        from imas_codex.standard_names.sources.base import SourceCandidate
-        from imas_codex.standard_names.sources.dd_qualifier import qualify_dd
+        from iter_codex.standard_names.sources.base import SourceCandidate
+        from iter_codex.standard_names.sources.dd_qualifier import qualify_dd
 
         gyro_paths = [
             {
@@ -175,11 +175,11 @@ class TestConstantNodeTypeExtraction:
 
         with (
             patch(
-                "imas_codex.graph.client.GraphClient",
+                "iter_codex.graph.client.GraphClient",
                 return_value=mock_gc,
             ),
             patch(
-                "imas_codex.standard_names.sources.dd.report_extract_breakdown",
+                "iter_codex.standard_names.sources.dd.report_extract_breakdown",
                 return_value={
                     "total": 0,
                     "by_node_type": {},
@@ -190,7 +190,7 @@ class TestConstantNodeTypeExtraction:
                 },
             ),
         ):
-            from imas_codex.standard_names.sources.dd import extract_dd_candidates
+            from iter_codex.standard_names.sources.dd import extract_dd_candidates
 
             batches = extract_dd_candidates(
                 domain_filter="gyrokinetics",

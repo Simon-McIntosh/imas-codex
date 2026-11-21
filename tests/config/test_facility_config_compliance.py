@@ -22,7 +22,7 @@ from typing import Any, Union, get_args, get_origin
 import pytest
 import yaml
 
-from imas_codex.config.models import (
+from iter_codex.config.models import (
     ConfiguredBaseModel,
     FacilityConfig,
 )
@@ -30,7 +30,7 @@ from imas_codex.config.models import (
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 FACILITIES_DIR = (
-    Path(__file__).parent.parent.parent / "imas_codex" / "config" / "facilities"
+    Path(__file__).parent.parent.parent / "iter_codex" / "config" / "facilities"
 )
 
 

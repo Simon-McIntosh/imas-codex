@@ -16,8 +16,8 @@ import re
 
 import pytest
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR
-from imas_codex.standard_names.models import GrammarSegments, StandardNameCandidate
+from iter_codex.llm.prompt_loader import PROMPTS_DIR
+from iter_codex.standard_names.models import GrammarSegments, StandardNameCandidate
 
 # --------------------------------------------------------------------------
 # Helpers
@@ -130,7 +130,7 @@ def test_llm_schema_object_within_anthropic_property_limit(model_import):
     fail with 'Schema is too complex'."""
     import importlib
 
-    models_mod = importlib.import_module("imas_codex.standard_names.models")
+    models_mod = importlib.import_module("iter_codex.standard_names.models")
     model_cls = getattr(models_mod, model_import, None)
     if model_cls is None:
         pytest.skip(f"{model_import} not present")
