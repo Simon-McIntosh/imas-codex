@@ -9,20 +9,20 @@ constraints; it does not restate the endpoint.
 
 ## Reuse map
 
-- `imas_codex/standard_names/case_file.py` already builds a per-name case file
+- `iter_codex/standard_names/case_file.py` already builds a per-name case file
   and owns `completeness_verdict`, `assert_read_only` and `case_file_digest`. A
   code review of 2026-11-21 found it has no importer in the pipeline. The
   receipt's notion of an expected channel and of completeness is this module's:
   extend it, do not write a second one. After this node the module has a
   production importer.
-- `imas_codex/standard_names/context.py` assembles the context the compose path
+- `iter_codex/standard_names/context.py` assembles the context the compose path
   uses today. Each stage's prompt is rendered from its own assembly code; find
   that code per stage and record what it produced. Do not change what any stage
   sends.
 - The stages are the ones the section lists. Their worker code is under
-  `imas_codex/standard_names/worker_tasks/` and
-  `imas_codex/standard_names/review/`, with prompts under
-  `imas_codex/llm/prompts/sn/`.
+  `iter_codex/standard_names/worker_tasks/` and
+  `iter_codex/standard_names/review/`, with prompts under
+  `iter_codex/llm/prompts/sn/`.
 - The held-out members and their adjudicated defect classes are in
   `docs/evidence/fragments/sn-case-file-generation/benchmark-second-round-incumbent-defects.json`;
   the reference split is the one `benchmark.py` in that directory uses. The
@@ -47,7 +47,7 @@ constraints; it does not restate the endpoint.
 - The census is heavy enough to leave the fleet node: run it with
   `env -u SLURM_JOB_ID -u SLURM_JOBID sbatch --partition=all_debug
   --cpus-per-task=4 --mem=16G --time=00:55:00 --output=<a log under
-  ~/.cache/imas-codex-context-receipts/> --wrap '<command>'`, and read the log
+  ~/.cache/iter-codex-context-receipts/> --wrap '<command>'`, and read the log
   afterwards. Unit tests for the receipt may run in place.
 - Environment: `UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
   PYTHONPATH="$PWD" UV_NO_SYNC=1 uv run --no-sync …`. Never `pip install`. The
