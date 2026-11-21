@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from scripts.rename.apply import KEPT_LIST
-from scripts.rename.rules import OLD_NAME_PATTERN
+from scripts.rename.rules import OLD_NAME_PATTERN, count_context_occurrences
 from scripts.rename.tree import (
     kept_identifiers,
     load_kept_list,
@@ -36,6 +36,7 @@ class CheckReport:
     kept_paths: dict[str, dict] = field(default_factory=dict)
     kept_names: dict[str, int] = field(default_factory=dict)
     kept_identifiers: dict[str, dict[str, int]] = field(default_factory=dict)
+    kept_contexts: dict[str, int] = field(default_factory=dict)
     protected: int = 0
     violations: list[Violation] = field(default_factory=list)
 
@@ -84,6 +85,7 @@ def check_tree(
         identifier: {"kept": count, "covered": 0}
         for identifier, count in sorted(persisted.items())
     }
+    identifiers = sorted(persisted)
 
     live_texts: dict[str, str] = {}
     for rel in tracked_files(tree):
@@ -100,8 +102,17 @@ def check_tree(
             live_texts[rel] = text
             for name, stats in report.kept_identifiers.items():
                 stats["covered"] += text.count(name)
-            if hits > persisted_hits:
-                report.leftover[rel] = hits - persisted_hits
+            context_hits = 0
+            for context_id, found in count_context_occurrences(
+                text, identifiers, kept.contexts_for(rel)
+            ).items():
+                report.kept_contexts[context_id] = (
+                    report.kept_contexts.get(context_id, 0) + found
+                )
+                context_hits += found
+            protected_hits = persisted_hits + context_hits
+            if hits > protected_hits:
+                report.leftover[rel] = hits - protected_hits
             continue
         stats = report.kept_paths[entry.id]
         stats["hits"] += hits
@@ -111,7 +122,7 @@ def check_tree(
 
     report.protected = sum(
         stats["covered"] for stats in report.kept_identifiers.values()
-    )
+    ) + sum(report.kept_contexts.values())
     leftover_total = sum(report.leftover.values())
     if report.kept_hits + report.protected + leftover_total != report.old_name_hits:
         report.violations.append(
@@ -160,6 +171,17 @@ def check_tree(
                 )
             )
 
+    for context in kept.kept_contexts:
+        count = report.kept_contexts.get(context.id, 0)
+        if count < context.min_hits:
+            report.violations.append(
+                Violation(
+                    "kept-name-missing",
+                    f"kept context {context.id} holds {count} old-name occurrences, "
+                    f"below the declared floor of {context.min_hits} ({context.reason})",
+                )
+            )
+
     for rel, hits in sorted(report.leftover.items()):
         report.violations.append(
             Violation("leftover", f"{rel}: {hits} old-name hit(s) in a covered file")
@@ -203,6 +225,11 @@ def format_report(report: CheckReport) -> str:
     lines.append(
         "kept names: " + ", ".join(f"{k}={v}" for k, v in report.kept_names.items())
     )
+    if report.kept_contexts:
+        lines.append(
+            "kept contexts: "
+            + ", ".join(f"{k}={v}" for k, v in report.kept_contexts.items())
+        )
     if report.kept_identifiers:
         lines.append("kept identifiers (kept/covered):")
         lines.extend(

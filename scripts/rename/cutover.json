@@ -15,8 +15,11 @@
   "tracked_rename": {
     "command": "python -m scripts.rename apply",
     "kept_list": "scripts/rename/kept_names.json",
-    "kept_scopes": ["historical-evidence", "figure-artifacts"],
-    "evidence_split": "docs/evidence keeps its data and prose bytes (.html, .json, .md) and the Python beside them is renamed like any other code, the same split made for docs/figures; the kept list is the authority for the split and this sequence only names it."
+    "kept_scopes": [
+      "historical-evidence",
+      "figure-artifacts"
+    ],
+    "evidence_split": "Under docs/evidence everything keeps its bytes except *.py and *.sh, which are renamed like any other code. The kept list states that as an exclusion on the path, not as a list of kept extensions, so a new evidence file type is kept without a change to the list; the same split is made for docs/figures. The kept list is the authority for the split and this sequence only names it."
   },
   "inventory": [
     {
@@ -153,10 +156,11 @@
         "units"
       ],
       "disposition": "not measured",
-      "step": "Record `git worktree list --porcelain`, `squeue -u $USER -h -o '%i|%j|%T|%M|%N'`, `scontrol show job` for each job, `systemctl --user list-units --all 'imas-codex*' 'reckon-watch-imas-codex*'` and the live pointer listing under `~/.config/reckon/crew/live/` filtered on project imas-codex. Resolve or carry every worktree that holds unmerged commits: list it, and for each either merge its commits or park them on a named branch before any path moves. Do not touch a retained worktree's files. Stop writers: no graph writer, no scheduler job using the shared environment, the graph stopped for C5/C7.",
+      "step": "Record `git worktree list --porcelain`, `squeue -u $USER -h -o '%i|%j|%T|%M|%N'`, `scontrol show job` for each job, `systemctl --user list-units --all 'imas-codex*' 'reckon-watch-imas-codex*'` and the live pointer listing under `~/.config/reckon/crew/live/` filtered on project imas-codex. Resolve or carry every worktree that holds unmerged commits: list it, and for each either merge its commits or park them on a named branch before any path moves. Do not touch a retained worktree's files. Stop writers: no graph writer, no scheduler job using the shared environment, the graph stopped for C5/C7. Then list every session's queued and awaiting-upstream requests for the project, group them by the session that owns them, and have each owner drop its own before C1; read the `queued_requests` block in this step for the listing command, the instruction to give each owner, and when a re-dispatch is safe.",
       "queued_requests": {
         "listing": "Read every pointer file under `~/.config/reckon/crew/live/*.json` whose top-level `project` is `imas-codex`, and list its `run_id`, `phase` and owning `session`. Take the requests whose phase is `queued` or `awaiting-upstream` (a `held` request names its `prior_phase`, and is treated as the phase it names) and group them by owner session. The listing is not the project's retained history: `~/.config/reckon/crew/run_store.db` holds that and it does not move.",
-        "rule": "Each owner drops its own queued and awaiting-upstream requests for the project before the tracked rename (C1) and re-dispatches them after C7 serves the new project key. A queued request stores the old project key, a base revision before the rename, and write paths under the old package name, so one admitted after C1 would build a pre-rename tree on top of the renamed one. Nobody else drops anyone's requests: the freeze lists them and each owner clears its own.",
+        "operator_instruction": "The operator runs the listing in this step, then hands each owner the run ids listed for its session and instructs it to drop those requests before C1 starts. Each owner confirms the drop with the run ids it cleared, and the operator records that confirmation beside the listing. After C2's check has passed, the operator instructs the same owners to re-dispatch the dropped nodes. No owner needs a new project key: reckon keeps the key it has, so the re-dispatch targets the same project it came from.",
+        "rule": "Each owner drops its own queued and awaiting-upstream requests for the project before the tracked rename (C1) and re-dispatches them after C2's check passes. A queued request stores a base revision before the rename and write paths under the old package name, so one admitted after C1 would build a pre-rename tree on top of the renamed one. Re-dispatch is safe once C2 has rebuilt and verified the shared environment under the new distribution name, because a re-dispatched node then runs the renamed tool against the renamed tree; reckon's project key does not change, so no request has to be re-registered under a different project. Nobody else drops anyone's requests: the freeze lists them and each owner clears its own.",
         "parked_worktree": "A retained worktree may be recorded as parked by its owner under a kept ref; it is then not carried across the cutover, and C7 re-attaches or drains it only if its owner later unparks it."
       },
       "check": "Every retained worktree appears in the recorded list with a disposition (merged, carried, or abandoned with its commit sha named); the live pointer listing prints for project imas-codex and names every queued and awaiting-upstream request with its owner session; each owner's drop of its own requests is recorded with the run ids it dropped, so an empty queued list is a recorded fact rather than a search that saw nothing; the scheduler listing shows no job whose working directory or command is the shared environment. The recorded list is committed with the cutover landing record.",
@@ -168,12 +172,11 @@
       "surfaces": [
         "editable",
         "supplement",
-        "mcp",
-        "docs-state"
+        "mcp"
       ],
       "disposition": "renamed",
       "step": "On the primary branch at the quiet window, from the repository root: `python -m scripts.rename apply`, then `python -m scripts.rename check` (exit 0) and commit. The tracked change carries the distribution name, the import package, the [tool.iter-codex] settings table, the IMAS_CODEX->ITER_CODEX environment prefix, the root path constants the code resolves, unit and container names as tracked files declare them, and both tracked MCP client files (.mcp.json, .vscode/mcp.json: key iter-cx, project path and command renamed).",
-      "check": "`python -m scripts.rename check` exits 0 and reports every old-name hit under a kept path; `python -m scripts.rename cutover` reports zero unaccounted surfaces; a second `apply` reports zero changed files; `git grep -n imas_codex -- <each kept path from scripts/rename/kept_names.json>` returns only kept entries, and `docs/evidence` is not excluded wholesale - its .html, .json and .md bytes are kept while its Python is renamed, so a bare ':!docs/evidence' would hide exactly the files this check must see. NOTE: use `git grep` on the kept list, never a bare prefix replacement, so imas_standard_names and imas-dd are not casualties.; every dotted identifier that appears in a kept path (`<old name>.<artifact>`, a stored schema or receipt identity) is unchanged in the code that reads it",
+      "check": "`python -m scripts.rename check` exits 0 and reports every old-name hit under a kept path; `python -m scripts.rename cutover` reports zero unaccounted surfaces; a second `apply` reports zero changed files; `git grep -n imas_codex -- <each kept path from scripts/rename/kept_names.json>` returns only kept entries, and every file under `docs/evidence` is kept by default except the Python and shell beside it, which are renamed, so a new evidence file type needed no list change and a bare ':!docs/evidence' would hide exactly the files this check must see. NOTE: use `git grep` on the kept list, never a bare prefix replacement, so imas_standard_names and imas-dd are not casualties.; every dotted identifier that appears in a kept path (`<old name>.<artifact>`, a stored schema or receipt identity) is unchanged in the code that reads it",
       "undo": "`git revert` the single rename commit on the primary branch; the tree returns byte-identically because the tool only rewrites text and moves paths it names in its report."
     },
     {
@@ -236,21 +239,25 @@
     },
     {
       "id": "C7-reckon-project-key",
-      "title": "Serve reckon under the new project key with its history intact",
+      "title": "Check that reckon still serves the project under its existing key",
       "surfaces": [
         "reckon",
-        "docs-state",
-        "worktrees"
+        "docs-state"
       ],
-      "disposition": "migrated",
-      "step": "Back up `~/.config/reckon/mounts.json`, then replace the project key `imas-codex` with `iter-codex`. Update `docs/state/imas-codex` to `docs/state/iter-codex` (`git mv`) and rewrite only the live project keys: `project`/`slug` in project.json, index.json and crew.json. Leave `runs/` and `reviews/` payloads byte-identical: they are the preserved history. Re-register the project with reckon (`reckon mount`/`crew` according to its CLI) and let new run ids register under the new key; the retained worktrees from C0 are re-attached or drained under the new key before this step.",
-      "check": "`reckon` lists the project under `iter-codex` and the run history count is at least the recorded 1109 plus runs made since (a drop is a failure); the plan slugs and run ids are unchanged across the step: the `slug` values in project.json and index.json, and the run-id directory names under `docs/state/<project>/runs/`, compare equal, one for one, to the listing taken immediately before the step, so only the project key and the state directory's name moved and no record was re-registered under a new id; `python -m scripts.rename check` still exits 0 and reports `docs/state` under its kept entry; opening one historical review by id resolves.",
-      "preserved_ids": {
-        "plans": "The `slug` values in docs/state/<project>/project.json and index.json, and the plan ids they name, read once before the step and again after it.",
-        "runs": "The run-id directory names under docs/state/<project>/runs/ read before and after the step; new runs made during the step are allowed only if each one names a run that did not exist before, taken from the run store rather than assumed.",
-        "rule": "The two listings compare equal, one for one: a plan slug or a run id that changes means a record was re-registered under a new identity, which is a failure of the step rather than a migration. New run ids minted after the key moved are listed beside the comparison, never counted into it."
+      "disposition": "kept",
+      "step": "Nothing is moved or rewritten. Reckon's project key, its mounts entry, the state directory docs/state/imas-codex, its stored reviews, its ledger rows and the worktree root keep their names and their bytes. Reckon has no supported way to rename a project key, so the key stays. A value that differs from C0's listing is a failure of an earlier step: report it, never repair it by moving the key or the directory.",
+      "check": "Reckon lists the project under imas-codex with its retained run count equal to the count C0 recorded; one plan review and one run review open by their stored ids; one plan resolves by slug; the rename check still exits 0 with docs/state and docs/.reckon reported as kept.",
+      "undo": "Nothing changed: there is nothing to undo.",
+      "unchanged": {
+        "project_key": "The key imas-codex, unchanged.",
+        "mounts_entry": "The project's entry in the reckon mounts file, unchanged.",
+        "state_directory": "docs/state/imas-codex, its name and its bytes, unchanged.",
+        "stored_reviews": "Every stored plan and run review, unchanged and resolvable by id.",
+        "ledger_rows": "The project's retained ledger rows, including the 1109 counted.",
+        "worktree_root": "The worktree root and its worktrees, unchanged.",
+        "rule": "None of these is rewritten; a difference is reported, not repaired."
       },
-      "undo": "Restore mounts.json from the backup and `git mv docs/state/iter-codex docs/state/imas-codex` with the key lines reverted; reckon reads its file at start, so a restart restores the old key."
+      "out_of_scope": "Migrating the key or the state directory to a new name is a later change, made only when reckon supports renaming a key without new plan and run identities."
     },
     {
       "id": "C8-registry-and-repositories",
@@ -269,7 +276,7 @@
     },
     {
       "id": "C9-gate-scripts",
-      "title": "Rewrite or regenerate the saved gate scripts",
+      "title": "Regenerate a gate script still in use; keep the rest as evidence",
       "surfaces": [
         "gate-scripts"
       ],
@@ -312,7 +319,7 @@
         "imas-deps"
       ],
       "disposition": "renamed",
-      "step": "Re-run the inventory collectors named in docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html against the live system and compare row by row: each row must be renamed (count now zero or naming the new identity), kept (the IMAS surfaces, with their count unchanged), migrated (the value now names the new root, key or template), or still recorded as not measured. No new live reference to the old name may remain outside the kept list. Only then remove the \u00a710 transition alias, if the earlier stage created one; this rehearsal's rename ships no old console script, so the alias removal is a no-op unless the transition stage installed it.",
+      "step": "Re-run the inventory collectors named in docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html against the live system and compare row by row: each row must be renamed (count now zero or naming the new identity), kept (the IMAS surfaces with their count unchanged, and reckon's project key with docs/state/imas-codex under that key), migrated (the value now names the new root, key or template), or still recorded as not measured. No new live reference to the old name may remain outside the kept list. Only then remove the \u00a710 transition alias, if the earlier stage created one; this rehearsal's rename ships no old console script, so the alias removal is a no-op unless the transition stage installed it.",
       "check": "The row-by-row comparison has zero unaccounted surfaces and zero rows still naming the old name in a renamed surface; the two kept DD client keys, the standard-names distribution and import, and the IMAS dependencies are present; `python -m scripts.rename check` and `python -m scripts.rename cutover` both exit 0 on the merged tree.",
       "undo": "This step only reads and compares. A row that disagrees sends the operator back to the step that owns it with that step's undo."
     }

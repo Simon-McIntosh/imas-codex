@@ -9,6 +9,10 @@ from __future__ import annotations
 
 import re
 from collections import Counter
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scripts.rename.tree import KeptContext
 
 # One pattern covers the full name in any capitalization and either separator
 # (`imas_codex`, `imas-codex`, `IMAS_CODEX`, `IMAS Codex`, `IMAS-Codex`) and the
@@ -68,15 +72,60 @@ def count_hits(text: str) -> int:
     return len(OLD_NAME_PATTERN.findall(text))
 
 
-def protect(text: str, identifiers: list[str]) -> tuple[str, list[tuple[str, str]]]:
-    """Replace protected identifiers with stand-ins before the rename runs."""
+def _kept_spans(
+    text: str, identifiers: list[str], contexts: tuple[KeptContext, ...]
+) -> list[tuple[int, int, str, str | None]]:
+    """Every kept spelling's span, with the context id that claimed it.
+
+    Identifiers are claimed before contexts so a stored artifact identity
+    cannot be counted twice, and the first pattern to claim a span wins.
+    """
+    spans: list[tuple[int, int, str, str | None]] = []
+    for identifier in identifiers:
+        start = text.find(identifier)
+        while start != -1:
+            spans.append((start, start + len(identifier), identifier, None))
+            start = text.find(identifier, start + len(identifier))
+    for context in contexts:
+        for match in re.finditer(context.pattern, text):
+            if any(
+                match.start() < end and start < match.end()
+                for start, end, _, _ in spans
+            ):
+                continue
+            spans.append((match.start(), match.end(), match.group(0), context.id))
+    return spans
+
+
+def count_context_occurrences(
+    text: str, identifiers: list[str], contexts: tuple[KeptContext, ...]
+) -> dict[str, int]:
+    """Old-name occurrences each kept context holds, outside kept identifiers."""
+    counts: Counter[str] = Counter()
+    for _, _, original, context_id in _kept_spans(text, identifiers, contexts):
+        if context_id is not None:
+            counts[context_id] += len(OLD_NAME_PATTERN.findall(original))
+    return dict(counts)
+
+
+def protect(
+    text: str,
+    identifiers: list[str],
+    contexts: tuple[KeptContext, ...] = (),
+) -> tuple[str, list[tuple[str, str]], dict[str, int]]:
+    """Replace every kept spelling with a stand-in before the rename runs."""
+    spans = sorted(_kept_spans(text, identifiers, contexts))
     used: list[tuple[str, str]] = []
-    for index, identifier in enumerate(identifiers):
-        if identifier in text:
-            stand_in = placeholder(index)
-            text = text.replace(identifier, stand_in)
-            used.append((stand_in, identifier))
-    return text, used
+    for index in range(len(spans) - 1, -1, -1):
+        start, end, _, _ = spans[index]
+        stand_in = placeholder(index)
+        text = text[:start] + stand_in + text[end:]
+        used.append((stand_in, spans[index][2]))
+    counts: Counter[str] = Counter()
+    for _, _, original, context_id in spans:
+        if context_id is not None:
+            counts[context_id] += len(OLD_NAME_PATTERN.findall(original))
+    return text, used, dict(counts)
 
 
 def restore(text: str, used: list[tuple[str, str]]) -> str:

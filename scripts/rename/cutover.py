@@ -17,14 +17,39 @@ ORIGINS = frozenset({"inventory", "brief"})
 # A step whose written instruction was corrected after a defect is checked
 # structurally as well as by reading it: the block it carries is the part that
 # must survive an edit, so removing it fails here rather than in a review.
-REQUIRED_STEP_BLOCKS: dict[str, dict[str, tuple[str, ...]]] = {
-    "C0-freeze": {"queued_requests": ("listing", "rule", "parked_worktree")},
-    "C7-reckon-project-key": {"preserved_ids": ("plans", "runs", "rule")},
+REQUIRED_STEP_BLOCKS = {
+    "C0-freeze": {
+        "queued_requests": (
+            "listing",
+            "operator_instruction",
+            "rule",
+            "parked_worktree",
+        )
+    },
+    "C7-reckon-project-key": {
+        "unchanged": (
+            "project_key",
+            "mounts_entry",
+            "state_directory",
+            "stored_reviews",
+            "ledger_rows",
+            "worktree_root",
+            "rule",
+        )
+    },
     "C9-gate-scripts": {
         "kept_directory": ("path", "disposition", "regenerated_by", "rule")
     },
 }
 REQUIRED_BLOCK_VALUES = {"kept_directory": {"disposition": "kept"}}
+REQUIRED_STEP_DISPOSITIONS = {
+    "C7-reckon-project-key": "kept",
+    "C9-gate-scripts": "kept",
+}
+REQUIRED_STEP_TITLE_WORDS = {"C9-gate-scripts": ("regenerate", "evidence")}
+# The reckon step is a check, not a move: a text that carries either of these
+# has turned it back into a migration of the key or the state directory;
+FORBIDDEN_STEP_TEXT = {"C7-reckon-project-key": ("git mv", "docs/state/iter-codex")}
 
 
 @dataclass
@@ -146,16 +171,32 @@ def _check_tracked_rename(data: dict, report: CutoverReport) -> None:
                 f"tracked_rename names kept scope {scope!r}, which the kept list does not carry"
             )
             continue
-        if not entry.include:
-            report.violations.append(
-                f"kept scope {scope!r} keeps every file under {entry.path}; a scope the "
-                "rename relies on names the data and prose extensions it keeps, because "
-                "the Python beside them is live code"
-            )
-        elif any(fnmatch.fnmatch("probe.py", pattern) for pattern in entry.include):
-            report.violations.append(
-                f"kept scope {scope!r} keeps Python under {entry.path}; live code is renamed"
-            )
+        if entry.path.rstrip("/") == "docs/evidence":
+            if entry.include:
+                report.violations.append(
+                    f"kept scope {scope!r} narrows {entry.path} to an include list; the "
+                    "evidence default is every file under the path, so a new evidence "
+                    "file type needs no change to this list"
+                )
+            for name in ("probe.py", "probe.sh"):
+                if not any(fnmatch.fnmatch(name, pattern) for pattern in entry.exclude):
+                    report.violations.append(
+                        f"kept scope {scope!r} does not rename {name} under "
+                        f"{entry.path}: the live code beside the kept bytes follows "
+                        "the package"
+                    )
+        else:
+            if not entry.include:
+                report.violations.append(
+                    f"kept scope {scope!r} keeps every file under {entry.path}; this "
+                    "scope names the data extensions it keeps, because the script "
+                    "beside them is live code"
+                )
+            elif any(fnmatch.fnmatch("probe.py", pattern) for pattern in entry.include):
+                report.violations.append(
+                    f"kept scope {scope!r} keeps Python under {entry.path}; live code "
+                    "is renamed"
+                )
 
 
 def _load_kept_list(reference: str, report: CutoverReport) -> KeptList | None:
@@ -196,6 +237,28 @@ def _check_required_blocks(data: dict, report: CutoverReport) -> None:
                         f"step {step_id} {block} records {key}={value.get(key)!r}, "
                         f"expected {expected!r}"
                     )
+        disposition = REQUIRED_STEP_DISPOSITIONS.get(step_id)
+        if disposition and step.get("disposition") != disposition:
+            report.violations.append(
+                f"step {step_id} records disposition {step.get('disposition')!r}, "
+                f"expected {disposition!r}"
+            )
+        text = str(step.get("title") or "").lower()
+        for word in REQUIRED_STEP_TITLE_WORDS.get(step_id, ()):
+            if word not in text:
+                report.violations.append(
+                    f"step {step_id} no longer states {word!r}: the title and the "
+                    "body have drifted apart"
+                )
+        body = " ".join(
+            str(step.get(key) or "") for key in ("title", "step", "check", "undo")
+        ).lower()
+        for phrase in FORBIDDEN_STEP_TEXT.get(step_id, ()):
+            if phrase in body:
+                report.violations.append(
+                    f"step {step_id} carries {phrase!r}; this step checks that reckon "
+                    "keeps its key and state directory, it does not move them"
+                )
 
 
 def format_report(report: CutoverReport) -> str:
