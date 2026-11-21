@@ -69,6 +69,16 @@
       "note": "The setpoint measure now requires at least one signal decided as a setpoint, or the section is delivered as failed with the reason; the search clause names a system that holds one.",
       "reason": "",
       "when": "2026-11-21T20:12:26.666773+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "9de770617b6d527f62780ebb5b878d2251ebc76b",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The pilot comparison now has a failing condition: every changed value is read by hand and none may be wrong.",
+      "reason": "",
+      "when": "2026-11-21T20:12:31.344574+00:00"
     }
   ],
   "responses": {
@@ -80,6 +90,15 @@
       "note": "The setpoint measure now requires at least one signal decided as a setpoint, or the section is delivered as failed with the reason; the search clause names a system that holds one.",
       "reason": "",
       "when": "2026-11-21T20:12:26.666773+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "9de770617b6d527f62780ebb5b878d2251ebc76b",
+      "commit_basis": "edit",
+      "note": "The pilot comparison now has a failing condition: every changed value is read by hand and none may be wrong.",
+      "reason": "",
+      "when": "2026-11-21T20:12:31.344574+00:00"
     },
     "wiring-1": {
       "action": "acted",
