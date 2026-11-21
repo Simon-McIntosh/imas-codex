@@ -25,7 +25,24 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 98,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The node's dispatch contract carries it: the walk must return the measured-against signal as a typed relation with its kind and rule, and the same walk before the run, or with the relation removed, must not return that typed relation.",
+      "when": "2026-11-21T10:31:48.755759+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The node's dispatch contract carries it: the walk must return the measured-against signal as a typed relation with its kind and rule, and the same walk before the run, or with the relation removed, must not return that typed relation.",
+      "when": "2026-11-21T10:31:48.755759+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261121T082352936023-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261121T082352936023-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "65415f13645852919e029c7e434c42e60b76d3b8",
   "rubric": "content",
