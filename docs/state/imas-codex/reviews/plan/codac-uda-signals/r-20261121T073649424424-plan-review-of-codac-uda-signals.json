@@ -49,7 +49,30 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 94,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2b5c1e6992bc587ea8faa6eee2575eb14bd6953c",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The pulse link is now established by the designation token the category name carries under the archive's naming convention, matched exactly to a control node or component code, which the pulse import already parses; a name that only resembles a system gives no link.",
+      "reason": "",
+      "when": "2026-11-21T07:54:08.858439+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2b5c1e6992bc587ea8faa6eee2575eb14bd6953c",
+      "commit_basis": "edit",
+      "note": "The pulse link is now established by the designation token the category name carries under the archive's naming convention, matched exactly to a control node or component code, which the pulse import already parses; a name that only resembles a system gives no link.",
+      "reason": "",
+      "when": "2026-11-21T07:54:08.858439+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261121T073649424424-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261121T073649424424-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "b38de2a04f8b2af103c8c61eeb8cda75fd4dc482",
   "rubric": "content",
