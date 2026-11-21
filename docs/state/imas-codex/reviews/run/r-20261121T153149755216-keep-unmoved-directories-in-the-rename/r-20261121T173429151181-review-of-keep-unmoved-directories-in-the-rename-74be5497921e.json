@@ -1,0 +1,25 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-21T17:40:54.786Z",
+  "dispatched_at": "2026-11-21T17:34:49Z",
+  "findings": [],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to stop the rename rewriting paths to three directories that stay put and to test the shipped kept contexts; scripts/rename/kept_names.json:126-143 adds checkout-directory (floor 30), reckon-worktree-root (8) and gate-script-cache (2), which is exactly that deliverable.\nVERDICT done_when: the done_when asks for shipped contexts with floors, a test reading the shipped file and applying the rename to literal samples, deletion/zero-floor failures, scratch-tree counts, idempotence and a clean closing search; the gate at tests/scripts/test_rename.py:975-1010 asserts the shipped-context samples and the manifest records the rehearsal counts, negative controls and both arm suites.\nVERDICT write_paths: the declared paths are scripts/rename, tests/scripts and the evidence fragment; the three changed files are scripts/rename/kept_names.json, tests/scripts/test_rename.py and docs/evidence/fragments/codac-uda-signals/keep-unmoved-directories-in-the-rename.html, all inside them.\nVERDICT manifest: read; it states tests/scripts passed, names the two arm logs and four negative-control logs, records both arms as single-line JSON with whole test ids, and lists the three changed paths.\nVERDICT diff: read commit by commit against 25da0bcde; f11b6d6c9 adds the three kept contexts and their tests, 74be54979 adds the evidence fragment, and no other path changed.\nCALL_SITES: scripts/rename/apply.py:apply_rename, scripts/rename/check.py:check_tree, scripts/rename/cutover.py:check_cutover, scripts/rename/__main__.py:main\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/rename/kept_names.json:126 keeps the checkout path in absolute, tilde, $HOME, ${HOME} and ${userHome} spellings while the moved roots are still renamed, which is the goal stated in the node brief.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/scripts/test_rename.py:1004 asserts each moving root, the repository URL and the import are renamed, and the manifest's baseline_suite/after_suite logs carry 23 identical failing ids (verified by diffing the logs), so added failures are zero.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff (kept_names.json, test_rename.py, the evidence fragment) is inside the declared write paths and nothing else changed.\nSCORE durability: 19\nJUSTIFICATION durability: tests/scripts/test_rename.py:986 reads the shipped kept list through load_kept_list and asserts the sample is byte-identical, so removing a shipped context or zeroing its floor reddens it, as the recorded negative-control logs show (8 and 4 failures, exit 1).\nSCORE fit: 19\nJUSTIFICATION fit: the test composes the same protect/rename_text/restore path production uses at scripts/rename/apply.py:152-156, and the context ids and test names are capability names with no plan or ticket labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change reuses scripts/rename/tree.py:load_kept_list and the rules.py protected-span machinery rather than forking a kept-name matcher, and the floor is enforced by the existing check at scripts/rename/check.py:174-181.\n",
+  "review_run_id": "r-20261121T173429151181-review-of-keep-unmoved-directories-in-the-rename-74be5497921e",
+  "reviewed_base_sha": "25da0bcde8dfdbd62019e5cfcd8440d62bcbda45",
+  "reviewed_head_sha": "74be5497921e673e1b1bdf2fdd556575b82b349c",
+  "reviewed_run_id": "r-20261121T153149755216-keep-unmoved-directories-in-the-rename",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T17:41:07.918698+00:00",
+  "total": 114
+}
