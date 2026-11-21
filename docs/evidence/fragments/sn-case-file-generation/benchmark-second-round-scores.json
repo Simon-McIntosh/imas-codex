@@ -1,0 +1,1155 @@
+{
+  "schema": "imas-codex.standard-name-record-benchmark/second-round/scores",
+  "packets": 255,
+  "verdicts": 255,
+  "undecided_packet_lines": 0,
+  "unrecognised_verdicts": [],
+  "rule": "A name is right when it denotes the same quantity; a definition is right when it states every reference definition point. Both right means both. Group is not scored.",
+  "arms": {
+    "incumbent": {
+      "members": 87,
+      "name_scored": 80,
+      "name_right": 55,
+      "name_share": 0.6875,
+      "name_interval": [
+        0.5793222425531255,
+        0.7784959588710518
+      ],
+      "definition_scored": 86,
+      "definition_right": 80,
+      "definition_share": 0.9302325581395349,
+      "definition_interval": [
+        0.8560385935896314,
+        0.9676345854900786
+      ],
+      "both_scored": 79,
+      "both_right": 54,
+      "both_share": 0.6835443037974683,
+      "both_interval": [
+        0.5745191237451232,
+        0.7755471403312849
+      ],
+      "blocked": 0,
+      "blocked_by_type": {},
+      "changed_right_incumbent": 0,
+      "right_incumbent_total": 64,
+      "changed_right_incumbent_share": 0.0,
+      "cost_usd": 0.0,
+      "seconds": 0.0,
+      "cost_per_name": 0.0,
+      "seconds_per_name": 0.0
+    },
+    "keep-or-repair/frontier": {
+      "members": 87,
+      "name_scored": 72,
+      "name_right": 58,
+      "name_share": 0.8055555555555556,
+      "name_interval": [
+        0.6996724105411147,
+        0.8804852062054944
+      ],
+      "definition_scored": 77,
+      "definition_right": 72,
+      "definition_share": 0.935064935064935,
+      "definition_interval": [
+        0.8568357493578059,
+        0.9719469195522837
+      ],
+      "both_scored": 71,
+      "both_right": 56,
+      "both_share": 0.7887323943661971,
+      "both_interval": [
+        0.6802502178379415,
+        0.867574485823009
+      ],
+      "blocked": 9,
+      "blocked_by_type": {
+        "collision": 4,
+        "insufficient-source-text": 1,
+        "registry-conflict": 4
+      },
+      "changed_right_incumbent": 53,
+      "right_incumbent_total": 64,
+      "changed_right_incumbent_share": 0.828125,
+      "cost_usd": 1.925792,
+      "seconds": 6240.517479419708,
+      "cost_per_name": 0.022135540229885058,
+      "seconds_per_name": 71.73008597034148
+    },
+    "keep-or-repair/local": {
+      "members": 87,
+      "name_scored": 78,
+      "name_right": 62,
+      "name_share": 0.7948717948717948,
+      "name_interval": [
+        0.6924602695475389,
+        0.8696020478016798
+      ],
+      "definition_scored": 84,
+      "definition_right": 74,
+      "definition_share": 0.8809523809523809,
+      "definition_interval": [
+        0.7945508422552969,
+        0.9340345075240097
+      ],
+      "both_scored": 78,
+      "both_right": 60,
+      "both_share": 0.7692307692307693,
+      "both_interval": [
+        0.6644424217371642,
+        0.8487449114947313
+      ],
+      "blocked": 3,
+      "blocked_by_type": {
+        "insufficient-source-text": 3
+      },
+      "changed_right_incumbent": 28,
+      "right_incumbent_total": 64,
+      "changed_right_incumbent_share": 0.4375,
+      "cost_usd": 0.0,
+      "seconds": 10677.495181560516,
+      "cost_per_name": 0.0,
+      "seconds_per_name": 122.72982967310938
+    },
+    "one-pass/frontier": {
+      "members": 87,
+      "name_scored": 66,
+      "name_right": 54,
+      "name_share": 0.8181818181818182,
+      "name_interval": [
+        0.7085480732292816,
+        0.8928139359439194
+      ],
+      "definition_scored": 69,
+      "definition_right": 67,
+      "definition_share": 0.9710144927536232,
+      "definition_interval": [
+        0.9003341623693444,
+        0.9920147973076359
+      ],
+      "both_scored": 66,
+      "both_right": 53,
+      "both_share": 0.803030303030303,
+      "both_interval": [
+        0.6916121200582054,
+        0.8811136029638907
+      ],
+      "blocked": 18,
+      "blocked_by_type": {
+        "collision": 9,
+        "grammar-gap": 4,
+        "insufficient-source-text": 3,
+        "registry-conflict": 2
+      },
+      "changed_right_incumbent": 64,
+      "right_incumbent_total": 64,
+      "changed_right_incumbent_share": 1.0,
+      "cost_usd": 1.5099319999999996,
+      "seconds": 4604.580507993698,
+      "cost_per_name": 0.017355540229885055,
+      "seconds_per_name": 52.92621273555975
+    },
+    "perturbed/frontier": {
+      "members": 87,
+      "name_scored": 22,
+      "name_right": 16,
+      "name_share": 0.7272727272727273,
+      "name_interval": [
+        0.5184826598759761,
+        0.8684923971201054
+      ],
+      "definition_scored": 27,
+      "definition_right": 22,
+      "definition_share": 0.8148148148148148,
+      "definition_interval": [
+        0.6330131638145156,
+        0.9181929285702346
+      ],
+      "both_scored": 22,
+      "both_right": 15,
+      "both_share": 0.6818181818181818,
+      "both_interval": [
+        0.47318597741042745,
+        0.8363940681864375
+      ],
+      "blocked": 60,
+      "blocked_by_type": {
+        "collision": 4,
+        "grammar-gap": 1,
+        "insufficient-source-text": 39,
+        "registry-conflict": 16
+      },
+      "changed_right_incumbent": 58,
+      "right_incumbent_total": 64,
+      "changed_right_incumbent_share": 0.90625,
+      "cost_usd": 1.7676569999999996,
+      "seconds": 6630.171919584274,
+      "cost_per_name": 0.020317896551724134,
+      "seconds_per_name": 76.2088726388997
+    }
+  },
+  "comparisons": [
+    {
+      "arms": [
+        "incumbent",
+        "keep-or-repair/frontier"
+      ],
+      "members": 77,
+      "right_a": 53,
+      "right_b": 54,
+      "both_right": 47,
+      "only_a_right": 6,
+      "only_b_right": 7,
+      "difference": 0.012987012987012988,
+      "interval": [
+        -0.07792207792207795,
+        0.10389610389610393
+      ],
+      "called_win": false
+    },
+    {
+      "arms": [
+        "incumbent",
+        "keep-or-repair/local"
+      ],
+      "members": 79,
+      "right_a": 54,
+      "right_b": 59,
+      "both_right": 51,
+      "only_a_right": 3,
+      "only_b_right": 8,
+      "difference": 0.06329113924050633,
+      "interval": [
+        -0.012658227848101333,
+        0.139240506329114
+      ],
+      "called_win": false
+    },
+    {
+      "arms": [
+        "incumbent",
+        "one-pass/frontier"
+      ],
+      "members": 79,
+      "right_a": 54,
+      "right_b": 51,
+      "both_right": 48,
+      "only_a_right": 6,
+      "only_b_right": 3,
+      "difference": -0.0379746835443038,
+      "interval": [
+        -0.11392405063291144,
+        0.03797468354430378
+      ],
+      "called_win": false
+    },
+    {
+      "arms": [
+        "incumbent",
+        "perturbed/frontier"
+      ],
+      "members": 78,
+      "right_a": 54,
+      "right_b": 15,
+      "both_right": 12,
+      "only_a_right": 42,
+      "only_b_right": 3,
+      "difference": -0.5,
+      "interval": [
+        -0.6282051282051282,
+        -0.3717948717948718
+      ],
+      "called_win": true
+    },
+    {
+      "arms": [
+        "keep-or-repair/frontier",
+        "keep-or-repair/local"
+      ],
+      "members": 79,
+      "right_a": 56,
+      "right_b": 59,
+      "both_right": 50,
+      "only_a_right": 6,
+      "only_b_right": 9,
+      "difference": 0.0379746835443038,
+      "interval": [
+        -0.050949367088608796,
+        0.1392405063291139
+      ],
+      "called_win": false
+    },
+    {
+      "arms": [
+        "keep-or-repair/frontier",
+        "one-pass/frontier"
+      ],
+      "members": 80,
+      "right_a": 56,
+      "right_b": 52,
+      "both_right": 48,
+      "only_a_right": 8,
+      "only_b_right": 4,
+      "difference": -0.05,
+      "interval": [
+        -0.13749999999999996,
+        0.03749999999999998
+      ],
+      "called_win": false
+    },
+    {
+      "arms": [
+        "keep-or-repair/frontier",
+        "perturbed/frontier"
+      ],
+      "members": 80,
+      "right_a": 56,
+      "right_b": 15,
+      "both_right": 13,
+      "only_a_right": 43,
+      "only_b_right": 2,
+      "difference": -0.5125,
+      "interval": [
+        -0.6375,
+        -0.3875
+      ],
+      "called_win": true
+    },
+    {
+      "arms": [
+        "keep-or-repair/local",
+        "one-pass/frontier"
+      ],
+      "members": 81,
+      "right_a": 60,
+      "right_b": 52,
+      "both_right": 47,
+      "only_a_right": 13,
+      "only_b_right": 5,
+      "difference": -0.09876543209876543,
+      "interval": [
+        -0.19753086419753085,
+        -0.0
+      ],
+      "called_win": false
+    },
+    {
+      "arms": [
+        "keep-or-repair/local",
+        "perturbed/frontier"
+      ],
+      "members": 80,
+      "right_a": 60,
+      "right_b": 15,
+      "both_right": 11,
+      "only_a_right": 49,
+      "only_b_right": 4,
+      "difference": -0.5625,
+      "interval": [
+        -0.6875,
+        -0.42500000000000004
+      ],
+      "called_win": true
+    },
+    {
+      "arms": [
+        "one-pass/frontier",
+        "perturbed/frontier"
+      ],
+      "members": 81,
+      "right_a": 52,
+      "right_b": 15,
+      "both_right": 12,
+      "only_a_right": 40,
+      "only_b_right": 3,
+      "difference": -0.4567901234567901,
+      "interval": [
+        -0.5802469135802468,
+        -0.33333333333333337
+      ],
+      "called_win": true
+    }
+  ],
+  "member_comparison": [
+    {
+      "member": "accumulated_total_gas_count",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/local": "right"
+      }
+    },
+    {
+      "member": "accumulated_total_prefill_gas_count",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/local": "right"
+      }
+    },
+    {
+      "member": "accumulated_tritium_prefill_count",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong"
+      }
+    },
+    {
+      "member": "alpha_angle_of_coil_conductor_element",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "unscored",
+        "keep-or-repair/local": "right"
+      }
+    },
+    {
+      "member": "area_of_plasma_filament",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "back_surface_neutron_flux",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong"
+      }
+    },
+    {
+      "member": "coefficient_of_flux_surface",
+      "arms": {
+        "incumbent": "unscored",
+        "keep-or-repair/frontier": "unscored",
+        "keep-or-repair/local": "unscored",
+        "one-pass/frontier": "unscored",
+        "perturbed/frontier": "unscored"
+      }
+    },
+    {
+      "member": "current_of_divertor",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "decay_time_due_to_disruption",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong",
+        "perturbed/frontier": "wrong"
+      }
+    },
+    {
+      "member": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "effective_turn_count_of_passive_loop",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong"
+      }
+    },
+    {
+      "member": "electron_particle_flux_at_wall_due_to_pumping",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong",
+        "perturbed/frontier": "wrong"
+      }
+    },
+    {
+      "member": "elongation_of_flux_surface",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "equilibrium_weight_of_interferometer_beam",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right"
+      }
+    },
+    {
+      "member": "ethylene_source_rate",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "right",
+        "perturbed/frontier": "wrong"
+      }
+    },
+    {
+      "member": "external_loop_voltage",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "faraday_angle",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "flux_surface_averaged_magnetic_field_magnitude",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "flux_surface_averaged_major_radius",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "grating_line_density",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "height_of_plasma_filament",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "hydrogen_density_at_limiter",
+      "arms": {
+        "incumbent": "unscored",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "inverse_of_square_of_magnetic_field_magnitude",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "loop_voltage_at_plasma_boundary",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "lower_bound_photon_energy",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "lower_inner_squareness_of_flux_surface",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "minimum_gas_flow",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong"
+      }
+    },
+    {
+      "member": "minor_length_of_plasma_filament",
+      "arms": {
+        "incumbent": "unscored",
+        "keep-or-repair/frontier": "unscored",
+        "keep-or-repair/local": "unscored",
+        "one-pass/frontier": "unscored",
+        "perturbed/frontier": "unscored"
+      }
+    },
+    {
+      "member": "minor_radius_of_plasma_boundary",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "normalized_collisionality",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "normalized_minor_radius_of_flux_surface",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "wrong"
+      }
+    },
+    {
+      "member": "normalized_toroidal_beta",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "wrong"
+      }
+    },
+    {
+      "member": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "wrong",
+        "perturbed/frontier": "wrong"
+      }
+    },
+    {
+      "member": "outer_radius_of_plasma_filament",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "particle_energy",
+      "arms": {
+        "incumbent": "unscored",
+        "keep-or-repair/frontier": "unscored",
+        "keep-or-repair/local": "unscored",
+        "perturbed/frontier": "unscored"
+      }
+    },
+    {
+      "member": "plasma_current",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "polarization_angle_at_constraint_position",
+      "arms": {
+        "incumbent": "wrong"
+      }
+    },
+    {
+      "member": "poloidal_beta",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "poloidal_length_of_flux_surface",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "poloidal_magnetic_flux",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "poloidal_magnetic_flux_at_magnetic_axis",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "poloidal_plane_cross_sectional_area_of_plasma_boundary",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "power_at_divertor_target_due_to_recombination",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "radial_coordinate_at_inboard_midplane",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong"
+      }
+    },
+    {
+      "member": "radial_coordinate_of_current_center",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong"
+      }
+    },
+    {
+      "member": "radial_coordinate_of_poloidal_field_coil",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "wrong"
+      }
+    },
+    {
+      "member": "radial_separatrix_distance_at_outboard_midplane",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "radius_of_poloidal_field_coil",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "unscored",
+        "keep-or-repair/local": "wrong",
+        "perturbed/frontier": "unscored"
+      }
+    },
+    {
+      "member": "ratio_of_particle_temperature_to_particle_reference_temperature",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "resistivity_of_plasma_facing_component",
+      "arms": {
+        "incumbent": "unscored",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right"
+      }
+    },
+    {
+      "member": "right_hand_circularly_polarized_wave_electric_field",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "safety_factor_at_magnetic_axis",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "second_local_tangential_width_of_optical_element",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "spectral_photon_radiance",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "spectral_rate_of_spectrometer_channel",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/local": "wrong"
+      }
+    },
+    {
+      "member": "square_of_toroidal_flux_coordinate_gradient_magnitude",
+      "arms": {
+        "incumbent": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "surface_temperature",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right"
+      }
+    },
+    {
+      "member": "temperature_of_sensor",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "thickness_of_breeder_blanket_layer",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right"
+      }
+    },
+    {
+      "member": "thickness_of_plasma_filament",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "toroidal_angle_of_control_surface",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "toroidal_angle_of_poloidal_magnetic_field_probe",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong"
+      }
+    },
+    {
+      "member": "toroidal_magnetic_field_at_magnetic_axis",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "toroidal_magnetic_flux_at_plasma_boundary",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "toroidal_parity",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong"
+      }
+    },
+    {
+      "member": "toroidal_reference_magnetic_field",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "toroidal_total_current_density",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "total_external_heating_power",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "triangularity_of_plasma_boundary",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "tungsten_density",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "right"
+      }
+    },
+    {
+      "member": "vertical_coordinate_of_constraint_position",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "vertical_coordinate_of_coordinate_system",
+      "arms": {
+        "incumbent": "unscored",
+        "keep-or-repair/frontier": "unscored",
+        "keep-or-repair/local": "unscored",
+        "one-pass/frontier": "right",
+        "perturbed/frontier": "unscored"
+      }
+    },
+    {
+      "member": "vertical_coordinate_of_current_center",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong"
+      }
+    },
+    {
+      "member": "vertical_coordinate_of_measurement_position",
+      "arms": {
+        "incumbent": "unscored",
+        "keep-or-repair/local": "unscored"
+      }
+    },
+    {
+      "member": "vertical_coordinate_of_plasma_filament",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "vertical_outline_of_plasma_boundary",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/local": "right"
+      }
+    },
+    {
+      "member": "volume_of_flux_surface",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    },
+    {
+      "member": "wave_phase_of_wave_beam",
+      "arms": {
+        "incumbent": "unscored",
+        "keep-or-repair/frontier": "unscored",
+        "keep-or-repair/local": "unscored",
+        "one-pass/frontier": "unscored"
+      }
+    },
+    {
+      "member": "weight_of_interferometer_beam",
+      "arms": {
+        "incumbent": "wrong",
+        "keep-or-repair/frontier": "wrong",
+        "keep-or-repair/local": "wrong",
+        "one-pass/frontier": "wrong",
+        "perturbed/frontier": "wrong"
+      }
+    },
+    {
+      "member": "y_major_axis_unit_vector_of_shatter_cone",
+      "arms": {
+        "incumbent": "right",
+        "keep-or-repair/frontier": "right",
+        "keep-or-repair/local": "right",
+        "one-pass/frontier": "right"
+      }
+    }
+  ]
+}

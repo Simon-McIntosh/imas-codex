@@ -1,0 +1,312 @@
+{
+ "schema": "imas-codex.standard-name-record-benchmark/second-round/incumbent-defects",
+ "note": "Classes assigned by the coordinating session to the held-out incumbents its committed blind verdicts mark not right on name or definition. A class is the adjudicator's reading of why the record fails; the verdicts are in benchmark-second-round-verdicts.jsonl and the arm figures in benchmark-second-round-scores.json.",
+ "held_out_members": 87,
+ "incumbent_not_right": 33,
+ "classes": [
+  {
+   "class": "name drops a qualifier the source states",
+   "count": 15,
+   "repaired_by_local": 9,
+   "repaired_by_frontier": 6,
+   "members": [
+    {
+     "member": "accumulated_total_gas_count",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": true,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "accumulated_total_prefill_gas_count",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": true,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "accumulated_tritium_prefill_count",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "ethylene_source_rate",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": true,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "back_surface_neutron_flux",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": true,
+     "right_after_keep_or_repair_frontier": true
+    },
+    {
+     "member": "thickness_of_breeder_blanket_layer",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "wrong",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": true,
+     "right_after_keep_or_repair_frontier": true
+    },
+    {
+     "member": "surface_temperature",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "wrong",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": true,
+     "right_after_keep_or_repair_frontier": true
+    },
+    {
+     "member": "normalized_collisionality",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": true,
+     "right_after_keep_or_repair_frontier": true
+    },
+    {
+     "member": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": true,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "effective_turn_count_of_passive_loop",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": true
+    },
+    {
+     "member": "electron_particle_flux_at_wall_due_to_pumping",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "spectral_rate_of_spectrometer_channel",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "polarization_angle_at_constraint_position",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "toroidal_angle_of_poloidal_magnetic_field_probe",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "resistivity_of_plasma_facing_component",
+     "incumbent_name_verdict": "undecidable",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": true,
+     "right_after_keep_or_repair_frontier": true
+    }
+   ]
+  },
+  {
+   "class": "name has no owner or subject",
+   "count": 7,
+   "repaired_by_local": 0,
+   "repaired_by_frontier": 1,
+   "members": [
+    {
+     "member": "vertical_coordinate_of_current_center",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "radial_coordinate_of_current_center",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "radial_coordinate_at_inboard_midplane",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "minimum_gas_flow",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": true
+    },
+    {
+     "member": "weight_of_interferometer_beam",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "decay_time_due_to_disruption",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "wrong",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "radius_of_poloidal_field_coil",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    }
+   ]
+  },
+  {
+   "class": "one name for several quantities, or a parent too vague to identify one",
+   "count": 6,
+   "repaired_by_local": 0,
+   "repaired_by_frontier": 0,
+   "members": [
+    {
+     "member": "coefficient_of_flux_surface",
+     "incumbent_name_verdict": "undecidable",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "particle_energy",
+     "incumbent_name_verdict": "undecidable",
+     "incumbent_definition_verdict": "wrong",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "wave_phase_of_wave_beam",
+     "incumbent_name_verdict": "undecidable",
+     "incumbent_definition_verdict": "wrong",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "vertical_coordinate_of_coordinate_system",
+     "incumbent_name_verdict": "undecidable",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "vertical_coordinate_of_measurement_position",
+     "incumbent_name_verdict": "undecidable",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "minor_length_of_plasma_filament",
+     "incumbent_name_verdict": "undecidable",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": false,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    }
+   ]
+  },
+  {
+   "class": "wrong or garbled term",
+   "count": 4,
+   "repaired_by_local": 0,
+   "repaired_by_frontier": 1,
+   "members": [
+    {
+     "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": true
+    },
+    {
+     "member": "toroidal_parity",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "right",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    },
+    {
+     "member": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+     "incumbent_name_verdict": "wrong",
+     "incumbent_definition_verdict": "wrong",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": false
+    }
+   ]
+  },
+  {
+   "class": "definition fault alone",
+   "count": 1,
+   "repaired_by_local": 0,
+   "repaired_by_frontier": 1,
+   "members": [
+    {
+     "member": "hydrogen_density_at_limiter",
+     "incumbent_name_verdict": "right",
+     "incumbent_definition_verdict": "undecidable",
+     "source_text_present": true,
+     "right_after_keep_or_repair_local": false,
+     "right_after_keep_or_repair_frontier": true
+    }
+   ]
+  }
+ ]
+}
