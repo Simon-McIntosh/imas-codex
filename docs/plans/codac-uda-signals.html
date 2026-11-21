@@ -23,7 +23,7 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="101">
+<meta name="plan-version" content="102">
 <meta name="plan-modified" content="2026-11-21">
 </head>
 <body>
@@ -322,6 +322,9 @@
 </div>
 <div class="r-comment" data-section="s25" data-id="c-run-r-20261121T111649974096-review-of-measure-category-names-against-plant-codes-bf4de0896e9c" data-who="reckon-build" data-when="2026-11-21T11:33:50.468Z">
     <div class="r-comment-body"><p>review of r-20261121T103158287430-measure-category-names-against-plant-codes at f77dd1120..bf4de0896 scores goal_fidelity 18, evidence 16, scope_discipline 19, durability 18, fit 17, reuse 18; added failures 0/0 against the reviewed run's gate log; two non-blocking findings (the fragment says the negative control fails "four" tests while the log lists five; select_hand_sample near-duplicates the private standard-names sampling helpers) and no blocking finding; the records are stored under the reviewed run's review-records/ as the plain and the at-bf4de0896 copies.</p></div>
+</div>
+<div class="r-comment" data-section="s25" data-id="c-run-r-20261121T103158287430-measure-category-names-against-plant-codes" data-who="reckon-build" data-when="2026-11-21T11:16:40.515Z">
+    <div class="r-comment-body"><p>categories_read=744 (equals the graph PulseCategory count); whole delimited part equal to a control-node code: 711 categories, 6 distinct codes; whole delimited part equal to a plant-component code: 11 categories, 1 distinct code; code only inside a longer word: 17 categories, 1 distinct code; exactly one linked (or carried) code: 728 categories, 5906 pulses; more than one: 0 categories, 0 pulses; none: 16 categories, 51 pulses (728+0+16=744); sealed hand-sample digest f9c782a1cb2a636ac95237bff7178bfbcdc64ba7fc41766a2e3c4eaf425f5158; hand reading 5 right, 0 wrong, 15 undecidable; delimited-part rule would link 711/744 = 95.565% of categories with zero wrong in the twenty; links written 0; search-behaviour changes 0</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261115T024952708941-review-of-archive-pulse-schema-179e16f1bee2" data-who="reckon-build" data-when="2026-11-15T03:56:30.143Z">
     <div class="r-comment-body"><p>Reviewed run r-20261115T021249205435-archive-pulse-schema at 1c2476daf9f7c83e4eaa0d56c60fb0d132c05136..179e16f1bee2299fd628a85eeba20f2ff03c1a78; scores goal_fidelity 19, evidence 18, scope_discipline 19, durability 18, fit 19, reuse 14; added_failure_count 0 with an empty added_failure_ids; three non-blocking findings recorded on the Pulse identity collision, a forked host-key exclusion helper, and the private-overlay merge shape; the parsed record is stored at both declared paths and passes the review contract with findings []</p></div>
