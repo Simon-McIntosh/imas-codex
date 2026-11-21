@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 7,
+  "call_sites": [
+    "iter_codex/graph/neo4j_ops.py:281 (_stop_neo4j calls stop_neo4j_job)",
+    "iter_codex/graph/neo4j_ops.py:285 (_stop_neo4j calls _clean_neo4j_locks at the exited node)",
+    "iter_codex/graph/neo4j_ops.py:295 (_stop_neo4j calls stop_local_store_holders)",
+    "iter_codex/cli/graph/server.py:316 (graph server stop calls stop_neo4j_job)",
+    "iter_codex/cli/embed.py:659 (embed stop calls _kill_login_embed under its own pgrep gate)",
+    "iter_codex/cli/embed.py:684 (embed stop calls _kill_embed_orphans under its own pgrep gate)",
+    "iter_codex/cli/services.py:1087,1399-1400,1437,1472,1880 (_stop_login_services, _deploy_neo4j_noslurm, deploy_embed, deploy_embed_noslurm and _deploy_login_embed_nohup call the new selection helpers)"
+  ],
+  "completed_at": "2026-11-21T23:15:00.887Z",
+  "dispatched_at": "2026-11-21T23:05:30Z",
+  "findings": [
+    {
+      "file": "iter_codex/cli/services.py",
+      "line": "990",
+      "severity": "non-blocking",
+      "text": "non-blocking: stop_neo4j_job runs _run_remote(f\"scancel {job_id}\", check=False) and discards the returned output, so the scheduler cancel prints nothing; goal requirement 6 states that the scheduler cancel and each signal print what they did, and check=False also hides a failing scancel until the later job-exit wait expires. No safety impact, because a scancel that did not take effect surfaces through _wait_for_job_exit raising, but this is the one stated goal item the node leaves unmet."
+    },
+    {
+      "file": "iter_codex/cli/services.py",
+      "line": "840",
+      "severity": "non-blocking",
+      "text": "non-blocking: _signal_pids builds `if kill -<sig> <pid> 2>/dev/null; then echo SIG..; else echo \"PID <pid> already gone\"; fi`, which collapses every failure (EPERM, EINVAL) into the single claim that the pid was already gone, so a signal refused for lack of permission is reported as a process that had exited; goal requirement 6 asks each signal to print what it did."
+    },
+    {
+      "file": "tests/cli/test_neo4j_stop_waits_for_exit.py",
+      "line": "186",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_lock_cleanup_refuses_while_a_process_holds_the_store asserts only that no collected script contains `pkill`; it does not assert that the lock-removal script never ran, so a reordering that executed the rm -f / dd clean script and raised afterwards would still pass this test while destroying the locks it guards."
+    },
+    {
+      "file": "iter_codex/cli/embed.py",
+      "line": "654",
+      "severity": "non-blocking",
+      "text": "non-blocking: the embed stop path in embed.py still decides whether to stop by `pgrep -u $USER -f \"iter-codex embed start\"` (and again at line 679 with `iter-codex embed`), so a server the pgrep misses is never handed to the new recorded-pid selector and survives the stop; the file is outside the node's declared write paths and the worker recorded it under outside_scope, so the repair belongs to a follow-up node rather than this one."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call site(s): iter_codex/graph/neo4j_ops.py:281,285,295, iter_codex/cli/graph/server.py:316, iter_codex/cli/embed.py:659,684, and the services.py deploy/stop helpers at 1087,1399-1400,1437,1472,1880.",
+    "diff": "read commits 58a42e631, 02dd39a63, f777948e6 and c5d94c341 against base f13d2860adde: five files, 887 insertions and 154 deletions; services.py replaces every pattern selector with a store/job/recorded-pid scan, neo4j_ops.py drops its three pkill calls for stop_local_store_holders, one existing test file is rewritten, one new test file and the evidence fragment are added.",
+    "done_when": "the done_when asks for a search free of pkill/killall/pgrep|kill in the two modules, scheduler- and process-table-faked tests for the five named cases, unchanged existing tests with both arms recorded, and a fragment listing each removed form; I grepped both modules at the reviewed head (services.py:1123 is a single pgrep inside _get_service_load that feeds only a resource measurement, neo4j_ops.py:926,944 are read-only status listings), and the four negative-control logs each show EXIT=1 with the specific failing test the done_when names.",
+    "goal": "the node goal is that stopping the graph service resolves every signalled process to a pid, shows it, and signals only that list, never touching the store while a holder remains; iter_codex/cli/services.py:651-712,834-909 implement the store/job scan, the printed listing, TERM-then-KILL escalation and the store-release wait, and iter_codex/cli/services.py:990 is the one goal item (requirement 6, the scheduler cancel printing what it did) left unmet.",
+    "manifest": "read; status complete, commits listed as four full shas, baseline_suite and after_suite recorded as single-line JSON naming their logs and whole test ids, four negative-control logs listed, and the worker's own outside_scope names the unrepaired embed.py pgrep calls; I confirmed each log on disk, including that base.log and repair-head.log carry the identical four FAILED ids.",
+    "write_paths": "the declared paths are iter_codex/graph/neo4j_ops.py, iter_codex/cli/services.py, tests/cli, tests/graph and docs/evidence/fragments/codac-uda-signals/stop-the-graph-by-listed-pids.html; every path in the diff is inside them and tests/graph was simply not needed."
+  },
+  "justifications": {
+    "durability": "tests/cli/test_stop_signals_listed_pids.py walks a real fake /proc tree with the production scan and negative_control_store_path.log shows four of its assertions failing when store-path attribution is removed, while tests/cli/test_neo4j_stop_waits_for_exit.py:186 is the one weak spot because it never asserts the rm/dd script did not run before the refusal.",
+    "evidence": "the gate command in the manifest names tests/cli tests/graph, base.log at f13d2860adde and repair-head.log at c5d94c341bce both record 4 failed with the same four ids and EXIT=1, and I re-ran the two focused node test files at the reviewed head myself for 23 passed EXIT=0.",
+    "fit": "the added helpers follow the module's own idiom (module-private snake_case names, click.echo for operator output, subprocess errors caught at the same boundary as services.py:944), with a redundant local `import shlex` left inside _run_on_node beside the new module-level import at iter_codex/cli/services.py:30.",
+    "goal_fidelity": "iter_codex/cli/services.py:651-712 and 834-909 deliver pids-by-store-or-job selection, printed listings, escalation and the store-release raise, but services.py:990 still discards the scancel output the goal's requirement 6 asks it to print.",
+    "reuse": "a capability search found no owner for store/job attribution: iter_codex/cli/host.py:140 lists processes by a name regex for the dashboard and iter_codex/remote/tunnel.py:114 owns only local tunnel pid files, so the new scan is the first owner and the recorded-pid reader wraps _run_remote rather than duplicating either.",
+    "scope_discipline": "every path the diff touches is inside the declared write paths, and the only out-of-scope need (iter_codex/cli/embed.py's pgrep gate) is recorded under outside_scope instead of being edited."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that stopping the graph service resolves every signalled process to a pid, shows it, and signals only that list, never touching the store while a holder remains; iter_codex/cli/services.py:651-712,834-909 implement the store/job scan, the printed listing, TERM-then-KILL escalation and the store-release wait, and iter_codex/cli/services.py:990 is the one goal item (requirement 6, the scheduler cancel printing what it did) left unmet.\nVERDICT done_when: the done_when asks for a search free of pkill/killall/pgrep|kill in the two modules, scheduler- and process-table-faked tests for the five named cases, unchanged existing tests with both arms recorded, and a fragment listing each removed form; I grepped both modules at the reviewed head (services.py:1123 is a single pgrep inside _get_service_load that feeds only a resource measurement, neo4j_ops.py:926,944 are read-only status listings), and the four negative-control logs each show EXIT=1 with the specific failing test the done_when names.\nVERDICT write_paths: the declared paths are iter_codex/graph/neo4j_ops.py, iter_codex/cli/services.py, tests/cli, tests/graph and docs/evidence/fragments/codac-uda-signals/stop-the-graph-by-listed-pids.html; every path in the diff is inside them and tests/graph was simply not needed.\nVERDICT manifest: read; status complete, commits listed as four full shas, baseline_suite and after_suite recorded as single-line JSON naming their logs and whole test ids, four negative-control logs listed, and the worker's own outside_scope names the unrepaired embed.py pgrep calls; I confirmed each log on disk, including that base.log and repair-head.log carry the identical four FAILED ids.\nVERDICT diff: read commits 58a42e631, 02dd39a63, f777948e6 and c5d94c341 against base f13d2860adde: five files, 887 insertions and 154 deletions; services.py replaces every pattern selector with a store/job/recorded-pid scan, neo4j_ops.py drops its three pkill calls for stop_local_store_holders, one existing test file is rewritten, one new test file and the evidence fragment are added.\nCALL_SITES: iter_codex/graph/neo4j_ops.py:281 (_stop_neo4j calls stop_neo4j_job), iter_codex/graph/neo4j_ops.py:285 (_stop_neo4j calls _clean_neo4j_locks), iter_codex/graph/neo4j_ops.py:295 (_stop_neo4j calls stop_local_store_holders), iter_codex/cli/graph/server.py:316 (graph server stop calls stop_neo4j_job), iter_codex/cli/embed.py:659 (embed stop calls _kill_login_embed), iter_codex/cli/embed.py:684 (embed stop calls _kill_embed_orphans), iter_codex/cli/services.py:1087,1399-1400,1437,1472,1880 (deploy and stop helpers call the new selection functions)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: iter_codex/cli/services.py:651-712 and 834-909 deliver pids-by-store-or-job selection, printed listings, escalation and the store-release raise, but services.py:990 still discards the scancel output the goal's requirement 6 asks it to print.\nSCORE evidence: 19\nJUSTIFICATION evidence: the gate command in the manifest names tests/cli tests/graph, base.log at f13d2860adde and repair-head.log at c5d94c341bce both record 4 failed with the same four ids and EXIT=1, and I re-ran the two focused node test files at the reviewed head myself for 23 passed EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path the diff touches is inside the declared write paths, and the only out-of-scope need (iter_codex/cli/embed.py's pgrep gate) is recorded under outside_scope instead of being edited.\nSCORE durability: 18\nJUSTIFICATION durability: tests/cli/test_stop_signals_listed_pids.py walks a real fake /proc tree with the production scan and negative_control_store_path.log shows four of its assertions failing when store-path attribution is removed, while tests/cli/test_neo4j_stop_waits_for_exit.py:186 never asserts the rm/dd script did not run before the refusal.\nSCORE fit: 19\nJUSTIFICATION fit: the added helpers follow the module's own idiom (module-private snake_case names, click.echo for operator output, subprocess errors caught at the same boundary as services.py:944), with a redundant local `import shlex` left inside _run_on_node beside the new module-level import at iter_codex/cli/services.py:30.\nSCORE reuse: 18\nJUSTIFICATION reuse: a capability search found no owner for store/job attribution: iter_codex/cli/host.py:140 lists processes by a name regex for the dashboard and iter_codex/remote/tunnel.py:114 owns only local tunnel pid files, so the new scan is the first owner and the recorded-pid reader wraps _run_remote rather than duplicating either.\nFINDING iter_codex/cli/services.py:990 non-blocking: stop_neo4j_job runs _run_remote(f\"scancel {job_id}\", check=False) and discards the returned output, so the scheduler cancel prints nothing; goal requirement 6 states that the scheduler cancel and each signal print what they did, and check=False also hides a failing scancel until the later job-exit wait expires, with no safety impact because a scancel that did not take effect surfaces through _wait_for_job_exit raising.\nFINDING iter_codex/cli/services.py:840 non-blocking: _signal_pids collapses every kill failure into the claim that the pid was already gone, so a signal refused for lack of permission is reported as a process that had exited.\nFINDING tests/cli/test_neo4j_stop_waits_for_exit.py:186 non-blocking: the lock-cleanup refusal test asserts only that no script contains pkill and never asserts the rm -f / dd clean script did not run, so a reordering that cleaned the locks and raised afterwards would still pass.\nFINDING iter_codex/cli/embed.py:654 non-blocking: the embed stop path still decides whether to stop by a pgrep name pattern (also at line 679), so a recorded-pid process the pgrep misses is never signalled; the file is outside the declared write paths and is recorded under outside_scope for a follow-up node.",
+  "review_node": "review-of-stop-the-graph-by-listed-pids-c5d94c341bce",
+  "review_run_id": "r-20261121T230501480768-review-of-stop-the-graph-by-listed-pids-c5d94c341bce",
+  "reviewed_base_sha": "f13d2860addec7925209d7095d0e80b9a339df48",
+  "reviewed_head_sha": "c5d94c341bce1c537cc0ed74378e9c4a7b5a9a76",
+  "reviewed_run_id": "r-20261121T205832963647-stop-the-graph-by-listed-pids",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261121T230501480768-review-of-stop-the-graph-by-listed-pids-c5d94c341bce"
+  },
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T23:15:12.629490+00:00",
+  "total": 111
+}
