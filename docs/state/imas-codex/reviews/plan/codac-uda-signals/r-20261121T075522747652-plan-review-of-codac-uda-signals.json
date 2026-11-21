@@ -51,9 +51,28 @@
       "note": "The premise was wrong: no designation is parsed. The category link is taken out of this section; a new measurement section first establishes from the catalogue how category names name systems, and writes no link.",
       "reason": "",
       "when": "2026-11-21T08:22:04.159319+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0692b8001be88cdf60010ec333d49a56efe4b6a1",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause is removed with the category link; the measurement section reports how many categories resolve, so an empty outcome is a stated result and not a pass.",
+      "reason": "",
+      "when": "2026-11-21T08:22:08.173998+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0692b8001be88cdf60010ec333d49a56efe4b6a1",
+      "commit_basis": "edit",
+      "note": "The clause is removed with the category link; the measurement section reports how many categories resolve, so an empty outcome is a stated result and not a pass.",
+      "reason": "",
+      "when": "2026-11-21T08:22:08.173998+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
