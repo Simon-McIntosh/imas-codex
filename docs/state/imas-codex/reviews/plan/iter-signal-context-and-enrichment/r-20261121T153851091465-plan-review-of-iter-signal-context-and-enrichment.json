@@ -1,0 +1,84 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-21T15:56:54.843Z",
+  "dispatched_at": "2026-11-21T15:39:30Z",
+  "findings": [
+    {
+      "anchor": "plan.html:21",
+      "id": "wiring-1",
+      "reason": "without the edge the queue releases \u00a77 first, spending about 13 hours of local-lane work to reproduce the defect the plan has just decided to fix first.",
+      "text": "the declaration table gives s7 `depends-on` only `iter-signal-context-and-enrichment#s6`, yet the lead's recorded decision `field-code-meanings-next` (plan.html:149) answers \"built before the full-catalogue enrichment and the sibling-signal relations\", and \u00a77's descriptions consume the quantity/unit/role values \u00a712 decides plant-wide; \u00a77 is therefore releasable now that \u00a76 is `done`, and its run (31,245 groups and 62,490 calls per the \u00a76 landing record) would write the whole catalogue's descriptions from the same role scarcity \u00a712 exists to repair, reproducing at scale the sibling-identical descriptions \u00a712 cites at plan.html:98",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:99",
+      "id": "done_when-1",
+      "reason": "the node can land complete with the motivating condition unchanged, leaving the sibling-relation work that follows still blocked on roles and the section's stated purpose unserved.",
+      "text": "the setpoint measure is two clauses that together cannot fail on the point \u00a712 was created for: \"a query for the setpoint role ... returns only signals carrying it\" holds vacuously on an empty result, and the positive half is \"at least one signal across the facility is decided as a setpoint or the record says plainly that none is and why\", so a landing with zero setpoints decided anywhere satisfies the done-when while \u00a712's own rationale (plan.html:98) names \"no setpoint is decided anywhere, so no signal can be related to the one it is measured against\" as the defect",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:99",
+      "id": "done_when-2",
+      "reason": "the only guard against \u00a712 regressing values \u00a711 already decided has no failing condition, so a plant-wide table that contradicts the pilot's own metadata lands as a pass.",
+      "text": "for the pilot system the comparison is \"the number unchanged, newly decided, and changed, with every changed value listed privately and read by hand\", and unlike \u00a712's other readings (at most one wrong in thirty entries, at most two wrong in thirty signals) this one states no tolerance, so a role or quantity correctly decided under \u00a711 and changed wrongly by the field-code table is recorded but cannot fail the node",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:185",
+      "id": "done_when-3",
+      "reason": "the status change rests on a record that does not carry two of the measures that close the section, so the plan asserts a completion its own record cannot show.",
+      "text": "the new landing record that carries \u00a76 to `done` (plan.html:20 declares `s6: done`) omits two items its own done-when requires: \"a search recorded in the landing record\" that finds one path by which a group description reaches its members, and the requirement that no member description state a value the vocabulary does not hold for that signal (the record reports 180 signal-quantity / 188 unit / 16 role but not that none is unsupported)",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:99",
+      "id": "done_when-4",
+      "reason": "the worker that finds this gate heavy has no partition named in the section and must choose one itself, which the plan's other heavy sections never leave open.",
+      "text": "\u00a712 runs the \u00a711 vocabulary assignment \"over every catalogued signal of the facility\", which \u00a75 counted at 995,006 variables, and names no compute partition, while \u00a73, \u00a77 and \u00a710 each state where their heavy run executes (`rigel`, `rigel`, `all_debug`); a plant-wide graph pass is a heavy job under the project's own compute rule",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "9de770617b6d527f62780ebb5b878d2251ebc76b",
+  "plan_fingerprint": "e0de3c946a327e6df56391704c1c09ed99afa8451da785e71ae5e8075df1e1bc",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 84,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261121T153851091465-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "ddb133c0438cc403ba00c9e7cceb337d361f2fc5",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `#s11` and `#s4` in \u00a712's `data-links` and `depends-on` resolve, \"section 11\" exists at plan.html:91-94, and the new decision's `data-sections=\"s12\"` names the section at plan.html:97.",
+    "done_when": "a finding \u2014 \u00a712's setpoint check can be satisfied with zero setpoints decided plant-wide (plan.html:99), and the landing record that carries \u00a76 to `done` omits two measures its own done-when requires (plan.html:185).",
+    "evidence_paths": "pass \u2014 the landing record, the digest-stamped private sample files and the private configuration the table's rows live in are durable, and no session-scratch or node-local path is named.",
+    "naming": "pass \u2014 the new section, decision and comment carry no plan labels, stage names, ticket numbers or version tags, and state mechanism rather than changelog.",
+    "reasoning": "pass \u2014 the two figures \u00a712 cites from the landed work check out against the pilot vocabulary evidence (plan.html:98's 202 roles against the fragment's role row 202 / 3 / 134 / 65 / 1 / 1,563 / 1,766), and the plant-wide figures it asks for are obtainable from the catalogue and graph it describes.",
+    "single_goal": "pass \u2014 \u00a712 names one deliverable: a field-code meaning table applied as the vocabulary's field-pattern source across the plant; the assignment is the table's use, not a second goal.",
+    "wiring": "a finding \u2014 the declaration table gives s7 `depends-on` only `iter-signal-context-and-enrichment#s6` (plan.html:21), so nothing in the graph orders the field-code section before the full-catalogue enrichment the lead's recorded decision places it ahead of."
+  },
+  "section_digests": {
+    "_document": "059f6ebec511c03e4407704268dcf1b877f8a5c6e9397ebf08cb4d1806a93d37",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s11": "0a44a06e3ce743fddcb14d83e8d2791ca5977f2a3959db6c4f0b59b17f876c9d",
+    "s12": "d685e69d84971db515686ac30b44c13ae3ec0cb0c39095b06f85e523894a3a78",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "50b6e12267ff30f5571b048a9c664b594c88c014ef069ffc458ca324467d0e0a",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T15:57:34.338635+00:00",
+  "total": null
+}
