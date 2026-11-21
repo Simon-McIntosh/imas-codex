@@ -59,6 +59,16 @@
       "note": "The pulse link is now established by the designation token the category name carries under the archive's naming convention, matched exactly to a control node or component code, which the pulse import already parses; a name that only resembles a system gives no link.",
       "reason": "",
       "when": "2026-11-21T07:54:08.858439+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2b5c1e6992bc587ea8faa6eee2575eb14bd6953c",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The component-to-structure kind is removed: the schema already carries that link from imported rows and no other source establishes it.",
+      "reason": "",
+      "when": "2026-11-21T07:54:12.437235+00:00"
     }
   ],
   "responses": {
@@ -70,6 +80,15 @@
       "note": "The pulse link is now established by the designation token the category name carries under the archive's naming convention, matched exactly to a control node or component code, which the pulse import already parses; a name that only resembles a system gives no link.",
       "reason": "",
       "when": "2026-11-21T07:54:08.858439+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "2b5c1e6992bc587ea8faa6eee2575eb14bd6953c",
+      "commit_basis": "edit",
+      "note": "The component-to-structure kind is removed: the schema already carries that link from imported rows and no other source establishes it.",
+      "reason": "",
+      "when": "2026-11-21T07:54:12.437235+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261121T073649424424-plan-review-of-codac-uda-signals.json",
