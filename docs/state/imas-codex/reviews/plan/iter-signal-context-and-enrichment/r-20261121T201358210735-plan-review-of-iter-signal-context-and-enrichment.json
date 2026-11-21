@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-21T20:20:29.938Z",
+  "dispatched_at": "2026-11-21T20:14:43Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261121T201358210735-plan-review-of-iter-signal-context-and-enrichment/plan.html:98",
+      "id": "reasoning-1",
+      "reason": "the section's entire rationale, and its new hard-failing setpoint condition, rest on a figure the cited record never measured, so the plan must either record that split or stop asserting it.",
+      "text": "\u00a712's Delivers says \"The landed work shows why: sibling signals on one component carry word-for-word the same description, a role is decided for only 202 signals, and no setpoint is decided anywhere\", but the \u00a711 landing record reports only the role axis totals (202 decided, 3 conflict, 1,563 undecided) and never breaks the 202 down by role, although \u00a711's own done-when requires \"the number of signals decided as each role\" (plan.html:94); the sibling-description half is likewise the \u00a76 landing comment's softer claim, that descriptions \"carry the same description\" for sibling field codes, not a word-for-word measurement",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261121T201358210735-plan-review-of-iter-signal-context-and-enrichment/plan.html:99",
+      "id": "done_when-1",
+      "reason": "a gate the work cannot pass on its own merits will be passed by guessing a role, which is the exact defect the vocabulary section was written to prevent.",
+      "text": "the setpoint measure now reads \"At least one signal across the facility is decided as a setpoint; if none is, the section is delivered as failed with the reason and does not land as done\", where the earlier wording allowed \"or the record says plainly that none is and why\"; the failing condition is a property of the catalogue, not of the work, so a table that correctly and completely establishes that no field code means setpoint fails the section, and the only way left to land it is to decide a setpoint the sources do not state, which \u00a711 forbids (\"Nothing is guessed\", plan.html:93)",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261121T201358210735-plan-review-of-iter-signal-context-and-enrichment/plan.html:96",
+      "id": "single_goal-1",
+      "reason": "split, the table's thirty hand-read entries can fail cheaply before a job over the whole in-graph catalogue is spent.",
+      "text": "\u00a712 is titled with \"and\" (\"Each field code has a stated meaning, and roles are decided across the plant\") and delivers both the code table, with its thirty hand-read entries, and the plant-wide run of \u00a711's assignment over every catalogued signal in the graph, with its own population counts, pilot before/after comparison, setpoint measure and search check; the gate cannot express a correct table landing beside a failed plant-wide run",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "1ca2e22ca0710f095db82aa736a036cee0fe0838",
+  "plan_fingerprint": "d41cb5ded94f28d9b8e378b9a1a27ba31a2631cc6c34e6f94bad4c3b96072d75",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 86,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261121T201358210735-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "f37fb00e8f1b0bcc6eebf3a57a7aeb2801d46a2e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a711, \u00a74 and \u00a77 resolve, the cited evidence fragments (`pilot-signal-vocabulary.html`, `pilot-enrichment-by-group.html`) exist, and every section reference in the reviewed units resolves to a section that exists.",
+    "done_when": "a finding \u2014 \u00a712's setpoint clause makes landing depend on a property of the data rather than on the work: a correct table that honestly establishes no setpoint code is delivered as failed.",
+    "evidence_paths": "pass \u2014 the measures land in the section's landing record, the pre-chosen reading files are private and digested into it, and the plant-wide job names its partition (`rigel`).",
+    "naming": "pass \u2014 \"field code\", \"role\" and \"quantity\" are mechanism words; no plan label, stage name or ticket number reaches the section text or the schema-held table.",
+    "reasoning": "a finding \u2014 \u00a712 states as established by the landed work that \"no setpoint is decided anywhere\", but the \u00a711 landing record never reports the number of signals decided as each role.",
+    "single_goal": "a finding \u2014 \u00a712 carries two deliverables, the field-code table and the plant-wide role assignment, in one node whose gate mixes their measures.",
+    "wiring": "pass \u2014 \u00a77's `depends-on` now names `s12` as well as `s6`, `s12`'s own `depends-on` (`#s11`, `#s4`) both resolve to landed sections, and no other section needs the field-code table without it."
+  },
+  "section_digests": {
+    "_document": "16e141c613a7ea38069cf9f96533814d771400ecce36ebe578732cb23482f744",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s11": "0a44a06e3ce743fddcb14d83e8d2791ca5977f2a3959db6c4f0b59b17f876c9d",
+    "s12": "06698e2717ab3f128a0d64a64ed587c3367ba7b22234d71894c0b9abc7bcb014",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "50b6e12267ff30f5571b048a9c664b594c88c014ef069ffc458ca324467d0e0a",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T20:20:38.431400+00:00",
+  "total": null
+}
