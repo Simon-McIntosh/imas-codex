@@ -1,0 +1,87 @@
+<article id="measure-category-names-against-plant-codes-evidence">
+  <h3>Most pulse category names carry a plant code in a whole delimited part, and no hand-read category named the wrong system</h3>
+  <p>The graph holds <strong>744 pulse categories</strong>, and every one was read.
+    Each name was split into its maximal runs of letters and digits, so a hyphen,
+    colon, underscore, space or punctuation character separates parts. A part
+    that equals a plant code already in the graph is a delimited match; a code
+    that occurs only inside a longer part is counted separately and never as a
+    delimited match. The measurement interprets no code and writes no link.</p>
+  <p><strong>711 of 744 names (95.565%) carry a plant code as a whole delimited
+    part</strong>, so a rule on delimited parts would link that share. Seventeen
+    names carry a code only inside a longer word, and sixteen carry no code at
+    all. Those three groups partition every category, and the second and third
+    are the negative control for the first: a rule that widened to inside-word
+    matches, or that split on too few characters, would move categories out of
+    the first group, and the figure shows the small sizes the rule avoids.</p>
+
+  <figure>
+    <img src="/imas-codex/figures/codac-uda-signals/measure-category-names-against-plant-codes/rule-and-hand-reading.svg"
+      alt="Bar chart of the 744 category names by how they carry a plant code, beside the hand reading of the 20-category sealed sample.">
+    <figcaption>Left: all 744 category names by what a whole-delimited-part
+      match against a plant code finds. Right: the sealed twenty read by hand
+      against their pulses' own descriptions. Counts are also given in the
+      tables. Drawn with the shared checked
+      <code>imas_codex.plotting.save_figure</code>; the SVG was rendered and
+      inspected.</figcaption>
+  </figure>
+
+  <h4>How a name can carry a code</h4>
+  <table>
+    <thead><tr><th>Way the name carries a code</th><th>Categories matched</th><th>Distinct codes matched</th></tr></thead>
+    <tbody>
+      <tr><td>Whole delimited part equal to a control-node code</td><td>711</td><td>6</td></tr>
+      <tr><td>Whole delimited part equal to a plant-component code</td><td>11</td><td>1</td></tr>
+      <tr><td>Code appearing only inside a longer word</td><td>17</td><td>1</td></tr>
+    </tbody>
+  </table>
+  <p>The ways overlap by construction: the eleven component-code names are also
+    control-code names, so the delimited groups below say what the rule would
+    link rather than adding the two categories' counts. Code values are held
+    privately; only how many distinct codes each way matches is reported here.</p>
+
+  <h4>Categories by how many codes a delimited rule would link</h4>
+  <table>
+    <thead><tr><th>Codes the name links</th><th>Categories</th><th>Pulses held</th></tr></thead>
+    <tbody>
+      <tr><td>Exactly one</td><td>728</td><td>5,906</td></tr>
+      <tr><td>More than one</td><td>0</td><td>0</td></tr>
+      <tr><td>None</td><td>16</td><td>51</td></tr>
+      <tr><td><strong>Total</strong></td><td><strong>728 + 0 + 16 = 744</strong></td><td><strong>5,957</strong></td></tr>
+    </tbody>
+  </table>
+  <p>The one-code group is the 711 delimited-linkable names plus the 17 whose
+    single code sits only inside a longer word; a delimited rule would link 711.
+    The empty more-than-one group is a measured zero, not an unexercised path:
+    the invented two-code case in the tests fills it, and the deliberate
+    negative control that changes the classifier makes that test fail.</p>
+
+  <h4>Hand reading of a sealed sample</h4>
+  <p>Twenty categories the delimited rule would link were chosen before any
+    verdict, stratified so every carried code is represented, and written to a
+    private file. Its SHA-256 is
+    <code>f9c782a1cb2a636ac95237bff7178bfbcdc64ba7fc41766a2e3c4eaf425f5158</code>.
+    Each was read against its pulses' own descriptions, with one verdict and
+    reason recorded privately, and no substitution was made. The reading judged
+    <strong>5 right, 0 wrong and 15 undecidable</strong>.</p>
+  <p>No sampled category's pulses named a system other than the one its name's
+    code names, so the rule produced no wrong link in the twenty. The reading's
+    power is limited by the descriptions themselves: fifteen of the twenty pulse
+    descriptions are test labels or bare words, so they identify no plant system
+    and the verdict is undecidable rather than a confirmation. The twenty
+    support the claim that the rule did not name a wrong system; they do not
+    establish that it names the right one in most cases.</p>
+
+  <h4>What was and was not changed</h4>
+  <p>The measurement writes <strong>zero links</strong> and changes
+    <strong>zero search behaviour</strong>. The only product change is a module
+    of pure functions that classifies a name and counts the results, plus its
+    tests; nothing reads it at runtime. No real host, category, pulse, variable,
+    description or code name appears in any tracked file, test, report or commit
+    message: the tests use invented names, and the real per-category table,
+    sealed selection, verdicts and descriptions live only in a private directory
+    outside the repository.</p>
+  <p>The focused tests pass. The deliberate negative control counts an
+    inside-word occurrence as a delimited match and collapses two delimited
+    codes into one; the committed classifier fails four of them, and the log is
+    named by the manifest.</p>
+</article>
