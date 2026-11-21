@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Standard-name record generation, second round</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 62rem; margin: 2rem auto;
+  padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem;
+  max-width: 100%; }
+th, td { padding: 0.25rem 0.75rem; text-align: left;
+  border-bottom: 1px solid #e2e2e2; vertical-align: top; }
+code { background: #f4f4f4; padding: 0.1rem 0.3rem; }
+.pending { padding: 0.75rem 1rem; border-left: 3px solid #2b6cb0;
+  background: #f0f6fc; margin: 1rem 0; }
+figure { margin: 1.5rem 0; }
+figcaption { font-size: 0.85rem; color: #555; }
+</style>
+</head>
+<body>
+<h1>Standard-name record generation, second round</h1>
+<p>The held-out names and definitions are in the blind packet and have not been scored. No held-out score appears here; the round reports what was generated and waits for the adjudicator's verdicts.</p>
+<div class="pending"><strong>Held-out scores are pending adjudication.</strong>
+The packet holds 255 distinct records. The key is not
+opened until the adjudicator's verdicts are committed.</div>
+
+<h2>Arms and models</h2>
+<table>
+<tr><th>Arm</th><th>Structure</th><th>Model</th><th>Case file</th></tr>
+<tr><td>keep-or-repair/frontier</td><td>keep-or-repair</td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>full</td></tr><tr><td>keep-or-repair/local</td><td>keep-or-repair</td><td><code>local/deepseek-v4.1-flash</code></td><td>full</td></tr><tr><td>one-pass/frontier</td><td>one-pass</td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>full</td></tr><tr><td>incumbent</td><td>incumbent</td><td><code>no call: the incumbent record as it stands</code></td><td>full</td></tr><tr><td>perturbed/frontier</td><td>keep-or-repair</td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>perturbed</td></tr>
+</table>
+<p>Frontier model: <code>openrouter/openai/gpt-6.1-sol</code>. Local model:
+<code>local/deepseek-v4.1-flash</code>.</p>
+<p>Kimi: not run. The command that will run it is
+<code>KIMI_BASE_URL="${KIMI_BASE_URL:?set KIMI_BASE_URL to the B300 server /v1 root}" uv run --no-sync python docs/evidence/fragments/sn-case-file-generation/benchmark.py --stage second-round</code>.</p>
+
+<h2>Development iteration (proxy, development half only)</h2>
+<p>A proxy, not a verdict: the share of a member's records whose name is one of the reference's right names and whose unit agrees. It is mechanical, it is read only on the development half, and it decides nothing about the held-out half.</p>
+<figure><svg viewBox="0 0 1400 722" width="100%" font-family="system-ui, sans-serif" role="img" aria-label="proxy share by prompt version and arm"><text x="78" y="637.0" font-size="14" text-anchor="end" fill="#444">0</text><text x="78" y="501.5" font-size="14" text-anchor="end" fill="#444">25</text><text x="78" y="366.0" font-size="14" text-anchor="end" fill="#444">50</text><text x="78" y="230.5" font-size="14" text-anchor="end" fill="#444">75</text><text x="78" y="95.0" font-size="14" text-anchor="end" fill="#444">100</text><text x="8" y="62" font-size="16" text-anchor="start" fill="#1a1a1a">proxy share [%]</text><rect x="310" y="26" width="22" height="6" fill="#2b6cb0"/><text x="340" y="35" font-size="14" fill="#1a1a1a">keep-or-repair/frontier</text><rect x="630" y="26" width="22" height="6" fill="#2e8b57"/><text x="660" y="35" font-size="14" fill="#1a1a1a">keep-or-repair/local</text><text x="301.7" y="666" font-size="16" text-anchor="middle" fill="#1a1a1a">v1</text><rect x="214.5" y="272.7" width="93.1" height="359.3" fill="#2b6cb0"/><text x="261.1" y="264.7" font-size="14" text-anchor="middle" fill="#1a1a1a">66.3</text><rect x="319.7" y="284.9" width="93.1" height="347.1" fill="#2e8b57"/><text x="366.2" y="276.9" font-size="14" text-anchor="middle" fill="#1a1a1a">64.0</text><text x="725.0" y="666" font-size="16" text-anchor="middle" fill="#1a1a1a">v2</text><rect x="637.9" y="272.7" width="93.1" height="359.3" fill="#2b6cb0"/><text x="684.4" y="264.7" font-size="14" text-anchor="middle" fill="#1a1a1a">66.3</text><rect x="743.0" y="284.9" width="93.1" height="347.1" fill="#2e8b57"/><text x="789.6" y="276.9" font-size="14" text-anchor="middle" fill="#1a1a1a">64.0</text><text x="1148.3" y="666" font-size="16" text-anchor="middle" fill="#1a1a1a">v3</text><rect x="1061.2" y="266.6" width="93.1" height="365.4" fill="#2b6cb0"/><text x="1107.8" y="258.6" font-size="14" text-anchor="middle" fill="#1a1a1a">67.4</text><rect x="1166.3" y="284.9" width="93.1" height="347.1" fill="#2e8b57"/><text x="1212.9" y="276.9" font-size="14" text-anchor="middle" fill="#1a1a1a">64.0</text><line x1="90" y1="632" x2="1360" y2="632" stroke="#1a1a1a" stroke-width="1.2"/></svg><figcaption>Mechanical proxy by prompt version and arm on the
+development half. It is not a verdict and it says nothing about the held-out
+half.</figcaption></figure>
+<table>
+<tr><th>Version</th><th>Prompt hash</th><th>Arm</th><th>Proxy right</th>
+<th>Share [95%]</th><th>Blocked</th></tr>
+<tr><td>v1</td><td><code>a79991ed1758</code></td><td>keep-or-repair/frontier</td><td>59 / 89</td><td>66.3% [56.0, 75.3]</td><td>12</td></tr><tr><td>v1</td><td><code>a79991ed1758</code></td><td>keep-or-repair/local</td><td>57 / 89</td><td>64.0% [53.7, 73.2]</td><td>3</td></tr><tr><td>v2</td><td><code>a5dec95b62de</code></td><td>keep-or-repair/frontier</td><td>59 / 89</td><td>66.3% [56.0, 75.3]</td><td>4</td></tr><tr><td>v2</td><td><code>a5dec95b62de</code></td><td>keep-or-repair/local</td><td>57 / 89</td><td>64.0% [53.7, 73.2]</td><td>1</td></tr><tr><td>v3</td><td><code>8c0336eadd7b</code></td><td>keep-or-repair/frontier</td><td>60 / 89</td><td>67.4% [57.1, 76.3]</td><td>6</td></tr><tr><td>v3</td><td><code>8c0336eadd7b</code></td><td>keep-or-repair/local</td><td>57 / 89</td><td>64.0% [53.7, 73.2]</td><td>5</td></tr>
+</table>
+<table>
+<tr><th>Version</th><th>Stated detail dropped</th>
+<th>Blocked on a derivable name</th><th>Change</th></tr>
+<tr><td>v1</td><td>0</td><td>0</td><td>the keep-or-repair prompt as first written: decide keep, repair or blocked, and quote the case-file words that forced a repair</td></tr><tr><td>v2</td><td>8</td><td>7</td><td>answers a stated detail being dropped (8 of 50 in the failure read) by requiring every stated detail to appear in the definition, and answers blocking on a derivable name (7 of 50) by naming when a blocker is allowed</td></tr><tr><td>v3</td><td>8</td><td>7</td><td>answers a repair that rewrites a sound clause: a repair changes only what the case file contradicts, and a keep copies the incumbent verbatim</td></tr>
+</table>
+
+<h2>Generated decisions, held-out half</h2>
+<table><tr><th>Arm</th><th>Members</th><th>Keep</th><th>Repair</th><th>Blocked</th></tr><tr><td>incumbent</td><td>87</td><td>87</td><td>0</td><td>0</td></tr><tr><td>keep-or-repair/frontier</td><td>87</td><td>15</td><td>63</td><td>9</td></tr><tr><td>keep-or-repair/local</td><td>87</td><td>67</td><td>17</td><td>3</td></tr><tr><td>one-pass/frontier</td><td>87</td><td>0</td><td>69</td><td>18</td></tr><tr><td>perturbed/frontier</td><td>87</td><td>7</td><td>20</td><td>60</td></tr></table>
+<p>Blocked types by arm: {"incumbent": {}, "keep-or-repair/frontier": {"collision": 4, "insufficient-source-text": 1, "registry-conflict": 4}, "keep-or-repair/local": {"insufficient-source-text": 3}, "one-pass/frontier": {"collision": 9, "grammar-gap": 4, "insufficient-source-text": 3, "registry-conflict": 2}, "perturbed/frontier": {"collision": 4, "grammar-gap": 1, "insufficient-source-text": 39, "registry-conflict": 16}}</p>
+
+<h2>Perturbed control</h2>
+<p>74 of 87 answers
+changed when the source description and the enclosing-structure text were
+replaced with another physics group's (85.1%), and 53 of those changed decision too.
+At least half of the answers follow the source text the control replaced.</p>
+
+<h2>Spend</h2>
+<p>USD 10.71 spent against a ceiling of USD
+30.00 (534 development calls and
+348 held-out generation calls). Within the
+ceiling: <strong>yes</strong>.</p>
+<p>Records file <code>benchmark-second-round-records.jsonl</code>
+(435 lines). Packet
+<code>benchmark-second-round-packet.jsonl</code> (255 lines),
+fields: packet_id, source_descriptions, enclosing_statements, name, definition, documentation, unit.</p>
+</body>
+</html>

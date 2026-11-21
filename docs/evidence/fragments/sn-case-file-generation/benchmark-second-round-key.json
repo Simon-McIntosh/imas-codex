@@ -1,0 +1,3889 @@
+{
+  "rule": "The adjudicator does not open this file until its verdicts are committed. It maps a packet id back to the member and arms it stands for, and carries the reference's right names and definition points.",
+  "seed": 20261120,
+  "records_digest": "40236fb01f149fe3afa53725d92440ed8c60a0c6475604549a4917014a5b2329",
+  "packets": {
+    "pkt-fc7dc16f48c71d38": {
+      "member": "accumulated_total_gas_count",
+      "arms": [
+        [
+          "accumulated_total_gas_count",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-7c4abf3b35513980": {
+      "member": "accumulated_total_gas_count",
+      "arms": [
+        [
+          "accumulated_total_gas_count",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-67f0241150d8ee97": {
+      "member": "accumulated_total_prefill_gas_count",
+      "arms": [
+        [
+          "accumulated_total_prefill_gas_count",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-c9b868dd5875c4b0": {
+      "member": "accumulated_total_prefill_gas_count",
+      "arms": [
+        [
+          "accumulated_total_prefill_gas_count",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-6417c54b59f71da0": {
+      "member": "accumulated_tritium_prefill_count",
+      "arms": [
+        [
+          "accumulated_tritium_prefill_count",
+          "incumbent"
+        ],
+        [
+          "accumulated_tritium_prefill_count",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-a30c27645a13f7bd": {
+      "member": "accumulated_tritium_prefill_count",
+      "arms": [
+        [
+          "accumulated_tritium_prefill_count",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-d9c2de9221c4441b": {
+      "member": "alpha_angle_of_coil_conductor_element",
+      "arms": [
+        [
+          "alpha_angle_of_coil_conductor_element",
+          "incumbent"
+        ],
+        [
+          "alpha_angle_of_coil_conductor_element",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-d8fc19cb2498d1c0": {
+      "member": "alpha_angle_of_coil_conductor_element",
+      "arms": [
+        [
+          "alpha_angle_of_coil_conductor_element",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-c6a7b0f780e7e7f0": {
+      "member": "area_of_plasma_filament",
+      "arms": [
+        [
+          "area_of_plasma_filament",
+          "incumbent"
+        ],
+        [
+          "area_of_plasma_filament",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "area_of_plasma_filament",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-e45daf44d309a0b3": {
+      "member": "area_of_plasma_filament",
+      "arms": [
+        [
+          "area_of_plasma_filament",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-c2da56f9a557a770": {
+      "member": "back_surface_neutron_flux",
+      "arms": [
+        [
+          "back_surface_neutron_flux",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-724d96a7b162cccc": {
+      "member": "back_surface_neutron_flux",
+      "arms": [
+        [
+          "back_surface_neutron_flux",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "back_surface_neutron_flux",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-a039c1f45763c8a6": {
+      "member": "back_surface_neutron_flux",
+      "arms": [
+        [
+          "back_surface_neutron_flux",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-e0293dd0e6fcf716": {
+      "member": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "arms": [
+        [
+          "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+          "incumbent"
+        ],
+        [
+          "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-cd8af1764dc6af02": {
+      "member": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "arms": [
+        [
+          "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-ef8d8d7980f1b41d": {
+      "member": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "arms": [
+        [
+          "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-da76ec8d9f87aead": {
+      "member": "coefficient_of_flux_surface",
+      "arms": [
+        [
+          "coefficient_of_flux_surface",
+          "incumbent"
+        ],
+        [
+          "coefficient_of_flux_surface",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-3c63a48ce73e5ff6": {
+      "member": "coefficient_of_flux_surface",
+      "arms": [
+        [
+          "coefficient_of_flux_surface",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-3fd56f53a3561b66": {
+      "member": "coefficient_of_flux_surface",
+      "arms": [
+        [
+          "coefficient_of_flux_surface",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-2d67ae009122b7b5": {
+      "member": "coefficient_of_flux_surface",
+      "arms": [
+        [
+          "coefficient_of_flux_surface",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-990438fe7d45e8c7": {
+      "member": "current_of_divertor",
+      "arms": [
+        [
+          "current_of_divertor",
+          "incumbent"
+        ],
+        [
+          "current_of_divertor",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "current_of_divertor",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-1a638c7ebb36f436": {
+      "member": "current_of_divertor",
+      "arms": [
+        [
+          "current_of_divertor",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-eeef47ba5c04811f": {
+      "member": "decay_time_due_to_disruption",
+      "arms": [
+        [
+          "decay_time_due_to_disruption",
+          "incumbent"
+        ],
+        [
+          "decay_time_due_to_disruption",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "decay_time_due_to_disruption",
+          "keep-or-repair/local"
+        ],
+        [
+          "decay_time_due_to_disruption",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-d0899bf38d6a60f2": {
+      "member": "decay_time_due_to_disruption",
+      "arms": [
+        [
+          "decay_time_due_to_disruption",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-99706dd40bb58297": {
+      "member": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "arms": [
+        [
+          "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+          "incumbent"
+        ],
+        [
+          "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-32479ac8b5bfc03b": {
+      "member": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "arms": [
+        [
+          "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-4d08d8744e0efdb5": {
+      "member": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "arms": [
+        [
+          "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-739e182d9fb56cd1": {
+      "member": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+      "arms": [
+        [
+          "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+          "incumbent"
+        ],
+        [
+          "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-4894e3a3f357ce4c": {
+      "member": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+      "arms": [
+        [
+          "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-f45375e92629061f": {
+      "member": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+      "arms": [
+        [
+          "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-6d36f478e8a04384": {
+      "member": "effective_turn_count_of_passive_loop",
+      "arms": [
+        [
+          "effective_turn_count_of_passive_loop",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-341d89c7c9644eab": {
+      "member": "effective_turn_count_of_passive_loop",
+      "arms": [
+        [
+          "effective_turn_count_of_passive_loop",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-f55dca78fabb1a62": {
+      "member": "effective_turn_count_of_passive_loop",
+      "arms": [
+        [
+          "effective_turn_count_of_passive_loop",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-c2007aba0c7c7f95": {
+      "member": "effective_turn_count_of_passive_loop",
+      "arms": [
+        [
+          "effective_turn_count_of_passive_loop",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-f89781544f29ff18": {
+      "member": "electron_particle_flux_at_wall_due_to_pumping",
+      "arms": [
+        [
+          "electron_particle_flux_at_wall_due_to_pumping",
+          "incumbent"
+        ],
+        [
+          "electron_particle_flux_at_wall_due_to_pumping",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "electron_particle_flux_at_wall_due_to_pumping",
+          "keep-or-repair/local"
+        ],
+        [
+          "electron_particle_flux_at_wall_due_to_pumping",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-e7af75fe6537e99b": {
+      "member": "electron_particle_flux_at_wall_due_to_pumping",
+      "arms": [
+        [
+          "electron_particle_flux_at_wall_due_to_pumping",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-2a23e11077853bb0": {
+      "member": "elongation_of_flux_surface",
+      "arms": [
+        [
+          "elongation_of_flux_surface",
+          "incumbent"
+        ],
+        [
+          "elongation_of_flux_surface",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-28ef56ad5c57b934": {
+      "member": "elongation_of_flux_surface",
+      "arms": [
+        [
+          "elongation_of_flux_surface",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-6f4e90ba93f95ced": {
+      "member": "elongation_of_flux_surface",
+      "arms": [
+        [
+          "elongation_of_flux_surface",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-b9db69f4d1dc26c5": {
+      "member": "elongation_of_flux_surface",
+      "arms": [
+        [
+          "elongation_of_flux_surface",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-2c06b0a68c05cd49": {
+      "member": "equilibrium_weight_of_interferometer_beam",
+      "arms": [
+        [
+          "equilibrium_weight_of_interferometer_beam",
+          "incumbent"
+        ],
+        [
+          "equilibrium_weight_of_interferometer_beam",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-896c4d577db492fc": {
+      "member": "equilibrium_weight_of_interferometer_beam",
+      "arms": [
+        [
+          "equilibrium_weight_of_interferometer_beam",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-7e67b9434cc9f252": {
+      "member": "ethylene_source_rate",
+      "arms": [
+        [
+          "ethylene_source_rate",
+          "incumbent"
+        ],
+        [
+          "ethylene_source_rate",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "ethylene_source_rate",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-937fe4cd94041741": {
+      "member": "ethylene_source_rate",
+      "arms": [
+        [
+          "ethylene_source_rate",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-3a854f6450586931": {
+      "member": "external_loop_voltage",
+      "arms": [
+        [
+          "external_loop_voltage",
+          "incumbent"
+        ],
+        [
+          "external_loop_voltage",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-74aa65f5f77c6fd7": {
+      "member": "external_loop_voltage",
+      "arms": [
+        [
+          "external_loop_voltage",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-0433887f5c5b827b": {
+      "member": "external_loop_voltage",
+      "arms": [
+        [
+          "external_loop_voltage",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-a4365c085fd0e2fa": {
+      "member": "external_loop_voltage",
+      "arms": [
+        [
+          "external_loop_voltage",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-e441f2567e67d423": {
+      "member": "faraday_angle",
+      "arms": [
+        [
+          "faraday_angle",
+          "incumbent"
+        ],
+        [
+          "faraday_angle",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-e10b78366fcaae71": {
+      "member": "faraday_angle",
+      "arms": [
+        [
+          "faraday_angle",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-2b4acf8153df1b86": {
+      "member": "faraday_angle",
+      "arms": [
+        [
+          "faraday_angle",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-3cf1c39afe885e05": {
+      "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+      "arms": [
+        [
+          "field_aligned_surface_tilt_angle_of_langmuir_probe",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-42af92021af7f01e": {
+      "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+      "arms": [
+        [
+          "field_aligned_surface_tilt_angle_of_langmuir_probe",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-3bba2ed74a3ecd73": {
+      "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+      "arms": [
+        [
+          "field_aligned_surface_tilt_angle_of_langmuir_probe",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-b5a81887397939ba": {
+      "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+      "arms": [
+        [
+          "field_aligned_surface_tilt_angle_of_langmuir_probe",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-5fe63862ba86032f": {
+      "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+      "arms": [
+        [
+          "field_aligned_surface_tilt_angle_of_langmuir_probe",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-9a2be45ad9df5fcd": {
+      "member": "flux_surface_averaged_magnetic_field_magnitude",
+      "arms": [
+        [
+          "flux_surface_averaged_magnetic_field_magnitude",
+          "incumbent"
+        ],
+        [
+          "flux_surface_averaged_magnetic_field_magnitude",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-a9b9bca55c76f9d8": {
+      "member": "flux_surface_averaged_magnetic_field_magnitude",
+      "arms": [
+        [
+          "flux_surface_averaged_magnetic_field_magnitude",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-70db8f14c20307e7": {
+      "member": "flux_surface_averaged_magnetic_field_magnitude",
+      "arms": [
+        [
+          "flux_surface_averaged_magnetic_field_magnitude",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-6288568c15054e56": {
+      "member": "flux_surface_averaged_major_radius",
+      "arms": [
+        [
+          "flux_surface_averaged_major_radius",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-143f58f8bb00278c": {
+      "member": "flux_surface_averaged_major_radius",
+      "arms": [
+        [
+          "flux_surface_averaged_major_radius",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-2604853912e993ee": {
+      "member": "flux_surface_averaged_major_radius",
+      "arms": [
+        [
+          "flux_surface_averaged_major_radius",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-2b72d34a59d3620b": {
+      "member": "flux_surface_averaged_major_radius",
+      "arms": [
+        [
+          "flux_surface_averaged_major_radius",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-336724e60c6aa66a": {
+      "member": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+      "arms": [
+        [
+          "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-c5e0afe8ecf23f4d": {
+      "member": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+      "arms": [
+        [
+          "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-2f5f8c33ee2000c4": {
+      "member": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+      "arms": [
+        [
+          "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-7b35f9a9a4847595": {
+      "member": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+      "arms": [
+        [
+          "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-c7f4c181349e3673": {
+      "member": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+      "arms": [
+        [
+          "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-d8e2fec957793dc1": {
+      "member": "grating_line_density",
+      "arms": [
+        [
+          "grating_line_density",
+          "incumbent"
+        ],
+        [
+          "grating_line_density",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "grating_line_density",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-cd7c1262b479a5f7": {
+      "member": "grating_line_density",
+      "arms": [
+        [
+          "grating_line_density",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-7d70b7df6b90170c": {
+      "member": "height_of_plasma_filament",
+      "arms": [
+        [
+          "height_of_plasma_filament",
+          "incumbent"
+        ],
+        [
+          "height_of_plasma_filament",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-dd904628ff5139e8": {
+      "member": "height_of_plasma_filament",
+      "arms": [
+        [
+          "height_of_plasma_filament",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-5630b7e1dc7023f1": {
+      "member": "height_of_plasma_filament",
+      "arms": [
+        [
+          "height_of_plasma_filament",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-47ba8f67cc44ad6f": {
+      "member": "hydrogen_density_at_limiter",
+      "arms": [
+        [
+          "hydrogen_density_at_limiter",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-4e78803502cc15e4": {
+      "member": "hydrogen_density_at_limiter",
+      "arms": [
+        [
+          "hydrogen_density_at_limiter",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-a81cd58bb7791c17": {
+      "member": "hydrogen_density_at_limiter",
+      "arms": [
+        [
+          "hydrogen_density_at_limiter",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-2c756dd518ffa8a7": {
+      "member": "hydrogen_density_at_limiter",
+      "arms": [
+        [
+          "hydrogen_density_at_limiter",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-5dcae559a0ef58e0": {
+      "member": "inverse_of_square_of_magnetic_field_magnitude",
+      "arms": [
+        [
+          "inverse_of_square_of_magnetic_field_magnitude",
+          "incumbent"
+        ],
+        [
+          "inverse_of_square_of_magnetic_field_magnitude",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-8524be670dbf7505": {
+      "member": "inverse_of_square_of_magnetic_field_magnitude",
+      "arms": [
+        [
+          "inverse_of_square_of_magnetic_field_magnitude",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-f41f8471a447b606": {
+      "member": "inverse_of_square_of_magnetic_field_magnitude",
+      "arms": [
+        [
+          "inverse_of_square_of_magnetic_field_magnitude",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-410b290e82fe1a3c": {
+      "member": "inverse_of_square_of_magnetic_field_magnitude",
+      "arms": [
+        [
+          "inverse_of_square_of_magnetic_field_magnitude",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-83a5a6cd7e20818b": {
+      "member": "loop_voltage_at_plasma_boundary",
+      "arms": [
+        [
+          "loop_voltage_at_plasma_boundary",
+          "incumbent"
+        ],
+        [
+          "loop_voltage_at_plasma_boundary",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-7a80970867bdfe63": {
+      "member": "loop_voltage_at_plasma_boundary",
+      "arms": [
+        [
+          "loop_voltage_at_plasma_boundary",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-5915f17ff0e0ab95": {
+      "member": "loop_voltage_at_plasma_boundary",
+      "arms": [
+        [
+          "loop_voltage_at_plasma_boundary",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-076d600db7395d57": {
+      "member": "lower_bound_photon_energy",
+      "arms": [
+        [
+          "lower_bound_photon_energy",
+          "incumbent"
+        ],
+        [
+          "lower_bound_photon_energy",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-fd592eca233ff251": {
+      "member": "lower_bound_photon_energy",
+      "arms": [
+        [
+          "lower_bound_photon_energy",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-88920efe92f9ecdd": {
+      "member": "lower_bound_photon_energy",
+      "arms": [
+        [
+          "lower_bound_photon_energy",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-4f04b5f674b42405": {
+      "member": "lower_inner_squareness_of_flux_surface",
+      "arms": [
+        [
+          "lower_inner_squareness_of_flux_surface",
+          "incumbent"
+        ],
+        [
+          "lower_inner_squareness_of_flux_surface",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-f52b2a4abbf73876": {
+      "member": "lower_inner_squareness_of_flux_surface",
+      "arms": [
+        [
+          "lower_inner_squareness_of_flux_surface",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-98144b3b654f60d9": {
+      "member": "lower_inner_squareness_of_flux_surface",
+      "arms": [
+        [
+          "lower_inner_squareness_of_flux_surface",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-e7db85502a001088": {
+      "member": "minimum_gas_flow",
+      "arms": [
+        [
+          "minimum_gas_flow",
+          "incumbent"
+        ],
+        [
+          "minimum_gas_flow",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-84c4ee923ae77f6d": {
+      "member": "minimum_gas_flow",
+      "arms": [
+        [
+          "minimum_gas_flow",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-9b2ae0d2dc7f151c": {
+      "member": "minimum_gas_flow",
+      "arms": [
+        [
+          "minimum_gas_flow",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-1195911b8e8cabd3": {
+      "member": "minor_length_of_plasma_filament",
+      "arms": [
+        [
+          "minor_length_of_plasma_filament",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-7d23f765045e876c": {
+      "member": "minor_length_of_plasma_filament",
+      "arms": [
+        [
+          "minor_length_of_plasma_filament",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-465f06dffa5c91c3": {
+      "member": "minor_length_of_plasma_filament",
+      "arms": [
+        [
+          "minor_length_of_plasma_filament",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-be07136782853d8a": {
+      "member": "minor_length_of_plasma_filament",
+      "arms": [
+        [
+          "minor_length_of_plasma_filament",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-44d5d88e3a05dbb1": {
+      "member": "minor_length_of_plasma_filament",
+      "arms": [
+        [
+          "minor_length_of_plasma_filament",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-434f680e6692f083": {
+      "member": "minor_radius_of_plasma_boundary",
+      "arms": [
+        [
+          "minor_radius_of_plasma_boundary",
+          "incumbent"
+        ],
+        [
+          "minor_radius_of_plasma_boundary",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-e2633bb7235b7a1e": {
+      "member": "minor_radius_of_plasma_boundary",
+      "arms": [
+        [
+          "minor_radius_of_plasma_boundary",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-e33fd7f98f599a36": {
+      "member": "normalized_collisionality",
+      "arms": [
+        [
+          "normalized_collisionality",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-28ac14cd86a6f51a": {
+      "member": "normalized_collisionality",
+      "arms": [
+        [
+          "normalized_collisionality",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-2befc827820c5f3e": {
+      "member": "normalized_collisionality",
+      "arms": [
+        [
+          "normalized_collisionality",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-3acc264841c879e2": {
+      "member": "normalized_collisionality",
+      "arms": [
+        [
+          "normalized_collisionality",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-903314b68be98215": {
+      "member": "normalized_minor_radius_of_flux_surface",
+      "arms": [
+        [
+          "normalized_minor_radius_of_flux_surface",
+          "incumbent"
+        ],
+        [
+          "normalized_minor_radius_of_flux_surface",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-5023e823a01034b1": {
+      "member": "normalized_minor_radius_of_flux_surface",
+      "arms": [
+        [
+          "normalized_minor_radius_of_flux_surface",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-c0c5a4c099c9f1ed": {
+      "member": "normalized_minor_radius_of_flux_surface",
+      "arms": [
+        [
+          "normalized_minor_radius_of_flux_surface",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-8c1a7114abc315ce": {
+      "member": "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+      "arms": [
+        [
+          "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+          "incumbent"
+        ],
+        [
+          "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-06519f9a769228d9": {
+      "member": "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+      "arms": [
+        [
+          "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-e7d5c272d35491ea": {
+      "member": "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+      "arms": [
+        [
+          "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-bf7adff429b9e5b8": {
+      "member": "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+      "arms": [
+        [
+          "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-ff1d6317415f4641": {
+      "member": "normalized_toroidal_beta",
+      "arms": [
+        [
+          "normalized_toroidal_beta",
+          "incumbent"
+        ],
+        [
+          "normalized_toroidal_beta",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-662c13fbe3bc3abd": {
+      "member": "normalized_toroidal_beta",
+      "arms": [
+        [
+          "normalized_toroidal_beta",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-5bfa7b25a6471ebf": {
+      "member": "normalized_toroidal_beta",
+      "arms": [
+        [
+          "normalized_toroidal_beta",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-21f255b7e36161ee": {
+      "member": "normalized_toroidal_beta",
+      "arms": [
+        [
+          "normalized_toroidal_beta",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-796c9fcf214b864d": {
+      "member": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+      "arms": [
+        [
+          "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-61170160c05b4fe7": {
+      "member": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+      "arms": [
+        [
+          "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-3d23e0fdc7e711b3": {
+      "member": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+      "arms": [
+        [
+          "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-1ddad183ca9aff1d": {
+      "member": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+      "arms": [
+        [
+          "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-6b6030a2223ca77e": {
+      "member": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+      "arms": [
+        [
+          "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-dc00cc67a3469704": {
+      "member": "outer_radius_of_plasma_filament",
+      "arms": [
+        [
+          "outer_radius_of_plasma_filament",
+          "incumbent"
+        ],
+        [
+          "outer_radius_of_plasma_filament",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-39a23309584d3480": {
+      "member": "outer_radius_of_plasma_filament",
+      "arms": [
+        [
+          "outer_radius_of_plasma_filament",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-17d3a4bb987ece43": {
+      "member": "outer_radius_of_plasma_filament",
+      "arms": [
+        [
+          "outer_radius_of_plasma_filament",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-4ee6e460e3c5fec4": {
+      "member": "particle_energy",
+      "arms": [
+        [
+          "particle_energy",
+          "incumbent"
+        ],
+        [
+          "particle_energy",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "particle_energy",
+          "keep-or-repair/local"
+        ],
+        [
+          "particle_energy",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-d8dff26e36e221a0": {
+      "member": "plasma_current",
+      "arms": [
+        [
+          "plasma_current",
+          "incumbent"
+        ],
+        [
+          "plasma_current",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-de243ca7079b4d6c": {
+      "member": "plasma_current",
+      "arms": [
+        [
+          "plasma_current",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-e83c3a917c349d8e": {
+      "member": "plasma_current",
+      "arms": [
+        [
+          "plasma_current",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-c0fd8d87b1cb00d1": {
+      "member": "polarization_angle_at_constraint_position",
+      "arms": [
+        [
+          "polarization_angle_at_constraint_position",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-dfb82e43b7f04fe3": {
+      "member": "poloidal_beta",
+      "arms": [
+        [
+          "poloidal_beta",
+          "incumbent"
+        ],
+        [
+          "poloidal_beta",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-1b759dccb5d5473d": {
+      "member": "poloidal_beta",
+      "arms": [
+        [
+          "poloidal_beta",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-5d7e429dc0a24621": {
+      "member": "poloidal_beta",
+      "arms": [
+        [
+          "poloidal_beta",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-ddbad4b6c6e29407": {
+      "member": "poloidal_length_of_flux_surface",
+      "arms": [
+        [
+          "poloidal_length_of_flux_surface",
+          "incumbent"
+        ],
+        [
+          "poloidal_length_of_flux_surface",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-93b4cc1026cee241": {
+      "member": "poloidal_length_of_flux_surface",
+      "arms": [
+        [
+          "poloidal_length_of_flux_surface",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-f0a64f93421cd4f8": {
+      "member": "poloidal_length_of_flux_surface",
+      "arms": [
+        [
+          "poloidal_length_of_flux_surface",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-d3fda63079c0ea6f": {
+      "member": "poloidal_magnetic_flux",
+      "arms": [
+        [
+          "poloidal_magnetic_flux",
+          "incumbent"
+        ],
+        [
+          "poloidal_magnetic_flux",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-d4ed060bcab341b4": {
+      "member": "poloidal_magnetic_flux",
+      "arms": [
+        [
+          "poloidal_magnetic_flux",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-663296d98fcd49c0": {
+      "member": "poloidal_magnetic_flux",
+      "arms": [
+        [
+          "poloidal_magnetic_flux",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-42e90f6de82f8ff0": {
+      "member": "poloidal_magnetic_flux_at_magnetic_axis",
+      "arms": [
+        [
+          "poloidal_magnetic_flux_at_magnetic_axis",
+          "incumbent"
+        ],
+        [
+          "poloidal_magnetic_flux_at_magnetic_axis",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-f9d3418f1284c6a3": {
+      "member": "poloidal_magnetic_flux_at_magnetic_axis",
+      "arms": [
+        [
+          "poloidal_magnetic_flux_at_magnetic_axis",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-992087a3af0bfb91": {
+      "member": "poloidal_magnetic_flux_at_magnetic_axis",
+      "arms": [
+        [
+          "poloidal_magnetic_flux_at_magnetic_axis",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-5644115e072b4b2f": {
+      "member": "poloidal_plane_cross_sectional_area_of_plasma_boundary",
+      "arms": [
+        [
+          "poloidal_plane_cross_sectional_area_of_plasma_boundary",
+          "incumbent"
+        ],
+        [
+          "poloidal_plane_cross_sectional_area_of_plasma_boundary",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-6f63104ac7afa067": {
+      "member": "poloidal_plane_cross_sectional_area_of_plasma_boundary",
+      "arms": [
+        [
+          "poloidal_plane_cross_sectional_area_of_plasma_boundary",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-ab878240e4973e12": {
+      "member": "poloidal_plane_cross_sectional_area_of_plasma_boundary",
+      "arms": [
+        [
+          "poloidal_plane_cross_sectional_area_of_plasma_boundary",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-cd3e3a70225d24e0": {
+      "member": "power_at_divertor_target_due_to_recombination",
+      "arms": [
+        [
+          "power_at_divertor_target_due_to_recombination",
+          "incumbent"
+        ],
+        [
+          "power_at_divertor_target_due_to_recombination",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-4730c27e958c08d1": {
+      "member": "power_at_divertor_target_due_to_recombination",
+      "arms": [
+        [
+          "power_at_divertor_target_due_to_recombination",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-ea7bdf8adb70b46e": {
+      "member": "power_at_divertor_target_due_to_recombination",
+      "arms": [
+        [
+          "power_at_divertor_target_due_to_recombination",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-00d6175041212deb": {
+      "member": "power_at_divertor_target_due_to_recombination",
+      "arms": [
+        [
+          "power_at_divertor_target_due_to_recombination",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-ff2ba5abadac3312": {
+      "member": "radial_coordinate_at_inboard_midplane",
+      "arms": [
+        [
+          "radial_coordinate_at_inboard_midplane",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-4ccd1712178fd013": {
+      "member": "radial_coordinate_at_inboard_midplane",
+      "arms": [
+        [
+          "radial_coordinate_at_inboard_midplane",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-59bc5fc81d242aa3": {
+      "member": "radial_coordinate_at_inboard_midplane",
+      "arms": [
+        [
+          "radial_coordinate_at_inboard_midplane",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-6b1acd6fab08a8c1": {
+      "member": "radial_coordinate_at_inboard_midplane",
+      "arms": [
+        [
+          "radial_coordinate_at_inboard_midplane",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-a313e6bfd26f05da": {
+      "member": "radial_coordinate_of_current_center",
+      "arms": [
+        [
+          "radial_coordinate_of_current_center",
+          "incumbent"
+        ],
+        [
+          "radial_coordinate_of_current_center",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-7baa20c13d4c1e95": {
+      "member": "radial_coordinate_of_current_center",
+      "arms": [
+        [
+          "radial_coordinate_of_current_center",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-8e1f074e4d0f40d6": {
+      "member": "radial_coordinate_of_current_center",
+      "arms": [
+        [
+          "radial_coordinate_of_current_center",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-86224222171a7049": {
+      "member": "radial_coordinate_of_poloidal_field_coil",
+      "arms": [
+        [
+          "radial_coordinate_of_poloidal_field_coil",
+          "incumbent"
+        ],
+        [
+          "radial_coordinate_of_poloidal_field_coil",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "radial_coordinate_of_poloidal_field_coil",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-381f9157de467361": {
+      "member": "radial_coordinate_of_poloidal_field_coil",
+      "arms": [
+        [
+          "radial_coordinate_of_poloidal_field_coil",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-52aabd1355034581": {
+      "member": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+      "arms": [
+        [
+          "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+          "incumbent"
+        ],
+        [
+          "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-de2f5edf4f48a15b": {
+      "member": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+      "arms": [
+        [
+          "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-23ed7e4c1964f6b2": {
+      "member": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+      "arms": [
+        [
+          "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-50482e36885ec14b": {
+      "member": "radial_separatrix_distance_at_outboard_midplane",
+      "arms": [
+        [
+          "radial_separatrix_distance_at_outboard_midplane",
+          "incumbent"
+        ],
+        [
+          "radial_separatrix_distance_at_outboard_midplane",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-27f06d43d00a2171": {
+      "member": "radial_separatrix_distance_at_outboard_midplane",
+      "arms": [
+        [
+          "radial_separatrix_distance_at_outboard_midplane",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-e48ce18d313304e1": {
+      "member": "radial_separatrix_distance_at_outboard_midplane",
+      "arms": [
+        [
+          "radial_separatrix_distance_at_outboard_midplane",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-3aabfb2922b9fec2": {
+      "member": "radial_separatrix_distance_at_outboard_midplane",
+      "arms": [
+        [
+          "radial_separatrix_distance_at_outboard_midplane",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-f4f805e29d177571": {
+      "member": "radius_of_poloidal_field_coil",
+      "arms": [
+        [
+          "radius_of_poloidal_field_coil",
+          "incumbent"
+        ],
+        [
+          "radius_of_poloidal_field_coil",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-87154b257844b234": {
+      "member": "radius_of_poloidal_field_coil",
+      "arms": [
+        [
+          "radius_of_poloidal_field_coil",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-8063353f7cd30f43": {
+      "member": "radius_of_poloidal_field_coil",
+      "arms": [
+        [
+          "radius_of_poloidal_field_coil",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-55089263ad7e9b6d": {
+      "member": "ratio_of_particle_temperature_to_particle_reference_temperature",
+      "arms": [
+        [
+          "ratio_of_particle_temperature_to_particle_reference_temperature",
+          "incumbent"
+        ],
+        [
+          "ratio_of_particle_temperature_to_particle_reference_temperature",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "ratio_of_particle_temperature_to_particle_reference_temperature",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-541567c9284c5885": {
+      "member": "ratio_of_particle_temperature_to_particle_reference_temperature",
+      "arms": [
+        [
+          "ratio_of_particle_temperature_to_particle_reference_temperature",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-2b11288dfe2c438f": {
+      "member": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+      "arms": [
+        [
+          "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+          "incumbent"
+        ],
+        [
+          "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-9c1aad1fa8020c51": {
+      "member": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+      "arms": [
+        [
+          "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-b61973508cc9e904": {
+      "member": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+      "arms": [
+        [
+          "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-4dd80c4bce22d24b": {
+      "member": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+      "arms": [
+        [
+          "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-e4f6c40e5bdf05b2": {
+      "member": "resistivity_of_plasma_facing_component",
+      "arms": [
+        [
+          "resistivity_of_plasma_facing_component",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-bff6b5f0df38c5ca": {
+      "member": "resistivity_of_plasma_facing_component",
+      "arms": [
+        [
+          "resistivity_of_plasma_facing_component",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "resistivity_of_plasma_facing_component",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-1c6c289b8e9166d3": {
+      "member": "right_hand_circularly_polarized_wave_electric_field",
+      "arms": [
+        [
+          "right_hand_circularly_polarized_wave_electric_field",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-2f344da060cb6710": {
+      "member": "right_hand_circularly_polarized_wave_electric_field",
+      "arms": [
+        [
+          "right_hand_circularly_polarized_wave_electric_field",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-4390a8282680dcbd": {
+      "member": "right_hand_circularly_polarized_wave_electric_field",
+      "arms": [
+        [
+          "right_hand_circularly_polarized_wave_electric_field",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-763548a065a66bae": {
+      "member": "right_hand_circularly_polarized_wave_electric_field",
+      "arms": [
+        [
+          "right_hand_circularly_polarized_wave_electric_field",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-a29dfdd1bfc29c06": {
+      "member": "safety_factor_at_magnetic_axis",
+      "arms": [
+        [
+          "safety_factor_at_magnetic_axis",
+          "incumbent"
+        ],
+        [
+          "safety_factor_at_magnetic_axis",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-dc7b1f856fc71afe": {
+      "member": "safety_factor_at_magnetic_axis",
+      "arms": [
+        [
+          "safety_factor_at_magnetic_axis",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-f9c6b08fd0c10304": {
+      "member": "safety_factor_at_magnetic_axis",
+      "arms": [
+        [
+          "safety_factor_at_magnetic_axis",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-9f06efc4d1722500": {
+      "member": "second_local_tangential_width_of_optical_element",
+      "arms": [
+        [
+          "second_local_tangential_width_of_optical_element",
+          "incumbent"
+        ],
+        [
+          "second_local_tangential_width_of_optical_element",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "second_local_tangential_width_of_optical_element",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-244a50c7a69063b4": {
+      "member": "second_local_tangential_width_of_optical_element",
+      "arms": [
+        [
+          "second_local_tangential_width_of_optical_element",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-81aae154407a7fd7": {
+      "member": "spectral_photon_radiance",
+      "arms": [
+        [
+          "spectral_photon_radiance",
+          "incumbent"
+        ],
+        [
+          "spectral_photon_radiance",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "spectral_photon_radiance",
+          "keep-or-repair/local"
+        ],
+        [
+          "spectral_photon_radiance",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-4cc348dd13683973": {
+      "member": "spectral_photon_radiance",
+      "arms": [
+        [
+          "spectral_photon_radiance",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-c0b2cb041a21cd2e": {
+      "member": "spectral_rate_of_spectrometer_channel",
+      "arms": [
+        [
+          "spectral_rate_of_spectrometer_channel",
+          "incumbent"
+        ],
+        [
+          "spectral_rate_of_spectrometer_channel",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-e76f2f0f4f854606": {
+      "member": "square_of_toroidal_flux_coordinate_gradient_magnitude",
+      "arms": [
+        [
+          "square_of_toroidal_flux_coordinate_gradient_magnitude",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-bcac5e789dbc6bc9": {
+      "member": "square_of_toroidal_flux_coordinate_gradient_magnitude",
+      "arms": [
+        [
+          "square_of_toroidal_flux_coordinate_gradient_magnitude",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-7eb80b41aca4f2df": {
+      "member": "surface_temperature",
+      "arms": [
+        [
+          "surface_temperature",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-dd7c617ec2adeb89": {
+      "member": "surface_temperature",
+      "arms": [
+        [
+          "surface_temperature",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-d0bf4dbc785b4659": {
+      "member": "surface_temperature",
+      "arms": [
+        [
+          "surface_temperature",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-54e49c0bb1463c6a": {
+      "member": "temperature_of_sensor",
+      "arms": [
+        [
+          "temperature_of_sensor",
+          "incumbent"
+        ],
+        [
+          "temperature_of_sensor",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "temperature_of_sensor",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-66e120b1bc83c96a": {
+      "member": "temperature_of_sensor",
+      "arms": [
+        [
+          "temperature_of_sensor",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-18fdefddcb8a777e": {
+      "member": "thickness_of_breeder_blanket_layer",
+      "arms": [
+        [
+          "thickness_of_breeder_blanket_layer",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-61be253904325ece": {
+      "member": "thickness_of_breeder_blanket_layer",
+      "arms": [
+        [
+          "thickness_of_breeder_blanket_layer",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-c905ec020e97d6b5": {
+      "member": "thickness_of_breeder_blanket_layer",
+      "arms": [
+        [
+          "thickness_of_breeder_blanket_layer",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-4992dc23f6e10207": {
+      "member": "thickness_of_plasma_filament",
+      "arms": [
+        [
+          "thickness_of_plasma_filament",
+          "incumbent"
+        ],
+        [
+          "thickness_of_plasma_filament",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-01b91e69b292edca": {
+      "member": "thickness_of_plasma_filament",
+      "arms": [
+        [
+          "thickness_of_plasma_filament",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-2ac7bc0a66fc1553": {
+      "member": "thickness_of_plasma_filament",
+      "arms": [
+        [
+          "thickness_of_plasma_filament",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-89ad05897666c45c": {
+      "member": "thickness_of_plasma_filament",
+      "arms": [
+        [
+          "thickness_of_plasma_filament",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-8ff23850b3eaeb89": {
+      "member": "toroidal_angle_of_control_surface",
+      "arms": [
+        [
+          "toroidal_angle_of_control_surface",
+          "incumbent"
+        ],
+        [
+          "toroidal_angle_of_control_surface",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-2e6a7d7602024831": {
+      "member": "toroidal_angle_of_control_surface",
+      "arms": [
+        [
+          "toroidal_angle_of_control_surface",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-7b7db3e4edff47c3": {
+      "member": "toroidal_angle_of_control_surface",
+      "arms": [
+        [
+          "toroidal_angle_of_control_surface",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-68823b21f3926b02": {
+      "member": "toroidal_angle_of_poloidal_magnetic_field_probe",
+      "arms": [
+        [
+          "toroidal_angle_of_poloidal_magnetic_field_probe",
+          "incumbent"
+        ],
+        [
+          "toroidal_angle_of_poloidal_magnetic_field_probe",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-ca5ff35fc39aeeb0": {
+      "member": "toroidal_angle_of_poloidal_magnetic_field_probe",
+      "arms": [
+        [
+          "toroidal_angle_of_poloidal_magnetic_field_probe",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-53f5a78d87fa5fb6": {
+      "member": "toroidal_angle_of_poloidal_magnetic_field_probe",
+      "arms": [
+        [
+          "toroidal_angle_of_poloidal_magnetic_field_probe",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-37bea92fd9e23e4f": {
+      "member": "toroidal_magnetic_field_at_magnetic_axis",
+      "arms": [
+        [
+          "toroidal_magnetic_field_at_magnetic_axis",
+          "incumbent"
+        ],
+        [
+          "toroidal_magnetic_field_at_magnetic_axis",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-16b2aaee4c9f1503": {
+      "member": "toroidal_magnetic_field_at_magnetic_axis",
+      "arms": [
+        [
+          "toroidal_magnetic_field_at_magnetic_axis",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-ebaa2c1f14b41092": {
+      "member": "toroidal_magnetic_field_at_magnetic_axis",
+      "arms": [
+        [
+          "toroidal_magnetic_field_at_magnetic_axis",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-d27693537122b825": {
+      "member": "toroidal_magnetic_flux_at_plasma_boundary",
+      "arms": [
+        [
+          "toroidal_magnetic_flux_at_plasma_boundary",
+          "incumbent"
+        ],
+        [
+          "toroidal_magnetic_flux_at_plasma_boundary",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-0ada9393d1d5ae15": {
+      "member": "toroidal_magnetic_flux_at_plasma_boundary",
+      "arms": [
+        [
+          "toroidal_magnetic_flux_at_plasma_boundary",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-9a9b2e491d33ae48": {
+      "member": "toroidal_magnetic_flux_at_plasma_boundary",
+      "arms": [
+        [
+          "toroidal_magnetic_flux_at_plasma_boundary",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-36490940a67c167f": {
+      "member": "toroidal_parity",
+      "arms": [
+        [
+          "toroidal_parity",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-8c0ce70eb12a8e4d": {
+      "member": "toroidal_parity",
+      "arms": [
+        [
+          "toroidal_parity",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-ef19cf2ea9068a8d": {
+      "member": "toroidal_parity",
+      "arms": [
+        [
+          "toroidal_parity",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-077c8771e231c56d": {
+      "member": "toroidal_parity",
+      "arms": [
+        [
+          "toroidal_parity",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-212f3b5ef3335950": {
+      "member": "toroidal_reference_magnetic_field",
+      "arms": [
+        [
+          "toroidal_reference_magnetic_field",
+          "incumbent"
+        ],
+        [
+          "toroidal_reference_magnetic_field",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "toroidal_reference_magnetic_field",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-ad0495dd16416903": {
+      "member": "toroidal_reference_magnetic_field",
+      "arms": [
+        [
+          "toroidal_reference_magnetic_field",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-4027c9805a12e35a": {
+      "member": "toroidal_total_current_density",
+      "arms": [
+        [
+          "toroidal_total_current_density",
+          "incumbent"
+        ],
+        [
+          "toroidal_total_current_density",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-26407c6066c27579": {
+      "member": "toroidal_total_current_density",
+      "arms": [
+        [
+          "toroidal_total_current_density",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-1c398400b0776b42": {
+      "member": "toroidal_total_current_density",
+      "arms": [
+        [
+          "toroidal_total_current_density",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-cbbba4a2ab931698": {
+      "member": "total_external_heating_power",
+      "arms": [
+        [
+          "total_external_heating_power",
+          "incumbent"
+        ],
+        [
+          "total_external_heating_power",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-139a1391ad93b17d": {
+      "member": "total_external_heating_power",
+      "arms": [
+        [
+          "total_external_heating_power",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-011e49348f2572b1": {
+      "member": "total_external_heating_power",
+      "arms": [
+        [
+          "total_external_heating_power",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-bf49358f039a8f52": {
+      "member": "triangularity_of_plasma_boundary",
+      "arms": [
+        [
+          "triangularity_of_plasma_boundary",
+          "incumbent"
+        ],
+        [
+          "triangularity_of_plasma_boundary",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-f46f69101206fea8": {
+      "member": "triangularity_of_plasma_boundary",
+      "arms": [
+        [
+          "triangularity_of_plasma_boundary",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-8b3f6076e76b70c5": {
+      "member": "tungsten_density",
+      "arms": [
+        [
+          "tungsten_density",
+          "incumbent"
+        ],
+        [
+          "tungsten_density",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "tungsten_density",
+          "keep-or-repair/local"
+        ],
+        [
+          "tungsten_density",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-7e3019066a6b69d0": {
+      "member": "tungsten_density",
+      "arms": [
+        [
+          "tungsten_density",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-b715ec892fb4463f": {
+      "member": "vertical_coordinate_of_constraint_position",
+      "arms": [
+        [
+          "vertical_coordinate_of_constraint_position",
+          "incumbent"
+        ],
+        [
+          "vertical_coordinate_of_constraint_position",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-a416009f69ea4d84": {
+      "member": "vertical_coordinate_of_constraint_position",
+      "arms": [
+        [
+          "vertical_coordinate_of_constraint_position",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-8d00f678526ef604": {
+      "member": "vertical_coordinate_of_constraint_position",
+      "arms": [
+        [
+          "vertical_coordinate_of_constraint_position",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-40f8c15b66ac42c6": {
+      "member": "vertical_coordinate_of_coordinate_system",
+      "arms": [
+        [
+          "vertical_coordinate_of_coordinate_system",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-a7fcca9083c98c10": {
+      "member": "vertical_coordinate_of_coordinate_system",
+      "arms": [
+        [
+          "vertical_coordinate_of_coordinate_system",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-5b0277ec595ee2ff": {
+      "member": "vertical_coordinate_of_coordinate_system",
+      "arms": [
+        [
+          "vertical_coordinate_of_coordinate_system",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-d3ba348459e0e2a5": {
+      "member": "vertical_coordinate_of_coordinate_system",
+      "arms": [
+        [
+          "vertical_coordinate_of_coordinate_system",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-5f0ce5db1e563e76": {
+      "member": "vertical_coordinate_of_coordinate_system",
+      "arms": [
+        [
+          "vertical_coordinate_of_coordinate_system",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-d1a4ae98ffca4264": {
+      "member": "vertical_coordinate_of_current_center",
+      "arms": [
+        [
+          "vertical_coordinate_of_current_center",
+          "incumbent"
+        ],
+        [
+          "vertical_coordinate_of_current_center",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-bd9241c54bd6090f": {
+      "member": "vertical_coordinate_of_current_center",
+      "arms": [
+        [
+          "vertical_coordinate_of_current_center",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-efd00fbae5129967": {
+      "member": "vertical_coordinate_of_current_center",
+      "arms": [
+        [
+          "vertical_coordinate_of_current_center",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-86af0a996dbd8c0d": {
+      "member": "vertical_coordinate_of_measurement_position",
+      "arms": [
+        [
+          "vertical_coordinate_of_measurement_position",
+          "incumbent"
+        ],
+        [
+          "vertical_coordinate_of_measurement_position",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-5e6caf15d60302b4": {
+      "member": "vertical_coordinate_of_plasma_filament",
+      "arms": [
+        [
+          "vertical_coordinate_of_plasma_filament",
+          "incumbent"
+        ],
+        [
+          "vertical_coordinate_of_plasma_filament",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-6665ebdb69ee3eb5": {
+      "member": "vertical_coordinate_of_plasma_filament",
+      "arms": [
+        [
+          "vertical_coordinate_of_plasma_filament",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-909d5e1c03bb4a86": {
+      "member": "vertical_coordinate_of_plasma_filament",
+      "arms": [
+        [
+          "vertical_coordinate_of_plasma_filament",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-dc9ef96f1ffb3d99": {
+      "member": "vertical_outline_of_plasma_boundary",
+      "arms": [
+        [
+          "vertical_outline_of_plasma_boundary",
+          "incumbent"
+        ],
+        [
+          "vertical_outline_of_plasma_boundary",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-4a6a96b787f1ebaa": {
+      "member": "volume_of_flux_surface",
+      "arms": [
+        [
+          "volume_of_flux_surface",
+          "incumbent"
+        ],
+        [
+          "volume_of_flux_surface",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-8043a3114eb3c9fe": {
+      "member": "volume_of_flux_surface",
+      "arms": [
+        [
+          "volume_of_flux_surface",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-16a1edd4c8c1ee37": {
+      "member": "volume_of_flux_surface",
+      "arms": [
+        [
+          "volume_of_flux_surface",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-1039810c44a4efa7": {
+      "member": "wave_phase_of_wave_beam",
+      "arms": [
+        [
+          "wave_phase_of_wave_beam",
+          "incumbent"
+        ]
+      ]
+    },
+    "pkt-428f340db4340600": {
+      "member": "wave_phase_of_wave_beam",
+      "arms": [
+        [
+          "wave_phase_of_wave_beam",
+          "keep-or-repair/frontier"
+        ]
+      ]
+    },
+    "pkt-77e09944cad846fc": {
+      "member": "wave_phase_of_wave_beam",
+      "arms": [
+        [
+          "wave_phase_of_wave_beam",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-19c20d011c20f6ef": {
+      "member": "wave_phase_of_wave_beam",
+      "arms": [
+        [
+          "wave_phase_of_wave_beam",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-0363e95801842682": {
+      "member": "weight_of_interferometer_beam",
+      "arms": [
+        [
+          "weight_of_interferometer_beam",
+          "incumbent"
+        ],
+        [
+          "weight_of_interferometer_beam",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "weight_of_interferometer_beam",
+          "keep-or-repair/local"
+        ],
+        [
+          "weight_of_interferometer_beam",
+          "perturbed/frontier"
+        ]
+      ]
+    },
+    "pkt-ce805128c1880ecb": {
+      "member": "weight_of_interferometer_beam",
+      "arms": [
+        [
+          "weight_of_interferometer_beam",
+          "one-pass/frontier"
+        ]
+      ]
+    },
+    "pkt-f30ea202eb64f0ea": {
+      "member": "y_major_axis_unit_vector_of_shatter_cone",
+      "arms": [
+        [
+          "y_major_axis_unit_vector_of_shatter_cone",
+          "incumbent"
+        ],
+        [
+          "y_major_axis_unit_vector_of_shatter_cone",
+          "keep-or-repair/frontier"
+        ],
+        [
+          "y_major_axis_unit_vector_of_shatter_cone",
+          "keep-or-repair/local"
+        ]
+      ]
+    },
+    "pkt-9c6be4c53af843bf": {
+      "member": "y_major_axis_unit_vector_of_shatter_cone",
+      "arms": [
+        [
+          "y_major_axis_unit_vector_of_shatter_cone",
+          "one-pass/frontier"
+        ]
+      ]
+    }
+  },
+  "members": {
+    "accumulated_total_gas_count": {
+      "right_names": [
+        "accumulated_total_gas_count"
+      ],
+      "definition_points": [
+        "the quantity is an equivalent-electron inventory, weighting each species by z_s (atomic number for an atomic species, sum of constituent atomic numbers for a molecule) via N_eq(t) = Σ_s z_s N_s(t)",
+        "N_s(t) is the cumulative number of particles of species s delivered since plasma breakdown",
+        "the sum runs over all injected gas species, giving one total inventory",
+        "accumulation covers only the post-breakdown injection history and excludes prefill gas",
+        "it excludes instantaneous injection rates and single-species inventories such as accumulated hydrogen count due to gas injection",
+        "it is the post-breakdown counterpart of accumulated total prefill gas count",
+        "unit is 1 (dimensionless)"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "accumulated_total_prefill_gas_count": {
+      "right_names": [
+        "accumulated_total_prefill_gas_count"
+      ],
+      "definition_points": [
+        "Cumulative inventory, not an instantaneous rate",
+        "Restricted to the plasma prefill phase between t0 and t1",
+        "Includes all injected gas species, summed over species",
+        "Expressed as an equivalent-electron count, so the unit is dimensionless (1)",
+        "Defined by the time integral of the species-summed equivalent-electron injection rate up to evaluation time t"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "accumulated_tritium_prefill_count": {
+      "right_names": [
+        "accumulated_tritium_prefill_count"
+      ],
+      "definition_points": [
+        "Accumulated neutral tritium introduced by gas injection during prefill before plasma breakdown.",
+        "Expressed as an equivalent-electron count, with one equivalent electron per tritium atom and two per neutral diatomic tritium molecule.",
+        "Defined by the integral of the tritium introduction rate from prefill start t0 to plasma breakdown t_bd.",
+        "Excludes post-breakdown gas injection, wall recycling, neutral-beam fueling, and pellet fueling.",
+        "Counts injected tritium, not retained or ionized tritium inventory; the equivalent-electron convention is an accounting normalization, not a free-electron count.",
+        "Relates as the tritium contribution to accumulated_total_prefill_gas_equivalent_electron_count and contrasts with accumulated_tritium_count_due_to_gas_injection."
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "alpha_angle_of_coil_conductor_element": {
+      "right_names": [
+        "alpha_angle_of_coil_conductor_element"
+      ],
+      "definition_points": [
+        "first inclination angle (alpha) of the oblique (trapezoidal/parallelogram) cross-sectional geometry of an active PF coil element",
+        "part of the oblique geometry parameterisation for non-rectangular conductor cross-sections",
+        "measured from the outward major-radius direction",
+        "unit rad"
+      ],
+      "unit": "rad",
+      "verdict": "sound"
+    },
+    "area_of_plasma_filament": {
+      "right_names": [
+        "poloidal_plane_cross_sectional_area_of_plasma_filament"
+      ],
+      "definition_points": [
+        "unit m^2",
+        "the quantity is the cross-sectional area of a discrete plasma current filament element",
+        "the section is taken in the poloidal plane in the right-handed cylindrical (R, phi, Z) frame with toroidal angle phi held fixed",
+        "A_p = integral over S_p of dR dZ, where S_p is the element cross-sectional domain",
+        "no universal cross-sectional shape is imposed",
+        "for uniform toroidal current density, the filament current is I = j_phi A_p",
+        "area alone does not determine mutual inductance, which also depends on geometry and relative placement"
+      ],
+      "unit": "m^2",
+      "verdict": "sound"
+    },
+    "back_surface_neutron_flux": {
+      "right_names": [
+        "back_surface_neutron_energy_flux",
+        "back_surface_neutron_energy_flux_density"
+      ],
+      "definition_points": [
+        "local rate of neutron kinetic-energy transfer outward through the designated rear surface per unit actual surface area and time",
+        "scalar energy flux, explicitly distinguished from neutron count flux, integrated power, and spatial maximum or average",
+        "computed locally over the back surface and aggregates outward-crossing neutron kinetic-energy contributions across energies",
+        "unit W.m^-2"
+      ],
+      "unit": "W.m^-2",
+      "verdict": "naming_defect"
+    },
+    "co_passing_fast_ion_charge_state_power_density_due_to_collisions": {
+      "right_names": [
+        "co_passing_fast_ion_charge_state_power_density_due_to_collisions"
+      ],
+      "definition_points": [
+        "flux-surface-averaged quantity (volume-shell-weighted magnetic flux-surface average)",
+        "Coulomb-collisional energy-transfer rate per unit volume, i.e. power density",
+        "transfer from co-passing fast-particle donors to fast ions of one specified recipient species and charge state",
+        "co-passing restriction applies to the donating particles' guiding-center orbits, not to the recipient ions' orbit class",
+        "no sum over recipient species or charge states; counter-passing and trapped donors are excluded",
+        "positive sign when energy transfers from co-passing fast particles to the specified fast-ion charge-state population, negative when reversed",
+        "unit W.m^-3"
+      ],
+      "unit": "W.m^-3",
+      "verdict": "sound"
+    },
+    "coefficient_of_flux_surface": {
+      "right_names": [
+        "coefficient_of_flux_surface"
+      ],
+      "definition_points": [
+        "Angular expansion coefficients specify how individual basis terms contribute to the cross-sectional shape of a magnetic flux surface.",
+        "The coefficient vector collects amplitudes for the specified flux surface; its components label expansion terms rather than spatial directions.",
+        "They depend on the selected shape function, angular parameterization, and basis; no particular harmonic or trigonometric parity is imposed at this parent level.",
+        "They describe the specified flux surface, not a surface average or an enclosed-volume integral."
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "current_of_divertor": {
+      "right_names": [
+        "current_of_divertor"
+      ],
+      "definition_points": [
+        "Total electric current incident on a divertor, summed over all targets",
+        "Net conventional current carried by charged particles striking the divertor surfaces",
+        "Includes signed electron and ion contributions",
+        "Integrated over the union of divertor target surfaces",
+        "Excludes neutral-particle flux and displacement current",
+        "Sign convention: positive when conventional charged-particle current flows from the plasma into the divertor material"
+      ],
+      "unit": "A",
+      "verdict": "sound"
+    },
+    "decay_time_due_to_disruption": {
+      "right_names": [
+        "current_decay_time_due_to_disruption"
+      ],
+      "definition_points": [
+        "the quantity is an electric-current decay timescale during a disruption",
+        "it covers the total plasma current and the current of a specified particle population",
+        "either a linear-threshold convention, τ_lin = (t(f_low) − t(f_high))/(f_high − f_low), with the reference current magnitude and the upper/lower fractions stated, or an exponential e-folding convention, I(t) = I_0 exp[−(t−t_0)/τ_exp], with I_0 and t_0 stated",
+        "linear-threshold and exponential times are not equal, so the convention used must be specified",
+        "it denotes neither a local current-density decay time nor an electron-temperature decay time",
+        "unit: s"
+      ],
+      "unit": "s",
+      "verdict": "naming_defect"
+    },
+    "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate": {
+      "right_names": [
+        "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+      ],
+      "definition_points": [
+        "the quantity is dV/dψ, the radial derivative of the volume enclosed by a flux surface with respect to poloidal flux",
+        "V is the cumulative volume enclosed by the nested flux surface from the magnetic axis to that surface",
+        "ψ is the signed poloidal magnetic-flux coordinate",
+        "the sign is positive when enclosed volume increases with increasing signed ψ",
+        "unit is Wb^-1.m^3",
+        "it is distinct from the derivative with respect to toroidal flux coordinate"
+      ],
+      "unit": "Wb^-1.m^3",
+      "verdict": "sound"
+    },
+    "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate": {
+      "right_names": [
+        "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+      ],
+      "definition_points": [
+        "It is the radial derivative dV/dρ_tor of the volume enclosed by a flux surface with respect to the toroidal flux coordinate ρ_tor.",
+        "The volume is cumulative from the magnetic axis to the specified surface and carries no species weighting.",
+        "It is a geometric coefficient/metric tensor element used in flux-surface-averaged 1D transport relations.",
+        "The unit is m^2."
+      ],
+      "unit": "m^2",
+      "verdict": "sound"
+    },
+    "effective_turn_count_of_passive_loop": {
+      "right_names": [
+        "effective_turn_count_of_passive_loop"
+      ],
+      "definition_points": [
+        "the signed effective number of turns in a passive conductor loop or passive-loop element",
+        "the sign convention: positive means current is counter-clockwise when seen from above, indicating current flow direction relative to the toroidal axis",
+        "that the quantity is used for computing the magnetic field contribution or current-turn source strength of the passive loop",
+        "that the effective turn count may be fractional for equivalent or homogenized passive-loop elements"
+      ],
+      "unit": "1",
+      "verdict": "definition_defect"
+    },
+    "electron_particle_flux_at_wall_due_to_pumping": {
+      "right_names": [
+        "electron_particle_flux_at_wall_due_to_pumping"
+      ],
+      "definition_points": [
+        "the quantity is the wall-pumping particle-removal rate counted in equivalent electrons",
+        "it is a global scalar exhaust throughput, not an areal flux density",
+        "the counting population is electron-equivalent particles, not necessarily physical electrons and not a specified neutral species",
+        "the unit is s^-1"
+      ],
+      "unit": "s^-1",
+      "verdict": "sound"
+    },
+    "elongation_of_flux_surface": {
+      "right_names": [
+        "elongation_of_flux_surface"
+      ],
+      "definition_points": [
+        "dimensionless ratio κ of vertical to horizontal extent (equivalently semi-axes for an ellipse) of a flux surface's poloidal cross-section",
+        "characterizes the poloidal shape and is independent of overall size",
+        "applies to an individual/local flux surface, not an average over nested surfaces",
+        "not restricted to the plasma boundary; boundary elongation is a separate quantity",
+        "unit 1"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "equilibrium_weight_of_interferometer_beam": {
+      "right_names": [
+        "equilibrium_weight_of_interferometer_beam"
+      ],
+      "definition_points": [
+        "dimensionless (unit 1)",
+        "weight factor for the line-integrated electron-density (n_e line) constraint",
+        "weight given to the measurement",
+        "sets the relative contribution of the constraint residual in the equilibrium objective function",
+        "applies per interferometer-beam constraint, not to electron density itself",
+        "enters the weighted least-squares objective as w_i^2 (reconstructed_i - measured_i)^2 / sigma_i^2"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "ethylene_source_rate": {
+      "right_names": [
+        "ethylene_source_rate"
+      ],
+      "definition_points": [
+        "instantaneous injection rate of ethylene (C2H4) gas into the plasma vessel",
+        "expressed as equivalent electrons per second",
+        "each C2H4 molecule counted as 16 equivalent electrons",
+        "unit s^-1"
+      ],
+      "unit": "s^-1",
+      "verdict": "sound"
+    },
+    "external_loop_voltage": {
+      "right_names": [
+        "external_loop_voltage"
+      ],
+      "definition_points": [
+        "External voltage is the negative time derivative of the externally applied average poloidal flux: V_ext = -d(psi_external_average)/dt.",
+        "It represents the inductive voltage from external poloidal-field coils driving plasma current.",
+        "The averaging applies to the external poloidal flux before time differentiation; the quantity is not an averaged loop voltage.",
+        "The unit is V."
+      ],
+      "unit": "V",
+      "verdict": "naming_defect"
+    },
+    "faraday_angle": {
+      "right_names": [
+        "faraday_angle"
+      ],
+      "definition_points": [
+        "signed rotation of the linear-polarization orientation accumulated along a probing beam path through magnetized plasma",
+        "line integral of electron density times the magnetic-field component parallel to the beam path over the plasma-crossing segment",
+        "rotation produced outside the plasma, including by optical or calibration elements, is excluded",
+        "the same physical angle may be a direct polarimetric observation or a value calculated from a reconstructed equilibrium along the same beam path; their difference is a fit residual",
+        "sign convention: positive when the polarization plane rotates according to the right-hand rule about the beam-propagation direction",
+        "unit rad"
+      ],
+      "unit": "rad",
+      "verdict": "sound"
+    },
+    "field_aligned_surface_tilt_angle_of_langmuir_probe": {
+      "right_names": [
+        "magnetic_field_incident_angle_with_respect_to_plasma_facing_surface_of_langmuir_probe"
+      ],
+      "definition_points": [
+        "Incident angle of the magnetic field with respect to the plasma-facing surface at the Langmuir probe measurement location.",
+        "Unit: rad."
+      ],
+      "unit": "rad",
+      "verdict": "naming_defect"
+    },
+    "flux_surface_averaged_magnetic_field_magnitude": {
+      "right_names": [
+        "flux_surface_averaged_magnetic_field_magnitude"
+      ],
+      "definition_points": [
+        "flux-surface average of the local total equilibrium magnetic-field magnitude 〈|B|〉",
+        "local magnitude taken before averaging, not the magnitude of a surface-averaged field vector",
+        "average weighted by the inverse magnitude of the poloidal flux gradient, 1/|∇ψ|",
+        "positive for a nonvanishing equilibrium field, irrespective of field-direction sign convention",
+        "not the flux-surface average of the squared field magnitude",
+        "unit: T"
+      ],
+      "unit": "T",
+      "verdict": "sound"
+    },
+    "flux_surface_averaged_major_radius": {
+      "right_names": [
+        "flux_surface_averaged_major_radius"
+      ],
+      "definition_points": [
+        "flux-surface average over a complete closed magnetic flux surface",
+        "mean major radius, i.e. mean perpendicular distance from the toroidal symmetry axis",
+        "geometric metric coefficient used in flux-surface-averaged transport equations",
+        "flux-surface-average weighting by inverse magnitude of the poloidal flux gradient",
+        "unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface": {
+      "right_names": [
+        "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface"
+      ],
+      "definition_points": [
+        "Fourier coefficients of B_n, the normal component of the non-axisymmetric vacuum magnetic field",
+        "evaluated on control-surface points",
+        "represents the toroidal mode decomposition of the 3D magnetic perturbation normal to each control surface",
+        "unit T"
+      ],
+      "unit": "T",
+      "verdict": "definition_defect"
+    },
+    "grating_line_density": {
+      "right_names": [
+        "grating_line_density"
+      ],
+      "definition_points": [
+        "number of grating lines (grooves)",
+        "per unit length",
+        "of the spectrometer diffraction grating",
+        "unit m^-1"
+      ],
+      "unit": "m^-1",
+      "verdict": "sound"
+    },
+    "height_of_plasma_filament": {
+      "right_names": [
+        "height_of_plasma_filament"
+      ],
+      "definition_points": [
+        "full vertical height/extent of the rectangular cross-section",
+        "of a discrete plasma current-carrying filament element",
+        "vertical extent of the current element geometry in the filamentary representation",
+        "unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "hydrogen_density_at_limiter": {
+      "right_names": [
+        "hydrogen_ion_density_at_limiter"
+      ],
+      "definition_points": [
+        "hydrogen ion (H+) number density",
+        "local evaluation at a plasma-facing limiter surface",
+        "evaluation on the plasma side of the magnetic presheath or sheath entrance",
+        "excludes neutral hydrogen and other ion species",
+        "defined from the hydrogen-ion velocity distribution function as an integral over velocity space",
+        "unit m^-3"
+      ],
+      "unit": "m^-3",
+      "verdict": "naming_defect"
+    },
+    "inverse_of_square_of_magnetic_field_magnitude": {
+      "right_names": [
+        "inverse_of_square_of_magnetic_field_magnitude"
+      ],
+      "definition_points": [
+        "reciprocal square of total magnetic-field magnitude, B^{-2} = 1/|B|^2",
+        "applies to the full magnetic-field vector, including all vector components, not to a selected component",
+        "local magnetic-geometry factor, positive wherever the field magnitude is nonzero",
+        "no flux-surface or volume aggregation at this level; flux-surface averaging is a separate operation",
+        "distinct from the squared field magnitude and from the reciprocal square of a selected field component",
+        "unit T^-2"
+      ],
+      "unit": "T^-2",
+      "verdict": "sound"
+    },
+    "loop_voltage_at_plasma_boundary": {
+      "right_names": [
+        "loop_voltage_at_plasma_boundary"
+      ],
+      "definition_points": [
+        "It is the loop voltage at the last closed flux surface (LCFS), i.e. the plasma boundary.",
+        "It is the toroidal electromotive force around a closed loop, given by the electric-field circulation.",
+        "It provides the inductive drive for ohmic plasma current.",
+        "Sign convention: a positive value drives positive ohmic current flowing anti-clockwise when viewed from above.",
+        "The unit is V."
+      ],
+      "unit": "V",
+      "verdict": "sound"
+    },
+    "lower_bound_photon_energy": {
+      "right_names": [
+        "lower_bound_photon_energy"
+      ],
+      "definition_points": [
+        "The quantity is a lower photon-energy bound in eV: the low-energy edge of a photon-energy window, not a central or representative photon energy.",
+        "For energy-resolved emission bands (e.g. the hard X-ray emission energy band used in the emissivity profile reconstruction, and the soft X-ray channel band), it is the lower boundary of the band",
+        "together with the upper bound it specifies the spectral window of the channel/profile.",
+        "For photon counting it is a per-detector-pixel or per-channel detection threshold: an incident photon is registered only if its energy strictly exceeds the threshold (E_gamma > E_gamma,min); the threshold applies individually to each pixel or channel and is not an average over the detector.",
+        "Exceeding the threshold is necessary for counting but does not imply unit detection probability."
+      ],
+      "unit": "eV",
+      "verdict": "definition_defect"
+    },
+    "lower_inner_squareness_of_flux_surface": {
+      "right_names": [
+        "lower_inner_squareness_of_flux_surface"
+      ],
+      "definition_points": [
+        "dimensionless coefficient, unit 1",
+        "Luce (2013) squareness definition",
+        "lower-inner / inner-lower quadrant of a flux surface",
+        "deviation from an elliptical boundary",
+        "signed departure from the reference ellipse"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "minimum_gas_flow": {
+      "right_names": [
+        "minimum_volumetric_gas_flow_rate"
+      ],
+      "definition_points": [
+        "The quantity is the lower reliable operating bound of the pressure-volume gas throughput delivered by a gas injection valve.",
+        "The throughput is pressure-volume throughput, Q_g = p_g dV_g/dt, with unit Pa.m^3.s^-1, not mass flow or particle-number rate.",
+        "It applies to the aggregate gas stream across a defined flow boundary and is not restricted to a molecular species or charge state."
+      ],
+      "unit": "Pa.m^3.s^-1",
+      "verdict": "naming_defect"
+    },
+    "minor_length_of_plasma_filament": {
+      "right_names": [
+        "second_inclination_length_of_plasma_filament"
+      ],
+      "definition_points": [
+        "the quantity is the length of the parallelogram side inclined at angle beta",
+        "beta is measured with respect to the vertical height axis",
+        "the side belongs to the oblique/parallelogram cross-sectional description of a plasma current filament element",
+        "the stored unit is m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "minor_radius_of_plasma_boundary": {
+      "right_names": [
+        "minor_radius_of_plasma_boundary"
+      ],
+      "definition_points": [
+        "Minor radius of the plasma boundary is half the difference between the maximum and minimum major radii on its poloidal cross-sectional contour.",
+        "It is the contour-wide horizontal size parameter of the boundary, not a local major-radius coordinate or flux-surface average.",
+        "The source identifies the boundary as the last closed flux surface and gives the unit as m."
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "normalized_collisionality": {
+      "right_names": [
+        "normalized_collisionality"
+      ],
+      "definition_points": [
+        "ratio of the inter-species collision frequency to a characteristic transit frequency",
+        "for pairs of particle species in a local gyrokinetic simulation",
+        "dimensionless, with unit 1",
+        "governing collisional coupling and neoclassical effects"
+      ],
+      "unit": "1",
+      "verdict": "definition_defect"
+    },
+    "normalized_minor_radius_of_flux_surface": {
+      "right_names": [
+        "normalized_minor_radius_of_flux_surface"
+      ],
+      "definition_points": [
+        "the quantity is the normalized minor-radius label of a local flux surface",
+        "it is half the difference between the maximum and minimum major radii of the surface, divided by the reference length L_ref",
+        "it is dimensionless, with unit 1",
+        "the reference length L_ref is specified and positive",
+        "it sets the radial location of the gyrokinetic flux-tube simulation",
+        "it is a geometric half-width normalization, not a magnetic-flux normalization"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "normalized_poloidal_flux_coordinate_of_plasma_boundary": {
+      "right_names": [
+        "normalized_poloidal_flux_coordinate_of_plasma_boundary"
+      ],
+      "definition_points": [
+        "the normalized poloidal flux coordinate value identifying the selected plasma boundary",
+        "normalization to the poloidal flux difference from the magnetic axis to the separatrix, so the value is zero at the axis and one at the separatrix",
+        "the linear normalized poloidal flux value itself, not its square root",
+        "the boundary is commonly chosen slightly below one, near 99.x% of the separatrix flux, for fixed-boundary equilibrium calculations",
+        "used to specify which closed flux surface is taken as the plasma boundary",
+        "unit: 1 (dimensionless)"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "normalized_toroidal_beta": {
+      "right_names": [
+        "normalized_toroidal_beta"
+      ],
+      "definition_points": [
+        "The defining normalization is β_N = 100 × β_tor × a[m] × B0[T] / Ip[MA].",
+        "It must state the explicit factor of 100 separating β_N from unnormalized toroidal beta.",
+        "The numerical unit conventions are a in metres, B0 in tesla, and Ip in mega-amperes.",
+        "β_tor is the dimensionless whole-plasma toroidal pressure beta being rescaled."
+      ],
+      "unit": "1",
+      "verdict": "definition_defect"
+    },
+    "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift": {
+      "right_names": [
+        "normalized_toroidal_flux_coordinate_displacement_of_pellet_deposition_relative_to_ablation_due_to_e_cross_b_drift"
+      ],
+      "definition_points": [
+        "The quantity is the shift of the pellet deposition location relative to the ablation location.",
+        "The shift is caused by E×B drifts.",
+        "It is expressed as a difference in normalized toroidal flux coordinate (Δρ_tor_norm), with the sign defined as deposition minus ablation.",
+        "It is not an absolute deposition coordinate, a geometric distance, or a drift velocity."
+      ],
+      "unit": "1",
+      "verdict": "naming_defect"
+    },
+    "outer_radius_of_plasma_filament": {
+      "right_names": [
+        "poloidal_plane_outer_cross_sectional_radius_of_plasma_filament"
+      ],
+      "definition_points": [
+        "It is the geometric outer radius of the outer circular boundary of the annular cross-section representing a current-carrying plasma filament.",
+        "It is measured in the poloidal plane from the filament cross-section center (R_c, Z_c) to a point (R, Z) on the outer boundary, as r_outer = sqrt((R - R_c)^2 + (Z - Z_c)^2).",
+        "It applies only to the outer boundary of an annular plasma-filament cross-section and is not an average over the conducting region.",
+        "It is paired with the inner radius r_inner, with 0 <= r_inner <= r_outer, and the current-carrying cross-section occupies the annulus between them.",
+        "The unit is m."
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "particle_energy": {
+      "right_names": [
+        "particle_energy"
+      ],
+      "definition_points": [
+        "the quantity is the energy associated with particle kinetic motion, and the general quantity inherited by its specialized forms",
+        "for a single particle of mass m moving nonrelativistically with velocity v, W = (1/2)m|v|^2, with m the particle mass and v the particle velocity",
+        "the general quantity does not select a species, particle population, spatial region, velocity component, or aggregation convention",
+        "it is not inherently a name for a population-integrated total, not restricted to suprathermal particles, and not inherently a gyrokinetic coordinate",
+        "it is distinct from potential energy, thermal energy defined by a temperature, and field energy",
+        "unit: J"
+      ],
+      "unit": "J",
+      "verdict": "sound"
+    },
+    "plasma_current": {
+      "right_names": [
+        "plasma_current"
+      ],
+      "definition_points": [
+        "Total signed conventional electric current carried toroidally by the entire plasma population through a complete poloidal cross-section.",
+        "Net signed current with opposite-direction contributions combined algebraically.",
+        "Toroidal projection of plasma current density integrated over the full plasma cross-section: I_p = ∫_{A_p} j_pl · φ̂ dA.",
+        "Cross-section taken at fixed toroidal angle in the right-handed cylindrical (R, φ, Z) frame, with positive normal +φ̂.",
+        "Includes contributions from all plasma charge carriers over the complete cross-section; not species-resolved, not unsigned particle flow, and not current-density magnitude.",
+        "Excludes currents in external coils and passive structures.",
+        "Sign convention: positive when conventional plasma current flows in the direction of increasing toroidal angle φ (counterclockwise viewed from above +Z).",
+        "Unit: A."
+      ],
+      "unit": "A",
+      "verdict": "sound"
+    },
+    "polarization_angle_at_constraint_position": {
+      "right_names": [
+        "motional_stark_polarization_angle_at_constraint_position"
+      ],
+      "definition_points": [
+        "must state that it is the measured MSE polarization angle",
+        "must state that it is the reconstructed value calculated from the reconstructed equilibrium",
+        "must state the unit as rad"
+      ],
+      "unit": "rad",
+      "verdict": "definition_defect"
+    },
+    "poloidal_beta": {
+      "right_names": [
+        "poloidal_beta"
+      ],
+      "definition_points": [
+        "dimensionless (unit 1)",
+        "βp = 4∫p dV / (R0 μ0 Ip²)",
+        "volume-averaged pressure p over the evaluation volume V",
+        "R0 is the reference major radius, μ0 vacuum permeability, Ip plasma current",
+        "global value uses the plasma volume; profile value uses the source-specified evaluation volume",
+        "effective poloidal magnetic-pressure scale set by net plasma current and geometry, not a pointwise poloidal field",
+        "requires nonzero Ip and positive evaluation volume"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "poloidal_length_of_flux_surface": {
+      "right_names": [
+        "poloidal_length_of_flux_surface"
+      ],
+      "definition_points": [
+        "poloidal arc length of the closed contour of one selected magnetic flux surface in the poloidal plane (equilibrium/time_slice/global_quantities/length_pol, unit m)",
+        "a geometric property of the equilibrium flux surface, used in flux-surface-averaged quantities",
+        "retains the absolute geometric scale of the contour (perimeter, not a scale-independent shape ratio)",
+        "excludes enclosed area, volume, toroidal circumference and local arc segments"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "poloidal_magnetic_flux": {
+      "right_names": [
+        "poloidal_magnetic_flux"
+      ],
+      "definition_points": [
+        "signed magnetic flux through a horizontal disk centered on the toroidal symmetry axis",
+        "full poloidal flux including the 2π toroidal integration, not flux divided by 2π or a normalized coordinate",
+        "includes plasma-current and external-source contributions",
+        "positive when the field threading the disk has a net component toward increasing Z (upward normal)",
+        "level sets define magnetic surfaces in axisymmetric equilibrium",
+        "unit Wb"
+      ],
+      "unit": "Wb",
+      "verdict": "sound"
+    },
+    "poloidal_magnetic_flux_at_magnetic_axis": {
+      "right_names": [
+        "poloidal_magnetic_flux_at_magnetic_axis"
+      ],
+      "definition_points": [
+        "the signed poloidal magnetic flux (ψ) through a horizontal disk centered on the toroidal symmetry axis, bounded by the toroidal circle at the magnetic axis",
+        "the value of the equilibrium poloidal-flux function Φ_p evaluated at the magnetic-axis coordinates (R_a, Z_a), i.e. Φ_p,a = 2π∫₀^{R_a} B_Z(R′,Z_a) R′ dR′",
+        "an unnormalized flux value, positive when the net vertical field threading the disk is directed toward increasing Z, which need not vanish at the axis",
+        "unit: Wb"
+      ],
+      "unit": "Wb",
+      "verdict": "sound"
+    },
+    "poloidal_plane_cross_sectional_area_of_plasma_boundary": {
+      "right_names": [
+        "poloidal_plane_cross_sectional_area_of_plasma_boundary"
+      ],
+      "definition_points": [
+        "area enclosed by the last closed flux surface / LCFS in the poloidal plane",
+        "global equilibrium scalar characterizing plasma cross-sectional size at the plasma boundary",
+        "unit m^2"
+      ],
+      "unit": "m^2",
+      "verdict": "sound"
+    },
+    "power_at_divertor_target_due_to_recombination": {
+      "right_names": [
+        "power_at_divertor_target_due_to_recombination"
+      ],
+      "definition_points": [
+        "total power deposited on a divertor target due to recombination",
+        "sum of the plasma-ion recombination channel and the neutral-particle recombination channel at the plasma-material interface",
+        "stored unit W"
+      ],
+      "unit": "W",
+      "verdict": "sound"
+    },
+    "radial_coordinate_at_inboard_midplane": {
+      "right_names": [
+        "radial_coordinate_at_inboard_midplane"
+      ],
+      "definition_points": [
+        "major-radius coordinate R of a magnetic flux surface at its inboard (high-field-side) midplane intersection",
+        "right-handed cylindrical (R, phi, Z) frame with R as major radius",
+        "one coordinate value for each specified magnetic flux surface, i.e. the profile element at that surface",
+        "not a flux-surface, poloidal or toroidal average, and not the outboard-midplane coordinate",
+        "unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "radial_coordinate_of_current_center": {
+      "right_names": [
+        "radial_coordinate_of_current_center"
+      ],
+      "definition_points": [
+        "Major-radius (R) coordinate of the current centre",
+        "Current-weighted first moment over the plasma current-carrying poloidal cross-section: ∫_{D_p} R j_φ dS divided by total toroidal current I_p",
+        "R is the major-radius coordinate in the right-handed cylindrical (R, φ, Z) frame; j_φ is the toroidal plasma current density",
+        "Unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "radial_coordinate_of_poloidal_field_coil": {
+      "right_names": [
+        "radial_coordinate_of_first_point_of_poloidal_field_coil",
+        "radial_coordinate_of_second_point_of_poloidal_field_coil",
+        "radial_coordinate_of_annulus_centre_of_poloidal_field_coil"
+      ],
+      "definition_points": [
+        "Identify which reference point is meant: first point, second point, or annulus centre in the poloidal-field coil cross-section.",
+        "Define the major-radius coordinate as R = sqrt(x^2 + y^2) in a right-handed Cartesian (x, y, z) frame whose z-axis is the toroidal symmetry axis and whose vertical coordinate is z = Z.",
+        "State that it is a nonnegative point-location coordinate, not an average over the coil and not a cross-sectional radius or the complete cross-sectional outline.",
+        "For the annulus entry, preserve the source's 'centre major radius' meaning."
+      ],
+      "unit": "m",
+      "verdict": "naming_defect"
+    },
+    "radial_perturbed_vacuum_magnetic_vector_potential_real_part": {
+      "right_names": [
+        "radial_perturbed_vacuum_magnetic_vector_potential_real_part"
+      ],
+      "definition_points": [
+        "real part of the first-order perturbed magnetic vector-potential eigenfunction",
+        "first coordinate component, i.e. the radial (R) component",
+        "in the vacuum region, outside the plasma",
+        "for a single given toroidal mode number, not summed over toroidal modes",
+        "from linear MHD stability analysis",
+        "stored unit T.m"
+      ],
+      "unit": "T.m",
+      "verdict": "sound"
+    },
+    "radial_separatrix_distance_at_outboard_midplane": {
+      "right_names": [
+        "radial_separatrix_distance_at_outboard_midplane"
+      ],
+      "definition_points": [
+        "signed major-radius separation between the mapped measurement position and the separatrix at the outboard midplane",
+        "mapping along magnetic flux surfaces preserves the flux-surface label and moves the position to the outboard midplane",
+        "separation is in the major-radius direction, ΔR = R_mapped − R_sep,mid",
+        "positive values correspond to the scrape-off layer / outside the separatrix; zero at the separatrix and negative on the confined-plasma side",
+        "unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "radius_of_poloidal_field_coil": {
+      "right_names": [
+        "curvature_radius_of_poloidal_field_coil"
+      ],
+      "definition_points": [
+        "Non-negative curvature radius of one arc-of-circle segment used to approximate the cross-sectional contour of a poloidal field coil",
+        "Measured in a poloidal plane of the right-handed cylindrical (R, φ, Z) frame, where R is major radius and Z is vertical height",
+        "For a circular contour segment, the curvature radius ρ is the inverse magnitude of the planar curvature κ: ρ = 1/|κ|",
+        "A finite physical arc has ρ > 0; the segment approaches a straight line as ρ grows and κ → 0",
+        "Each arc is anchored by a start point in the poloidal plane whose major-radius coordinate is major_radius_of_poloidal_field_coil and vertical coordinate is height_of_poloidal_field_coil; the end of each arc coincides with the start of the next",
+        "The value is determined from the designed circular-arc contour, from CAD geometry, or by fitting circular arcs to surveyed boundary points",
+        "Unit: m"
+      ],
+      "unit": "m",
+      "verdict": "naming_defect"
+    },
+    "ratio_of_particle_temperature_to_particle_reference_temperature": {
+      "right_names": [
+        "ratio_of_particle_temperature_to_particle_reference_temperature"
+      ],
+      "definition_points": [
+        "dimensionless normalised temperature T_p/T_ref with unit 1",
+        "T_p is the kinetic temperature of the selected particle species",
+        "T_ref is the positive reference temperature on the same simulated magnetic flux surface",
+        "the species dependence is retained in the numerator only",
+        "the quantity is defined in a local gyrokinetic simulation / flux-tube context",
+        "it is not an absolute temperature"
+      ],
+      "unit": "1",
+      "verdict": "definition_defect"
+    },
+    "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius": {
+      "right_names": [
+        "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius"
+      ],
+      "definition_points": [
+        "the ratio is the squared gradient magnitude of the length-valued toroidal-flux coordinate divided by squared major radius",
+        "it is a local equilibrium metric coefficient encoding flux-surface spacing with inverse-square major-radius weighting",
+        "it is pointwise and not spatially averaged; its flux-surface-averaged counterpart is distinct",
+        "the toroidal-flux coordinate retains its prescribed scale with no boundary normalization or arbitrary flux-label substitution",
+        "in the right-handed cylindrical (R, phi, Z) frame, R is the distance from the toroidal symmetry axis",
+        "the stored unit is m^-2"
+      ],
+      "unit": "m^-2",
+      "verdict": "sound"
+    },
+    "resistivity_of_plasma_facing_component": {
+      "right_names": [
+        "resistivity_of_mobile_plasma_facing_component_unit"
+      ],
+      "definition_points": [
+        "Electrical resistivity of a mobile plasma-facing component (PFC) unit in the 2D wall description.",
+        "A material property relevant for electromagnetic analysis including induced and eddy current calculations in the wall structure."
+      ],
+      "unit": "m.ohm",
+      "verdict": "naming_defect"
+    },
+    "right_hand_circularly_polarized_wave_electric_field": {
+      "right_names": [
+        "right_hand_circularly_polarized_wave_electric_field"
+      ],
+      "definition_points": [
+        "complex E-minus contribution of the wave electric field",
+        "transverse/perpendicular to the static magnetic field",
+        "right-hand circular polarization",
+        "retains amplitude and phase of the circular-polarization contribution",
+        "unit V.m^-1"
+      ],
+      "unit": "V.m^-1",
+      "verdict": "sound"
+    },
+    "safety_factor_at_magnetic_axis": {
+      "right_names": [
+        "safety_factor_at_magnetic_axis"
+      ],
+      "definition_points": [
+        "The quantity is the safety factor q at the magnetic axis, i.e. at the innermost closed flux surface / locus where the poloidal field vanishes.",
+        "It is defined by the limit q0 = lim_{rho->0} q(rho), not by direct evaluation of the poloidal-angle integral at the axis.",
+        "It is a",
+        "signed safety factor: positive when the toroidal angle advance of a field line is in the direction of increasing phi as poloidal angle theta increases.",
+        "It is a locus-specific value, not a spatial average or sum, and is distinct from the minimum safety factor.",
+        "The stored unit is 1."
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "second_local_tangential_width_of_optical_element": {
+      "right_names": [
+        "second_local_tangential_width_of_optical_element"
+      ],
+      "definition_points": [
+        "Full clear-aperture width along the X2 direction, i.e. the second local tangential axis",
+        "Applies to rectangular aperture geometry only (geometry_type=3)",
+        "Defined in the object-local aperture-plane coordinate system (X1, X2), with X2 as the second local tangential axis",
+        "Denotes the full width, not the half-width, and excludes opaque mounts and structures outside the aperture",
+        "Unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "spectral_photon_radiance": {
+      "right_names": [
+        "spectral_photon_radiance"
+      ],
+      "definition_points": [
+        "photon-number radiance rather than energy radiance",
+        "directional quantity along a viewing direction",
+        "per unit projected area perpendicular to the ray",
+        "per unit viewing solid angle",
+        "per unit wavelength interval",
+        "per unit time as a rate",
+        "plasma emission, including spectral line and continuum contributions at the specified wavelength"
+      ],
+      "unit": "m^-3.s^-1.sr^-1",
+      "verdict": "sound"
+    },
+    "spectral_rate_of_spectrometer_channel": {
+      "right_names": [
+        "spectral_rate_of_spectrometer_channel"
+      ],
+      "definition_points": [
+        "detected photoelectron rate assigned to each wavelength pixel of a spectrometer channel",
+        "electronic gain compensation applied",
+        "relative channel calibration applied",
+        "before absolute radiometric calibration",
+        "unit s^-1"
+      ],
+      "unit": "s^-1",
+      "verdict": "sound"
+    },
+    "square_of_toroidal_flux_coordinate_gradient_magnitude": {
+      "right_names": [
+        "square_of_toroidal_flux_coordinate_gradient_magnitude"
+      ],
+      "definition_points": [
+        "It is the scalar $g^{\\rho_{\\mathrm{tor}}\\rho_{\\mathrm{tor}}} = |\\nabla\\rho_{\\mathrm{tor}}|^2$, where $\\rho_{\\mathrm{tor}}$ is the toroidal magnetic-flux surface label and $\\nabla$ is the spatial gradient with respect to physical position.",
+        "It is local: no directional projection, no flux-surface averaging, and no scaling by magnetic-field strength or major radius.",
+        "The normalization or scale of $\\rho_{\\mathrm{tor}}$ must be stated explicitly, because it fixes the dimensions and unit of the coefficient.",
+        "The unit must match that convention; a physical-space gradient with a dimensionless normalized flux label has inverse-square-length dimension, so unit 1 is inconsistent with the declared dimensionless designation unless a coordinate convention making it dimensionless is stated."
+      ],
+      "unit": "1",
+      "verdict": "definition_defect"
+    },
+    "surface_temperature": {
+      "right_names": [
+        "apparent_surface_temperature"
+      ],
+      "definition_points": [
+        "It is an apparent (infrared-radiance-derived) surface temperature, not a thermodynamic surface temperature.",
+        "It is a processed 2D image/distribution over plasma-facing component surfaces from an infrared camera frame.",
+        "The two image dimensions are row index (horizontal orientation) and column index (vertical orientation).",
+        "The unit is K."
+      ],
+      "unit": "K",
+      "verdict": "naming_defect"
+    },
+    "temperature_of_sensor": {
+      "right_names": [
+        "temperature_of_sensor"
+      ],
+      "definition_points": [
+        "Temperature measured by a thermocouple sensor attached to a tokamak structural component",
+        "Time-resolved thermal measurement",
+        "Used for structural health monitoring and machine protection",
+        "Unit: K"
+      ],
+      "unit": "K",
+      "verdict": "definition_defect"
+    },
+    "thickness_of_breeder_blanket_layer": {
+      "right_names": [
+        "thickness_of_breeder_blanket_layer_at_midplane",
+        "midplane_thickness_of_breeder_blanket_layer"
+      ],
+      "definition_points": [
+        "The thickness is of an individual material layer within a breeding blanket module.",
+        "The thickness is evaluated at the midplane.",
+        "The quantity characterizes the physical dimension of the layer relevant to neutronics and shielding assessment.",
+        "The unit is m."
+      ],
+      "unit": "m",
+      "verdict": "naming_defect"
+    },
+    "thickness_of_plasma_filament": {
+      "right_names": [
+        "thickness_of_plasma_filament"
+      ],
+      "definition_points": [
+        "full thickness of a rectangular (thick-line) plasma filament cross-section",
+        "measured in the local plane along the direction normal/perpendicular to the filament's central segment",
+        "transverse side length of the rectangle, complementing the tangential length along the segment",
+        "a full side length, not a half-width",
+        "unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "toroidal_angle_of_control_surface": {
+      "right_names": [
+        "toroidal_angle_of_control_surface"
+      ],
+      "definition_points": [
+        "Toroidal angle locating each point of the control surface about the machine symmetry axis",
+        "Right-handed cylindrical (R, φ, Z) frame with φ = atan2(y, x) mod 2π from Cartesian x and y",
+        "Facility-defined zero direction for φ",
+        "Periodicity: values differing by integer multiples of 2π represent the same toroidal direction",
+        "Sign convention: positive when φ increases counter-clockwise viewed from above the +Z direction",
+        "Unit: rad"
+      ],
+      "unit": "rad",
+      "verdict": "sound"
+    },
+    "toroidal_angle_of_poloidal_magnetic_field_probe": {
+      "right_names": [
+        "toroidal_angle_of_poloidal_magnetic_field_probe"
+      ],
+      "definition_points": [
+        "toroidal angle of the sensitive axis of a poloidal field (Bp) probe coil",
+        "deviation of the coil orientation from a purely poloidal plane",
+        "signed azimuthal orientation angle in the right-handed cylindrical (R, phi, Z) frame",
+        "computed as atan2(n_phi, n_R), where n is the probe sensitive-axis unit normal",
+        "positive when rotation from the positive radial direction toward the horizontal projection of the sensitive-axis normal is toward increasing toroidal angle phi",
+        "unit rad",
+        "used to project the measured field component onto the correct direction"
+      ],
+      "unit": "rad",
+      "verdict": "sound"
+    },
+    "toroidal_magnetic_field_at_magnetic_axis": {
+      "right_names": [
+        "toroidal_magnetic_field_at_magnetic_axis"
+      ],
+      "definition_points": [
+        "total toroidal magnetic field at the magnetic axis",
+        "includes both TF-coil/external-coil and plasma-current contributions",
+        "signed toroidal projection B_axis · φhat evaluated locally at the magnetic axis",
+        "unit T",
+        "positive when the field projects in the direction of increasing toroidal angle φ"
+      ],
+      "unit": "T",
+      "verdict": "sound"
+    },
+    "toroidal_magnetic_flux_at_plasma_boundary": {
+      "right_names": [
+        "toroidal_magnetic_flux_at_plasma_boundary"
+      ],
+      "definition_points": [
+        "net flux of the toroidal magnetic-field component through the poloidal cross-section enclosed by the plasma boundary",
+        "boundary value of toroidal magnetic flux used to define toroidal-flux radial labels",
+        "right-handed cylindrical (R, phi, Z) frame with phi increasing counter-clockwise viewed from +Z",
+        "definition as integral over the boundary-enclosed poloidal region: Phi_tor,b = integral B dot phi-hat dA_RZ = integral B_phi dA_RZ = integral F(psi)/R dA_RZ",
+        "B_phi is the toroidal field component in tesla, dA_RZ is poloidal area element in square meters, and F(psi)=R B_phi is the poloidal-current function in tesla meters",
+        "includes both externally imposed toroidal-field flux and the plasma poloidal-current contribution",
+        "is distinct from toroidal magnetic flux at the plasma boundary due to poloidal current and from poloidal magnetic flux at the plasma boundary",
+        "sign convention: positive when the net toroidal magnetic field threading the boundary poloidal cross-section points in the direction of increasing toroidal angle phi",
+        "unit Wb"
+      ],
+      "unit": "Wb",
+      "verdict": "sound"
+    },
+    "toroidal_parity": {
+      "right_names": [
+        "b_field_phi_sign"
+      ],
+      "definition_points": [
+        "The definition must state that the quantity is the sign of the toroidal magnetic-field component B_phi = B·phihat on a flux surface in local gyrokinetic geometry.",
+        "It must state that the indicator takes values +1 or -1 for nonzero B_phi and is undefined when B_phi vanishes.",
+        "It must state the sign convention that positive means B_phi points toward increasing toroidal angle phi."
+      ],
+      "unit": "1",
+      "verdict": "naming_defect"
+    },
+    "toroidal_reference_magnetic_field": {
+      "right_names": [
+        "toroidal_reference_magnetic_field"
+      ],
+      "definition_points": [
+        "It is the signed toroidal component B_phi of the equilibrium magnetic field at the reference point.",
+        "The reference point has major radius equal to the reference major radius.",
+        "The field is expressed in the right-handed cylindrical (R, phi, Z) frame.",
+        "The defining projection is B_phi,ref = B_eq(x_ref) dot phi_hat(x_ref), with phi_hat the unit vector in the direction of increasing toroidal angle phi.",
+        "For an axisymmetric equilibrium the value is independent of phi_ref.",
+        "Sign convention: positive when B_phi points in the direction of increasing toroidal angle phi in the right-handed cylindrical (R, phi, Z) frame.",
+        "The unit is T."
+      ],
+      "unit": "T",
+      "verdict": "sound"
+    },
+    "toroidal_total_current_density": {
+      "right_names": [
+        "toroidal_total_current_density"
+      ],
+      "definition_points": [
+        "signed toroidal component/projection of the total current density",
+        "algebraic sum of all included current-density contributions, not a sum of magnitudes",
+        "local scalar quantity per grid element, not a flux-surface average or spatial integral",
+        "unit A.m^-2",
+        "positive sign in the direction of increasing toroidal angle"
+      ],
+      "unit": "A.m^-2",
+      "verdict": "sound"
+    },
+    "total_external_heating_power": {
+      "right_names": [
+        "total_external_heating_power"
+      ],
+      "definition_points": [
+        "Total additional external heating power coupled to the plasma",
+        "Summed over all auxiliary heating systems: NBI, EC, IC, and LH",
+        "Excludes Ohmic power",
+        "Represents total non-inductive auxiliary power input driving plasma heating and current drive",
+        "Unit: W"
+      ],
+      "unit": "W",
+      "verdict": "sound"
+    },
+    "triangularity_of_plasma_boundary": {
+      "right_names": [
+        "triangularity_of_plasma_boundary"
+      ],
+      "definition_points": [
+        "dimensionless shape parameter of the plasma-boundary poloidal cross-section",
+        "aggregate of the inward radial displacements of the upper and lower boundary extrema",
+        "radial reference is the geometric-center major radius R0",
+        "normalisation by the boundary minor radius a",
+        "averaging formula delta = 1/2[(R0 - Ru)/a + (R0 - Rl)/a]",
+        "coordinates are in the right-handed cylindrical (R, phi, Z) frame",
+        "applies to the entire plasma boundary, not only one half-plane extremum or an individual flux surface"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "tungsten_density": {
+      "right_names": [
+        "tungsten_density"
+      ],
+      "definition_points": [
+        "number density (particle count per unit volume) of tungsten ions, unit m^-3",
+        "summed over all positive ionization states Z = 1 to 74",
+        "neutral tungsten explicitly excluded",
+        "value may be local (at a specified location) or a spatial average over a defined domain, with locus/averaging domain distinguishing the sibling quantities (volume-averaged, at magnetic axis, at divertor target)"
+      ],
+      "unit": "m^-3",
+      "verdict": "sound"
+    },
+    "vertical_coordinate_of_constraint_position": {
+      "right_names": [
+        "vertical_coordinate_of_constraint_position"
+      ],
+      "definition_points": [
+        "signed height of the constraint position relative to the zero-height plane",
+        "coordinate axis Z parallel to the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame",
+        "defined by Z = x·ẑ with x the position vector from the coordinate origin and ẑ the upward unit vector along the symmetry axis",
+        "applies individually at each constraint position (a point coordinate, not a spatial average or the value of the constrained observable)",
+        "sign convention: positive above the zero-height plane along ẑ",
+        "unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "vertical_coordinate_of_coordinate_system": {
+      "right_names": [
+        "vertical_coordinate_of_coordinate_system"
+      ],
+      "definition_points": [
+        "Vertical (Z) coordinate of the coordinate system",
+        "Values of the Height on the grid",
+        "Unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "vertical_coordinate_of_current_center": {
+      "right_names": [
+        "vertical_coordinate_of_current_center"
+      ],
+      "definition_points": [
+        "the quantity is the signed vertical (Z) coordinate of the plasma-current centre",
+        "it is the toroidal-current-density-weighted centroid height: ∫ Z j_phi dA divided by ∫ j_phi dA over the plasma-current-carrying poloidal cross-section, equivalently normalised by the total plasma current",
+        "coordinates are in the right-handed cylindrical (R, phi, Z) frame",
+        "positive sign in the +Z direction from the coordinate origin",
+        "unit is m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "vertical_coordinate_of_measurement_position": {
+      "right_names": [
+        "vertical_coordinate_of_measurement_position"
+      ],
+      "definition_points": [
+        "the quantity is the vertical (Z) coordinate of a position, given as a signed value in a right-handed cylindrical (R, φ, Z) frame",
+        "Z is the projection of the position vector onto the vertical direction, Z = x·ẑ, with x from the coordinate origin to the position and ẑ the unit vector along the symmetry axis",
+        "the vertical direction is parallel to the toroidal symmetry axis; R is major radius from the axis and φ toroidal angle increasing counterclockwise viewed from above +Z",
+        "sign convention: positive when the displacement from the origin to the position points in the direction of increasing Z",
+        "it is one coordinate component of a single position, not the complete position nor an aggregated/measured physical value, and its counterpart is the radial coordinate of the measurement position",
+        "unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "vertical_coordinate_of_plasma_filament": {
+      "right_names": [
+        "vertical_coordinate_of_plasma_filament"
+      ],
+      "definition_points": [
+        "signed height from the zero-height plane in the right-handed cylindrical (R, φ, Z) frame",
+        "Z = x·ẑ, where x is the position vector of the specified point relative to the coordinate origin and ẑ is the unit vector along the positive symmetry-axis direction",
+        "the specified point is the reference point for an oblique cross-section or the second endpoint of the central segment for a thick-line cross-section",
+        "applies to one filament geometry point, not an average over filaments or the plasma boundary",
+        "positive when the specified point lies on the positive-Z side of the zero-height plane",
+        "unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "vertical_outline_of_plasma_boundary": {
+      "right_names": [
+        "vertical_outline_of_plasma_boundary"
+      ],
+      "definition_points": [
+        "Signed vertical height Z of each point on the plasma-boundary outline",
+        "Defined in the right-handed cylindrical (R, φ, Z) frame; Z is vertical height",
+        "Each outline point has its own Z value; not an average or extremum over the boundary",
+        "Applies to the plasma-boundary outline and not to a plasma-facing component outline",
+        "Sign convention: positive in the direction of increasing Z",
+        "Unit: m"
+      ],
+      "unit": "m",
+      "verdict": "sound"
+    },
+    "volume_of_flux_surface": {
+      "right_names": [
+        "volume_of_flux_surface"
+      ],
+      "definition_points": [
+        "Volume (V) enclosed inside a magnetic flux surface, i.e. integrated over the full interior of the surface, not the shell between adjacent surfaces (V = ∫_Ω d³x with Ω the region inside the selected surface)",
+        "Space outside the selected surface is excluded, and differences between enclosed volumes give the volume between neighbouring surfaces",
+        "For nested surfaces the value increases from zero at the magnetic axis and equals the volume enclosed by the plasma boundary when the selected surface is the LCFS",
+        "Unit: m^3"
+      ],
+      "unit": "m^3",
+      "verdict": "sound"
+    },
+    "wave_phase_of_wave_beam": {
+      "right_names": [
+        "wave_beam_envelope_phase_relative_to_launch_phase"
+      ],
+      "definition_points": [
+        "The quantity is the angular argument of the complex probing-wave envelope at the wave-beam locus.",
+        "It is referenced to the launch phase, i.e. φ_env − φ_launch modulo 2π for a launch-referenced value.",
+        "It is the envelope phase, not the carrier oscillation phase.",
+        "Phase values differing by an integer number of full revolutions are equivalent; an unwrapped phase selects a continuous branch, and fringe-jump correction changes that representation without changing the phase modulo one revolution.",
+        "The sign convention is positive when the envelope phase advances counterclockwise relative to launch using the positive-time-exponent phasor convention.",
+        "The unit is rad."
+      ],
+      "unit": "rad",
+      "verdict": "naming_defect"
+    },
+    "weight_of_interferometer_beam": {
+      "right_names": [
+        "weight_of_interferometer_beam"
+      ],
+      "definition_points": [
+        "dimensionless scalar factor assigned to the residual of a single interferometer beam",
+        "applies per beam, not to an entire interferometer system",
+        "enters the weighted objective as w_b * r_b^2, where r_b is the beam's residual between modeled and reference line-integrated electron density",
+        "controls the relative influence of that beam's line-integrated electron-density constraint among simultaneously weighted constraints",
+        "no summation, averaging, or normalization over multiple beams is implied; each beam has its own weight and residual contribution",
+        "unit: 1 (dimensionless)"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    },
+    "y_major_axis_unit_vector_of_shatter_cone": {
+      "right_names": [
+        "y_major_axis_unit_vector_of_shatter_cone"
+      ],
+      "definition_points": [
+        "signed y component of the unit vector along the major axis of an elliptic shatter cone",
+        "projection onto the y basis direction of the right-handed Cartesian (x, y, z) frame",
+        "positive when the major-axis unit vector has a component in the +y direction",
+        "unit is 1"
+      ],
+      "unit": "1",
+      "verdict": "sound"
+    }
+  }
+}

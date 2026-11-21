@@ -1,0 +1,484 @@
+{
+  "schema": "imas-codex.standard-name-record-benchmark/second-round",
+  "generated": "2026-11-20T10:04:20+00:00",
+  "seat": "Standard-name record generation, second round",
+  "models": {
+    "frontier": "openrouter/openai/gpt-6.1-sol",
+    "local": "local/deepseek-v4.1-flash",
+    "kimi": {
+      "run": false,
+      "command": "KIMI_BASE_URL=\"${KIMI_BASE_URL:?set KIMI_BASE_URL to the B300 server /v1 root}\" uv run --no-sync python docs/evidence/fragments/sn-case-file-generation/benchmark.py --stage second-round"
+    }
+  },
+  "split": {
+    "seed": 20261118,
+    "second_seed": 20261120,
+    "members": 176,
+    "development": 89,
+    "held_out": 87
+  },
+  "records": {
+    "file": "benchmark-second-round-records.jsonl",
+    "lines": 435,
+    "digest": "40236fb01f149fe3afa53725d92440ed8c60a0c6475604549a4917014a5b2329"
+  },
+  "records_digest": "40236fb01f149fe3afa53725d92440ed8c60a0c6475604549a4917014a5b2329",
+  "packet": {
+    "file": "benchmark-second-round-packet.jsonl",
+    "lines": 255,
+    "fields": [
+      "packet_id",
+      "source_descriptions",
+      "enclosing_statements",
+      "name",
+      "definition",
+      "documentation",
+      "unit"
+    ],
+    "key": "benchmark-second-round-key.json",
+    "shuffled_by_seed": 20261120,
+    "prose_incumbent_mentions": 0
+  },
+  "arms": [
+    {
+      "arm": "keep-or-repair/frontier",
+      "structure": "keep-or-repair",
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "case": "full"
+    },
+    {
+      "arm": "keep-or-repair/local",
+      "structure": "keep-or-repair",
+      "model": "local/deepseek-v4.1-flash",
+      "case": "full"
+    },
+    {
+      "arm": "one-pass/frontier",
+      "structure": "one-pass",
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "case": "full"
+    },
+    {
+      "arm": "incumbent",
+      "structure": "incumbent",
+      "model": "",
+      "case": "full"
+    },
+    {
+      "arm": "perturbed/frontier",
+      "structure": "keep-or-repair",
+      "model": "openrouter/openai/gpt-6.1-sol",
+      "case": "perturbed"
+    }
+  ],
+  "prompts": {
+    "versions": {
+      "v1": {
+        "hash": "a79991ed17585efe5f6b606a0346303363454087ea9c8306ad7bd13e9c48a0c6",
+        "text": "You are given one standard-name case file. It opens with the incumbent record:\nthe name, definition, documentation and unit the catalog already holds. Decide\nwhether to keep it, repair it, or report that the case file cannot decide.\n\nReturn decision \"keep\" when the case file neither contradicts the incumbent nor\nunder-identifies the quantity. A keep copies the incumbent's name, definition\nand documentation unchanged, with its unit and its physics group.\nReturn decision \"repair\" when the case file contradicts the incumbent or states\na detail the incumbent omits. A repair returns the corrected record, and the\nreason quotes the words of the case file that forced the repair.\nReturn decision \"blocked\" only when the case file cannot determine a record;\nthen blocker names one of grammar-gap, registry-conflict,\ninsufficient-source-text or collision, and the reason quotes the source words\nthat stop it. Otherwise leave blocker and reason empty.\nThe lead ruled that a name identifies and its definition specifies. The name\ncarries only what separates the quantity from its neighbours: the kind of\nquantity, the physical object or locus it describes, and a relation or component\nwhere the separation depends on it. Normalisations, weightings, averaging or\nintegration, conventions, coordinate frames and methods belong to the definition,\nnot to the name, unless omitting them would change which quantity is meant. The\ndefinition states how the number is obtained and its unit.\n"
+      },
+      "v2": {
+        "hash": "a5dec95b62deecf1f19f36bafee9a46028effa63587c6fc772182ec0713cb604",
+        "text": "You are given one standard-name case file. It opens with the incumbent record:\nthe name, definition, documentation and unit the catalog already holds. Decide\nwhether to keep it, repair it, or report that the case file cannot decide.\n\nReturn decision \"keep\" when the case file neither contradicts the incumbent nor\nunder-identifies the quantity. A keep copies the incumbent's name, definition\nand documentation unchanged, with its unit and its physics group.\nReturn decision \"repair\" when the case file contradicts the incumbent or states\na detail the incumbent omits. A repair returns the corrected record, and the\nreason quotes the words of the case file that forced the repair.\nReturn decision \"blocked\" only when the case file cannot determine a record;\nthen blocker names one of grammar-gap, registry-conflict,\ninsufficient-source-text or collision, and the reason quotes the source words\nthat stop it. Otherwise leave blocker and reason empty.\nThe lead ruled that a name identifies and its definition specifies. The name\ncarries only what separates the quantity from its neighbours: the kind of\nquantity, the physical object or locus it describes, and a relation or component\nwhere the separation depends on it. Normalisations, weightings, averaging or\nintegration, conventions, coordinate frames and methods belong to the definition,\nnot to the name, unless omitting them would change which quantity is meant. The\ndefinition states how the number is obtained and its unit.\n\nTwo failures the previous round counted are answered here.\nFirst, every detail the case file states that affects the number must appear in\nthe definition: a time dependence, a coordinate frame, a normalisation, a\nweighting, an averaging convention or a dimension the source states is not to\nbe summarised away. State each one.\nSecond, derive a name the case file determines. When the case file supplies the\nlocus, the vocabulary and a registry entry, compose the record; a collision, a\ngrammar gap or an insufficient-source-text blocker applies only when the term\nthe answer needs is genuinely absent from what the case file supplies.\n"
+      },
+      "v3": {
+        "hash": "8c0336eadd7b907b80dce15ae38a61b381202eba10605ae358650ad49e58661e",
+        "text": "You are given one standard-name case file. It opens with the incumbent record:\nthe name, definition, documentation and unit the catalog already holds. Decide\nwhether to keep it, repair it, or report that the case file cannot decide.\n\nReturn decision \"keep\" when the case file neither contradicts the incumbent nor\nunder-identifies the quantity. A keep copies the incumbent's name, definition\nand documentation unchanged, with its unit and its physics group.\nReturn decision \"repair\" when the case file contradicts the incumbent or states\na detail the incumbent omits. A repair returns the corrected record, and the\nreason quotes the words of the case file that forced the repair.\nReturn decision \"blocked\" only when the case file cannot determine a record;\nthen blocker names one of grammar-gap, registry-conflict,\ninsufficient-source-text or collision, and the reason quotes the source words\nthat stop it. Otherwise leave blocker and reason empty.\nThe lead ruled that a name identifies and its definition specifies. The name\ncarries only what separates the quantity from its neighbours: the kind of\nquantity, the physical object or locus it describes, and a relation or component\nwhere the separation depends on it. Normalisations, weightings, averaging or\nintegration, conventions, coordinate frames and methods belong to the definition,\nnot to the name, unless omitting them would change which quantity is meant. The\ndefinition states how the number is obtained and its unit.\n\nTwo failures the previous round counted are answered here.\nFirst, every detail the case file states that affects the number must appear in\nthe definition: a time dependence, a coordinate frame, a normalisation, a\nweighting, an averaging convention or a dimension the source states is not to\nbe summarised away. State each one.\nSecond, derive a name the case file determines. When the case file supplies the\nlocus, the vocabulary and a registry entry, compose the record; a collision, a\ngrammar gap or an insufficient-source-text blocker applies only when the term\nthe answer needs is genuinely absent from what the case file supplies.\n\nA repair changes only what the case file contradicts or under-identifies: keep\nevery other word of the incumbent's name, definition and documentation, so a\nreader comparing the two records sees the repaired clause and nothing else. A\nkeep returns the incumbent's text verbatim; do not reword a record you judge\nsound.\n"
+      }
+    },
+    "one_pass": {
+      "hash": "c91a3abde7303f683ba8144e03f1f19cad33f51281745ea7e6bb2d42cd0e1aba",
+      "note": "round one's v2 one-pass prompt, unchanged"
+    },
+    "final_version": "v3"
+  },
+  "development": {
+    "half": "development",
+    "measure": "A proxy, not a verdict: the share of a member's records whose name is one of the reference's right names and whose unit agrees. It is mechanical, it is read only on the development half, and it decides nothing about the held-out half.",
+    "rounds": [
+      {
+        "prompt_version": "v1",
+        "prompt_hash": "a79991ed17585efe5f6b606a0346303363454087ea9c8306ad7bd13e9c48a0c6",
+        "change": "the keep-or-repair prompt as first written: decide keep, repair or blocked, and quote the case-file words that forced a repair",
+        "answers": {},
+        "failures_counted_on_this_half": {
+          "blocked": 3,
+          "name-not-in-reference": 26,
+          "unit-mismatch": 5
+        },
+        "arms": [
+          {
+            "arm": "keep-or-repair/frontier",
+            "members": 89,
+            "right": 59,
+            "share": 0.6629213483146067,
+            "interval": [
+              0.5597888036006071,
+              0.7525716479516251
+            ],
+            "blocked": 12,
+            "name_in_reference": 59,
+            "unit_agrees": 77
+          },
+          {
+            "arm": "keep-or-repair/local",
+            "members": 89,
+            "right": 57,
+            "share": 0.6404494382022472,
+            "interval": [
+              0.5368541183779016,
+              0.7324221329602296
+            ],
+            "blocked": 3,
+            "name_in_reference": 60,
+            "unit_agrees": 81
+          }
+        ],
+        "measure": "A proxy, not a verdict: the share of a member's records whose name is one of the reference's right names and whose unit agrees. It is mechanical, it is read only on the development half, and it decides nothing about the held-out half."
+      },
+      {
+        "prompt_version": "v2",
+        "prompt_hash": "a5dec95b62deecf1f19f36bafee9a46028effa63587c6fc772182ec0713cb604",
+        "change": "answers a stated detail being dropped (8 of 50 in the failure read) by requiring every stated detail to appear in the definition, and answers blocking on a derivable name (7 of 50) by naming when a blocker is allowed",
+        "answers": {
+          "detail-the-case-file-states-dropped": 8,
+          "blocked-on-a-name-the-generator-can-derive": 7
+        },
+        "failures_counted_on_this_half": {
+          "blocked": 1,
+          "name-not-in-reference": 29,
+          "unit-mismatch": 5
+        },
+        "arms": [
+          {
+            "arm": "keep-or-repair/frontier",
+            "members": 89,
+            "right": 59,
+            "share": 0.6629213483146067,
+            "interval": [
+              0.5597888036006071,
+              0.7525716479516251
+            ],
+            "blocked": 4,
+            "name_in_reference": 59,
+            "unit_agrees": 85
+          },
+          {
+            "arm": "keep-or-repair/local",
+            "members": 89,
+            "right": 57,
+            "share": 0.6404494382022472,
+            "interval": [
+              0.5368541183779016,
+              0.7324221329602296
+            ],
+            "blocked": 1,
+            "name_in_reference": 59,
+            "unit_agrees": 83
+          }
+        ],
+        "measure": "A proxy, not a verdict: the share of a member's records whose name is one of the reference's right names and whose unit agrees. It is mechanical, it is read only on the development half, and it decides nothing about the held-out half."
+      },
+      {
+        "prompt_version": "v3",
+        "prompt_hash": "8c0336eadd7b907b80dce15ae38a61b381202eba10605ae358650ad49e58661e",
+        "change": "answers a repair that rewrites a sound clause: a repair changes only what the case file contradicts, and a keep copies the incumbent verbatim",
+        "answers": {
+          "detail-the-case-file-states-dropped": 8,
+          "blocked-on-a-name-the-generator-can-derive": 7
+        },
+        "failures_counted_on_this_half": {
+          "blocked": 5,
+          "name-not-in-reference": 25,
+          "unit-mismatch": 5
+        },
+        "arms": [
+          {
+            "arm": "keep-or-repair/frontier",
+            "members": 89,
+            "right": 60,
+            "share": 0.6741573033707865,
+            "interval": [
+              0.5713422761622178,
+              0.7625602754970651
+            ],
+            "blocked": 6,
+            "name_in_reference": 60,
+            "unit_agrees": 83
+          },
+          {
+            "arm": "keep-or-repair/local",
+            "members": 89,
+            "right": 57,
+            "share": 0.6404494382022472,
+            "interval": [
+              0.5368541183779016,
+              0.7324221329602296
+            ],
+            "blocked": 5,
+            "name_in_reference": 59,
+            "unit_agrees": 79
+          }
+        ],
+        "measure": "A proxy, not a verdict: the share of a member's records whose name is one of the reference's right names and whose unit agrees. It is mechanical, it is read only on the development half, and it decides nothing about the held-out half."
+      }
+    ]
+  },
+  "decisions": {
+    "incumbent": {
+      "members": 87,
+      "keep": 87,
+      "repair": 0,
+      "blocked": 0,
+      "blocked_by_type": {}
+    },
+    "keep-or-repair/frontier": {
+      "members": 87,
+      "keep": 15,
+      "repair": 63,
+      "blocked": 9,
+      "blocked_by_type": {
+        "collision": 4,
+        "insufficient-source-text": 1,
+        "registry-conflict": 4
+      }
+    },
+    "keep-or-repair/local": {
+      "members": 87,
+      "keep": 67,
+      "repair": 17,
+      "blocked": 3,
+      "blocked_by_type": {
+        "insufficient-source-text": 3
+      }
+    },
+    "one-pass/frontier": {
+      "members": 87,
+      "keep": 0,
+      "repair": 69,
+      "blocked": 18,
+      "blocked_by_type": {
+        "collision": 9,
+        "grammar-gap": 4,
+        "insufficient-source-text": 3,
+        "registry-conflict": 2
+      }
+    },
+    "perturbed/frontier": {
+      "members": 87,
+      "keep": 7,
+      "repair": 20,
+      "blocked": 60,
+      "blocked_by_type": {
+        "collision": 4,
+        "grammar-gap": 1,
+        "insufficient-source-text": 39,
+        "registry-conflict": 16
+      }
+    }
+  },
+  "perturbed": {
+    "compared_members": 87,
+    "changed_members": 74,
+    "changed_share": 0.8505747126436781,
+    "decision_changed_members": 53,
+    "donors": {
+      "effective_turn_count_of_passive_loop": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+      "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface": "accumulated_tritium_prefill_count",
+      "lower_bound_photon_energy": "normalized_collisionality",
+      "normalized_collisionality": "alpha_angle_of_coil_conductor_element",
+      "normalized_toroidal_beta": "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+      "polarization_angle_at_constraint_position": "temperature_of_sensor",
+      "ratio_of_particle_temperature_to_particle_reference_temperature": "thickness_of_plasma_filament",
+      "square_of_toroidal_flux_coordinate_gradient_magnitude": "loop_voltage_at_plasma_boundary",
+      "temperature_of_sensor": "flux_surface_averaged_magnetic_field_magnitude",
+      "back_surface_neutron_flux": "spectral_photon_radiance",
+      "decay_time_due_to_disruption": "toroidal_parity",
+      "external_loop_voltage": "current_of_divertor",
+      "field_aligned_surface_tilt_angle_of_langmuir_probe": "current_of_divertor",
+      "hydrogen_density_at_limiter": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+      "minimum_gas_flow": "spectral_photon_radiance",
+      "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift": "y_major_axis_unit_vector_of_shatter_cone",
+      "radial_coordinate_of_poloidal_field_coil": "poloidal_beta",
+      "radius_of_poloidal_field_coil": "radial_separatrix_distance_at_outboard_midplane",
+      "resistivity_of_plasma_facing_component": "spectral_photon_radiance",
+      "surface_temperature": "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+      "thickness_of_breeder_blanket_layer": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+      "toroidal_parity": "normalized_toroidal_beta",
+      "wave_phase_of_wave_beam": "y_major_axis_unit_vector_of_shatter_cone",
+      "accumulated_total_gas_count": "poloidal_magnetic_flux_at_magnetic_axis",
+      "accumulated_total_prefill_gas_count": "minor_radius_of_plasma_boundary",
+      "accumulated_tritium_prefill_count": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+      "alpha_angle_of_coil_conductor_element": "minimum_gas_flow",
+      "area_of_plasma_filament": "normalized_toroidal_beta",
+      "co_passing_fast_ion_charge_state_power_density_due_to_collisions": "thickness_of_breeder_blanket_layer",
+      "coefficient_of_flux_surface": "radial_coordinate_of_poloidal_field_coil",
+      "current_of_divertor": "toroidal_angle_of_poloidal_magnetic_field_probe",
+      "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate": "right_hand_circularly_polarized_wave_electric_field",
+      "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+      "electron_particle_flux_at_wall_due_to_pumping": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "elongation_of_flux_surface": "accumulated_tritium_prefill_count",
+      "equilibrium_weight_of_interferometer_beam": "toroidal_parity",
+      "ethylene_source_rate": "radial_coordinate_of_current_center",
+      "faraday_angle": "wave_phase_of_wave_beam",
+      "flux_surface_averaged_magnetic_field_magnitude": "spectral_photon_radiance",
+      "flux_surface_averaged_major_radius": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+      "grating_line_density": "plasma_current",
+      "height_of_plasma_filament": "hydrogen_density_at_limiter",
+      "inverse_of_square_of_magnetic_field_magnitude": "ratio_of_particle_temperature_to_particle_reference_temperature",
+      "loop_voltage_at_plasma_boundary": "radial_separatrix_distance_at_outboard_midplane",
+      "lower_inner_squareness_of_flux_surface": "normalized_collisionality",
+      "minor_length_of_plasma_filament": "surface_temperature",
+      "minor_radius_of_plasma_boundary": "current_of_divertor",
+      "normalized_minor_radius_of_flux_surface": "surface_temperature",
+      "normalized_poloidal_flux_coordinate_of_plasma_boundary": "hydrogen_density_at_limiter",
+      "outer_radius_of_plasma_filament": "radial_separatrix_distance_at_outboard_midplane",
+      "particle_energy": "poloidal_magnetic_flux",
+      "plasma_current": "wave_phase_of_wave_beam",
+      "poloidal_beta": "poloidal_magnetic_flux",
+      "poloidal_length_of_flux_surface": "resistivity_of_plasma_facing_component",
+      "poloidal_magnetic_flux": "toroidal_reference_magnetic_field",
+      "poloidal_magnetic_flux_at_magnetic_axis": "normalized_toroidal_beta",
+      "poloidal_plane_cross_sectional_area_of_plasma_boundary": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+      "power_at_divertor_target_due_to_recombination": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+      "radial_coordinate_at_inboard_midplane": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+      "radial_coordinate_of_current_center": "spectral_rate_of_spectrometer_channel",
+      "radial_perturbed_vacuum_magnetic_vector_potential_real_part": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+      "radial_separatrix_distance_at_outboard_midplane": "vertical_coordinate_of_measurement_position",
+      "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius": "loop_voltage_at_plasma_boundary",
+      "right_hand_circularly_polarized_wave_electric_field": "vertical_coordinate_of_current_center",
+      "safety_factor_at_magnetic_axis": "second_local_tangential_width_of_optical_element",
+      "second_local_tangential_width_of_optical_element": "y_major_axis_unit_vector_of_shatter_cone",
+      "spectral_photon_radiance": "total_external_heating_power",
+      "spectral_rate_of_spectrometer_channel": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "thickness_of_plasma_filament": "hydrogen_density_at_limiter",
+      "toroidal_angle_of_control_surface": "current_of_divertor",
+      "toroidal_angle_of_poloidal_magnetic_field_probe": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+      "toroidal_magnetic_field_at_magnetic_axis": "alpha_angle_of_coil_conductor_element",
+      "toroidal_magnetic_flux_at_plasma_boundary": "second_local_tangential_width_of_optical_element",
+      "toroidal_reference_magnetic_field": "elongation_of_flux_surface",
+      "toroidal_total_current_density": "normalized_toroidal_beta",
+      "total_external_heating_power": "resistivity_of_plasma_facing_component",
+      "triangularity_of_plasma_boundary": "y_major_axis_unit_vector_of_shatter_cone",
+      "tungsten_density": "lower_bound_photon_energy",
+      "vertical_coordinate_of_constraint_position": "resistivity_of_plasma_facing_component",
+      "vertical_coordinate_of_coordinate_system": "loop_voltage_at_plasma_boundary",
+      "vertical_coordinate_of_current_center": "spectral_rate_of_spectrometer_channel",
+      "vertical_coordinate_of_measurement_position": "ratio_of_particle_temperature_to_particle_reference_temperature",
+      "vertical_coordinate_of_plasma_filament": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+      "vertical_outline_of_plasma_boundary": "toroidal_angle_of_poloidal_magnetic_field_probe",
+      "volume_of_flux_surface": "second_local_tangential_width_of_optical_element",
+      "weight_of_interferometer_beam": "surface_temperature",
+      "y_major_axis_unit_vector_of_shatter_cone": "right_hand_circularly_polarized_wave_electric_field"
+    },
+    "by_member": {
+      "accumulated_total_gas_count": true,
+      "accumulated_total_prefill_gas_count": false,
+      "accumulated_tritium_prefill_count": true,
+      "alpha_angle_of_coil_conductor_element": true,
+      "area_of_plasma_filament": false,
+      "back_surface_neutron_flux": false,
+      "co_passing_fast_ion_charge_state_power_density_due_to_collisions": true,
+      "coefficient_of_flux_surface": true,
+      "current_of_divertor": true,
+      "decay_time_due_to_disruption": false,
+      "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate": true,
+      "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate": true,
+      "effective_turn_count_of_passive_loop": true,
+      "electron_particle_flux_at_wall_due_to_pumping": false,
+      "elongation_of_flux_surface": true,
+      "equilibrium_weight_of_interferometer_beam": true,
+      "ethylene_source_rate": false,
+      "external_loop_voltage": true,
+      "faraday_angle": true,
+      "field_aligned_surface_tilt_angle_of_langmuir_probe": true,
+      "flux_surface_averaged_magnetic_field_magnitude": true,
+      "flux_surface_averaged_major_radius": true,
+      "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface": true,
+      "grating_line_density": true,
+      "height_of_plasma_filament": true,
+      "hydrogen_density_at_limiter": true,
+      "inverse_of_square_of_magnetic_field_magnitude": true,
+      "loop_voltage_at_plasma_boundary": true,
+      "lower_bound_photon_energy": true,
+      "lower_inner_squareness_of_flux_surface": true,
+      "minimum_gas_flow": true,
+      "minor_length_of_plasma_filament": true,
+      "minor_radius_of_plasma_boundary": true,
+      "normalized_collisionality": true,
+      "normalized_minor_radius_of_flux_surface": true,
+      "normalized_poloidal_flux_coordinate_of_plasma_boundary": true,
+      "normalized_toroidal_beta": true,
+      "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift": true,
+      "outer_radius_of_plasma_filament": true,
+      "particle_energy": false,
+      "plasma_current": true,
+      "polarization_angle_at_constraint_position": false,
+      "poloidal_beta": true,
+      "poloidal_length_of_flux_surface": true,
+      "poloidal_magnetic_flux": true,
+      "poloidal_magnetic_flux_at_magnetic_axis": true,
+      "poloidal_plane_cross_sectional_area_of_plasma_boundary": true,
+      "power_at_divertor_target_due_to_recombination": true,
+      "radial_coordinate_at_inboard_midplane": true,
+      "radial_coordinate_of_current_center": true,
+      "radial_coordinate_of_poloidal_field_coil": true,
+      "radial_perturbed_vacuum_magnetic_vector_potential_real_part": true,
+      "radial_separatrix_distance_at_outboard_midplane": true,
+      "radius_of_poloidal_field_coil": true,
+      "ratio_of_particle_temperature_to_particle_reference_temperature": true,
+      "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius": true,
+      "resistivity_of_plasma_facing_component": true,
+      "right_hand_circularly_polarized_wave_electric_field": true,
+      "safety_factor_at_magnetic_axis": true,
+      "second_local_tangential_width_of_optical_element": true,
+      "spectral_photon_radiance": false,
+      "spectral_rate_of_spectrometer_channel": false,
+      "square_of_toroidal_flux_coordinate_gradient_magnitude": true,
+      "surface_temperature": true,
+      "temperature_of_sensor": true,
+      "thickness_of_breeder_blanket_layer": true,
+      "thickness_of_plasma_filament": true,
+      "toroidal_angle_of_control_surface": true,
+      "toroidal_angle_of_poloidal_magnetic_field_probe": true,
+      "toroidal_magnetic_field_at_magnetic_axis": true,
+      "toroidal_magnetic_flux_at_plasma_boundary": true,
+      "toroidal_parity": true,
+      "toroidal_reference_magnetic_field": true,
+      "toroidal_total_current_density": true,
+      "total_external_heating_power": true,
+      "triangularity_of_plasma_boundary": true,
+      "tungsten_density": false,
+      "vertical_coordinate_of_constraint_position": true,
+      "vertical_coordinate_of_coordinate_system": true,
+      "vertical_coordinate_of_current_center": true,
+      "vertical_coordinate_of_measurement_position": true,
+      "vertical_coordinate_of_plasma_filament": true,
+      "vertical_outline_of_plasma_boundary": false,
+      "volume_of_flux_surface": true,
+      "wave_phase_of_wave_beam": true,
+      "weight_of_interferometer_beam": false,
+      "y_major_axis_unit_vector_of_shatter_cone": true
+    },
+    "reading": "At least half of the answers follow the source text the control replaced."
+  },
+  "spend": {
+    "spent_usd": 10.709,
+    "ceiling_usd": 30.0,
+    "within_ceiling": true,
+    "development_calls": 534,
+    "held_out_generation_calls": 348
+  },
+  "adjudication": {
+    "state": "pending",
+    "statement": "The held-out names and definitions are in the blind packet and have not been scored. No held-out score appears here; the round reports what was generated and waits for the adjudicator's verdicts.",
+    "adjudicator": "the coordinating session, adjudicating blind"
+  },
+  "not_run": [
+    {
+      "arm": "keep-or-repair/kimi",
+      "reason": "no Kimi endpoint is configured in this environment: KIMI_BASE_URL is unset and the shared .env carries no such variable, so the arm was not asked",
+      "command": "KIMI_BASE_URL=\"${KIMI_BASE_URL:?set KIMI_BASE_URL to the B300 server /v1 root}\" uv run --no-sync python docs/evidence/fragments/sn-case-file-generation/benchmark.py --stage second-round"
+    }
+  ]
+}
