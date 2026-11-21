@@ -79,9 +79,28 @@
       "note": "The section now delivers the plant-system argument on the pulse search as part of its endpoint.",
       "reason": "",
       "when": "2026-11-21T07:54:15.298623+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2b5c1e6992bc587ea8faa6eee2575eb14bd6953c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "With the component-to-structure kind removed, each remaining kind has a negative control.",
+      "reason": "",
+      "when": "2026-11-21T07:54:18.530151+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2b5c1e6992bc587ea8faa6eee2575eb14bd6953c",
+      "commit_basis": "edit",
+      "note": "With the component-to-structure kind removed, each remaining kind has a negative control.",
+      "reason": "",
+      "when": "2026-11-21T07:54:18.530151+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
