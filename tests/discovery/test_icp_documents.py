@@ -21,9 +21,9 @@ def document_client(monkeypatch):
         "origin": RECORDS,
         "description_path": "/openapi.json",
         "readable_origins": [RECORDS, DOCUMENTS],
+        "document_identities": ["SAMPLE"],  # ignored: kept to prove it is optional
         "document_origin": DOCUMENTS,
         "document_path": "/",
-        "document_identities": ["SAMPLE"],
         "credential_service": "synthetic",
         "identity_origins": [IDENTITY],
         "sign_in_origins": [IDENTITY, GATEWAY, RECORDS, DOCUMENTS],
@@ -53,29 +53,32 @@ def document_client(monkeypatch):
     monkeypatch.setattr(requests.adapters.HTTPAdapter, "send", send)
     with ICPClient(facility="synthetic", min_interval=0) as client:
         client._authenticated = True
+        # The production default paces documents; most tests do not need the wait.
+        client._policy.document_pacer.interval = 0
         yield client, sent, config
 
 
 @pytest.mark.parametrize("entry", ["client", "session", "prepared", "base", "adapter"])
-def test_unlisted_document_identity_sends_zero_requests(document_client, entry):
+def test_unlisted_well_formed_identity_is_readable(document_client, entry):
     client, sent, _ = document_client
     url = DOCUMENT_URL.replace("SAMPLE", "UNLISTED")
     request = requests.Request("GET", url).prepare()
-    with pytest.raises(ICPRequestRefused, match="identity"):
-        if entry == "client":
-            client.get(url)
-        elif entry == "session":
-            client.session.get(url)
-        elif entry == "prepared":
-            client.session.send(request)
-        elif entry == "base":
-            requests.Session.send(client.session, request)
-        else:
-            client.session.get_adapter(url).send(request)
-    assert sent == []
+    if entry == "client":
+        result = client.get(url)
+    elif entry == "session":
+        result = client.session.get(url)
+    elif entry == "prepared":
+        result = client.session.send(request)
+    elif entry == "base":
+        result = requests.Session.send(client.session, request)
+    else:
+        result = client.session.get_adapter(url).send(request)
+    assert result.status_code == 200
+    assert len(sent) == 1
+    assert sent[0].url == url
 
 
-def test_allowlisted_document_is_readable(document_client):
+def test_document_get_is_readable(document_client):
     client, sent, _ = document_client
     assert client.get(DOCUMENT_URL).status_code == 200
     assert len(sent) == 1
@@ -112,6 +115,26 @@ def test_document_write_refused_before_transport(document_client, method, entry)
             requests.Session.send(client.session, request)
         else:
             client.session.get_adapter(DOCUMENT_URL).send(request)
+    assert sent == []
+
+
+@pytest.mark.parametrize("method", ["POST", "PUT", "PATCH", "DELETE"])
+@pytest.mark.parametrize("entry", ["client", "session", "prepared", "adapter"])
+def test_unlisted_identity_write_refused_before_transport(
+    document_client, method, entry
+):
+    client, sent, _ = document_client
+    url = DOCUMENT_URL.replace("SAMPLE", "UNLISTED")
+    request = requests.Request(method, url).prepare()
+    with pytest.raises(ICPRequestRefused, match="only GET and HEAD"):
+        if entry == "client":
+            client.request(method, url)
+        elif entry == "session":
+            client.session.request(method, url)
+        elif entry == "prepared":
+            client.session.send(request)
+        else:
+            client.session.get_adapter(url).send(request)
     assert sent == []
 
 
@@ -157,6 +180,34 @@ def test_document_other_host_refused(document_client, entry, url):
     assert sent == []
 
 
+def test_document_interval_has_a_safe_default(document_client):
+    assert module.DEFAULT_DOCUMENT_INTERVAL == 1.0
+    with ICPClient(facility="synthetic", min_interval=0) as client:
+        assert client._policy.document_pacer.interval == 1.0
+
+
+def test_document_interval_read_from_private_configuration(document_client):
+    _, _, config = document_client
+    config["document_min_interval"] = 2.5
+    with ICPClient(facility="synthetic", min_interval=0) as client:
+        assert client._policy.document_pacer.interval == 2.5
+
+
+def test_document_rate_is_applied_at_the_transport_boundary(
+    document_client, monkeypatch
+):
+    client, sent, _ = document_client
+    client._policy.document_pacer.interval = 1.0
+    clock = Mock(side_effect=(10.0, 10.0, 10.1, 10.5, 10.5))
+    sleep = Mock()
+    monkeypatch.setattr(module.time, "monotonic", clock)
+    monkeypatch.setattr(module.time, "sleep", sleep)
+    client.session.get(DOCUMENT_URL)
+    client.session.head(DOCUMENT_URL)
+    assert sleep.call_args.args[0] == pytest.approx(0.9)
+    assert len(sent) == 2
+
+
 @pytest.mark.parametrize(
     "suffix",
     [
@@ -168,6 +219,11 @@ def test_document_other_host_refused(document_client, entry, url):
         "/?uid=SAMPLE&version=v1.2&action=delete_document",
         "/?uid=SAMPLE&version=v1.2&action=get_document&extra=yes",
         "/?uid=SAMPLE&version=latest&action=get_document",
+        "/?uid=&version=v1.2&action=get_document",
+        "/?uid=../other&version=v1.2&action=get_document",
+        "/?uid=a%2Fb&version=v1.2&action=get_document",
+        "/?uid=bad uid&version=v1.2&action=get_document",
+        "/?uid=" + "A" * 65 + "&version=v1.2&action=get_document",
     ],
 )
 def test_document_form_is_exact(document_client, suffix):
@@ -180,10 +236,10 @@ def test_document_form_is_exact(document_client, suffix):
 def test_document_params_checked_before_authentication(document_client):
     client, sent, _ = document_client
     client._authenticated = False
-    with pytest.raises(ICPRequestRefused, match="identity"):
+    with pytest.raises(ICPRequestRefused, match="document GET form"):
         client.get(
             DOCUMENTS,
-            params={"uid": "UNLISTED", "version": "v1.2", "action": "get_document"},
+            params={"uid": "../other", "version": "v1.2", "action": "get_document"},
         )
     assert sent == []
 
@@ -395,16 +451,16 @@ async def test_failed_get_has_explicit_outcome_and_no_file(
 
 
 @pytest.mark.asyncio
-async def test_document_identity_refused_before_authentication_or_size_probe(
+async def test_malformed_document_identity_refused_before_authentication_or_probe(
     document_client, tmp_path
 ):
     from iter_codex.discovery.icp.documents import ICPDocuments
 
     client, sent, _ = document_client
     client._authenticated = False
-    with pytest.raises(ICPRequestRefused, match="identity"):
+    with pytest.raises(ICPRequestRefused, match="document GET form"):
         await ICPDocuments(client).fetch(
-            "UNLISTED", "v1.2", tmp_path, expected_type="pdf"
+            "../other", "v1.2", tmp_path, expected_type="pdf"
         )
     assert sent == []
     assert list(tmp_path.iterdir()) == []
@@ -432,9 +488,12 @@ async def test_size_probe_prevents_oversized_get(file_transport, tmp_path):
         ("document_origin", DOCUMENTS + "/other"),
         ("document_path", "//other"),
         ("document_path", "/?action=other"),
-        ("document_identities", []),
-        ("document_identities", "SAMPLE"),
-        ("document_identities", ["../other"]),
+        ("document_min_interval", True),
+        ("document_min_interval", "1.0"),
+        ("document_min_interval", None),
+        ("document_min_interval", -1),
+        ("document_min_interval", float("inf")),
+        ("document_min_interval", float("nan")),
     ],
 )
 def test_document_private_config_fails_closed(document_client, field, value):
@@ -452,7 +511,7 @@ def test_total_document_budget_applies_across_identities(document_client):
     from iter_codex.discovery.icp.client import _DocumentAccess
 
     identities = frozenset(f"SAMPLE{i}" for i in range(9))
-    client._policy.documents = _DocumentAccess(DOCUMENTS, "/", identities)
+    client._policy.documents = _DocumentAccess(DOCUMENTS, "/")
     for uid in sorted(identities)[:8]:
         for _ in range(5):
             client.session.head(client.document_url(uid, "v1.2"))

@@ -1,4 +1,4 @@
-"""Fetch privately listed documents through the existing guarded transfer session."""
+"""Fetch any well-formed document identity through the existing guarded session."""
 
 from __future__ import annotations
 

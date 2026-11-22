@@ -14,6 +14,7 @@ they are not flattened into a cross-host persistent cookie dictionary.
 
 from __future__ import annotations
 
+import math
 import os
 import re
 import threading
@@ -31,6 +32,8 @@ from iter_codex.discovery.wiki.auth import CredentialManager, CredentialStoreUna
 from iter_codex.discovery.wiki.confluence import ConfluenceClient
 
 _READ_METHODS = frozenset({"GET", "HEAD"})
+_DOCUMENT_IDENTITY = re.compile(r"[A-Za-z0-9_-]{1,64}")
+DEFAULT_DOCUMENT_INTERVAL = 1.0
 
 
 class ICPConfigurationError(ValueError):
@@ -98,7 +101,6 @@ class RequestRecord:
 class _DocumentAccess:
     origin: str
     path: str
-    identities: frozenset[str] = field(repr=False)
 
     def check(self, request: requests.PreparedRequest) -> str:
         parts = urlsplit(request.url)
@@ -114,10 +116,9 @@ class _DocumentAccess:
             or query.keys() != {"uid", "version", "action"}
             or query["action"] != "get_document"
             or not re.fullmatch(r"v[0-9]+(?:\.[0-9]+)*", query["version"])
+            or not _DOCUMENT_IDENTITY.fullmatch(query["uid"])
         ):
             raise ICPRequestRefused("Only the configured document GET form is allowed")
-        if query["uid"] not in self.identities:
-            raise ICPRequestRefused("The document identity is not privately listed")
         return query["uid"]
 
 
@@ -132,9 +133,11 @@ class _RequestPolicy:
         description_path: str,
         documents: _DocumentAccess | None = None,
         records_only: bool = False,
+        document_interval: float = DEFAULT_DOCUMENT_INTERVAL,
     ) -> None:
         self.readable_origins = readable_origins
         self.pacer = RequestPacer(interval)
+        self.document_pacer = RequestPacer(document_interval)
         self.identity_origins = identity_origins
         self.sign_in_origins = sign_in_origins
         self.gateway_paths = gateway_paths
@@ -321,8 +324,11 @@ class _RequestPolicy:
             if self.sign_in_requests > self.max_sign_in_requests:
                 raise ICPRequestRefused("The sign-in request budget was exhausted")
 
-    def throttle(self) -> None:
-        self.pacer.wait()
+    def throttle(self, request: requests.PreparedRequest) -> None:
+        if self.documents and _origin(request.url) == self.documents.origin:
+            self.document_pacer.wait()
+        else:
+            self.pacer.wait()
 
 
 class _GuardedAdapter(requests.adapters.HTTPAdapter):
@@ -337,7 +343,7 @@ class _GuardedAdapter(requests.adapters.HTTPAdapter):
         if "verify" in kwargs and not kwargs["verify"]:
             raise ICPRequestRefused("TLS verification is required")
         self._policy.before_send(request)
-        self._policy.throttle()
+        self._policy.throttle(request)
         started_at = time.monotonic()
         signing_in = self._policy.authenticating
         response = None
@@ -470,12 +476,15 @@ class ICPClient:
         if not path.startswith("/") or path.startswith("//"):
             raise ICPConfigurationError("Configure an absolute description path")
         documents = None
+        document_interval = DEFAULT_DOCUMENT_INTERVAL
         if any(key.startswith("document_") for key in config):
             try:
                 document_origin = _origin(config["document_origin"])
                 parts = urlsplit(config["document_origin"])
                 document_path = config["document_path"]
-                identities = config["document_identities"]
+                document_interval = config.get(
+                    "document_min_interval", DEFAULT_DOCUMENT_INTERVAL
+                )
                 if (
                     parts.path not in ("", "/")
                     or parts.query
@@ -486,21 +495,16 @@ class ICPClient:
                     or not document_path.startswith("/")
                     or document_path.startswith("//")
                     or urlsplit(document_path).path != document_path
-                    or not isinstance(identities, list)
-                    or not identities
-                    or any(
-                        not isinstance(uid, str)
-                        or not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", uid)
-                        for uid in identities
-                    )
+                    or isinstance(document_interval, bool)
+                    or not isinstance(document_interval, (int, float))
+                    or not math.isfinite(document_interval)
+                    or document_interval < 0
                 ):
                     raise ValueError
-                documents = _DocumentAccess(
-                    document_origin, document_path, frozenset(identities)
-                )
+                documents = _DocumentAccess(document_origin, document_path)
             except (KeyError, ValueError, TypeError, AttributeError):
                 raise ICPConfigurationError(
-                    "Configure a separate listed document origin, path and identities"
+                    "Configure a separate document origin, path and request interval"
                 ) from None
         self._origin = origin
         self._description_url = urljoin(origin + "/", path)
@@ -554,6 +558,7 @@ class ICPClient:
             urlsplit(self._description_url).path,
             documents,
             records_only,
+            document_interval,
         )
         self._session = _GuardedSession(self._policy)
         self._login = _APILogin(
@@ -646,7 +651,7 @@ class ICPClient:
         return response
 
     def document_url(self, uid: str, version: str) -> str:
-        """Build and validate a privately listed document GET before sign-in."""
+        """Build and validate a well-formed document GET before sign-in."""
         access = self._policy.documents
         if access is None:
             raise ICPConfigurationError("Configure private document access")
