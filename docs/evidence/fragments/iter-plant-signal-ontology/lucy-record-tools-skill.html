@@ -1,0 +1,212 @@
+<section id="lucy-record-tools-skill-evidence">
+  <h3>A skill that routes record finding through Lucy's direct tools</h3>
+  <p>The project skill <code>.claude/skills/lucy-records/SKILL.md</code>
+    tells an agent to answer with <code>icp_search_records</code>,
+    <code>icp_get_records</code>, the version, relationship and folder tools
+    before reaching for the chat tool, and confines the chat tool to a
+    question that needs documents read and an answer written. It carries the
+    traps each tool states about itself and four worked searches: signal
+    lists, self-description documents, documents naming one PBS node, and one
+    document's versions. It documents the relation to the repository's own
+    read-only client, whose guarded session refuses any method outside the
+    sign-in exchange except GET and HEAD
+    (<code>iter_codex/discovery/icp/client.py:33</code>). It changes no source
+    and no test.</p>
+
+  <h4 id="lucy-record-tools-skill-confirmation">Every citation against the server's own descriptions</h4>
+  <p>The server's tool list was read live over the MCP endpoint the session's
+    <code>lucy2</code> client is configured for, on 2026-11-22, and returned
+    the fifteen tools below. Each description and each input schema was read
+    from that response, not from memory. <code>Document</code> and
+    <code>PBS Node</code> field and operator vocabularies come from live
+    <code>icp_describe_record_schema</code> calls for those two kinds.</p>
+  <table>
+    <thead><tr><th>Cited item</th><th>Where confirmed</th></tr></thead>
+    <tbody>
+      <tr><td><code>ask_lucy</code>, <code>ask_start</code>,
+        <code>ask_progress</code>, <code>ask_cancel</code></td>
+        <td>Live tool list, <code>tools/list</code> response; descriptions read
+        in full. The skill's positive control is <code>ask_lucy</code>'s own
+        "read documents in full when a question needs their exact contents".</td></tr>
+      <tr><td><code>platform_capabilities</code></td>
+        <td>Live tool list; its description is what the skill cites for
+        "what Lucy can do right now".</td></tr>
+      <tr><td><code>get_document_file</code> and its argument names
+        <code>uid</code>, <code>version</code>, <code>format</code>,
+        <code>export</code></td>
+        <td>Live tool list, input schema.</td></tr>
+      <tr><td><code>icp_describe_record_schema</code></td>
+        <td>Live tool list, and a live call with
+        <code>{"record_type": "Document"}</code>; the recorded result is the
+        source of every <code>Document</code> field name and operator below.</td></tr>
+      <tr><td><code>icp_search_records</code>; predicates as
+        <code>field</code>/<code>operator</code>/<code>values</code>;
+        <code>properties</code> limit <code>page_size</code>;
+        <code>continuation</code></td>
+        <td>Live tool list; input schema enumerates the full operator set
+        (after, before, between, contains, ends_with, eq, gt, gte, in, lt,
+        not_given, on_or_after, on_or_before, references, starts_with) and
+        states the two-call concurrency cap, the identical-argument
+        continuation rule, and the projection advice.</td></tr>
+      <tr><td><code>icp_get_records</code> and its <code>uids</code>,
+        <code>record_type</code>, <code>properties</code>,
+        <code>follow</code> arguments; <code>unexpected_record_type</code>,
+        <code>unregistered_record_type</code></td>
+        <td>Live tool list, description and input schema. The
+        <code>not_returned</code> outcome was observed in a live call naming
+        an invented UID.</td></tr>
+      <tr><td><code>icp_get_document_versions</code>; <code>selection</code>
+        values <code>current</code>, <code>latest</code>,
+        <code>current_and_latest</code></td>
+        <td>Live tool list, description and input schema.</td></tr>
+      <tr><td><code>icp_get_record_relationships</code>; arguments
+        <code>uid</code>, <code>record_type</code>, <code>version</code></td>
+        <td>Live tool list, description and input schema.</td></tr>
+      <tr><td><code>icp_get_folder</code>; <code>icp_list_folder_contents</code>
+        with <code>uid</code>, <code>recursive</code>,
+        <code>issued_after</code>, <code>issued_before</code>,
+        <code>page_size</code>, <code>continuation</code>; depth 4, 300
+        containers, 70 s</td>
+        <td>Live tool list, descriptions and input schemas; the bounds are in
+        the listing tool's own description.</td></tr>
+      <tr><td><code>icp_verify_folder_membership</code>; outcomes
+        <code>confirmed</code>, <code>outside_physical_tree</code>,
+        <code>unverified</code></td>
+        <td>Live tool list, description.</td></tr>
+      <tr><td><code>icp_lookup_abbreviation</code></td>
+        <td>Live tool list, description.</td></tr>
+      <tr><td>Kind <code>Document</code>; query fields
+        <code>uid</code>, <code>folder</code>, <code>title</code>,
+        <code>description</code>, <code>document_number</code>,
+        <code>file_type</code>, and the date fields</td>
+        <td>Live <code>icp_describe_record_schema</code> for
+        <code>Document</code>: its <code>query_fields</code> map, with each
+        field's own operator set.</td></tr>
+      <tr><td>Read properties <code>current_version</code>,
+        <code>last_version</code>, <code>version_state</code>,
+        <code>last_version_state</code>, <code>pbs</code></td>
+        <td>The same live schema call, <code>read_properties</code>; and a live
+        search projecting <code>current_version</code>, <code>version_state</code>
+        and <code>file_type</code>, which returned those keys.</td></tr>
+      <tr><td><code>folder</code> is the containment field, with
+        <code>source_property: parent_content</code></td>
+        <td>Live <code>Document</code> schema,
+        <code>query_fields.folder.source_property</code>.</td></tr>
+      <tr><td>Kind <code>PBS Node</code>; fields <code>code</code>,
+        <code>title</code>, <code>parent_content</code></td>
+        <td>Live <code>icp_describe_record_schema</code> for
+        <code>PBS Node</code>; a live search on <code>code</code> with
+        <code>starts_with</code> returned the root node.</td></tr>
+      <tr><td>Page envelope <code>has_more</code>, <code>continuation</code>,
+        <code>withheld_on_page</code>, <code>total_scope</code>,
+        <code>snapshot_consistency</code>, <code>ordering</code></td>
+        <td>Returned by a live search: <code>has_more: true</code>,
+        <code>total_scope: "not_disclosed"</code>,
+        <code>total_disclosed: false</code>,
+        <code>snapshot_consistency: "not_established"</code>,
+        <code>ordering: "source_uid_order"</code>,
+        <code>withheld_on_page: 0</code>.</td></tr>
+      <tr><td>Limits 100 records, 100 <code>page_size</code>, 8 predicates
+        on <code>Document</code>; 100 UIDs per <code>icp_get_records</code>
+        call</td>
+        <td>Live <code>Document</code> schema <code>limits</code> block; the
+        UID cap is in <code>icp_get_records</code>'s description.</td></tr>
+      <tr><td><code>capacity_exceeded</code>, "at most 2 ICP calls in
+        parallel"</td>
+        <td>Present verbatim in every ICP tool description in the live tool
+        list.</td></tr>
+      <tr><td><code>invalid_projection</code>, <code>unknown_properties</code>,
+        <code>source_read_attempted</code>, <code>invalid_query</code></td>
+        <td>Observed in two live refusals, recorded below.</td></tr>
+      <tr><td>The project client's GET/HEAD-only rule and its absence of
+        query POSTs</td>
+        <td><code>iter_codex/discovery/icp/client.py</code>
+        (<code>_READ_METHODS = frozenset({"GET", "HEAD"})</code>, and the
+        guarded session's refusal of any other method) and
+        <code>iter_codex/discovery/icp/records.py</code> module docstring,
+        "List-view and query POST operations are deliberately absent from this
+        reader".</td></tr>
+    </tbody>
+  </table>
+
+  <h4 id="lucy-record-tools-skill-negative-control">The wrong field name, and the refusals that make the traps demonstrable</h4>
+  <p>The declared check was run against the wrong field name the skill most
+    plausibly tempts an author into: <code>"version"</code> reads like the
+    document's version but is not a declared property. The live call returns a
+    refusal that proves the field name matters, and the live answer below is
+    the primary evidence — not a claim that a draft contained it. The stored
+    result is:</p>
+  <pre><code>{"status": "error", "items": [],
+ "error": {"code": "invalid_projection", "retryable": false, "details":
+   {"code": "unknown_properties", "record_type": "Document",
+    "unknown_properties": ["version"],
+    "declared_properties": [..., "current_version", ..., "last_version",
+      "last_version_state", "version_state", ...],
+    "source_read_attempted": false}}}</code></pre>
+  <p>Two facts come out of that one refusal: the declared name is
+    <code>current_version</code>, and <code>source_read_attempted: false</code>
+    means the call read nothing before rejecting the request. The corrected
+    recipe, with <code>current_version</code>, returned
+    <code>status: "success"</code> with two rows carrying
+    <code>current_version</code>, <code>version_state</code> and
+    <code>file_type</code>.</p>
+  <p>The second trap was measured the same way. <code>pbs</code> is readable on
+    <code>Document</code> and is not a query field, so a predicate on it is
+    refused rather than silently ignored:</p>
+  <pre><code>{"status": "error", "items": [],
+ "error": {"code": "invalid_query", "retryable": false, "details":
+   {"reason": "Unsupported field/operator: pbs/eq; this kind declares no query
+    field named 'pbs'. It takes: uid, folder, title, description,
+    document_number, file_type, creation_date, ..."}}}</code></pre>
+  <p>That is why the skill's PBS recipe resolves the node by <code>code</code>,
+    finds candidates by the text fields, and confirms the link by reading
+    <code>pbs</code> back — the only route the schema leaves open.</p>
+
+  <h4 id="lucy-record-tools-skill-gate">The mechanical check, and the negative control that found its own blind spot</h4>
+  <p>A gate script compares the skill against the saved live responses: every
+    cited tool name must be in the live tool list, every projected property
+    must be a declared <code>read_properties</code> name of the kind its
+    recipe names, every predicate's field and operator must be declared on that
+    kind's <code>query_fields</code>, and no identity-shaped literal beyond the
+    two invented ones may appear. On the committed skill it reports
+    <code>tools cited: 13, all in live list: True</code>,
+    <code>all declared: True</code>,
+    <code>PBS predicates: [('code', 'eq')]</code>, and <code>PASS</code>.</p>
+  <p>The negative control is a scratch copy of the skill with
+    <code>current_version</code> replaced by <code>version</code> in the
+    signal-list recipe. The first run of that control <strong>passed</strong>:
+    the gate was reading projections only from prose, so a field name inside a
+    recipe's JSON block was never inspected. That is a defect in the
+    instrument, not a property of the skill, and mutating the input is what
+    exposed it — a green result over an unmutated input had looked like
+    coverage. After the check was repaired to read each recipe's whole JSON
+    object, the same mutation fails:</p>
+  <pre><code>doc recipe properties: [..., 'version', ...]
+all declared: False
+FAIL
+ - undeclared projection properties: ['version']
+EXIT=1</code></pre>
+  <p>The refusal the server itself returns for the same wrong name is recorded
+    above, so the skill's instruction and the platform's behaviour were each
+    demonstrated rather than asserted.</p>
+
+  <h4 id="lucy-record-tools-skill-hygiene">No real identity in the tracked tree</h4>
+  <p>The skill's examples use the invented UID <code>AB12CD</code>, the
+    invented PBS code <code>00.AA.BB</code>, and no host, person or document
+    title. Checks run over the file before commit:</p>
+  <pre><code>grep -Eon '\b[A-Z0-9]{5,}\b' SKILL.md   -> AB12CD only
+grep -Ein 'iter\.org|@[a-z]|Dr\.|Mr\.' SKILL.md  -> none
+grep -En '[0-9]{2}\.[A-Z0-9]{2}|LC[0-9]|SSEN' SKILL.md -> 00.AA.BB only</code></pre>
+  <p>Live calls made while writing the skill returned real identities, titles
+    and codes. Those responses were kept under the run directory, outside the
+    repository, and none of their values was carried into the skill or into
+    this fragment.</p>
+
+  <h4 id="lucy-record-tools-skill-index">Skill discovery</h4>
+  <p>The repository carries no skill index: <code>.claude/skills/</code> holds
+    the skills themselves and the tool discovers them from their frontmatter,
+    so there is nothing to add an entry to. The skill's
+    <code>description</code> names the triggers the brief requires — ITER
+    documents, signal lists, self-description documents, PBS/GBS nodes, IDM
+    identities and versions.</p>
+</section>
