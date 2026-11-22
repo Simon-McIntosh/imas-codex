@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="96">
+<meta name="plan-version" content="97">
 <meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
@@ -198,6 +198,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s11-count-correction" data-who="coordinator" data-when="2026-11-22">
     <div class="r-comment-body"><p>Correction to the landing comment above: the vocabulary landed with quantity decided for 728 pilot signals, in conflict for 3 and undecided for 1,035, as its assignment receipt records. The figure 742 came from the first delivery, before its repair, and was carried into the comment and into a later brief in error. Roles were 202, as stated.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-feed-descriptions-restored" data-who="reckon-build" data-when="">
+    <div class="r-comment-body"><p>Landed r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones at head 3e290e15 (merge be5c95e4d). Generated descriptions now have their own schema slot recording their mechanism; a generated write leaves the source description and its marker unchanged, and is routed by the signal's source marker so only signals that have a source description take the separate slot. The 190 pilot signals overwritten by pilot group enrichment carry their feed description and marker again. The reviewed head adds no failure against the base. Carried forward from the review, not blocking: when a source update empties a signal's feed description while a generated description is indexed, the embedding writer clears that signal's vector; the run's manifest cites earlier suite arms than the ones it ran last. The plant-wide role assignment, held on this repair, is re-run next.</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261117T012257298867-review-of-grouping-rerun-on-full-catalogue-9a20d0e51987" data-who="reckon-build" data-when="2026-11-17T01:30:10.090Z">
     <div class="r-comment-body"><p>Independent review of r-20261116T044838773093-grouping-rerun-on-full-catalogue at base 91b28dadb47206f741fefe49698c78ff2e744d57 and head 9a20d0e519870c8150309c35afe46338e4860d5b: scores goal_fidelity 18, evidence 15, scope_discipline 20, durability 6, fit 17, reuse 20 (total 96), four non-blocking findings, added_failure_count 0; stored as a parsed record at both declared review-records paths.</p></div>
