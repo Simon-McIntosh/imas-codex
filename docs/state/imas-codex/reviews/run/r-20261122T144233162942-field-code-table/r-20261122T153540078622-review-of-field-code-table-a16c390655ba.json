@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-22T15:46:10.395Z",
   "dispatched_at": "2026-11-22T15:36:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-field-code-table-a16c390655ba",
+      "recorded_at": "2026-11-22T15:52:24.133217+00:00"
+    }
+  },
   "findings": [
     {
       "file": "iter_codex/discovery/signals/field_codes_graph.py",
