@@ -223,6 +223,11 @@ def test_every_propagated_statement_binds_the_parameters_it_names():
             missing = set(re.findall(r"\$(\w+)", cypher)) - set(params)
             assert not missing, f"statement binds {sorted(missing)} but is not given it"
             calls.append(cypher)
+            # The fixture's representative carries a source marker, so the
+            # generated route is the arm that writes it and the source slot is
+            # an arm the graph matches nothing for.
+            if "s.description_source IS NULL" in cypher:
+                return [{"updated": 0}]
             return [{"cnt": 1, "updated": 1}]
 
     with patch.object(parallel, "GraphClient", BindingGraph):
@@ -232,7 +237,7 @@ def test_every_propagated_statement_binds_the_parameters_it_names():
         )
 
     assert updated == 1
-    assert len(calls) == 4
+    assert len(calls) == 5
 
 
 @pytest.mark.asyncio
@@ -330,7 +335,7 @@ def test_propagation_binds_the_source_by_representative_id_alone():
         )
     )
 
-    assert len(statements) == 4
+    assert len(statements) == 5
     for statement in statements:
         assert "MATCH (sg:SignalSource {representative_id: $rep_id})" in statement
         assert "(sg:SignalSource)" not in statement
