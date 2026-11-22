@@ -53,6 +53,16 @@
       "note": "The setpoint clause no longer fails the section on a property of the data: the plant-wide section reports the setpoint count, and where it is zero states which codes were examined and why none establishes a setpoint; the search check applies only where a setpoint is decided.",
       "reason": "",
       "when": "2026-11-22T14:15:56.200481+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1ca2e22ca0710f095db82aa736a036cee0fe0838",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "Split: section 12 delivers the field-code table alone; a new section 13 runs the plant-wide assignment and waits on section 12.",
+      "reason": "",
+      "when": "2026-11-22T14:15:58.692833+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "The rationale now cites the measured role split recorded by the sibling-relation run (alarm 42, command 80, measurement 3, state 77, setpoint 0 of 202) and says the sibling descriptions were seen to be identical in the pilot's landed sample rather than measured across all siblings.",
       "reason": "",
       "when": "2026-11-22T14:15:53.325116+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1ca2e22ca0710f095db82aa736a036cee0fe0838",
+      "commit_basis": "edit",
+      "note": "Split: section 12 delivers the field-code table alone; a new section 13 runs the plant-wide assignment and waits on section 12.",
+      "reason": "",
+      "when": "2026-11-22T14:15:58.692833+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261121T201358210735-plan-review-of-iter-signal-context-and-enrichment.json",
