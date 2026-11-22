@@ -3,6 +3,14 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-22T21:49:19.637Z",
   "dispatched_at": "2026-11-22T21:23:31Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-22T21:52:42.432727+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones"
+    }
+  },
   "findings": [
     {
       "file": "iter_codex/discovery/signals/controls_metadata.py",
