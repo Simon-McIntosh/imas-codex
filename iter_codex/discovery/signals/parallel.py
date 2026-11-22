@@ -1542,6 +1542,13 @@ GENERATED_DESCRIPTION_SOURCE_PROPERTY = "generated_description_source"
 GENERATED_DESCRIPTION_AT_PROPERTY = "generated_description_updated_at"
 
 
+def _and_where(where: str, predicate: str) -> str:
+    """Add a predicate to a rendered ``WHERE``, or open one when there is none."""
+    if "WHERE" in where:
+        return f"{where}\n        AND {predicate}"
+    return f"{where}\n        WHERE {predicate}"
+
+
 def write_signal_descriptions(
     items: list[dict[str, Any]],
     *,
@@ -1556,18 +1563,23 @@ def write_signal_descriptions(
 ) -> int:
     """The single writer for FacilitySignal descriptions.
 
-    By default it writes the generated description into
-    ``generated_description`` together with its mechanism and timestamp, and
-    sets ``embedding``, ``embedded_at`` and ``embedded_text_hash`` from the
-    embed text, so a node's stored vector always describes the text written
-    beside it. It never writes ``description`` or ``description_source``: those
-    hold what the sources say, and enrichment must not erase a source. Every
-    signal description rewrite in this package goes through here: the
-    enrichment and under-specification marks, the propagation of a
+    Where the text lands depends on whether the signal already carries a source
+    description. A signal with ``description_source`` set — a controls-feed
+    label, say — keeps that text and its marker, and the composed text goes to
+    ``generated_description`` with its mechanism and timestamp. A signal with no
+    source marker has no source wording to hide, and ``description`` is its
+    enrichment slot, so the composed text is written there exactly as it was
+    before the separation. Either way ``embedding``, ``embedded_at`` and
+    ``embedded_text_hash`` follow the embed text, so a node's stored vector
+    always describes the text written beside it. No default-path write assigns
+    ``description`` or ``description_source`` on a signal that carries a source
+    marker. Every signal description rewrite in this package goes through here:
+    the enrichment and under-specification marks, the propagation of a
     representative's text to its group, and the individualization pass.
 
-    ``text_property`` selects the text slot. ``description`` is used only by a
-    source import that owns the source text; the default is the generated slot.
+    ``text_property`` forces a text slot. ``description`` is used only by a
+    source import that owns the source text; the default is the routing above,
+    which is what every generated write takes.
 
     ``embed_only`` rewrites the vector fields and hash for the embed text
     without touching any description property, which is what a re-embed sweep
@@ -1604,7 +1616,9 @@ def write_signal_descriptions(
             keyed by signal identity. Every item must have a receipt. Enables a
             caller to validate a batch before admitting new graph signals.
         text_property: Node property the item's ``description`` text is stored
-            in; the generated slot by default.
+            in, forced for every item. Left at its default, each item's slot is
+            chosen per signal: the generated slot where the signal carries a
+            source marker, else ``description``.
         embed_only: Write the vector fields and hash without any description
             property.
 
@@ -1688,24 +1702,35 @@ def write_signal_descriptions(
         return {**base_params, "items": rows}
 
     if embed_only:
-        text_assignments: list[str] = []
+        routes = [([], where)]
     elif text_property == GENERATED_DESCRIPTION_PROPERTY:
-        text_assignments = [
+        generated = [
             f"s.{GENERATED_DESCRIPTION_PROPERTY} = item.description",
             f"s.{GENERATED_DESCRIPTION_SOURCE_PROPERTY} = coalesce("
             "item.generated_description_source, item.enrichment_source, "
             "'enrichment')",
             f"s.{GENERATED_DESCRIPTION_AT_PROPERTY} = datetime()",
         ]
+        # The two routes are disjoint on the marker, so every matched signal is
+        # written once and its own slot follows what the signal already holds:
+        # a source-marked signal keeps its source text, an unmarked one is
+        # enriched into the description slot as it was before the separation.
+        routes = [
+            (generated, _and_where(where, "s.description_source IS NOT NULL")),
+            (
+                ["s.description = item.description"],
+                _and_where(where, "s.description_source IS NULL"),
+            ),
+        ]
     else:
-        text_assignments = [f"s.{text_property} = item.description"]
+        routes = [([f"s.{text_property} = item.description"], where)]
 
-    if gc is None:
-        with GraphClient() as client:
-            return _write_description_arms(
+    def _write_all(client: GraphClient) -> int:
+        return sum(
+            _write_description_arms(
                 client,
                 match,
-                where,
+                route_where,
                 text_assignments,
                 extra_clause,
                 embedded,
@@ -1713,17 +1738,13 @@ def write_signal_descriptions(
                 empty_text,
                 _params,
             )
-    return _write_description_arms(
-        gc,
-        match,
-        where,
-        text_assignments,
-        extra_clause,
-        embedded,
-        unembedded,
-        empty_text,
-        _params,
-    )
+            for text_assignments, route_where in routes
+        )
+
+    if gc is None:
+        with GraphClient() as client:
+            return _write_all(client)
+    return _write_all(gc)
 
 
 def _write_description_arms(

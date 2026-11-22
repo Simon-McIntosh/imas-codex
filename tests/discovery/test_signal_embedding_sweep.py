@@ -100,21 +100,35 @@ class _SweepGraph:
 
         if (
             "s.generated_description = item.description" in cypher
+            or "s.description = item.description" in cypher
             or "s.embedded_text_hash = item.embedded_text_hash" in cypher
         ):
-            carries_text = "s.generated_description = item.description" in cypher
+            carries_generated = "s.generated_description = item.description" in cypher
+            carries_source = "s.description = item.description" in cypher
             carries_vector = "s.embedding = item.embedding" in cypher
             carries_hash = "s.embedded_text_hash = item.embedded_text_hash" in cypher
+            applied = 0
             for item in params["items"]:
                 node = self.nodes[item["id"]]
-                if carries_text:
+                if "s.description_source IS NOT NULL" in cypher and not node.get(
+                    "description_source"
+                ):
+                    continue
+                if "s.description_source IS NULL" in cypher and node.get(
+                    "description_source"
+                ):
+                    continue
+                applied += 1
+                if carries_generated:
                     node["generated_description"] = item["description"]
+                elif carries_source:
+                    node["description"] = item["description"]
                 if carries_vector:
                     node["embedding"] = item["embedding"]
                     node["embedded_at"] = "now"
                 if carries_hash:
                     node["embedded_text_hash"] = item["embedded_text_hash"]
-            return [{"updated": len(params["items"])}]
+            return [{"updated": applied}]
 
         raise AssertionError(f"unexpected query: {cypher[:140]}")
 

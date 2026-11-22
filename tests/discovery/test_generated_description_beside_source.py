@@ -59,7 +59,24 @@ class _AssigningGraph:
 
     def query(self, cypher: str, **params):
         self.statements.append(cypher)
-        for item in params["items"]:
+        # The writer routes each item by the signal's own source marker, so the
+        # fake honours the predicate the statement carries: a route whose
+        # predicate the node fails is a route the graph would not have written.
+        if "s.description_source IS NOT NULL" in cypher:
+            selected = [
+                item
+                for item in params["items"]
+                if self.nodes[item["id"]].get("description_source") is not None
+            ]
+        elif "s.description_source IS NULL" in cypher:
+            selected = [
+                item
+                for item in params["items"]
+                if self.nodes[item["id"]].get("description_source") is None
+            ]
+        else:
+            selected = list(params["items"])
+        for item in selected:
             node = self.nodes[item["id"]]
             for prop, key in _ASSIGNMENT.findall(cypher):
                 node[prop] = item.get(key)
@@ -73,7 +90,7 @@ class _AssigningGraph:
                 node["generated_description_updated_at"] = "now"
             if "embedded_at = datetime()" in cypher:
                 node["embedded_at"] = "now"
-        return [{"updated": len(params["items"])}]
+        return [{"updated": len(selected)}]
 
 
 def _feed_described_signal() -> dict:
@@ -112,6 +129,40 @@ def test_generated_description_leaves_the_feed_description_alone(monkeypatch):
     assert node["generated_description"] == composed
     assert node["generated_description_source"] == "group_composition"
     assert node["generated_description_updated_at"] == "now"
+    assert node["embedded_text_hash"] == _text_hash(composed)
+    assert node["embedding"] == _embedding_of(composed)
+
+
+def test_signal_without_a_source_marker_is_still_written_to_description(monkeypatch):
+    """``description`` stays the enrichment slot where there is no source to keep.
+
+    A facility whose source wording lives in ``source_description`` has no
+    source marker on ``description``; enrichment has always composed that slot
+    and must go on doing so, or those facilities stop receiving new text.
+    """
+    nodes = {
+        "facility:general/codac_uda/DEMO:NE": {
+            "id": "facility:general/codac_uda/DEMO:NE",
+            "description": "An earlier composed description.",
+        }
+    }
+    monkeypatch.setattr(parallel, "GraphClient", lambda: _AssigningGraph(nodes))
+    monkeypatch.setattr(parallel, "embed_descriptions_batch", _fake_embed)
+
+    composed = "Density, measured by the interferometer."
+    parallel.write_signal_descriptions(
+        [
+            {
+                "id": "facility:general/codac_uda/DEMO:NE",
+                "description": composed,
+                "enrichment_source": "group_composition",
+            }
+        ]
+    )
+
+    node = nodes["facility:general/codac_uda/DEMO:NE"]
+    assert node["description"] == composed
+    assert "generated_description" not in node
     assert node["embedded_text_hash"] == _text_hash(composed)
     assert node["embedding"] == _embedding_of(composed)
 
