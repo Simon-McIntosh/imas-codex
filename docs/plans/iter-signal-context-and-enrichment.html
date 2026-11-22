@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="89">
+<meta name="plan-version" content="90">
 <meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
@@ -294,7 +294,10 @@ fails, and the cohort-selector positive control, live); the group suite 22 passe
 11 passed with 1 pre-existing failure, reproduced at the base sha.</p></div>
 </div>
 <div class="r-comment" data-section="s12" data-id="c-run-r-20261122T153540078622-review-of-field-code-table-a16c390655ba" data-who="reckon-build" data-when="2026-11-22T15:46:10.395Z">
-    <div class="r-comment-body"><p>Independent review of r-20261122T144233162942-field-code-table at a16c390655ba6dab2584e02ad2e43e93d882502b: the field-code table is delivered and its guards fire under the declared mutations, but the landing record&#x27;s catalogue coverage is wrong — 33 of 259 catalogue codes have an entry (33/226), not the 39/220 reported, because field_codes_graph.py:152 subtracts the table&#x27;s code count from the catalogue rather than counting catalogue codes that have an entry.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261122T144233162942-field-code-table at a16c390655ba6dab2584e02ad2e43e93d882502b: the field-code table is delivered and its guards fire under the declared mutations, but the landing record's catalogue coverage is wrong — 33 of 259 catalogue codes have an entry (33/226), not the 39/220 reported, because field_codes_graph.py:152 subtracts the table's code count from the catalogue rather than counting catalogue codes that have an entry.</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261122T155756661910-review-of-field-code-table-2b2e6303552f" data-who="reckon-build" data-when="2026-11-22T16:04:47.599Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261122T144233162942-field-code-table at 2b2e63035 scores goal_fidelity 17, evidence 13, scope_discipline 15, durability 18, fit 17, reuse 15 (total 95) with no blocking finding; the earlier blocking catalogue-split defect (review f92c7a80466) is repaired by 2b2e63035 and guarded by a new test, and seven non-blocking findings remain (hardcoded functional-specification count, facility-unscoped row query, unused `limit`, double-counted unestablished code, duplicated controls-source constant, builder outside the declared write path, and no schema slot for the declared meanings).</p></div>
 </div>
 </section>
 </main>

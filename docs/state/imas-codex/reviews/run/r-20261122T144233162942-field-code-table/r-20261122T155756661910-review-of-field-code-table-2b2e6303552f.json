@@ -1,0 +1,83 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-22T16:04:47.599Z",
+  "dispatched_at": "2026-11-22T15:58:36Z",
+  "findings": [
+    {
+      "file": "iter_codex/discovery/signals/field_codes_graph.py",
+      "id": "9c75b6dbb54",
+      "line": 131,
+      "severity": "non-blocking",
+      "text": "texts['functional_specification'] = 0 is hardcoded: TABLE_SOURCES lists the functional specification as a possible establishing source and the done_when asks for entries split by it, but no line of that document is ever read, so '0 established by the functional specification' is an assertion rather than a measurement and no regression in that source can be detected."
+    },
+    {
+      "file": "iter_codex/discovery/signals/field_codes_graph.py",
+      "id": "b9dc1ba163b",
+      "line": 38,
+      "severity": "non-blocking",
+      "text": "ROWS_QUERY matches every PlantSignalRow with no facility filter although build_from_graph takes a facility, so once another facility's rows are imported a code's role could be credited from the wrong facility's signal list."
+    },
+    {
+      "file": "iter_codex/discovery/signals/field_codes_graph.py",
+      "id": "f3f14dee5b9",
+      "line": 85,
+      "severity": "non-blocking",
+      "text": "snapshot_sources validates limit against 1..1000000 and then never applies it: CODES_QUERY, ROWS_QUERY and CONTROLS_QUERY carry no LIMIT, so the advertised catalogue bound does nothing and a large graph is read unbounded."
+    },
+    {
+      "file": "iter_codex/discovery/signals/field_codes.py",
+      "id": "5e1d02ac2d2",
+      "line": 322,
+      "severity": "non-blocking",
+      "text": "a code whose role is stated but whose meaning is undeclared is appended to unestablished here with reason 'role stated but no meaning declared', and again at field_codes.py:345 from the catalogue loop with the false reason 'no source states a role', so summary['unestablished'] double-counts it; the current build has no such code, but the first omitted private meaning corrupts both the count and the reason."
+    },
+    {
+      "file": "iter_codex/discovery/signals/field_codes_graph.py",
+      "id": "44015674cb3",
+      "line": 28,
+      "severity": "non-blocking",
+      "text": "CONTROLS_SOURCE_PREFIX is redefined identically to vocabulary_graph.py:33 instead of imported, so the two readers of the controls-metadata source can drift apart."
+    },
+    {
+      "file": "iter_codex/remote/field_code_table.py",
+      "id": "44756a7b460",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the builder landed as a new module where the declared write path was iter_codex/remote/signal_vocabulary.py; the review brief's reuse map names that module as the table's owner and asks for it to be extended, and nothing imports the new modules yet because section 13 must wire the consumer."
+    },
+    {
+      "file": "iter_codex/schemas/facility.yaml",
+      "id": "822d290a650",
+      "line": 312,
+      "severity": "non-blocking",
+      "text": "the plan says the table is held in the schema's data, but no schema slot declares it: the only facility.yaml change is the functional_specification enum member and the meanings are read from an unvalidated free-form dict at iter_codex/remote/field_code_table.py:35, so a malformed declared meaning is caught only by a build-time ValueError."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: goal is a table giving each archive field code its role, a one-line meaning and the establishing source, per component kind; iter_codex/discovery/signals/field_codes.py:172 FieldCodeTable with :154 FieldCodeConflict delivers it, and the graph summary at field_codes_graph.py:157 counts the catalogue split from the intersection (receipt: 33 with an entry, 226 without, 39 established codes).\nVERDICT done_when: the done_when's numbers are computed at field_codes.py:206-234 and field_codes_graph.py:145-160 and recorded in the private receipt (259 distinct, 33 with entry, 226 without, summing, 39 codes, 69 entries, 22/47/0 by source, 29/16/11/9/4 by role, 40 examined for setpoint with 7 decided); every demanded figure is present and sums, but 'graph-marked statements pass' is shown only by the live build log at revision 2b2e63, not a graph-marked run, and the functional-specification split is hardcoded 0 at field_codes_graph.py:131.\nVERDICT write_paths: read the manifest's declared paths; four of the five delivered files are inside them, and iter_codex/remote/field_code_table.py is a new file where the declared path was iter_codex/remote/signal_vocabulary.py.\nVERDICT manifest: read; status complete, commits a16c39065 and 2b2e63035, the literal gate command and logs/discovery-gate.log at revision 2b2e63 (60 passed, EXIT=0), the private receipt and readings paths, and the 20 hand readings; the required baseline_suite and after_suite JSON arms are absent.\nVERDICT diff: read commit by commit against 866016e4; a16c39065 adds five files (913 lines, no existing file modified except a five-line facility.yaml enum addition) and 2b2e63035 repairs the catalogue split across three of them (28 insertions, 12 deletions), removing the tautological sum assertion and adding a test that feeds a catalogue missing an entry code.\nCALL_SITES: iter_codex/remote/field_code_table.py:build (invoked as python -m iter_codex.remote.field_code_table)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: field_codes.py:172 builds the per-code and per-kind table the goal names, and field_codes_graph.py:157 now reports the catalogue split the goal requires.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate tests/discovery/test_field_code_table.py is recorded at 60 passed EXIT=0 and the receipt reconciles with the manifest, but the manifest carries no baseline_suite/after_suite arms and the functional-specification count is hardcoded at field_codes_graph.py:131.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: four of five delivered paths are declared, and iter_codex/remote/field_code_table.py is a new file where the declared path was iter_codex/remote/signal_vocabulary.py.\nSCORE durability: 18\nJUSTIFICATION durability: the negative-control log shows 10 tests red under a no-source/per-kind/conflict mutation and the revert log shows 3 red, and test_field_code_table.py:210-230 fails if the split again counts an entry code the catalogue does not hold.\nSCORE fit: 17\nJUSTIFICATION fit: element for element the module follows the frozen-dataclass and type-hinted idiom of signals/vocabulary.py, and ruff reports no finding on the five changed files.\nSCORE reuse: 15\nJUSTIFICATION reuse: field_codes.py:78-82 extends the vocabulary's ROLE_TERMS and values_from_text rather than forking the matcher, but field_codes_graph.py:28 duplicates CONTROLS_SOURCE_PREFIX from vocabulary_graph.py:33 and re-reads the same graph sources without extending that reader.\nFINDING iter_codex/discovery/signals/field_codes_graph.py:131 non-blocking: texts['functional_specification'] = 0 is hardcoded: TABLE_SOURCES lists the functional specification as a possible establishing source and the done_when asks for entries split by it, but no line of that document is ever read, so '0 established by the functional specification' is an assertion rather than a measurement and no regression in that source can be detected.\nFINDING iter_codex/discovery/signals/field_codes_graph.py:38 non-blocking: ROWS_QUERY matches every PlantSignalRow with no facility filter although build_from_graph takes a facility, so once another facility's rows are imported a code's role could be credited from the wrong facility's signal list.\nFINDING iter_codex/discovery/signals/field_codes_graph.py:85 non-blocking: snapshot_sources validates limit against 1..1000000 and then never applies it: CODES_QUERY, ROWS_QUERY and CONTROLS_QUERY carry no LIMIT, so the advertised catalogue bound does nothing and a large graph is read unbounded.\nFINDING iter_codex/discovery/signals/field_codes.py:322 non-blocking: a code whose role is stated but whose meaning is undeclared is appended to unestablished here with reason 'role stated but no meaning declared', and again at field_codes.py:345 from the catalogue loop with the false reason 'no source states a role', so summary['unestablished'] double-counts it; the current build has no such code, but the first omitted private meaning corrupts both the count and the reason.\nFINDING iter_codex/discovery/signals/field_codes_graph.py:28 non-blocking: CONTROLS_SOURCE_PREFIX is redefined identically to vocabulary_graph.py:33 instead of imported, so the two readers of the controls-metadata source can drift apart.\nFINDING iter_codex/remote/field_code_table.py:1 non-blocking: the builder landed as a new module where the declared write path was iter_codex/remote/signal_vocabulary.py; the review brief's reuse map names that module as the table's owner and asks for it to be extended, and nothing imports the new modules yet because section 13 must wire the consumer.\nFINDING iter_codex/schemas/facility.yaml:312 non-blocking: the plan says the table is held in the schema's data, but no schema slot declares it: the only facility.yaml change is the functional_specification enum member and the meanings are read from an unvalidated free-form dict at iter_codex/remote/field_code_table.py:35, so a malformed declared meaning is caught only by a build-time ValueError.",
+  "review_run_id": "r-20261122T155756661910-review-of-field-code-table-2b2e6303552f",
+  "reviewed_base_sha": "866016e4a4adcccdb81d7813fb37a43a6940611a",
+  "reviewed_head_sha": "2b2e6303552fc7b8cb4cc75cef860513b404ba45",
+  "reviewed_run_id": "r-20261122T144233162942-field-code-table",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T16:03:51.498467+00:00",
+  "total": 95,
+  "verdicts": {
+    "call_sites": "iter_codex/remote/field_code_table.py:build (invoked as python -m iter_codex.remote.field_code_table)",
+    "diff": "read commit by commit against 866016e4; a16c39065 adds five files (913 lines, no existing file modified except a five-line facility.yaml enum addition) and 2b2e63035 repairs the catalogue split across three of them (28 insertions, 12 deletions), removing the tautological sum assertion and adding a test that feeds a catalogue missing an entry code.",
+    "done_when": "the done_when's numbers are computed at field_codes.py:206-234 and field_codes_graph.py:145-160 and recorded in the private receipt (259 distinct, 33 with entry, 226 without, summing, 39 codes, 69 entries, 22/47/0 by source, 29/16/11/9/4 by role, 40 examined for setpoint with 7 decided); every demanded figure is present and sums, but 'graph-marked statements pass' is shown only by the live build log at revision 2b2e63, not a graph-marked run, and the functional-specification split is hardcoded 0 at field_codes_graph.py:131.",
+    "goal": "goal is a table giving each archive field code its role, a one-line meaning and the establishing source, per component kind; iter_codex/discovery/signals/field_codes.py:172 FieldCodeTable with :154 FieldCodeConflict delivers it, and the graph summary at field_codes_graph.py:157 counts the catalogue split from the intersection (receipt: 33 with an entry, 226 without, 39 established codes).",
+    "manifest": "read; status complete, commits a16c39065 and 2b2e63035, the literal gate command and logs/discovery-gate.log at revision 2b2e63 (60 passed, EXIT=0), the private receipt and readings paths, and the 20 hand readings; the required baseline_suite and after_suite JSON arms are absent.",
+    "write_paths": "read the manifest's declared paths; four of the five delivered files are inside them, and iter_codex/remote/field_code_table.py is a new file where the declared path was iter_codex/remote/signal_vocabulary.py."
+  }
+}
