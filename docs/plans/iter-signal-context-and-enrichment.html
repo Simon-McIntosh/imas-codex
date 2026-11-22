@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="93">
+<meta name="plan-version" content="94">
 <meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
@@ -192,6 +192,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s12-landed" data-who="coordinator" data-when="2026-11-22">
     <div class="r-comment-body"><p>Landed 2026-11-22, in two commits. Of the catalogue's 259 distinct field codes, 33 have a sourced entry and 226 have none. The table establishes 39 codes in all (69 entries across component kinds); 6 of those codes are carried by no ITER signal in the graph and are listed apart. Entries are established 22 by a signal-list row, 47 by controls metadata and none by the functional specification, which defers field-code meanings to a reference the project does not hold; that zero is asserted, not measured, since no line of the specification is read. 40 codes were examined for the setpoint role and 7 establish it; one of them is among the six codes no signal carries, so six setpoint codes reach catalogue signals. Three code-and-kind pairs conflict and take no entry. Twenty sampled entries were read by hand against their verbatim source text, none wrong. The first delivery miscounted the split as 39 with an entry and 220 without, counting the six non-catalogue codes; the coordinator landed it before reading its review, which had blocked on that, and the repair landed after its own review. Open follow-ups from review: the table's graph reads apply no bound, the signal-list rows are read without a facility filter, the table is held in private configuration rather than a schema slot, and one code can be listed twice as unexplained.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s6-overwrote-feed" data-who="coordinator" data-when="2026-11-22">
+    <div class="r-comment-body"><p>Defect found 2026-11-22 in the landed pilot enrichment: it wrote each generated description into the same property where the controls metadata feed stores its operator label, and cleared the source marker. Compared with a snapshot taken just before the run, all 190 described pilot signals had a feed description and all 190 now hold only the generated text. The feed text is recoverable from that snapshot, saved privately, and from the feed itself. The plant-wide role assignment of section 13 read the damaged signals as having no source and is held, not landed. A repair node, <code>keep-feed-descriptions-beside-generated-ones</code>, restores the 190 feed descriptions and holds generated descriptions in their own property so no enrichment can replace a source again; section 13 is re-run after it lands. Section 7, the full-catalogue run, must not start before that repair, since it would repeat the overwrite across the plant.</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261117T012257298867-review-of-grouping-rerun-on-full-catalogue-9a20d0e51987" data-who="reckon-build" data-when="2026-11-17T01:30:10.090Z">
     <div class="r-comment-body"><p>Independent review of r-20261116T044838773093-grouping-rerun-on-full-catalogue at base 91b28dadb47206f741fefe49698c78ff2e744d57 and head 9a20d0e519870c8150309c35afe46338e4860d5b: scores goal_fidelity 18, evidence 15, scope_discipline 20, durability 6, fit 17, reuse 20 (total 96), four non-blocking findings, added_failure_count 0; stored as a parsed record at both declared review-records paths.</p></div>
