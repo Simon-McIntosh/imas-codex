@@ -116,6 +116,16 @@
       "note": "s4 now names the coordinator-supplied record export as the sole route, with its provenance (search, date, pages, withheld counts) recorded; the client's POST refusal is stated as the reason, and a client search is left to the pipeline plan",
       "reason": "",
       "when": "2026-11-22T21:01:06.233354+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "reuse_search-4",
+      "note": "s1 and s2 now treat the two role vocabularies as deliberately separate axes; s2 asks for a stated relation and precedence between them, not one merged vocabulary",
+      "reason": "",
+      "when": "2026-11-22T21:01:09.030103+00:00"
     }
   ],
   "responses": {
@@ -142,6 +152,15 @@
       "note": "s4 now names the coordinator-supplied record export as the sole route, with its provenance (search, date, pages, withheld counts) recorded; the client's POST refusal is stated as the reason, and a client search is left to the pipeline plan",
       "reason": "",
       "when": "2026-11-22T21:01:06.233354+00:00"
+    },
+    "reuse_search-4": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s1 and s2 now treat the two role vocabularies as deliberately separate axes; s2 asks for a stated relation and precedence between them, not one merged vocabulary",
+      "reason": "",
+      "when": "2026-11-22T21:01:09.030103+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-plant-signal-ontology/r-20261122T202504338686-plan-review-of-iter-plant-signal-ontology.json",
