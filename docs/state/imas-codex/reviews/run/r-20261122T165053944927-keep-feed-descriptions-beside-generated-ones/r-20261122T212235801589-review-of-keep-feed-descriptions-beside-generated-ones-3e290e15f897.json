@@ -15,6 +15,12 @@
       "recorded_at": "2026-11-22T21:52:42.432727+00:00",
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-22T21:52:42.432727+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones"
     }
   },
   "findings": [
