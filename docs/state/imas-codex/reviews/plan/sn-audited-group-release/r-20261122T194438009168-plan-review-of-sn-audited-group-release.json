@@ -71,6 +71,16 @@
       "note": "Lead ruling 2026-11-22: every one of the 208 members is re-read blind after repair under current rules, changed or not, and the rate is taken from that reading alone; the decoy draw is removed (00b98bcef).",
       "reason": "",
       "when": "2026-11-22T20:34:27.912514+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "8e101d1f-e306-47cb-a56a-48cba5e5c742",
+      "commit": "00b98bcef15a1bc0a87659d2deae6b279e2b4fcc",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 4 now states its USD 40 ceiling inside the USD 400 repair total the lead set on 2026-11-19; section 2's USD 300 is the landed section's history (00b98bcef).",
+      "reason": "",
+      "when": "2026-11-22T20:34:51.542070+00:00"
     }
   ],
   "responses": {
@@ -82,6 +92,15 @@
       "note": "The post-repair reading now adjudicates under the classes of section 1 with a locus without an owner counted as a further defect class, as ruled 2026-11-21 (00b98bcef).",
       "reason": "",
       "when": "2026-11-22T20:34:02.398100+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "8e101d1f-e306-47cb-a56a-48cba5e5c742",
+      "commit": "00b98bcef15a1bc0a87659d2deae6b279e2b4fcc",
+      "commit_basis": "edit",
+      "note": "Section 4 now states its USD 40 ceiling inside the USD 400 repair total the lead set on 2026-11-19; section 2's USD 300 is the landed section's history (00b98bcef).",
+      "reason": "",
+      "when": "2026-11-22T20:34:51.542070+00:00"
     },
     "reasoning-1": {
       "action": "acted",
