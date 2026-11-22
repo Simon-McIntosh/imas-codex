@@ -89,7 +89,30 @@
   "plan_slug": "iter-plant-signal-ontology",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "s1 restates the field-code gap: the table exists and is stored privately; s2 now settles whether it becomes a graph class and how the private configuration entries retire",
+      "reason": "",
+      "when": "2026-11-22T21:00:59.680834+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s1 restates the field-code gap: the table exists and is stored privately; s2 now settles whether it becomes a graph class and how the private configuration entries retire",
+      "reason": "",
+      "when": "2026-11-22T21:00:59.680834+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-plant-signal-ontology/r-20261122T202504338686-plan-review-of-iter-plant-signal-ontology.json",
   "review_run_id": "r-20261122T202504338686-plan-review-of-iter-plant-signal-ontology",
   "reviewed_blob_sha": "61c79d135645cc6c5021e4645364974853b24089",
   "rubric": "design",
