@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T20:16:40.680Z",
+  "dispatched_at": "2026-11-22T19:45:27Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-audited-group-release/r-20261122T194438009168-plan-review-of-sn-audited-group-release/plan.html:21",
+      "id": "wiring-1",
+      "reason": "with the edge missing the router may start s4 as soon as s7 and s9 land, and a third of its repairs then have neither a writable proposal nor a listed reason, so the section cannot reach its bar.",
+      "text": "s4 declares only sn-case-file-generation#s7 and #s9, but its recorded blocker tally for the first group names 33 members blocked on grammar gaps that the plan's own record resolves through the grammar proposal (sn-case-file-generation#s5, whose text opens \"Equilibrium's repair met 33 grammar gaps\"), the same recorded order of work places that section before this one, and s4's only escape for a member without a proposal is \"no proposal can be made from the source text\", which a grammar gap is not",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-audited-group-release/r-20261122T194438009168-plan-review-of-sn-audited-group-release/plan.html:42",
+      "id": "done_when-1",
+      "reason": "a node obeying the done-when records verdicts under seven classes, so the post-repair rate and therefore the cut omit a class the lead has ruled must count.",
+      "text": "the first and second adjudications are bound to \"the classes of \u00a71\", whose committed fixed list (docs/evidence/fragments/sn-audited.../blind-audit.py DEFECT_CLASSES and equilibrium-adjudication.json class_list) holds seven classes with no locus-without-an-owner class, while the recorded ruling on this section says the blind re-adjudication before the cut \"counts a locus without an owner as a defect class\"",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-audited-group-release/r-20261122T194438009168-plan-review-of-sn-audited-group-release/plan.html:42",
+      "id": "reasoning-1",
+      "reason": "the rate after repair is what the \u00a73 bar reads, so it mixes two instruction sets over the same group and can refuse a cut the current rule would allow (or the reverse) for up to 52 members.",
+      "text": "the group's rate after repair takes \"the first reading of each member that did not [change]\", but the lead ruled that verdicts resting only on a name omitting a qualifier (52 of the equilibrium members) were judged under the identity rule's predecessor and \"are re-read before they are acted on\", so an unchanged member judged defective only on that class keeps a verdict the section's own ruling retires, while an identical changed name is read under the new rule",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-audited-group-release/r-20261122T194438009168-plan-review-of-sn-audited-group-release/plan.html:34",
+      "id": "done_when-2",
+      "reason": "the plan states two totals for one ceiling, so a node enforcing \"the spend ceiling\" in s4's report-not-cut branch and the release-notes figure has no single value to report against.",
+      "text": "\u00a72 fixes the total repair ceiling at \"raised from USD 250 to USD 300\" with \u00a74's USD 40 \"inside it\", while the ruling recorded on \u00a74 (plan.html:70, 2026-11-19) raises \"the repair ceiling\" to USD 400 with spend standing at about USD 259, and sn-case-file-generation's record states the same USD 400",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "8c07c8165c68e16afc57c9dad08927d3088f2245",
+  "plan_fingerprint": "69a476eecceaa8f9de4d9561af8b5cdb746f297db0fb438fc5f8a09f3803e60f",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 54,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261122T194438009168-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "127453cdc427e0f5e0cd209384844c2c43ab2ef2",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a71, \u00a73 and \u00a77 resolve in the plan, the two declared cross-plan anchors (sn-case-file-generation#s7 and #s9) exist as sections in that plan, and the evidence fragment directory resolves.",
+    "done_when": "a finding \u2014 s4's adjudication is defined as \"under the classes of \u00a71\", whose fixed list has no locus-without-an-owner class although the section's own ruling requires one.",
+    "evidence_paths": "pass \u2014 every record s4 names is committed under docs/evidence/fragments/sn-audited-group-release/, which exists in the checkout; no session-scratch or node-local path is named.",
+    "naming": "pass \u2014 s4 introduces no plan labels, stage names or ticket numbers into code, files or symbols; its paths and quantities are mechanism-named.",
+    "reasoning": "a finding \u2014 the rate-after-repair composition keeps unchanged members' first readings, which the section's own ruling says must be re-read before they are acted on.",
+    "single_goal": "pass \u2014 s4 carries one deliverable, the first group brought to the bar and cut (or reported and not cut) on a recorded ruling.",
+    "wiring": "a finding \u2014 s4's declared dependencies omit the grammar release (sn-case-file-generation#s5) that 33 of the group's repairs are blocked on."
+  },
+  "section_digests": {
+    "_document": "96580dc671b5ee69e2cc041dbca93e9dcedec56c16f19c715ba2119d05dc09d4",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "3073ba4c58fc1374d8568d8e8798f5c1fac407860517b8ac0c4e0ca15a6a4a2b",
+    "s3": "a302e5d7f08618c4b0b55889eb4a8df491abf4aed370ac9e8014d8e48c4cd5a9",
+    "s4": "f854a31fe9bbe921fef6633018bac212c6c245329dd44e7a004f4966f60b7132",
+    "s5": "19c92fc230104ebb4640eb2b10fe6d0dfc22fa16be6c052663dff9958abeea5b",
+    "s6": "90a0463c758d22b32611805f931c843f2382e2bc89a2e1ef318231acd72f2fca",
+    "s7": "c00231603538a13a9d760a0a7f3e06c28b97eb1c5682e0dc7a2708499b5571a9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T20:16:48.144103+00:00",
+  "total": null
+}
