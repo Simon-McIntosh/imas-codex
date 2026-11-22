@@ -25,7 +25,30 @@
   "plan_slug": "sn-case-file-generation",
   "plan_version": 28,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "70108768465050ad085c176c8296b580a2c5b7c6",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 5 now samples about 200 names across the other groups through the detection passes of section 7, reporting only, in place of the deferred generation stage of section 4.",
+      "reason": "",
+      "when": "2026-11-22T14:28:33.610148+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "70108768465050ad085c176c8296b580a2c5b7c6",
+      "commit_basis": "edit",
+      "note": "Section 5 now samples about 200 names across the other groups through the detection passes of section 7, reporting only, in place of the deferred generation stage of section 4.",
+      "reason": "",
+      "when": "2026-11-22T14:28:33.610148+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-case-file-generation/r-20261122T140925064379-plan-review-of-sn-case-file-generation.json",
   "review_run_id": "r-20261122T140925064379-plan-review-of-sn-case-file-generation",
   "reviewed_blob_sha": "e4b4914da9a2ffce1417949b415df25ca21f2149",
   "rubric": "content",
