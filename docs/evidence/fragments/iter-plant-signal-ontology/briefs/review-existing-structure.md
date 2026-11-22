@@ -21,7 +21,22 @@ delivered. These instructions add the inputs, the reuse map and the rules.
   metadata), `iter_codex/remote/field_code_table.py`,
   `iter_codex/remote/signal_vocabulary.py`, `iter_codex/tools/plant_search.py`,
   the archive scanner `iter_codex/discovery/signals/scanners/codac_uda.py`.
-- Field-code meanings: `field_code_meanings` in the gitignored
+- Known owners the design review named, as a starting census of readers and
+  writers (extend it, do not trust it as complete): graph writers
+  `plant_context_graph.py`, `archive_grouping_graph.py`,
+  `group_enrichment.py`, `field_codes_graph.py`, `vocabulary_graph.py`;
+  the shared query filters in `iter_codex/graph/domain_queries.py` (the two
+  role axes are separate predicates there); the plant search tools in
+  `iter_codex/tools/plant_search.py`; the document pipeline
+  `iter_codex/discovery/documents/` (shared `Document`, `DocumentStatus` in
+  `iter_codex/schemas/common.yaml`); the document receipt
+  `DocumentReceipt` returned by `ICPDocuments.fetch` in
+  `iter_codex/discovery/icp/documents.py`, which already carries identity,
+  version, digest, size and sheets.
+- The field-code table: `iter_codex/discovery/signals/field_codes.py` and
+  `field_codes_graph.py` assemble it from graph sources in precedence;
+  `iter_codex/remote/field_code_table.py` stores it. The meanings are in
+  `field_code_meanings` in the gitignored
   `iter_codex/config/facilities/iter_private.yaml` (69 entries). Copy that file
   into your worktree from the main checkout if it is missing.
 - Documentation found so far, private:
