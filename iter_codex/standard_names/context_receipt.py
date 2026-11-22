@@ -49,7 +49,9 @@ STAGES: tuple[str, ...] = (
 #: Every channel a receipt can name. The last two are the parent's children
 #: channel and the producer channel, which states whether a producer exists at
 #: all so a name with no source is reported as such rather than as an empty
-#: source.
+#: source. ``coordinates`` is held here because the case file carries it and a
+#: future template may read it; no current stage template does, so it appears
+#: in no stage's expectations and the census reports that.
 CHANNELS: tuple[str, ...] = (
     "source_text",
     "enclosing_structure_text",
@@ -74,13 +76,11 @@ STAGE_CHANNELS: dict[str, tuple[str, ...]] = {
         "source_text",
         "enclosing_structure_text",
         "unit",
-        "coordinates",
     ),
     "name_composition": (
         "source_text",
         "enclosing_structure_text",
         "unit",
-        "coordinates",
         "family",
         "neighbours",
         "grammar",

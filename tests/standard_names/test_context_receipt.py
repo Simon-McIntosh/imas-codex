@@ -96,7 +96,9 @@ def test_an_absent_channel_absent_in_the_record_is_reported_not_ignored():
     assert "source_text" in receipt.missing
     assert "enclosing_structure_text" in receipt.missing
     assert "unit" in receipt.missing
-    assert "coordinates" in receipt.missing
+    assert "coordinates" not in receipt.missing
+    assert "coordinates" in cr.CHANNELS
+    assert all("coordinates" not in expected for expected in cr.STAGE_CHANNELS.values())
 
 
 def test_a_stage_rendering_never_reaches_a_model():
