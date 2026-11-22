@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import pytest
 
+from iter_codex.discovery.signals.field_codes import FieldCodeEntry, FieldCodeTable
 from iter_codex.discovery.signals.vocabulary import (
     SignalSources,
     VocabularyRules,
@@ -27,8 +28,17 @@ ROW = "Signal purpose: Absolute Pressure at the cold box outlet"
 ROW_MEASURED = "Signal purpose: Temperature of the shield support"
 
 
-def _assign(*signals: SignalSources, rules: VocabularyRules | None = None):
-    return {record["id"]: record for record in assign_vocabulary(list(signals), rules)}
+def _assign(
+    *signals: SignalSources,
+    rules: VocabularyRules | None = None,
+    pattern_roles: dict[str, str] | None = None,
+):
+    return {
+        record["id"]: record
+        for record in assign_vocabulary(
+            list(signals), rules, pattern_roles=pattern_roles
+        )
+    }
 
 
 def _rules(**overrides) -> VocabularyRules:
@@ -322,7 +332,103 @@ class TestRecordShape:
         assert assign_vocabulary(signals) == assign_vocabulary(signals)
 
 
-class TestAccessionToken:
+def _table(*entries) -> FieldCodeTable:
+    return FieldCodeTable(
+        entries=tuple(
+            FieldCodeEntry(
+                code=code,
+                component_kind=kind,
+                role=role,
+                meaning="an invented meaning",
+                source=source,
+                support=1,
+            )
+            for code, kind, role, source in entries
+        )
+    )
+
+
+class TestFieldCodeTableRoles:
+    """The table decides the role; the population consensus no longer does.
+
+    A code the table establishes gives its role to a signal of a named kind. A
+    code it does not establish gives none, however many signals share the code,
+    because the table is now the field-pattern source.
+    """
+
+    def test_a_table_entry_decides_the_role_and_is_credited_to_the_pattern(self):
+        record = _assign(
+            SignalSources("inv:t1", field_code="QX"),
+            pattern_roles={"inv:t1": "measurement"},
+        )["inv:t1"]
+        assert record["vocabulary_role"] == "measurement"
+        assert record["vocabulary_role_source"] == "field_pattern"
+
+    def test_a_code_the_table_does_not_establish_stays_undecided(self):
+        """Three signals share a role, but their bare sibling gets none from the code."""
+        signals = [
+            SignalSources("inv:bare", field_code="QQ"),
+            *[
+                SignalSources(
+                    f"inv:p{index}",
+                    field_code="QQ",
+                    controls_text="invented operating state",
+                )
+                for index in range(3)
+            ],
+        ]
+        consensus = _assign(*signals)
+        assert consensus["inv:bare"]["vocabulary_role"] == "state"
+        assert consensus["inv:bare"]["vocabulary_role_source"] == "field_pattern"
+        table_only = _assign(*signals, pattern_roles={})
+        assert table_only["inv:bare"]["vocabulary_role"] is None
+        assert table_only["inv:bare"]["vocabulary_role_state"] == "undecided"
+
+    def test_a_table_role_that_contradicts_the_signals_own_source_conflicts(self):
+        record = _assign(
+            SignalSources(
+                "inv:c1", field_code="QX", controls_text="invented fault alarm"
+            ),
+            pattern_roles={"inv:c1": "measurement"},
+        )["inv:c1"]
+        assert record["vocabulary_role_state"] == "conflict"
+        assert record["vocabulary_role"] is None
+
+    def test_quantity_and_unit_keep_their_population_consensus(self):
+        """The table states no quantity, so the pattern consensus still decides it."""
+        signals = [
+            SignalSources("inv:bare", field_code="QW"),
+            *[
+                SignalSources(
+                    f"inv:q{index}",
+                    field_code="QW",
+                    controls_text="invented water temperature",
+                )
+                for index in range(3)
+            ],
+        ]
+        record = _assign(*signals, pattern_roles={})["inv:bare"]
+        assert record["vocabulary_quantity"] == "temperature"
+        assert record["vocabulary_quantity_source"] == "field_pattern"
+        assert record["vocabulary_role_state"] == "undecided"
+
+    def test_kind_selection_gives_each_kind_its_own_role(self):
+        from iter_codex.discovery.signals.vocabulary_graph import table_roles
+
+        table = _table(
+            ("ZZ", "VC", "command", "signal_list_row"),
+            ("ZZ", "CU", "state", "controls_metadata"),
+        )
+        signals = [
+            {"id": "inv:k1", "field_code": "ZZ", "component_category": "VC"},
+            {"id": "inv:k2", "field_code": "ZZ", "component_category": "CU"},
+            {"id": "inv:k3", "field_code": "ZZ", "component_category": "MT"},
+        ]
+        assert table_roles(signals, table) == {
+            "inv:k1": "command",
+            "inv:k2": "state",
+        }
+
     def test_the_token_is_the_letters_before_the_number(self):
         assert device_token("inv:site:MT1100-TT-XI") == "MT"
         assert device_token("inv:site:MPT8101-PT-XI") == "MPT"

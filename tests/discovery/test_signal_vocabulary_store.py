@@ -257,3 +257,156 @@ def test_every_stored_key_is_a_declared_property():
 def test_an_archive_unit_of_whitespace_is_not_a_unit(bad):
     document = json.dumps({"full": [{"name": "Units", "value": bad}]})
     assert archive_unit(document) is None
+
+
+class TestCatalogueAssignment:
+    """Plant-wide assignment: the table's role and the pilot comparison."""
+
+    def test_the_table_decides_a_newly_decided_pilot_role(self):
+        from iter_codex.discovery.signals.field_codes import (
+            FieldCodeEntry,
+            FieldCodeTable,
+        )
+
+        table = FieldCodeTable(
+            entries=(
+                FieldCodeEntry(
+                    code="QX",
+                    component_kind=None,
+                    role="measurement",
+                    meaning="an invented reading",
+                    source="controls_metadata",
+                    support=1,
+                ),
+            )
+        )
+        signals = [_signal("inv:new", field_code="QX", plant_context_state="derived")]
+        result = assign_cohort(signals, [], table=table)
+        record = result["ledger"][0]
+        assert record["vocabulary_role"] == "measurement"
+        assert record["vocabulary_role_source"] == "field_pattern"
+
+    def test_a_pilot_value_the_table_leaves_open_is_reported_as_changed(self):
+        from iter_codex.discovery.signals.vocabulary_graph import pilot_comparison
+
+        before = [
+            _signal(
+                "inv:lost",
+                vocabulary_role="state",
+                vocabulary_role_source="field_pattern",
+                vocabulary_role_state="decided",
+            )
+        ]
+        ledger = assign_cohort([_signal("inv:lost")], [], table=_empty_table())[
+            "ledger"
+        ]
+        report = pilot_comparison(before, ledger)
+        assert report["role"]["changed"] == 1
+        assert report["role"]["changed_items"][0]["before"] == "state"
+        assert report["role"]["changed_items"][0]["after"] is None
+
+    def test_an_unchanged_pilot_value_is_counted_unchanged(self):
+        from iter_codex.discovery.signals.vocabulary_graph import pilot_comparison
+
+        before = [
+            _signal(
+                "inv:same",
+                vocabulary_quantity="pressure",
+                vocabulary_quantity_state="decided",
+            )
+        ]
+        ledger = assign_cohort(
+            [_signal("inv:same", description="invented pressure")],
+            [{"id": "inv:same", "description": "invented pressure"}],
+        )["ledger"]
+        report = pilot_comparison(before, ledger)
+        assert report["quantity"]["unchanged"] == 1
+        assert report["quantity"]["changed"] == 0
+
+    def test_a_hand_changed_pilot_value_is_caught_as_a_change(self):
+        """A stored value that contradicts its own source cannot pass as unchanged."""
+        from iter_codex.discovery.signals.vocabulary_graph import pilot_comparison
+
+        before = [
+            _signal(
+                "inv:contradicted",
+                field_code="QX",
+                description="invented reading of the flow",
+                vocabulary_role="alarm",
+                vocabulary_role_source="controls_metadata",
+                vocabulary_role_state="decided",
+            )
+        ]
+        ledger = assign_cohort(
+            [
+                _signal(
+                    "inv:contradicted",
+                    field_code="QX",
+                    description="invented reading of the flow",
+                )
+            ],
+            [{"id": "inv:contradicted", "description": "invented reading of the flow"}],
+            table=_empty_table(),
+        )["ledger"]
+        report = pilot_comparison(before, ledger)
+        assert report["role"]["changed"] == 1
+        assert report["role"]["changed_items"][0]["before"] == "alarm"
+        assert report["role"]["changed_items"][0]["after"] == "measurement"
+
+    def test_a_newly_decided_role_is_listed_with_its_source(self):
+        from iter_codex.discovery.signals.field_codes import (
+            FieldCodeEntry,
+            FieldCodeTable,
+        )
+        from iter_codex.discovery.signals.vocabulary_graph import newly_decided
+
+        table = FieldCodeTable(
+            entries=(
+                FieldCodeEntry(
+                    code="QX",
+                    component_kind="MF",
+                    role="setpoint",
+                    meaning="an invented threshold",
+                    source="signal_list_row",
+                    support=1,
+                ),
+            )
+        )
+        before = [_signal("inv:sp", field_code="QX", component_category="MF")]
+        ledger = assign_cohort(before, [], table=table)["ledger"]
+        items = newly_decided(before, ledger, "role")
+        assert [(item["id"], item["value"], item["source"]) for item in items] == [
+            ("inv:sp", "setpoint", "field_pattern")
+        ]
+
+
+def _empty_table():
+    from iter_codex.discovery.signals.field_codes import FieldCodeTable
+
+    return FieldCodeTable()
+
+
+class TestCatalogueSnapshot:
+    def test_a_snapshot_shorter_than_the_control_count_is_refused(self):
+        from iter_codex.discovery.signals.vocabulary_graph import snapshot_catalogue
+
+        class _ShortGraph:
+            def query(self, statement, **parameters):
+                if "count(s) AS total" in statement:
+                    return [{"total": 3, "coded": 3}]
+                if "LIMIT $limit" in statement:
+                    return [{"id": "inv:one", "field_code": "QX"}]
+                return []
+
+        with pytest.raises(RuntimeError, match="every catalogued signal"):
+            snapshot_catalogue(_ShortGraph(), "inv")
+
+    def test_an_empty_catalogue_is_refused(self):
+        from iter_codex.discovery.signals.vocabulary_graph import snapshot_catalogue
+
+        class _EmptyGraph:
+            def query(self, statement, **parameters):
+                return [{"total": 0, "coded": 0}]
+
+        with pytest.raises(RuntimeError, match="sees no signal"):
+            snapshot_catalogue(_EmptyGraph(), "inv")

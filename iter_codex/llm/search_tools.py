@@ -371,7 +371,9 @@ def _rank_signals(
     search still draws up to ``k`` signals.
     """
     vocabulary = {"quantity": quantity, "vocabulary_role": vocabulary_role}
-    vocabulary = {name: value for name, value in vocabulary.items() if value is not None}
+    vocabulary = {
+        name: value for name, value in vocabulary.items() if value is not None
+    }
     signal_ids, _ = _vector_search_signals(
         gc,
         embedding,
@@ -460,25 +462,29 @@ def _search_signals(
         "function": function,
         "component_category": component_category,
         "field": field,
+        "vocabulary_role": vocabulary_role,
     }
     if query is None or any(value is not None for value in plant_filters.values()):
         from iter_codex.tools.plant_search import list_plant_signals
 
         if query is not None:
             raise ValueError("omit query when listing by plant codes")
+        if vocabulary_role is not None and vocabulary_role not in VOCABULARY_ROLES:
+            return _VOCABULARY_ROLE_REFUSAL.format(value=vocabulary_role)
         if any(
             (
                 diagnostic,
                 physics_domain,
                 role,
                 quantity,
-                vocabulary_role,
                 check_status,
                 error_type,
                 include_check_details,
             )
         ):
-            raise ValueError("plant listings accept plant-code filters only")
+            raise ValueError(
+                "plant listings accept plant-code and vocabulary-role filters only"
+            )
         if gc is not None:
             return list_plant_signals(
                 gc, facility, **plant_filters, limit=k, offset=offset
@@ -954,9 +960,7 @@ def _text_search_signals(
     in either branch.
     """
     role_clause = "          AND s.signal_role = $role\n" if role is not None else ""
-    role_param: dict[str, str] = (
-        {"role": role} if role is not None else {}
-    )
+    role_param: dict[str, str] = {"role": role} if role is not None else {}
     if quantity is not None:
         role_clause += "          AND s.vocabulary_quantity = $quantity\n"
         role_param["quantity"] = quantity

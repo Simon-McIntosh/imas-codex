@@ -378,13 +378,22 @@ def _pattern_values(
 
 
 def assign_vocabulary(
-    signals: Sequence[SignalSources], rules: VocabularyRules | None = None
+    signals: Sequence[SignalSources],
+    rules: VocabularyRules | None = None,
+    pattern_roles: Mapping[str, str] | None = None,
 ) -> list[dict[str, Any]]:
     """Assign every signal's three axes; one outcome per axis and no inference.
 
     The returned record carries the stored member (None unless decided), the
     credited source (None unless decided), the outcome, and every candidate that
     was weighed, so a reader can check the precedence without re-running rules.
+
+    ``pattern_roles`` replaces the population's role consensus with a role the
+    field-code table establishes for the signal, keyed by signal identity. A
+    signal absent from the mapping gets no role from the field-pattern source,
+    so a code the table does not establish stays undecided however many signals
+    share it. The quantity and unit axes keep the population consensus, because
+    the table states a role and a meaning and no quantity or unit.
     """
     rules = rules or VocabularyRules()
     lookup = rules.unit_lookup()
@@ -394,6 +403,14 @@ def assign_vocabulary(
             raise ValueError(f"signal identity repeated: {signal.signal_id}")
         saw.add(signal.signal_id)
     patterns = _pattern_values(signals, rules, lookup)
+    if pattern_roles is not None:
+        for signal in signals:
+            slot = patterns.setdefault(signal.signal_id, {})
+            role = pattern_roles.get(signal.signal_id)
+            if role is None:
+                slot.pop("role", None)
+            else:
+                slot["role"] = role
     result = []
     for signal in signals:
         own = _own_candidates(signal, rules, lookup)
@@ -433,6 +450,11 @@ def summarise(records: Sequence[Mapping[str, Any]]) -> dict[str, dict[str, Any]]
         )
         if sum(states.values()) != len(records):
             raise AssertionError("an axis must have exactly one outcome per signal")
+        members = Counter(
+            record[f"vocabulary_{axis}"]
+            for record in records
+            if record[f"vocabulary_{axis}_state"] == "decided"
+        )
         summary[axis] = {
             "decided": states["decided"],
             "conflict": states["conflict"],
@@ -440,6 +462,7 @@ def summarise(records: Sequence[Mapping[str, Any]]) -> dict[str, dict[str, Any]]
             "decided_by_source": {
                 source: credited.get(source, 0) for source in SOURCE_ORDER
             },
+            "decided_members": dict(sorted(members.items())),
         }
     return summary
 

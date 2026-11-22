@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Roles decided across the plant from the field-code table</title>
+</head>
+<body>
+  <h2 id="plant-wide-roles-summary">Roles decided across the plant from the field-code table</h2>
+  <p id="plant-wide-roles-scope">The ITER catalogue holds 97,525 archive signals in the graph, 30,031 of them carrying a field code. The closed-vocabulary assignment that ran on the 1,766-signal pilot system now runs over all 97,525, with the field-code table as the field-pattern source for the role axis. Values are stored only where a source states them: a linked signal-list row, the controls metadata a signal carries, the unit the archive reports, or the table's entry for the signal's field code and component kind. Each axis carries one outcome per signal, and on every axis the decided, in-conflict and undecided counts sum to 97,525.</p>
+
+  <figure id="plant-wide-roles-figure">
+    <img src="/imas-codex/figures/iter-signal-context-and-enrichment/plant-wide-roles/decided-split.svg" alt="Left: signals decided on each axis, split by credited source, with the field-code table deciding most roles. Right: the number of signals decided as each role, with setpoint highlighted.">
+    <figcaption>Signals decided on each axis by credited source, and the role membership of the 1,732 signals whose role is decided. The field-code table decides 1,575 roles and the controls metadata 154.</figcaption>
+  </figure>
+
+  <h3 id="plant-wide-roles-split">Outcome by axis and credited source</h3>
+  <table id="plant-wide-roles-table">
+    <thead>
+      <tr><th>Axis</th><th>Decided</th><th>Signal-list row</th><th>Controls metadata</th><th>Archive unit</th><th>Field-code table</th><th>Conflict</th><th>Undecided</th><th>Sum</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Quantity</td><td>2,355</td><td>155</td><td>1,134</td><td>—</td><td>1,066</td><td>3</td><td>95,167</td><td>97,525</td></tr>
+      <tr><td>Unit</td><td>2,114</td><td>—</td><td>1,288</td><td>587</td><td>239</td><td>1</td><td>95,410</td><td>97,525</td></tr>
+      <tr><td>Role</td><td>1,732</td><td>3</td><td>154</td><td>—</td><td>1,575</td><td>0</td><td>95,793</td><td>97,525</td></tr>
+    </tbody>
+  </table>
+  <p id="plant-wide-roles-split-note">A dash marks a source the axis does not consult: the archive unit states the unit only, and a signal-list row states no unit because the source layout has no unit column. The field-code table is new as a role source in this section; before it, the role's field-pattern value came from the population's own consensus, which this run no longer uses. Quantity and unit keep their population consensus, so the quantity column credited to the field-code table is that consensus, not the table.</p>
+
+  <h3 id="plant-wide-roles-members">Signals decided as each role</h3>
+  <p id="plant-wide-roles-members-counts">Of the 1,732 signals whose role is decided, 1,436 are <code>measurement</code>, 101 <code>state</code>, 86 <code>command</code>, 63 <code>setpoint</code> and 46 <code>alarm</code>. The setpoint count is a property of the sources rather than a target: the table states a setpoint role for seven of the forty codes it examined, and those seven codes decide 56 signals; the controls metadata states a setpoint for 7 more.</p>
+
+  <h3 id="plant-wide-roles-pilot">The pilot system before and after</h3>
+  <table id="plant-wide-roles-pilot-table">
+    <thead>
+      <tr><th>Axis</th><th>Unchanged</th><th>Newly decided</th><th>Changed</th><th>Undecided before and after</th><th>Decided before</th><th>Decided after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Quantity</td><td>703</td><td>0</td><td>25</td><td>1,038</td><td>728</td><td>703</td></tr>
+      <tr><td>Role</td><td>198</td><td>542</td><td>4</td><td>1,022</td><td>202</td><td>740</td></tr>
+    </tbody>
+  </table>
+  <p id="plant-wide-roles-pilot-note">The pilot's decided quantities fall by 25 because the pilot's field-pattern values were drawn from a 1,766-signal population: over the whole catalogue the same field codes are not unanimous, so no pattern states a value and the quantity is undecided. The four changed roles are error-code channels whose field code the table does not establish, so the population consensus that once decided them no longer applies. None of the 25 earlier quantities and none of the four roles is stated by the signal's own source.</p>
+
+  <h3 id="plant-wide-roles-readings">The readings that could have failed</h3>
+  <ul id="plant-wide-roles-reading-list">
+    <li id="plant-wide-roles-reading-changed">Every one of the 29 pilot values this section changed was listed privately and read by hand against the signal's own sources: 29 verdicts, all right, 0 wrong. The file carries one written verdict and one reason per value, and the reasons name what the own source does and does not state.</li>
+    <li id="plant-wide-roles-reading-sample">The sample of newly-decided roles was drawn before the storing run and written to a private file whose digest is <code>b9619b6e2cf91aa44aef87ad92a33fe5ad8f0b80f98ecbc3c26f33cb30590997</code>. It holds ten signals credited to the controls metadata and ten credited to the field-code table, which is every source that credits a newly-decided role: no signal-list row credits one. The storing run recomputed the sample and its digest is unchanged. Twenty signals were read by hand, one verdict and reason each: 20 right, 0 wrong, against the allowance of two wrong.</li>
+    <li id="plant-wide-roles-reading-refusal">The reading is not a script. A file with one identical reason for every item, an empty reason, an omitted item or a verdict outside the three admitted values is refused. Six tests cover it, five of them refusals; the same file reloaded from JSON is still refused.</li>
+  </ul>
+
+  <h3 id="plant-wide-roles-checks">Checks that could have failed</h3>
+  <ul id="plant-wide-roles-check-list">
+    <li id="plant-wide-roles-check-write">The write stored 96,348 signals in 482 batches; a read-back compared 6,201 assigned values with the assignment and found 0 mismatched. A second assignment read the catalogue again, reassigned it and reported 0 changed signals.</li>
+    <li id="plant-wide-roles-check-units">The 2,114 decided units were compared with 3,157 source spellings through the shared unit authority: 0 disagreements, so two spellings of one unit (KA against kA) agree. A unit written two ways does not become a conflict.</li>
+    <li id="plant-wide-roles-check-search">The catalogue holds a setpoint: 56 signals in one plant system and one in another. A server search for the setpoint role on the system holding 56 returned 56, every item carrying the role, and a search on a system that holds none returned 0 with an empty page.</li>
+    <li id="plant-wide-roles-check-graph">The graph-marked statements pass: 14 tests, including the catalogue read and its control query, the table-driven write, a code without a table entry storing no role, a repeated assignment changing nothing, the role filter and its MCP route.</li>
+    <li id="plant-wide-roles-check-mutation">Removing the table as the role source and falling back to the population consensus fails two tests that pass at the unmutated head, and the failing ids are recorded in the negative-control log.</li>
+    <li id="plant-wide-roles-check-controls">The declared negative controls hold: a signal whose code has no table entry and no other source stays undecided (a unit test and the 226 catalogue codes with no entry); a pilot value contradicting its own source is reported as changed (a unit test drives a hand-changed value through the comparison); and a scripted reading file is refused.</li>
+    <li id="plant-wide-roles-check-scan">The changed and added tracked files were searched for real signal identities and for the archive's accession prefixes: no signal name, accessor, or document identity appears. The private receipts and both readings files live outside the repository.</li>
+  </ul>
+
+  <h3 id="plant-wide-roles-undecided">What stays undecided</h3>
+  <p id="plant-wide-roles-undecided-note">95,793 roles and 95,167 quantities have no source that states them. The controls feed describes many channels only as an analogue input or a signal value, the signal list has one row per component, and the table establishes an entry for 33 of the catalogue's 259 field codes. The rule fills none of that gap with a default: a code the table does not establish and no other source states leaves the role undecided, which is what the negative control requires.</p>
+</body>
+</html>

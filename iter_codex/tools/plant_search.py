@@ -14,6 +14,8 @@ _DESCRIPTION_CHARS = 2048
 _SIGNAL_FIELDS = """s { .id, .name, .accessor, .unit, .control_path,
     .component_category, .component_sequence, .field_code, .field_discriminator,
     .name_parse_outcome, .candidate_plant_component,
+    .vocabulary_quantity, .vocabulary_quantity_state,
+    .vocabulary_role, .vocabulary_role_state,
     description: substring(s.description, 0, $description_chars),
     description_truncated: coalesce(size(s.description), 0) > $description_chars }"""
 
@@ -110,6 +112,7 @@ def list_plant_signals(
     function: str | None = None,
     component_category: str | None = None,
     field: str | None = None,
+    vocabulary_role: str | None = None,
     limit: int = 20,
     offset: int = 0,
 ) -> str:
@@ -117,7 +120,9 @@ def list_plant_signals(
 
     A plant system is a control-path prefix with a hyphen boundary. A function
     is an exact FunctionID (the complete control path). Category and field are
-    exact parsed codes. All supplied filters are combined with AND.
+    exact parsed codes. ``vocabulary_role`` keeps only signals the assignment
+    decided as that role, so a role listing never returns another role. All
+    supplied filters are combined with AND.
     """
     _pagination(limit, offset)
     facility = _text(facility, "facility")
@@ -131,9 +136,12 @@ def list_plant_signals(
         }.items()
         if value is not None
     }
+    if vocabulary_role is not None:
+        filters["vocabulary_role"] = _text(vocabulary_role, "vocabulary_role").lower()
     if not filters:
         raise ValueError(
-            "a plant_system, function, component_category or field filter is required"
+            "a plant_system, function, component_category, field or "
+            "vocabulary_role filter is required"
         )
     predicates = ["s.control_path IS NOT NULL"]
     if "plant_system" in filters:
@@ -144,6 +152,7 @@ def list_plant_signals(
         ("function", "control_path"),
         ("component_category", "component_category"),
         ("field", "field_code"),
+        ("vocabulary_role", "vocabulary_role"),
     ):
         if name in filters:
             predicates.append(f"s.{prop} = ${name}")
