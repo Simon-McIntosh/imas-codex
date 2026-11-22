@@ -136,6 +136,16 @@
       "note": "s2's done-when now requires naming the one class that holds documents, catalogued or fetched, and what happens to the other document owner, so the graph keeps one document form",
       "reason": "",
       "when": "2026-11-22T21:01:11.748348+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-2",
+      "note": "s2's done-when now requires a census of every reader and writer of each class it changes; the brief lists the known owners and graph writers",
+      "reason": "",
+      "when": "2026-11-22T21:01:14.437839+00:00"
     }
   ],
   "responses": {
@@ -147,6 +157,15 @@
       "note": "s2's done-when now requires naming the one class that holds documents, catalogued or fetched, and what happens to the other document owner, so the graph keeps one document form",
       "reason": "",
       "when": "2026-11-22T21:01:11.748348+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s2's done-when now requires a census of every reader and writer of each class it changes; the brief lists the known owners and graph writers",
+      "reason": "",
+      "when": "2026-11-22T21:01:14.437839+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
