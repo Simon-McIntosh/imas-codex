@@ -33,7 +33,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 86,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1ca2e22ca0710f095db82aa736a036cee0fe0838",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The rationale now cites the measured role split recorded by the sibling-relation run (alarm 42, command 80, measurement 3, state 77, setpoint 0 of 202) and says the sibling descriptions were seen to be identical in the pilot's landed sample rather than measured across all siblings.",
+      "reason": "",
+      "when": "2026-11-22T14:15:53.325116+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1ca2e22ca0710f095db82aa736a036cee0fe0838",
+      "commit_basis": "edit",
+      "note": "The rationale now cites the measured role split recorded by the sibling-relation run (alarm 42, command 80, measurement 3, state 77, setpoint 0 of 202) and says the sibling descriptions were seen to be identical in the pilot's landed sample rather than measured across all siblings.",
+      "reason": "",
+      "when": "2026-11-22T14:15:53.325116+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261121T201358210735-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261121T201358210735-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "f37fb00e8f1b0bcc6eebf3a57a7aeb2801d46a2e",
   "rubric": "content",
