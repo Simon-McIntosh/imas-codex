@@ -1,0 +1,1171 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "cbfa37b006bc0611d7160e7c07e7d975fbf2869f",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51/brief.md",
+    "sha256": "4faa34835015151b20133e931c4c045d1e005f4cddda5fdb21f66357b3f643c6"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 4044867,
+      "input_tokens_cumulative": 4044867,
+      "output_tokens": 24645,
+      "output_tokens_cumulative": 24645,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-22T18:48:40.933Z",
+  "completed_at_source": "terminal_event",
+  "dispatch_width": "section",
+  "dispatched_at": "2026-11-22T18:38:00Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "",
+    "reason": "brief-names-no-plan",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-22T23:37:38.112293+00:00",
+    "horizon_seconds": 18000,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-22T18:37:38Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 5,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 7,
+    "mean_context": 145000,
+    "observed_at": "2026-11-22T18:37:33Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 5,
+      "aggregate_tokens_per_second": 405.89,
+      "detail": "",
+      "mean_tokens_per_second": 61.498,
+      "observed_at": "2026-11-22T18:37:33Z",
+      "runs": 6.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-22T18:48:40.933Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51/manifest.md",
+  "member": "disposable-r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51/brief.md",
+    "brief_sha256": "4faa34835015151b20133e931c4c045d1e005f4cddda5fdb21f66357b3f643c6",
+    "capability": null,
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff"
+    },
+    "done_when": "the review for r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones covering only the commits it gained since it was reviewed: docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html",
+    "id": "review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-22T18:37:38Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 5,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 7,
+      "mean_context": 145000,
+      "observed_at": "2026-11-22T18:37:33Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 5,
+        "aggregate_tokens_per_second": 405.89,
+        "detail": "",
+        "mean_tokens_per_second": 61.498,
+        "observed_at": "2026-11-22T18:37:33Z",
+        "runs": 6.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51/manifest.md",
+    "mcp_set": "",
+    "negative_control": "",
+    "node_body": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51/node.json",
+    "over_fence_note": "",
+    "over_fence_reason": "",
+    "peer_scopes": {},
+    "plan": "",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "review",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "5h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones/review-records/r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones/review-records/r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones.at-1bdae75a8b5196bac2b5640a50d2ecddcbec612c.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2201453.0,
+  "outcome": "review scored 109, 2 finding(s)",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-22T18:37:44.416801+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 2385.571606,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 196.174,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.6895436457671609,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 4.348385711145833,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-fable-5-1",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.021437500520748293,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T03:00:00.387588+00:00",
+        "stale": true,
+        "suits": "The most capable and most expensive Claude model, about two and a half times Opus's token price. Reserve it for the very hardest nodes.",
+        "utilisation_pct": 64.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 2385.571606,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 196.174,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.6895436457671609,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 4.348385711145833,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.021437500520748293,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T03:00:00.387588+00:00",
+        "stale": true,
+        "suits": "The lane's fastest and cheapest model, about a twentieth of Sonnet's token price. Suits light, well-defined work.",
+        "utilisation_pct": 64.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 2385.571606,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 196.174,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.6895436457671609,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 4.348385711145833,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.021437500520748293,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T03:00:00.387588+00:00",
+        "stale": true,
+        "suits": "A strong general model for deep or open-ended work, about twice Sonnet's token price.",
+        "utilisation_pct": 64.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 2385.571606,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 196.174,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.6895436457671609,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 4.348385711145833,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.021437500520748293,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T03:00:00.387588+00:00",
+        "stale": true,
+        "suits": "The lane default, an everyday coding model at about half of Opus's token price. Suits guided implementation and full reviews.",
+        "utilisation_pct": 64.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 6,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 250,
+          "passed": 16,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": 17
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 402049.862145,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": null,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 0.9313462583194073,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 0.08526779924768518,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 1.0,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-22T20:41:07+00:00",
+        "stale": true,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 92.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 402049.862145,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": null,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 0.9313462583194073,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 0.08526779924768518,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 5,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 1.0,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-22T20:41:07+00:00",
+        "stale": true,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 92.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 402049.862145,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": null,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 0.9313462583194073,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 0.08526779924768518,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6.1-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 4,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 1.0,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-22T20:41:07+00:00",
+        "stale": true,
+        "suits": "The lane default, the current-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 92.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "in-harness-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "omp-local",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 6,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "omp",
+        "local": false,
+        "model": "local/deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 190,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "local-backend: local work is offered through clive"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": 17
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 222.451,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"review\",\"spec_level\":\"exact\",\"capability\":null,\"goal\":\"attach an independent review to run r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones covering only the commits it gained since it was reviewed: docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html\",\"done_when\":\"the review for r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones, and never in the worktree; the turn ends once that record is stored and the manifest reads complete\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":50392,\"estimated_hours\":null,\"estimated_hours_source\":null,\"attempts\":0,\"write_path_count\":2,\"negative_control_declared\":false,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null,\"lift_preference\":null},\"orchestrator_comment\":\"\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":6880.75,\"expected_wait_profile_age_s\":25599.220112,\"running\":6,\"waiting\":0,\"queue_position\":1,\"headroom\":6,\"worker_slots\":19,\"tokens_per_second\":62.144,\"read_at\":\"2026-11-22T18:38:20.048775+00:00\"}}",
+    "rendered_token_estimate": 407,
+    "stage_ms": {
+      "budget-snapshot": 891.572,
+      "context-estimate": 14.717,
+      "records": 1459.275,
+      "verdict-inputs": 1128.307
+    },
+    "template_digest": "5ea6c8844f959f84293c0d2c90c1db0de4375d09e641cca7be7c360603b00202",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_link": null,
+  "promoted_by": "review-self",
+  "promoted_revision": "cbfa37b006bc0611d7160e7c07e7d975fbf2869f",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/_trash/r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51-20261122T184856411467Z"
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+    "reviewed_base_sha": "c92bd864287e44ccc3f34bc520b6372e42a65f3e",
+    "reviewed_head_sha": "1bdae75a8b5196bac2b5640a50d2ecddcbec612c",
+    "scores": {
+      "durability": 14,
+      "evidence": 15,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 109
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+  "session_harness": "claude",
+  "session_id": "b15e0a0c-4484-4124-ad5a-ca733f80e330",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 4044867,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 619.548,
+    "generated_tokens": 24645,
+    "generation_seconds": 602.316,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 52.9,
+    "machine_seconds": 17.232,
+    "peak_input_tokens": 121702,
+    "tokens_per_second": 40.92,
+    "wall_tokens_per_second": 39.78
+  },
+  "time_budget": "5h",
+  "tool_steps": 49.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 18000,
+        "classification": "blocked",
+        "commits_beyond_base": 2,
+        "delivery": {},
+        "detail": "committed path outside declared scope: iter_codex/llm/search_tools.py",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 2075,
+        "ended_during_launch": false,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-22T16:42:56Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-22T16:08:23Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261122T144352526858-plant-wide-roles",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 16909,
+          "worker_pid": 2081533
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "committed path outside declared scope: iter_codex/llm/search_tools.py",
+          "lifting_condition": null,
+          "next_action": "inspect the worktree at /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/plant-wide-roles before promoting run r-20261122T144352526858-plant-wide-roles",
+          "promotion_recorded": false,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-22T16:42:56Z",
+        "lane_event": null,
+        "launch_error": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 6888,
+        "log_fresh": false,
+        "manifest_commits": [
+          "dfb280edb70cdeae1bc4d5cc78a569de7cbc1e02",
+          "d5312cef8e70fcebcdefa31c64c3998f801fceac"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "06b821ec0cfc434e93c6059ed34c70ac27803069c88cada53f7fe1ec91669433",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T144352526858-plant-wide-roles/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "inspect the worktree at /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/plant-wide-roles before promoting run r-20261122T144352526858-plant-wide-roles",
+        "node": "plant-wide-roles",
+        "orientation_check": {
+          "checked_at": "2026-11-22T16:42:54Z",
+          "detail": "committed path outside declared scope: iter_codex/llm/search_tools.py",
+          "expected": {
+            "base_sha": "e2482c5034ad977f7fa257af78782a6b22e7ac95",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/plant-wide-roles",
+            "write_paths": [
+              "docs/evidence/fragments/iter-signal-context-and-enrichment/plant-wide-roles.html",
+              "docs/figures/iter-signal-context-and-enrichment/plant-wide-roles",
+              "iter_codex/discovery/signals",
+              "iter_codex/remote/signal_vocabulary.py",
+              "iter_codex/tools/plant_search.py",
+              "tests/discovery",
+              "tests/graph"
+            ]
+          },
+          "inputs": {
+            "commits": [
+              "dfb280edb70cdeae1bc4d5cc78a569de7cbc1e02",
+              "d5312cef8e70fcebcdefa31c64c3998f801fceac"
+            ],
+            "expected": {
+              "base_sha": "e2482c5034ad977f7fa257af78782a6b22e7ac95",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/plant-wide-roles",
+              "write_paths": [
+                "docs/evidence/fragments/iter-signal-context-and-enrichment/plant-wide-roles.html",
+                "docs/figures/iter-signal-context-and-enrichment/plant-wide-roles",
+                "iter_codex/discovery/signals",
+                "iter_codex/remote/signal_vocabulary.py",
+                "iter_codex/tools/plant_search.py",
+                "tests/discovery",
+                "tests/graph"
+              ]
+            },
+            "head": "d5312cef8e70fcebcdefa31c64c3998f801fceac",
+            "reported": {
+              "base_sha": "e2482c5034ad977f7fa257af78782a6b22e7ac95",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/plant-wide-roles",
+              "write_paths": [
+                "docs/evidence/fragments/iter-signal-context-and-enrichment/plant-wide-roles.html",
+                "docs/figures/iter-signal-context-and-enrichment/plant-wide-roles",
+                "iter_codex/discovery/signals",
+                "iter_codex/remote/signal_vocabulary.py",
+                "iter_codex/tools/plant_search.py",
+                "tests/discovery",
+                "tests/graph"
+              ]
+            },
+            "status": "complete"
+          },
+          "matched": false,
+          "mismatches": [],
+          "reported": {
+            "base_sha": "e2482c5034ad977f7fa257af78782a6b22e7ac95",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/plant-wide-roles",
+            "write_paths": [
+              "docs/evidence/fragments/iter-signal-context-and-enrichment/plant-wide-roles.html",
+              "docs/figures/iter-signal-context-and-enrichment/plant-wide-roles",
+              "iter_codex/discovery/signals",
+              "iter_codex/remote/signal_vocabulary.py",
+              "iter_codex/tools/plant_search.py",
+              "tests/discovery",
+              "tests/graph"
+            ]
+          }
+        },
+        "phase": "blocked",
+        "plan": "iter-signal-context-and-enrichment",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261122T144352526858-plant-wide-roles",
+        "session": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261122T144352526858-plant-wide-roles",
+          "session_id": "528437c4-7d32-42c9-96d4-9ae512b25854",
+          "source": "pointer"
+        },
+        "settled": null,
+        "stored_phase": "blocked",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 6906,
+        "terminal_at": "2026-11-22T16:42:37Z",
+        "wait_age_seconds": null,
+        "wait_class": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/plant-wide-roles"
+      }
+    ]
+  },
+  "wall_seconds": 640,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-22T18:48:41Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-22T18:38:16Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 4474,
+    "worker_pid": 3214200
+  },
+  "worker_seconds": 612,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

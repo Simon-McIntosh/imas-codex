@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-22T21:49:19.637Z",
+  "dispatched_at": "2026-11-22T21:23:31Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-22T21:52:42.432727+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-22T21:52:42.432727+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-22T21:52:42.432727+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones"
+    }
+  },
+  "findings": [
+    {
+      "file": "iter_codex/discovery/signals/controls_metadata.py",
+      "line": 291,
+      "severity": "non-blocking",
+      "text": "a source update that empties a signal's feed description reaches the writer with embed_text '' while the signal carries a generated description, so the empty_text arm writes the empty text's hash and sets embedding and embedded_at to null, destroying the vector for a text that is now the indexed generated description; the lambda at line 291 returns item['description'] for a generated row, which is empty in exactly this case, and the vector should be left alone as it is when the description is non-empty."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html",
+      "line": 63,
+      "severity": "non-blocking",
+      "text": "the suite bullet states the changed tree fails one prompt-schema walk and the base tree's only other failure is a 30-second timeout, which describes the earlier default-tier arms; the arms recorded in the manifest's baseline_suite and after_suite at 0aa4b347 and 3e290e15 report 34 and 31 failures over -m 'not slow' with the failing ids being live-graph data and standard-name state on both sides, so the evidence narrative does not reconcile with the logs it points a reader to even though the measured conclusion (no added failure) holds."
+    },
+    {
+      "file": "manifests/manifest.md",
+      "line": 8,
+      "severity": "non-blocking",
+      "text": "the record's commits list names three shas and omits 3e290e15, the commit the after_suite arm actually ran at, and changed_paths omits tests/discovery/test_signal_glossary.py and tests/discovery/test_signals_pipeline.py, both carried by that commit; failure_attribution at line 20 likewise describes the earlier arms at base and c92bd864 (28 failures, one head-only catalogue-text test that now passes), so three manifest fields disagree with the arms they cite."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the run's goal is to hold a signal's source description apart from a generated one and restore the 190 overwritten feed labels; iter_codex/schemas/facility.yaml:3335 declares generated_description with its mechanism and timestamp beside description, and iter_codex/discovery/signals/parallel.py:1706 routes every generated write by the signal's own description_source marker.\nVERDICT done_when: the done_when asks for a separation test that fails without the separation, graph-marked statements on rigel, and default-tier arms adding no failure; test-logs/negative-control.log shows the mutated writer reddening the separation test, test-logs/graph-arm.log ends 16 passed with EXIT=0, and the recorded arms 0aa4b347 and 3e290e15 leave an empty head-only set.\nVERDICT write_paths: all 16 paths in 0aa4b347..3e290e15 fall inside the declared write paths (schema, discovery/signals, tools/plant_search.py, llm, tests/discovery, tests/graph, and the evidence fragment); nothing outside them was touched.\nVERDICT manifest: read; status complete, private receipt at ~/.cache/imas-codex-codac-uda/keep-feed-descriptions/repair-receipt.json records restored_pairs 190 with empty bad_source and bad_generated, but its commits, changed_paths and failure_attribution fields are stale against the final arms.\nVERDICT diff: read the four commits c92bd864, 1bdae75a, 3bd839c9 and 3e290e15 against 0aa4b347: the schema slots, the two-route writer, the controls-import hash and vector handling, the snapshot comparator, the labelled search readers, the plant-search field, the evidence fragment, and the tests that follow the narrowing.\nCALL_SITES: iter_codex/discovery/signals/group_enrichment.py:777, iter_codex/discovery/signals/parallel.py:2140, iter_codex/discovery/signals/parallel.py:2228, iter_codex/discovery/signals/parallel.py:2699, iter_codex/discovery/signals/parallel.py:5497, iter_codex/discovery/signals/controls_metadata.py:263, iter_codex/llm/search_tools.py:1110, iter_codex/tools/plant_search.py:20\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: iter_codex/discovery/signals/parallel.py:1706 sends a source-marked signal's composed text to generated_description and an unmarked signal's to description, so the separation the goal asks for holds at the one writer while the unmarked enrichment slot keeps working.\nSCORE evidence: 18\nJUSTIFICATION evidence: test-logs/baseline-suite.log and test-logs/after-suite.log each carry the revision as a header line and a bare EXIT=1 tail, and their failure sets differ by zero head-only ids, though the evidence fragment at line 63 and the manifest's failure_attribution still narrate the earlier arms.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every changed path in 0aa4b347..3e290e15 is inside the declared set, with the only incidental edits being ruff line-rewraps of pre-existing lines at iter_codex/llm/search_tools.py:373.\nSCORE durability: 18\nJUSTIFICATION durability: I re-applied the old-path mutation to iter_codex/discovery/signals/parallel.py:1707 in a scratch extraction of 3e290e15 and tests/discovery/test_generated_description_beside_source.py::test_generated_description_leaves_the_feed_description_alone failed while the other four passed, so the assertion reddens on exactly the regression it names.\nSCORE fit: 18\nJUSTIFICATION fit: the new module iter_codex/discovery/signals/description_snapshot.py:12 follows the package's pure-helper idiom and the schema docs at iter_codex/schemas/facility.yaml:3323 state the rule on each slot, though a few docstring phrases read relative to the superseded contract.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends the existing single writer at iter_codex/discovery/signals/parallel.py:1538 rather than adding a second one, and a capability search over iter_codex for a stored-description drift comparator found no owner, so description_snapshot.py is the first.\nFINDING iter_codex/discovery/signals/controls_metadata.py:291 non-blocking: a source update that empties a signal's feed description reaches the writer with embed_text '' while the signal carries a generated description, so the empty_text arm writes the empty text's hash and sets embedding and embedded_at to null, destroying the vector for a text that is now the indexed generated description; the lambda at line 291 returns item['description'] for a generated row, which is empty in exactly this case, and the vector should be left alone as it is when the description is non-empty.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html:63 non-blocking: the suite bullet states the changed tree fails one prompt-schema walk and the base tree's only other failure is a 30-second timeout, which describes the earlier default-tier arms; the arms recorded in the manifest's baseline_suite and after_suite at 0aa4b347 and 3e290e15 report 34 and 31 failures over -m 'not slow' with the failing ids being live-graph data and standard-name state on both sides, so the evidence narrative does not reconcile with the logs it points a reader to even though the measured conclusion (no added failure) holds.\nFINDING manifests/manifest.md:8 non-blocking: the record's commits list names three shas and omits 3e290e15, the commit the after_suite arm actually ran at, and changed_paths omits tests/discovery/test_signal_glossary.py and tests/discovery/test_signals_pipeline.py, both carried by that commit; failure_attribution at line 20 likewise describes the earlier arms at base and c92bd864 (28 failures, one head-only catalogue-text test that now passes), so three manifest fields disagree with the arms they cite.",
+  "review_run_id": "r-20261122T212235801589-review-of-keep-feed-descriptions-beside-generated-ones-3e290e15f897",
+  "reviewed_base_sha": "0aa4b34774d7a767bd6af5cb03403419c1a2248c",
+  "reviewed_head_sha": "3e290e15f8973eea2459040dd9320b4bf0dab86b",
+  "reviewed_run_id": "r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T21:51:59.071162+00:00",
+  "total": 111,
+  "verdicts": {
+    "call_sites": "iter_codex/discovery/signals/group_enrichment.py:777, iter_codex/discovery/signals/parallel.py:2140, iter_codex/discovery/signals/parallel.py:2228, iter_codex/discovery/signals/parallel.py:2699, iter_codex/discovery/signals/parallel.py:5497, iter_codex/discovery/signals/controls_metadata.py:263, iter_codex/llm/search_tools.py:1110, iter_codex/tools/plant_search.py:20",
+    "diff": "read the four commits c92bd864, 1bdae75a, 3bd839c9 and 3e290e15 against 0aa4b347: the schema slots, the two-route writer, the controls-import hash and vector handling, the snapshot comparator, the labelled search readers, the plant-search field, the evidence fragment, and the tests that follow the narrowing.",
+    "done_when": "the done_when asks for a separation test that fails without the separation, graph-marked statements on rigel, and default-tier arms adding no failure; test-logs/negative-control.log shows the mutated writer reddening the separation test, test-logs/graph-arm.log ends 16 passed with EXIT=0, and the recorded arms 0aa4b347 and 3e290e15 leave an empty head-only set.",
+    "goal": "the run's goal is to hold a signal's source description apart from a generated one and restore the 190 overwritten feed labels; iter_codex/schemas/facility.yaml:3335 declares generated_description with its mechanism and timestamp beside description, and iter_codex/discovery/signals/parallel.py:1706 routes every generated write by the signal's own description_source marker.",
+    "manifest": "read; status complete, private receipt at ~/.cache/imas-codex-codac-uda/keep-feed-descriptions/repair-receipt.json records restored_pairs 190 with empty bad_source and bad_generated, but its commits, changed_paths and failure_attribution fields are stale against the final arms.",
+    "write_paths": "all 16 paths in 0aa4b347..3e290e15 fall inside the declared write paths (schema, discovery/signals, tools/plant_search.py, llm, tests/discovery, tests/graph, and the evidence fragment); nothing outside them was touched."
+  }
+}

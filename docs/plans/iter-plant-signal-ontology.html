@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="iter-plant-signal-ontology">
+  <meta name="plan-title" content="ITER plant signals have one consistent place in the shared ontology">
+  <meta name="plan-summary" content="The schema for archive signals, plant structure and documents is made consistent with the shared classes, and the ITER archive graph is migrated">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="12.25">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="signals,discovery">
+  <meta name="plan-blocks" content="iter-signal-context-and-enrichment">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[&quot;iter-plant-signal-ontology#s2&quot;],&quot;s4&quot;:[&quot;iter-plant-signal-ontology#s3&quot;]}">
+  <title>ITER plant signals have one consistent place in the shared ontology | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; ITER plant data</p>
+      <h1>ITER plant signals have one consistent place in the shared ontology</h1>
+      <p class="lead">Descriptions and graph links are to be built for every plant system the archive covers. Before a pipeline does that system by system, the classes and relationships those systems will be written into are reviewed, made consistent with the rest of the shared schema, and the ITER archive part of the graph is moved onto them.</p>
+    </header>
+
+    <h2 id="s1">§1 — Where this starts</h2>
+    <section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>The schema is LinkML, and it is shared: one graph holds the Data Dictionary, the standard names and every facility's signals, and ITER's archive signals are one facility among them. The ITER archive work so far added its classes one pass at a time, for plant context, grouping, field codes, the signal vocabulary and group enrichment, each with its own state field on the signal. The pilot plant system carries context; the other systems carry their parsed names and controls-feed labels only.</p>
+    <p>On 2026-11-22 the coordinator read the schema and found six places where the structure is not yet defined well enough to repeat across the plant:</p>
+    <ul>
+      <li>Each signal carries two role vocabularies, one of six values judged at enrichment from prose and one of five assigned by rule from a source. They are designed as separate axes and queried as separate filters, but nothing states how they relate or which a reader should trust when they disagree.</li>
+      <li>The component and control-node memberships each exist twice, as a candidate link and as an archive-grouping link, both derived from the same parsed name.</li>
+      <li>A field-code table, each code's role and meaning with its source, is assembled from graph sources and stored in private configuration. It is not in the graph, so no signal can be linked to what its code means or to the document that says so.</li>
+      <li>The official plant breakdown (PBS) is held as plant-structure nodes, but a control system is linked to it only through imported signal-list rows, which exist for the pilot system alone.</li>
+      <li>The graph has two document classes: the shared one, whose workflow begins at discovered but which holds no version, version state or PBS link, and the plant-context one, which holds those but requires the fetched file's digest. A signal list that has been found but not read fits neither.</li>
+      <li>Source text and generated text shared one description slot; their separation is landing under the enrichment plan, and this review reads the schema after it lands.</li>
+    </ul>
+    <p>A direct record search the same day found 77 signal-list documents on the first page alone, with more withheld from the page; most of them name the PBS node they describe. Per-system self-description documents were found the same way. The lead's decisions: the ontology is settled before a pipeline runs it across the plant; it stays consistent with the current shared classes; there is enough documentation behind it to make a good start; it is expected to evolve as the work progresses; and only the ITER archive parts of the graph are migrated. Any IDM document may be fetched read-only.</p>
+
+    <h2 id="s2">§2 — The existing structure for ITER plant signals is reviewed against the shared schema</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p><strong>Delivers.</strong> A research record, <code>docs/research/iter-plant-signal-ontology-review.html</code>, that reviews every class, slot and relationship the ITER archive signals use or are reached through, and proposes the ontology the plant-wide work will write into. For each class and relationship it gives the number of ITER-facility nodes or relationships in the live graph, and a verdict: keep, rename, merge into another, or remove. For each proposed addition it names the shared class it reuses or extends, or states why none fits; what existing definition it makes redundant or retires, or why none; and the documentation that will fill it. The additions it settles are: the one document class that holds documents whether catalogued or fetched, with the slots a catalogued document needs (identity, title, current version, version state including superseded and obsolete, file type, PBS references) and what becomes of the other document class; whether the field-code table becomes a graph class and how its private configuration entries retire; the binding of a first-level control-breakdown node to its PBS node; and the stated relation and precedence between the two role axes. It answers whether the plant-structure class and the PBS are one concept and what the class should be called. For each class it changes it lists every reader and writer in the code, the plant search tools and the shared query filters among them. It states which proposed changes touch a class other facilities also use, and keeps those additive. A figure shows the proposed classes and relationships.</p>
+    <p><strong>Done when.</strong> Every class and relationship type reachable from an ITER archive signal appears in the record with its live count and verdict; each of the six problems listed in section 1 has a stated resolution; each proposal names the shared class it reuses or the reason none fits, and what it makes redundant or why nothing; every changed class has its readers and writers listed; the documentation behind the proposal is measured, as the number of first-level control-breakdown nodes holding at least one catalogued ITER archive signal for which at least one signal list or self-description document has been found, out of all such nodes, stated as a lower bound because the census it uses is a sample, with the magnet supplies named; and the record states which changes alter any class used by another facility. The review reads the schema after the source and generated description separation has landed. No real signal, document identity or document text appears in the tracked record. <strong>Negative control:</strong> one class the review keeps unchanged is shown to have no ITER node or relationship that the proposal would leave unrepresented, and one class it removes is shown to have no reader left.</p>
+
+    <h2 id="s3">§3 — The schema carries the reviewed ontology and the ITER archive part of the graph is migrated to it</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="iter-plant-signal-ontology#s2"></section>
+    <p><strong>Delivers.</strong> The LinkML schema holds the ontology section 2 settles, the generated models build from it, every reader and writer of a changed class uses the new form, and the ITER-facility nodes and relationships of the archive classes in the live graph are migrated to it. The migration is repeatable, and a private before-image of everything it changes is kept under <code>~/.cache/imas-codex-codac-uda/ontology-migration/</code> with a stated way to restore it.</p>
+    <p><strong>Done when.</strong> The schema validates and the models build; for every class and relationship section 2 decided, the live graph holds the decided form with the counts the landing record states before and after; node and relationship counts for every other facility, for the Data Dictionary and for the standard names are identical before and after; a second migration run changes nothing; the plant search and signal tools answer the same queries for a fixed set of twenty ITER signals before and after; and graph-marked statements pass on a compute partition, with the default tier for the touched packages adding no failure against the base revision. <strong>Negative control:</strong> the count comparison reports a difference when a node of another facility is changed in a scratch run, and the migration refuses to run against a label outside the classes section 2 listed.</p>
+
+    <h2 id="s4">§4 — Every signal list and self-description document found in IDM is catalogued and linked to its plant system</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="iter-plant-signal-ontology#s3"></section>
+    <p><strong>Delivers.</strong> The graph holds, as ITER-facility nodes in the catalogued-document form section 3 introduced, every signal-list and self-description document a records search finds, with its identity, title, current version and version state, file type and the PBS nodes it names, and a link to each archive control system it is matched to. A document is catalogued whether or not it has been fetched; fetching and importing rows is the pipeline's work and is not part of this section. The project's read-only client refuses the POST that a records search uses, so the documents come from a record export the coordinator supplies under <code>~/.cache/imas-codex-codac-uda/document-census/</code>, with each search's predicate, date, pages read and rows withheld by permissions recorded beside it; a search through the client is left to the pipeline plan.</p>
+    <p><strong>Done when.</strong> The landing record gives the number of documents found per search, catalogued, linked to a PBS node, and matched to an archive control system, and the number of first-level control-breakdown nodes with and without a matched document; the magnet supplies' signal lists and self-description documents are catalogued and matched; twenty matches are checked by hand against the document's title and PBS reference; a second run adds nothing; and no document identity or title appears in the tracked tree. <strong>Negative control:</strong> a document whose PBS reference names a system with no archive signals is catalogued but matched to no control system, and a superseded or obsolete version is recorded as such rather than as current.</p>
+
+    <section data-reckon="followups">
+      <h2>Followups</h2>
+      <p>Next: a plan that runs plant context, grouping, field-code meanings, the signal vocabulary and group enrichment as stages of the signals discovery pipeline, system by system, magnet supplies first, writing into the ontology this plan settles.</p>
+    </section>
+  </main>
+</body>
+</html>

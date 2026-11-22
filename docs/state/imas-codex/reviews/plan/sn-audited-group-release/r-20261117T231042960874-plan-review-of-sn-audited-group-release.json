@@ -17,7 +17,30 @@
   "plan_slug": "sn-audited-group-release",
   "plan_version": 35,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "8e101d1f-e306-47cb-a56a-48cba5e5c742",
+      "commit": "a703e889afc4f7017467e2ca72452458174ba55e",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 4's second reading now draws as many unchanged members as changed ones, or every unchanged member where fewer remain, and states the count drawn beside the count changed (a703e889a).",
+      "reason": "",
+      "when": "2026-11-22T18:46:52.630140+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "8e101d1f-e306-47cb-a56a-48cba5e5c742",
+      "commit": "a703e889afc4f7017467e2ca72452458174ba55e",
+      "commit_basis": "edit",
+      "note": "Section 4's second reading now draws as many unchanged members as changed ones, or every unchanged member where fewer remain, and states the count drawn beside the count changed (a703e889a).",
+      "reason": "",
+      "when": "2026-11-22T18:46:52.630140+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261117T231042960874-plan-review-of-sn-audited-group-release.json",
   "review_run_id": "r-20261117T231042960874-plan-review-of-sn-audited-group-release",
   "reviewed_blob_sha": "de807ddd5d2b515420cc45a7de2379f1992803c0",
   "rubric": "content",

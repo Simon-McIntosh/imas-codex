@@ -3,15 +3,19 @@
 A description rewrite that leaves the old embedding in place leaves the vector
 describing text the node no longer carries, so search ranks a signal by a
 description that is gone. ``write_signal_descriptions`` is the one place a
-``FacilitySignal`` description is written: it sets ``description``,
-``embedding``, ``embedded_at`` and ``embedded_text_hash`` together, and every
-description rewrite in the signals package delegates to it.
+``FacilitySignal`` generated description is written: it sets
+``generated_description``, ``embedding``, ``embedded_at`` and
+``embedded_text_hash`` together, and every description rewrite in the signals
+package delegates to it. A signal that carries a source marker keeps its
+``description`` and its marker, and the composed text goes beside them; a
+signal with no marker has ``description`` as its enrichment slot and is
+written there as before.
 
 The individualization pass replaces each group member's copy of the
-representative's description with its own. These tests drive that pass over a
-small stateful graph and assert the members end holding embeddings of their own
-text rather than the representative's — the check that fails against a writer
-that writes the description without re-embedding.
+representative's text with its own. These tests drive that pass over a small
+stateful graph and assert the members end holding embeddings of their own text
+rather than the representative's — the check that fails against a writer that
+writes the description without re-embedding.
 """
 
 from __future__ import annotations
@@ -45,6 +49,15 @@ def _fake_embed(items, text_field="description", embedding_field="embedding"):
 
 def _text_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _routes_the_node_accepts(cypher, items, nodes):
+    """The items whose node satisfies the route predicate the statement carries."""
+    if "s.description_source IS NOT NULL" in cypher:
+        return [i for i in items if nodes[i["id"]].get("description_source")]
+    if "s.description_source IS NULL" in cypher:
+        return [i for i in items if not nodes[i["id"]].get("description_source")]
+    return list(items)
 
 
 class _Graph:
@@ -89,16 +102,22 @@ class _Graph:
                 ]
             return []
 
-        if "embedded_text_hash" in cypher:
+        if "embedded_text_hash" in cypher or "s.generated_description =" in cypher:
             by_id = {m["id"]: m for m in self.members}
-            for item in params["items"]:
+            items = _routes_the_node_accepts(cypher, params["items"], by_id)
+            carries_generated = "s.generated_description = item.description" in cypher
+            for item in items:
                 node = by_id[item["id"]]
-                node["description"] = item["description"]
-                node["embedding"] = item.get("embedding")
-                node["embedded_text_hash"] = item["embedded_text_hash"]
+                if carries_generated:
+                    node["generated_description"] = item["description"]
+                else:
+                    node["description"] = item["description"]
+                if "s.embedding = item.embedding" in cypher:
+                    node["embedding"] = item.get("embedding")
+                    node["embedded_text_hash"] = item["embedded_text_hash"]
                 node["name"] = item["name"]
                 node["enrichment_source"] = item["enrichment_source"]
-            return [{"updated": len(params["items"])}]
+            return [{"updated": len(items)}]
 
         if "SET sg.members_described = true" in cypher:
             self.source["members_described"] = True
@@ -123,9 +142,12 @@ def _members(start, n):
         {
             "id": f"facility:mdac_magpbtc{i}",
             "accessor": f"eddbreadTime('E101173', 'MDAC', 'magPbTC{i}', t1, t2)",
-            # Every member starts holding the representative's copy and its
-            # vector, the state propagation leaves behind.
-            "description": REP_DESCRIPTION,
+            # Every member starts holding the representative's generated copy
+            # and its vector, the state propagation leaves behind, beside its
+            # own source description.
+            "description": f"Feed label TC-{i}",
+            "description_source": "feed:fixture",
+            "generated_description": REP_DESCRIPTION,
             "embedding": _embedding_of(REP_DESCRIPTION),
             "embedded_text_hash": _text_hash(REP_DESCRIPTION),
             "name": None,
@@ -184,22 +206,30 @@ def test_individualization_write_reembeds_each_member(monkeypatch):
     graph = _Graph(_source(members_described=False), _members(10, 2))
     graph.members[0]["id"] = REP_ID
     graph.members[0]["node_description"] = "Magnetic probe TC-10 at R=1.10 m"
+    sources = {m["id"]: m["description"] for m in graph.members}
     _wire(monkeypatch, graph)
 
     asyncio.run(parallel.individualize_source_descriptions("facility"))
 
-    descriptions = [m["description"] for m in graph.members]
+    descriptions = [m["generated_description"] for m in graph.members]
     assert len(set(descriptions)) == 2, descriptions
     for member in graph.members:
-        assert member["embedding"] == _embedding_of(member["description"]), (
-            f"{member['id']} kept a stale embedding for {member['description']!r}"
+        assert member["embedding"] == _embedding_of(member["generated_description"]), (
+            f"{member['id']} kept a stale embedding for "
+            f"{member['generated_description']!r}"
         )
-        assert member["embedded_text_hash"] == _text_hash(member["description"])
+        assert member["embedded_text_hash"] == _text_hash(
+            member["generated_description"]
+        )
+        assert member["description"] == sources[member["id"]], (
+            "the source description must survive an individualized write"
+        )
 
 
-def test_writer_sets_description_embedding_and_hash_together(monkeypatch):
-    """The writer stores the description, its embedding and its hash in one write."""
+def test_writer_sets_generated_description_embedding_and_hash_together(monkeypatch):
+    """The writer stores the generated text, its vector and its hash in one write."""
     written: list[dict] = []
+    statements: list[str] = []
 
     class _Capture:
         def __enter__(self):
@@ -209,6 +239,7 @@ def test_writer_sets_description_embedding_and_hash_together(monkeypatch):
             return False
 
         def query(self, cypher: str, **params):
+            statements.append(cypher)
             written.extend(params["items"])
             return [{"updated": len(params["items"])}]
 
@@ -219,11 +250,17 @@ def test_writer_sets_description_embedding_and_hash_together(monkeypatch):
         [{"id": "tcv:ip", "description": "Plasma current"}]
     )
 
-    assert len(written) == 1
     row = written[0]
     assert row["description"] == "Plasma current"
     assert row["embedding"] == _embedding_of("Plasma current")
     assert row["embedded_text_hash"] == _text_hash("Plasma current")
+    marked = next(s for s in statements if "s.description_source IS NOT NULL" in s)
+    unmarked = next(s for s in statements if "s.description_source IS NULL" in s)
+    assert "s.generated_description = item.description" in marked
+    assert "s.generated_description_source = coalesce(" in marked
+    assert "s.embedding = item.embedding" in marked
+    assert "s.description = item.description" in unmarked
+    assert "s.generated_description =" not in unmarked
 
 
 def test_writer_embeds_the_text_the_caller_supplies(monkeypatch):
@@ -282,14 +319,19 @@ class _NodeGraph:
 
     def query(self, cypher: str, **params):
         carrying_vector = "s.embedding = item.embedding" in cypher
-        for item in params["items"]:
+        carrying_generated = "s.generated_description = item.description" in cypher
+        items = _routes_the_node_accepts(cypher, params["items"], self.nodes)
+        for item in items:
             node = self.nodes[item["id"]]
-            node["description"] = item["description"]
+            if carrying_generated:
+                node["generated_description"] = item["description"]
+            else:
+                node["description"] = item["description"]
             if carrying_vector:
                 node["embedding"] = item["embedding"]
                 node["embedded_text_hash"] = item["embedded_text_hash"]
                 node["embedded_at"] = "now"
-        return [{"updated": len(params["items"])}]
+        return [{"updated": len(items)}]
 
 
 def _known_signal(signal_id: str, description: str) -> dict:
@@ -297,6 +339,7 @@ def _known_signal(signal_id: str, description: str) -> dict:
     return {
         "id": signal_id,
         "description": description,
+        "description_source": "feed:fixture",
         "embedding": _embedding_of(description),
         "embedded_text_hash": _text_hash(description),
         "embedded_at": "earlier",
@@ -328,7 +371,8 @@ def test_unembedded_item_keeps_its_vector_and_hash(monkeypatch):
     )
 
     node = nodes["tcv:ip"]
-    assert node["description"] == "Plasma current (A)"
+    assert node["generated_description"] == "Plasma current (A)"
+    assert node["description"] == "Plasma current"
     assert node["embedding"] == _embedding_of("Plasma current")
     assert node["embedded_text_hash"] == _text_hash("Plasma current")
     assert node["embedded_at"] == "earlier"
@@ -358,7 +402,8 @@ def test_only_the_embedded_item_receives_a_fresh_vector(monkeypatch):
 
     assert nodes["tcv:ip"]["embedding"] == _embedding_of("Plasma current (A)")
     assert nodes["tcv:ip"]["embedded_text_hash"] == _text_hash("Plasma current (A)")
-    assert nodes["tcv:q95"]["description"] == "Edge safety factor (new)"
+    assert nodes["tcv:q95"]["generated_description"] == "Edge safety factor (new)"
+    assert nodes["tcv:q95"]["description"] == "Edge safety factor"
     assert nodes["tcv:q95"]["embedding"] == _embedding_of("Edge safety factor")
     assert nodes["tcv:q95"]["embedded_text_hash"] == _text_hash("Edge safety factor")
     assert nodes["tcv:q95"]["embedded_at"] == "earlier"

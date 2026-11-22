@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-22T18:09:16.765Z",
+  "dispatched_at": "2026-11-22T18:03:37Z",
+  "findings": [
+    {
+      "file": "iter_codex/discovery/signals/controls_metadata.py",
+      "id": "c23857fee5e",
+      "line": 291,
+      "severity": "non-blocking",
+      "text": "the embed_text lambda returns item['description'] for a generated row, so a generated row whose feed description is empty lands in the writer's empty-text arm, which nulls its stored vector and stamps the empty-text hash; that contradicts the comment at :283 that such a row's vector is left untouched, and the row leaves vector search until the re-embed sweep."
+    },
+    {
+      "file": "iter_codex/discovery/signals/controls_metadata.py",
+      "id": "c9d879f5cde",
+      "line": 258,
+      "severity": "non-blocking",
+      "text": "the generated_state hash override has no test: the repeat-import node in tests/graph/test_controls_metadata.py:57 carries no generated_description, so deleting this block would leave every graph test green while a source import would again re-report and re-embed every generated row on each run."
+    },
+    {
+      "file": "iter_codex/discovery/signals/parallel.py",
+      "id": "2ff58665aaa",
+      "line": 1909,
+      "severity": "non-blocking",
+      "text": "the reembed_stale_signal_descriptions docstring still says the sweep rewrites with 'the description-only embed text, so the stored vector, its hash and its description move together', while embed_text now prefers the generated text and embed_only writes no description property at all, so the docstring misdescribes the mechanism the same commit changed."
+    },
+    {
+      "file": "tests/discovery/test_signal_description_writer.py",
+      "id": "28f6d236060",
+      "line": 238,
+      "severity": "non-blocking",
+      "text": "assert row['description'] == 'Plasma current' compares the captured item against the literal the test itself passed in, so it holds whatever the writer does and survives a regression in the slot it appears to guard; the statement assertions at :241-243 are the ones that actually catch a revert to s.description."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html",
+      "id": "f8f71c0b2a1",
+      "line": 27,
+      "severity": "non-blocking",
+      "text": "the pre-repair feed-marker total (2,708) is derived by subtracting 190 from the post-repair 2,898 rather than measured, so the claim that no other row changed rests on that arithmetic; the done_when asks for the graph total before, and a measurement taken before the first mutation would have settled it."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to restore the 190 feed descriptions and hold generated text beside them; iter_codex/discovery/signals/parallel.py:1545 write_signal_descriptions now defaults to generated_description with its mechanism and timestamp, iter_codex/schemas/facility.yaml:3322 declares the three generated slots, and the repair is recorded 190/190 in docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html:17.\nVERDICT done_when: the done_when's measures are recorded: the separation test plus its red mutation (negative-control.log), the 190/190 snapshot comparison, the ITER counts (97,525 signals, 2,708/2,898 feed-marked), the vocabulary run at 728 quantity/202 role with per-axis counts, and the single-line baseline/after arms in the manifest; the quantity figure falls 14 short of the brief's 742, and the plan's own 2026-11-20 landing record states 728.\nVERDICT write_paths: read the manifest's declared paths; all 14 changed paths in the diff sit inside them (facility.yaml, discovery/signals, tools/plant_search.py, llm, tests/discovery, tests/graph, and the named evidence fragment).\nVERDICT manifest: read; status complete, one commit c92bd8642, the three gate logs with EXIT= lines, the negative-control log, and the private repair/vocabulary receipts that reconcile with the landing record.\nVERDICT diff: read commit by commit against 0aa4b34774d7: one commit, 14 files, +628/-106; the writer gains a generated slot, an embed_only mode and a generated-first embed text, controls_metadata gains a generated-hash guard, the two readers label their text, and four test files add or rewrite the guards.\nCALL_SITES: iter_codex/discovery/signals/group_enrichment.py:819, iter_codex/discovery/signals/parallel.py:1930, iter_codex/discovery/signals/parallel.py:2194, iter_codex/discovery/signals/parallel.py:2282, iter_codex/discovery/signals/parallel.py:2753, iter_codex/discovery/signals/parallel.py:5551, iter_codex/discovery/signals/controls_metadata.py:287, iter_codex/llm/search_tools.py:941, iter_codex/llm/search_tools.py:1069, iter_codex/llm/search_formatters.py:153, iter_codex/tools/plant_search.py:108\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: parallel.py:1687-1700 writes only generated_description, generated_description_source and generated_description_updated_at on the default path, so the landed change does what the goal states while the controls import keeps writing the source slot at controls_metadata.py:287-305.\nSCORE evidence: 17\nJUSTIFICATION evidence: baseline-suite.log and after-suite.log carry EXIT= lines and whole test ids, graph-arm.log records 16 passed EXIT=0, and negative-control.log records the separation test red under the reinstated regression; the 2,708 pre-repair marker total at keep-feed-descriptions-beside-generated-ones.html:27 is derived by subtraction rather than measured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all 14 paths in the diff are inside the declared write paths, and the only beyond-goal content is two ruff-format hunks at search_tools.py:374 and :959.\nSCORE durability: 16\nJUSTIFICATION durability: tests/discovery/test_generated_description_beside_source.py:109 asserts the feed constant survives a generated write and the mutation log shows it red, but the generated-hash branch added at controls_metadata.py:258 is reached by no test, since the repeat-import node in tests/graph/test_controls_metadata.py:57 carries no generated_description.\nSCORE fit: 17\nJUSTIFICATION fit: the constants and writer options follow the surrounding style of parallel.py:1526-1545, but the docstring at parallel.py:1909 still describes a description-only embed text that the same commit replaced.\nSCORE reuse: 19\nJUSTIFICATION reuse: no owner of a snapshot-versus-stored comparison exists in iter_codex/discovery/signals or iter_codex/graph (variable_name_graph.py:63 takes a guarded population snapshot, a different capability), and the writer, embed-text derivation and search readers were extended rather than forked.\nFINDING iter_codex/discovery/signals/controls_metadata.py:291 non-blocking: the embed_text lambda returns item['description'] for a generated row, so a generated row whose feed description is empty lands in the writer's empty-text arm, which nulls its stored vector and stamps the empty-text hash; that contradicts the comment at :283 that such a row's vector is left untouched, and the row leaves vector search until the re-embed sweep.\nFINDING iter_codex/discovery/signals/controls_metadata.py:258 non-blocking: the generated_state hash override has no test: the repeat-import node in tests/graph/test_controls_metadata.py:57 carries no generated_description, so deleting this block would leave every graph test green while a source import would again re-report and re-embed every generated row on each run.\nFINDING iter_codex/discovery/signals/parallel.py:1909 non-blocking: the reembed_stale_signal_descriptions docstring still says the sweep rewrites with 'the description-only embed text, so the stored vector, its hash and its description move together', while embed_text now prefers the generated text and embed_only writes no description property at all, so the docstring misdescribes the mechanism the same commit changed.\nFINDING tests/discovery/test_signal_description_writer.py:238 non-blocking: assert row['description'] == 'Plasma current' compares the captured item against the literal the test itself passed in, so it holds whatever the writer does and survives a regression in the slot it appears to guard; the statement assertions at :241-243 are the ones that actually catch a revert to s.description.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html:27 non-blocking: the pre-repair feed-marker total (2,708) is derived by subtracting 190 from the post-repair 2,898 rather than measured, so the claim that no other row changed rests on that arithmetic; the done_when asks for the graph total before, and a measurement taken before the first mutation would have settled it.",
+  "review_run_id": "r-20261122T180312717112-review-of-keep-feed-descriptions-beside-generated-ones-c92bd864287e",
+  "reviewed_base_sha": "0aa4b34774d7a767bd6af5cb03403419c1a2248c",
+  "reviewed_head_sha": "c92bd864287e44ccc3f34bc520b6372e42a65f3e",
+  "reviewed_run_id": "r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T18:08:12.545054+00:00",
+  "total": 106,
+  "verdicts": {
+    "call_sites": "iter_codex/discovery/signals/group_enrichment.py:819, iter_codex/discovery/signals/parallel.py:1930, iter_codex/discovery/signals/parallel.py:2194, iter_codex/discovery/signals/parallel.py:2282, iter_codex/discovery/signals/parallel.py:2753, iter_codex/discovery/signals/parallel.py:5551, iter_codex/discovery/signals/controls_metadata.py:287, iter_codex/llm/search_tools.py:941, iter_codex/llm/search_tools.py:1069, iter_codex/llm/search_formatters.py:153, iter_codex/tools/plant_search.py:108",
+    "diff": "read commit by commit against 0aa4b34774d7: one commit, 14 files, +628/-106; the writer gains a generated slot, an embed_only mode and a generated-first embed text, controls_metadata gains a generated-hash guard, the two readers label their text, and four test files add or rewrite the guards.",
+    "done_when": "the done_when's measures are recorded: the separation test plus its red mutation (negative-control.log), the 190/190 snapshot comparison, the ITER counts (97,525 signals, 2,708/2,898 feed-marked), the vocabulary run at 728 quantity/202 role with per-axis counts, and the single-line baseline/after arms in the manifest; the quantity figure falls 14 short of the brief's 742, and the plan's own 2026-11-20 landing record states 728.",
+    "goal": "the goal is to restore the 190 feed descriptions and hold generated text beside them; iter_codex/discovery/signals/parallel.py:1545 write_signal_descriptions now defaults to generated_description with its mechanism and timestamp, iter_codex/schemas/facility.yaml:3322 declares the three generated slots, and the repair is recorded 190/190 in docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html:17.",
+    "manifest": "read; status complete, one commit c92bd8642, the three gate logs with EXIT= lines, the negative-control log, and the private repair/vocabulary receipts that reconcile with the landing record.",
+    "write_paths": "read the manifest's declared paths; all 14 changed paths in the diff sit inside them (facility.yaml, discovery/signals, tools/plant_search.py, llm, tests/discovery, tests/graph, and the named evidence fragment)."
+  }
+}

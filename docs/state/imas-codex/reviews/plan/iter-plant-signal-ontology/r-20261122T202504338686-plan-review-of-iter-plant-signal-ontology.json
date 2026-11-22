@@ -1,0 +1,302 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T21:00:00.885Z",
+  "dispatched_at": "2026-11-22T20:26:01Z",
+  "findings": [
+    {
+      "anchor": "iter_codex/discovery/signals/field_codes.py:1",
+      "id": "reuse_search-1",
+      "reason": "\u00a72's proposal must be stated as settling whether that table becomes a graph class and how `field_code_meanings` in private configuration retires, not a fresh field-code mechanism.",
+      "text": "\u00a71 problem 3 (\"field-code meanings live in private configuration, not in the graph\") is already built: `field_codes.py` and `field_codes_graph.py` assemble a per-code role-and-meaning table from three graph sources in precedence, `iter_codex/remote/field_code_table.py:1` stores it privately with a determinism assertion, and `ArchiveFieldPattern.description` (facility.yaml:2093) already says \"Meaning of the shared fields when established from linked context\". \u00a72 will re-derive a mechanism whose hard parts (precedence, conflict recording, per-component-kind keys, the empty-source-must-raise check in `field_codes_graph.py:8`) exist and are tested",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "iter_codex/discovery/icp/documents.py:56",
+      "id": "reuse_search-2",
+      "reason": "the section's \"catalogued-document form\" is largely the existing receipt plus two fields, and saying so changes what \u00a73 must define and what \u00a74 must write.",
+      "text": "\u00a74 asks for documents with identity, title, current version, version state, file type and sheets; `ICPDocuments.fetch` already returns a `DocumentReceipt` carrying `uid`, `version`, `sha256`, `size_bytes`, `page_count` (facility.yaml-unrelated but documents.py:13-28) and `sheets`, i.e. every identity field \u00a74 needs except version state and PBS references. The plan's \u00a74 text does not say it extends this receipt shape",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "iter_codex/discovery/icp/records.py:4",
+      "id": "reuse_search-3",
+      "reason": "\u00a74 now rests on a capability that is designed out, and the plan must either add a bounded search endpoint to the client or state that the export is the only route and why.",
+      "text": "\u00a74 says document records are read \"through the project's read-only client, or through a record export the coordinator supplies where that client cannot search\". `records.py:4-5 says list-view and query POST operations are deliberately absent from this reader\"` and `icp/client.py:198` refuses every POST but sign-in, so the search \u00a74 depends on cannot run through the client as written; \u00a74 does not say this and offers the export as though it were an equivalent instrument. The same traversal is also already proven in the graph for the signal\u2192row\u2192PBS join (`vocabulary_graph.py:62`, `SignalContextLink` at facility.yaml:1940)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "iter_codex/schemas/facility.yaml:185",
+      "id": "reuse_search-4",
+      "reason": "the settled answer may be a stated precedence between two axes rather than one vocabulary, and \u00a72 asks for one vocabulary, which would change what \u00a73 has to migrate and what domain_queries must accept.",
+      "text": "\u00a71 problem 1 says the two role vocabularies have \"no statement of which is canonical\", but `SignalRole` (185, six values, judged from prose, model) and `SignalVocabularyRole` (271, five values, assigned by rule from a source) are documented as deliberately orthogonal, and both are queried as separate predicates in `iter_codex/graph/domain_queries.py:150` and `:154`. \u00a72's proposed \"one canonical role vocabulary\" would force a merge that the existing design rejects and the two value sets do not align one-to-one (measured/commanded/reference_or_setpoint/status_or_flag/configuration_parameter/derived_or_computed versus measurement/setpoint/state/alarm/command)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "iter_codex/schemas/facility.yaml:4311",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73 must state which existing class absorbs the catalogue form (or that one is replaced by the other), otherwise the live graph carries three shapes for one document.",
+      "text": "census: `Document` (4311, workflow documented\u2192scored\u2192ingested, `DocumentStatus` at `iter_codex/schemas/common.yaml:222`, readers in `iter_codex/discovery/documents/pipeline.py` and `workers.py`) and `PlantContextDocument` (1884, private and versioned, requires `sha256` and `text`, links `PlantStructure`, written by `iter_codex/discovery/signals/plant_context.py:17`, read by `iter_codex/discovery/signals/group_enrichment.py:89`) are already two document owners with disjoint halves of \u00a74's record; `PlantContextDocument` cannot hold an unfetched document because `sha256` is required, and `Document` has no version, PBS link or version state. \u00a74's \"catalogued-document form section 3 introduced\" would therefore be a third",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "iter_codex/discovery/signals/plant_context.py:270",
+      "id": "duplicate_owner-2",
+      "reason": "the merge of the duplicate memberships is one change across six schema classes and three writers, and \u00a73's \"every reader and writer of a changed class uses the new form\" is unmeasurable until this census is in the brief.",
+      "text": "census of the plant-structure and membership owners \u00a72 proposes to revisit: `PlantStructure` (facility.yaml:1855), `PlantSignalRow` (1908, `plant_context.py:270`), `SignalContextLink` (1940, `plant_context.py:391`), `PlantComponent` (1966) with `candidate_plant_component` (facility.yaml:3426) and `archive_component`/`archive_control_node` (3443-3452) as the duplicate pair \u00a71 problem 2 names, plus the three graph writers `plant_context_graph.py:30`, `archive_grouping_graph.py:19` and `group_enrichment.py:74`. Any \u00a73 decision remaps all of these together, and the plan names none",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "iter_codex/tools/plant_search.py:1",
+      "id": "duplicate_owner-3",
+      "reason": "a changed field shape that these readers expose is a public read-path change, and the plan's own gate depends on it.",
+      "text": "\u00a73's done-when measures \"the plant search and signal tools answer the same queries\", but `tools/plant_search.py` is the owner of those bounded reads (and `iter_codex/graph/domain_queries.py:124-154` the shared filter builder); \u00a72's review proposes class changes without naming this reader among the ones it must not break",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html#s4",
+      "id": "thin_wrapper-1",
+      "reason": "",
+      "text": "\u2014 the section offers a coordinator-supplied record export as an alternative to a client that cannot search; that is a thin layer over a missing capability, and it is WOULD_CHANGE_THE_PLAN: yes \u2014 REASON: either the client gains a bounded search (a real change with a refusal family of its own) or the export is named as the sole route with its provenance recorded; a silent either/or leaves the evidence unverifiable.",
+      "type": "thin_wrapper",
+      "would_change": null
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html#s4",
+      "id": "interface_budget-1",
+      "reason": "\u00a72's verdict vocabulary retires and merges existing classes, so the same account can be extended to the additions at no cost: each new definition states its predecessor or its reason for none.",
+      "text": "with public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0, \u00a73 and \u00a74 add a catalogue-document form, a document version-state vocabulary that exists nowhere in the shared schema (`superseded` appears only under `iter_codex/schemas/standard_name.yaml:321`), and a control-system-to-PBS binding; neither section names a definition it retires or merges, nor states why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html#s2",
+      "id": "interface_budget-2",
+      "reason": "the two answer different questions, and only the second keeps the schema from growing a fourth document owner and a third role axis; it costs one clause per proposal.",
+      "text": "\u00a72 asks for additions (catalogued document, field code with meaning and source, control system bound to PBS, one role vocabulary) and its done-when requires each to name the shared class it reuses; it does not require the converse, which is what the budget rule asks: what each addition makes redundant, or why nothing is",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+  "plan_fingerprint": "9453f5fa18ac59bf4ab4a5ae8448e9fe381fe12dc2c2edcec9281a1e4259c218",
+  "plan_slug": "iter-plant-signal-ontology",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "s1 restates the field-code gap: the table exists and is stored privately; s2 now settles whether it becomes a graph class and how the private configuration entries retire",
+      "reason": "",
+      "when": "2026-11-22T21:00:59.680834+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reuse_search-2",
+      "reason": "The receipt shape a catalogued document extends is the worker's choice; the brief for s3/s4 names ICPDocuments.fetch and DocumentReceipt as the reuse point. The plan states the endpoint (one document form holding catalogued and fetched documents).",
+      "when": "2026-11-22T21:01:02.853854+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "reuse_search-3",
+      "note": "s4 now names the coordinator-supplied record export as the sole route, with its provenance (search, date, pages, withheld counts) recorded; the client's POST refusal is stated as the reason, and a client search is left to the pipeline plan",
+      "reason": "",
+      "when": "2026-11-22T21:01:06.233354+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "reuse_search-4",
+      "note": "s1 and s2 now treat the two role vocabularies as deliberately separate axes; s2 asks for a stated relation and precedence between them, not one merged vocabulary",
+      "reason": "",
+      "when": "2026-11-22T21:01:09.030103+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "s2's done-when now requires naming the one class that holds documents, catalogued or fetched, and what happens to the other document owner, so the graph keeps one document form",
+      "reason": "",
+      "when": "2026-11-22T21:01:11.748348+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-2",
+      "note": "s2's done-when now requires a census of every reader and writer of each class it changes; the brief lists the known owners and graph writers",
+      "reason": "",
+      "when": "2026-11-22T21:01:14.437839+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-3",
+      "note": "s2's census of readers names the plant search tools and the shared filter builder among the read paths that must not change behaviour",
+      "reason": "",
+      "when": "2026-11-22T21:01:18.247838+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "s4 names the record export as the sole route with recorded provenance; no either/or remains",
+      "reason": "",
+      "when": "2026-11-22T21:01:23.384353+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "s2 now requires each addition to state what it makes redundant or retires, or why nothing; s3 and s4 inherit those verdicts",
+      "reason": "",
+      "when": "2026-11-22T21:01:27.289061+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "interface_budget-2",
+      "note": "s2's done-when carries the converse clause: each addition names what it makes redundant, or why nothing",
+      "reason": "",
+      "when": "2026-11-22T21:01:31.466509+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s2's done-when now requires naming the one class that holds documents, catalogued or fetched, and what happens to the other document owner, so the graph keeps one document form",
+      "reason": "",
+      "when": "2026-11-22T21:01:11.748348+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s2's done-when now requires a census of every reader and writer of each class it changes; the brief lists the known owners and graph writers",
+      "reason": "",
+      "when": "2026-11-22T21:01:14.437839+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s2's census of readers names the plant search tools and the shared filter builder among the read paths that must not change behaviour",
+      "reason": "",
+      "when": "2026-11-22T21:01:18.247838+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s2 now requires each addition to state what it makes redundant or retires, or why nothing; s3 and s4 inherit those verdicts",
+      "reason": "",
+      "when": "2026-11-22T21:01:27.289061+00:00"
+    },
+    "interface_budget-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s2's done-when carries the converse clause: each addition names what it makes redundant, or why nothing",
+      "reason": "",
+      "when": "2026-11-22T21:01:31.466509+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s1 restates the field-code gap: the table exists and is stored privately; s2 now settles whether it becomes a graph class and how the private configuration entries retire",
+      "reason": "",
+      "when": "2026-11-22T21:00:59.680834+00:00"
+    },
+    "reuse_search-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The receipt shape a catalogued document extends is the worker's choice; the brief for s3/s4 names ICPDocuments.fetch and DocumentReceipt as the reuse point. The plan states the endpoint (one document form holding catalogued and fetched documents).",
+      "when": "2026-11-22T21:01:02.853854+00:00"
+    },
+    "reuse_search-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s4 now names the coordinator-supplied record export as the sole route, with its provenance (search, date, pages, withheld counts) recorded; the client's POST refusal is stated as the reason, and a client search is left to the pipeline plan",
+      "reason": "",
+      "when": "2026-11-22T21:01:06.233354+00:00"
+    },
+    "reuse_search-4": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s1 and s2 now treat the two role vocabularies as deliberately separate axes; s2 asks for a stated relation and precedence between them, not one merged vocabulary",
+      "reason": "",
+      "when": "2026-11-22T21:01:09.030103+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s4 names the record export as the sole route with recorded provenance; no either/or remains",
+      "reason": "",
+      "when": "2026-11-22T21:01:23.384353+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-plant-signal-ontology/r-20261122T202504338686-plan-review-of-iter-plant-signal-ontology.json",
+  "review_run_id": "r-20261122T202504338686-plan-review-of-iter-plant-signal-ontology",
+  "reviewed_blob_sha": "61c79d135645cc6c5021e4645364974853b24089",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a72's single review record with per-class live counts and keep/rename/merge/remove verdicts, plus \u00a73's one migration with a before-image and an idempotency run, is one deep step per endpoint rather than a spread of wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a73/\u00a74's \"catalogued-document form\" becomes the third document owner beside `Document` (facility.yaml:4311) and `PlantContextDocument` (facility.yaml:1884), and \u00a74's records search duplicates a client that exists with the capability omitted.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 and \u00a74 add schema definitions (a catalogue-document form, a document version-state vocabulary, a control-system-to-PBS binding) without naming what each retires or merges, or stating why nothing can be.",
+    "reuse_search": "a finding \u2014 the endpoints \u00a72 and \u00a74 ask for already have owners in the tree: the field-code table (`iter_codex/discovery/signals/field_codes.py`, `field_codes_graph.py`, `iter_codex/remote/field_code_table.py`) and the document fetch path (`iter_codex/discovery/icp/documents.py:56`), and the plan's \u00a71 problem statements treat both as absent.",
+    "thin_wrapper": "a finding \u2014 \u00a74's fallback \"a record export the coordinator supplies where that client cannot search\" is a manual layer around a search the guarded client deliberately refuses to perform."
+  },
+  "section_digests": {
+    "_document": "878222f143675060d6c67a635eec3665eba921bbb9e79636d618cca92baea9f3",
+    "s1": "aff7c40a33c48ca9fa3012b710a376135f704099f5648c31837a88e938d3c272",
+    "s2": "df9a165e5b50ba7a18b9d21352bc2a0298bd036ba32574284c9261e33b415638",
+    "s3": "8dd929c6f93343ec66932e59c3285281a17bc190027f7984ba11908e426650d0",
+    "s4": "838978854846dee0bd524dbe514819fc48f4b2496de23362be564d7e8fa8908b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T21:00:04.077126+00:00",
+  "total": null
+}

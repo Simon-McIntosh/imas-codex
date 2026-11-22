@@ -968,9 +968,7 @@ def _text_search_signals(
         role_clause += "          AND s.vocabulary_role = $vocabulary_role\n"
         role_param["vocabulary_role"] = vocabulary_role
     eligible = searchable_description_predicate(text="s[field]")
-    field_guard = (
-        f"(NOT (field IN ['description', 'source_description']) OR {eligible})"
-    )
+    field_guard = f"(NOT (field IN ['description', 'source_description', 'generated_description']) OR {eligible})"
     escaped = re.sub(r'([+\-!(){}\[\]^"~*?:\\/])', r"\\\1", query)
     fields = [
         "name",
@@ -980,6 +978,7 @@ def _text_search_signals(
         "aliases",
         "unit",
         "source_description",
+        "generated_description",
     ]
 
     # Try fulltext index first (BM25 scoring)
@@ -1112,6 +1111,7 @@ def _enrich_signals(
              collect(DISTINCT wc.section) AS wiki_mentions,
              collect(DISTINCT {title: wp.title, id: wp.id}) AS documented_pages
         RETURN s.id AS id, s.name AS name, s.description AS description,
+               s.generated_description AS generated_description,
                s.physics_domain AS physics_domain, s.unit AS unit,
                s.description_source AS description_source,
                s.description_source_updated_at AS description_source_updated_at,

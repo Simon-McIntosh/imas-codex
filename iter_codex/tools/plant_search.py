@@ -16,8 +16,11 @@ _SIGNAL_FIELDS = """s { .id, .name, .accessor, .unit, .control_path,
     .name_parse_outcome, .candidate_plant_component,
     .vocabulary_quantity, .vocabulary_quantity_state,
     .vocabulary_role, .vocabulary_role_state,
+    description_source: s.description_source,
     description: substring(s.description, 0, $description_chars),
-    description_truncated: coalesce(size(s.description), 0) > $description_chars }"""
+    description_truncated: coalesce(size(s.description), 0) > $description_chars,
+    generated_description: substring(s.generated_description, 0, $description_chars),
+    generated_description_truncated: coalesce(size(s.generated_description), 0) > $description_chars }"""
 
 
 def _pagination(limit: int, offset: int) -> None:
@@ -123,6 +126,12 @@ def list_plant_signals(
     exact parsed codes. ``vocabulary_role`` keeps only signals the assignment
     decided as that role, so a role listing never returns another role. All
     supplied filters are combined with AND.
+
+    Each signal carries two descriptions, each named for what it holds:
+    ``description`` is the source description (feed or archive wording), with
+    ``description_source`` naming where it came from, and
+    ``generated_description`` is the enrichment-composed text. The plant
+    catalogue's own semantics are read from the source description.
     """
     _pagination(limit, offset)
     facility = _text(facility, "facility")

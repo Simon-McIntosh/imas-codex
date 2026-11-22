@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/discovery/test_catalogue_text_kept.py::test_reenumeration_only_refills_catalogue_text_on_enriched_signal"
+  ],
+  "completed_at": "2026-11-22T18:48:40.933Z",
+  "dispatched_at": "2026-11-22T18:38:00Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "keep-feed-descriptions-beside-generated-ones",
+      "recorded_at": "2026-11-22T21:01:44.566453+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/discovery/test_catalogue_text_kept.py",
+      "line": 231,
+      "severity": "blocking",
+      "text": "after the run's change a test that passes at base fails, because it asserts enrichment rewrites description to 'Fresh model wording' while the writer now writes that text to generated_description and leaves description as 'Existing model wording'; the after arm records it as the only head-only failure, so landing leaves CI red until the assertion reads generated_description."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html",
+      "line": 27,
+      "severity": "non-blocking",
+      "text": "the sentence attributes the 2,708 baseline to the coordinator 'before this run', but the run's own repair probe printed before_counts feed_source 2708 at 17:07:50 UTC, nine seconds before the receipt stamped 17:07:59, so the attribution of who measured it and when is not supported by the artifacts even though the value is."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the gained commit 1bdae75a is a one-line evidence correction to docs/.../keep-feed-descriptions-beside-generated-ones.html:27, replacing 'the before figure is the after figure less the 190' with a statement that 2,708 was measured from the live graph, which is the provenance the prior review's finding f8f71c0b2a1 asked for.\nVERDICT done_when: the measures are unchanged by the gained commit; the run's manifest.md baseline_suite/after_suite compare 0aa4b347 (28 failed / 3,870 passed, EXIT=1) with c92bd864 (28 failed / 3,875 passed, EXIT=1), and the set difference leaves one head-only failure at tests/discovery/test_catalogue_text_kept.py:231 and one base-only live test.\nVERDICT write_paths: the gained commit touches only docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html, which is inside the declared write paths; the whole run's 14 paths were checked in the prior record at c92bd864.\nVERDICT manifest: read; status complete, commits c92bd864 and 1bdae75a, three gate logs each ending in an EXIT= line, and a blockers line naming the same stale test the arm difference finds.\nVERDICT diff: read c92bd864..1bdae75a commit by commit: one commit, one file, +1/-1, a prose change to the counts note only; no code or test changed.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the only gained change is the sentence at docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html:27 that attributes the pre-repair baseline to a measurement, exactly the correction the prior finding required.\nSCORE evidence: 15\nJUSTIFICATION evidence: the 2,708 value is corroborated by the run's own pre-repair probe output (before_counts feed_source 2708) nine seconds before the repair receipt; the sentence's 'before this run' wording is not supported by the artifacts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the gained commit changes one line of docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html:27 and nothing else, inside the declared write path.\nSCORE durability: 14\nJUSTIFICATION durability: the gained commit adds or changes no assertion, and the run's after arm leaves a base-green test red at tests/discovery/test_catalogue_text_kept.py:231.\nSCORE fit: 20\nJUSTIFICATION fit: the new sentence keeps the paragraph id keep-feed-descriptions-beside-generated-ones-counts-note and the evidence file's existing idiom at docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html:27.\nSCORE reuse: 20\nJUSTIFICATION reuse: the gained commit adds no definition; the repair-verification capability is already owned by iter_codex/discovery/signals/description_snapshot.py:1, which the run extended rather than forked.\nFINDING tests/discovery/test_catalogue_text_kept.py:231 blocking: after the run's change a test that passes at base fails, because it asserts enrichment rewrites description to 'Fresh model wording' while the writer now writes that text to generated_description and leaves description as 'Existing model wording'; the after arm records it as the only head-only failure, so landing leaves CI red until the assertion reads generated_description.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html:27 non-blocking: the sentence attributes the 2,708 baseline to the coordinator 'before this run', but the run's own repair probe printed before_counts feed_source 2708 at 17:07:50 UTC, nine seconds before the receipt stamped 17:07:59, so the attribution of who measured it and when is not supported by the artifacts even though the value is.",
+  "review_run_id": "r-20261122T183737912942-review-of-keep-feed-descriptions-beside-generated-ones-1bdae75a8b51",
+  "reviewed_base_sha": "c92bd864287e44ccc3f34bc520b6372e42a65f3e",
+  "reviewed_head_sha": "1bdae75a8b5196bac2b5640a50d2ecddcbec612c",
+  "reviewed_run_id": "r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T18:48:51.629224+00:00",
+  "total": 109,
+  "verdicts": {
+    "call_sites": "none",
+    "diff": "read c92bd864..1bdae75a commit by commit: one commit, one file, +1/-1, a prose change to the counts note only; no code or test changed.",
+    "done_when": "the measures are unchanged by the gained commit; the run's manifest.md baseline_suite/after_suite compare 0aa4b347 (28 failed / 3,870 passed, EXIT=1) with c92bd864 (28 failed / 3,875 passed, EXIT=1), and the set difference leaves one head-only failure at tests/discovery/test_catalogue_text_kept.py:231 and one base-only live test.",
+    "goal": "the gained commit 1bdae75a is a one-line evidence correction to docs/.../keep-feed-descriptions-beside-generated-ones.html:27, replacing 'the before figure is the after figure less the 190' with a statement that 2,708 was measured from the live graph, which is the provenance the prior review's finding f8f71c0b2a1 asked for.",
+    "manifest": "read; status complete, commits c92bd864 and 1bdae75a, three gate logs each ending in an EXIT= line, and a blockers line naming the same stale test the arm difference finds.",
+    "write_paths": "the gained commit touches only docs/evidence/fragments/iter-signal-context-and-enrichment/keep-feed-descriptions-beside-generated-ones.html, which is inside the declared write paths; the whole run's 14 paths were checked in the prior record at c92bd864."
+  }
+}

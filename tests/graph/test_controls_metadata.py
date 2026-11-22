@@ -148,9 +148,7 @@ def test_controls_import_preserves_archive_state_and_excludes_unknowns(
         ) == [{"total": 0}]
 
 
-def test_description_provenance_survives_reembedding_but_not_a_rewrite(
-    disposable_graph,
-):
+def test_description_provenance_survives_generated_writes(disposable_graph):
     from iter_codex.discovery.signals.parallel import write_signal_descriptions
 
     with GraphClient() as graph:
@@ -165,8 +163,16 @@ def test_description_provenance_survives_reembedding_but_not_a_rewrite(
             precomputed_embeddings={"demo:temperature": [1.0] * 256},
         )
         assert graph.query(
-            "MATCH (s:FacilitySignal {id:'demo:temperature'}) RETURN s.description_source AS source"
-        ) == [{"source": FEED_SOURCE}]
+            "MATCH (s:FacilitySignal {id:'demo:temperature'}) "
+            "RETURN s.description AS description, s.description_source AS source, "
+            "s.description_source_updated_at AS updated"
+        ) == [
+            {
+                "description": "Helium inlet temperature",
+                "source": FEED_SOURCE,
+                "updated": "2026-01-02 03:04:05",
+            }
+        ]
         write_signal_descriptions(
             [{"id": "demo:temperature", "description": "Helium outlet temperature"}],
             gc=graph,
@@ -174,8 +180,15 @@ def test_description_provenance_survives_reembedding_but_not_a_rewrite(
         )
         assert graph.query(
             "MATCH (s:FacilitySignal {id:'demo:temperature'}) "
-            "RETURN s.description_source AS source, s.description_source_updated_at AS updated"
-        ) == [{"source": None, "updated": None}]
+            "RETURN s.description AS description, s.description_source AS source, "
+            "s.generated_description AS generated"
+        ) == [
+            {
+                "description": "Helium inlet temperature",
+                "source": FEED_SOURCE,
+                "generated": "Helium outlet temperature",
+            }
+        ]
         write_signal_descriptions(
             [
                 {
@@ -188,10 +201,12 @@ def test_description_provenance_survives_reembedding_but_not_a_rewrite(
         )
         assert graph.query(
             "MATCH (s:FacilitySignal {id:'demo:temperature'}) "
-            "RETURN s.description AS description, s.embedding IS NOT NULL AS retained_vector"
+            "RETURN s.generated_description AS generated, s.description AS description, "
+            "s.embedding IS NOT NULL AS retained_vector"
         ) == [
             {
-                "description": "Demonstration cooling temperature",
+                "generated": "Demonstration cooling temperature",
+                "description": "Helium inlet temperature",
                 "retained_vector": True,
             }
         ]
@@ -202,8 +217,9 @@ def test_description_provenance_survives_reembedding_but_not_a_rewrite(
             precomputed_embeddings={"demo:temperature": None},
         )
         assert graph.query(
-            "MATCH (s:FacilitySignal {id:'demo:temperature'}) RETURN s.embedding AS embedding"
-        ) == [{"embedding": None}]
+            "MATCH (s:FacilitySignal {id:'demo:temperature'}) "
+            "RETURN s.embedding AS embedding, s.description AS description"
+        ) == [{"embedding": None, "description": "Helium inlet temperature"}]
 
 
 def test_archive_rescan_preserves_feed_unit_type_and_description(disposable_graph):
