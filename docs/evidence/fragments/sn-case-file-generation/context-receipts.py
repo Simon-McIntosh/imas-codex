@@ -352,13 +352,19 @@ def document(report: dict[str, Any]) -> str:
     )
 
     gate_revision = os.environ.get("CONTEXT_RECEIPT_REVISION") or report["revision"]
+    gate_result = os.environ.get("CONTEXT_RECEIPT_GATE_RESULT", "").strip()
+    gate_sentence = (
+        f" Its whole-directory gate reported <code>{escape(gate_result)}</code>."
+        if gate_result
+        else ""
+    )
     add(
         "p",
         "provenance",
         f"Census data at revision <code>{report['revision']}</code>, tree "
         f"<code>{report['tree']}</code>, generated {report['generated_at']}. The "
         f"gates and control runs beside it were read at revision "
-        f"<code>{gate_revision}</code>.",
+        f"<code>{gate_revision}</code>.{gate_sentence}",
     )
 
     add("h2", "omissions-head", "Omissions, ranked by how many names each affects")
