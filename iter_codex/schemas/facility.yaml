@@ -3136,7 +3136,7 @@ classes:
     annotations:
       fulltext_index:
         tag: fulltext_index
-        value: "facility_signal_text:name,description,node_path,keywords,aliases,unit,source_description"
+        value: "facility_signal_text:name,description,node_path,keywords,aliases,unit,source_description,generated_description"
     mixins:
       - DiscoveryProvenance
       - LLMOperation
@@ -3320,15 +3320,30 @@ classes:
         annotations:
           relationship_type: CHECKED_WITH
       description:
-        description: What this signal measures (physics description)
+        description: >-
+          Source description: what the sources say this signal measures. Holds
+          the controls-feed label or the archive's own wording. Enrichment writes
+          generated_description instead and never rewrites this text.
       description_source:
         description: >-
-          Source supplying the current description, unit and type, such as a
+          Source supplying the source description, unit and type, such as a
           controls metadata feed. Does not assert engineering validation.
       description_source_updated_at:
         description: >-
           Update timestamp supplied by the description source, preserved as
           reported. A timestamp without a timezone is not assumed to be UTC.
+      generated_description:
+        description: >-
+          Description composed by an enrichment mechanism from the signal's
+          context. Held apart from the source description so enrichment cannot
+          erase what the sources say.
+      generated_description_source:
+        description: >-
+          Mechanism that composed the generated description, such as group
+          composition or a source's propagated text.
+      generated_description_updated_at:
+        range: datetime
+        description: When the generated description was written
       source_description:
         description: Catalogue wording supplied by the source data system, independent of enrichment
       metadata_archive:

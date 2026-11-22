@@ -3,15 +3,17 @@
 A description rewrite that leaves the old embedding in place leaves the vector
 describing text the node no longer carries, so search ranks a signal by a
 description that is gone. ``write_signal_descriptions`` is the one place a
-``FacilitySignal`` description is written: it sets ``description``,
-``embedding``, ``embedded_at`` and ``embedded_text_hash`` together, and every
-description rewrite in the signals package delegates to it.
+``FacilitySignal`` generated description is written: it sets
+``generated_description``, ``embedding``, ``embedded_at`` and
+``embedded_text_hash`` together, and every description rewrite in the signals
+package delegates to it. ``description`` holds what the sources say and is
+never written here.
 
 The individualization pass replaces each group member's copy of the
-representative's description with its own. These tests drive that pass over a
-small stateful graph and assert the members end holding embeddings of their own
-text rather than the representative's — the check that fails against a writer
-that writes the description without re-embedding.
+representative's text with its own. These tests drive that pass over a small
+stateful graph and assert the members end holding embeddings of their own text
+rather than the representative's — the check that fails against a writer that
+writes the description without re-embedding.
 """
 
 from __future__ import annotations
@@ -89,13 +91,14 @@ class _Graph:
                 ]
             return []
 
-        if "embedded_text_hash" in cypher:
+        if "embedded_text_hash" in cypher or "s.generated_description =" in cypher:
             by_id = {m["id"]: m for m in self.members}
             for item in params["items"]:
                 node = by_id[item["id"]]
-                node["description"] = item["description"]
-                node["embedding"] = item.get("embedding")
-                node["embedded_text_hash"] = item["embedded_text_hash"]
+                node["generated_description"] = item["description"]
+                if "s.embedding = item.embedding" in cypher:
+                    node["embedding"] = item.get("embedding")
+                    node["embedded_text_hash"] = item["embedded_text_hash"]
                 node["name"] = item["name"]
                 node["enrichment_source"] = item["enrichment_source"]
             return [{"updated": len(params["items"])}]
@@ -123,9 +126,11 @@ def _members(start, n):
         {
             "id": f"facility:mdac_magpbtc{i}",
             "accessor": f"eddbreadTime('E101173', 'MDAC', 'magPbTC{i}', t1, t2)",
-            # Every member starts holding the representative's copy and its
-            # vector, the state propagation leaves behind.
-            "description": REP_DESCRIPTION,
+            # Every member starts holding the representative's generated copy
+            # and its vector, the state propagation leaves behind, beside its
+            # own source description.
+            "description": f"Feed label TC-{i}",
+            "generated_description": REP_DESCRIPTION,
             "embedding": _embedding_of(REP_DESCRIPTION),
             "embedded_text_hash": _text_hash(REP_DESCRIPTION),
             "name": None,
@@ -184,22 +189,30 @@ def test_individualization_write_reembeds_each_member(monkeypatch):
     graph = _Graph(_source(members_described=False), _members(10, 2))
     graph.members[0]["id"] = REP_ID
     graph.members[0]["node_description"] = "Magnetic probe TC-10 at R=1.10 m"
+    sources = {m["id"]: m["description"] for m in graph.members}
     _wire(monkeypatch, graph)
 
     asyncio.run(parallel.individualize_source_descriptions("facility"))
 
-    descriptions = [m["description"] for m in graph.members]
+    descriptions = [m["generated_description"] for m in graph.members]
     assert len(set(descriptions)) == 2, descriptions
     for member in graph.members:
-        assert member["embedding"] == _embedding_of(member["description"]), (
-            f"{member['id']} kept a stale embedding for {member['description']!r}"
+        assert member["embedding"] == _embedding_of(member["generated_description"]), (
+            f"{member['id']} kept a stale embedding for "
+            f"{member['generated_description']!r}"
         )
-        assert member["embedded_text_hash"] == _text_hash(member["description"])
+        assert member["embedded_text_hash"] == _text_hash(
+            member["generated_description"]
+        )
+        assert member["description"] == sources[member["id"]], (
+            "the source description must survive an individualized write"
+        )
 
 
-def test_writer_sets_description_embedding_and_hash_together(monkeypatch):
-    """The writer stores the description, its embedding and its hash in one write."""
+def test_writer_sets_generated_description_embedding_and_hash_together(monkeypatch):
+    """The writer stores the generated text, its vector and its hash in one write."""
     written: list[dict] = []
+    statements: list[str] = []
 
     class _Capture:
         def __enter__(self):
@@ -209,6 +222,7 @@ def test_writer_sets_description_embedding_and_hash_together(monkeypatch):
             return False
 
         def query(self, cypher: str, **params):
+            statements.append(cypher)
             written.extend(params["items"])
             return [{"updated": len(params["items"])}]
 
@@ -224,6 +238,10 @@ def test_writer_sets_description_embedding_and_hash_together(monkeypatch):
     assert row["description"] == "Plasma current"
     assert row["embedding"] == _embedding_of("Plasma current")
     assert row["embedded_text_hash"] == _text_hash("Plasma current")
+    statement = statements[0]
+    assert "s.generated_description = item.description" in statement
+    assert "s.description = item.description" not in statement
+    assert "s.generated_description_source = coalesce(" in statement
 
 
 def test_writer_embeds_the_text_the_caller_supplies(monkeypatch):
@@ -284,7 +302,7 @@ class _NodeGraph:
         carrying_vector = "s.embedding = item.embedding" in cypher
         for item in params["items"]:
             node = self.nodes[item["id"]]
-            node["description"] = item["description"]
+            node["generated_description"] = item["description"]
             if carrying_vector:
                 node["embedding"] = item["embedding"]
                 node["embedded_text_hash"] = item["embedded_text_hash"]
@@ -328,7 +346,8 @@ def test_unembedded_item_keeps_its_vector_and_hash(monkeypatch):
     )
 
     node = nodes["tcv:ip"]
-    assert node["description"] == "Plasma current (A)"
+    assert node["generated_description"] == "Plasma current (A)"
+    assert node["description"] == "Plasma current"
     assert node["embedding"] == _embedding_of("Plasma current")
     assert node["embedded_text_hash"] == _text_hash("Plasma current")
     assert node["embedded_at"] == "earlier"
@@ -358,7 +377,8 @@ def test_only_the_embedded_item_receives_a_fresh_vector(monkeypatch):
 
     assert nodes["tcv:ip"]["embedding"] == _embedding_of("Plasma current (A)")
     assert nodes["tcv:ip"]["embedded_text_hash"] == _text_hash("Plasma current (A)")
-    assert nodes["tcv:q95"]["description"] == "Edge safety factor (new)"
+    assert nodes["tcv:q95"]["generated_description"] == "Edge safety factor (new)"
+    assert nodes["tcv:q95"]["description"] == "Edge safety factor"
     assert nodes["tcv:q95"]["embedding"] == _embedding_of("Edge safety factor")
     assert nodes["tcv:q95"]["embedded_text_hash"] == _text_hash("Edge safety factor")
     assert nodes["tcv:q95"]["embedded_at"] == "earlier"

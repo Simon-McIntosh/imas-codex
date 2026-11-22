@@ -14,8 +14,11 @@ _DESCRIPTION_CHARS = 2048
 _SIGNAL_FIELDS = """s { .id, .name, .accessor, .unit, .control_path,
     .component_category, .component_sequence, .field_code, .field_discriminator,
     .name_parse_outcome, .candidate_plant_component,
+    description_source: s.description_source,
     description: substring(s.description, 0, $description_chars),
-    description_truncated: coalesce(size(s.description), 0) > $description_chars }"""
+    description_truncated: coalesce(size(s.description), 0) > $description_chars,
+    generated_description: substring(s.generated_description, 0, $description_chars),
+    generated_description_truncated: coalesce(size(s.generated_description), 0) > $description_chars }"""
 
 
 def _pagination(limit: int, offset: int) -> None:
@@ -118,6 +121,12 @@ def list_plant_signals(
     A plant system is a control-path prefix with a hyphen boundary. A function
     is an exact FunctionID (the complete control path). Category and field are
     exact parsed codes. All supplied filters are combined with AND.
+
+    Each signal carries two descriptions, each named for what it holds:
+    ``description`` is the source description (feed or archive wording), with
+    ``description_source`` naming where it came from, and
+    ``generated_description`` is the enrichment-composed text. The plant
+    catalogue's own semantics are read from the source description.
     """
     _pagination(limit, offset)
     facility = _text(facility, "facility")

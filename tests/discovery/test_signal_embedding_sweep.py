@@ -80,6 +80,7 @@ class _SweepGraph:
                 {
                     "id": nid,
                     "description": node.get("description"),
+                    "generated_description": node.get("generated_description"),
                     "embedded_text_hash": node.get("embedded_text_hash"),
                     "facility_id": node.get("facility_id"),
                 }
@@ -97,18 +98,21 @@ class _SweepGraph:
                 )
             ]
 
-        if "s.description = item.description" in cypher:
+        if (
+            "s.generated_description = item.description" in cypher
+            or "s.embedded_text_hash = item.embedded_text_hash" in cypher
+        ):
+            carries_text = "s.generated_description = item.description" in cypher
             carries_vector = "s.embedding = item.embedding" in cypher
             carries_hash = "s.embedded_text_hash = item.embedded_text_hash" in cypher
             for item in params["items"]:
                 node = self.nodes[item["id"]]
-                node["description"] = item["description"]
+                if carries_text:
+                    node["generated_description"] = item["description"]
                 if carries_vector:
                     node["embedding"] = item["embedding"]
-                    node["embedded_text_hash"] = item["embedded_text_hash"]
                     node["embedded_at"] = "now"
-                elif carries_hash:
-                    node["description"] = item["description"]
+                if carries_hash:
                     node["embedded_text_hash"] = item["embedded_text_hash"]
             return [{"updated": len(params["items"])}]
 

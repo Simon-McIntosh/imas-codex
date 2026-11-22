@@ -251,6 +251,22 @@ def import_controls_metadata(
             if count != len(pending):
                 raise RuntimeError("new feed-covered signal batch was not acknowledged")
             added += count
+        # A signal carrying a generated description keeps that text as its
+        # embed text, so its stored hash is the hash of the generated text. A
+        # source update must not read as a description change against it, or
+        # every import re-reports the row as changed and re-embeds it forever.
+        generated_state = {
+            record["id"]: record["embedded_text_hash"] or ""
+            for record in graph.query(
+                "UNWIND $ids AS id MATCH (s:FacilitySignal {id:id}) "
+                "WHERE s.generated_description IS NOT NULL "
+                "RETURN s.id AS id, s.embedded_text_hash AS embedded_text_hash",
+                ids=[row["id"] for row in rows],
+            )
+        }
+        for row in rows:
+            if row["id"] in generated_state:
+                row["text_hash"] = generated_state[row["id"]]
         receipt = graph.query(UPDATE_QUERY, facility=facility, rows=rows)
         if len(receipt) != len(rows):
             raise RuntimeError("controls metadata update was not acknowledged")
@@ -260,15 +276,30 @@ def import_controls_metadata(
             from iter_codex.discovery.signals.parallel import write_signal_descriptions
 
             row_by_id = {row["id"]: row for row in updates}
+            generated_ids = set(generated_state)
+            # A signal's embed text is its generated description where it has
+            # one, so a source update must not re-vector that row: replacing
+            # the vector would leave it describing text other than the indexed
+            # generated description. Those rows take the no-vector arm, which
+            # rewrites the source text and leaves the stored vector and hash
+            # untouched. A feed-only row with no vector and no text to vectorise
+            # records the empty text's hash, so it stops reading as changed.
             count = write_signal_descriptions(
                 [{"id": row["id"], **row["props"]} for row in updates],
                 gc=graph,
-                embed_text=lambda item, row_by_id=row_by_id: (
+                text_property="description",
+                embed_text=lambda item, row_by_id=row_by_id, generated_ids=generated_ids: (
                     item["description"]
-                    if row_by_id[item["id"]]["embedding"] is not None
+                    if item["id"] in generated_ids
+                    or row_by_id[item["id"]]["embedding"] is not None
                     else ""
                 ),
-                precomputed_embeddings={row["id"]: row["embedding"] for row in updates},
+                precomputed_embeddings={
+                    row["id"]: (
+                        None if row["id"] in generated_ids else row["embedding"]
+                    )
+                    for row in updates
+                },
             )
             if count != len(updates):
                 raise RuntimeError("controls description write was not acknowledged")

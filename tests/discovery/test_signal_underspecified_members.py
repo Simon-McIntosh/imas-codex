@@ -37,9 +37,9 @@ class _Graph:
             if self.claim_token == params["token"]:
                 return [dict(self.member)]
             return []
-        if "SET s.description = item.description" in statement:
+        if "SET s.generated_description = item.description" in statement:
             item = params["items"][0]
-            self.member["description"] = item["description"]
+            self.member["generated_description"] = item["description"]
             self.member["embedding"] = item["embedding"]
             self.member["embedded_text_hash"] = item["embedded_text_hash"]
             return [{"updated": 1}]
@@ -92,7 +92,9 @@ def test_underspecified_source_member_leaves_discovered_with_its_own_text(monkey
         == 1
     )
     assert graph.member["status"] == "enriched"
-    assert graph.member["description"] == description
+    assert graph.member["generated_description"] == description
+    assert graph.member.get("description") is None
+    assert graph.member["source_description"] == "Member's own catalogue text"
     assert graph.member["embedding"] == [float(len(description))]
     assert (
         graph.member["embedded_text_hash"]
