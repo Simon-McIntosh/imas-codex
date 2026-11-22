@@ -210,7 +210,7 @@ class FieldCodeTable:
         specific = sum(1 for entry in self.entries if entry.component_kind is not None)
         summary: dict[str, Any] = {
             "entries": len(self.entries),
-            "codes_with_entry": len(self.codes()),
+            "entry_codes": len(self.codes()),
             "entries_by_source": {
                 source: by_source.get(source, 0) for source in TABLE_SOURCES
             },
@@ -226,7 +226,11 @@ class FieldCodeTable:
         }
         if signals_by_code is not None:
             codes = self.codes()
+            catalogue = set(signals_by_code)
             summary["catalogue_signals"] = sum(signals_by_code.values())
+            summary["codes_with_entry"] = len(codes & catalogue)
+            summary["codes_without_entry"] = len(catalogue - codes)
+            summary["entry_codes_not_in_catalogue"] = sorted(codes - catalogue)
             summary["signals_with_entry"] = sum(
                 count for code, count in signals_by_code.items() if code in codes
             )

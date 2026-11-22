@@ -149,17 +149,12 @@ def build_from_graph(
     summary.update(
         {
             "distinct_codes": distinct,
-            "codes_without_entry": distinct - summary["codes_with_entry"],
             "source_texts_read": texts,
             "role_statements": len(statements),
             "codes_with_role_statement": len({item.code for item in statements}),
             "setpoint": _setpoint_report(table, statements),
         }
     )
-    if summary["codes_with_entry"] + summary["codes_without_entry"] != distinct:
-        raise AssertionError(
-            "entry and non-entry codes must sum to the distinct catalogue codes"
-        )
     return {"table": table, "summary": summary}
 
 
