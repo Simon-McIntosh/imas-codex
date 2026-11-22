@@ -166,6 +166,16 @@
       "note": "s4 names the record export as the sole route with recorded provenance; no either/or remains",
       "reason": "",
       "when": "2026-11-22T21:01:23.384353+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "s2 now requires each addition to state what it makes redundant or retires, or why nothing; s3 and s4 inherit those verdicts",
+      "reason": "",
+      "when": "2026-11-22T21:01:27.289061+00:00"
     }
   ],
   "responses": {
@@ -195,6 +205,15 @@
       "note": "s2's census of readers names the plant search tools and the shared filter builder among the read paths that must not change behaviour",
       "reason": "",
       "when": "2026-11-22T21:01:18.247838+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s2 now requires each addition to state what it makes redundant or retires, or why nothing; s3 and s4 inherit those verdicts",
+      "reason": "",
+      "when": "2026-11-22T21:01:27.289061+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
