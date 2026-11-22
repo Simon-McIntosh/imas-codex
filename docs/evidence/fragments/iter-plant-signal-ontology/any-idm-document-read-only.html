@@ -1,0 +1,64 @@
+<article id="any-idm-document-read-only-evidence">
+  <h2>The read-only client fetches any well-formed document identity</h2>
+  <p>The document gate no longer keeps a list of identities. It now validates the
+  <em>form</em> of the request: the configured path, exactly the three query keys
+  <code>uid</code>, <code>version</code> and <code>action</code>, no repeated key, no
+  fragment, <code>action=get_document</code>, a version of the shape
+  <code>v&lt;digits&gt;[.&lt;digits&gt;]*</code>, and an identity of one to sixty-four
+  characters from letters, digits, underscore and hyphen. Everything else is refused
+  at the same transport chokepoint as before, before any network call.</p>
+  <p>Every other rule of the request policy is unchanged: GET and HEAD are the only
+  methods, the origin and Host header must match the configured document origin, the
+  sign-in boundary still applies, and the per-identity and session request budgets still
+  count document reads. A write method sent to a valid document URL is refused by the
+  method rule, which runs before the document gate, so the write refusal tests pass
+  unchanged.</p>
+
+  <h3>Rate limit and its default</h3>
+  <p>The document origin has its own pacer, separate from the general client pacer, and
+  its interval is read from the private configuration key
+  <code>document_min_interval</code>. When the key is absent the interval is
+  <strong>1.0 s</strong>. That default is chosen because one document fetch is two
+  transport requests (a HEAD size probe and then the GET), each able to carry a file of
+  up to 50 MB, and a one-second floor bounds that bulk transfer more conservatively than
+  the general read interval of 0.5 s. A configured value must be a finite, non-negative
+  number; a boolean, a string, a null, a negative number or a non-finite value is refused
+  at construction rather than silently loosened to the default.</p>
+
+  <h3>Identity list</h3>
+  <p><code>document_identities</code> is <strong>ignored</strong>, not removed. The private
+  configuration still carries the key, and construction no longer reads it. One test
+  fixture deliberately keeps a fictitious entry to show the key is optional and has no
+  effect. The main checkout's private configuration therefore needs only the existing
+  document origin and path, and optionally <code>document_min_interval</code>.</p>
+
+  <h3>Live fetch</h3>
+  <table><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody>
+<tr><th>Identity among the seven pilot identities</th><td>no</td></tr>
+<tr><th>Outcome</th><td>fetched</td></tr>
+<tr><th>HTTP status</th><td>200</td></tr>
+<tr><th>Content type</th><td>application/pdf</td></tr>
+<tr><th>Signature</th><td>%PDF-</td></tr>
+<tr><th>Pages</th><td>4</td></tr>
+<tr><th>Bytes</th><td>192020</td></tr>
+<tr><th>Digest recorded privately</th><td>yes, SHA-256 beside the stored file</td></tr>
+<tr><th>Identity in a tracked file</th><td>no</td></tr>
+  </tbody></table>
+  <p>The fetch went through the guarded client's normal path: sign-in, the HEAD size
+  probe, the GET, content validation, and storage under a private directory outside the
+  repository with owner-only permissions. The identity, title and digest exist only in
+  private storage. No identity, title or host name appears in this fragment or any other
+  tracked file; the tests use invented identities and hosts.</p>
+
+  <h3>Tests</h3>
+  <table><thead><tr><th>Arm</th><th>Result</th></tr></thead><tbody>
+<tr><th>Base revision, client test files</th><td>480 passed</td></tr>
+<tr><th>Node revision, same files</th><td>507 passed</td></tr>
+<tr><th>Negative control: identity check restored</th><td>5 failed, all in the unlisted-identity test</td></tr>
+  </tbody></table>
+  <p>The added tests cover an allowed GET of an unlisted identity, refusal of POST, PUT,
+  PATCH and DELETE to the same URL before transport, refusal of a malformed identity, an
+  extra query key, a different path and a fragment, the safe default interval, the
+  default read from private configuration, and the interval applied at the transport
+  boundary.</p>
+</article>
