@@ -80,6 +80,7 @@ class _SweepGraph:
                 {
                     "id": nid,
                     "description": node.get("description"),
+                    "generated_description": node.get("generated_description"),
                     "embedded_text_hash": node.get("embedded_text_hash"),
                     "facility_id": node.get("facility_id"),
                 }
@@ -97,20 +98,37 @@ class _SweepGraph:
                 )
             ]
 
-        if "s.description = item.description" in cypher:
+        if (
+            "s.generated_description = item.description" in cypher
+            or "s.description = item.description" in cypher
+            or "s.embedded_text_hash = item.embedded_text_hash" in cypher
+        ):
+            carries_generated = "s.generated_description = item.description" in cypher
+            carries_source = "s.description = item.description" in cypher
             carries_vector = "s.embedding = item.embedding" in cypher
             carries_hash = "s.embedded_text_hash = item.embedded_text_hash" in cypher
+            applied = 0
             for item in params["items"]:
                 node = self.nodes[item["id"]]
-                node["description"] = item["description"]
+                if "s.description_source IS NOT NULL" in cypher and not node.get(
+                    "description_source"
+                ):
+                    continue
+                if "s.description_source IS NULL" in cypher and node.get(
+                    "description_source"
+                ):
+                    continue
+                applied += 1
+                if carries_generated:
+                    node["generated_description"] = item["description"]
+                elif carries_source:
+                    node["description"] = item["description"]
                 if carries_vector:
                     node["embedding"] = item["embedding"]
-                    node["embedded_text_hash"] = item["embedded_text_hash"]
                     node["embedded_at"] = "now"
-                elif carries_hash:
-                    node["description"] = item["description"]
+                if carries_hash:
                     node["embedded_text_hash"] = item["embedded_text_hash"]
-            return [{"updated": len(params["items"])}]
+            return [{"updated": applied}]
 
         raise AssertionError(f"unexpected query: {cypher[:140]}")
 

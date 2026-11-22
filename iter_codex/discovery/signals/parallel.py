@@ -1527,12 +1527,26 @@ _DESCRIPTION_WRITER_KEYS = frozenset(
     {
         "id",
         "description",
+        "generated_description",
         "embed_text",
         "embedding",
         "embedded_at",
         "embedded_text_hash",
     }
 )
+
+# The generated-description slot and its provenance. ``description`` holds what
+# the sources say; a generated text never lands there.
+GENERATED_DESCRIPTION_PROPERTY = "generated_description"
+GENERATED_DESCRIPTION_SOURCE_PROPERTY = "generated_description_source"
+GENERATED_DESCRIPTION_AT_PROPERTY = "generated_description_updated_at"
+
+
+def _and_where(where: str, predicate: str) -> str:
+    """Add a predicate to a rendered ``WHERE``, or open one when there is none."""
+    if "WHERE" in where:
+        return f"{where}\n        AND {predicate}"
+    return f"{where}\n        WHERE {predicate}"
 
 
 def write_signal_descriptions(
@@ -1544,16 +1558,32 @@ def write_signal_descriptions(
     followers_status: str | None = None,
     extra_params: dict[str, Any] | None = None,
     precomputed_embeddings: dict[str, list[float] | None] | None = None,
+    text_property: str = GENERATED_DESCRIPTION_PROPERTY,
+    embed_only: bool = False,
 ) -> int:
     """The single writer for FacilitySignal descriptions.
 
-    Sets ``description`` together with its ``embedding``, ``embedded_at`` and
-    ``embedded_text_hash``, so a node's stored vector always describes the text
-    stored beside it. Every signal description rewrite in this package goes
-    through here: the enrichment and under-specification marks, the propagation
-    of a representative's text to its group, and the individualization pass.
-    Because the vector is written with the text, a description rewrite can no
-    longer leave a stale embedding behind.
+    Where the text lands depends on whether the signal already carries a source
+    description. A signal with ``description_source`` set — a controls-feed
+    label, say — keeps that text and its marker, and the composed text goes to
+    ``generated_description`` with its mechanism and timestamp. A signal with no
+    source marker has no source wording to hide, and ``description`` is its
+    enrichment slot, so the composed text is written there exactly as it was
+    before the separation. Either way ``embedding``, ``embedded_at`` and
+    ``embedded_text_hash`` follow the embed text, so a node's stored vector
+    always describes the text written beside it. No default-path write assigns
+    ``description`` or ``description_source`` on a signal that carries a source
+    marker. Every signal description rewrite in this package goes through here:
+    the enrichment and under-specification marks, the propagation of a
+    representative's text to its group, and the individualization pass.
+
+    ``text_property`` forces a text slot. ``description`` is used only by a
+    source import that owns the source text; the default is the routing above,
+    which is what every generated write takes.
+
+    ``embed_only`` rewrites the vector fields and hash for the embed text
+    without touching any description property, which is what a re-embed sweep
+    over an already-written text needs.
 
     ``embed_text`` derives the text to embed for one item; it defaults to
     :func:`signal_embed_text`, the single derivation the re-embed sweep and the
@@ -1585,12 +1615,21 @@ def write_signal_descriptions(
         precomputed_embeddings: Vectors already obtained for these exact items,
             keyed by signal identity. Every item must have a receipt. Enables a
             caller to validate a batch before admitting new graph signals.
+        text_property: Node property the item's ``description`` text is stored
+            in, forced for every item. Left at its default, each item's slot is
+            chosen per signal: the generated slot where the signal carries a
+            source marker, else ``description``.
+        embed_only: Write the vector fields and hash without any description
+            property.
 
     Returns:
         Number of nodes written.
     """
     if not items:
         return 0
+
+    if text_property not in {"description", GENERATED_DESCRIPTION_PROPERTY}:
+        raise ValueError("text_property must be a description slot")
 
     derive = embed_text or signal_embed_text
     payload: list[dict[str, Any]] = []
@@ -1662,27 +1701,57 @@ def write_signal_descriptions(
     def _params(rows: list[dict[str, Any]]) -> dict[str, Any]:
         return {**base_params, "items": rows}
 
-    if gc is None:
-        with GraphClient() as client:
-            return _write_description_arms(
+    if embed_only:
+        routes = [([], where)]
+    elif text_property == GENERATED_DESCRIPTION_PROPERTY:
+        generated = [
+            f"s.{GENERATED_DESCRIPTION_PROPERTY} = item.description",
+            f"s.{GENERATED_DESCRIPTION_SOURCE_PROPERTY} = coalesce("
+            "item.generated_description_source, item.enrichment_source, "
+            "'enrichment')",
+            f"s.{GENERATED_DESCRIPTION_AT_PROPERTY} = datetime()",
+        ]
+        # The two routes are disjoint on the marker, so every matched signal is
+        # written once and its own slot follows what the signal already holds:
+        # a source-marked signal keeps its source text, an unmarked one is
+        # enriched into the description slot as it was before the separation.
+        routes = [
+            (generated, _and_where(where, "s.description_source IS NOT NULL")),
+            (
+                ["s.description = item.description"],
+                _and_where(where, "s.description_source IS NULL"),
+            ),
+        ]
+    else:
+        routes = [([f"s.{text_property} = item.description"], where)]
+
+    def _write_all(client: GraphClient) -> int:
+        return sum(
+            _write_description_arms(
                 client,
                 match,
-                where,
+                route_where,
+                text_assignments,
                 extra_clause,
                 embedded,
                 unembedded,
                 empty_text,
                 _params,
             )
-    return _write_description_arms(
-        gc, match, where, extra_clause, embedded, unembedded, empty_text, _params
-    )
+            for text_assignments, route_where in routes
+        )
+
+    if gc is None:
+        with GraphClient() as client:
+            return _write_all(client)
+    return _write_all(gc)
 
 
 def _write_description_arms(
     gc: GraphClient,
     match: str,
     where: str,
+    text_assignments: list[str],
     extra_clause: str,
     embedded: list[dict[str, Any]],
     unembedded: list[dict[str, Any]],
@@ -1698,44 +1767,41 @@ def _write_description_arms(
     and the row stays marked for re-embedding.
     """
     written = 0
-    provenance = """
-            SET s.description_source = CASE WHEN s.description = item.description
-                    THEN s.description_source ELSE null END,
-                s.description_source_updated_at = CASE WHEN s.description = item.description
-                    THEN s.description_source_updated_at ELSE null END
-    """
-    if embedded:
-        statement = f"""
+
+    def _statement(assignments: list[str]) -> str | None:
+        every = text_assignments + assignments
+        if not every:
+            return None
+        body = ",\n                ".join(every)
+        return f"""
             UNWIND $items AS item
             {match}{where}
-            {provenance}
-            SET s.description = item.description,
-                s.embedding = item.embedding,
-                s.embedded_at = datetime(),
-                s.embedded_text_hash = item.embedded_text_hash{extra_clause}
+            SET {body}{extra_clause}
             RETURN count(s) AS updated
         """
+
+    if embedded:
+        statement = _statement(
+            [
+                "s.embedding = item.embedding",
+                "s.embedded_at = datetime()",
+                "s.embedded_text_hash = item.embedded_text_hash",
+            ]
+        )
         written += _run_description_write(gc, statement, params_for(embedded))
     if empty_text:
-        statement = f"""
-            UNWIND $items AS item
-            {match}{where}
-            {provenance}
-            SET s.description = item.description,
-                s.embedded_text_hash = item.embedded_text_hash,
-                s.embedding = null, s.embedded_at = null{extra_clause}
-            RETURN count(s) AS updated
-        """
+        statement = _statement(
+            [
+                "s.embedded_text_hash = item.embedded_text_hash",
+                "s.embedding = null",
+                "s.embedded_at = null",
+            ]
+        )
         written += _run_description_write(gc, statement, params_for(empty_text))
     if unembedded:
-        statement = f"""
-            UNWIND $items AS item
-            {match}{where}
-            {provenance}
-            SET s.description = item.description{extra_clause}
-            RETURN count(s) AS updated
-        """
-        written += _run_description_write(gc, statement, params_for(unembedded))
+        statement = _statement([])
+        if statement is not None:
+            written += _run_description_write(gc, statement, params_for(unembedded))
     return written
 
 
@@ -1769,17 +1835,20 @@ _SIGNAL_EMBED_ROW_CHUNK = 2000
 
 
 def signal_embed_text(row: dict[str, Any]) -> str:
-    """The text a signal's embedding encodes: its description alone.
+    """The text a signal's embedding encodes: its generated text, else its source text.
 
     This is the single derivation of a signal's embed text. The description
     writer takes it as its default ``embed_text``, the re-embed sweep writes
     through that writer, and the census's hash predicate recomputes it to
     decide a stored vector is stale — so all three agree on what text a stored
-    vector should describe. A composed name/description/unit text scored lower
-    on the golden harness, so the description alone is what is kept here. A
-    signal with no description has an empty embed text.
+    vector should describe. A generated description carries the richest
+    semantic content a signal has, so it is preferred; the source description
+    is what a signal with no generated text indexes. A composed
+    name/description/unit text scored lower on the golden harness, so one
+    description field is what is kept here. A signal with neither has an empty
+    embed text.
     """
-    return row.get("description") or ""
+    return row.get("generated_description") or row.get("description") or ""
 
 
 def _embed_text_hash(text: str) -> str:
@@ -1804,6 +1873,7 @@ def fetch_signal_embed_state(
         "MATCH (s:FacilitySignal) "
         f"{where} "
         "RETURN s.id AS id, s.description AS description, "
+        "s.generated_description AS generated_description, "
         "s.embedded_text_hash AS embedded_text_hash, "
         "s.facility_id AS facility_id"
     )
@@ -1869,12 +1939,17 @@ def reembed_stale_signal_descriptions(
         by_id = {row["id"]: row for row in rows}
         mismatches = find_signal_hash_mismatches(rows, client)
         items = [
-            {"id": sid, "description": by_id[sid]["description"]} for sid in mismatches
+            {
+                "id": sid,
+                "description": by_id[sid]["description"],
+                "generated_description": by_id[sid]["generated_description"],
+            }
+            for sid in mismatches
         ]
         written = 0
         for chunk in _chunks(items, batch_size):
             written += write_signal_descriptions(
-                chunk, gc=client, embed_text=signal_embed_text
+                chunk, gc=client, embed_text=signal_embed_text, embed_only=True
             )
         return {
             "population": len(rows),

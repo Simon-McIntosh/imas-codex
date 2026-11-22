@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Keeping a feed description beside its generated one</title>
+</head>
+<body>
+  <h2 id="keep-feed-descriptions-beside-generated-ones-summary">Keeping a feed description beside its generated one</h2>
+  <p id="keep-feed-descriptions-beside-generated-ones-scope">Pilot group enrichment wrote each of its 190 composed descriptions into the signal's <code>description</code> property, which is where the controls metadata feed stores its operator label, and left <code>description_source</code> empty. Every one of those 190 signals had a feed label before the run, so 190 source descriptions were replaced rather than annotated. The plant-wide role assignment reads <code>description_source</code> to credit a source, so it read all 190 as carrying no source and undecided the values the feed had decided for them, and that assignment is held. The repair puts a generated description in its own property, restores the 190 feed labels and their source marker, and changes the single writer so no enrichment can reach the source slot again.</p>
+
+  <h3 id="keep-feed-descriptions-beside-generated-ones-separation">One slot for what the sources say, one for what enrichment composed</h3>
+  <p id="keep-feed-descriptions-beside-generated-ones-slots"><code>FacilitySignal</code> now declares <code>generated_description</code>, <code>generated_description_source</code> and <code>generated_description_updated_at</code> beside the existing <code>description</code>, <code>description_source</code> and <code>description_source_updated_at</code>. The schema states the rule on all six: <code>description</code> holds what the sources say and enrichment never rewrites it; the generated trio holds the composed text, the mechanism that composed it and when it was written.</p>
+  <p id="keep-feed-descriptions-beside-generated-ones-writer">The shared description writer is the only path in the package that writes a signal description. It chooses the slot from what the signal already holds: a signal carrying a source marker keeps its <code>description</code> and its marker, and the composed text goes to <code>generated_description</code> with its mechanism and timestamp; a signal with no source marker has <code>description</code> as its enrichment slot and is written there exactly as before the separation, so enrichment at a facility whose source wording lives elsewhere is unchanged. The one caller that passes the source slot is the controls feed import, which owns that text. The writer never assigns <code>description</code> or <code>description_source</code> on a signal that carries a source marker, so the separation holds at the single point where all rewrites pass through rather than in each caller. The embedding and its hash move with the text the search indexes: a generated write embeds the generated text, and a source re-import of a signal that already carries a generated description rewrites the source slot and leaves the stored vector and hash alone, because the vector describes the generated text the index serves.</p>
+
+  <h3 id="keep-feed-descriptions-beside-generated-ones-repair">What the repair changed in the live graph</h3>
+  <p id="keep-feed-descriptions-beside-generated-ones-repair-result">A private before-image of every property on every affected node was written before the first mutation, with the statement that restores it. The repair then copied each node's current description into <code>generated_description</code> with mechanism <code>group_composition</code>, and wrote the snapshot's feed text and feed source back into <code>description</code> and <code>description_source</code>. Comparing every one of the 190 against the snapshot: 190 source descriptions equal, 190 source markers equal, 190 generated descriptions equal to the text the pilot run wrote, none missing.</p>
+  <table id="keep-feed-descriptions-beside-generated-ones-counts">
+    <caption>ITER signal counts across the repair; the node total is unchanged because no signal was created or removed</caption>
+    <thead><tr><th>Measure</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td>ITER signals</td><td>97,525</td><td>97,525</td></tr>
+      <tr><td>Carrying a feed source marker</td><td>2,708</td><td>2,898</td></tr>
+      <tr><td>Carrying a generated description</td><td>0</td><td>190</td></tr>
+      <tr><td>Carrying an embedding</td><td>2,686</td><td>2,686</td></tr>
+    </tbody>
+  </table>
+  <p id="keep-feed-descriptions-beside-generated-ones-counts-note">The before figure, 2,708, was measured by the coordinator from the live graph before this run; the after figure is 2,898, and the two differ by exactly the 190 whose marker the repair restored. The embedding total does not move because each of the 190 already carried a vector over the pilot text, and that text is now the generated description, which is the text search indexes; a hash comparison found all 190 stored hashes equal to the hash of that text, so no row needed re-vectorising.</p>
+
+  <h3 id="keep-feed-descriptions-beside-generated-ones-readers">Which readers read which text, and why</h3>
+  <table id="keep-feed-descriptions-beside-generated-ones-reader-table">
+    <thead><tr><th>Reader</th><th>Text it reads</th><th>Why that text</th></tr></thead>
+    <tbody>
+      <tr><td>Signal vocabulary</td><td><code>description</code></td><td>It attributes a decided value to a source, so it must read what the sources say. Unchanged code; it sees the feed text again now that the repair restored it.</td></tr>
+      <tr><td>Signal briefs given to a model</td><td><code>description</code></td><td>The brief states what the source says about the signal; a composed description would feed enrichment back to itself.</td></tr>
+      <tr><td>Plant search</td><td>Both, truncated, with the source flagged</td><td>A reader of a search result is shown the source text and, where one exists, the generated text beside it, each labelled</td></tr>
+      <tr><td>Fulltext search</td><td>Both slots, plus name, path, keywords, aliases, unit and archive wording</td><td>A search term may match either an operator label or a composed description, so both are indexed; the field guard admits either, and a result names which it is showing.</td></tr>
+      <tr><td>Vector search and the re-embed sweep</td><td>The generated description where one exists, else the source description</td><td>One derivation (<code>signal_embed_text</code>) shared by the writer, the sweep and the hash census, so what is stored, what is compared and what is indexed move together.</td></tr>
+      <tr><td>Server search report</td><td>Both, labelled</td><td>Every line that shows a description says whether it is the source or the generated one, so a reader can tell what the sources say from what an enrichment composed.</td></tr>
+    </tbody>
+  </table>
+  <p id="keep-feed-descriptions-beside-generated-ones-index">The fulltext index <code>facility_signal_text</code> is declared from the schema annotation, and the declared property list changed, so the index was dropped and recreated from the schema rather than left as it was: an index recreate with the old list would have left the generated text unsearchable while everything reported success. The live index reports <code>ONLINE</code> over the eight declared properties, and a probe restricted to the generated property returns hits, which an index without that property cannot do.</p>
+
+  <h3 id="keep-feed-descriptions-beside-generated-ones-vocabulary">The vocabulary after the repair</h3>
+  <p id="keep-feed-descriptions-beside-generated-ones-vocabulary-run">Running the assignment over the 1,766 pilot signals decides 589 values across three write batches in 4.2 seconds, with a repeat run changing nothing; the verify pass recomputes all 2,087 assigned values and finds no mismatch.</p>
+  <table id="keep-feed-descriptions-beside-generated-ones-vocabulary-table">
+    <caption>Per-axis outcomes over 1,766 pilot signals after the repair</caption>
+    <thead><tr><th>Axis</th><th>Decided</th><th>Conflict</th><th>Undecided</th><th>Signal list row</th><th>Controls metadata</th><th>Archive unit</th><th>Field pattern</th></tr></thead>
+    <tbody>
+      <tr><td>Quantity</td><td>728</td><td>3</td><td>1,035</td><td>155</td><td>523</td><td>—</td><td>50</td></tr>
+      <tr><td>Role</td><td>202</td><td>1</td><td>1,563</td><td>3</td><td>134</td><td>—</td><td>65</td></tr>
+      <tr><td>Unit</td><td>1,157</td><td>1</td><td>608</td><td>—</td><td>1,039</td><td>118</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p id="keep-feed-descriptions-beside-generated-ones-vocabulary-gap">The role axis meets the target of 202 exactly. The quantity axis reads 728 where the target was 742, and the shortfall is a target that was not reproducible rather than a value the repair lost. The vocabulary's own landing record from 2026-11-20, written before the pilot enrichment ran, states 728 quantities, 3 conflicts and 1,035 undecided with the same per-source split (155 / 523 / 50) the run above reproduces; 742 appears in the brief and in no landed record. Every signal the repair touched now reads the same source text the pre-pilot record measured, and the run reproduces that record cell for cell, so the 14-value difference is between two descriptions of the same earlier run, not between the state before and after the repair. A variant of the decision rule that would decide 14 more rows was not found: the precedence order, the per-source credits and the field-pattern confinement all reproduce 728.</p>
+
+  <h3 id="keep-feed-descriptions-beside-generated-ones-checks">Checks that could have failed</h3>
+  <ul id="keep-feed-descriptions-beside-generated-ones-check-list">
+    <li id="keep-feed-descriptions-beside-generated-ones-check-separation">A test writes a generated description onto a signal that carries a feed description and asserts that the feed text, its source marker and its reported update time are unchanged while the generated text, its mechanism, its timestamp and the embedding move. With the writer's default slot switched back to <code>description</code>, the test fails on the mutated source text; restoring the default passes it.</li>
+    <li id="keep-feed-descriptions-beside-generated-ones-check-unmarked">A second test writes a composed description onto a signal with no source marker and asserts that <code>description</code> receives that text and that no generated slot is created, so the narrowing that protects a feed label leaves an ordinary enrichment slot working.</li>
+    <li id="keep-feed-descriptions-beside-generated-ones-check-snapshot">A scratch-graph test writes a snapshot, changes one signal's description by hand, and asserts the comparison reports that one signal under description mismatch, reports nothing under marker mismatch and nothing missing. It proves the instrument the repair's verification rests on.</li>
+    <li id="keep-feed-descriptions-beside-generated-ones-check-reimport">A source re-import over a graph a previous import already populated changes no node and no property, which the earlier shape of the writer could only satisfy by re-embedding a row on every run.</li>
+    <li id="keep-feed-descriptions-beside-generated-ones-check-graph">Graph-marked statements for the touched packages pass on <code>rigel</code>: 16 passed, 0 failed.</li>
+    <li id="keep-feed-descriptions-beside-generated-ones-check-suite">The default tier over the touched packages adds no failure. The changed tree fails one test, a prompt-schema coverage walk that the unchanged base tree fails identically, and the base tree's only other failure in that run is a 30-second timeout opening a scratch catalogue database that passes in the changed tree in the same run and passed in two earlier runs of the same base tree. Both arms and their whole test ids are recorded in the run's manifest.</li>
+    <li id="keep-feed-descriptions-beside-generated-ones-check-tree">The tree carries no real accessor or description text: the fixtures use invented names, and a search for the terms the repair touched over the tracked tree returns no live value.</li>
+  </ul>
+
+  <h3 id="keep-feed-descriptions-beside-generated-ones-gap">What this does not show</h3>
+  <p id="keep-feed-descriptions-beside-generated-ones-gap-note">The repair restores the 190 signals that had a feed description in the snapshot. It cannot recover a source description for a signal that had none before the pilot run, and it does not judge whether any composed description is correct: the reading that measured the composed texts stands as it was. The separation prevents a future enrichment from erasing a source, but a mechanism that writes through a path other than the shared writer would bypass the test, so the guarantee is only as wide as the single-writer rule it rests on.</p>
+</body>
+</html>

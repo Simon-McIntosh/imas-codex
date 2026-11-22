@@ -1918,13 +1918,16 @@ class TestSignalPatternDetection:
         mock_gc.__exit__ = MagicMock(return_value=False)
         # First call: count discovered followers -> 5
         # Second call: update SignalSource node -> void
-        # Third call: propagate discovered → enriched -> 5 updated
+        # Third and fourth calls: the writer's two routes by source marker,
+        # the marked one matching every follower and the other none
+        # Fifth call: diagnostic creation
         mock_gc.query = MagicMock(
             side_effect=[
                 [{"cnt": 5}],
-                [],  # SignalSource update
+                [],
                 [{"updated": 5}],
-                [],  # diagnostic creation
+                [{"updated": 0}],
+                [],
             ]
         )
 

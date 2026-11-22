@@ -212,14 +212,18 @@ def format_signals_report(
             if matched:
                 meta.append(f"Matched: {', '.join(matched)}")
             parts.append("  " + " | ".join(meta))
-            if len(members) == 1 and members[0].get("description"):
+            if len(members) == 1:
                 member = members[0]
-                if not description_is_name(
-                    member["description"],
+                source = member.get("description")
+                if source and not description_is_name(
+                    source,
                     member.get("name") or "",
                     member.get("accessor") or "",
                 ):
-                    parts.append(f"  {member['description']}")
+                    parts.append(f"  Source description: {source}")
+                generated = member.get("generated_description")
+                if generated and generated != source:
+                    parts.append(f"  Generated description: {generated}")
             sources = sorted(
                 {
                     (
@@ -532,7 +536,7 @@ def format_docs_report(
             parts.append(f"  - {name}  [{sid}]")
             desc = sig.get("description") or ""
             if desc:
-                parts.append(f"    {desc}")
+                parts.append(f"    Source description: {desc}")
 
     return "\n".join(parts)
 
