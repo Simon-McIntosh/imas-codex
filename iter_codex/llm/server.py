@@ -63,7 +63,6 @@ import asyncio
 import io
 import logging
 import subprocess
-import sys
 import threading
 from contextlib import redirect_stdout
 from dataclasses import dataclass, field
@@ -1768,35 +1767,28 @@ def _get_repl() -> dict[str, Any]:
 
 
 def _reload_repl() -> str:
-    """Reload the REPL environment after code changes.
+    """Reinitialize the REPL's own state without touching the module cache.
 
-    Clears cached modules and reinitializes all utilities.
-    Use after editing iter_codex source files.
+    Resetting the utilities that hold a graph client or an encoder rebuilds
+    them against current settings. The module cache is deliberately left
+    alone: deleting entries from ``sys.modules`` while another thread is
+    importing one of them makes importlib raise ``KeyError`` for the module
+    name, which surfaces as an arbitrary tool call failing. Reloading code
+    needs a server restart, which is the only operation that replaces every
+    module and every reference to it coherently.
 
     Returns:
         Status message
     """
     global _repl_globals, _imas_tools_instance, _graph_client
 
-    # Clear REPL state
     _repl_globals = None
     _imas_tools_instance = None
     _graph_client = None
 
-    # Invalidate iter_codex module cache
-    modules_to_reload = [name for name in sys.modules if name.startswith("iter_codex")]
-    for name in modules_to_reload:
-        try:
-            del sys.modules[name]
-        except KeyError:
-            pass
-
-    logger.info(f"Cleared {len(modules_to_reload)} cached iter_codex modules")
-
-    # Reinitialize
     _init_repl()
 
-    return f"REPL reloaded. Cleared {len(modules_to_reload)} modules and reinitialized utilities."
+    return "REPL state reinitialized. Edited modules load on server restart."
 
 
 # =============================================================================
