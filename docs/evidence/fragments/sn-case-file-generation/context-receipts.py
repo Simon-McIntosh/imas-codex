@@ -332,7 +332,7 @@ def document(report: dict[str, Any]) -> str:
     def add(tag: str, suffix: str, text: str) -> None:
         parts.append(f'<{tag} id="{NODE}-{suffix}">{text}</{tag}>')
 
-    total = populations["all"]["names"]
+    total = len(report["rows"])
     add(
         "h1",
         "title",
@@ -612,8 +612,11 @@ def check(report: dict[str, Any]) -> list[str]:
     if not report["provenance"]["stored_unchanged"]:
         problems.append("stored standard-name text changed during the run")
     rows = report["rows"]
-    if len(rows) != report["populations"]["all"]["names"]:
-        problems.append("row count does not match the population count")
+    per_stage = report["populations"]["all"]["names"]
+    if not isinstance(per_stage, dict) or any(
+        count != len(rows) for count in per_stage.values()
+    ):
+        problems.append("a stage's population count does not match the row count")
     recomputed = table_from_rows(rows)
     for stage, channels in recomputed.items():
         for channel, counts in channels.items():
@@ -698,8 +701,17 @@ def build_report(*, limit: int = 0) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
+    parser.add_argument(
+        "--render",
+        action="store_true",
+        help="re-render the page from the committed JSON without reading the graph",
+    )
     parser.add_argument("--limit", type=int, default=0)
     args = parser.parse_args()
+    if args.render:
+        PAGE.write_text(document(json.loads(DATA.read_text())))
+        print(f"re-rendered {PAGE}")
+        return 0
     if args.check:
         report = json.loads(DATA.read_text())
         problems = check(report)
@@ -709,9 +721,8 @@ def main() -> int:
                 print(" -", problem)
             return 1
         print(
-            "context-receipts.json verified: %d names, %d omissions",
-            len(report["rows"]),
-            len(report["populations"]["all"]["omissions"]),
+            f"context-receipts.json verified: {len(report['rows'])} names, "
+            f"{len(report['populations']['all']['omissions'])} omissions"
         )
         return 0
     report = build_report(limit=args.limit)

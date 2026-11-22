@@ -33,21 +33,20 @@ SVG = Path("docs/figures/sn-case-file-generation/context-receipts/channel-covera
 
 def load() -> tuple[list[str], list[str], dict[str, dict[str, dict]], int]:
     report = json.loads(EVIDENCE.read_text())
-    populations = report["populations"]["all"]
-    table = populations["table"]
-    stages = [stage for stage in report["stages"] if stage in table]
-    channels = [
-        channel
-        for channel in report["channels"]
-        if any(channel in table[stage] for stage in stages)
-    ]
-    return stages, channels, table, populations["names"]
+    table = report["populations"]["all"]["table"]
+    stages = list(table)
+    channels: list[str] = []
+    for stage in stages:
+        for channel in table[stage]:
+            if channel not in channels:
+                channels.append(channel)
+    return stages, channels, table, len(report["rows"])
 
 
 def draw(stages, channels, table, names, path) -> None:
-    shares = np.full((len(stages), len(channels)), np.nan)
-    for row, stage in enumerate(stages):
-        for column, channel in enumerate(channels):
+    shares = np.full((len(channels), len(stages)), np.nan)
+    for row, channel in enumerate(channels):
+        for column, stage in enumerate(stages):
             block = table[stage].get(channel)
             if block is None or not block["expected"]:
                 continue
@@ -58,24 +57,15 @@ def draw(stages, channels, table, names, path) -> None:
     cmap.set_bad("#f0f0f0")
     image = axes.imshow(shares, cmap=cmap, vmin=0, vmax=100, aspect="auto")
 
-    axes.set_xticks(range(len(channels)), channels, rotation=35, ha="right")
-    axes.set_yticks(range(len(stages)), stages)
-    axes.set_xlabel("channel the stage expects")
-    axes.set_ylabel("stage")
+    axes.set_xticks(range(len(stages)), stages, rotation=90, ha="center")
+    axes.set_yticks(range(len(channels)), channels)
+    axes.set_xlabel("stage")
+    axes.set_ylabel("channel the stage expects")
 
-    for row in range(len(stages)):
-        for column in range(len(channels)):
+    for row in range(len(channels)):
+        for column in range(len(stages)):
             value = shares[row, column]
             if np.isnan(value):
-                axes.text(
-                    column,
-                    row,
-                    "not expected",
-                    ha="center",
-                    va="center",
-                    color="#7a7a7a",
-                    fontsize=9,
-                )
                 continue
             axes.text(
                 column,
