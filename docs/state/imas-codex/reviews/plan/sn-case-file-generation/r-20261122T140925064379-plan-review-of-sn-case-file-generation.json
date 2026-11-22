@@ -35,9 +35,28 @@
       "note": "Section 5 now samples about 200 names across the other groups through the detection passes of section 7, reporting only, in place of the deferred generation stage of section 4.",
       "reason": "",
       "when": "2026-11-22T14:28:33.610148+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "70108768465050ad085c176c8296b580a2c5b7c6",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 5's done-when now requires the proposal to carry the owner, counting-basis and subject rules, matching the sprint's done-when.",
+      "reason": "",
+      "when": "2026-11-22T14:28:44.335023+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "70108768465050ad085c176c8296b580a2c5b7c6",
+      "commit_basis": "edit",
+      "note": "Section 5's done-when now requires the proposal to carry the owner, counting-basis and subject rules, matching the sprint's done-when.",
+      "reason": "",
+      "when": "2026-11-22T14:28:44.335023+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
