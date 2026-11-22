@@ -351,6 +351,16 @@ def document(report: dict[str, Any]) -> str:
         "channels a stage expected and did not receive.",
     )
 
+    gate_revision = os.environ.get("CONTEXT_RECEIPT_REVISION") or report["revision"]
+    add(
+        "p",
+        "provenance",
+        f"Census data at revision <code>{report['revision']}</code>, tree "
+        f"<code>{report['tree']}</code>, generated {report['generated_at']}. The "
+        f"gates and control runs beside it were read at revision "
+        f"<code>{gate_revision}</code>.",
+    )
+
     add("h2", "omissions-head", "Omissions, ranked by how many names each affects")
     omission_rows = [
         (
