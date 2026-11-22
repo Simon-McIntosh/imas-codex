@@ -273,6 +273,7 @@ class Neo4jOperation:
         from iter_codex.cli.services import (
             _clean_neo4j_locks,
             _is_graph_compute_target,
+            stop_local_store_holders,
             stop_neo4j_job,
         )
 
@@ -281,22 +282,17 @@ class Neo4jOperation:
             if node:
                 _clean_neo4j_locks(node)
 
-        # Always kill local orphans — recovery cycles or manual starts
-        # can leave Neo4j processes running directly on the login node
+        # Always clean local orphans — recovery cycles or manual starts can
+        # leave Neo4j processes running directly on the login node.  Only
+        # processes whose working directory or open file is this graph's
+        # store are listed; another Neo4j on the shared node is reported as
+        # left alone and never signalled.
         service_name = f"iter-codex-neo4j-{self.profile.name}"
         subprocess.run(
             ["systemctl", "--user", "stop", service_name],
             capture_output=True,
         )
-        subprocess.run(
-            ["pkill", "-15", "-f", "neo4j_.*community.sif"],
-            capture_output=True,
-        )
-        subprocess.run(
-            ["pkill", "-15", "-f", "Neo4jCommunity"],
-            capture_output=True,
-        )
-        subprocess.run(["pkill", "-15", "-f", "neo4j.*console"], capture_output=True)
+        stop_local_store_holders()
 
     def _start_neo4j(self) -> None:
         # Try SLURM-based start first (Neo4j on compute node)
