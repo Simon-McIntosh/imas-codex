@@ -309,6 +309,11 @@ enums:
         description: The archive's own metadata gives the unit; applies to the unit only
       field_pattern:
         description: Other signals sharing this signal's field code state the value unanimously
+      functional_specification:
+        description: >-
+          The system's functional specification states the value. It establishes a
+          field code's role in the field-code table; the per-signal assignment does
+          not read it.
 
   DiagnosticCategory:
     description: Categories of fusion plasma diagnostics
