@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T14:26:58.679Z",
+  "dispatched_at": "2026-11-22T14:09:53Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:46",
+      "id": "wiring-1",
+      "reason": "a worker dispatched on s5 under the new declarations would have no \u00a74 pipeline and no cross-group run to execute, so s5 must either keep \u00a74/\u00a76 as prerequisites or have its done-when re-pointed to a source that exists.",
+      "text": "s5's declaration now depends on s7 and \u00a74 is deferred, but s5's done-when still requires its ~200 live names across the 28 other groups to be \"run through the pipeline of \u00a74 reporting only\" and their blockers joined to equilibrium's; \u00a77 is scoped to the 87 held-out members of equilibrium and produces no cross-group grammar-gap run, so the section is declared dispatchable while the input it names can no longer be produced",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:46",
+      "id": "done_when-1",
+      "reason": "the section's closure contract must name the owner rule (and the counting-basis and subject rules S20 requires), or it can pass while the sprint's own done-when stays unmet.",
+      "text": "s5's done-when lists what the proposal must contain but omits the owner rule the plan's own 2026-11-20 comment says \"is carried into the grammar proposal\" and that sprint S20's done-when requires (\"the grammar proposal carries the owner, counting-basis and subject rules\"), so s5 can be closed with the proposal missing a required rule",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "94536e69c70045231f50f53951e1573b9510f57b",
+  "plan_fingerprint": "ef51b4f51051e507e94ddbba76b8721c6276468be26d837c6d0f580a37b75908",
+  "plan_slug": "sn-case-file-generation",
+  "plan_version": 28,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261122T140925064379-plan-review-of-sn-case-file-generation",
+  "reviewed_blob_sha": "e4b4914da9a2ffce1417949b415df25ca21f2149",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every file, plan section and evidence path named in the changed unit resolves: benchmark-second-round-scores.json, benchmark-second-round-incumbent-defects.json, case-file-source-census.json, briefs/context-receipts.md, sn-audited-group-release#s4, sn-definitions-by-construction#s10, and sprint S20 all exist, with no extensionless href to reinterpret.",
+    "done_when": "a finding \u2014 s5's done-when (:46) does not require the owner rule that the plan's own 2026-11-20 comment and the newly declared S20 sprint make part of the grammar proposal.",
+    "evidence_paths": "pass \u2014 the changed comment and every implementable section name evidence under docs/evidence/fragments/sn-case-file-generation/, and the cited files exist on that path.",
+    "naming": "pass \u2014 the changed metadata and comment introduce no plan label, stage name, ticket number or version tag into code or symbol text; the section ids are the plan's own convention.",
+    "reasoning": "pass \u2014 the new comment's figures are corroborated by the committed scores file (incumbent both-right 54, keep-or-repair local 60, frontier 56, one-pass frontier 53, perturbed control 15), and the declaration moves s3 to done, s4/s6 to deferred, matching the ruling the comment records.",
+    "single_goal": "pass \u2014 each implementable section (s5, s7, s8, s9) names one deliverable, and the deferred sections are declared rather than merged into them.",
+    "wiring": "a finding \u2014 the changed declarations move s5's depends-on from s4 to s7 (docs/plans/sn-case-file-generation.html:20), but s5's own done-when still runs its names \"through the pipeline of \u00a74\" (:46), and \u00a74 is now deferred."
+  },
+  "section_digests": {
+    "_document": "c19f05ef9fe43120cfdf96444d732b5236b430ecaa9efbf3b4dfc8c5330a0ef5",
+    "s1": "66daa3f78292910aa399a3a7874182b6ced822cba15f461f52d7f321bfb0d49c",
+    "s2": "678940dfe8bd6d437c712fed9aac830d188a43a3a48ac6eca1c34afa21ad5cfa",
+    "s3": "7da2eb37916f38bde6478e3e6258bf73b046248fbc5a7d256ce3251c430a2d4a",
+    "s4": "d0c203a2f760ab938d4544c7f4956717f1a6a1b14ab758143abf49bbdf0beb45",
+    "s5": "6695eb1820bfd26db82bf71b88bd092e7e57b2cd09a20902ceb273188d79512f",
+    "s6": "5914118099288f7cdc28bdb5a4837999feae2391e6decaa78a12188d67aa1b7e",
+    "s7": "e72a2a8e63b73f766aff6cb9d8adb72bcd41c5b121d15160e5c82fe081e0c592",
+    "s8": "5f0774921b0a497d2cf53b921d9c6ed464764b94720ac22980cffccb9d27418c",
+    "s9": "2b8a3003bcc74d9c5ff7b4608be9d39e730ce1701548cd6e82dc1a4bee91b4c0"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T14:27:03.329907+00:00",
+  "total": null
+}
