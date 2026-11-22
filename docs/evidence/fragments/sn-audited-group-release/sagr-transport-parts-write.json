@@ -1,6 +1,6 @@
 {
   "environment": {
-    "generated_at": "2026-11-22T21:03:34.141761+00:00",
+    "generated_at": "2026-11-22T21:23:00.320620+00:00",
     "host": "98dci4-clu-3051.iter.org",
     "python": "3.12.11",
     "node": "sagr-transport-parts-write"
@@ -1256,5 +1256,23 @@
         "volume_integrated_particle_source_rate"
       ]
     }
-  }
+  },
+  "revision": "9e7009cdfcd1986896c49e3beb66425578d97886",
+  "run_records": [
+    {
+      "label": "check",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T193445739125-sagr-transport-parts-write/logs/arms.log",
+      "summary": "RESULT [check]: 8 passed, 0 failed, 8 arms; write_ready false"
+    },
+    {
+      "label": "plant-vocabulary",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T193445739125-sagr-transport-parts-write/logs/planted-vocabulary.log",
+      "summary": "RESULT [plant-vocabulary]: 7 passed, 1 failed, 8 arms; write_ready false"
+    },
+    {
+      "label": "require-write-ready",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T193445739125-sagr-transport-parts-write/logs/require-write-ready.log",
+      "summary": "RESULT [require-write-ready]: 8 passed, 0 failed, 8 arms; write_ready false"
+    }
+  ]
 }

@@ -31,6 +31,7 @@ import argparse
 import html
 import json
 import platform
+import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -42,6 +43,10 @@ OUT_JSON = FRAGMENTS / "sagr-transport-parts-write.json"
 OUT_HTML = FRAGMENTS / "sagr-transport-parts-write.html"
 NODE = "sagr-transport-parts-write"
 LIVE_STAGES = frozenset({"accepted", "reviewed", "drafted", "pending"})
+RUN_LOGS = Path(
+    "/home/ITER/mcintos/.config/reckon/crew/runs/"
+    "r-20261122T193445739125-sagr-transport-parts-write/logs"
+)
 
 #: The vocabulary entries the five ruled parts need, in the shape
 #: ``imas_standard_names/grammar/vocabularies/physics_domains.yml`` uses. The
@@ -153,6 +158,29 @@ def _probe_writer(name: str, domain: str) -> dict[str, Any]:
         "reason": result.get("reason"),
         "from_domain": result.get("from_domain"),
     }
+
+
+def _head_revision() -> str:
+    """The commit this measurement was taken at, read from the worktree itself."""
+    root = FRAGMENTS.parents[3]
+    completed = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return completed.stdout.strip()
+
+
+def summary_line(label: str, payload: dict[str, Any]) -> str:
+    """The one result line a captured run states, counted from its own arms."""
+    held = payload["arms"]
+    passed = sum(1 for value in held.values() if value)
+    failed = len(held) - passed
+    return (
+        f"RESULT [{label}]: {passed} passed, {failed} failed, {len(held)} arms; "
+        f"write_ready {str(payload['write_ready']).lower()}"
+    )
 
 
 def measure(plant_vocabulary: bool = False) -> dict[str, Any]:
@@ -321,6 +349,14 @@ def render_page(payload: dict[str, Any]) -> str:
     )
     remedy = "".join("<li>" + _esc(step) + "</li>" for step in payload["remedy"])
     proposal = _yaml_block(payload["grammar_proposal"])
+    runs = "".join(
+        "<tr><td><code>"
+        + _esc(Path(row["log"]).name)
+        + "</code></td><td><code>"
+        + _esc(row["summary"])
+        + "</code></td></tr>"
+        for row in payload["run_records"]
+    )
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="docs-project" content="iter-codex">'
@@ -380,6 +416,12 @@ def render_page(payload: dict[str, Any]) -> str:
         '<h2 id="' + NODE + '-arms-head">Arms</h2>'
         '<table id="' + NODE + '-arms-table"><thead><tr><th>Arm</th>'
         "<th>Result</th></tr></thead><tbody>" + arms + "</tbody></table>"
+        '<h2 id="' + NODE + '-runs-head">The runs behind this page</h2>'
+        '<p id="' + NODE + '-runs-note">All three runs were captured at revision '
+        "<code>" + _esc(payload["revision"]) + "</code>. Each log states its own "
+        "revision as its first line and ends with the result line quoted here.</p>"
+        '<table id="' + NODE + '-runs-table"><thead><tr><th>Log</th>'
+        "<th>Result line</th></tr></thead><tbody>" + runs + "</tbody></table>"
         '<h2 id="' + NODE + '-remedy-head">What has to change first</h2>'
         "<p>None of the five names is in the vocabulary this repository "
         "validates against, and codex owns no vocabulary data: the source is "
@@ -418,12 +460,20 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    if args.plant_vocabulary:
+        label = "plant-vocabulary"
+    elif args.require_write_ready:
+        label = "require-write-ready"
+    else:
+        label = "check"
+
     payload = measure(plant_vocabulary=args.plant_vocabulary)
     failed = [name for name, held in payload["arms"].items() if not held]
     for name, held in payload["arms"].items():
         print(f"{'PASS' if held else 'FAIL'}  {name}")
     print(f"write_ready: {payload['write_ready']}")
     print(f"blocker: {payload['blocker']}")
+    print(summary_line(label, payload))
 
     if args.check or args.require_write_ready:
         if failed:
@@ -432,6 +482,25 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         return 0
 
+    planted = measure(plant_vocabulary=True)
+    payload["revision"] = _head_revision()
+    payload["run_records"] = [
+        {
+            "label": "check",
+            "log": str(RUN_LOGS / "arms.log"),
+            "summary": summary_line("check", payload),
+        },
+        {
+            "label": "plant-vocabulary",
+            "log": str(RUN_LOGS / "planted-vocabulary.log"),
+            "summary": summary_line("plant-vocabulary", planted),
+        },
+        {
+            "label": "require-write-ready",
+            "log": str(RUN_LOGS / "require-write-ready.log"),
+            "summary": summary_line("require-write-ready", payload),
+        },
+    ]
     OUT_JSON.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     OUT_HTML.write_text(render_page(payload), encoding="utf-8")
     print(f"wrote {OUT_JSON.name} and {OUT_HTML.name}")
