@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T21:10:41.114Z",
+  "dispatched_at": "2026-11-22T20:24:48Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:52",
+      "id": "done_when-1",
+      "reason": "the gate is unmeasurable as written, and two workers would report different fractions for the same graph.",
+      "text": "\u00a72's done-when measures \"the number of control systems in the archive catalogue ... out of the total\" but the plan never defines a control system, and the schema has no such class (`PlantStructure`, `PlantComponent`, `ControlNode` at facility.yaml:1855/1966/2023), so the denominator is whatever the worker invents and the gate can be satisfied by choosing it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:61",
+      "id": "reasoning-1",
+      "reason": "s4 cannot be closed against a form s2 never required, so the negative control fails for a reason belonging to s2.",
+      "text": "\u00a74 delivers \"its identity, title, current version and version state\" and its negative control requires \"a superseded or obsolete version is recorded as such\", but the shared `Document` class (facility.yaml:4311) has no title, version or version-state attribute and `DocumentStatus` (common.yaml:222) has no superseded/obsolete member, while \u00a72's deliverable (lines 51) lists only \"a catalogued document that need not yet be fetched, ...\" among additions, so nothing in the plan settles the slots \u00a74 must write and measure",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:20",
+      "id": "wiring-1",
+      "reason": "s2's verdicts on the description slots would be authored against a superseded schema, and the declared block edge would schedule the enrichment plan after this one while \u00a71 relies on its separation first.",
+      "text": "`plan-blocks` names `iter-signal-context-and-enrichment`, whose sections s7\u2013s9 (plant-wide enrichment, an agent finds a signal, the backup) do not wait on this plan, while \u00a71 (line 45) says the source/generated description separation \"is landing under the enrichment plan\", landing today under a brief of that plan (docs/evidence/fragments/iter-signal-context-and-enrichment/briefs/keep-feed-descriptions-beside-generated-ones.md), and \u00a72\u2013s3 review that class; the stage is `implementable` now with `depends-on: []`, so s2 can review a schema the separation is about to change",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:56",
+      "id": "evidence_paths-1",
+      "reason": "a before-image with no named durable path is unrecoverable after the run, which is exactly what the restore promise exists to prevent.",
+      "text": "\u00a73 keeps \"a private before-image of everything it changes ... with a stated way to restore it\" but names no durable location, and \u00a74's catalogue read path says only \"the project's read-only client, or through a record export the coordinator supplies\", so both private artefacts can land in a node-local scratch directory that dies with the run",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+  "plan_fingerprint": "9453f5fa18ac59bf4ab4a5ae8448e9fe381fe12dc2c2edcec9281a1e4259c218",
+  "plan_slug": "iter-plant-signal-ontology",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261122T202411851606-plan-review-of-iter-plant-signal-ontology",
+  "reviewed_blob_sha": "61c79d135645cc6c5021e4645364974853b24089",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/plans/iter-signal-context-and-enrichment.html` and the declared slugs resolve; the \u00a72 research record is a deliverable, not an anchor.",
+    "done_when": "a finding \u2014 \u00a72's gate counts \"control systems in the archive catalogue ... out of the total\", a population the plan never defines against the archive catalogue or the schema.",
+    "evidence_paths": "a finding \u2014 \u00a73 keeps a before-image \"with a stated way to restore it\" but names no durable path, and \u00a74's private catalogue has none either, so both can land in a scratchpad that dies with the run.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers in the plan's symbols or prose.",
+    "reasoning": "a finding \u2014 \u00a74's deliverable requires a document title, version and version state, and its negative control requires a superseded/obsolete state, none of which the shared `Document` class has and none of which \u00a72 is asked to settle; and the root cause of \u00a71's bullet 1\u20135 claims reproduces against the schema while bullet 6's separation work is still in flight.",
+    "single_goal": "pass \u2014 each section names one deliverable (s2 a review record, s3 the schema carried into the graph, s4 the catalogued documents and their consequences).",
+    "wiring": "a finding \u2014 the section dependencies (s3\u2190s2, s4\u2190s3) are correct, but `plan-blocks` names a plan that is running now, and s2 declares no wait on the description-separation work its own \u00a71 says is landing under that plan."
+  },
+  "section_digests": {
+    "_document": "878222f143675060d6c67a635eec3665eba921bbb9e79636d618cca92baea9f3",
+    "s1": "aff7c40a33c48ca9fa3012b710a376135f704099f5648c31837a88e938d3c272",
+    "s2": "df9a165e5b50ba7a18b9d21352bc2a0298bd036ba32574284c9261e33b415638",
+    "s3": "8dd929c6f93343ec66932e59c3285281a17bc190027f7984ba11908e426650d0",
+    "s4": "838978854846dee0bd524dbe514819fc48f4b2496de23362be564d7e8fa8908b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T21:27:10.770369+00:00",
+  "total": null
+}
