@@ -15,10 +15,11 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-effort-hours" content="48.0">
 <meta name="plan-after" content="sn-definitions-by-construction">
-<meta name="plan-version" content="50">
-<meta name="plan-modified" content="2026-11-19">
+<meta name="plan-version" content="51">
+<meta name="plan-modified" content="2026-11-22">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;done&quot;}">
-<meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-audited-group-release#s1&quot;],&quot;s3&quot;:[&quot;sn-audited-group-release#s1&quot;,&quot;sn-audited-group-release#s2&quot;],&quot;s4&quot;:[&quot;sn-audited-group-release#s2&quot;,&quot;sn-audited-group-release#s3&quot;,&quot;sn-definitions-by-construction#s11&quot;],&quot;s5&quot;:[&quot;sn-audited-group-release#s4&quot;,&quot;sn-audited-group-release#s6&quot;],&quot;s6&quot;:[&quot;sn-audited-group-release#s2&quot;],&quot;s7&quot;:[&quot;sn-audited-group-release#s2&quot;]}">
+<meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-audited-group-release#s1&quot;],&quot;s3&quot;:[&quot;sn-audited-group-release#s1&quot;,&quot;sn-audited-group-release#s2&quot;],&quot;s4&quot;:[&quot;sn-case-file-generation#s7&quot;,&quot;sn-case-file-generation#s9&quot;],&quot;s5&quot;:[&quot;sn-audited-group-release#s4&quot;,&quot;sn-audited-group-release#s6&quot;],&quot;s6&quot;:[&quot;sn-audited-group-release#s2&quot;],&quot;s7&quot;:[&quot;sn-audited-group-release#s2&quot;]}">
+<meta name="plan-sprint" content="S20">
 </head>
 <body>
 <main class="plan-doc">
@@ -67,6 +68,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s4-lead-rulings-20261119" data-who="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9" data-when="2026-11-19T08:10:00Z">
     <div class="r-comment-body"><p>Lead rulings of 2026-11-19. <strong>Audit basis:</strong> the lead read the 20 sampled equilibrium verdicts (8 sound, 9 defective, 3 undecidable) and accepts blind adjudication as the audit basis for the group. Verdicts that rest only on a name omitting a qualifier are re-read under the rule that a name identifies and a definition specifies, when the group is adjudicated again after regeneration. <strong>Spend:</strong> the repair ceiling is raised to USD 400; spend stands at about USD 259. <strong>Derived parent:</strong> <code>source_rate_due_to_gas_injection</code>, which names no subject, is left as a known defect for regeneration to rewrite or retire; no hand edit. <strong>Evidence worktrees:</strong> the two name-definition probe runs and the stopped renames probe are reclaimed, their heads kept on the fork as <code>refs/keep/name-definition-probes</code>, <code>refs/keep/name-definition-phrases</code> and <code>refs/keep/equivalent-electron-renames-stopped-probe</code>. <strong>Repository rename:</strong> the release-candidate precondition is dropped.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s4-follows-flagged-repair" data-who="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9" data-when="2026-11-22T00:10:00Z">
+    <div class="r-comment-body"><p>Lead ruling of 2026-11-21: the existing names are kept and improved, not regenerated. The first group is therefore brought to the bar by the flagged repair and the family consistency step of <code>sn-case-file-generation</code> (sections 7 and 9), which this section now waits on, and not by the regeneration that plan's section 6 described; that section is deferred. The blind re-adjudication before the cut is unchanged, and counts a locus without an owner as a defect class.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261117T012949277535-review-of-sagr-blind-audit-d4f2a7d2cc8b" data-who="reckon-build" data-when="2026-11-17T01:34:12.018Z">
     <div class="r-comment-body"><p>independent review of run r-20261116T220839161092-sagr-blind-audit at d4f2a7d2cc8bc082006fcccbbadd8f1a2ce87160 scores goal_fidelity 11, evidence 8, scope_discipline 19, durability 4, fit 16, reuse 5 (total 63) and blocks on two defects: the sample statistics at blind-audit.py:692-695 are computed over sampled names plus the 40 planted names, so the published 191 of 379 and the per-class counts violate the done_when's exclusion (sample-only reading 174 of 339, 51.3 %), and the negative-control log's header names revision 1e87f877f, which carries no assert_readers_not_pipeline.</p></div>
