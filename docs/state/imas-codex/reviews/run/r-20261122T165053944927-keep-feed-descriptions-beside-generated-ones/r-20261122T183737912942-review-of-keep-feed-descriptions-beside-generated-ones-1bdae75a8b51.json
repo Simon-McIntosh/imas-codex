@@ -5,6 +5,13 @@
   ],
   "completed_at": "2026-11-22T18:48:40.933Z",
   "dispatched_at": "2026-11-22T18:38:00Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "keep-feed-descriptions-beside-generated-ones",
+      "recorded_at": "2026-11-22T21:01:44.566453+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/discovery/test_catalogue_text_kept.py",
