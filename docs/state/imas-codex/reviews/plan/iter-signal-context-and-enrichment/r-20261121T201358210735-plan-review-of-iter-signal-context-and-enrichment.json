@@ -43,9 +43,28 @@
       "note": "The rationale now cites the measured role split recorded by the sibling-relation run (alarm 42, command 80, measurement 3, state 77, setpoint 0 of 202) and says the sibling descriptions were seen to be identical in the pilot's landed sample rather than measured across all siblings.",
       "reason": "",
       "when": "2026-11-22T14:15:53.325116+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1ca2e22ca0710f095db82aa736a036cee0fe0838",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The setpoint clause no longer fails the section on a property of the data: the plant-wide section reports the setpoint count, and where it is zero states which codes were examined and why none establishes a setpoint; the search check applies only where a setpoint is decided.",
+      "reason": "",
+      "when": "2026-11-22T14:15:56.200481+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1ca2e22ca0710f095db82aa736a036cee0fe0838",
+      "commit_basis": "edit",
+      "note": "The setpoint clause no longer fails the section on a property of the data: the plant-wide section reports the setpoint count, and where it is zero states which codes were examined and why none establishes a setpoint; the search check applies only where a setpoint is decided.",
+      "reason": "",
+      "when": "2026-11-22T14:15:56.200481+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
