@@ -388,6 +388,35 @@ def document(report: dict[str, Any]) -> str:
         "<code>context-receipts.json</code>.</figcaption></figure>"
     )
 
+    add("h2", "cohorts-head", "Each cohort on its own")
+    for key, label in (
+        ("equilibrium", "Equilibrium members"),
+        ("held_out", "Held-out reference members"),
+    ):
+        block = populations[key]
+        size = sum(1 for row in report["rows"] if key in row.get("populations", ()))
+        add("h3", f"{key}-head", f"{label}: {size} names")
+        rows = [
+            (
+                row["stage"],
+                row["channel"],
+                row["names"],
+                row["expected"],
+                f"{row['share_absent']:.0%}",
+            )
+            for row in block["omissions"]
+        ]
+        if rows:
+            parts.append(
+                _table(
+                    f"{NODE}-{key}-omissions-table",
+                    ["Stage", "Channel", "Names absent", "Names expecting it", "Share"],
+                    rows,
+                )
+            )
+        else:
+            add("p", f"{key}-none", "Every expected channel was present.")
+
     add("h2", "controls-head", "The controls")
     parts.append(
         _table(
