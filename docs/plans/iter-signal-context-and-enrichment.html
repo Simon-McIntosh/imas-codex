@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="88">
+<meta name="plan-version" content="89">
 <meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
@@ -292,6 +292,9 @@ Gates at the repair head: tests/discovery 2,455 passed; the graph statement gate
 nine statements with their own parameters, a structural check that a statement constant without an entry
 fails, and the cohort-selector positive control, live); the group suite 22 passed; the prompt-coverage file
 11 passed with 1 pre-existing failure, reproduced at the base sha.</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261122T153540078622-review-of-field-code-table-a16c390655ba" data-who="reckon-build" data-when="2026-11-22T15:46:10.395Z">
+    <div class="r-comment-body"><p>Independent review of r-20261122T144233162942-field-code-table at a16c390655ba6dab2584e02ad2e43e93d882502b: the field-code table is delivered and its guards fire under the declared mutations, but the landing record&#x27;s catalogue coverage is wrong — 33 of 259 catalogue codes have an entry (33/226), not the 39/220 reported, because field_codes_graph.py:152 subtracts the table&#x27;s code count from the catalogue rather than counting catalogue codes that have an entry.</p></div>
 </div>
 </section>
 </main>

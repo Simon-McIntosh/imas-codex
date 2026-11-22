@@ -1,0 +1,70 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-22T15:46:10.395Z",
+  "dispatched_at": "2026-11-22T15:36:14Z",
+  "findings": [
+    {
+      "file": "iter_codex/discovery/signals/field_codes_graph.py",
+      "line": 152,
+      "severity": "blocking",
+      "text": "iter_codex/discovery/signals/field_codes_graph.py:152 computes codes_without_entry as distinct - summary['codes_with_entry'], while codes_with_entry is len(table.codes()) (field_codes.py:202) and counts entry codes that are not in the catalogue at all. The landing record's central split is therefore wrong: it reports 39 catalogue field codes with an entry and 220 without, but the receipt it cites (field-code-private/table_receipt.json) shows 225 catalogue codes with no entry and no conflict, so only 33 of the catalogue's 259 codes have an entry and 226 do not. Six entry codes (CO 1, CO 2, CO 3, CO2, CO3, WT) carry zero FacilitySignal rows in facility iter, verified by a bounded graph count. The 39+220=259 sum is forced by the subtraction, so it can never disagree and cannot surface the error."
+    },
+    {
+      "file": "iter_codex/discovery/signals/field_codes_graph.py",
+      "line": 159,
+      "severity": "non-blocking",
+      "text": "iter_codex/discovery/signals/field_codes_graph.py:159 asserts codes_with_entry + codes_without_entry == distinct, but codes_without_entry was defined one line earlier as distinct - codes_with_entry, so the identity is algebraically guaranteed and the AssertionError can never fire. It reports a check on the measure it was added to protect while protecting nothing, which is why the wrong 39 entry codes above went unnoticed."
+    },
+    {
+      "file": "iter_codex/discovery/signals/field_codes.py",
+      "line": 340,
+      "severity": "non-blocking",
+      "text": "iter_codex/discovery/signals/field_codes.py:318 and :340 add a code twice to table.unestablished when its role is stated but no meaning is declared: once with the reason 'role stated but no meaning declared', and again from the catalogue loop with the false reason 'no source states a role', because that code is in neither the established nor the conflicted set. summary['unestablished'] (line 225) then overcounts. The current build records 0 such codes so the receipt is unaffected, but the first omitted private meaning silently corrupts both the count and the reason."
+    },
+    {
+      "file": "iter_codex/discovery/signals/field_codes_graph.py",
+      "line": 85,
+      "severity": "non-blocking",
+      "text": "iter_codex/discovery/signals/field_codes_graph.py:85 validates limit and then never uses it, while CODES_QUERY, ROWS_QUERY and CONTROLS_QUERY carry no LIMIT. The docstring's 'Use a finite catalogue bound' promises a bound the reader does not apply, so a large graph is read unbounded while the caller believes it capped the read."
+    },
+    {
+      "file": "iter_codex/remote/field_code_table.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The builder landed as a new module iter_codex/remote/field_code_table.py, and the declared write path iter_codex/remote/signal_vocabulary.py was not touched. The review brief's reuse map names signal_vocabulary's field-pattern source as the table's owner and asks for it to be extended, so the coordinator planned the wiring there and will not find it; nothing imports the new modules yet, so the table is a standalone artefact whose consumer (section 13) must still be wired."
+    },
+    {
+      "file": "iter_codex/schemas/facility.yaml",
+      "line": 312,
+      "severity": "non-blocking",
+      "text": "The plan's section 12 says the table is held in the schema's data, but no schema slot declares it: the only facility.yaml change is the functional_specification enum member, and the meanings are read from an unvalidated free-form dict, meanings_from_config reading private.get('field_code_meanings') at iter_codex/remote/field_code_table.py:35. Nothing validates the shape section 13 will depend on, and a typo in the 69 declared meanings is caught only by build-time ValueError."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a table giving each archive field code its role, one-line meaning and establishing source; iter_codex/discovery/signals/field_codes.py:172 FieldCodeTable and :154 FieldCodeConflict deliver it, but the recorded catalogue coverage is wrong (33 codes with an entry, reported as 39).\nVERDICT done_when: the done_when's numbers are computed by field_codes_graph.py:147-157 and stored in the private receipt; the entry/non-entry split does not measure the catalogue and reports 39/220 where the receipt's own unestablished list yields 33/226.\nVERDICT write_paths: read the manifest's declared paths; four of the five delivered files are inside them, and iter_codex/remote/field_code_table.py is a new file where the declared path was iter_codex/remote/signal_vocabulary.py.\nVERDICT manifest: read; it states the gate command and logs, the receipt and readings paths, the counts and the 20 hand readings, and records status complete with commits a16c39065.\nVERDICT diff: read commit by commit against 866016e4; one commit adds five files, 913 lines, no existing file modified apart from a five-line facility.yaml enum addition.\nCALL_SITES: iter_codex/remote/field_code_table.py:main\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: iter_codex/discovery/signals/field_codes.py:172 builds the per-code and per-kind table the goal names, but the catalogue coverage the goal requires is misreported by field_codes_graph.py:152.\nSCORE evidence: 12\nJUSTIFICATION evidence: the gate tests/discovery/test_field_code_table.py is recorded as 59 passed EXIT=0, but the gate asserts table behaviour only, so the done_when's numeric split is unguarded and wrong at field_codes_graph.py:152.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: four of five delivered paths are declared, and iter_codex/remote/field_code_table.py is a new file where the declared path was iter_codex/remote/signal_vocabulary.py.\nSCORE durability: 12\nJUSTIFICATION durability: the negative-control log shows 10 tests red under a no-source/per-kind/conflict mutation, but no test distinguishes table codes from catalogue codes, which is exactly the defect at field_codes_graph.py:152.\nSCORE fit: 16\nJUSTIFICATION fit: field_codes.py:115 reuses the vocabulary's role rule shape and the names describe mechanisms, though it imports the private helper _phrase_pattern across modules at field_codes.py:33.\nSCORE reuse: 15\nJUSTIFICATION reuse: field_codes.py:78 extends the vocabulary's ROLE_TERMS and values_from_text rather than forking the matcher, but adds a parallel SOURCE_ROLE_TERMS table beside vocabulary.py:114 rather than extending the owner as the brief asked.\nFINDING iter_codex/discovery/signals/field_codes_graph.py:152 blocking: codes_without_entry is computed against the table's code set, not the catalogue, so the landing record reports 39 catalogue codes with an entry where the survey yields 33.\nFINDING iter_codex/discovery/signals/field_codes_graph.py:159 non-blocking: the sum assertion restates the subtraction it checks and can never fail.\nFINDING iter_codex/discovery/signals/field_codes.py:340 non-blocking: a code whose role is stated but whose meaning is undeclared is counted twice and given a false reason.\nFINDING iter_codex/discovery/signals/field_codes_graph.py:85 non-blocking: limit is validated but never applied, so the read is unbounded.\nFINDING iter_codex/remote/field_code_table.py:1 non-blocking: the builder landed outside the declared iter_codex/remote/signal_vocabulary.py and nothing imports it.\nFINDING iter_codex/schemas/facility.yaml:312 non-blocking: the meanings have no schema slot, though the plan says the table is held in the schema's data.",
+  "review_run_id": "r-20261122T153540078622-review-of-field-code-table-a16c390655ba",
+  "reviewed_base_sha": "866016e4a4adcccdb81d7813fb37a43a6940611a",
+  "reviewed_head_sha": "a16c390655ba6dab2584e02ad2e43e93d882502b",
+  "reviewed_run_id": "r-20261122T144233162942-field-code-table",
+  "scores": {
+    "durability": 12,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 15,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T15:46:26.045938+00:00",
+  "total": 83,
+  "verdicts": {
+    "call_sites": "iter_codex/remote/field_code_table.py:main, the module entry point invoked as python -m",
+    "diff": "read commit by commit against 866016e4; one commit adds five files, 913 lines, no existing file modified apart from a five-line facility.yaml enum addition.",
+    "done_when": "the done_when's numbers are computed by field_codes_graph.py:147-157 and stored in the private receipt; the entry/non-entry split does not measure the catalogue and reports 39/220 where the receipt's own unestablished list yields 33/226.",
+    "goal": "the node's goal is a table giving each archive field code its role, one-line meaning and establishing source; iter_codex/discovery/signals/field_codes.py:172 FieldCodeTable and :154 FieldCodeConflict deliver it, but the recorded catalogue coverage is wrong (33 codes with an entry, reported as 39).",
+    "manifest": "read; it states the gate command and logs, the receipt and readings paths, the counts and the 20 hand readings, and records status complete with commits a16c39065.",
+    "write_paths": "read the manifest's declared paths; four of the five delivered files are inside them, and iter_codex/remote/field_code_table.py is a new file where the declared path was iter_codex/remote/signal_vocabulary.py."
+  }
+}
