@@ -6364,6 +6364,46 @@
   "plan_link": "codac-uda-signals#s11",
   "promoted_by": null,
   "promoted_revision": "c5d94c341bce1c537cc0ed74378e9c4a7b5a9a76",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261121T205832963647-stop-the-graph-by-listed-pids",
+    "scratch_bytes": 993278418,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261121T205832963647-stop-the-graph-by-listed-pids",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 993278418,
+        "path": "/tmp/reckon-crew-scratch/r-20261121T205832963647-stop-the-graph-by-listed-pids"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/stop-the-graph-by-listed-pids",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/_trash/r-20261121T205832963647-stop-the-graph-by-listed-pids-20261122T013331756003Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
