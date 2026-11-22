@@ -692,7 +692,7 @@ def build_report(*, limit: int = 0) -> dict[str, Any]:
         "node": NODE,
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "command": (
-            "CONTEXT_RECEIPT_RUN=<run> uv run --no-sync python "
+            "uv run --no-sync python "
             "docs/evidence/fragments/sn-case-file-generation/context-receipts.py"
         ),
         "revision": git("rev-parse", "HEAD"),

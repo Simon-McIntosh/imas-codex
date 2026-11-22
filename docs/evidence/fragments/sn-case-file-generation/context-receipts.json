@@ -1,5 +1,5 @@
 {
- "command": "CONTEXT_RECEIPT_RUN=<run> uv run --no-sync python docs/evidence/fragments/sn-case-file-generation/context-receipts.py",
+ "command": "uv run --no-sync python docs/evidence/fragments/sn-case-file-generation/context-receipts.py",
  "controls": {
   "negative": {
    "absent_after": 1,
