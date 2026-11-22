@@ -117,7 +117,7 @@ class TestRoleByComponentKind:
         )
         summary = table.summary()
         assert summary["entries"] == 2
-        assert summary["codes_with_entry"] == 1
+        assert summary["entry_codes"] == 1
         assert summary["entries_for_one_kind"] == 2
 
 
@@ -188,7 +188,7 @@ class TestPrecedenceAndFallback:
 
 
 class TestCountsAndStability:
-    def test_entries_and_non_entries_sum_to_the_distinct_codes(self):
+    def test_the_catalogue_split_counts_only_codes_the_catalogue_holds(self):
         signals_by_code = {"QX": 2, "ZZ": 3, "WZ": 1, "UN": 5}
         table = build_field_code_table(
             [_statement("QX", "MF", "measurement"), _statement("ZZ", "VC", "command")],
@@ -196,11 +196,28 @@ class TestCountsAndStability:
             codes_in_catalogue=signals_by_code,
         )
         summary = table.summary(signals_by_code)
-        counted_without = {item["code"] for item in table.unestablished} | {
-            item.code for item in table.conflicts
-        }
         assert summary["entries"] == 2
-        assert summary["codes_with_entry"] + len(counted_without) == len(
+        assert summary["entry_codes"] == 2
+        assert summary["codes_with_entry"] == 2
+        assert summary["codes_without_entry"] == 2
+        assert summary["entry_codes_not_in_catalogue"] == []
+
+    def test_an_entry_code_the_catalogue_does_not_hold_is_not_counted_with_it(self):
+        signals_by_code = {"QX": 2, "UN": 5}
+        table = build_field_code_table(
+            [
+                _statement("QX", "MF", "measurement"),
+                _statement("ABS", "MF", "measurement"),
+            ],
+            {("QX", "MF"): "a reading", ("ABS", "MF"): "a reading"},
+            codes_in_catalogue=signals_by_code,
+        )
+        summary = table.summary(signals_by_code)
+        assert summary["entry_codes"] == 2
+        assert summary["codes_with_entry"] == 1
+        assert summary["codes_without_entry"] == 1
+        assert summary["entry_codes_not_in_catalogue"] == ["ABS"]
+        assert summary["codes_with_entry"] + summary["codes_without_entry"] == len(
             signals_by_code
         )
 
