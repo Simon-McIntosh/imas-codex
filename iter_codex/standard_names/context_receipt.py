@@ -126,7 +126,7 @@ STAGE_CHANNELS: dict[str, tuple[str, ...]] = {
 #: ``None`` when the stage renders no system prompt. These are the production
 #: templates; the census renders them and sends nothing.
 STAGE_TEMPLATES: dict[str, tuple[str | None, str]] = {
-    "extraction": (None, "sn/generate_name_dd"),
+    "extraction": ("sn/self_refine_system", "sn/self_refine_user"),
     "name_composition": ("sn/generate_name_system", "sn/generate_name_dd"),
     "name_review": ("sn/review_names_system", "sn/review_names_user"),
     "refinement": ("sn/refine_name_system", "sn/refine_name_user"),
@@ -646,5 +646,126 @@ def emit_receipt(
 ) -> ContextReceipt:
     """Build and record a stage receipt for one name in one call."""
     receipt = receipt_from_content(stage, name, content, prompt_text=prompt_text)
+    record_receipt(receipt, sink=sink)
+    return receipt
+
+
+def content_from_prompt_context(
+    context: Mapping[str, Any], *, name: str = ""
+) -> dict[str, Any]:
+    """Express a live stage's prompt context in the case file's channel shape.
+
+    A stage assembles its own prompt context and sends that; the receipt's
+    channels and its completeness are the case file's. This maps the one onto
+    the other, so a stage records what it actually sent while the expectations
+    stay a single table. A value the context does not carry is left absent and
+    reported as such by the same probes the census uses.
+    """
+    item = dict(context.get("item") or {})
+    if not item:
+        items = list(context.get("items") or ())
+        item = dict(items[0]) if items else {}
+    name = str(item.get("id") or name)
+
+    enclosing = list(context.get("anc") or ())
+    dd_text = str(item.get("dd_description") or item.get("description") or "")
+    source = {
+        "id": name,
+        "exists": bool(dd_text),
+        "text": dd_text,
+        "unit": item.get("unit") or item.get("dd_units"),
+        "coordinates": list(item.get("coordinates") or ()),
+        "enclosing": {
+            "status": "ok" if enclosing else "none",
+            "statement": (
+                f"{len(enclosing)} enclosing statement(s)"
+                if enclosing
+                else "no enclosing statement"
+            ),
+            "statements": enclosing,
+        },
+    }
+
+    family = dict(context.get("sibling_family") or {})
+    siblings = list(family.get("siblings") or ())
+    if not siblings:
+        siblings = [{"name": str(s)} for s in (context.get("sib") or ())]
+
+    def _neighbour(block: Any) -> dict[str, Any]:
+        members = list(block or ())
+        return {
+            "status": "ok" if members else "none",
+            "statement": (
+                f"{len(members)} neighbour(s)" if members else "no neighbour"
+            ),
+            "members": members,
+        }
+
+    grammar_block = context.get("grammar")
+    vocabulary_sections = list(context.get("vocabulary_sections") or ())
+    children = list(item.get("derived_children") or context.get("children") or ())
+    return {
+        "target": {"id": name, "kind": item.get("kind")},
+        "incumbent": item or None,
+        "sources": [source] if name else [],
+        "family": {
+            "status": "members" if siblings else "none",
+            "statement": (f"{len(siblings)} sibling(s)" if siblings else "no family"),
+            "members": siblings,
+        },
+        "neighbours": {
+            "by_subject": _neighbour(context.get("vector_neighbours")),
+            "by_locus": _neighbour(
+                context.get("same_path_neighbours") or context.get("locus_context")
+            ),
+        },
+        "grammar": {
+            "status": "parsed" if grammar_block else "unread",
+            "statement": "grammar contract supplied" if grammar_block else "no grammar",
+            "segments": grammar_block or {},
+            "vocabulary": {
+                "status": "ok" if vocabulary_sections else "none",
+                "statement": (
+                    f"{len(vocabulary_sections)} vocabulary section(s)"
+                    if vocabulary_sections
+                    else "no vocabulary"
+                ),
+                "entries": vocabulary_sections,
+            },
+        },
+        "children": {
+            "status": "members" if children else "none",
+            "statement": (
+                f"{len(children)} child name(s)" if children else "no child name"
+            ),
+            "members": [{"name": str(child)} for child in children],
+        },
+        "producer": {
+            "status": "dd" if dd_text else ("derived" if name else "none"),
+            "dd_paths": list(item.get("source_paths") or ()),
+            "derived": [],
+            "statement": "a producer answer was computed from the item",
+        },
+    }
+
+
+def record_stage_receipt(
+    stage: str,
+    name: str,
+    context: Mapping[str, Any],
+    *,
+    prompt_text: str = "",
+    sink: Path | None = None,
+) -> ContextReceipt:
+    """Record the receipt for a stage that has just rendered its prompt.
+
+    This is the production entry point: a stage calls it with the context it
+    sent and the prompt it rendered, and the receipt records what arrived. It
+    is observation only and never touches a model.
+    """
+    content = content_from_prompt_context(context, name=name)
+    receipt = receipt_from_content(
+        stage, str(name or content["target"]["id"]), content, prompt_text=prompt_text
+    )
     record_receipt(receipt, sink=sink)
     return receipt

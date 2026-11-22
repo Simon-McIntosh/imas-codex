@@ -194,3 +194,55 @@ def test_a_parent_stage_expects_the_children_channel():
     )
     receipt = cr.receipt_from_content("parent_enrichment", "x", non_parent)
     assert receipt.channels["children"].present is True
+
+
+def test_a_live_stage_context_records_what_the_stage_sent(tmp_path):
+    """The production entry point records a receipt from a stage's own context."""
+    from iter_codex.standard_names.context import build_compose_context
+
+    context = dict(build_compose_context())
+    context.update(
+        {
+            "item": {
+                "id": "elongation_of_flux_surface",
+                "name": "elongation_of_flux_surface",
+                "kind": "scalar",
+                "unit": "1",
+                "description": "Elongation of a flux surface.",
+                "dd_description": "Elongation of the flux surface.",
+                "source_paths": ["dd:equilibrium/time_slice/profiles_1d/elongation"],
+                "derived_children": ["inner_elongation"],
+            },
+            "anc": [{"path": "equilibrium", "text": "Equilibrium IDS."}],
+            "sib": ["elongation_of_boundary"],
+            "vector_neighbours": [{"id": "squareness_of_flux_surface"}],
+            "coordinates": ["1"],
+        }
+    )
+    sink = tmp_path / "stage.jsonl"
+
+    receipt = cr.record_stage_receipt(
+        "name_review",
+        "elongation_of_flux_surface",
+        context,
+        prompt_text="the exact prompt",
+        sink=sink,
+    )
+
+    assert receipt.complete is True, receipt.missing
+    assert receipt.prompt_digest == cr.prompt_digest("the exact prompt")
+    assert sink.exists()
+    assert '"stage": "name_review"' in sink.read_text(encoding="utf-8")
+
+
+def test_a_live_context_without_source_text_reports_the_omission():
+    """A stage that sent no source text is not recorded as complete."""
+    context = {
+        "item": {"id": "no_text", "name": "no_text"},
+        "vector_neighbours": [{"id": "x"}],
+    }
+
+    receipt = cr.record_stage_receipt("name_composition", "no_text", context)
+
+    assert receipt.complete is False
+    assert "source_text" in receipt.missing

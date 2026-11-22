@@ -587,6 +587,17 @@ async def process_refine_name_batch(
                 logger.debug("refine_name: system prompt render failed for %s", sn_id)
                 system_prompt = None
 
+            from iter_codex.standard_names.context_receipt import (
+                record_stage_receipt,
+            )
+
+            record_stage_receipt(
+                "refinement",
+                sn_id,
+                prompt_context,
+                prompt_text=f"{system_prompt or ''}\n\n{user_prompt}",
+            )
+
             # ── LLM call ──────────────────────────────────────────────
             _messages = (
                 [

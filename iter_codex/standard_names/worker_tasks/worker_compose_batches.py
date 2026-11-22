@@ -348,6 +348,16 @@ async def compose_batch(
     )
     user_prompt = render_prompt("sn/generate_name_dd", {**context, **user_context})
 
+    from iter_codex.standard_names.context_receipt import record_stage_receipt
+
+    for composed_item in batch:
+        record_stage_receipt(
+            "name_composition",
+            str(composed_item.get("path") or composed_item.get("id") or ""),
+            {**context, **user_context, "item": composed_item},
+            prompt_text=f"{system_prompt}\n\n{user_prompt}",
+        )
+
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},

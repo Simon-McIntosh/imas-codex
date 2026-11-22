@@ -127,6 +127,15 @@ async def process_enrich_parents_batch(
             logger.debug("enrich_parents: system prompt render failed for %s", sn_id)
             system_prompt = None
 
+        from iter_codex.standard_names.context_receipt import record_stage_receipt
+
+        record_stage_receipt(
+            "parent_enrichment",
+            sn_id,
+            prompt_context,
+            prompt_text=f"{system_prompt or ''}\n\n{user_prompt}",
+        )
+
         _messages = (
             [
                 {"role": "system", "content": system_prompt},

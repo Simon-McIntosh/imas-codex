@@ -1366,6 +1366,15 @@ async def process_review_name_batch(
                 "fusion plasma physics."
             )
 
+        from iter_codex.standard_names.context_receipt import record_stage_receipt
+
+        record_stage_receipt(
+            "name_review",
+            sn_id,
+            prompt_context,
+            prompt_text=f"{system_prompt}\n\n{user_prompt}",
+        )
+
         def _render_escalation_prompt(
             prior_reviews: list[dict[str, Any]],
             base_context: dict[str, Any] = prompt_context,
