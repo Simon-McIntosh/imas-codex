@@ -156,6 +156,16 @@
       "note": "s2's census of readers names the plant search tools and the shared filter builder among the read paths that must not change behaviour",
       "reason": "",
       "when": "2026-11-22T21:01:18.247838+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "s4 names the record export as the sole route with recorded provenance; no either/or remains",
+      "reason": "",
+      "when": "2026-11-22T21:01:23.384353+00:00"
     }
   ],
   "responses": {
@@ -218,6 +228,15 @@
       "note": "s1 and s2 now treat the two role vocabularies as deliberately separate axes; s2 asks for a stated relation and precedence between them, not one merged vocabulary",
       "reason": "",
       "when": "2026-11-22T21:01:09.030103+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "386346053edc359534a4b97f29bd8d5d8344c495",
+      "commit_basis": "edit",
+      "note": "s4 names the record export as the sole route with recorded provenance; no either/or remains",
+      "reason": "",
+      "when": "2026-11-22T21:01:23.384353+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-plant-signal-ontology/r-20261122T202504338686-plan-review-of-iter-plant-signal-ontology.json",
