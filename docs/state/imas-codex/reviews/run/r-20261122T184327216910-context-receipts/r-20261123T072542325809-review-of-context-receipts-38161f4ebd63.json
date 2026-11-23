@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-11-23T08:06:45.805Z",
   "dispatched_at": "2026-11-23T07:26:06Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-context-receipts-38161f4ebd63",
+      "recorded_at": "2026-11-23T09:11:15.991292+00:00"
+    }
+  },
   "findings": [
     {
       "file": "iter_codex/standard_names/context_receipt.py",
