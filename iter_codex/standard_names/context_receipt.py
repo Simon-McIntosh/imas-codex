@@ -597,6 +597,38 @@ def _name_context(content: Mapping[str, Any]) -> dict[str, Any]:
         ],
     }
     item["sibling_family"] = sibling_family
+    def prompt_row(entry: Mapping[str, Any]) -> dict[str, Any]:
+        """One case-file neighbour row in the shape a stage's prompt reads.
+
+        The case file keys a neighbour by ``name`` and always carries ``score``,
+        which is null for the same-base channel because that lookup returns no
+        similarity. A stage's prompt entry is keyed ``id`` and carries ``score``
+        only where there is one, so the null-scored case must drop the key
+        rather than pass a null the template would format.
+        """
+        row: dict[str, Any] = {
+            "id": entry.get("name"),
+            "name": entry.get("name"),
+            "description": entry.get("description") or "",
+            "unit": entry.get("unit"),
+        }
+        if entry.get("score") is not None:
+            row["score"] = entry["score"]
+        return row
+
+    by_subject = dict(neighbours.get("by_subject") or {})
+    subject_rows = [dict(row) for row in (by_subject.get("members") or ())]
+    same_base_source = "same physical base"
+    vector_neighbours = [
+        prompt_row(row)
+        for row in subject_rows
+        if row.get("source") != same_base_source
+    ]
+    same_base_neighbours = [
+        prompt_row(row)
+        for row in subject_rows
+        if row.get("source") == same_base_source
+    ]
     by_locus = dict(neighbours.get("by_locus") or {})
     locus_rows = [dict(row) for row in (by_locus.get("members") or ())]
     dd_description = item["dd_description"] or item["description"]
@@ -626,10 +658,8 @@ def _name_context(content: Mapping[str, Any]) -> dict[str, Any]:
         "sib": [str(member.get("name") or "") for member in members],
         "cl": [str(member.get("name") or "") for member in members],
         "sibling_family": sibling_family,
-        "vector_neighbours": list(
-            (neighbours.get("by_subject") or {}).get("members") or ()
-        ),
-        "same_base_neighbours": [],
+        "vector_neighbours": vector_neighbours,
+        "same_base_neighbours": same_base_neighbours,
         "same_path_neighbours": locus_rows,
         "locus_context": locus_rows or None,
     }
