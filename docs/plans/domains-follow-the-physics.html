@@ -25,7 +25,7 @@
 <title>Domains Follow The Physics | imas-codex</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -60,7 +60,7 @@
 <ul>
 <li>An evidence page and data file are committed at <code>docs/evidence/fragments/domains-follow-the-physics/dd-path-domain-review.html</code> and <code>.json</code>. Read from the live graph in one run, they give:
 <ul>
-<li>for every DD path that carries a domain, the recorded mechanism that set it, with the count of paths under each mechanism. Paths carrying a domain with no recorded mechanism form a bucket of their own. The buckets sum to the number of paths carrying a domain, read in the same run;</li>
+<li>for every DD path that carries a domain, the recorded mechanism that set it, with the count of paths under each mechanism. Paths carrying a domain with no recorded mechanism form a bucket of their own. Some paths carry a domain although their recorded mechanism says they have none; they form another bucket, are listed path by path, and are counted under no assigning mechanism. The buckets sum to the number of paths carrying a domain, read in the same run;</li>
 <li>the count of paths the build leaves without a domain, by the reason it records;</li>
 <li>the count of live names whose stored domain equals a candidate drawn from their sources' IDS through the IDS-to-domain table, beside the count whose domain matches no such candidate;</li>
 <li>the paths that carry a value the ruled vocabulary no longer holds;</li>
