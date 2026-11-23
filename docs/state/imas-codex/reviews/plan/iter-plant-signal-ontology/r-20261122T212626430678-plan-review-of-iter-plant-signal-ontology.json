@@ -43,6 +43,16 @@
       "note": "s2's done-when now names the sample census file, what it holds and its date, and states the count is a lower bound that s4 recounts against its fuller census",
       "reason": "",
       "when": "2026-11-23T04:35:04.861453+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1da24b2eae3f530103bc8192707d0a797d2f57ae",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "s4 now bounds 'every' to the rows of the coordinator-supplied census, which reads every page of a signal-list and a self-description title search; withheld rows are counted per search, not catalogued",
+      "reason": "",
+      "when": "2026-11-23T04:35:11.230086+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "s2's done-when now names the sample census file, what it holds and its date, and states the count is a lower bound that s4 recounts against its fuller census",
       "reason": "",
       "when": "2026-11-23T04:35:04.861453+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "1da24b2eae3f530103bc8192707d0a797d2f57ae",
+      "commit_basis": "edit",
+      "note": "s4 now bounds 'every' to the rows of the coordinator-supplied census, which reads every page of a signal-list and a self-description title search; withheld rows are counted per search, not catalogued",
+      "reason": "",
+      "when": "2026-11-23T04:35:11.230086+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-plant-signal-ontology/r-20261122T212626430678-plan-review-of-iter-plant-signal-ontology.json",
