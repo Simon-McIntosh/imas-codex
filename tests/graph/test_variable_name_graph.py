@@ -64,23 +64,34 @@ def test_scanner_and_shared_catalogue_parse_persist_distinct_identities(
                 },
             }
         rows = graph.query("""MATCH (s:FacilitySignal)
-            OPTIONAL MATCH (s)-[:CANDIDATE_PLANT_COMPONENT]->(c:PlantComponent)
+            OPTIONAL MATCH (s)-[:IN_ARCHIVE_COMPONENT|CANDIDATE_PLANT_COMPONENT]->(c:PlantComponent)
             OPTIONAL MATCH (s)-[:AT_CONTROL_NODE]->(control:ControlNode)
             RETURN s.accessor AS selector,s.name_parse_outcome AS outcome,
-                s.candidate_plant_component AS component_property,c.id AS component,c.code AS code,
+                s.candidate_plant_component AS retired_component_property,c.id AS component,
                 s.control_node AS control_property,control.id AS control,control.code AS control_code""")
         assert len(rows) == 6
         for row in rows:
-            assert row["component_property"] == row["component"]
+            assert row["retired_component_property"] is None
+            assert row["component"] is None
             assert row["control_property"] == row["control"]
             if row["outcome"] == "component_variable":
-                assert row["code"] == "DEMO-UNIT:QAZ0001"
                 assert row["control_code"] == "DEMO-UNIT"
             elif row["outcome"] == "function_variable":
-                assert row["component"] is None
                 assert row["control_code"] == "DEMO-UNIT"
             else:
-                assert row["component"] is row["control"] is None
+                assert row["control"] is None
+        assert graph.query(
+            "MATCH (c:PlantComponent) RETURN c.id AS id,c.facility_id AS facility ORDER BY id"
+        ) == [
+            {
+                "id": "demo-alpha:plant_component:DEMO-UNIT:QAZ0001",
+                "facility": "demo-alpha",
+            },
+            {
+                "id": "demo-beta:plant_component:DEMO-UNIT:QAZ0001",
+                "facility": "demo-beta",
+            },
+        ]
         hierarchy = graph.query(
             "MATCH (c:ControlNode) OPTIONAL MATCH (c)-[:PARENT_CONTROL_NODE]->(p:ControlNode) RETURN c.parent_control_node AS parent_property,p.id AS parent"
         )

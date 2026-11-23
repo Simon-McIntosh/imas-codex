@@ -14,7 +14,7 @@ MATCH (s:FacilitySignal {facility_id: $facility})
 WHERE s.metadata_archive IS NOT NULL
   AND (s.accessor STARTS WITH $control_prefix OR s.accessor STARTS WITH $function_prefix)
 RETURN s.id AS id, s.accessor AS selector,
-       s.candidate_plant_component AS component_id,
+       s.archive_component AS component_id,
        s.plant_component_code AS component_code
 ORDER BY s.id LIMIT $limit
 """

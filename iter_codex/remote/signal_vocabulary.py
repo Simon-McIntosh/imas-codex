@@ -18,10 +18,9 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from iter_codex.discovery.base.facility import get_facility_infrastructure
 from iter_codex.discovery.signals.field_codes_graph import (
     build_from_graph,
-    meanings_from_config,
+    meanings_from_graph,
 )
 from iter_codex.discovery.signals.vocabulary_graph import (
     apply_assignment,
@@ -34,8 +33,6 @@ from iter_codex.discovery.signals.vocabulary_graph import (
     verify_assignment,
 )
 from iter_codex.graph.client import GraphClient
-
-MEANINGS_KEY = "field_code_meanings"
 
 
 def sample_for_reading(items: list[dict], *, per_source: int = 10) -> dict:
@@ -127,8 +124,8 @@ def run_catalogue_assignment(
 ) -> dict:
     """Assign the whole catalogue, with the field-code table deciding the role.
 
-    The table is built from the graph's own sources and the facility's declared
-    meanings, so the run contacts no archive or document host. The pilot's
+    The table is built from the graph's own sources and the meanings the graph
+    holds, so the run contacts no archive or document host. The pilot's
     before-and-after comparison is read from the values the graph already
     stores, and every changed value is listed so it can be read by hand.
     """
@@ -140,9 +137,8 @@ def run_catalogue_assignment(
         "document_host_contacted": False,
     }
     started = datetime.now(UTC)
-    private = get_facility_infrastructure(facility) or {}
-    meanings = meanings_from_config(private.get(MEANINGS_KEY) or [])
     with GraphClient() as graph:
+        meanings = meanings_from_graph(graph, facility)
         built = build_from_graph(graph, facility, meanings)
         table = built["table"]
         receipt["field_code_table"] = built["summary"]

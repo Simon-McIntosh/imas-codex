@@ -14,11 +14,11 @@ from iter_codex.discovery.icp.records import FunctionCategory, PlantNode
 from iter_codex.discovery.signals.variable_names import parse_variable_name
 from iter_codex.discovery.wiki.excel import _format_row_with_headers
 from iter_codex.graph.models import (
-    PlantContextDocument,
+    Document,
+    PlantBreakdownNode,
     PlantContextMatch,
     PlantFunctionCategory,
     PlantSignalRow,
-    PlantStructure,
     SignalContextLink,
 )
 
@@ -65,9 +65,10 @@ class SpreadsheetLayout:
 
 def extract_signal_rows(
     content: bytes,
-    document: PlantContextDocument,
+    document: Document,
     layouts: list[SpreadsheetLayout],
     *,
+    scope: str,
     plant_bindings: dict[str, str] | None = None,
     category_bindings: dict[str, str] | None = None,
 ) -> list[PlantSignalRow]:
@@ -143,7 +144,7 @@ def extract_signal_rows(
                     PlantSignalRow(
                         id=f"{document.id}:row:{fingerprint(layout.sheet, str(number))}",
                         facility_id=document.facility_id,
-                        context_scope=document.context_scope,
+                        context_scope=scope,
                         source_document=document.id,
                         sheet=layout.sheet,
                         row_number=number,
@@ -176,7 +177,7 @@ def extract_signal_rows(
 
 def structure_nodes(
     plants: list[PlantNode], facility: str, scope: str
-) -> list[PlantStructure]:
+) -> list[PlantBreakdownNode]:
     """Preserve official parent references, requiring their records to be present."""
     identities = {p.uid: f"{facility}:plant_structure:{p.uid}" for p in plants}
     result = []
@@ -184,7 +185,7 @@ def structure_nodes(
         if p.parent_uid and p.parent_uid not in identities:
             raise ValueError("A referenced parent plant record was not read")
         result.append(
-            PlantStructure(
+            PlantBreakdownNode(
                 id=identities[p.uid],
                 facility_id=facility,
                 context_scope=scope,
@@ -267,18 +268,18 @@ class PlantContextBundle:
     facility: str
     scope: str
     system: str
-    structures: list[PlantStructure]
+    structures: list[PlantBreakdownNode]
     categories: list[PlantFunctionCategory]
-    documents: list[PlantContextDocument]
+    documents: list[Document]
     rows: list[PlantSignalRow]
     links: list[SignalContextLink] = field(default_factory=list)
     signals: list[dict] = field(default_factory=list)
 
     def node_groups(self):
         return {
-            "PlantStructure": self.structures,
+            "PlantBreakdownNode": self.structures,
             "PlantFunctionCategory": self.categories,
-            "PlantContextDocument": self.documents,
+            "Document": self.documents,
             "PlantSignalRow": self.rows,
             "SignalContextLink": self.links,
         }
@@ -294,10 +295,10 @@ class PlantContextBundle:
         )
         source_systems = set()
         for document in self.documents:
-            if document.system_code != self.system:
+            if document.context_system_code != self.system:
                 raise ValueError("Document belongs to a different plant system")
             aliases = set(document.source_system_codes or []) - {self.system}
-            if aliases and not document.system_binding_note:
+            if aliases and not document.source_binding_note:
                 raise ValueError("A source system alias needs supporting evidence")
             source_systems.update(aliases)
         source_identities, archive_identities = defaultdict(set), defaultdict(set)

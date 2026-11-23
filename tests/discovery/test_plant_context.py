@@ -18,7 +18,7 @@ from iter_codex.discovery.signals.plant_context_graph import (
     snapshot_pilot_signals,
 )
 from iter_codex.graph.models import (
-    PlantContextDocument,
+    Document,
     PlantContextMatch,
     PlantSignalRow,
 )
@@ -26,17 +26,17 @@ from iter_codex.graph.models import (
 
 @pytest.fixture
 def document():
-    return PlantContextDocument(
+    return Document(
         id="synthetic:document:invented",
         facility_id="synthetic",
-        context_scope="synthetic:context:demo",
         source_uid="invented",
         version="draft",
-        description="Invented spreadsheet",
-        role="signal_list",
+        title="Invented spreadsheet",
+        content_role="signal_list",
         sha256="a" * 64,
-        system_code="DEMO-COIL",
-        plant_structure="synthetic:plant:demo",
+        status="discovered",
+        context_system_code="DEMO-COIL",
+        plant_structure=["synthetic:plant:demo"],
     )
 
 
@@ -175,6 +175,7 @@ def test_spreadsheet_coordinates_and_text_survive_beyond_preview_limit(document)
                 "Invented table", control_column=1, category_column=2, sequence_column=3
             )
         ],
+        scope="synthetic:context:demo",
     )
     assert len(rows) == 510
     assert rows[-1].row_number == 511
@@ -187,10 +188,13 @@ def test_spreadsheet_coordinates_and_text_survive_beyond_preview_limit(document)
 def test_spreadsheet_requires_every_sheet_and_valid_coordinates(document):
     content = workbook_bytes([["Name", "Value"], ["Invented", 1]])
     with pytest.raises(ValueError, match="Every worksheet"):
-        extract_signal_rows(content, document, [])
+        extract_signal_rows(content, document, [], scope="synthetic:context:demo")
     with pytest.raises(ValueError, match="columns"):
         extract_signal_rows(
-            content, document, [SpreadsheetLayout("Invented table", control_column=9)]
+            content,
+            document,
+            [SpreadsheetLayout("Invented table", control_column=9)],
+            scope="synthetic:context:demo",
         )
 
 
@@ -246,7 +250,7 @@ def test_pilot_snapshot_refuses_broken_selector_instrument():
 
 def test_curated_source_alias_allows_only_unambiguous_component_join(document):
     document.source_system_codes = ["DEMO-TEST"]
-    document.system_binding_note = (
+    document.source_binding_note = (
         "Invented specification identifies both system spellings"
     )
     b = bundle([row(control_path="DEMO-TEST-SENS", plant_reference="invented-owner")])

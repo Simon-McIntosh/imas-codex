@@ -32,9 +32,7 @@ SIGNALS = {
         "description_source": None,
         "unit": None,
         "field_code": "TT",
-        "archive_metadata": json.dumps(
-            {"full": [{"name": "Units", "value": "K"}]}
-        ),
+        "archive_metadata": json.dumps({"full": [{"name": "Units", "value": "K"}]}),
     },
     # Decided by the controls metadata the signal carries.
     "controls": {
@@ -52,9 +50,7 @@ SIGNALS = {
         "description_source": "controlsmetadata:/invented-feed",
         "unit": "K",
         "field_code": "QQ",
-        "archive_metadata": json.dumps(
-            {"full": [{"name": "Units", "value": "bar"}]}
-        ),
+        "archive_metadata": json.dumps({"full": [{"name": "Units", "value": "bar"}]}),
     },
     # No row, no metadata, a field code no other signal shares: undecided.
     "bare": {
@@ -67,7 +63,7 @@ SIGNALS = {
     },
 }
 
-ROW_TEXT = "Signal purpose: Absolute pressure at the invented cold box outlet",
+ROW_TEXT = ("Signal purpose: Absolute pressure at the invented cold box outlet",)
 ROW_SIGNAL = "row"
 
 
@@ -110,13 +106,11 @@ def vocabulary_transaction():
                 ).consume()
             tx.run(
                 """
-                CREATE (d:PlantContextDocument {id:$facility + ':document:demo',
-                    facility_id:$facility, role:'signal_list'})
                 CREATE (r:PlantSignalRow {id:$facility + ':row:demo',
                     facility_id:$facility, description:$text})
                 CREATE (l:SignalContextLink {id:$facility + ':link:demo',
                     facility_id:$facility, match_kind:'derived'})
-                WITH d, r, l
+                WITH r, l
                 MATCH (s:FacilitySignal {id:$signal})
                 CREATE (s)-[:HAS_PLANT_CONTEXT]->(l)
                 CREATE (l)-[:CONTEXT_SOURCE_ROW]->(r)

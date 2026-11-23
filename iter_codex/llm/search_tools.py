@@ -126,6 +126,18 @@ _VOCABULARY_ROLE_REFUSAL = (
     + ", ".join(VOCABULARY_ROLES)
     + "."
 )
+# The effective role is one member of either axis, since precedence selects a
+# member of the source-assigned axis where the source decided it and of the
+# judged axis otherwise.
+EFFECTIVE_ROLES = tuple(dict.fromkeys(SIGNAL_ROLES + VOCABULARY_ROLES))
+_EFFECTIVE_ROLE_REFUSAL = (
+    "Unknown effective_role {value!r}. An effective role is one of: "
+    "a source-decided vocabulary role ("
+    + ", ".join(VOCABULARY_ROLES)
+    + ") or a judged signal role ("
+    + ", ".join(SIGNAL_ROLES)
+    + ")."
+)
 
 _RERANK_QUESTION = {
     "relevance_grade": {
@@ -358,6 +370,7 @@ def _rank_signals(
     *,
     quantity: str | None = None,
     vocabulary_role: str | None = None,
+    effective_role: str | None = None,
     matches: dict[str, list[str]] | None = None,
 ) -> tuple[list[str], dict[str, float]]:
     """Rank facility signals by reciprocal rank fusion; return (ordered ids, scores).
@@ -366,11 +379,17 @@ def _rank_signals(
     are fused by rank. Each stream is over-fetched before the fusion and the
     fused order is cut at ``k``. The fused mass is the returned score.
 
-    ``diagnostic``, ``physics_domain``, ``role``, ``quantity`` and
-    ``vocabulary_role`` narrow both streams before the fusion cut, so a filtered
-    search still draws up to ``k`` signals.
+    ``diagnostic``, ``physics_domain``, ``role``, ``quantity``,
+    ``vocabulary_role`` and ``effective_role`` narrow both streams before the
+    fusion cut, so a filtered search still draws up to ``k`` signals.
+    ``effective_role`` applies the precedence rule: a decided ``vocabulary_role``
+    is authoritative over the judged ``signal_role``.
     """
-    vocabulary = {"quantity": quantity, "vocabulary_role": vocabulary_role}
+    vocabulary = {
+        "quantity": quantity,
+        "vocabulary_role": vocabulary_role,
+        "effective_role": effective_role,
+    }
     vocabulary = {
         name: value for name, value in vocabulary.items() if value is not None
     }
@@ -413,6 +432,7 @@ def _search_signals(
     role: str | None = None,
     quantity: str | None = None,
     vocabulary_role: str | None = None,
+    effective_role: str | None = None,
     check_status: str | None = None,
     error_type: str | None = None,
     include_check_details: bool = False,
@@ -442,6 +462,10 @@ def _search_signals(
     :data:`VOCABULARY_QUANTITIES` and :data:`VOCABULARY_ROLES`. They narrow both
     streams the same way and refuse an unknown member rather than returning an
     empty report that reads as "no such signal".
+
+    ``effective_role`` keeps one role by precedence: where a source decided
+    ``vocabulary_role`` that member is used, otherwise the judged ``signal_role``
+    stands in, and the report never presents the judged role as a source's.
 
     ``rerank`` reorders the fused pool through the shared Jev relevance rerank
     on the role-aware signal question, spending on the discovery-relevance
@@ -502,6 +526,8 @@ def _search_signals(
         return _VOCABULARY_QUANTITY_REFUSAL.format(value=quantity)
     if vocabulary_role is not None and vocabulary_role not in VOCABULARY_ROLES:
         return _VOCABULARY_ROLE_REFUSAL.format(value=vocabulary_role)
+    if effective_role is not None and effective_role not in EFFECTIVE_ROLES:
+        return _EFFECTIVE_ROLE_REFUSAL.format(value=effective_role)
 
     try:
         if gc is None:
@@ -537,6 +563,7 @@ def _search_signals(
             role,
             quantity=quantity,
             vocabulary_role=vocabulary_role,
+            effective_role=effective_role,
             matches=matches,
         )
         fused_ranks = {sid: rank for rank, sid in enumerate(signal_ids, 1)}
@@ -880,14 +907,16 @@ def _vector_search_signals(
     role: str | None = None,
     quantity: str | None = None,
     vocabulary_role: str | None = None,
+    effective_role: str | None = None,
 ) -> tuple[list[str], dict[str, float]]:
     """Vector search on facility_signal_desc_embedding index.
 
     The facility predicate is pushed inside SEARCH as an in-index pre-filter by
     :func:`signal_vector_search_block`, which owns the query; ``diagnostic``,
-    ``physics_domain``, ``role``, ``quantity`` and ``vocabulary_role`` stay as
-    post-filters, so the ANN limit is widened to ``max(k*2, 50)`` when any is
-    present and the cut is the requested ``k`` otherwise.
+    ``physics_domain``, ``role``, ``quantity``, ``vocabulary_role`` and
+    ``effective_role`` stay as post-filters, so the ANN limit is widened to
+    ``max(k*2, 50)`` when any is present and the cut is the requested ``k``
+    otherwise.
     """
     params: dict[str, Any] = {
         "k": k,
@@ -906,13 +935,22 @@ def _vector_search_signals(
         params["quantity"] = quantity
     if vocabulary_role is not None:
         params["vocabulary_role"] = vocabulary_role
+    if effective_role is not None:
+        params["effective_role"] = effective_role
 
-    # diagnostic/physics_domain/role/quantity/vocabulary_role discard rows after
-    # the ANN cut, so the cut is widened to keep the requested k reachable; with
-    # no such post-filter the facility pre-filter alone bounds the cut.
+    # diagnostic/physics_domain/role/quantity/vocabulary_role/effective_role
+    # discard rows after the ANN cut, so the cut is widened to keep the requested
+    # k reachable; with no such post-filter the facility pre-filter alone bounds it.
     if any(
         value is not None
-        for value in (diagnostic, physics_domain, role, quantity, vocabulary_role)
+        for value in (
+            diagnostic,
+            physics_domain,
+            role,
+            quantity,
+            vocabulary_role,
+            effective_role,
+        )
     ):
         params["k"] = max(k * 2, 50)
 
@@ -923,6 +961,7 @@ def _vector_search_signals(
             role=role is not None,
             quantity=quantity is not None,
             vocabulary_role=vocabulary_role is not None,
+            effective_role=effective_role is not None,
             node_alias="s",
         )
         + "\n"
@@ -950,6 +989,7 @@ def _text_search_signals(
     role: str | None = None,
     quantity: str | None = None,
     vocabulary_role: str | None = None,
+    effective_role: str | None = None,
 ) -> list[dict[str, Any]]:
     """Retrieve keyword matches with the fields that actually supplied them.
 
@@ -967,6 +1007,12 @@ def _text_search_signals(
     if vocabulary_role is not None:
         role_clause += "          AND s.vocabulary_role = $vocabulary_role\n"
         role_param["vocabulary_role"] = vocabulary_role
+    if effective_role is not None:
+        role_clause += (
+            "          AND CASE WHEN s.vocabulary_role_state = 'decided' "
+            "THEN s.vocabulary_role ELSE s.signal_role END = $effective_role\n"
+        )
+        role_param["effective_role"] = effective_role
     eligible = searchable_description_predicate(text="s[field]")
     field_guard = f"(NOT (field IN ['description', 'source_description', 'generated_description']) OR {eligible})"
     escaped = re.sub(r'([+\-!(){}\[\]^"~*?:\\/])', r"\\\1", query)

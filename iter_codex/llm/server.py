@@ -2457,6 +2457,7 @@ class AgentsServer:
                 role: str | None = None,
                 quantity: str | None = None,
                 vocabulary_role: str | None = None,
+                effective_role: str | None = None,
                 check_status: str | None = None,
                 error_type: str | None = None,
                 include_check_details: bool = False,
@@ -2497,6 +2498,11 @@ class AgentsServer:
                         this one: measurement, setpoint, state, alarm or command.
                         Separate from role, which is a model-judged six-member set.
                         A role outside the five is refused with the list.
+                    effective_role: Keep only signals whose effective role is this
+                        one, applying the precedence rule: where a source decided
+                        vocabulary_role that member is used, otherwise the judged
+                        role stands in. Accepts a member of either set, and the
+                        judged role is never presented as a source's own.
                     check_status: Filter by data-access check outcome.
                         Values: "passed", "failed", "unchecked".
                     error_type: Filter by check error classification
@@ -2531,6 +2537,7 @@ class AgentsServer:
                     role=role,
                     quantity=quantity,
                     vocabulary_role=vocabulary_role,
+                    effective_role=effective_role,
                     check_status=check_status,
                     error_type=error_type,
                     include_check_details=include_check_details,

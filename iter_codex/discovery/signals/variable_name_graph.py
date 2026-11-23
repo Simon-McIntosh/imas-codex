@@ -13,7 +13,8 @@ UNWIND $items AS item
 MATCH (s:FacilitySignal {id: item.id}), (f:Facility {id: item.facility})
 WHERE s.accessor = item.selector AND s.facility_id = item.facility
 SET s += item.properties
-REMOVE s.plant_system_code, s.control_function, s.variable_token
+REMOVE s.plant_system_code, s.control_function, s.variable_token,
+       s.candidate_plant_component, s.archive_control_node
 WITH s, f, item
 OPTIONAL MATCH (s)-[old:CANDIDATE_PLANT_COMPONENT|AT_CONTROL_NODE]->()
 DELETE old
@@ -39,7 +40,6 @@ FOREACH (props IN item.components |
     MERGE (c)-[:AT_FACILITY]->(f)
     MERGE (control:ControlNode {id: props.control_node})
     MERGE (c)-[:AT_CONTROL_NODE]->(control)
-    MERGE (s)-[:CANDIDATE_PLANT_COMPONENT]->(c)
 )
 RETURN count(DISTINCT s) AS written
 """

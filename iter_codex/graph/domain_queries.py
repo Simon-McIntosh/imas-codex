@@ -122,6 +122,7 @@ def signal_vector_search_block(
     role: bool = False,
     quantity: bool = False,
     vocabulary_role: bool = False,
+    effective_role: bool = False,
     k: str = "$k",
     node_alias: str = "s",
     score_alias: str = "score",
@@ -133,10 +134,12 @@ def signal_vector_search_block(
     (``facility_id`` is a registered index property), so the ANN cut is taken
     over the facility's own signals rather than a global candidate set. The
     ``diagnostic``/``physics_domain``/``has_data``/``role``/``quantity``/
-    ``vocabulary_role`` predicates are not index properties and stay as
-    post-filters over the returned signals, so a selective one loses its matches
-    to the ANN cut unless the caller widens ``k``. Callers append their own
-    ``RETURN`` clause and supply the matching parameters.
+    ``vocabulary_role``/``effective_role`` predicates are not index properties
+    and stay as post-filters over the returned signals, so a selective one loses
+    its matches to the ANN cut unless the caller widens ``k``. ``effective_role``
+    applies the precedence rule: a decided ``vocabulary_role`` is authoritative,
+    otherwise ``signal_role`` stands in. Callers append their own ``RETURN``
+    clause and supply the matching parameters.
     """
     prefilter_clauses = [f"{node_alias}.facility_id = $facility"]
     where_clauses: list[str] = [searchable_description_predicate(node_alias)]
@@ -152,6 +155,13 @@ def signal_vector_search_block(
         where_clauses.append(f"{node_alias}.vocabulary_quantity = $quantity")
     if vocabulary_role:
         where_clauses.append(f"{node_alias}.vocabulary_role = $vocabulary_role")
+    if effective_role:
+        where_clauses.append(
+            "CASE WHEN "
+            f"{node_alias}.vocabulary_role_state = 'decided' "
+            f"THEN {node_alias}.vocabulary_role ELSE {node_alias}.signal_role END "
+            "= $effective_role"
+        )
 
     return build_vector_search(
         "facility_signal_desc_embedding",

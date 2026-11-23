@@ -39,7 +39,6 @@ def test_grouping_schema_relationships_and_code_roundtrips():
         },
         "FacilitySignal": {
             ("archive_component", "PlantComponent", "IN_ARCHIVE_COMPONENT"),
-            ("archive_control_node", "ControlNode", "IN_ARCHIVE_CONTROL_NODE"),
         },
     }
     for label, relationships in expected.items():
@@ -66,7 +65,7 @@ def test_grouping_schema_relationships_and_code_roundtrips():
         accessor="unparseable fixture",
         archive_grouping_state="ungrouped",
     )
-    assert signal.archive_component is signal.archive_control_node is None
+    assert signal.archive_component is None
 
 
 def test_projection_corrects_legacy_membership_and_repeats_without_duplicates(
@@ -143,9 +142,10 @@ def test_projection_corrects_legacy_membership_and_repeats_without_duplicates(
             ) == [{"n": 2}]
         rows = graph.query("""MATCH (s:FacilitySignal {facility_id:'demo'})
             OPTIONAL MATCH (s)-[:IN_ARCHIVE_COMPONENT]->(c:PlantComponent)
-            OPTIONAL MATCH (s)-[:IN_ARCHIVE_CONTROL_NODE]->(control:ControlNode)
+            OPTIONAL MATCH (s)-[:AT_CONTROL_NODE]->(control:ControlNode)
             RETURN s.accessor AS selector,s.archive_grouping_state AS state,s.archive_component AS component_property,
-                c.id AS component,c.archive_member_count AS members,s.archive_control_node AS control_property,
+                c.id AS component,c.archive_member_count AS members,
+                s.archive_control_node AS retired_control_property,
                 control.id AS control,control.archive_member_count AS control_members,
                 s.status AS status,s.description AS description,s.claim_token AS claim,
                 s.plant_system_code AS legacy_system,s.control_function AS legacy_function""")
@@ -156,7 +156,7 @@ def test_projection_corrects_legacy_membership_and_repeats_without_duplicates(
                 "retained",
             )
             assert row["component_property"] == row["component"]
-            assert row["control_property"] == row["control"]
+            assert row["retired_control_property"] is None
             assert row["legacy_system"] is row["legacy_function"] is None
             if row["selector"] == "unparseable fixture":
                 assert row["state"] == "ungrouped"
