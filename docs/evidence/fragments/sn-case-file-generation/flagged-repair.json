@@ -1,0 +1,878 @@
+{
+ "adjudication": {
+  "adjudicator": "the coordinating session, adjudicating blind",
+  "key": "docs/evidence/fragments/sn-case-file-generation/flagged-repair-blind-key.json",
+  "packet": "docs/evidence/fragments/sn-case-file-generation/flagged-repair-blind-packet.jsonl",
+  "packet_lines": 4,
+  "scoring_command": "uv run --no-sync python docs/evidence/fragments/sn-case-file-generation/flagged-repair.py --stage score --verdicts <verdicts.jsonl>",
+  "state": "pending",
+  "statement": "Every repaired record is in the blind packet beside its incumbent; name and definition are judged separately before the key is opened. The counts of adjudicated failures that became right and of changed sound names that became wrong are reported once those verdicts are committed; the harness reads them with --stage score."
+ },
+ "blockers": [
+  {
+   "class": "name drops a qualifier the source states",
+   "member": "accumulated_total_gas_count",
+   "passes_flagged": [
+    "qualifier",
+    "term"
+   ],
+   "reason": "name-collision"
+  },
+  {
+   "class": "name drops a qualifier the source states",
+   "member": "accumulated_total_prefill_gas_count",
+   "passes_flagged": [
+    "qualifier"
+   ],
+   "reason": "name-collision"
+  },
+  {
+   "class": "name has no owner or subject",
+   "member": "decay_time_due_to_disruption",
+   "passes_flagged": [
+    "subject",
+    "multiplicity"
+   ],
+   "reason": "multiple-quantities"
+  },
+  {
+   "class": "name drops a qualifier the source states",
+   "member": "electron_particle_flux_at_wall_due_to_pumping",
+   "passes_flagged": [
+    "qualifier"
+   ],
+   "reason": "name-collision"
+  },
+  {
+   "class": "name drops a qualifier the source states",
+   "member": "ethylene_source_rate",
+   "passes_flagged": [
+    "qualifier",
+    "multiplicity",
+    "term"
+   ],
+   "reason": "name-collision"
+  },
+  {
+   "class": "wrong or garbled term",
+   "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+   "passes_flagged": [
+    "qualifier",
+    "term"
+   ],
+   "reason": "still-flagged"
+  },
+  {
+   "class": "",
+   "member": "lower_bound_photon_energy",
+   "passes_flagged": [
+    "multiplicity"
+   ],
+   "reason": "multiple-quantities"
+  },
+  {
+   "class": "name drops a qualifier the source states",
+   "member": "normalized_collisionality",
+   "passes_flagged": [
+    "qualifier",
+    "subject"
+   ],
+   "reason": "still-flagged"
+  },
+  {
+   "class": "name drops a qualifier the source states",
+   "member": "surface_temperature",
+   "passes_flagged": [
+    "qualifier",
+    "term",
+    "multiplicity"
+   ],
+   "reason": "multiple-quantities"
+  },
+  {
+   "class": "name drops a qualifier the source states",
+   "member": "thickness_of_breeder_blanket_layer",
+   "passes_flagged": [
+    "qualifier",
+    "term"
+   ],
+   "reason": "still-flagged"
+  }
+ ],
+ "control": {
+  "baseline_flagged": 0,
+  "baseline_flagged_members": [],
+  "entries": [
+   {
+    "baseline_flagged_passes": [],
+    "flagged_passes": [],
+    "member": "elongation_of_flux_surface",
+    "style_variation": "text:neighbor->neighbour+normalized->normalised,order:reversed-statement-order"
+   },
+   {
+    "baseline_flagged_passes": [],
+    "flagged_passes": [],
+    "member": "normalized_minor_radius_of_flux_surface",
+    "style_variation": "normalized->normalised,text:normalization->normalisation+normalized->normalised"
+   },
+   {
+    "baseline_flagged_passes": [],
+    "flagged_passes": [],
+    "member": "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+    "style_variation": "normalized->normalised,text:normalized->normalised,order:reversed-statement-order"
+   },
+   {
+    "baseline_flagged_passes": [],
+    "flagged_passes": [],
+    "member": "normalized_toroidal_beta",
+    "style_variation": "normalized->normalised,text:normalization->normalisation+normalized->normalised,order:reversed-statement-order"
+   },
+   {
+    "baseline_flagged_passes": [],
+    "flagged_passes": [],
+    "member": "poloidal_beta",
+    "style_variation": "text:normalization->normalisation+normalized->normalised,order:reversed-statement-order"
+   },
+   {
+    "baseline_flagged_passes": [],
+    "flagged_passes": [],
+    "member": "poloidal_magnetic_flux_at_magnetic_axis",
+    "style_variation": "text:center->centre+normalized->normalised,order:reversed-statement-order"
+   },
+   {
+    "baseline_flagged_passes": [],
+    "flagged_passes": [],
+    "member": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+    "style_variation": "text:normalization->normalisation"
+   },
+   {
+    "baseline_flagged_passes": [],
+    "flagged_passes": [],
+    "member": "square_of_toroidal_flux_coordinate_gradient_magnitude",
+    "style_variation": "text:normalized->normalised"
+   },
+   {
+    "baseline_flagged_passes": [],
+    "flagged_passes": [],
+    "member": "thickness_of_plasma_filament",
+    "style_variation": "text:neighbor->neighbour,order:reversed-statement-order"
+   },
+   {
+    "baseline_flagged_passes": [],
+    "flagged_passes": [],
+    "member": "volume_of_flux_surface",
+    "style_variation": "text:neighbor->neighbour,order:reversed-statement-order"
+   }
+  ],
+  "flagged_members_under_variation": [],
+  "flagged_under_variation": 0,
+  "members": 10,
+  "passes": true,
+  "style_variation": "British spelling of American tokens in the name where present, and in the definition, documentation and source text; quote style and run of whitespace normalised. No word, equation or qualifier is removed."
+ },
+ "generated": "2026-11-23T10:42:34.851819+00:00",
+ "graph_writes": false,
+ "identity_rule_digest": "a569800a6c0c11cacbe1db8ff698aa95451f4794790f7fea9ff1189bd86e9583",
+ "input_digests": {
+  "key": "1f6d6d56aaf7b54db79dee6e87b11f2617e765b9b0dc04a596dee2fa885ce790",
+  "records": "02b8dbab6d6454dc9343a3e8a599fc95a2a115a2d03f0fa63577439186168327",
+  "verdicts": "03855ae649b80521ca8e9afa59a3cd572ab9627d679db7e1387583f4ecb52d09"
+ },
+ "metrics": {
+  "adjudicated_failures": 33,
+  "adjudicated_sound": 54,
+  "any_pass": {
+   "failed_members_flagged": [
+    "accumulated_total_gas_count",
+    "accumulated_total_prefill_gas_count",
+    "accumulated_tritium_prefill_count",
+    "decay_time_due_to_disruption",
+    "electron_particle_flux_at_wall_due_to_pumping",
+    "ethylene_source_rate",
+    "field_aligned_surface_tilt_angle_of_langmuir_probe",
+    "normalized_collisionality",
+    "spectral_rate_of_spectrometer_channel",
+    "surface_temperature",
+    "thickness_of_breeder_blanket_layer"
+   ],
+   "failures": 33,
+   "failures_flagged": 11,
+   "recall": 0.3333333333333333,
+   "recall_interval": [
+    0.19750227679220683,
+    0.5039210557219438
+   ],
+   "sound": 54,
+   "sound_flag_interval": [
+    0.003276487718229061,
+    0.09771437488781931
+   ],
+   "sound_flag_share": 0.018518518518518517,
+   "sound_flagged": 1,
+   "sound_members_flagged": [
+    "lower_bound_photon_energy"
+   ]
+  },
+  "cross_class": {
+   "multiplicity": {
+    "definition fault alone": {
+     "flagged": 0,
+     "members": 1
+    },
+    "name drops a qualifier the source states": {
+     "flagged": 2,
+     "members": 15
+    },
+    "name has no owner or subject": {
+     "flagged": 1,
+     "members": 7
+    },
+    "one name for several quantities, or a parent too vague to identify one": {
+     "flagged": 0,
+     "members": 6
+    },
+    "wrong or garbled term": {
+     "flagged": 0,
+     "members": 4
+    }
+   },
+   "qualifier": {
+    "definition fault alone": {
+     "flagged": 0,
+     "members": 1
+    },
+    "name drops a qualifier the source states": {
+     "flagged": 9,
+     "members": 15
+    },
+    "name has no owner or subject": {
+     "flagged": 0,
+     "members": 7
+    },
+    "one name for several quantities, or a parent too vague to identify one": {
+     "flagged": 0,
+     "members": 6
+    },
+    "wrong or garbled term": {
+     "flagged": 1,
+     "members": 4
+    }
+   },
+   "subject": {
+    "definition fault alone": {
+     "flagged": 0,
+     "members": 1
+    },
+    "name drops a qualifier the source states": {
+     "flagged": 1,
+     "members": 15
+    },
+    "name has no owner or subject": {
+     "flagged": 1,
+     "members": 7
+    },
+    "one name for several quantities, or a parent too vague to identify one": {
+     "flagged": 0,
+     "members": 6
+    },
+    "wrong or garbled term": {
+     "flagged": 0,
+     "members": 4
+    }
+   },
+   "term": {
+    "definition fault alone": {
+     "flagged": 0,
+     "members": 1
+    },
+    "name drops a qualifier the source states": {
+     "flagged": 4,
+     "members": 15
+    },
+    "name has no owner or subject": {
+     "flagged": 0,
+     "members": 7
+    },
+    "one name for several quantities, or a parent too vague to identify one": {
+     "flagged": 0,
+     "members": 6
+    },
+    "wrong or garbled term": {
+     "flagged": 1,
+     "members": 4
+    }
+   }
+  },
+  "held_out_members": 87,
+  "per_class": [
+   {
+    "adjudicated_failures": 15,
+    "class": "name drops a qualifier the source states",
+    "flagged": 9,
+    "flagged_members": [
+     "accumulated_total_gas_count",
+     "accumulated_total_prefill_gas_count",
+     "accumulated_tritium_prefill_count",
+     "ethylene_source_rate",
+     "thickness_of_breeder_blanket_layer",
+     "surface_temperature",
+     "normalized_collisionality",
+     "electron_particle_flux_at_wall_due_to_pumping",
+     "spectral_rate_of_spectrometer_channel"
+    ],
+    "pass": "qualifier",
+    "recall": 0.6,
+    "recall_interval": [
+     0.357468301206246,
+     0.8017550385865841
+    ],
+    "sound_flag_interval": [
+     0.0,
+     0.0664135880908964
+    ],
+    "sound_flag_share": 0.0,
+    "sound_flagged": 0,
+    "sound_flagged_members": [],
+    "sound_members": 54
+   },
+   {
+    "adjudicated_failures": 7,
+    "class": "name has no owner or subject",
+    "flagged": 1,
+    "flagged_members": [
+     "decay_time_due_to_disruption"
+    ],
+    "pass": "subject",
+    "recall": 0.14285714285714285,
+    "recall_interval": [
+     0.02567962434474355,
+     0.5131278292743189
+    ],
+    "sound_flag_interval": [
+     0.0,
+     0.0664135880908964
+    ],
+    "sound_flag_share": 0.0,
+    "sound_flagged": 0,
+    "sound_flagged_members": [],
+    "sound_members": 54
+   },
+   {
+    "adjudicated_failures": 6,
+    "class": "one name for several quantities, or a parent too vague to identify one",
+    "flagged": 0,
+    "flagged_members": [],
+    "pass": "multiplicity",
+    "recall": 0.0,
+    "recall_interval": [
+     2.7755575615628914e-17,
+     0.3903342879021653
+    ],
+    "sound_flag_interval": [
+     0.003276487718229061,
+     0.09771437488781931
+    ],
+    "sound_flag_share": 0.018518518518518517,
+    "sound_flagged": 1,
+    "sound_flagged_members": [
+     "lower_bound_photon_energy"
+    ],
+    "sound_members": 54
+   },
+   {
+    "adjudicated_failures": 4,
+    "class": "wrong or garbled term",
+    "flagged": 1,
+    "flagged_members": [
+     "field_aligned_surface_tilt_angle_of_langmuir_probe"
+    ],
+    "pass": "term",
+    "recall": 0.25,
+    "recall_interval": [
+     0.04558726080970055,
+     0.6993581574175981
+    ],
+    "sound_flag_interval": [
+     0.0,
+     0.0664135880908964
+    ],
+    "sound_flag_share": 0.0,
+    "sound_flagged": 0,
+    "sound_flagged_members": [],
+    "sound_members": 54
+   }
+  ]
+ },
+ "outcomes": {
+  "accumulated_total_gas_count": {
+   "applied": false,
+   "blocker_reason": "name-collision",
+   "changed_fields": [],
+   "class": "name drops a qualifier the source states",
+   "collision_with": "accumulated_total_gas_equivalent_electron_count",
+   "decision": "repair",
+   "flags": [
+    {
+     "pass": "qualifier",
+     "quote": "Cumulative equivalent-electron inventory of all gas species delivered by injection after plasma breakdown, summed across species.",
+     "rule": "I1.10_qualifier_preservation: the record states the counting basis is equivalent-electron inventory (N_eq = sum_s z_s N_s), a kind-of-quantity qualifier that separates it from a plain particle count; the incumbent name 'accumulated_total_gas_count' omits 'equivalent_electron', denoting a broader/different quantity, as the nearest neighbours' separations confirm."
+    },
+    {
+     "pass": "term",
+     "quote": "accumulated_total_gas_count",
+     "rule": "I2.7_wrong_physics_qualifier — the name's qualifier 'gas' occupies the qualifier slot where the quantity's defining qualifier is 'equivalent_electron'; every nearest neighbour carrying the same kind of quantity (accumulated_total_gas_equivalent_electron_count, accumulated_total_prefill_gas_equivalent_electron_count, accumulated_argon_equivalent_electron_count_due_to_gas_injection, etc.) states 'equivalent_electron', and the definition specifies a weighted equivalent-electron inventory, not a bare gas count. The name as written denotes a different quantity (a plain particle count) than the source describes."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-fc7dc16f48c71d38",
+    "source_text_present": false
+   },
+   "member": "accumulated_total_gas_count",
+   "out_of_field": [],
+   "passes_flagged": [
+    "qualifier",
+    "term"
+   ]
+  },
+  "accumulated_total_prefill_gas_count": {
+   "applied": false,
+   "blocker_reason": "name-collision",
+   "changed_fields": [],
+   "class": "name drops a qualifier the source states",
+   "collision_with": "accumulated_total_prefill_gas_equivalent_electron_count",
+   "decision": "repair",
+   "flags": [
+    {
+     "pass": "qualifier",
+     "quote": "expressed as an equivalent-electron count",
+     "rule": "I1.10_qualifier_preservation: the definition and documentation state the quantity is an equivalent-electron inventory/count ('Cumulative equivalent-electron inventory', 'expressed as an equivalent-electron count'), and the nearest neighbour accumulated_total_prefill_gas_equivalent_electron_count carries the equivalent_electron qualifier that this name lacks; the counting basis (equivalent electrons versus particles/atoms) is identity, not normalisation, so its omission makes the name denote a broader quantity (a raw particle count) rather than the equivalent-electron count the record defines."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-67f0241150d8ee97",
+    "source_text_present": false
+   },
+   "member": "accumulated_total_prefill_gas_count",
+   "out_of_field": [],
+   "passes_flagged": [
+    "qualifier"
+   ]
+  },
+  "accumulated_tritium_prefill_count": {
+   "applied": true,
+   "blocker_reason": "",
+   "changed_fields": [
+    "name"
+   ],
+   "class": "name drops a qualifier the source states",
+   "decision": "repair",
+   "flags": [
+    {
+     "pass": "qualifier",
+     "quote": "expressed",
+     "rule": "I1.10_qualifier_preservation — the record states the counting basis 'equivalent electron' (one equivalent electron per tritium atom; equivalent-electron count), a load-bearing qualifier that separates this quantity from a plain tritium atom count, and the incumbent name omits it, denoting a broader/different quantity; neighbours carry 'equivalent_electron' for the same kind of quantity."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-6417c54b59f71da0",
+    "source_text_present": true
+   },
+   "member": "accumulated_tritium_prefill_count",
+   "out_of_field": [],
+   "passes_flagged": [
+    "qualifier"
+   ],
+   "repaired_record": {
+    "description": "Tritium prefill count is the amount of tritium introduced by gas injection before plasma breakdown, expressed as one equivalent electron per tritium atom.",
+    "documentation": "Tritium prefill count is the accumulated amount of neutral tritium introduced by gas injection during prefill before plasma breakdown, expressed as an equivalent-electron count. Each tritium atom contributes one equivalent electron; a neutral diatomic tritium molecule contributes two.\n\nThe equivalent-electron count is defined by\n\n$$\nN_{e,\\mathrm{eq}}^{\\mathrm{T,prefill}} = N_{\\mathrm{T,prefill}} = \\int_{t_0}^{t_{\\mathrm{bd}}} \\dot{N}_{\\mathrm{T}}(t)\\,dt\n$$\n\nwhere $N_{e,\\mathrm{eq}}^{\\mathrm{T,prefill}}$ is the tritium equivalent-electron count, $N_{\\mathrm{T,prefill}}$ is the accumulated count of injected tritium atoms including molecular constituents, $\\dot{N}_{\\mathrm{T}}$ is their introduction rate, $t$ is time, $t_0$ is the prefill start time, and $t_{\\mathrm{bd}}$ is the plasma-breakdown time.\n\nThis quantity counts injected tritium, not the retained or ionized tritium inventory. It excludes post-breakdown gas injection, wall recycling, neutral-beam fueling, and pellet fueling. The equivalent-electron convention is an accounting normalization based on neutral atomic composition, not an actual free-electron count.\n\nIt is the tritium contribution to the [total prefill gas count](name:accumulated_total_prefill_gas_equivalent_electron_count), which sums over all injected species. The [accumulated tritium count due to gas injection](name:accumulated_tritium_count_due_to_gas_injection) instead counts tritium introduced after plasma breakdown.",
+    "group": "",
+    "name": "accumulated_tritium_prefill_equivalent_electron_count_due_to_gas_injection",
+    "unit": "1"
+   },
+   "still_flagged": []
+  },
+  "decay_time_due_to_disruption": {
+   "applied": false,
+   "blocker_reason": "multiple-quantities",
+   "changed_fields": [],
+   "class": "name has no owner or subject",
+   "decision": "blocked",
+   "flags": [
+    {
+     "pass": "subject",
+     "quote": "decay_time_due_to_disruption",
+     "rule": "name-states-its-subject: the name states a decay time and a mechanism (disruption) but names no physical object or subject whose quantity it is; the definition and documentation confirm it is a generic parent covering plasma current, particle-population current, and runaway-electron current, and the family neighbours (plasma_decay_time_due_to_disruption, runaway_electron_decay_time_due_to_disruption, electron_decay_time_at_magnetic_axis_due_to_disruption) each name their subject, showing this name leaves its own subject to the definition."
+    },
+    {
+     "pass": "multiplicity",
+     "quote": "It encompasses the total plasma current and the current carried by a specified particle population, without imposing a particular current component or decay convention.",
+     "rule": "one-name-one-quantity: the name decay_time_due_to_disruption carries no qualifier distinguishing the current population (plasma current vs. runaway-electron current) nor the decay convention, yet the documentation states it covers both the total plasma current and a specified particle population's current, and both linear-threshold and exponential conventions, which are distinct quantities (a linear threshold time is not generally equal to an exponential e-folding time). The nearest neighbours plasma_decay_time_due_to_disruption and runaway_electron_decay_time_due_to_disruption show the required qualifier this name lacks, so one name cannot denote exactly one quantity."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "wrong",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-eeef47ba5c04811f",
+    "source_text_present": false
+   },
+   "member": "decay_time_due_to_disruption",
+   "out_of_field": [],
+   "passes_flagged": [
+    "subject",
+    "multiplicity"
+   ]
+  },
+  "electron_particle_flux_at_wall_due_to_pumping": {
+   "applied": false,
+   "blocker_reason": "name-collision",
+   "changed_fields": [],
+   "class": "name drops a qualifier the source states",
+   "collision_with": "particle_equivalent_electron_flux_at_wall_due_to_pumping",
+   "decision": "repair",
+   "flags": [
+    {
+     "pass": "qualifier",
+     "quote": "particles represented as equivalent electrons",
+     "rule": "I1.10_qualifier_preservation — the record states the counting basis is 'equivalent electrons' (electron-equivalent population), but the incumbent name says 'electron_particle', which denotes physical electrons; the stated 'equivalent' qualifier is dropped, so the name denotes a different/broader quantity than the equivalent-electron counting the definition and documentation state."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-f89781544f29ff18",
+    "source_text_present": false
+   },
+   "member": "electron_particle_flux_at_wall_due_to_pumping",
+   "out_of_field": [],
+   "passes_flagged": [
+    "qualifier"
+   ]
+  },
+  "ethylene_source_rate": {
+   "applied": false,
+   "blocker_reason": "name-collision",
+   "changed_fields": [],
+   "class": "name drops a qualifier the source states",
+   "collision_with": "ethylene_equivalent_electron_source_rate",
+   "decision": "repair",
+   "flags": [
+    {
+     "pass": "qualifier",
+     "quote": "expressed as equivalent electrons per second with each molecule counted as 16 equivalent electrons",
+     "rule": "I1.10_qualifier_preservation — the record states the counting basis 'equivalent electrons' (16 equivalent electrons per molecule), a counting-basis qualifier that is identity, not normalisation; the incumbent name 'ethylene_source_rate' omits it, so it denotes a broader molecular injection rate rather than the equivalent-electron rate, as the neighbour 'ethylene_equivalent_electron_source_rate' confirms."
+    },
+    {
+     "pass": "multiplicity",
+     "quote": "ethylene_source_rate",
+     "rule": "one-name-one-quantity — the name carries only the molecule qualifier 'ethylene' and omits the 'equivalent_electron' qualifier that its nearest neighbours (ethylene_equivalent_electron_source_rate, ethane_equivalent_electron_source_rate, silane_equivalent_electron_source_rate, ammonia_equivalent_electron_source_rate) all carry; the definition specifies an equivalent-electron rate (16 per molecule), so the incumbent name denotes the same quantity as ethylene_equivalent_electron_source_rate while lacking the qualifier that separates it, leaving one name for a molecular injection rate and an equivalent-electron rate."
+    },
+    {
+     "pass": "term",
+     "quote": "ethylene_source_rate",
+     "rule": "I2.7_wrong_physics_qualifier — the name lacks the 'equivalent_electron' qualifier that every nearest neighbour of the same kind of quantity carries (ethylene_equivalent_electron_source_rate, ethane_equivalent_electron_source_rate, silane_equivalent_electron_source_rate, ammonia_equivalent_electron_source_rate, argon_equivalent_electron_source_rate_due_to_gas_injection); the definition specifies an equivalent-electron rate (16 per molecule), not a molecular injection rate, so the unqualified 'source_rate' denotes a different quantity than the source describes."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-7e67b9434cc9f252",
+    "source_text_present": false
+   },
+   "member": "ethylene_source_rate",
+   "out_of_field": [],
+   "passes_flagged": [
+    "qualifier",
+    "multiplicity",
+    "term"
+   ]
+  },
+  "field_aligned_surface_tilt_angle_of_langmuir_probe": {
+   "applied": true,
+   "blocker_reason": "still-flagged",
+   "changed_fields": [
+    "name"
+   ],
+   "class": "wrong or garbled term",
+   "decision": "repair",
+   "flags": [
+    {
+     "pass": "qualifier",
+     "quote": "Incident angle of the magnetic field with respect to PFC surface",
+     "rule": "I"
+    },
+    {
+     "pass": "term",
+     "quote": "field_aligned_surface_tilt_angle",
+     "rule": "I2.7_wrong_physics_qualifier — the qualifier 'field_aligned' asserts the surface is aligned with the magnetic field, but the source defines the incident angle of the magnetic field with respect to the PFC surface; a surface aligned with the field would make that angle zero, so the qualifier misstates the physical relation (the surface is not field-aligned; the field is incident on the source's surface)."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-3cf1c39afe885e05",
+    "source_text_present": true
+   },
+   "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+   "out_of_field": [],
+   "passes_flagged": [
+    "qualifier",
+    "term"
+   ],
+   "repaired_record": {
+    "description": "Angle between the magnetic field and the plasma-facing surface of a Langmuir probe.",
+    "documentation": "",
+    "group": "",
+    "name": "incident_angle_of_magnetic_field_with_respect_to_pfc_surface_of_langmuir_probe",
+    "unit": "rad"
+   },
+   "still_flagged": [
+    "qualifier",
+    "term"
+   ]
+  },
+  "lower_bound_photon_energy": {
+   "applied": false,
+   "blocker_reason": "multiple-quantities",
+   "changed_fields": [],
+   "class": "",
+   "decision": "blocked",
+   "flags": [
+    {
+     "pass": "multiplicity",
+     "quote": "Lower energy detection threshold on each pixel of the detector (photons are counted only if their energy is above this value)",
+     "rule": "one-name-one-quantity: the sources describe two distinct quantities under one name — a per-pixel detection threshold (a counting eligibility cutoff) and the low-energy boundary of an emission band — which differ in kind (threshold vs. band edge) and locus (detector pixel/channel vs. emission band), so one name cannot denote exactly one quantity."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "right",
+    "packet_id": "pkt-076d600db7395d57",
+    "source_text_present": true
+   },
+   "member": "lower_bound_photon_energy",
+   "out_of_field": [],
+   "passes_flagged": [
+    "multiplicity"
+   ]
+  },
+  "normalized_collisionality": {
+   "applied": true,
+   "blocker_reason": "still-flagged",
+   "changed_fields": [
+    "name"
+   ],
+   "class": "name drops a qualifier the source states",
+   "decision": "repair",
+   "flags": [
+    {
+     "pass": "qualifier",
+     "quote": "Normalised collisionality between two species",
+     "rule": "I1.10_qualifier_preservation: the source states the quantity is between two species (interspecies), and the definition confirms it is the ratio of an interspecies collision frequency nu_ab to a characteristic frequency; the incumbent name 'normalized_collisionality' omits the species-pair qualifier, so it denotes a broader quantity (any collisionality) rather than the interspecies one. The nearest neighbours normalized_electron_collisionality and electron_collisionality_normalized_at_pedestal_top carry the species qualifier 'electron', showing this name must separate itself by the species qualifier it lacks."
+    },
+    {
+     "pass": "subject",
+     "quote": "normalized_collisionality",
+     "rule": "name-states-its-subject: the name states a normalized collisionality but names no species or population whose collisionality it is; the source identifies a specific subject ('between two species') and the family neighbours (normalized_electron_collisionality, electron_collisionality_normalized_at_pedestal_top) carry the 'electron' subject qualifier that this name lacks, so a reader cannot tell which object's collisionality is meant."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-e33fd7f98f599a36",
+    "source_text_present": true
+   },
+   "member": "normalized_collisionality",
+   "out_of_field": [],
+   "passes_flagged": [
+    "qualifier",
+    "subject"
+   ],
+   "repaired_record": {
+    "description": "Dimensionless ratio of a specified interspecies collision frequency to the characteristic streaming, transit, or bounce frequency used for the plasma population.",
+    "documentation": "This collisionality measures the strength of interspecies collisional relaxation relative to collisionless motion along magnetic-field trajectories.\n\n$$\n\\nu_{ab}^{*} = \\frac{\\nu_{ab}}{\\omega_{\\mathrm{char}}}\n$$\n\nwhere $\\nu_{ab}$ is the collision frequency between species $a$ and $b$, and $\\omega_{\\mathrm{char}}$ is the relevant characteristic streaming, transit, or bounce angular frequency; both quantities have reciprocal-time units.\n\nThe denominator must be interpreted according to the selected orbit or motion class, so this quantity is distinct from the collision frequency itself. It generalizes the population-specific electron collisionality and complements collisionality at the pedestal top when the characteristic frequency is evaluated there.",
+    "group": "",
+    "name": "normalized_interspecies_collisionality",
+    "unit": "1"
+   },
+   "still_flagged": [
+    "subject"
+   ]
+  },
+  "spectral_rate_of_spectrometer_channel": {
+   "applied": true,
+   "blocker_reason": "",
+   "changed_fields": [
+    "name"
+   ],
+   "class": "name drops a qualifier the source states",
+   "decision": "repair",
+   "flags": [
+    {
+     "pass": "qualifier",
+     "quote": "number of photoelectrons detected by unit time by a wavelength pixel of the channel",
+     "rule": "I1.10_qualifier_preservation — the source states the counting basis 'photoelectrons' (detected photoelectrons), and the definition likewise specifies 'photoelectron rate' (dN_pe/dt). The incumbent name 'spectral_rate_of_spectrometer_channel' states only 'rate' with no counting basis, so it denotes a broader quantity (any rate of any counted entity) and drops the stated 'photoelectron' qualifier that separates it from, e.g., photon count or particle rates."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-c0b2cb041a21cd2e",
+    "source_text_present": true
+   },
+   "member": "spectral_rate_of_spectrometer_channel",
+   "out_of_field": [],
+   "passes_flagged": [
+    "qualifier"
+   ],
+   "repaired_record": {
+    "description": "Detected photoelectron rate assigned to each wavelength pixel of a spectrometer channel after electronic gain compensation and relative calibration, but before absolute radiometric calibration.",
+    "documentation": "This quantity is the spectrally resolved detection rate of photoelectrons produced by a spectrometer channel. It represents the channel response at an individual wavelength pixel rather than an absolutely calibrated optical emission quantity.\n\nThe rate for wavelength pixel $p$ is defined by\n\n$$\nR_p = \\frac{dN_{\\mathrm{pe},p}}{dt}\n$$\n\nwhere $R_p$ is the detected photoelectron rate for pixel $p$, $N_{\\mathrm{pe},p}$ is the detected photoelectron count assigned to that pixel, and $t$ is time.\n\nThe quantity applies separately to each wavelength pixel of the spectrometer channel, with electronic gain compensation and relative channel calibration applied. It is not summed over the spectral range, and it is not an absolute radiance or photon-flux measurement.\n\nSumming the rates over pixels that contain an identified spectral feature produces the corresponding line-integrated signal, represented by [intensity at spectral line](name:intensity_at_spectral_line). The electrical output [voltage of spectrometer channel](name:voltage_of_spectrometer_channel) is a distinct signal quantity and is not this photoelectron rate.",
+    "group": "",
+    "name": "spectral_photoelectron_rate_of_spectrometer_channel",
+    "unit": "s^-1"
+   },
+   "still_flagged": []
+  },
+  "surface_temperature": {
+   "applied": false,
+   "blocker_reason": "multiple-quantities",
+   "changed_fields": [],
+   "class": "name drops a qualifier the source states",
+   "decision": "blocked",
+   "flags": [
+    {
+     "pass": "qualifier",
+     "quote": "Processed image in apparent temperature",
+     "rule": "I1.10_qualifier_preservation — the bound source states the quantity is 'apparent temperature' (a radiative/brightness temperature), but the incumbent name 'surface_temperature' drops the 'apparent' qualifier and denotes the thermodynamic surface temperature instead; the kind-of-quantity qualifier ('apparent' versus thermodynamic) is load-bearing and absent from the name."
+    },
+    {
+     "pass": "term",
+     "quote": "surface_temperature",
+     "rule": "I2.7_wrong_physics_qualifier: the qualifier 'surface' asserts a material surface (thermodynamic temperature of an exposed material boundary), but the source bound to this name is an apparent temperature from a processed infrared image — a radiative brightness temperature of the plasma as recorded by a camera channel, not the thermodynamic temperature of a material surface. The qualifier names a different physical quantity than the source describes."
+    },
+    {
+     "pass": "multiplicity",
+     "quote": "Processed image in apparent temperature. First dimension : row index (horizontal orientation). Second dimension: column index (vertical orientation).",
+     "rule": "one-name-one-quantity — the source bound to surface_temperature describes an apparent-temperature image (a 2-D array of apparent temperatures indexed by row and column), i.e. a different quantity from the thermodynamic surface temperature of the exposed material boundary that the name and definition assert; the name therefore denotes more than one distinct quantity (apparent/radiative brightness temperature image vs. thermodynamic surface material temperature)."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "wrong",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-7eb80b41aca4f2df",
+    "source_text_present": true
+   },
+   "member": "surface_temperature",
+   "out_of_field": [],
+   "passes_flagged": [
+    "qualifier",
+    "term",
+    "multiplicity"
+   ]
+  },
+  "thickness_of_breeder_blanket_layer": {
+   "applied": true,
+   "blocker_reason": "still-flagged",
+   "changed_fields": [
+    "name"
+   ],
+   "class": "name drops a qualifier the source states",
+   "decision": "repair",
+   "flags": [
+    {
+     "pass": "qualifier",
+     "quote": "Thickness of this layer evaluated at the midplane",
+     "rule": "I1.10_qualifier_preservation — the bound source states the qualifier 'at the midplane' (midplane evaluation locus), but the incumbent name 'thickness_of_breeder_blanket_layer' omits it, so the name denotes a broader quantity (thickness of the layer anywhere) rather than the midplane-evaluated thickness; the target path 'midplane_thickness' confirms the midplane qualifier is load-bearing identity."
+    },
+    {
+     "pass": "term",
+     "quote": "thickness_of_breeder_blanket_layer",
+     "rule": "I2.7_wrong_physics_qualifier — the source defines the thickness evaluated at the midplane, a midplane qualifier is required to separate this quantity from the general layer thickness; the incumbent name lacks the midplane qualifier and so denotes a different quantity (general through-thickness) than the source's midplane-evaluated thickness."
+    }
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "wrong",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-18fdefddcb8a777e",
+    "source_text_present": true
+   },
+   "member": "thickness_of_breeder_blanket_layer",
+   "out_of_field": [],
+   "passes_flagged": [
+    "qualifier",
+    "term"
+   ],
+   "repaired_record": {
+    "description": "Non-negative geometric separation between the inner and outer material interfaces of a breeder blanket layer along the specified thickness direction.",
+    "documentation": "Non-negative geometric separation between the inner and outer material interfaces of a breeder blanket layer is the local through-thickness of that layer along the specified thickness direction. The quantity applies to a single material or functional layer within the blanket, not to the total breeder blanket module build.\n\nThe layer thickness is defined by the separation of the two bounding interfaces along the thickness coordinate:\n\n$$\nd_\\ell = \\left|s_{\\ell,\\mathrm{out}} - s_{\\ell,\\mathrm{in}}\\right|\n$$\n\nwhere $d_\\ell$ is the layer thickness in m, and $s_{\\ell,\\mathrm{in}}$ and $s_{\\ell,\\mathrm{out}}$ are the signed coordinates in m of the inner and outer layer interfaces along the specified thickness direction.\n\nIt is not the toroidal width, poloidal height, surface extent, or volume-equivalent thickness of the layer. It is distinct from module-level quantities such as thickness_of_breeder_blanket_module, [lower_thickness_of_breeder_blanket_module](name:lower_thickness_of_breeder_blanket_module), and [upper_thickness_of_breeder_blanket_module](name:upper_thickness_of_breeder_blanket_module). For a radially stacked layer, the thickness direction is the cylindrical $\\hat{R}$ direction in the right-handed cylindrical $(R, \\phi, Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height.",
+    "group": "",
+    "name": "midplane_thickness_of_breeder_blanket_layer",
+    "unit": "m"
+   },
+   "still_flagged": [
+    "qualifier",
+    "term"
+   ]
+  }
+ },
+ "passes": {
+  "multiplicity": {
+   "class": "one name for several quantities, or a parent too vague to identify one",
+   "field": "name",
+   "rule_id": "one-name-one-quantity"
+  },
+  "qualifier": {
+   "class": "name drops a qualifier the source states",
+   "field": "name",
+   "rule_id": "I1.10_qualifier_preservation"
+  },
+  "subject": {
+   "class": "name has no owner or subject",
+   "field": "name",
+   "rule_id": "name-states-its-subject"
+  },
+  "term": {
+   "class": "wrong or garbled term",
+   "field": "name",
+   "rule_id": "I2.7_wrong_physics_qualifier"
+  }
+ },
+ "plan": "sn-case-file-generation",
+ "repairs": {
+  "accepted_in_packet": 2,
+  "applied": 5,
+  "blocked_by_reason": {
+   "multiple-quantities": 3,
+   "name-collision": 4,
+   "still-flagged": 3
+  },
+  "blocked_out": 10,
+  "failures_candidates_repair": 5,
+  "flagged_names": 12,
+  "rejected_name_collision": 4,
+  "rejected_out_of_field": 0,
+  "repair_attempted": 12,
+  "sound_names_changed": 0
+ },
+ "row_records": {
+  "full_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T184533028047-flagged-repair/flagged-repair-rows.jsonl",
+  "path": "docs/evidence/fragments/sn-case-file-generation/flagged-repair-rows.jsonl",
+  "statement": "One row per (phase, member, pass) for every call this node made, with the flag, the words of the source or the rule that caused it, the reason, and for a repair the decision and proposed name. The full log with prompt digests and token counts is in the run directory."
+ },
+ "schema": "imas-codex.standard-name-record-benchmark/flagged-repair",
+ "section": "s7",
+ "spend": {
+  "ceiling_usd": 10.0,
+  "local_calls_cost_zero": true,
+  "model": "local/deepseek-v4.1-flash",
+  "spent_usd": 0.0,
+  "within_ceiling": true
+ },
+ "stored_text_unchanged": true
+}

@@ -1,0 +1,61 @@
+{
+ "members": {
+  "accumulated_tritium_prefill_count": {
+   "definition_points": [
+    "Accumulated neutral tritium introduced by gas injection during prefill before plasma breakdown.",
+    "Expressed as an equivalent-electron count, with one equivalent electron per tritium atom and two per neutral diatomic tritium molecule.",
+    "Defined by the integral of the tritium introduction rate from prefill start t0 to plasma breakdown t_bd.",
+    "Excludes post-breakdown gas injection, wall recycling, neutral-beam fueling, and pellet fueling.",
+    "Counts injected tritium, not retained or ionized tritium inventory; the equivalent-electron convention is an accounting normalization, not a free-electron count.",
+    "Relates as the tritium contribution to accumulated_total_prefill_gas_equivalent_electron_count and contrasts with accumulated_tritium_count_due_to_gas_injection."
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-6417c54b59f71da0",
+    "source_text_present": true
+   },
+   "right_names": [
+    "accumulated_tritium_prefill_count"
+   ]
+  },
+  "spectral_rate_of_spectrometer_channel": {
+   "definition_points": [
+    "detected photoelectron rate assigned to each wavelength pixel of a spectrometer channel",
+    "electronic gain compensation applied",
+    "relative channel calibration applied",
+    "before absolute radiometric calibration",
+    "unit s^-1"
+   ],
+   "incumbent_verdict": {
+    "definition_verdict": "right",
+    "name_verdict": "wrong",
+    "packet_id": "pkt-c0b2cb041a21cd2e",
+    "source_text_present": true
+   },
+   "right_names": [
+    "spectral_rate_of_spectrometer_channel"
+   ]
+  }
+ },
+ "packets": {
+  "fr-0d9f67b1e2cf0448": {
+   "arm": "incumbent",
+   "member": "accumulated_tritium_prefill_count"
+  },
+  "fr-243534ee08c9fc3b": {
+   "arm": "repaired",
+   "member": "accumulated_tritium_prefill_count"
+  },
+  "fr-4428ff97ba76b754": {
+   "arm": "repaired",
+   "member": "spectral_rate_of_spectrometer_channel"
+  },
+  "fr-51942a59ae1965a6": {
+   "arm": "incumbent",
+   "member": "spectral_rate_of_spectrometer_channel"
+  }
+ },
+ "rule": "The adjudicator does not open this file until its verdicts are committed. It maps a packet id back to the member and the arm it stands for, and carries the reference's right names and definition points.",
+ "seed": 20261120
+}
