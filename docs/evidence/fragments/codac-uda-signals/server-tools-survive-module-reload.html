@@ -1,0 +1,73 @@
+<section id="server-tools-survive-module-reload-evidence">
+  <h3>Server tools survive the REPL's module reload</h3>
+  <p>A tool call no longer fails with a missing-module error when the
+    server's REPL reinitializes while the server's own modules are being
+    imported. The REPL reload was kept, and its module-cache deletion was
+    removed.</p>
+
+  <h3>Why the reload existed</h3>
+  <p>The REPL carries a <code>reload()</code> utility so a long-lived server
+    process can rebuild the utilities it holds — the graph client, the
+    encoder and the globals — against current settings without being
+    restarted. Its documented purpose was wider: it cleared source edits made
+    in a developer session. That wider promise was never delivered
+    coherently. Tool handlers are closures registered at server startup, so
+    deleting the module entries never rebound them; it only caused the next
+    call-time import to load a second copy of a module whose siblings were
+    still referenced by the running closures.</p>
+
+  <h3>The failure mechanism</h3>
+  <p>The reload deleted every module whose name began with
+    <code>iter_codex</code> from <code>sys.modules</code>. Each tool body
+    imports its support modules at call time, and CPython's importlib
+    installs the module under its name, runs its loader, then pops that name
+    to hand it back. A reload that removed the entry between the install and
+    the pop made the underlying lookup raise <code>KeyError</code> for the
+    module name. The tool call surfaced as an arbitrary
+    <code>KeyError: 'iter_codex.…'</code> that a fresh process could not
+    reproduce.</p>
+
+  <h3>What changed</h3>
+  <p><code>_reload_repl()</code> now resets only the REPL's own state
+    (<code>_repl_globals</code>, <code>_imas_tools_instance</code>,
+    <code>_graph_client</code>) and reinitializes the utilities. It no longer
+    touches <code>sys.modules</code>. Source edits require a server restart,
+    which is the only operation that replaces every module and every
+    reference to it together; the docstring states that boundary rather than
+    promising a hot reload it cannot provide.</p>
+
+  <h3>Reproduction and measure</h3>
+  <p>The reproduction runs the server's reload from inside the tool's own
+    call-time import — the worst interleaving two threads can produce,
+    made deterministic — and then calls the signal and pulse searches in
+    both orders, and every plant tool across four orders, in one
+    process.</p>
+  <table>
+    <thead><tr><th>Arm</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Base revision, new reproduction test</td>
+        <td>6 failed, 1 passed; each failure reads
+          <code>KeyError: 'iter_codex.tools.plant_search'</code></td>
+      </tr>
+      <tr>
+        <td>Fixed revision, same test</td>
+        <td>7 passed</td>
+      </tr>
+      <tr>
+        <td>Base revision, <code>tests/llm</code></td>
+        <td>1 failed, 353 passed; the failure is
+          <code>test_walk_reaches_*</code> and is identical at both
+          revisions</td>
+      </tr>
+      <tr>
+        <td>Fixed revision, <code>tests/llm</code></td>
+        <td>1 failed, 360 passed; the same pre-existing failure, and the
+          seven new tests pass</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>The fixed revision adds no failure against the base revision. The one
+    failure in both arms is an unrelated prompt-schema AST walk, recorded
+    under the run's outside-scope notes.</p>
+</section>
