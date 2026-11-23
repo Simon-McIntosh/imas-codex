@@ -34,6 +34,16 @@ logger = logging.getLogger(__name__)
 RECEIPT_SCHEMA = "iter-codex.standard-name-context-receipt"
 RECEIPT_VERSION = 1
 
+
+class StagePromptError(RuntimeError):
+    """A stage's production template could not render from the context given.
+
+    Raised rather than substituted with a marker: a receipt is evidence about
+    what a stage was shown, and a digest over a placeholder is evidence about
+    nothing.
+    """
+
+
 #: The model-calling stages, in pipeline order. A stage writes one receipt per
 #: name it handles; the census reads the same set so its ranks line up.
 STAGES: tuple[str, ...] = (
@@ -504,66 +514,136 @@ def summarise(receipts: Iterable[ContextReceipt]) -> dict[str, Any]:
     return {"names": names, "table": table, "omissions": omissions}
 
 
-def _stage_context(content: Mapping[str, Any]) -> dict[str, Any]:
-    """Assemble the context a stage's template reads from a case file.
+def _shared_context() -> dict[str, Any]:
+    """The section-level prompt context the compose pipeline renders from.
 
-    The keys are the ones the prompt templates name; where the case file cannot
-    supply a key the template renders it empty, which is the omission the
-    census counts rather than a value invented here.
+    Grammar, vocabulary, field guidance and every other static block are built
+    by :func:`iter_codex.standard_names.context.build_compose_context`, the call
+    each live stage makes. This module asks that owner rather than supplying its
+    own set: a thinner second set here is how three templates came to be
+    reported as rendered while they were raising on a census key the pipeline
+    does supply.
+    """
+    from iter_codex.standard_names.context import build_compose_context
+
+    try:
+        return dict(build_compose_context())
+    except Exception:  # noqa: BLE001 - reported, and the render then fails loudly
+        logger.warning(
+            "context_receipt: the compose context is unavailable, so a census "
+            "prompt would carry no grammar or field guidance",
+            exc_info=True,
+        )
+        return {}
+
+
+def _name_context(content: Mapping[str, Any]) -> dict[str, Any]:
+    """The per-name half of a stage's prompt context, from a case file.
+
+    Every key is read from the block that owns it. The family keeps the parent,
+    the anchor and each member's variation axis, which is what the case file
+    recorded from :func:`iter_codex.standard_names.context.fetch_sibling_family`;
+    the two neighbour channels stay distinct rather than one standing in for
+    both, and enclosure comes from the sources' own statements.
+
+    These are the keys :func:`content_from_prompt_context` reads back out of a
+    live stage's context and out of a receipt alike, so the two directions
+    describe one prompt instead of two shapes that drift apart.
     """
     target = dict(content.get("target") or {})
     incumbent = dict(content.get("incumbent") or {})
     sources = list(content.get("sources") or ())
     first = dict(sources[0]) if sources else {}
     unit = incumbent.get("unit") or first.get("unit")
-    siblings = list((content.get("family") or {}).get("members") or ())
+    family = dict(content.get("family") or {})
+    members = list(family.get("members") or ())
     neighbours = dict(content.get("neighbours") or {})
     children = list((content.get("children") or {}).get("members") or ())
+    grammar = dict(content.get("grammar") or {})
+    name = incumbent.get("name") or target.get("id") or ""
+    enclosing = [
+        {"path": statement.get("path"), "text": statement.get("text")}
+        for source in sources
+        for statement in ((source.get("enclosing") or {}).get("statements") or ())
+    ]
     item = {
         "id": incumbent.get("id") or target.get("id"),
-        "name": incumbent.get("name") or target.get("id"),
+        "name": name,
         "description": incumbent.get("description") or "",
         "documentation": incumbent.get("documentation") or "",
         "unit": unit,
         "kind": incumbent.get("kind") or target.get("kind"),
         "physics_domain": incumbent.get("physics_domain"),
+        "coordinates": list(first.get("coordinates") or ()),
         "source_paths": [str(source.get("id")) for source in sources],
         "dd_description": " ".join(str(source.get("text") or "") for source in sources),
         "dd_documentation": " ".join(
             str(source.get("text") or "") for source in sources
         ),
         "dd_units": unit,
-        "derived_children": children,
+        "derived_children": [str(child.get("name") or "") for child in children],
     }
-    fam = {
-        "parent": None,
-        "anchor": None,
+    sibling_family = {
+        "parent": family.get("parent"),
+        "anchor": family.get("anchor"),
         "siblings": [
-            {"name": member.get("name"), "description": member.get("description")}
-            for member in siblings
+            {
+                "name": member.get("name"),
+                "operator_kind": member.get("differs_on"),
+                "axis": member.get("axis"),
+                "description": member.get("description") or "",
+            }
+            for member in members
         ],
     }
-    item["sibling_family"] = fam
+    item["sibling_family"] = sibling_family
+    by_locus = dict(neighbours.get("by_locus") or {})
+    locus_rows = [dict(row) for row in (by_locus.get("members") or ())]
+    dd_description = item["dd_description"] or item["description"]
+    dd_context = {
+        "path": str(first.get("id") or ""),
+        "ids_name": name,
+        "unit": unit,
+        "physics_domain": incumbent.get("physics_domain") or "",
+        "description": item["description"] or dd_description,
+        "documentation": dd_description,
+        "coordinates": item["coordinates"],
+        "ancestors": enclosing,
+    }
     return {
         "item": item,
-        "children": children,
-        "anc": [
-            {"path": statement.get("path"), "text": statement.get("text")}
-            for source in sources
-            for statement in ((source.get("enclosing") or {}).get("statements") or ())
-        ],
-        "sib": [member.get("name") for member in siblings],
-        "cl": [member.get("name") for member in siblings],
-        "sibling_family": fam,
+        "name": name,
+        "description": item["description"],
+        "segments": dict(grammar.get("segments") or {}),
+        "dd_context": dd_context,
+        # The diagnostics list is produced at composition time by the stage
+        # that has just parsed the candidate. A census renders the prompt
+        # without one, and the template states that absence rather than this
+        # module inventing a diagnostic the stage did not have.
+        "diagnostics": [],
+        "anc": enclosing,
+        "children": [str(child.get("name") or "") for child in children],
+        "sib": [str(member.get("name") or "") for member in members],
+        "cl": [str(member.get("name") or "") for member in members],
+        "sibling_family": sibling_family,
         "vector_neighbours": list(
             (neighbours.get("by_subject") or {}).get("members") or ()
         ),
         "same_base_neighbours": [],
-        "same_path_neighbours": [],
-        "locus_context": None,
-        "name": item["name"],
-        "description": item["description"],
+        "same_path_neighbours": locus_rows,
+        "locus_context": locus_rows or None,
     }
+
+
+def _stage_context(content: Mapping[str, Any]) -> dict[str, Any]:
+    """The full prompt context a stage's template reads for one name.
+
+    The section-level half comes from the compose pipeline's own builder and
+    the per-name half from the case file; nothing here restates either. A key
+    neither can supply stays absent, and the render raises rather than passing
+    silently, so a census cannot report a prompt the stage never saw.
+    """
+    return {**_shared_context(), **_name_context(content)}
 
 
 def render_stage_prompt(
@@ -574,9 +654,13 @@ def render_stage_prompt(
 ) -> str:
     """Render *stage*'s prompt for one name from a case file, sending nothing.
 
-    The system and user templates are the production templates; a template that
-    cannot render contributes its own absence marker rather than a fabricated
-    block, so the digest states what the stage would actually have been shown.
+    The system and user templates are the production templates and the context
+    is the one the stage reads, so the returned text is what the stage would
+    have been shown. A template that cannot render raises
+    :class:`StagePromptError` naming the stage, the template and the missing
+    variable: a receipt whose digest covered a placeholder instead would say a
+    context arrived that the stage never had, and the census would report a
+    prompt that does not exist.
     """
     if stage not in STAGE_TEMPLATES:
         raise ValueError(f"unknown stage {stage!r}; expected one of {list(STAGES)}")
@@ -590,11 +674,10 @@ def render_stage_prompt(
             continue
         try:
             parts.append(render_prompt(template, context, prompts_dir=prompts_dir))
-        except Exception:
-            logger.debug(
-                "context_receipt: template %s failed to render", template, exc_info=True
-            )
-            parts.append(f"[{template} did not render]")
+        except Exception as error:
+            raise StagePromptError(
+                f"{stage}: template {template!r} did not render: {error}"
+            ) from error
     return "\n\n".join(parts)
 
 
@@ -619,21 +702,57 @@ def receipt_for_stage(
     )
 
 
-def receipt_sink() -> Path | None:  # type: ignore[valid-type]
-    """Return the receipt sink path from ``ITER_CODEX_CONTEXT_RECEIPT_SINK``."""
-    raw = os.environ.get("ITER_CODEX_CONTEXT_RECEIPT_SINK")
-    return Path(raw) if raw else None
+#: The sink a running stage appends its receipts to when nothing overrides it.
+#: It follows the CLI's own log directory, so a stage's record exists without
+#: the pipeline being configured to produce one — a receipt that is only
+#: written when an environment variable is set is a receipt no pipeline runs
+#: with, which is what this default exists to stop.
+DEFAULT_RECEIPT_SINK = Path("~/.local/share/iter-codex/logs/context-receipts.jsonl")
+
+#: Set this to redirect receipts, for a test or a stage run outside the CLI.
+RECEIPT_SINK_ENV = "ITER_CODEX_CONTEXT_RECEIPT_SINK"
 
 
-def record_receipt(receipt: ContextReceipt, *, sink: Path | None = None) -> None:
-    """Append one receipt to the JSONL sink, if a sink is configured."""
+def receipt_sink() -> Path:
+    """Return the path a receipt was appended to.
+
+    ``ITER_CODEX_CONTEXT_RECEIPT_SINK`` wins when it is set; otherwise the
+    module's own log file is used, so no stage has to be told where to write.
+    """
+    raw = os.environ.get(RECEIPT_SINK_ENV)
+    if raw:
+        return Path(raw).expanduser()
+    return DEFAULT_RECEIPT_SINK.expanduser()
+
+
+def record_receipt(receipt: ContextReceipt, *, sink: Path | None = None) -> Path:
+    """Append one receipt to the JSONL sink and return the path it went to.
+
+    A receipt records what a stage was shown, so it is written on every run
+    rather than when someone has configured it. The write is one ``O_APPEND``
+    line per receipt, which is what lets concurrent stages share the file.
+
+    A sink that cannot be written is reported at WARNING and does not raise:
+    the receipt is observation, and failing a paid stage's turn because its
+    recording surface was read-only would make the observation more dangerous
+    than its absence. It is logged rather than passed over, because a silent
+    skip is indistinguishable from a pipeline in which no stage ever ran.
+    """
     path = sink or receipt_sink()
-    if path is None:
-        return
-    path.parent.mkdir(parents=True, exist_ok=True)
     line = json.dumps(receipt.model_dump(), sort_keys=True, ensure_ascii=False)
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(line + "\n")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as handle:
+            handle.write(line + "\n")
+    except OSError:
+        logger.warning(
+            "context_receipt: could not write the %s receipt for %r to %s",
+            receipt.stage,
+            receipt.name,
+            path,
+            exc_info=True,
+        )
+    return path
 
 
 def emit_receipt(
@@ -761,7 +880,10 @@ def record_stage_receipt(
 
     This is the production entry point: a stage calls it with the context it
     sent and the prompt it rendered, and the receipt records what arrived. It
-    is observation only and never touches a model.
+    is observation only and never touches a model. The receipt is appended to
+    the sink :func:`receipt_sink` returns — by default the CLI's own log
+    directory — so calling this is what makes a stage's record exist; it is
+    not a no-op when nothing configured a sink.
     """
     content = content_from_prompt_context(context, name=name)
     receipt = receipt_from_content(
