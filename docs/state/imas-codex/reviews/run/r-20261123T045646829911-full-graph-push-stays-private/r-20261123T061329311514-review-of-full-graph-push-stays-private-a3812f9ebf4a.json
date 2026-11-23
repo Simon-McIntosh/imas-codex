@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "iter_codex/cli/graph/__init__.py:92",
+    "iter_codex/cli/graph/registry.py:459",
+    "iter_codex/cli/graph/registry.py:785"
+  ],
+  "completed_at": "2026-11-23T06:40:48.580Z",
+  "dispatched_at": "2026-11-23T06:14:26Z",
+  "findings": [
+    {
+      "file": "iter_codex/cli/graph/registry.py",
+      "line": "552",
+      "severity": "non-blocking",
+      "text": "non-blocking: _archive_label_counts re-implements the existing offsite.read_archive_manifest (the tar-walk for the single manifest.json member and its JSON parse) at iter_codex/graph/offsite.py:166 without extending it, and drops the int-coercion and raise-on-failure that GraphCensus.from_manifest performs, so two readers of the same archive manifest now exist and can drift."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/full-graph-push-stays-private.html",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "non-blocking: the \"Plant export\" table row closes </td> after the path cell and then emits the \"--facility X --without-dd\" parenthetical as a loose text node with a stray </td>, so that note renders outside the Path column and the row is malformed HTML."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit \u2014 a01663fba adds the archive-scope decision (registry.py:552 _archive_label_counts, ghcr.py:812 facility_owned_labels, ghcr.py:830 dump_holds_facility_content) and the remote tag-after-check, and a3812f9e adds the evidence fragment; 7 files, +541/-41.",
+    "done_when": "the done_when names tests per push path plus a negative control; tests/cli/test_graph_push_private_package.py covers full-graph, facility-filtered, cycle, remote, DD-only and the manifestless archive, and the manifest records the after arm at 59 passed/EXIT=0 and the negative control at 1 failed/EXIT=1.",
+    "goal": "the node's goal is that a graph push carrying facility nodes fails unless its registry package reads back private; iter_codex/cli/graph/registry.py:877 and :985 call _require_private_package after the write on the remote and local paths and ghcr.py:585 raises on anything but private.",
+    "manifest": "the reviewed manifest is status complete and records commits a01663fba and a3812f9e with a base arm of 49 passed and an after arm of 59 passed, both EXIT=0, plus a negative-control log; I read both suite-log tails and the negative-control log on disk and they agree.",
+    "write_paths": "the declared paths are iter_codex/cli/graph/registry.py, iter_codex/graph/ghcr.py, iter_codex/graph/remote.py, tests/cli, tests/graph and one evidence fragment; all seven files in dc6950fa..a3812f9e lie inside them and tests/graph was not needed."
+  },
+  "justifications": {
+    "durability": "tests/cli/test_graph_push_private_package.py:228 reddens when _require_private_package returns early, as logs/negative-control.log shows 1 failed/EXIT=1, and test_dd_only_push_never_queries_visibility (line 263) fails the test if a DD-only archive queries the registry.",
+    "evidence": "the manifest's gate command runs the graph CLI suite on both arms and the on-disk logs end \"59 passed\"/\"49 passed\" with EXIT=0, so the done_when measure is recorded rather than claimed.",
+    "fit": "the additions follow the surrounding registry.py and ghcr.py idiom and carry no plan, version or ticket identifiers; only registry.py:552 diverges from the sibling reader's raise-on-failure convention.",
+    "goal_fidelity": "registry.py:985 decides from the archive's own label_counts and registry.py:877 from the remote whole-graph scope, each failing via ghcr.py:585 before the latest tag, while a DD-only push skips through ghcr.py:830.",
+    "reuse": "registry.py:552 _archive_label_counts re-implements iter_codex/graph/offsite.py:166 read_archive_manifest rather than extending it.",
+    "scope_discipline": "every one of the seven changed files (registry.py, ghcr.py, remote.py, three tests/cli files, one evidence fragment) is inside the declared write paths and nothing else was touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that a graph push carrying facility nodes fails unless its registry package reads back private; iter_codex/cli/graph/registry.py:877 and :985 call _require_private_package after the write on the remote and local paths and ghcr.py:585 raises on anything but private.\nVERDICT done_when: the done_when names tests per push path plus a negative control; tests/cli/test_graph_push_private_package.py covers full-graph, facility-filtered, cycle, remote, DD-only and the manifestless archive, and the manifest records the after arm at 59 passed/EXIT=0 and the negative control at 1 failed/EXIT=1.\nVERDICT write_paths: the declared paths are iter_codex/cli/graph/registry.py, iter_codex/graph/ghcr.py, iter_codex/graph/remote.py, tests/cli, tests/graph and one evidence fragment; all seven files in dc6950fa..a3812f9e lie inside them and tests/graph was not needed.\nVERDICT manifest: the reviewed manifest is status complete and records commits a01663fba and a3812f9e with a base arm of 49 passed and an after arm of 59 passed, both EXIT=0, plus a negative-control log; I read both suite-log tails and the negative-control log on disk and they agree.\nVERDICT diff: read commit by commit \u2014 a01663fba adds the archive-scope decision (registry.py:552 _archive_label_counts, ghcr.py:812 facility_owned_labels, ghcr.py:830 dump_holds_facility_content) and the remote tag-after-check, and a3812f9e adds the evidence fragment; 7 files, +541/-41.\nCALL_SITES: iter_codex/cli/graph/__init__.py:92, iter_codex/cli/graph/registry.py:459, iter_codex/cli/graph/registry.py:785\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: registry.py:985 decides from the archive's own label_counts and registry.py:877 from the remote whole-graph scope, each failing via ghcr.py:585 before the latest tag, while a DD-only push skips through ghcr.py:830.\nSCORE evidence: 18\nJUSTIFICATION evidence: the manifest's gate command runs the graph CLI suite on both arms and the on-disk logs end \"59 passed\"/\"49 passed\" with EXIT=0, so the done_when measure is recorded rather than claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every one of the seven changed files (registry.py, ghcr.py, remote.py, three tests/cli files, one evidence fragment) is inside the declared write paths and nothing else was touched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/cli/test_graph_push_private_package.py:228 reddens when _require_private_package returns early, as logs/negative-control.log shows 1 failed/EXIT=1, and test_dd_only_push_never_queries_visibility (line 263) fails the test if a DD-only archive queries the registry.\nSCORE fit: 16\nJUSTIFICATION fit: the additions follow the surrounding registry.py and ghcr.py idiom and carry no plan, version or ticket identifiers; only registry.py:552 diverges from the sibling reader's raise-on-failure convention.\nSCORE reuse: 4\nJUSTIFICATION reuse: registry.py:552 _archive_label_counts re-implements iter_codex/graph/offsite.py:166 read_archive_manifest rather than extending it.\nFINDING iter_codex/cli/graph/registry.py:552 non-blocking: _archive_label_counts re-implements the existing offsite.read_archive_manifest (the tar-walk for the single manifest.json member and its JSON parse) at iter_codex/graph/offsite.py:166 without extending it, and drops the int-coercion and raise-on-failure that GraphCensus.from_manifest performs, so two readers of the same archive manifest now exist and can drift.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/full-graph-push-stays-private.html:19 non-blocking: the \"Plant export\" table row closes </td> after the path cell and then emits the \"--facility X --without-dd\" parenthetical as a loose text node with a stray </td>, so that note renders outside the Path column and the row is malformed HTML.",
+  "review_run_id": "r-20261123T061329311514-review-of-full-graph-push-stays-private-a3812f9ebf4a",
+  "reviewed_base_sha": "dc6950fae6f8a81e7c729b2734da8e07dd2ed944",
+  "reviewed_head_sha": "a3812f9ebf4a60fcab0724105a45d1e18ef4bedc",
+  "reviewed_run_id": "r-20261123T045646829911-full-graph-push-stays-private",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_delta_source": {
+    "added_failure_count": 0,
+    "added_failure_ids": [],
+    "after_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T045646829911-full-graph-push-stays-private/logs/graph-cli-after.log",
+    "after_summary": "59 passed, 1 warning, EXIT=0",
+    "baseline_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T045646829911-full-graph-push-stays-private/logs/graph-cli-base.log",
+    "baseline_summary": "49 passed, 0 failed, EXIT=0"
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T06:41:06.737965+00:00",
+  "total": 94
+}
