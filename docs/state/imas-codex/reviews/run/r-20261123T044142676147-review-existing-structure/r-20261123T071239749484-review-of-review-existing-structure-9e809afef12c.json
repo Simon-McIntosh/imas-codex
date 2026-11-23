@@ -1,0 +1,57 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run is a documentation node with no baseline_suite/after_suite arms in its manifest, so no test-derived pair exists. Its gate is check_record.py (a structural literal check), which ran at the head build with all 17 checks passed and EXIT=0 (resume-1.jsonl, 2026-11-23T07:09:24Z).",
+  "completed_at": "2026-11-23T07:49:57.302Z",
+  "dimension_justifications": {
+    "durability": "check_record.py's literal checks fail if the networks section, identity_state or the figure's FROM_COMPONENT panel is removed, but the substantive design claims have no guard and the gate script lives outside the repository.",
+    "evidence": "The gate check_record.py asserts the increment's presence literals and ran at the head build at EXIT=0, but the design itself rests on the coordinator's ICP4 reading and the record states this in its method paragraph, so the evidence is presence plus disclosure, not measurement.",
+    "fit": "PlantConnection, PlantMedium and identity_state follow the schema's reified-edge and provenance-mixin idiom at iter_codex/schemas/facility.yaml:1940 and introduce no plan or ticket label; one figure-legend dash is reused ambiguously.",
+    "goal_fidelity": "The networks section at docs/research/iter-plant-signal-ontology-review.html:37 delivers the typed connection the plan's section 2 names, with medium provenance, endpoints and identity rule, and the figure shows it.",
+    "reuse": "No connection owner exists: a schema search for connection/network/edge classes found only SignalContextLink (iter_codex/schemas/facility.yaml:1940), which the design cites as its pattern, and it reuses the PlantContextProvenance mixin (facility.yaml:1843) and the existing parser parse_variable_name (variable_names.py:106) instead of forking recognition.",
+    "scope_discipline": "Every path in 816fdec..9e809afe is one of the four declared write paths, and the increment carries only the plant-network deliverable the goal implies."
+  },
+  "dispatched_at": "2026-11-23T07:15:21Z",
+  "findings": [
+    {
+      "file": "docs/research/iter-plant-signal-ontology-review.html",
+      "line": 26,
+      "severity": "non-blocking",
+      "summary": "The classes caption enumerates the figure's grey dashed lines as 'the two duplicate memberships and the one class the proposal retires', but the plant-networks increment adds a third grey-dashed element to docs/figures/iter-plant-signal-ontology/review-existing-structure/ontology-proposal.svg (the 'source component reference' box, drawn with the retired dash and grey in draw_figure.py:140). A reader following the legend reads an active source input as a retired element; the caption or legend needs a dash or note that distinguishes an external reference from a retired class."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "None: the change is documentation and a figure, and no production runtime code reaches it. The design reuses the owners at iter_codex/schemas/facility.yaml:1843 (PlantContextProvenance mixin), iter_codex/schemas/facility.yaml:1940 (SignalContextLink reified edge) and the existing component parser parse_variable_name at iter_codex/discovery/signals/variable_names.py:106.",
+    "diff": "Read commit by commit: 57ae754f4 adds the networks, network-identity, network-sibling and rw-connection sections and extends the method, the classes caption, the shared table and remains; 9e809afef adds the one-paragraph method caveat; every path is an addition inside scope.",
+    "done_when": "The reviewed run's gate is python3 /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T044142676147-review-existing-structure/check_record.py; it ran at the head build with all 17 checks passed and EXIT=0 (resume-1.jsonl, 2026-11-23T07:09:24Z) and asserts the increment's literals id=networks, PlantConnection, identity_state, refs/keep/relate-sibling-signals, and FROM_COMPONENT plus PlantConnection in the figure.",
+    "goal": "The increment adds the typed plant-network connection the plan's section 2 requires: the record's networks, network-identity and network-sibling sections plus rw-connection design PlantConnection with a medium and its provenance, component endpoints, ports and an identity rule, and the figure gains a connection panel in docs/figures/iter-plant-signal-ontology/review-existing-structure/ontology-proposal.svg.",
+    "manifest": "Read manifest.md: status complete, tests names check_record.py, negative_control_log is recorded, and commits lists all four shas including 57ae754f4 and 9e809afef; the resume stream shows the head gate at EXIT=0.",
+    "write_paths": "The incremental diff 816fdec..9e809afe touches only docs/research/iter-plant-signal-ontology-review.html, docs/figures/iter-plant-signal-ontology/review-existing-structure/ontology-proposal.svg and docs/evidence/fragments/iter-plant-signal-ontology/review-existing-structure.html, all inside the four declared write paths."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T071239749484-review-of-review-existing-structure-9e809afef12c",
+  "reviewed_base_sha": "816fdec78e3b797d07530b3238b6e425781c6ace",
+  "reviewed_head_sha": "9e809afef12ca8f4b8336845e455383be69c824b",
+  "reviewed_run_id": "r-20261123T044142676147-review-existing-structure",
+  "rubric_items": {
+    "call_sites": "None: the change is documentation and a figure, and no production runtime code reaches it. The design reuses the owners at iter_codex/schemas/facility.yaml:1843 (PlantContextProvenance mixin), iter_codex/schemas/facility.yaml:1940 (SignalContextLink reified edge) and the existing component parser parse_variable_name at iter_codex/discovery/signals/variable_names.py:106.",
+    "diff": "Read commit by commit: 57ae754f4 adds the networks, network-identity, network-sibling and rw-connection sections and extends the method, the classes caption, the shared table and remains; 9e809afef adds the one-paragraph method caveat; every path is an addition inside scope.",
+    "done_when": "The reviewed run's gate is python3 /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T044142676147-review-existing-structure/check_record.py; it ran at the head build with all 17 checks passed and EXIT=0 (resume-1.jsonl, 2026-11-23T07:09:24Z) and asserts the increment's literals id=networks, PlantConnection, identity_state, refs/keep/relate-sibling-signals, and FROM_COMPONENT plus PlantConnection in the figure.",
+    "goal": "The increment adds the typed plant-network connection the plan's section 2 requires: the record's networks, network-identity and network-sibling sections plus rw-connection design PlantConnection with a medium and its provenance, component endpoints, ports and an identity rule, and the figure gains a connection panel in docs/figures/iter-plant-signal-ontology/review-existing-structure/ontology-proposal.svg.",
+    "manifest": "Read manifest.md: status complete, tests names check_record.py, negative_control_log is recorded, and commits lists all four shas including 57ae754f4 and 9e809afef; the resume stream shows the head gate at EXIT=0.",
+    "write_paths": "The incremental diff 816fdec..9e809afe touches only docs/research/iter-plant-signal-ontology-review.html, docs/figures/iter-plant-signal-ontology/review-existing-structure/ontology-proposal.svg and docs/evidence/fragments/iter-plant-signal-ontology/review-existing-structure.html, all inside the four declared write paths."
+  },
+  "scope_note": "Incremental review: this record reads only the commits the run gained after its prior independent review (which covered 730b85cd..816fdec), i.e. 57ae754f4 and 9e809afef. reviewed_base_sha is the prior reviewed head.",
+  "scores": {
+    "durability": 10,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:50:23.792384+00:00",
+  "total": 99
+}
