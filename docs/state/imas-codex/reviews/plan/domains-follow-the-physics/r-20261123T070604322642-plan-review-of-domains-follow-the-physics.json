@@ -35,6 +35,16 @@
       "note": "\u00a72 adds a bucket for paths that carry a domain with no recorded mechanism (5,177 measured), so every path carrying a domain is in exactly one bucket and the buckets sum to the paths carrying a domain",
       "reason": "",
       "when": "2026-11-23T07:27:25.401699+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2f22958a56f97c4f3ed3368d1768a97c70b2de06",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "\u00a72 adds a positive control: the census's count of paths carrying core_plasma_physics, a removed value known present before the rerun, must be non-zero and equal an independent count read by a second statement in the same run",
+      "reason": "",
+      "when": "2026-11-23T07:27:37.197626+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "\u00a72 adds a bucket for paths that carry a domain with no recorded mechanism (5,177 measured), so every path carrying a domain is in exactly one bucket and the buckets sum to the paths carrying a domain",
       "reason": "",
       "when": "2026-11-23T07:27:25.401699+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "2f22958a56f97c4f3ed3368d1768a97c70b2de06",
+      "commit_basis": "edit",
+      "note": "\u00a72 adds a positive control: the census's count of paths carrying core_plasma_physics, a removed value known present before the rerun, must be non-zero and equal an independent count read by a second statement in the same run",
+      "reason": "",
+      "when": "2026-11-23T07:27:37.197626+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/domains-follow-the-physics/r-20261123T070604322642-plan-review-of-domains-follow-the-physics.json",
