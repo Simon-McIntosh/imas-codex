@@ -11,19 +11,23 @@
 <tr><td><code>ArchiveEndpoint</code></td><td>3</td></tr>
 <tr><td><code>ControlNode</code></td><td>550</td></tr>
 <tr><td><code>PlantComponent</code></td><td>2,957</td></tr>
-<tr><td><code>ArchiveFieldPattern</code></td><td>422</td></tr>>
+<tr><td><code>ArchiveFieldPattern</code></td><td>422</td></tr>
 <tr><td><code>PlantStructure</code></td><td>18</td></tr>
 <tr><td><code>PlantFunctionCategory</code></td><td>16</td></tr>
 <tr><td><code>PlantContextDocument</code></td><td>7</td></tr>
 <tr><td><code>PlantSignalRow</code></td><td>343</td></tr>
 <tr><td><code>SignalContextLink</code></td><td>225</td></tr>
 <tr><td><code>Document</code></td><td>808</td></tr>
+<tr><td><code>SignalNode</code></td><td>0</td></tr>
+<tr><td><code>Diagnostic</code></td><td>0</td></tr>
+<tr><td><code>StandardName</code></td><td>0</td></tr>
+<tr><td><code>PhysicsDomain</code></td><td>0</td></tr>
 <tr><td><code>PulseCategory</code></td><td>744</td></tr>
 <tr><td><code>Pulse</code></td><td>5,957</td></tr>
 </tbody>
 </table>
 <p>The control hierarchy holds 11 / 43 / 110 / 167 / 219 nodes at levels one to five. Of 2,957 components, 2,857 sit under a control node and 74 carry a plant link. The signal population splits by archive role into 90,664 slow and 6,861 fast, and by lifecycle into 97,335 discovered and 190 enriched. No ITER signal carries <code>signal_role</code>; 1,732 carry a decided <code>vocabulary_role</code>: measurement 1,436, state 101, command 86, setpoint 63, alarm 46.</p>
-<p><code>FacilitySignal</code> is shared: jet holds 46,872 and jt-60sa 15,111. <code>Document</code> is shared: tcv holds 20,159, jet 19,159 and jt-60sa 1,057. Every other class in the table holds ITER nodes only, counted across every facility with one facility row returned for each.</p>
+<p><code>FacilitySignal</code> is shared: jet holds 46,872 and jt-60sa 15,111. <code>Document</code> is shared: tcv holds 20,159, jet 19,159 and jt-60sa 1,057. Every other class in the table holds ITER nodes only, counted across every facility with one facility row returned for each. The four classes at zero are declared on the signal and hold no node at any facility.</p>
 </section>
 
 <section id="review-existing-structure-redundancy">
@@ -42,7 +46,7 @@
 <section id="review-existing-structure-documentation">
 <h3>Documentation found for every first-level control-breakdown node, as a lower bound</h3>
 <p>The measure is 11 of 11 level-one nodes that hold at least one catalogued ITER archive signal and have at least one signal-list or self-description document found for them. The census is the sample at <code>~/.cache/imas-codex-codac-uda/document-census/signal-lists-sample.tsv</code> saved on 2026-11-22: 168 rows, of which 154 are signal-list rows, 9 self-description and 5 other kinds. Two signal-list pages were read while the search was still running, and 23 and 19 rows respectively were withheld by permissions, so the figure is a lower bound in two distinct ways.</p>
-<p>Of the 168 rows, 97 carry at least one plant-breakdown code, covering 84 distinct codes; 71 carry none and are attributed only where the row's own title names the system. The magnet root, which carries the pilot, attributes nine documents to five level-two nodes: the toroidal-field coil supply, the poloidal-field coil supply, the correction-coil supply, the magnet system proper and the magnet cold-test bench.</p>
+<p>Of the 168 rows, 97 carry at least one plant-breakdown code, covering 84 distinct codes; 71 carry none and are attributed only where the row's own title names the system. The magnet root, which carries the pilot, is attributed nine documents. Its signals split across five level-two nodes: the toroidal-field coil supply, the poloidal-field coil supply, the correction-coil supply, the magnet system proper and the magnet cold-test bench.</p>
 </section>
 
 <section id="review-existing-structure-negative-controls">
@@ -55,6 +59,11 @@
 <section id="review-existing-structure-change-scope">
 <h3>Removals and one rename are confined to ITER data; shared changes are additive</h3>
 <p>The classes that change name, merge or lose relationships — <code>ControlNode</code>, <code>PlantComponent</code>, <code>ArchiveFieldPattern</code>, <code>PlantStructure</code>, <code>PlantFunctionCategory</code>, <code>PlantContextDocument</code>, <code>PlantSignalRow</code>, <code>SignalContextLink</code>, <code>ArchiveEndpoint</code> — each returned exactly one facility row when counted across all facilities. The two shared classes take only optional slots and links; no required slot is added and no existing name changes.</p>
+</section>
+<section id="review-existing-structure-figure">
+<h3>The figure carries numbers only, and was rendered and read back</h3>
+<p>Every edge in the figure is one relationship type and carries exactly one number; the name, endpoints and count of each number are in the record's <a href="#relationships">relationship tables</a>, and each number appears once, so no number needs a key inside the image. The proposal's relationship types continue the same numbering. Two marks are labelled directly instead of numbered because neither is a relationship: the identity rule, written beside its dotted line, and the source record, whose box is a source record rather than a graph node and now has its own legend entry, with the caption naming both.</p>
+<p>The SVG was written through the repository's saving function, which refuses any figure with text clipped at the canvas or two text labels overlapping. Each version was also written to PNG at 1400 px and read back: three rounds of that reading moved a label off a crossing edge, moved the retired document class clear of the box it overlapped, and reduced its type until the class name sat inside its own outline. The PNG twin was removed after inspection, so only the SVG is tracked.</p>
 </section>
 <section id="review-existing-structure-plant-networks">
 <h3>The plant-network design rests on a committed sibling attempt and an unread source, not on this node's measurement</h3>
