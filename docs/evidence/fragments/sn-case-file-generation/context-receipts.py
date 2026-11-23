@@ -767,6 +767,10 @@ def check(report: dict[str, Any]) -> list[str]:
 
 
 def build_report(*, limit: int = 0) -> dict[str, Any]:
+    # Read the revision before the pass, not after it: the pass takes minutes
+    # and a commit landing while it runs would otherwise be named as the tree
+    # the data came from, though the code that produced it is the starting one.
+    revision = git("rev-parse", "HEAD")
     equilibrium = equilibrium_members()
     held = held_out_members()
     defects = defect_members()
@@ -801,7 +805,7 @@ def build_report(*, limit: int = 0) -> dict[str, Any]:
             "uv run --no-sync python "
             "docs/evidence/fragments/sn-case-file-generation/context-receipts.py"
         ),
-        "revision": git("rev-parse", "HEAD"),
+        "revision": revision,
         "tree": git("rev-parse", "HEAD^{tree}"),
         "inputs": {
             "adjudication": {
