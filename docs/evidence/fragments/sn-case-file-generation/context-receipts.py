@@ -428,8 +428,13 @@ def document(report: dict[str, Any]) -> str:
 
     gate_revision = os.environ.get("CONTEXT_RECEIPT_REVISION") or report["revision"]
     gate_result = os.environ.get("CONTEXT_RECEIPT_GATE_RESULT", "").strip()
+    gate_log = os.environ.get("CONTEXT_RECEIPT_GATE_LOG", "").strip()
+    gate_source = (
+        f", read from <code>{escape(gate_log)}</code> beside this page" if gate_log else ""
+    )
     gate_sentence = (
-        f" Its whole-directory gate reported <code>{escape(gate_result)}</code>."
+        f" Its whole-directory gate reported <code>{escape(gate_result)}</code>"
+        f"{gate_source}."
         if gate_result
         else ""
     )

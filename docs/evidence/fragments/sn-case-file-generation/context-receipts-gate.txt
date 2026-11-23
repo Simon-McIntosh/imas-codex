@@ -1,0 +1,610 @@
+REVISION=a014bd172 TREE=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts COMMAND=UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts uv run --no-sync pytest -p no:cacheprovider -n 4 tests/standard_names
+/home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/pytest_benchmark/logger.py:46: PytestBenchmarkWarning: Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.
+  warner(PytestBenchmarkWarning(text))
+============================= test session starts ==============================
+created: 4/4 workers
+4 workers [8923 items]
+
+........................................................................ [  0%]
+........................................................................ [  1%]
+........................................................................ [  2%]
+........................................................................ [  3%]
+........................................................................ [  4%]
+........................................................................ [  4%]
+........................................................................ [  5%]
+........................................................................ [  6%]
+........................................................................ [  7%]
+........................................................................ [  8%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+......................s................................................. [ 10%]
+........................................................................ [ 11%]
+..............................s......................................... [ 12%]
+........................................................................ [ 12%]
+........................................................................ [ 13%]
+........................................................................ [ 14%]
+........................................................................ [ 15%]
+........................................................................ [ 16%]
+........................................................................ [ 16%]
+........................................................................ [ 17%]
+........................................................................ [ 18%]
+........................................................................ [ 19%]
+........................................................................ [ 20%]
+........................................................................ [ 20%]
+........................................................................ [ 21%]
+........................................................................ [ 22%]
+........................................................................ [ 23%]
+..........s............................................................. [ 24%]
+........................................................................ [ 25%]
+........................................................................ [ 25%]
+........................................................................ [ 26%]
+........................................................................ [ 27%]
+........................................................................ [ 28%]
+........................................................................ [ 29%]
+........................................................................ [ 29%]
+........................................................................ [ 30%]
+........................................................................ [ 31%]
+........................................................................ [ 32%]
+........................................................................ [ 33%]
+........................................................................ [ 33%]
+.......................................s.......s........................ [ 34%]
+........................................................................ [ 35%]
+........................................................................ [ 36%]
+........................................................................ [ 37%]
+........................................................................ [ 37%]
+........................................................................ [ 38%]
+........................................................................ [ 39%]
+........................................................................ [ 40%]
+........................................................................ [ 41%]
+........................................................................ [ 41%]
+........................................................................ [ 42%]
+........................................................................ [ 43%]
+........................................................................ [ 44%]
+........................................................................ [ 45%]
+........................................................................ [ 45%]
+........................................................................ [ 46%]
+........................................................................ [ 47%]
+........................................................................ [ 48%]
+........................................................................ [ 49%]
+........................................................................ [ 50%]
+........................................................................ [ 50%]
+........................................................................ [ 51%]
+........................................................................ [ 52%]
+........................................................................ [ 53%]
+........................................................................ [ 54%]
+........................................................................ [ 54%]
+........................................................................ [ 55%]
+........................................................................ [ 56%]
+........................................................................ [ 57%]
+........................................................................ [ 58%]
+........................................................................ [ 58%]
+........................................................................ [ 59%]
+................................s....................................... [ 60%]
+........................................................................ [ 61%]
+........................................................................ [ 62%]
+........................................................................ [ 62%]
+........................................................................ [ 63%]
+........................................................................ [ 64%]
+........................................................................ [ 65%]
+........................................................................ [ 66%]
+........................................................................ [ 66%]
+........................................................................ [ 67%]
+........................................................................ [ 68%]
+........................................................................ [ 69%]
+..............................................sss....................... [ 70%]
+........................................................................ [ 71%]
+........................................................................ [ 71%]
+........................................................................ [ 72%]
+........................................................................ [ 73%]
+........................................................................ [ 74%]
+........................................................................ [ 75%]
+........................................................................ [ 75%]
+........................................................................ [ 76%]
+.......................s................................................ [ 77%]
+........................................................................ [ 78%]
+........................................................................ [ 79%]
+........................................................................ [ 79%]
+........................................................................ [ 80%]
+........................................................................ [ 81%]
+........................................................................ [ 82%]
+........................................................................ [ 83%]
+........................................................................ [ 83%]
+........................................................................ [ 84%]
+........................................................................ [ 85%]
+........................................................................ [ 86%]
+........................................................................ [ 87%]
+........................................................................ [ 87%]
+........................................................................ [ 88%]
+........................................................................ [ 89%]
+........................................................................ [ 90%]
+........................................................................ [ 91%]
+........................................................................ [ 91%]
+........................................................................ [ 92%]
+........................................................................ [ 93%]
+.......................................s................................ [ 94%]
+........................................................................ [ 95%]
+........................................................................ [ 96%]
+........................................................................ [ 96%]
+........................................................................ [ 97%]
+........................................................................ [ 98%]
+........................................................................ [ 99%]
+...................................................................      [100%]
+=============================== warnings summary ===============================
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+  /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestGrammarTokensBySegment::test_physical_base_view_uses_the_lightweight_canonical_accessor without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestGrammarTokensBySegment::test_carries_the_operator_class without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestGrammarTokensBySegment::test_carries_every_isn_operator without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestGrammarTokensBySegment::test_carries_every_segment_vocabulary without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestGrammarTokensBySegment::test_reverse_index_resolves_operators without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestGrammarTokensBySegment::test_degrades_to_empty_without_isn without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestOperatorComposition::test_recognises_expressible_compounds without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestOperatorComposition::test_reports_the_operators_it_found without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestOperatorComposition::test_single_operator_morphological_variant without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestOperatorComposition::test_requires_at_least_one_operator without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestOperatorComposition::test_containing_an_operator_word_is_not_enough without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestOperatorComposition::test_unknown_residual_is_not_composable without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestOperatorComposition::test_atomic_compounds_are_not_decomposed without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestClassifyGapOperatorAware::test_never_absent_for_operator_expressible without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestClassifyGapOperatorAware::test_not_actionable_for_operator_expressible without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestClassifyGapOperatorAware::test_operator_slot_is_named_in_the_verdict without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestClassifyGapOperatorAware::test_single_operator_still_wrong_slot without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestClassifyGapOperatorAware::test_genuinely_absent_token_still_absent without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestClassifyGapOperatorAware::test_documented_boundary_of_the_rule without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestClassifyGapOperatorAware::test_novel_physics_still_asks_for_a_token without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestRatioSpelling::test_ratio_is_composable without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestRatioSpelling::test_guidance_names_the_binary_operator_and_both_operands without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestRatioSpelling::test_a_ratio_with_an_unregistered_operand_stays_absent without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestInfixOperatorSpelling::test_infix_operator_is_composable without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestInfixOperatorSpelling::test_reports_the_whole_registered_operator without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestInfixOperatorSpelling::test_a_split_operator_needs_both_halves_present without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestInfixOperatorSpelling::test_the_residue_must_still_be_registered without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestDescribeGap::test_names_the_operators_and_the_slot without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestDescribeGap::test_single_operator_guidance_names_the_registered_class without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestDescribeGap::test_absent_token_guidance_states_the_deficiency without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestDescribeGap::test_guidance_is_a_single_nonempty_line without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+tests/standard_names/test_operator_aware_gap_classification.py:1
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_operator_aware_gap_classification.py:1: PytestWarning: usefixtures() in tests/standard_names/test_operator_aware_gap_classification.py::TestDescribeGap::test_category_agrees_with_classify_gap without arguments has no effect
+    """Operator awareness across every consumer of the grammar token vocabulary.
+
+tests/standard_names/test_declared_attribute_access.py::test_three_argument_getattr_names_a_declared_attribute
+tests/standard_names/test_declared_attribute_access.py::test_a_reintroduced_findings_getattr_is_refused
+tests/standard_names/test_name_definition_agreement.py::test_the_answer_classes_are_written_once
+  <unknown>:1077: SyntaxWarning: invalid escape sequence '\s'
+
+tests/standard_names/test_defaulted_attributes_exist.py::test_configured_module_roots_have_coverage
+tests/standard_names/test_defaulted_attributes_exist.py::test_empty_container_defaulted_surface_is_covered
+tests/standard_names/test_defaulted_attributes_exist.py::test_defaulted_literal_attributes_are_declared
+tests/standard_names/test_status_predicate_null_safety.py::test_every_status_exclusion_states_its_null_handling
+tests/standard_names/test_no_split_name_bindings.py::test_no_dynamic_name_binding
+tests/standard_names/test_no_split_name_bindings.py::test_no_dynamic_name_lookup
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/iter_codex/config/models.py:1077: SyntaxWarning: invalid escape sequence '\s'
+    name: str = Field(default=..., description="""Signal identifier in the data system's native format. PPF: \"DDA/DTYPE\" (e.g., \"EFIT/RLIM\"). MDSplus: node path (e.g., \"\static::top.v:r\"). IMAS: IDS path (e.g., \"wall.description_2d[0].limiter.unit[0].outline.r\").""", json_schema_extra = { "linkml_meta": {'alias': 'name',
+
+tests/standard_names/test_vocab_uniqueness.py::TestVocabUniqueness::test_report_cross_segment_tokens
+  /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/context-receipts/tests/standard_names/test_vocab_uniqueness.py:39: UserWarning: 213 tokens appear in >1 closed segment:
+    active_limiter_point: ['geometry', 'position', 'path']
+    active_spatial_resolution_zone: ['geometry', 'position', 'path']
+    active_wall_point: ['geometry', 'position', 'path']
+    annulus_center: ['geometry', 'position', 'path']
+    antenna_row: ['geometry', 'position', 'path']
+    antenna_strap: ['device', 'object']
+    aperture: ['device', 'object']
+    arc_of_circle_center: ['geometry', 'position', 'path']
+    beam_path: ['geometry', 'position', 'path']
+    beam_tracing_beam: ['device', 'object']
+    beam_tracing_point: ['geometry', 'position', 'path']
+    beam_tracing_ray: ['device', 'object']
+    beamlet_group: ['device', 'object']
+    bolometer: ['device', 'object']
+    bragg_crystal: ['device', 'object']
+    breakdown_candidate: ['geometry', 'position', 'path']
+    breeder_blanket: ['device', 'object']
+    breeder_blanket_layer: ['device', 'object']
+    breeder_blanket_module: ['device', 'object']
+    breeder_blanket_shield: ['device', 'object']
+    calorimetry_component: ['geometry', 'position', 'path']
+    camera: ['device', 'object']
+    charge_exchange_channel: ['geometry', 'position', 'path']
+    closest_wall_point: ['geometry', 'position', 'path']
+    coil_conductor: ['device', 'object']
+    coil_conductor_element: ['device', 'object']
+    conductor: ['device', 'object']
+    conductor_cross_section: ['device', 'object']
+    constant_toroidal_flux: ['geometry', 'position', 'path']
+    constraint_position: ['geometry', 'position', 'path']
+    control_surface: ['geometry', 'position', 'path']
+    cooling_circuit_inlet: ['geometry', 'position', 'path']
+    coordinate_system: ['device', 'object']
+    correction_coil: ['device', 'object']
+    cryostat: ['device', 'object']
+    current_center: ['geometry', 'position', 'path']
+    detector: ['device', 'object']
+    detector_pixel: ['geometry', 'position', 'path']
+    deuterium_deuterium: ['qualifier', 'subject']
+    deuterium_tritium: ['qualifier', 'subject']
+    diagnostic_antenna: ['device', 'object']
+    diagnostic_aperture: ['device', 'object']
+    diagnostic_component_centre: ['geometry', 'position', 'path']
+    diamagnetic_loop: ['device', 'object']
+    divertor: ['zone', 'device', 'object']
+    divertor_plate: ['geometry', 'position', 'path']
+    divertor_target: ['geometry', 'position', 'path']
+    divertor_tile: ['device', 'object']
+    dr_dz_zero_point: ['geometry', 'position', 'path']
+    ece_channel: ['geometry', 'position', 'path']
+    ece_channel_emission_position: ['geometry', 'position', 'path']
+    electron_cyclotron_beam: ['device', 'object']
+    electron_cyclotron_heating_antenna: ['device', 'object']
+    electron_cyclotron_launcher: ['device', 'object']
+    electron_cyclotron_launcher_mirror: ['device', 'object']
+    emissivity_peak: ['geometry', 'position', 'path']
+    energy: ['channel', 'physical_base']
+    ferritic_element: ['device', 'object']
+    ferritic_element_centroid: ['geometry', 'position', 'path']
+    ferritic_insert: ['device', 'object']
+    ferritic_insert_centroid: ['geometry', 'position', 'path']
+    fiber_optic_current_sensor: ['device', 'object']
+    fibre_bundle: ['device', 'object']
+    filter: ['device', 'object']
+    filter_window: ['device', 'object']
+    first_wall: ['geometry', 'position', 'path']
+    first_wall_midplane: ['geometry', 'position', 'path']
+    flux_loop: ['device', 'object']
+    flux_surface: ['geometry', 'position', 'path']
+    gamma_ray_detector: ['device', 'object']
+    gauge: ['device', 'object']
+    geometric_axis: ['geometry', 'position', 'path']
+    grating: ['device', 'object']
+    gyrokinetic_eigenmode: ['device', 'object']
+    halo_boundary: ['geometry', 'position', 'path']
+    hard_xray_detector: ['device', 'object']
+    image_surface: ['geometry', 'position', 'path']
+    inboard_midplane: ['geometry', 'position', 'path']
+    infrared_camera: ['device', 'object']
+    inlet: ['geometry', 'position', 'path']
+    inner: ['zone', 'locus_qualifier']
+    inside_flux_surface: ['geometry', 'position', 'path']
+    interferometer_beam: ['device', 'object']
+    internal_transport_barrier: ['geometry', 'position', 'path']
+    ion_cyclotron_heating_antenna: ['device', 'object']
+    ion_source: ['device', 'object']
+    ion_state: ['subject', 'device', 'object']
+    iron_core_segment: ['device', 'object']
+    isotope: ['device', 'object']
+    langmuir_probe: ['device', 'object']
+    langmuir_probe_position: ['geometry', 'position', 'path']
+    last_closed_flux_surface: ['geometry', 'position', 'path']
+    launching_position: ['geometry', 'position', 'path']
+    limiter: ['geometry', 'position', 'path']
+    limiter_tile: ['device', 'object']
+    line_of_sight: ['geometry', 'position', 'path']
+    lower: ['zone', 'locus_qualifier']
+    lower_hybrid_antenna: ['device', 'object']
+    lower_hybrid_antenna_row: ['device', 'object']
+    magnetic_axis: ['geometry', 'position', 'path']
+    magnetic_field_line: ['geometry', 'position', 'path']
+    magnetic_field_probe: ['device', 'object']
+    mass_spectrometer: ['device', 'object']
+    mass_spectrometer_channel: ['device', 'object']
+    measurement_position: ['geometry', 'position', 'path']
+    midplane: ['geometry', 'position', 'path']
+    minimum_absolute_safety_factor: ['geometry', 'position', 'path']
+    momentum: ['channel', 'physical_base']
+    mse: ['device', 'object']
+    neoclassical_tearing_mode: ['device', 'object', 'process']
+    neoclassical_tearing_mode_center: ['geometry', 'position', 'path']
+    neoclassical_tearing_mode_onset: ['geometry', 'position', 'path']
+    neutral_beam_injector: ['device', 'object']
+    neutron_detector: ['device', 'object']
+    neutron_detector_converter: ['device', 'object']
+    normalized_poloidal: ['component', 'coordinate']
+    normalized_poloidal_magnetic_flux: ['geometry', 'position', 'path']
+    normalized_radial: ['component', 'coordinate']
+    normalized_toroidal: ['component', 'coordinate']
+    normalized_vertical: ['component', 'coordinate']
+    optical_element: ['device', 'object']
+    optical_fibre: ['device', 'object']
+    outboard_midplane: ['geometry', 'position', 'path']
+    outboard_midplane_separatrix: ['geometry', 'position', 'path']
+    outer: ['zone', 'geometry', 'position', 'path', 'locus_qualifier']
+    outlet: ['geometry', 'position', 'path']
+    parallel: ['component', 'coordinate']
+    passive_loop: ['device', 'object']
+    passive_loop_element: ['device', 'object']
+    passive_structure: ['device', 'object', 'process']
+    pedestal: ['zone', 'geometry', 'position', 'path']
+    pedestal_maximum: ['geometry', 'position', 'path']
+    pedestal_top: ['geometry', 'position', 'path']
+    pedestal_top_high_field_side: ['geometry', 'position', 'path']
+    pedestal_top_low_field_side: ['geometry', 'position', 'path']
+    pellet: ['subject', 'device', 'object']
+    pellet_fragment: ['device', 'object']
+    pellet_injector: ['device', 'object']
+    pellet_path: ['geometry', 'position', 'path']
+    pellet_path_point: ['geometry', 'position', 'path']
+    perpendicular: ['component', 'coordinate']
+    pickup_coil: ['device', 'object']
+    pipe: ['device', 'object']
+    plant_component_port: ['device', 'object']
+    plant_subsystem: ['device', 'object']
+    plant_system: ['device', 'object']
+    plasma_boundary: ['geometry', 'position', 'path']
+    plasma_boundary_gap: ['geometry', 'position', 'path']
+    plasma_boundary_gap_reference_point: ['geometry', 'position', 'path']
+    plasma_facing_component: ['device', 'object']
+    plasma_filament: ['device', 'object']
+    polarimeter_beam: ['device', 'object']
+    polarizer: ['device', 'object']
+    poloidal: ['component', 'coordinate', 'section_plane']
+    poloidal_field_coil: ['device', 'object']
+    poloidal_magnetic_field_probe: ['device', 'object']
+    port: ['device', 'object']
+    post_sawtooth_crash: ['geometry', 'position', 'path']
+    power_convertor: ['device', 'object']
+    pre_sawtooth_crash: ['geometry', 'position', 'path']
+    radial: ['component', 'coordinate']
+    radial_magnetic_field_probe: ['device', 'object']
+    reciprocating_probe: ['device', 'object']
+    rectangle_center: ['geometry', 'position', 'path']
+    reflectometer_antenna: ['device', 'object']
+    reflectometer_cutoff_position: ['geometry', 'position', 'path']
+    reflectometer_detector: ['device', 'object']
+    reflector: ['device', 'object']
+    rogowski_coil: ['device', 'object']
+    saddle_loop: ['device', 'object']
+    sawtooth_inversion_radius: ['geometry', 'position', 'path']
+    sawtooth_mixing_radius: ['geometry', 'position', 'path']
+    scrape_off_layer: ['zone', 'region']
+    sensor: ['device', 'object']
+    sensor_attachment_point: ['geometry', 'position', 'path']
+    separatrix: ['zone', 'geometry', 'position', 'path']
+    shatter_cone: ['device', 'object']
+    shattering_position: ['geometry', 'position', 'path']
+    shunt: ['device', 'object']
+    slit: ['device', 'object']
+    soft_xray_detector: ['device', 'object']
+    spectral_line: ['geometry', 'position', 'path']
+    spectrometer: ['device', 'object']
+    spectrometer_channel: ['device', 'object']
+    strain_gauge: ['device', 'object']
+    strain_gauge_sensor: ['device', 'object']
+    strike_point: ['geometry', 'position', 'path']
+    tearing_mode_center: ['geometry', 'position', 'path']
+    temperature_sensor: ['device', 'object']
+    thermal_shield: ['device', 'object']
+    thomson_scattering_channel_position: ['geometry', 'position', 'path']
+    thomson_scattering_detector: ['device', 'object']
+    thomson_scattering_laser: ['device', 'object']
+    threshold_crossing: ['geometry', 'position', 'path']
+    toroidal: ['component', 'coordinate']
+    toroidal_field_coil: ['device', 'object']
+    toroidal_magnetic_field_probe: ['device', 'object']
+    trim_coil: ['device', 'object']
+    tritium_tritium: ['qualifier', 'subject']
+    upper: ['zone', 'locus_qualifier']
+    vacuum_vessel: ['device', 'object']
+    valve: ['device', 'object']
+    vertical: ['component', 'coordinate']
+    visible_camera: ['device', 'object']
+    wall: ['geometry', 'position', 'path']
+    wall_material: ['device', 'object']
+    wave_beam: ['device', 'object']
+    wave_diagnostic_channel: ['device', 'object']
+    working_fluid: ['device', 'object']
+    x: ['component', 'coordinate']
+    x_point: ['geometry', 'position', 'path']
+    y: ['component', 'coordinate']
+    z: ['component', 'coordinate']
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 10 durations =============================
+12.79s call     tests/standard_names/test_harmonize.py::test_shared_part_census_counts_one_wording_per_family
+12.39s call     tests/standard_names/test_compose_batch_isolation.py::TestGrammarRefusalIsolation::test_refused_candidate_is_recorded_and_siblings_still_persist
+8.51s call     tests/standard_names/test_pool_endpoint_failure_scope.py::test_reachable_seat_pool_commits_work_while_compose_is_dead
+8.46s call     tests/standard_names/test_judgment_goldens.py::test_built_ruled_rows_match_the_committed_fixture
+8.39s call     tests/standard_names/test_harmonize_apply.py::test_dry_run_reports_the_whole_apply_refused
+7.25s call     tests/standard_names/test_harmonize_apply.py::test_failed_anchor_leaves_members_untouched
+7.16s call     tests/standard_names/test_pool_batch_processors.py::TestComposeDomainContextFromBatch::test_compose_domain_context_from_batch
+6.85s call     tests/standard_names/test_generate_docs.py::test_species_family_carries_one_population_statement
+6.75s call     tests/standard_names/test_export_producer_predicate.py::test_refusal_disappears_when_the_predicate_is_reverted
+6.64s call     tests/standard_names/test_harmonize_apply.py::test_apply_names_a_member_below_threshold
+========== 8912 passed, 11 skipped, 143 warnings in 303.30s (0:05:03) ==========
+EXIT=0
