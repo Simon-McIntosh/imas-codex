@@ -95,6 +95,16 @@
       "note": "the IDS-to-domain table leaves \u00a71 and is regenerated from the rerun path domains in \u00a73",
       "reason": "",
       "when": "2026-11-23T07:04:41.439482+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "bab3757dbd0e24dbc951cf0b54a941e5e4c30ced",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "\u00a73 adds a planted control on a disposable graph: a path carrying a removed value is reassigned to a ruled value and a path carrying an unchanged domain keeps it",
+      "reason": "",
+      "when": "2026-11-23T07:04:43.837775+00:00"
     }
   ],
   "responses": {
@@ -106,6 +116,15 @@
       "note": "\u00a72 now counts paths by the recorded mechanism that set the domain, and separately counts the live names whose stored domain equals a candidate drawn from their sources' IDS through the IDS-to-domain table",
       "reason": "",
       "when": "2026-11-23T07:04:38.956625+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "bab3757dbd0e24dbc951cf0b54a941e5e4c30ced",
+      "commit_basis": "edit",
+      "note": "\u00a73 adds a planted control on a disposable graph: a path carrying a removed value is reassigned to a ruled value and a path carrying an unchanged domain keeps it",
+      "reason": "",
+      "when": "2026-11-23T07:04:43.837775+00:00"
     },
     "reasoning-1": {
       "action": "acted",
