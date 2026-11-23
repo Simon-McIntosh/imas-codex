@@ -149,7 +149,17 @@
   and at the node revision, so neither tier adds a failure. The
   graph targets pass on the partition where they were run, and every log names
   the revision, the tree and the command and ends with a single <code>EXIT=</code>
-  line.</p>
+  line. The gate logs are <code>logs/schema-20261123T200229Z.log</code>,
+  <code>logs/models-20261123T200229Z.log</code>,
+  <code>logs/graph-20261123T194515Z.log</code>,
+  <code>logs/default-20261123T194515Z.log</code>,
+  <code>logs/base-default-20261123T194857Z.log</code>,
+  <code>logs/head-default-20261123T194857Z.log</code>,
+  <code>logs/base-default-20261123T193138Z.log</code>,
+  <code>logs/head-default-20261123T193138Z.log</code>,
+  <code>logs/base-graph-20261123T201243Z.log</code>,
+  <code>logs/head-graph-20261123T201243Z.log</code> and
+  <code>logs/migrate-20261123T190518Z.log</code>.</p>
 
   <h3>Two negative controls, both detecting what they were built to detect</h3>
   <p><strong>A change outside the migration is reported and removed.</strong> A
@@ -161,12 +171,14 @@
   <code>CONTROL_DETECTED</code>. The probe left by an earlier run of the same
   control was removed, and a recount taken afterwards moved by exactly that one
   facility node and nothing else.</p>
-  <p><strong>The migration refuses a class outside the approved set.</strong> A
-  sink of the class names outside the approved set — <code>StandardName</code>,
-  <code>DataSource</code> and <code>CodeChunk</code> — each yields a refusal naming the
-  label before any write: <code>migration refused: label(s) outside the permitted
-  classes</code>. The refusal is what turns "only the classes in scope change"
-  from a claim about the code into a property of every run.</p>
+  <p><strong>The migration refuses a class outside the approved set.</strong>
+  Naming <code>StandardName</code> on the command line stops the run before it
+  opens the graph, with <code>UnapprovedNameError: ['StandardName'] is outside
+  the classes and relationships this migration may touch</code> and
+  <code>EXIT=1</code>, recorded in
+  <code>logs/negative-control-unapproved-label-20261123T215500Z.log</code>. The
+  refusal is what turns "only the classes in scope change" from a claim about
+  the code into a property of every run.</p>
 
   <h3>Restore</h3>
   <p>The private before-image holds every node and relationship the migration
