@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T00:19:37.269Z",
+  "dispatched_at": "2026-11-22T23:57:59Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:52",
+      "id": "done_when-1",
+      "reason": "a \u00a72 worker must invent the census and its scope, so the stated lower bound is neither reproducible nor comparable with \u00a74's count, and the two sections can report different numbers for one population with nothing to reconcile them.",
+      "text": "\u00a72's done-when asks for \"the number of first-level control-breakdown nodes holding at least one catalogued ITER archive signal for which at least one signal list or self-description document has been found, out of all such nodes, stated as a lower bound because the census it uses is a sample\" but no section of the plan names that census; the artifact that exists is `~/.cache/imas-codex-codac-uda/document-census/signal-lists-sample.tsv`, whose own header records \"pages 1-2 of an unfinished result (has_more true; 23 and 19 withheld by permissions)\", and it holds signal lists only; the same measure is delivered again by \u00a74 as \"the number of first-level control-breakdown nodes with and without a matched document\"",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:62",
+      "id": "done_when-2",
+      "reason": "the endpoint is unbounded over a corpus the plan knows is partly withheld, so the node cannot close on a measurable target and its gate would pass or fail on how the worker chose to interpret \"every\".",
+      "text": "\u00a74's done-when demands the graph hold \"every signal-list and self-description document a records search finds\", but the only declared input, the export under `~/.cache/imas-codex-codac-uda/document-census/` (line 61), currently holds one signal-list search's unfinished sample and no self-description export at all, and \u00a71 already records that documents are withheld from the page",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:62",
+      "id": "evidence_paths-1",
+      "reason": "the check that proves the matching is right leaves no artifact a reader can open, so the only surviving evidence is a count and a worker's assertion, which is exactly the shape a wrong match passes.",
+      "text": "\u00a74 requires \"twenty matches are checked by hand against the document's title and PBS reference\" while also requiring \"no document identity or title appears in the tracked tree\", and the plan names no private path where those twenty checks are recorded",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fd3cef44cff701db90245c2a621dcbba7208aa77",
+  "plan_fingerprint": "d126d75666337b2aed3c4616ef67651acb9bfee2d9286601ba573c04dbb96dd9",
+  "plan_slug": "iter-plant-signal-ontology",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261122T212626430678-plan-review-of-iter-plant-signal-ontology",
+  "reviewed_blob_sha": "1deb0d35249d49d6d8a619e21c2f7f95663a4803",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the snapshotted `plan.html` is byte-identical to `docs/plans/iter-plant-signal-ontology.html`, section ids s1\u2013s4, `data-links` and the followups block all resolve, and the one plan cited in prose (the enrichment plan, unwired by slug) names no anchor to check; the delivery path `docs/research/iter-plant-signal-ontology-review.html` is a target, not a citation.",
+    "done_when": "a finding \u2014 \u00a72's documentation census names no census artifact and duplicates the coverage count \u00a74 delivers, and \u00a74's endpoint asks for every document a records search finds while the only supplied export is one unfinished signal-list page sample; \u00a73's done-when, by contrast, is measurable and its both-clause negative control can fail.",
+    "evidence_paths": "a finding \u2014 \u00a74's twenty hand-checks have no named durable path while document identities and titles are banned from the tracked tree, so the check itself leaves nothing a later reader can open.",
+    "naming": "pass \u2014 no symbol, file or stage label is introduced; `iter-plant-signal-ontology#s2` appears only as a plan-id in `data-links`, and the proposed class and relationship names are left to the review rather than frozen in plan text.",
+    "reasoning": "pass \u2014 the six schema problems \u00a71 states were each checked against `iter_codex/schemas/facility.yaml` and hold: `SignalRole` has six values at line 185 against `SignalVocabularyRole`'s five at line 271; `CANDIDATE_PLANT_COMPONENT` (line 3445) sits beside `archive_control_node`/`IN_ARCHIVE_CONTROL_NODE` (line 3456); `Document`'s workflow is discovered, scored, ingested (line 4329) with no version slot, while `PlantContextDocument` demands `sha256` and `plant_structure` (lines 1884\u20131907); the field-code table is private configuration per the enrichment plan's own landed record; and no section prescribes a code path, step sequence or function.",
+    "single_goal": "pass \u2014 \u00a72 delivers one research record, \u00a73 one adoption-and-migration state, \u00a74 one catalogued-document population, each with a single done-when that can close it.",
+    "wiring": "pass \u2014 s3 depends on s2 and s4 on s3, each declared in `plan-section-depends-on` and mirrored by the `data-links` on those sections; `plan-blocks` names `iter-signal-context-and-enrichment`, which exists as `docs/plans/iter-signal-context-and-enrichment.html`, and the one external state \u00a72's done-when leans on (the source/generated description separation) has already landed: `iter_codex/schemas/facility.yaml` carries `source_description`, `generated_description` and `description_source` and `iter_codex/graph/models.py` builds them, so no dependency is missing."
+  },
+  "section_digests": {
+    "_document": "878222f143675060d6c67a635eec3665eba921bbb9e79636d618cca92baea9f3",
+    "s1": "5a379093a3af688baa00b2dd56c7697cc8abfff3e4eadd31cd85c809aad0899e",
+    "s2": "5b183174182351a62dc8cb7e171b5331a0bc0624bf2decae5a4ead0ef0b2c53e",
+    "s3": "c3ca8d5036fe3480c5c2ff305867abe1690ea0110ad3734309f44c8da17956d2",
+    "s4": "f8f033a086ecae4ee0263b65184fc79d7e44c9fa46ec9d1ba39792a08bfe0a1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T00:30:10.608596+00:00",
+  "total": null
+}
