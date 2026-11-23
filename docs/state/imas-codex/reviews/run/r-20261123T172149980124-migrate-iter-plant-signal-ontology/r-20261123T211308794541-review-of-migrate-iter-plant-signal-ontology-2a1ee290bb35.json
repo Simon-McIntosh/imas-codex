@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-23T21:14:03Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T21:48:35.007650+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261123T172149980124-migrate-iter-plant-signal-ontology",
+      "section": "\u00a73"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T21:48:35.007650+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261123T172149980124-migrate-iter-plant-signal-ontology",
+      "section": "\u00a73"
+    }
+  },
+  "findings": [
+    {
+      "detail": "ROW_TEXT = (\"Signal purpose: ...\",) at tests/graph/test_signal_vocabulary_store.py:66 is passed as text=$text into CREATE (r:PlantSignalRow {description:$text}) at line 120. iter_codex/discovery/signals/vocabulary_graph.py applies str() to the description, which on a list yields \"['Signal purpose: ...']\" including quotes and brackets. The quantity assertion still passes because the keyword inside the text survives, so the test measures less than its comment states and would keep passing if the row-text path broke in a way that only affected the bracketed form.",
+      "file": "tests/graph/test_signal_vocabulary_store.py",
+      "id": "f13ee8d9e0b",
+      "line": 66,
+      "severity": "non-blocking",
+      "summary": "ROW_TEXT is a one-element tuple, so the vocabulary fixture stores a list where it means a string.",
+      "text": "ROW_TEXT is a one-element tuple rather than a string, and the fixture stores it as the description of the PlantSignalRow the vocabulary test reads its quantity from; the reader stringifies the value, so the test exercises a bracketed list repr in place of the row text it claims to model."
+    },
+    {
+      "detail": "assert_approved at iter_codex/graph/plant_ontology_migration.py:110 is exercised once, by logs/negative-control-unapproved-label-20261123T215500Z.log, and the repeat-pass idempotency is exercised once, by the applied-run census. Both are evidence for this landing but neither is a regression guard: the schema roundtrip tests cover the schema side, nothing in tests/ imports plant_ontology_migration, and its APPROVED_LABELS/APPROVED_RELATIONSHIPS sets can be widened, or a migration step made non-idempotent, with a green suite. The graph-marked tests that do run need a live graph, so a cheap test over assert_approved's refusal alone would cover the contract the negative control demonstrates.",
+      "file": "iter_codex/graph/plant_ontology_migration.py",
+      "id": "f3985cee477",
+      "line": 110,
+      "severity": "non-blocking",
+      "summary": "The migration module's refusal and idempotency are proven only by one-off run logs, not by a test.",
+      "text": "The 768-line migration module has no automated test; assert_approved, the per-step idempotency and restore are asserted only by one-off logs in the reviewed run's own directory, so a later edit can weaken the approved-label refusal without any test going red."
+    }
+  ],
+  "plan_slug": "iter-plant-signal-ontology",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to carry the approved plant-signal ontology into the schema, the writers and readers, and the live ITER graph while leaving no other facility, class or answer moved; the landed head holds every decided item, and the live census the node filed shows each decided class in its decided form with matching before and after counts.\nVERDICT write_paths: read the reviewed node's declared paths; every changed path in the six commits (facility.yaml, the six signal/writer modules, the four reader modules, the LLM search tools and server, the tools and remote readers, and the tests) is inside them.\nVERDICT manifest: read; it lists the five commits ef7a4259, a95c523c, 16a9f785, 103d791c and 2a1ee290 with an explicit failure_attribution of 3 default and 17 graph failures identical at base and node.\nVERDICT diff: read commit by commit against a44f8dd8; the schema diff is internally consistent with the approved decisions, the production diff changes only the classes and properties the migration moves, and no untouched code is edited.\nCALL_SITES: iter_codex/remote/field_code_table.py:38, iter_codex/remote/signal_vocabulary.py:141, iter_codex/discovery/signals/field_codes_graph.py:289, iter_codex/llm/search_tools.py:391, iter_codex/llm/search_tools.py:466, iter_codex/tools/plant_search.py:16, iter_codex/discovery/signals/group_enrichment.py:59, iter_codex/discovery/signals/plant_context_graph.py:17, iter_codex/discovery/signals/archive_grouping_graph.py:57\nSCORE goal_fidelity: 17\nJUSTIFICATION: every decided ontology item is present in the landed head: PlantStructure is relabelled PlantBreakdownNode with PARENT_PLANT_NODE, PlantContextDocument is merged into the shared Document class with DOCUMENT_PLANT_STRUCTURE, the two retired duplicate memberships are gone from the schema and the writers, ArchiveFieldCode is declared and populated from the graph's own sources, PlantConnection exists as the schema-only declaration the approved form asked for, and the first-level control binding is one root bound from a source that states it.\nSCORE evidence: 18\nJUSTIFICATION: the gate logs the node cites exist, name the revision, the tree and the command, and end in a single EXIT= line; the schema and model gates are EXIT=0, the graph targets and default tier are green, and the base and node arms of both the whole default suite (3 failed) and the whole graph suite (17 failed) carry identical failure identifiers, so the zero added failure count is derived rather than asserted; the single deduction is that the manifest's tests field is a prose sentence rather than a runnable command, recovered only from the log command headers.\nSCORE scope_discipline: 18\nJUSTIFICATION: every path in the six commits is inside the node's declared write paths, no plan or signal-list reading text is committed, and the only graph movement outside the migration's scope is one JT-60SA relationship attributed to a peer discovery write that also writes the edge type.\nSCORE durability: 13\nJUSTIFICATION: the schema half is durably guarded by roundtrip tests over the renamed classes and relationship types, but the migration module has no automated test at all, so the approved-label refusal, the per-step idempotency and the restore path hold only for the run that executed them; the vocabulary fixture defect in tests/graph/test_signal_vocabulary_store.py weakens the one test that exercises the reading path, and both together mean a future weakening of the migration contract would read as green.\nSCORE fit: 17\nJUSTIFICATION: the names introduced are mechanism names rather than plan labels, the migration sits in iter_codex/graph beside the modules it reads, and the effective_role precedence rule is stated once in the schema, once in the query builder and once at the search tool, so a reader of any of the three meets the same rule; the deduction is the duplicated precedence wording, which three files must keep in step by hand.\nSCORE reuse: 18\nJUSTIFICATION: the migration reuses GraphClient, the facility configuration and the field_codes_graph helpers rather than re-deriving them, and no existing migration owner was displaced; a search of iter_codex/graph found no prior migration module to extend.\nFINDING tests/graph/test_signal_vocabulary_store.py:66 non-blocking: ROW_TEXT is a one-element tuple, so the row fixture stores a list repr where it intends a string and the test measures less than its comment claims.\nFINDING iter_codex/graph/plant_ontology_migration.py:110 non-blocking: the migration module adds no automated test, so the approved-label refusal and the idempotency are proven only by one-off logs rather than guarded against a later edit.\n",
+  "review_run_id": "r-20261123T211308794541-review-of-migrate-iter-plant-signal-ontology-2a1ee290bb35",
+  "reviewed_base_sha": "a44f8dd849526b5ff2f5fb4f5f3af883bee70458",
+  "reviewed_head_sha": "2a1ee290bb357b5042d510d96ac3d2cb3c4166dc",
+  "reviewed_node": "migrate-iter-ontology",
+  "reviewed_plan": "iter-plant-signal-ontology",
+  "reviewed_run_id": "r-20261123T172149980124-migrate-iter-plant-signal-ontology",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "test_logs_read": [
+    "logs/schema-20261123T200229Z.log",
+    "logs/models-20261123T200229Z.log",
+    "logs/graph-20261123T194515Z.log",
+    "logs/default-20261123T194515Z.log",
+    "logs/base-default-20261123T194857Z.log",
+    "logs/head-default-20261123T194857Z.log",
+    "logs/base-default-20261123T193138Z.log",
+    "logs/head-default-20261123T193138Z.log",
+    "logs/base-graph-20261123T201243Z.log",
+    "logs/head-graph-20261123T201243Z.log",
+    "logs/head-graph-targets-20261123T210102Z.log",
+    "logs/head-default-tier-20261123T210102Z.log",
+    "logs/migrate-20261123T190518Z.log",
+    "logs/negative-control-unapproved-label-20261123T215500Z.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T21:49:23.429648+00:00",
+  "total": 101
+}

@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T22:17:28.879Z",
+  "dispatched_at": "2026-11-23T21:53:57Z",
+  "findings": [
+    {
+      "file": "docs/figures/iter-plant-signal-ontology/migrate-iter-plant-signal-ontology/make_figure.py",
+      "line": 100,
+      "severity": "blocking",
+      "summary": "The after-count annotation is placed 9 pt to the right of its marker, so on every row whose after count is zero the label is printed on top of the grey connector line: in the rendered PNG the line is visible through the counter of the \"0\" and the glyph's left edge touches the marker. It affects the six rows with an after count of zero (PlantStructure, PlantContextDocument, PARENT_PLANT_STRUCTURE, CONTEXT_FOR_PLANT, CANDIDATE_PLANT_COMPONENT, IN_ARCHIVE_CONTROL_NODE). A value label drawn over the data line degrades legibility of the very rows the figure exists to show, and the number is the reading a reader must trust."
+    },
+    {
+      "file": "docs/figures/iter-plant-signal-ontology/migrate-iter-plant-signal-ontology/make_figure.py",
+      "line": 73,
+      "severity": "blocking",
+      "summary": "The after markers are drawn over the before markers at a larger z-order and at the same size, so where the two counts nearly coincide the before marker is completely hidden: the Document (ITER) row renders as one blue dot with 808 to its left and 815 to its right, and the grey before mark at 808 is nowhere visible. The reader sees a single mark for a row that carries two counts and cannot tell from the marks which side is before and which is after; only the label placement convention recovers it. Data one of the two series encodes is not visible in the image."
+    },
+    {
+      "file": "docs/figures/iter-plant-signal-ontology/migrate-iter-plant-signal-ontology/make_figure.py",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The figure draws 14 rows while the evidence fragment's class table beside it lists a sixth class, PlantConnection, at 0 before and 0 after; the class is absent from the image with no visual cue that its omission is deliberate. A reader comparing the figure with the table must reconcile the difference themselves. Nothing is lost visually, because a pair of zero counts has no position the dumbbell can show, but the caption does not say the figure omits it."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T211416341203-review-of-migrate-iter-plant-signal-ontology-2a1ee290bb35-figure",
+  "reviewed_base_sha": "a44f8dd849526b5ff2f5fb4f5f3af883bee70458",
+  "reviewed_head_sha": "2a1ee290bb357b5042d510d96ac3d2cb3c4166dc",
+  "reviewed_run_id": "r-20261123T172149980124-migrate-iter-plant-signal-ontology",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Passes: value labels are near-black (#1f1f1f after, #3d3d3d before) and row and axis labels are dark grey on white, and the grey before marker sits at roughly 3:1 against white, so every text element clears its background.",
+    "data_ink": "Passes: grey and blue markers, the connector between each pair, and the value labels are the only ink in the plotting area beyond the axes and a frameless legend; nothing else competes with the data.",
+    "decoration": "Passes: no gradient, no background fill, no shaded bands, no gridlines, no frame; the top and right spines are removed and the legend has no box. No decorative styling draws attention away from the data.",
+    "label_collision": "Fails: the after-count annotation is offset so that on every row whose after count is zero (six rows) the leader line runs straight through the middle of the \"0\" glyph and the glyph's left edge abuts the marker. No label is clipped at a canvas edge and no two text labels overlap each other.",
+    "legibility": "Fails for one row: every count label is readable at 1400 px, but the Document (ITER) row shows a single blue dot between the numbers 808 and 815 because the grey before marker (808) sits under the blue after marker (815) and is entirely hidden, so that row's two marks cannot be compared.",
+    "table_form": "Passes: the image is a dumbbell chart on a logarithmic counting axis, not a table; the log-scale distance between each before and after mark carries the comparison the accompanying tables do not, so the visual form is appropriate to the information."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T22:18:40.857973+00:00",
+  "total": null
+}
