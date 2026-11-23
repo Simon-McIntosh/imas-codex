@@ -23,8 +23,8 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="104">
-<meta name="plan-modified" content="2026-11-22">
+<meta name="plan-version" content="105">
+<meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
   <main class="plan-doc">
@@ -238,6 +238,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-rename-cutover-done" data-who="coordinator" data-when="2026-11-22">
     <div class="r-comment-body"><p>The rename cutover ran on 2026-11-21 and 2026-11-22 with the lead's approval, the coordinator running the steps directly. The tracked rename is one commit, <code>187843a6d</code>: 2,253 files, the package directory now <code>iter_codex</code>; the tool's check and cutover check exit with no violation and a second application changed nothing. The shared environment was rebuilt as <code>iter-codex</code> and the lead renamed the one settings key in <code>.env</code>. The graph-stop path was first repaired so it signals only listed processes (<code>788de7740</code>); the graph and embedding services were then stopped, the share, config and cache roots moved to <code>iter-codex</code> with the store's absolute symlink re-pointed, and both services restarted from the new location. The graph's node, relationship, ITER-signal and standard-name counts after the move equal those before it (1,959,932 nodes, 5,417,930 relationships), and its service log shows no error. The push timer was reinstalled as <code>iter-codex-graph-push.timer</code> and the old timer and LLM unit disabled; the Codex MCP client now names <code>iter-cx</code>; seven stored template properties on five data-access nodes import <code>iter_codex</code>; four stored credentials were copied to the new service names with the old entries kept. The fork is now <code>Simon-McIntosh/iter-codex</code> and the organisation repository <code>iterorganization/ITER-Codex</code>, with both remotes updated. Kept by the lead's decisions: reckon's project key and <code>docs/state/imas-codex</code>, the checkout directory, the saved gate-script directory, the standard-names and data-dictionary surfaces, and historical records and published image tags. Not done: images are not yet published under the new name (the next graph push will publish them), and no offline consistency check ran on the store, because the checker refused this account and the export path needed the running server; the post-move counts are the evidence instead. The step-by-step receipts are private, under the cutover cache.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-server-reload-race-fixed" data-who="reckon-build" data-when="">
+    <div class="r-comment-body"><p>Landed r-20261122T194047253104-server-tools-survive-module-reload at head 9c6bf35c (merge 5e00a651c). The server's REPL reload no longer deletes the package's loaded modules, so the intermittent missing-module failure of the pulse search after the signal search, seen on 2026-11-17 and again on 2026-11-22, is gone. A test reproduces the failure at the base revision and calls every plant tool in several orders at the head; the review found no added failure.</p></div>
 </div>
 <div class="r-comment" data-section="s12" data-id="c-run-r-20261115T121442060665-review-of-full-archive-variable-catalogue-1230469a687e-figure" data-who="reckon-build" data-when="2026-11-15T12:33:00.993Z">
     <div class="r-comment-body"><p>figure review parsed for r-20261115T083925189595-full-archive-variable-catalogue at 1230469a687e: 6/6 rubric items answered on catalogue-recovery.svg, 0 blocking findings, 2 non-blocking findings (no noun for the bounded-reader count at make_figure.py:36; the four flow arrows leave the resume stage without an exit and the audit stage without an entry at make_figure.py:66-71); no suite ran, added_failure_count 0.</p></div>
