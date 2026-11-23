@@ -1,7 +1,7 @@
 {
  "subject": "the 33 held-out incumbents the second-round blind read marked not right, re-read against one codified rule set",
  "reader": "coordinating session, 2026-11-23, at the lead's request to test whether they are failures or readings of unsettled rules",
- "finding": "the two readings of the same names disagree on 17 of the 33 (the reference set called them sound or a definition fault); the disagreements trace to rules that leave the call open, not to the names",
+ "finding": "the reference set and the second-round blind read disagree on the name of 21 of the 33: the second round marked the name wrong or undecidable where the reference set called the record sound (17) or a definition fault only (4); the disagreements trace to rules that leave the call open",
  "rules": {
   "identity": "A word that changes the number a quantity takes belongs in the name: what is counted or carried (energy versus number, ions versus neutrals, equivalent electrons versus particles), how it is measured when that changes the value (apparent versus thermodynamic temperature), and which quantity a rate or time belongs to.",
   "specification": "Where and how a quantity is evaluated (a location such as the midplane, a reconstruction context, a component sub-unit, the species pair of a collisionality) belongs in the definition, unless two catalog names would otherwise denote the same words; then the name carries the least that separates them.",
@@ -184,5 +184,10 @@
   "borderline": 3,
   "not_defects": 13,
   "total": 33
+ },
+ "reference_set_verdicts": {
+  "sound": 17,
+  "naming_defect": 12,
+  "definition_defect": 4
  }
 }
