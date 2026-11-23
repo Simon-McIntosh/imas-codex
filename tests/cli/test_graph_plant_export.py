@@ -73,23 +73,26 @@ def test_plant_filter_keeps_the_facilitys_own_nodes():
 
 
 def test_public_registry_answer_makes_the_push_refuse(monkeypatch):
-    """A registry that reports the package public stops the push."""
+    """A package holding facility content that reads back public stops the push."""
     import click
 
     from iter_codex.cli.graph import registry as registry_mod
     from iter_codex.graph import ghcr
 
     monkeypatch.setattr(ghcr, "get_package_visibility", lambda *a, **k: "public")
-    # The registry refuses the write and keeps reporting public.
-    monkeypatch.setattr(ghcr, "set_package_visibility", lambda *a, **k: "public")
+    # The check reads the registry; it never changes a package's visibility.
+    monkeypatch.setattr(
+        ghcr,
+        "set_package_visibility",
+        lambda *a, **k: pytest.fail("the push check changed a package's visibility"),
+    )
 
     with pytest.raises(click.ClickException) as excinfo:
-        registry_mod._report_plant_package_visibility(
+        registry_mod._require_private_package(
             "ghcr.io/owner",
-            "iter-codex-graph-iter-without-dd",
+            "iter-codex-graph",
             None,
-            facilities=("iter",),
-            without_dd=True,
+            holds_facility_content=True,
         )
     assert "must not be published publicly" in str(excinfo.value)
 
@@ -101,33 +104,29 @@ def test_private_registry_answer_is_reported_and_the_push_continues(
     from iter_codex.graph import ghcr
 
     monkeypatch.setattr(ghcr, "get_package_visibility", lambda *a, **k: "private")
-    registry_mod._report_plant_package_visibility(
+    registry_mod._require_private_package(
         "ghcr.io/owner",
-        "iter-codex-graph-iter-without-dd",
+        "iter-codex-graph",
         None,
-        facilities=("iter",),
-        without_dd=True,
+        holds_facility_content=True,
     )
     assert "private (registry-reported)" in capsys.readouterr().out
 
 
-def test_a_facility_export_without_the_plant_flag_skips_the_visibility_report(
-    monkeypatch, capsys
-):
+def test_a_dump_without_facility_content_skips_the_visibility_read(monkeypatch, capsys):
     from iter_codex.cli.graph import registry as registry_mod
     from iter_codex.graph import ghcr
 
     monkeypatch.setattr(
         ghcr,
         "get_package_visibility",
-        lambda *a, **k: pytest.fail("visibility read for a full-graph package"),
+        lambda *a, **k: pytest.fail("visibility read for a DD-only package"),
     )
-    registry_mod._report_plant_package_visibility(
+    registry_mod._require_private_package(
         "ghcr.io/owner",
         "iter-codex-graph-dd",
         None,
-        facilities=(),
-        without_dd=False,
+        holds_facility_content=False,
     )
     assert capsys.readouterr().out == ""
 

@@ -15,7 +15,9 @@ import json
 import os
 import shutil
 import subprocess
+from collections.abc import Mapping
 from datetime import UTC, datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -799,3 +801,41 @@ def require_private_package(
             "ITER-internal content must not be published publicly"
         )
     return visibility
+
+
+# ============================================================================
+# Facility-content decision
+# ============================================================================
+
+
+@lru_cache(maxsize=1)
+def facility_owned_labels() -> frozenset[str]:
+    """Node labels whose nodes carry a ``facility_id``, derived from the schema.
+
+    A Data-Dictionary-only dump is produced by deleting every node that has a
+    ``facility_id``, so the labels that make a dump facility-bearing are the
+    same rule stated positively. Deriving them from the schema keeps the push
+    check and the export filter reading one definition.
+    """
+    from iter_codex.graph.schema import GraphSchema
+
+    schema = GraphSchema()
+    return frozenset(
+        label
+        for label in schema.node_labels
+        if "facility_id" in schema.get_required_fields(label)
+    )
+
+
+def dump_holds_facility_content(label_counts: Mapping[str, int] | None) -> bool:
+    """Whether an archive's recorded label set names any facility-owned node.
+
+    *label_counts* is what the archive's own manifest recorded for the dump it
+    wrote, so the answer comes from the dump rather than from the flags the
+    push happened to carry. An absent or unreadable label set answers True:
+    a scope that cannot be read cannot clear a facility package.
+    """
+    if not label_counts:
+        return True
+    owned = facility_owned_labels()
+    return any(label in owned and count > 0 for label, count in label_counts.items())
