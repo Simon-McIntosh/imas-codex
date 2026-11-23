@@ -21,9 +21,11 @@ from __future__ import annotations
 
 import argparse
 import base64
+import contextlib
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -196,6 +198,77 @@ def build(ids: list[str], *, limit: int = 0) -> dict[str, Any]:
     }
 
 
+_WRITE_CLAUSE = re.compile(
+    r"\b(CREATE|MERGE|SET|DELETE|DETACH|REMOVE|DROP|LOAD\s+CSV)\b", re.IGNORECASE
+)
+
+
+@contextlib.contextmanager
+def measured_spend():
+    """Count the model calls and graph writes the census actually makes.
+
+    The page states that the census spends nothing and writes nothing, and a
+    hardcoded zero cannot be wrong, so it cannot be evidence: a case-file pass
+    that reached a model or wrote to the graph would still print zero. Both
+    counters sit on the boundary such a call crosses, so a pass that touched
+    either would record it. The set of armed boundaries travels in the report,
+    so an instrumentation that failed to install is visible rather than
+    silently reporting zero.
+    """
+    counts: dict[str, Any] = {"model_calls": 0, "graph_writes": 0, "armed": []}
+    restores: list[tuple[Any, str, Any]] = []
+
+    try:
+        from iter_codex.discovery.base import llm as base_llm
+
+        original_call = getattr(base_llm, "call_llm_structured", None)
+        if call_llm := original_call:
+
+            def counted_call(*args, _original=call_llm, **kwargs):
+                counts["model_calls"] += 1
+                return _original(*args, **kwargs)
+
+            base_llm.call_llm_structured = counted_call
+            restores.append((base_llm, "call_llm_structured", original_call))
+
+        original_acall = getattr(base_llm, "acall_llm_structured", None)
+        if acall_llm := original_acall:
+
+            async def counted_acall(*args, _original=acall_llm, **kwargs):
+                counts["model_calls"] += 1
+                return await _original(*args, **kwargs)
+
+            base_llm.acall_llm_structured = counted_acall
+            restores.append((base_llm, "acall_llm_structured", original_acall))
+
+        if original_call or original_acall:
+            counts["armed"].append("model")
+    except ImportError:
+        pass
+
+    try:
+        from iter_codex.graph.client import GraphClient
+
+        original_query = GraphClient.query
+
+        def counted_query(self, cypher, *args, **kwargs):
+            if _WRITE_CLAUSE.search(str(cypher)):
+                counts["graph_writes"] += 1
+            return original_query(self, cypher, *args, **kwargs)
+
+        GraphClient.query = counted_query
+        restores.append((GraphClient, "query", original_query))
+        counts["armed"].append("graph")
+    except ImportError:
+        pass
+
+    try:
+        yield counts
+    finally:
+        for owner, name, original in reversed(restores):
+            setattr(owner, name, original)
+
+
 def controls(result: dict[str, Any]) -> dict[str, Any]:
     """Find a name complete at every stage, and withhold one channel from one."""
     positive = None
@@ -347,8 +420,10 @@ def document(report: dict[str, Any]) -> str:
         "were read through the case file each stage can draw on. Every model-calling "
         f"stage's own prompt template was rendered for every name and sent nowhere: "
         f"<strong>{provenance['graph_writes']} graph writes and "
-        f"{provenance['model_calls']} model calls</strong>. The table below ranks the "
-        "channels a stage expected and did not receive.",
+        f"{provenance['model_calls']} model calls</strong>, counted at the "
+        f"<code>{escape(', '.join(provenance.get('counted_boundaries') or []) or 'none')}</code> "
+        "boundary while the pass ran rather than asserted afterwards. The table "
+        "below ranks the channels a stage expected and did not receive.",
     )
 
     gate_revision = os.environ.get("CONTEXT_RECEIPT_REVISION") or report["revision"]
@@ -654,6 +729,14 @@ def check(report: dict[str, Any]) -> list[str]:
         )
     if report["provenance"]["model_calls"] != 0:
         problems.append("the census reported a model call")
+    if report["provenance"]["graph_writes"] != 0:
+        problems.append("the census reported a graph write")
+    armed = report["provenance"].get("counted_boundaries") or []
+    for boundary in ("graph", "model"):
+        if boundary not in armed:
+            problems.append(
+                f"the {boundary} spend counter was not armed, so its zero is not a measurement"
+            )
     if not report["provenance"]["stored_unchanged"]:
         problems.append("stored standard-name text changed during the run")
     rows = report["rows"]
@@ -683,16 +766,18 @@ def build_report(*, limit: int = 0) -> dict[str, Any]:
     held = held_out_members()
     defects = defect_members()
     ids = sorted(set(equilibrium) | set(held))
-    result = build(ids, limit=limit)
-    annotate_rows(result)
-    populations = {
-        "equilibrium": summarise_cohort(result, set(equilibrium)),
-        "held_out": summarise_cohort(result, set(held)),
-        "all": summarise_cohort(result, set(ids)),
-    }
+    with measured_spend() as spend:
+        result = build(ids, limit=limit)
+        annotate_rows(result)
+        populations = {
+            "equilibrium": summarise_cohort(result, set(equilibrium)),
+            "held_out": summarise_cohort(result, set(held)),
+            "all": summarise_cohort(result, set(ids)),
+        }
     provenance = {
-        "model_calls": 0,
-        "graph_writes": 0,
+        "model_calls": spend["model_calls"],
+        "graph_writes": spend["graph_writes"],
+        "counted_boundaries": sorted(spend["armed"]),
         "graph_statements": sum(
             record.provenance.get("graph_statements", 0)
             for record in result["records"].values()
