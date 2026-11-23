@@ -1,0 +1,188 @@
+{
+ "subject": "the 33 held-out incumbents the second-round blind read marked not right, re-read against one codified rule set",
+ "reader": "coordinating session, 2026-11-23, at the lead's request to test whether they are failures or readings of unsettled rules",
+ "finding": "the two readings of the same names disagree on 17 of the 33 (the reference set called them sound or a definition fault); the disagreements trace to rules that leave the call open, not to the names",
+ "rules": {
+  "identity": "A word that changes the number a quantity takes belongs in the name: what is counted or carried (energy versus number, ions versus neutrals, equivalent electrons versus particles), how it is measured when that changes the value (apparent versus thermodynamic temperature), and which quantity a rate or time belongs to.",
+  "specification": "Where and how a quantity is evaluated (a location such as the midplane, a reconstruction context, a component sub-unit, the species pair of a collisionality) belongs in the definition, unless two catalog names would otherwise denote the same words; then the name carries the least that separates them.",
+  "owner": "A centre, centroid, axis or similar locus names its owner unless the term is unique in the catalog.",
+  "parent": "A generic parent name is right when it names the general quantity its children specialise; being general is not a multiplicity defect.",
+  "conventional_term": "A term with a settled meaning (neutron flux as a number flux, parity, weight, radius of a coil) is used only with that meaning.",
+  "transfer": "A transfer between two populations names both donor and recipient; the grammar has no form for this today.",
+  "one_name": "One quantity has one name; a repaired name that collides with an existing one marks a duplicate to retire, not a repair to refuse."
+ },
+ "real_defects": [
+  {
+   "member": "accumulated_total_gas_count",
+   "rule": "one_name",
+   "reason": "duplicate of accumulated_total_gas_equivalent_electron_count; retire the shorter"
+  },
+  {
+   "member": "accumulated_total_prefill_gas_count",
+   "rule": "one_name",
+   "reason": "duplicate of accumulated_total_prefill_gas_equivalent_electron_count; retire the shorter"
+  },
+  {
+   "member": "accumulated_tritium_prefill_count",
+   "rule": "identity",
+   "reason": "an equivalent-electron count named as a tritium count; siblings carry equivalent_electron"
+  },
+  {
+   "member": "ethylene_source_rate",
+   "rule": "identity",
+   "reason": "rate of equivalent electrons (16 per molecule), named as an ethylene rate"
+  },
+  {
+   "member": "electron_particle_flux_at_wall_due_to_pumping",
+   "rule": "identity",
+   "reason": "equivalent electrons named as electrons, and a global throughput named as a flux"
+  },
+  {
+   "member": "back_surface_neutron_flux",
+   "rule": "conventional_term",
+   "reason": "an energy flux in W.m^-2 named neutron flux, which conventionally counts neutrons"
+  },
+  {
+   "member": "surface_temperature",
+   "rule": "identity",
+   "reason": "an apparent infrared temperature image named as a thermodynamic surface temperature"
+  },
+  {
+   "member": "hydrogen_density_at_limiter",
+   "rule": "identity",
+   "reason": "an ion density named as a hydrogen density, which includes neutrals"
+  },
+  {
+   "member": "spectral_rate_of_spectrometer_channel",
+   "rule": "identity",
+   "reason": "a photoelectron rate; the name does not say rate of what"
+  },
+  {
+   "member": "decay_time_due_to_disruption",
+   "rule": "identity",
+   "reason": "a current decay time; the name does not say what decays"
+  },
+  {
+   "member": "radius_of_poloidal_field_coil",
+   "rule": "conventional_term",
+   "reason": "a curvature radius of one contour arc, read as the coil's radius"
+  },
+  {
+   "member": "toroidal_parity",
+   "rule": "conventional_term",
+   "reason": "the sign of B_phi named parity"
+  },
+  {
+   "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+   "rule": "conventional_term",
+   "reason": "garbled; the quantity is the magnetic-field incidence angle at the probe surface"
+  },
+  {
+   "member": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+   "rule": "conventional_term",
+   "reason": "reads as a normalised toroidal displacement; it is a shift in normalised toroidal flux coordinate"
+  },
+  {
+   "member": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+   "rule": "conventional_term",
+   "reason": "the normal is to the control surface, not a flux surface"
+  },
+  {
+   "member": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+   "rule": "transfer",
+   "reason": "reads as the power density of co-passing fast ions; it is transfer from co-passing fast particles to one fast-ion charge state"
+  },
+  {
+   "member": "weight_of_interferometer_beam",
+   "rule": "conventional_term",
+   "reason": "a residual weight in a fit, read as a mass"
+  }
+ ],
+ "borderline": [
+  {
+   "member": "minimum_gas_flow",
+   "reason": "the unit is a pressure-volume throughput; 'gas flow' is conventional usage but the owner (the valve) is unnamed"
+  },
+  {
+   "member": "radial_coordinate_at_inboard_midplane",
+   "reason": "the owner is a flux surface; the sibling radial_coordinate_at_outboard_midplane follows the same form, so the family is consistent either way"
+  },
+  {
+   "member": "minor_length_of_plasma_filament",
+   "reason": "'minor length' for one side of a parallelogram cross-section is not a settled term"
+  }
+ ],
+ "not_defects_under_the_rules": [
+  {
+   "member": "thickness_of_breeder_blanket_layer",
+   "rule": "specification",
+   "reason": "the midplane is where it is evaluated"
+  },
+  {
+   "member": "normalized_collisionality",
+   "rule": "specification",
+   "reason": "the species pair is a specification"
+  },
+  {
+   "member": "polarization_angle_at_constraint_position",
+   "rule": "specification",
+   "reason": "the motional Stark context is fixed by the constraint position"
+  },
+  {
+   "member": "resistivity_of_plasma_facing_component",
+   "rule": "specification",
+   "reason": "the mobile sub-unit is a specification"
+  },
+  {
+   "member": "toroidal_angle_of_poloidal_magnetic_field_probe",
+   "rule": "identity",
+   "reason": "the name states what it is"
+  },
+  {
+   "member": "effective_turn_count_of_passive_loop",
+   "rule": "identity",
+   "reason": "the name is right; its fault was in the definition"
+  },
+  {
+   "member": "vertical_coordinate_of_current_center",
+   "rule": "owner",
+   "reason": "current centre is unique to the plasma current"
+  },
+  {
+   "member": "radial_coordinate_of_current_center",
+   "rule": "owner",
+   "reason": "current centre is unique to the plasma current"
+  },
+  {
+   "member": "coefficient_of_flux_surface",
+   "rule": "parent",
+   "reason": "generic parent of the shape coefficients"
+  },
+  {
+   "member": "particle_energy",
+   "rule": "parent",
+   "reason": "generic parent of the energy forms"
+  },
+  {
+   "member": "vertical_coordinate_of_coordinate_system",
+   "rule": "parent",
+   "reason": "generic grid coordinate"
+  },
+  {
+   "member": "vertical_coordinate_of_measurement_position",
+   "rule": "parent",
+   "reason": "generic position coordinate"
+  },
+  {
+   "member": "wave_phase_of_wave_beam",
+   "rule": "specification",
+   "reason": "the launch reference is a specification; 'envelope' would sharpen it"
+  }
+ ],
+ "counts": {
+  "real": 17,
+  "borderline": 3,
+  "not_defects": 13,
+  "total": 33
+ }
+}
