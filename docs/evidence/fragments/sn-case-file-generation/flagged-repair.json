@@ -170,7 +170,7 @@
   "passes": true,
   "style_variation": "British spelling of American tokens in the name where present, and in the definition, documentation and source text; quote style and run of whitespace normalised. No word, equation or qualifier is removed."
  },
- "generated": "2026-11-23T10:42:34.851819+00:00",
+ "generated": "2026-11-23T10:50:20.559344+00:00",
  "graph_writes": false,
  "identity_rule_digest": "a569800a6c0c11cacbe1db8ff698aa95451f4794790f7fea9ff1189bd86e9583",
  "input_digests": {

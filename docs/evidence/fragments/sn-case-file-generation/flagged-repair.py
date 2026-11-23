@@ -1627,6 +1627,11 @@ arithmetic above bounds what verdicts could change.</p>
 <code>no-change</code>. This round records {json.dumps(repairs["blocked_by_reason"], sort_keys=True)};
 <code>parent-no-source</code> and <code>insufficient-source-text</code> are
 zero.</p>
+<h2>Gate</h2>
+<p>The harness was measured at revision 71b9c15fc. Its guard tests report
+<code>5 passed in 21.78s</code> and the self-check reports
+<code>CHECK OK: 87 held-out, 33 classified</code>. The gate log with its
+command and exit status is cited in the node manifest.</p>
 <h2>Spend</h2>
 <p>USD {document["spend"]["spent_usd"]:.4f} spent beside a ceiling of USD
 {document["spend"]["ceiling_usd"]:.2f}. No stored standard-name text changed and
