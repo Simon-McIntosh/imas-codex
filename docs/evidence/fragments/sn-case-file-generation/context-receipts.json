@@ -146,9 +146,9 @@
    }
   ]
  },
- "elapsed_seconds": 889.8,
+ "elapsed_seconds": 674.0,
  "failures": [],
- "generated_at": "2026-11-23T05:44:42+00:00",
+ "generated_at": "2026-11-23T09:01:53+00:00",
  "inputs": {
   "adjudication": {
    "digest": "ed87e2a5dc8dd08acddaf887f52a5a186f8b00bb45aa48dca7d35318629bb1ce",
@@ -1392,6 +1392,10 @@
   }
  },
  "provenance": {
+  "counted_boundaries": [
+   "graph",
+   "model"
+  ],
   "graph_statements": 1335,
   "graph_writes": 0,
   "model_calls": 0,
@@ -1405,7 +1409,7 @@
   },
   "stored_unchanged": true
  },
- "revision": "eb8a91b4348a8922ed10d8edfab2112d83692df9",
+ "revision": "56fbb263af067ae9bcf85260781b89595a0b6607",
  "rows": [
   {
    "defect": "name drops a qualifier the source states",
@@ -1442,7 +1446,7 @@
    "id": "accumulated_total_gas_count",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "9101d4cc9d38",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1459,7 +1463,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "2d5f33c5aed2",
+    "digest": "ccde3e23858e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1554,7 +1558,7 @@
    "id": "accumulated_total_prefill_gas_count",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "4c085a572371",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1571,7 +1575,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "8d871138c212",
+    "digest": "31fb45b8774a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1660,7 +1664,7 @@
    "id": "accumulated_tritium_prefill_count",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "af604e047aae",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1674,7 +1678,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "3a9c3edf00a8",
+    "digest": "a7b799a46624",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1754,7 +1758,7 @@
    "id": "alpha_angle_of_coil_conductor_element",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "b32b376a4a27",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1768,7 +1772,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "bd5eee7d8c5d",
+    "digest": "85a4cfa39471",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1848,7 +1852,7 @@
    "id": "alpha_angle_of_plasma_filament",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "7bf9e3750eb6",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1862,7 +1866,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "a5b7952e4405",
+    "digest": "cf5e6bdd728b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1948,7 +1952,7 @@
    "id": "area_of_plasma_filament",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "4e1618396b91",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -1965,7 +1969,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "95089af9b684",
+    "digest": "4dabcba3d998",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2063,7 +2067,7 @@
    "id": "average_external_magnetic_flux",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "0cb63cc5c4b9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2081,7 +2085,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "f489fbe4a68d",
+    "digest": "1d2e3ed7be74",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2179,7 +2183,7 @@
    "id": "back_surface_neutron_flux",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "c33ad49408af",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2197,7 +2201,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "a98faf9f0252",
+    "digest": "0f7c3deee0a9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2295,7 +2299,7 @@
    "id": "beta",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "8cf10a86df86",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2313,7 +2317,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "714cf31c2997",
+    "digest": "871930f1fab4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2403,7 +2407,7 @@
    "id": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "3f992b431ead",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2417,7 +2421,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "5e54e1ba136d",
+    "digest": "7be4ddeacd20",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2505,7 +2509,7 @@
    "id": "coefficient_of_flux_surface",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "868b0fe80245",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2523,7 +2527,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "680ed1ba7498",
+    "digest": "e6f17744b831",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2622,7 +2626,7 @@
    "id": "current_density",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "40f53ae0d9b4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2640,7 +2644,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "ec1d4b61f483",
+    "digest": "639ed9e1ebc1",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2730,7 +2734,7 @@
    "id": "current_of_divertor",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "b60598b7c5d9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2744,7 +2748,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "5ec8638a55d7",
+    "digest": "2a965cf7f0e6",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2824,7 +2828,7 @@
    "id": "current_of_passive_structure",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "5e9afa62155e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2838,7 +2842,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "72ef7a835f15",
+    "digest": "1ecb0f4c684d",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2918,7 +2922,7 @@
    "id": "current_of_plasma_filament",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "afe74ad933dc",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -2932,7 +2936,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "06f2cc86484a",
+    "digest": "8d0d7f6ec4f8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3020,7 +3024,7 @@
    "id": "current_weighted_average_external_magnetic_flux",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "c766d7f82cae",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3038,7 +3042,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "eb3cb00fb72c",
+    "digest": "2951883833f7",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3136,7 +3140,7 @@
    "id": "decay_time_due_to_disruption",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "71c7a48b870b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3154,7 +3158,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "81a52a5962bc",
+    "digest": "d0040bdfe5d4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3244,7 +3248,7 @@
    "id": "derivative_of_elongation_of_flux_surface_with_respect_to_normalized_minor_radius",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "34fb969aa112",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3258,7 +3262,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "1c192f50ddd7",
+    "digest": "cb8d5f7e23bf",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3338,7 +3342,7 @@
    "id": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "66a1b11e883e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3352,7 +3356,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "b0f453b4f721",
+    "digest": "18f160803231",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3432,7 +3436,7 @@
    "id": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "3c848e9096bf",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3446,7 +3450,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d4489efd4643",
+    "digest": "2e1b06e12e9e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3526,7 +3530,7 @@
    "id": "derivative_of_sine_coefficient_of_flux_surface_with_respect_to_normalized_minor_radius",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "ef64e85efa37",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3540,7 +3544,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "71f3915f016e",
+    "digest": "db62530bcf17",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3620,7 +3624,7 @@
    "id": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "da605221eb89",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3634,7 +3638,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "ce7ab380e8e4",
+    "digest": "00b8ecf1790b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3717,7 +3721,7 @@
    "id": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "64a3765cdfc1",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3732,7 +3736,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "5a688a762096",
+    "digest": "981598a01b86",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3814,7 +3818,7 @@
    "id": "effective_turn_count_of_passive_loop",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "759f31953d0e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3828,7 +3832,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "a29f81d356f4",
+    "digest": "ef0d2ecc45e8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3910,7 +3914,7 @@
    "id": "electron_density",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "5032415cdc20",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -3925,7 +3929,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "de077f0af062",
+    "digest": "f1bae15e3463",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4012,7 +4016,7 @@
    "id": "electron_particle_flux_at_wall_due_to_pumping",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "fa04e947f212",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4029,7 +4033,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "357c2914b349",
+    "digest": "0df0162b184a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4120,7 +4124,7 @@
    "id": "elongation_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "26a46afc2aad",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4135,7 +4139,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "9c8d2c0d39ed",
+    "digest": "e511c69fc404",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4217,7 +4221,7 @@
    "id": "elongation_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d8584cb602fe",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4231,7 +4235,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "9f5e15cc8fca",
+    "digest": "a52b3d9a0d8e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4311,7 +4315,7 @@
    "id": "equilibrium_weight_of_interferometer_beam",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "ea9e2d2ef5ca",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4325,7 +4329,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "1d23c8dc3e1d",
+    "digest": "57881bf5caf9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4412,7 +4416,7 @@
    "id": "ethylene_source_rate",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "a798a4e548ce",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4429,7 +4433,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "9cb367ddd5e1",
+    "digest": "891c1ab455ae",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4524,7 +4528,7 @@
    "id": "external_loop_voltage",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "b6f2ff7c19bb",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4541,7 +4545,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "909e7d74212e",
+    "digest": "3236594daa2b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4639,7 +4643,7 @@
    "id": "external_magnetic_flux",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "5512989da731",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4657,7 +4661,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "0c556f3f5d08",
+    "digest": "b14fc3cafcd2",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4747,7 +4751,7 @@
    "id": "factor_at_limiter",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "b12a5f7c2be9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4761,7 +4765,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "b67bee8be5df",
+    "digest": "646eaf6ecfee",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4841,7 +4845,7 @@
    "id": "faraday_angle",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "1300c4ca4fe4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4855,7 +4859,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "48caa17e68da",
+    "digest": "73a59dc50344",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4936,7 +4940,7 @@
    "id": "field_aligned_surface_tilt_angle_of_langmuir_probe",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "ac734bb7bf32",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -4950,7 +4954,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "f5edc8802e41",
+    "digest": "eddea1f5950c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5036,7 +5040,7 @@
    "id": "flux_surface_averaged_current_density_due_to_wave_driven_current_drive",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "6fae05825242",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5053,7 +5057,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "4913a0ec3452",
+    "digest": "beda5f79c8e7",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5142,7 +5146,7 @@
    "id": "flux_surface_averaged_inverse_of_major_radius",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "40d8e4182c26",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5156,7 +5160,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d81fd0a700f5",
+    "digest": "2b35c2c32137",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5236,7 +5240,7 @@
    "id": "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "a12659d01716",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5250,7 +5254,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "0881e8ebe9e6",
+    "digest": "faa45e6bd408",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5330,7 +5334,7 @@
    "id": "flux_surface_averaged_inverse_of_square_of_major_radius",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "275e5f36e89c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5344,7 +5348,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "16fcc11c6016",
+    "digest": "a55072962dc4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5424,7 +5428,7 @@
    "id": "flux_surface_averaged_magnetic_field_magnitude",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d74bab3f7c57",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5438,7 +5442,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "680da924939c",
+    "digest": "f5f4f58dd1fe",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5519,7 +5523,7 @@
    "id": "flux_surface_averaged_major_radius",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "6793b4a0a604",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5533,7 +5537,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "da199f54fda8",
+    "digest": "d30c76ce1d6d",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5614,7 +5618,7 @@
    "id": "flux_surface_averaged_parallel_current_density",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "abe7b5b85541",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5628,7 +5632,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "3f22c91ac594",
+    "digest": "27bb3c1fb470",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5708,7 +5712,7 @@
    "id": "flux_surface_averaged_parallel_current_density_at_constraint_position",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "92eed761fa7b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5722,7 +5726,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "de7f886072fb",
+    "digest": "d483048a0b9f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5802,7 +5806,7 @@
    "id": "flux_surface_averaged_poloidal_magnetic_field_at_pedestal_top",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "fcfd8ba390f8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5816,7 +5820,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "e066b1b7ee5f",
+    "digest": "125166c59ff0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5896,7 +5900,7 @@
    "id": "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "99bc372ede13",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5910,7 +5914,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "938f49ab10c0",
+    "digest": "3b9b3afc8c70",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -5990,7 +5994,7 @@
    "id": "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "1d5dc01f9b06",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6004,7 +6008,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d5fab29faa1f",
+    "digest": "0e5ed6369125",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6084,7 +6088,7 @@
    "id": "flux_surface_averaged_square_of_magnetic_field_magnitude",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "1d6fc683764b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6098,7 +6102,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "c399c4cb8954",
+    "digest": "82cc69745908",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6178,7 +6182,7 @@
    "id": "flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "f2da94213c83",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6192,7 +6196,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "bb40918205c5",
+    "digest": "09337dd5c358",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6272,7 +6276,7 @@
    "id": "flux_surface_averaged_toroidal_current_density",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "05aa99117fb5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6286,7 +6290,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "05a1b7d6af00",
+    "digest": "d62055a79561",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6366,7 +6370,7 @@
    "id": "flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "788640b7a00f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6380,7 +6384,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "bd93a32cc119",
+    "digest": "e6e91ea9989c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6466,7 +6470,7 @@
    "id": "flux_surface_normal_contravariant_flux_surface_averaged_metric",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "d0dafdff9ece",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6483,7 +6487,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "cdd8fb0bc344",
+    "digest": "79a51ad6d7b9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6572,7 +6576,7 @@
    "id": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "2ad74132e07e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6586,7 +6590,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "5d612954bd1e",
+    "digest": "2e0212308046",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6667,7 +6671,7 @@
    "id": "gap_at_closest_wall_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "b1a4a59206b8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6681,7 +6685,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "336c2de1fa11",
+    "digest": "38d9df208f6b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6761,7 +6765,7 @@
    "id": "gap_at_outboard_midplane",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "e5001241884a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6775,7 +6779,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "8cb257284467",
+    "digest": "cc0dfc5da29c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6855,7 +6859,7 @@
    "id": "gap_at_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "900f02d8596e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6869,7 +6873,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "e68cddec0962",
+    "digest": "7745d969ce12",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6949,7 +6953,7 @@
    "id": "grating_line_density",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d78fdb03d595",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -6963,7 +6967,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "1fd20cbc5854",
+    "digest": "74eed216c78f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7043,7 +7047,7 @@
    "id": "height_of_plasma_filament",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "a1fed5f201be",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7057,7 +7061,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "110eb0eec9be",
+    "digest": "f5117cfab117",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7138,7 +7142,7 @@
    "id": "hydrogen_density_at_limiter",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "1fc6875c844b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7152,7 +7156,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "0945e252be83",
+    "digest": "faccc823c59e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7238,7 +7242,7 @@
    "id": "inner_radius_of_plasma_filament",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "7b706ad21f71",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7255,7 +7259,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "9e9f48d28e40",
+    "digest": "edcfd72b10ed",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7352,7 +7356,7 @@
    "id": "inner_squareness_of_flux_surface",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "37857796df26",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7370,7 +7374,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "45ea967befac",
+    "digest": "bfbeab6d9aa5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7468,7 +7472,7 @@
    "id": "inner_squareness_of_plasma_boundary",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "d82ca9e998f7",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7486,7 +7490,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "cac5e5fb7e2d",
+    "digest": "5a1917b2a241",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7584,7 +7588,7 @@
    "id": "inverse_of_major_radius",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "7cf629ba0662",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7602,7 +7606,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "6061ad8a720f",
+    "digest": "f7e1325fd817",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7700,7 +7704,7 @@
    "id": "inverse_of_square_of_magnetic_field_magnitude",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "1e8d3c427d13",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7718,7 +7722,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "5a59ef243a26",
+    "digest": "9a53f6a646e2",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7817,7 +7821,7 @@
    "id": "inverse_of_square_of_major_radius",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "7579baba50e0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7835,7 +7839,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "dc615bc260ec",
+    "digest": "310e5120ec58",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7925,7 +7929,7 @@
    "id": "loop_voltage_at_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "214b0dfe1895",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -7939,7 +7943,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "12a01ac156e1",
+    "digest": "6856dc2d4a01",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8019,7 +8023,7 @@
    "id": "lower_bound_photon_energy",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "22a15121f472",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8033,7 +8037,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "e204da89d337",
+    "digest": "ead424a73713",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8113,7 +8117,7 @@
    "id": "lower_inner_squareness_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "8200557d398a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8127,7 +8131,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "8e994ebfb2ef",
+    "digest": "efd6df5b9f7f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8208,7 +8212,7 @@
    "id": "lower_inner_squareness_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "80592162c3ee",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8222,7 +8226,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "ecacbaec3959",
+    "digest": "dd462fb82e6f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8302,7 +8306,7 @@
    "id": "lower_outer_squareness_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "3fc1c8a50862",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8316,7 +8320,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "cb54171cbff9",
+    "digest": "510ceba98bbf",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8396,7 +8400,7 @@
    "id": "lower_outer_squareness_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "3f4742eae975",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8410,7 +8414,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "dbeb1d6c06b1",
+    "digest": "1bad9f83f47e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8490,7 +8494,7 @@
    "id": "lower_triangularity_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d38152943cbd",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8504,7 +8508,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "f234d4f9ddc9",
+    "digest": "4dc0acc63254",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8584,7 +8588,7 @@
    "id": "lower_triangularity_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "a1bb1ba4ba20",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8598,7 +8602,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "cc0eabc363ea",
+    "digest": "028b463598cb",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8686,7 +8690,7 @@
    "id": "magnetic_field",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "924ef80f5955",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8704,7 +8708,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "cff287259245",
+    "digest": "34b3ecd287a0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8802,7 +8806,7 @@
    "id": "magnetic_field_at_pedestal_top_high_field_side",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "8b6ee68a7a9d",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8820,7 +8824,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "ff92f365b9d5",
+    "digest": "f286a6927c3a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8910,7 +8914,7 @@
    "id": "magnetic_field_magnitude_at_pedestal_top_high_field_side",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "e6c63a7ce1cf",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -8924,7 +8928,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "9504065dd50d",
+    "digest": "4fae5527e368",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9012,7 +9016,7 @@
    "id": "magnetic_flux",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "cb7df39aaa19",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9030,7 +9034,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "9fc2e5ce1647",
+    "digest": "cee9c056d06d",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9128,7 +9132,7 @@
    "id": "magnetic_flux_due_to_diamagnetic_drift",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "0793b2f648cf",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9146,7 +9150,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "cdabcb7aa9c7",
+    "digest": "e93f146b7d72",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9236,7 +9240,7 @@
    "id": "magnetic_shear_at_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "651c6a3f7182",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9250,7 +9254,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "dff2a6b08e0a",
+    "digest": "b5ad64dbec9a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9330,7 +9334,7 @@
    "id": "magnetic_shear_at_magnetic_axis",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "ccdacfff089b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9344,7 +9348,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "483e7a47e3bb",
+    "digest": "1dfbf223da0f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9430,7 +9434,7 @@
    "id": "major_length_of_plasma_filament",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "0b177ce3691f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9447,7 +9451,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "fa591c63b6b4",
+    "digest": "2cbb0a32726e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9544,7 +9548,7 @@
    "id": "major_radius",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "a606db34078d",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9562,7 +9566,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "da09e1fb8ef3",
+    "digest": "0aa188ec37fe",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9658,7 +9662,7 @@
    "id": "maximum_magnetic_field",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "e1752e89559b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9675,7 +9679,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "ce044d8eb863",
+    "digest": "23d15eab0816",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9770,7 +9774,7 @@
    "id": "maximum_magnetic_field_magnitude",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "a4541d28e989",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9787,7 +9791,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "05516abfb80d",
+    "digest": "e9f550441747",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9876,7 +9880,7 @@
    "id": "mhd_energy",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "afcd0fc98608",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9890,7 +9894,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "50b4affee6b7",
+    "digest": "db11e05714ee",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9970,7 +9974,7 @@
    "id": "minimum_gas_flow",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "8573c5e7b05b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -9984,7 +9988,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "10d1acc1b533",
+    "digest": "575f695966fe",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10064,7 +10068,7 @@
    "id": "minimum_over_flux_surface_magnetic_field_magnitude",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "19fe4c893eca",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10078,7 +10082,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "3d0c1cce9241",
+    "digest": "db5b421feb21",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10158,7 +10162,7 @@
    "id": "minimum_safety_factor",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "bce70765e34c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10172,7 +10176,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "8e2748abb3f3",
+    "digest": "406f5ade7c84",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10258,7 +10262,7 @@
    "id": "minor_length_of_plasma_filament",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "690103efac9f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10275,7 +10279,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "3825c4836294",
+    "digest": "2c6057a4bb9e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10365,7 +10369,7 @@
    "id": "minor_radius_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "3df9a2ae1d43",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10379,7 +10383,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "e25da22ef61e",
+    "digest": "2c8ea52741da",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10468,7 +10472,7 @@
    "id": "non_axisymmetric_magnetic_field",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "617faa247130",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10486,7 +10490,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "7bc84c366359",
+    "digest": "d19756f1e420",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10576,7 +10580,7 @@
    "id": "normal_non_axisymmetric_magnetic_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "a0701462dd17",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10590,7 +10594,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "b5d00f37bbfd",
+    "digest": "3fde238c2622",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10670,7 +10674,7 @@
    "id": "normalized_collisionality",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "84738d86ae46",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10684,7 +10688,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "15bc040c11ae",
+    "digest": "7527d2772a19",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10764,7 +10768,7 @@
    "id": "normalized_minor_radius_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "cf3e7def3255",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10778,7 +10782,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d36f91e9a7e7",
+    "digest": "2463ca4f1142",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10859,7 +10863,7 @@
    "id": "normalized_plasma_internal_inductance",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "2c14a916e144",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10873,7 +10877,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "6fbd3afa6974",
+    "digest": "c44fdac6ed22",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10953,7 +10957,7 @@
    "id": "normalized_poloidal_flux_coordinate_at_minimum_absolute_safety_factor",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "172a196c5f87",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -10967,7 +10971,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "5e4d1ab324e7",
+    "digest": "5287e93f8f95",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11047,7 +11051,7 @@
    "id": "normalized_poloidal_flux_coordinate_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "43aa00e5157b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11061,7 +11065,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "7023f3d2ea5a",
+    "digest": "0ae6fea29b7b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11142,7 +11146,7 @@
    "id": "normalized_toroidal_beta",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d05143ad0b6a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11156,7 +11160,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d64dfdf17a86",
+    "digest": "c75125d8da6c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11237,7 +11241,7 @@
    "id": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "a62f25d8dfb6",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11251,7 +11255,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "71d1dc0eee31",
+    "digest": "28118f1987a1",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11333,7 +11337,7 @@
    "id": "normalized_toroidal_flux_coordinate",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "64bc4bc73744",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11348,7 +11352,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "05d1dcbe0a56",
+    "digest": "b907d6365a88",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11429,7 +11433,7 @@
    "id": "normalized_toroidal_flux_coordinate_at_constraint_position",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "7eb6808e01ff",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11443,7 +11447,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "7005544b9622",
+    "digest": "a3c1992eee80",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11523,7 +11527,7 @@
    "id": "normalized_toroidal_flux_coordinate_at_minimum_absolute_safety_factor",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "07f9be4f305d",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11537,7 +11541,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "6865fad48acb",
+    "digest": "a2969ef5fe33",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11623,7 +11627,7 @@
    "id": "outer_radius_of_plasma_filament",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "426ce6f12aca",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11640,7 +11644,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "12bf0df3e0ac",
+    "digest": "e91e2f7ce63e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11738,7 +11742,7 @@
    "id": "outer_squareness_of_flux_surface",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "b3e90d6720d4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11756,7 +11760,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "db22b3c096ab",
+    "digest": "ffe4f7342b59",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11854,7 +11858,7 @@
    "id": "outer_squareness_of_plasma_boundary",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "ea69cc37ae9a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11872,7 +11876,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "b1a7494b0f85",
+    "digest": "2535a4404b5b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11970,7 +11974,7 @@
    "id": "parallel_current_density_at_constraint_position",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "93883705d441",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -11988,7 +11992,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "20c815e6b617",
+    "digest": "29cb147b566a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12078,7 +12082,7 @@
    "id": "parallel_current_density_flux_surface_averaged_due_to_wave_driven_current_drive",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "4321d92850d0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12092,7 +12096,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "806be8b96a42",
+    "digest": "eb61870667e8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12180,7 +12184,7 @@
    "id": "particle_energy",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "2cba8eb4dd14",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12198,7 +12202,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "cf2df42cfe2b",
+    "digest": "e21809f26ba9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12290,7 +12294,7 @@
    "id": "plasma_current",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "77cf2e8966fb",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12305,7 +12309,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "8e6f02279c26",
+    "digest": "066f8c32cdc4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12387,7 +12391,7 @@
    "id": "plasma_inductance",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "25b346e0e9aa",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12401,7 +12405,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "8b877b00ede2",
+    "digest": "a0140b26e72a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12483,7 +12487,7 @@
    "id": "plasma_pressure",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "6a32e114fd78",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12498,7 +12502,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "924ab5e6e88c",
+    "digest": "6ac907d570c9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12579,7 +12583,7 @@
    "id": "plasma_resistance",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "35299126b0ca",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12593,7 +12597,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "7222bd441b5e",
+    "digest": "1126ed10cf20",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12679,7 +12683,7 @@
    "id": "polarization_angle_at_constraint_position",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "89b861d5bc82",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12696,7 +12700,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "a6092975a807",
+    "digest": "1cc768bababb",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12786,7 +12790,7 @@
    "id": "poloidal_angle_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "5f52ec022cc4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12800,7 +12804,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "0821e9443dce",
+    "digest": "5980df6377cd",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12880,7 +12884,7 @@
    "id": "poloidal_angle_of_gyrokinetic_eigenmode",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "f6dc2fed5d48",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12894,7 +12898,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d05561241022",
+    "digest": "4216cd6f58b8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12974,7 +12978,7 @@
    "id": "poloidal_angle_of_plasma_boundary_gap",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "6c67c84c5f36",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -12988,7 +12992,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "a4fb5032e5fc",
+    "digest": "397863cd0831",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13068,7 +13072,7 @@
    "id": "poloidal_beta",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "720b446e65ff",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13082,7 +13086,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "208d2a028603",
+    "digest": "70be7ad369aa",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13165,7 +13169,7 @@
    "id": "poloidal_current_function",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "01746b166ba4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13180,7 +13184,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "190a8f753063",
+    "digest": "b63eca53acf8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13261,7 +13265,7 @@
    "id": "poloidal_current_weighted_average_external_magnetic_flux",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "bca5ed3fd09a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13275,7 +13279,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "72dbda57a8c5",
+    "digest": "d3bc05d43868",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13355,7 +13359,7 @@
    "id": "poloidal_length_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "c152372ea26c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13369,7 +13373,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "986bb6cd83a4",
+    "digest": "38b0299a4032",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13452,7 +13456,7 @@
    "id": "poloidal_magnetic_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "eb8fa5205313",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13467,7 +13471,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "a0269d25e240",
+    "digest": "74cf2f0efb50",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13556,7 +13560,7 @@
    "id": "poloidal_magnetic_field_at_pedestal_top",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "c9cd0268d389",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13574,7 +13578,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "0a1668c31929",
+    "digest": "46f4f93fce4f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13664,7 +13668,7 @@
    "id": "poloidal_magnetic_field_at_pedestal_top_high_field_side",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "bc9054e89621",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13678,7 +13682,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "274bd1bd939b",
+    "digest": "e1836788d3c2",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13758,7 +13762,7 @@
    "id": "poloidal_magnetic_field_at_pedestal_top_low_field_side",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "31889c7810d8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13772,7 +13776,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "b84d251366ac",
+    "digest": "00ea3d6bca3b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13852,7 +13856,7 @@
    "id": "poloidal_magnetic_field_of_magnetic_field_probe",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "bfcf532d7ac0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13866,7 +13870,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "05b86d596dc4",
+    "digest": "687626b48190",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13946,7 +13950,7 @@
    "id": "poloidal_magnetic_flux",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d778c9373576",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -13960,7 +13964,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "a009104c2a6d",
+    "digest": "b8dc68ad4e1f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14041,7 +14045,7 @@
    "id": "poloidal_magnetic_flux_at_constraint_position",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "bcc992f2bae2",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14055,7 +14059,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "fd6b3acc30fb",
+    "digest": "ca5b93e25cf2",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14135,7 +14139,7 @@
    "id": "poloidal_magnetic_flux_at_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "b8617aecb4cc",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14149,7 +14153,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "231eaf1ce6aa",
+    "digest": "0b365447f143",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14229,7 +14233,7 @@
    "id": "poloidal_magnetic_flux_at_magnetic_axis",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "0b5781f9017b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14243,7 +14247,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "27f7429e52ed",
+    "digest": "da73d3f69bc1",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14324,7 +14328,7 @@
    "id": "poloidal_magnetic_flux_at_minimum_absolute_safety_factor",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "3be7ebe514fb",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14338,7 +14342,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "514a40b70230",
+    "digest": "7a39e8f9cdee",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14418,7 +14422,7 @@
    "id": "poloidal_magnetic_flux_at_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "51086e5308a3",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14432,7 +14436,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "ca5710aa07e5",
+    "digest": "9242a1204c02",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14512,7 +14516,7 @@
    "id": "poloidal_magnetic_flux_of_flux_loop",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "80152f94c478",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14526,7 +14530,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "ab66a04a41c0",
+    "digest": "3c8de33522a6",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14608,7 +14612,7 @@
    "id": "poloidal_plane_cross_sectional_area_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "2a642785bf6f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14623,7 +14627,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d47eaea187b2",
+    "digest": "ca59c828efd9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14704,7 +14708,7 @@
    "id": "poloidal_plane_cross_sectional_area_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "a6449356856d",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14718,7 +14722,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "b60be2c26874",
+    "digest": "33f27533d896",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14807,7 +14811,7 @@
    "id": "power_at_divertor_target_due_to_recombination",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "09363c8e26ac",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14825,7 +14829,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "6107c6e7efab",
+    "digest": "8adb70547202",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14915,7 +14919,7 @@
    "id": "product_of_poloidal_current_function_and_derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "6f2151656182",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -14929,7 +14933,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "957224bdb25f",
+    "digest": "8bf6abe281db",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15011,7 +15015,7 @@
    "id": "radial_coordinate",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "8960d6b5fc42",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15026,7 +15030,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "4b40c4326724",
+    "digest": "61b3b0b2363d",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15107,7 +15111,7 @@
    "id": "radial_coordinate_at_inboard_midplane",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "ab98254698b1",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15121,7 +15125,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "162eb2c9e5db",
+    "digest": "02733b1a4f85",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15202,7 +15206,7 @@
    "id": "radial_coordinate_at_outboard_midplane",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "0941b0ae6da3",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15216,7 +15220,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "716b38440bce",
+    "digest": "e8236d8271c9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15296,7 +15300,7 @@
    "id": "radial_coordinate_of_closest_wall_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "a8724a2ab56a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15310,7 +15314,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "5d13a560d911",
+    "digest": "fa66e346c3f6",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15390,7 +15394,7 @@
    "id": "radial_coordinate_of_conductor_cross_section",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "68bf0fe2c16b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15404,7 +15408,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "0a0df7c7b726",
+    "digest": "d70494c8e295",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15484,7 +15488,7 @@
    "id": "radial_coordinate_of_control_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "dc6a3781f1df",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15498,7 +15502,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "60a0fb724c7c",
+    "digest": "6cb419b73c8e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15578,7 +15582,7 @@
    "id": "radial_coordinate_of_coordinate_system",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "90babe5a7d2b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15592,7 +15596,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "319e49b0e420",
+    "digest": "6941ae8a2fbb",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15672,7 +15676,7 @@
    "id": "radial_coordinate_of_current_center",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d953abef7495",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15686,7 +15690,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "c1292560c2ec",
+    "digest": "3531081606a1",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15767,7 +15771,7 @@
    "id": "radial_coordinate_of_dr_dz_zero_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "dac55e3f6437",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15781,7 +15785,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "374a57a67383",
+    "digest": "aa5a616c3cf9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15861,7 +15865,7 @@
    "id": "radial_coordinate_of_geometric_axis",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "e792a1c80a89",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15875,7 +15879,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "b7008fd21bdb",
+    "digest": "2a425bdbaf56",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15955,7 +15959,7 @@
    "id": "radial_coordinate_of_magnetic_axis",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "e4a33331173d",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -15969,7 +15973,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "a615fc9b5a86",
+    "digest": "c1e3103e5340",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16049,7 +16053,7 @@
    "id": "radial_coordinate_of_measurement_position",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d534d8dd4882",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16063,7 +16067,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "5c64a7d94708",
+    "digest": "6f7466cce6b5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16143,7 +16147,7 @@
    "id": "radial_coordinate_of_plasma_filament",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d0119fe16d85",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16157,7 +16161,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "ad4b0d431dad",
+    "digest": "1b7fb562e4c3",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16237,7 +16241,7 @@
    "id": "radial_coordinate_of_poloidal_field_coil",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "5ff7778d0b53",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16251,7 +16255,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "b3f74304d862",
+    "digest": "8789e7620612",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16331,7 +16335,7 @@
    "id": "radial_coordinate_of_strike_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "2bff7f044525",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16345,7 +16349,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "379b4d5a42ba",
+    "digest": "f7e777374d2f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16425,7 +16429,7 @@
    "id": "radial_coordinate_of_x_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "bb536cde565b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16439,7 +16443,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "59bc9646851b",
+    "digest": "775a22dafe2f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16525,7 +16529,7 @@
    "id": "radial_derivative_of_poloidal_magnetic_flux",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "1b669a665f3a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16542,7 +16546,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "1b4307e5c2fe",
+    "digest": "376eb02cfa90",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16631,7 +16635,7 @@
    "id": "radial_magnetic_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "4162ef7e70f6",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16645,7 +16649,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "67a4b0273351",
+    "digest": "fee9a6f2f2bf",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16725,7 +16729,7 @@
    "id": "radial_magnetization_of_iron_core_segment",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "7c147583e8f3",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16739,7 +16743,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "7d23101a9164",
+    "digest": "12a6fc05aea3",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16819,7 +16823,7 @@
    "id": "radial_non_axisymmetric_magnetic_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "4b53f6c85ee5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16833,7 +16837,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "e381c26fe8eb",
+    "digest": "7c8e09e71d31",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16919,7 +16923,7 @@
    "id": "radial_outline_of_flux_surface",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "1a137944966b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -16936,7 +16940,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "1db79b2e904d",
+    "digest": "df560411899e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17025,7 +17029,7 @@
    "id": "radial_outline_of_iron_core_segment",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "3991e62d2b3a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17039,7 +17043,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "ea9b79cca00d",
+    "digest": "d3b4ec6440ce",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17119,7 +17123,7 @@
    "id": "radial_outline_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "b157d9ff0405",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17133,7 +17137,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "c232685a5585",
+    "digest": "5422b7068140",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17213,7 +17217,7 @@
    "id": "radial_outline_of_plasma_filament",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "6cfa67e23f9f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17227,7 +17231,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d2ec6b736589",
+    "digest": "67022c383b4b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17307,7 +17311,7 @@
    "id": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "4f0376ca0a30",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17321,7 +17325,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "f63d0867e52e",
+    "digest": "e328a0fb8091",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17401,7 +17405,7 @@
    "id": "radial_separatrix_distance_at_outboard_midplane",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "dbfec9188c61",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17415,7 +17419,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "790fa76ebb38",
+    "digest": "09d4d34262b4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17495,7 +17499,7 @@
    "id": "radial_surface_normal_of_control_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "701fc4af97d0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17509,7 +17513,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "cbc5c63801c5",
+    "digest": "442405f0a10c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17589,7 +17593,7 @@
    "id": "radius_of_plasma_filament",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "dbd9749b5939",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17603,7 +17607,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "28c6a3c93c6a",
+    "digest": "8430bcbac37a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17691,7 +17695,7 @@
    "id": "radius_of_poloidal_field_coil",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "051cc805536a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17709,7 +17713,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "2a326b216bd0",
+    "digest": "65383b2d745b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17799,7 +17803,7 @@
    "id": "ratio_of_particle_temperature_to_particle_reference_temperature",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "a8cf3d7e4694",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17813,7 +17817,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "df173464b63c",
+    "digest": "0a7ff9136b31",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17901,7 +17905,7 @@
    "id": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "16cc33a4a4b7",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -17919,7 +17923,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "9eec5101ace6",
+    "digest": "18f3d9c13e18",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18017,7 +18021,7 @@
    "id": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "ddecb81a500e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18035,7 +18039,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "f30361c3226c",
+    "digest": "dd36e977b5ed",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18126,7 +18130,7 @@
    "id": "reference_major_radius",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d9ad84366db4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18140,7 +18144,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "a036f8f1149b",
+    "digest": "d55db875d90b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18220,7 +18224,7 @@
    "id": "resistivity_of_plasma_facing_component",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "f089255b6177",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18234,7 +18238,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "3ce5c6fbb998",
+    "digest": "ee98c466e361",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18316,7 +18320,7 @@
    "id": "right_hand_circularly_polarized_wave_electric_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "7e8e9c8d1b15",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18331,7 +18335,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "cf3be2918c11",
+    "digest": "3da941462858",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18412,7 +18416,7 @@
    "id": "rotational_transform",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d652f8897bc4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18426,7 +18430,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "aae9c0a74c6d",
+    "digest": "f5d3530b31ca",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18506,7 +18510,7 @@
    "id": "safety_factor_at_magnetic_axis",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "6723689bf81a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18520,7 +18524,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "8681b245032a",
+    "digest": "1edb68efc67e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18601,7 +18605,7 @@
    "id": "safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "f969c51fa42b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18615,7 +18619,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "1a618ca8e771",
+    "digest": "0270b40d2080",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18695,7 +18699,7 @@
    "id": "safety_factor_at_pedestal_top",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "0bd73daa3f4b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18709,7 +18713,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "73f12963c50f",
+    "digest": "de12e1f2ae02",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18789,7 +18793,7 @@
    "id": "safety_factor_at_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "2907e4e49221",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18803,7 +18807,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "5f027ac04a6b",
+    "digest": "c3ed8a5b9b9b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18883,7 +18887,7 @@
    "id": "second_local_tangential_width_of_optical_element",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "336b1757e4ae",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18897,7 +18901,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "680e7a84377d",
+    "digest": "60fb13f2da28",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -18985,7 +18989,7 @@
    "id": "sine_coefficient_of_flux_surface",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "1bf0adb30d35",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19003,7 +19007,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "93013e3e50d7",
+    "digest": "f35a91ffde96",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19093,7 +19097,7 @@
    "id": "spectral_photon_radiance",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "9a6e9ceaf602",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19107,7 +19111,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "95233dbc3f32",
+    "digest": "c23afc2bb0ca",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19187,7 +19191,7 @@
    "id": "spectral_rate_of_spectrometer_channel",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "f7cb05b68908",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19201,7 +19205,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "c5176df4c3d0",
+    "digest": "4ba636658e0a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19289,7 +19293,7 @@
    "id": "square_of_magnetic_field_magnitude",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "0e9236551c8b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19307,7 +19311,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "46a5a8bff274",
+    "digest": "6c93edeac546",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19405,7 +19409,7 @@
    "id": "square_of_major_radius",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "74ac324bb571",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19423,7 +19427,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "6c26a59904ac",
+    "digest": "75f01bf14b6a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19521,7 +19525,7 @@
    "id": "square_of_toroidal_flux_coordinate_gradient_magnitude",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "20f90c9c7183",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19539,7 +19543,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "18c5aa05d6f3",
+    "digest": "950046a250f7",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19638,7 +19642,7 @@
    "id": "squareness_of_flux_surface",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "4a6b73738314",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19656,7 +19660,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "4866cb91eb49",
+    "digest": "795fd9ca5f3f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19754,7 +19758,7 @@
    "id": "squareness_of_plasma_boundary",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "9f133303bd3a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19772,7 +19776,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "0c256c05a5d9",
+    "digest": "99d8b19c2906",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19862,7 +19866,7 @@
    "id": "surface_area_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "cbf9e0e2d1ff",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19876,7 +19880,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "b7bfc6fbd0f0",
+    "digest": "d559c6beb8da",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19958,7 +19962,7 @@
    "id": "surface_temperature",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "fb2a75e12b70",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -19973,7 +19977,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "71deaf987682",
+    "digest": "8b0dcf369998",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20054,7 +20058,7 @@
    "id": "temperature_of_sensor",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "cc2268070f40",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20068,7 +20072,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "8233e5f5f220",
+    "digest": "3746c8f8619a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20148,7 +20152,7 @@
    "id": "thickness_of_breeder_blanket_layer",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "c387137c6738",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20162,7 +20166,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "7f69f5d45b19",
+    "digest": "b65308e6488e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20242,7 +20246,7 @@
    "id": "thickness_of_plasma_filament",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "130ecd9e38b5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20256,7 +20260,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "4fa07e7d1c69",
+    "digest": "c505579bd32c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20337,7 +20341,7 @@
    "id": "toroidal_angle",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "593579f9c074",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20351,7 +20355,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "213a082fb527",
+    "digest": "1d8201c74818",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20431,7 +20435,7 @@
    "id": "toroidal_angle_of_control_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "bd93fb95a290",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20445,7 +20449,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "6ca680a81342",
+    "digest": "f78afe04e0d0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20526,7 +20530,7 @@
    "id": "toroidal_angle_of_measurement_position",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "4d4514bf6f18",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20540,7 +20544,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "8b9ede12b587",
+    "digest": "d6d1068b21ed",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20620,7 +20624,7 @@
    "id": "toroidal_angle_of_poloidal_magnetic_field_probe",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "f42a86f89b1c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20634,7 +20638,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "f1331185b83f",
+    "digest": "779dfea6d98f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20714,7 +20718,7 @@
    "id": "toroidal_current_density_flux_surface_averaged_at_constraint_position",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "ef5b0fc444d0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20728,7 +20732,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "34883e41f55b",
+    "digest": "c902ee6d3abd",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20808,7 +20812,7 @@
    "id": "toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "ab8932a66fd6",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20822,7 +20826,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "84deff7fd26f",
+    "digest": "82ee3f2d0f68",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20904,7 +20908,7 @@
    "id": "toroidal_flux_coordinate",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "22d9ab68fc9f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -20919,7 +20923,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "aa8c01bf7e44",
+    "digest": "9930acd0e834",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21000,7 +21004,7 @@
    "id": "toroidal_flux_coordinate_at_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "4f2c9339d2c4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21014,7 +21018,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d9eb96f1809f",
+    "digest": "3fa1e9bd43ac",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21102,7 +21106,7 @@
    "id": "toroidal_flux_coordinate_gradient",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "863a721b7ba9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21120,7 +21124,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "b0a94a296731",
+    "digest": "107fa08bf165",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21218,7 +21222,7 @@
    "id": "toroidal_flux_coordinate_gradient_magnitude",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "aebf894ed431",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21236,7 +21240,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "ff89a47df517",
+    "digest": "12ae6c279013",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21326,7 +21330,7 @@
    "id": "toroidal_flux_coordinate_of_magnetic_axis",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "e22c3ff910d4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21340,7 +21344,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d646d746a497",
+    "digest": "b3d7ea26c15a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21420,7 +21424,7 @@
    "id": "toroidal_magnetic_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "f9bb624e2519",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21434,7 +21438,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "c2a38640921f",
+    "digest": "cb79a7214f01",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21514,7 +21518,7 @@
    "id": "toroidal_magnetic_field_at_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "8bb199a06c6e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21528,7 +21532,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "acead7c0eb45",
+    "digest": "2a5a26930ec9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21608,7 +21612,7 @@
    "id": "toroidal_magnetic_field_at_magnetic_axis",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "6c5aa91a62a8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21622,7 +21626,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "81631e31d099",
+    "digest": "f46ae6aa2786",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21703,7 +21707,7 @@
    "id": "toroidal_magnetic_field_at_pedestal_top_high_field_side",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "6e44277fa311",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21717,7 +21721,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "1248465b9bb2",
+    "digest": "befecb88d517",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21799,7 +21803,7 @@
    "id": "toroidal_magnetic_flux",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "db4a4b7e9bb7",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21814,7 +21818,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "fda27b3def3e",
+    "digest": "f097b744bc03",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21895,7 +21899,7 @@
    "id": "toroidal_magnetic_flux_at_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "053c616c9594",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21909,7 +21913,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "a2832a3dcf85",
+    "digest": "3246fb8659fa",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -21990,7 +21994,7 @@
    "id": "toroidal_magnetic_flux_at_plasma_boundary_due_to_poloidal_current",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "5725e6dc18ba",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22004,7 +22008,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d0d34f084949",
+    "digest": "662f32bd9dbf",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22084,7 +22088,7 @@
    "id": "toroidal_magnetic_flux_due_to_diamagnetic_drift",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "32c7482c1223",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22098,7 +22102,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "09b7fe83b7cc",
+    "digest": "8b28ef7ea554",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22178,7 +22182,7 @@
    "id": "toroidal_magnetic_vector_potential",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "cb421a328f44",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22192,7 +22196,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "1290caa166dd",
+    "digest": "55b539b2c44c",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22272,7 +22276,7 @@
    "id": "toroidal_non_axisymmetric_magnetic_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "3302ffef7256",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22286,7 +22290,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "0792cee7effa",
+    "digest": "c9371e1fbbd5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22366,7 +22370,7 @@
    "id": "toroidal_parity",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "c3d189028942",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22380,7 +22384,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "1a5e8fed04c2",
+    "digest": "8f58edf519ba",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22460,7 +22464,7 @@
    "id": "toroidal_reference_magnetic_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "63e3dabbc1c5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22474,7 +22478,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "810cc6fa2ab1",
+    "digest": "6e1525b6046b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22554,7 +22558,7 @@
    "id": "toroidal_total_current_density",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "8e8eb4030d90",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22568,7 +22572,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "3dfb47a29e63",
+    "digest": "088c166e7429",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22649,7 +22653,7 @@
    "id": "toroidal_vacuum_magnetic_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "172335d575eb",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22663,7 +22667,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "835c307c5fd9",
+    "digest": "250c8134a3d8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22743,7 +22747,7 @@
    "id": "total_external_heating_power",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "804bf6070185",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22757,7 +22761,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "b95a041977e1",
+    "digest": "2cf48d7f1a23",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22845,7 +22849,7 @@
    "id": "triangularity_of_flux_surface",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "4cde6e9095d5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22863,7 +22867,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "34862a04044b",
+    "digest": "11a2a4146dd6",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22955,7 +22959,7 @@
    "id": "triangularity_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d87bc4e28913",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -22970,7 +22974,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "595cf0936022",
+    "digest": "3a2c3f3eeec4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23060,7 +23064,7 @@
    "id": "tungsten_density",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "b133af5605b4",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23078,7 +23082,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "73d7a82d4be4",
+    "digest": "761b4bc6f0cf",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23168,7 +23172,7 @@
    "id": "upper_inner_squareness_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "c142ff28dbef",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23182,7 +23186,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "bd3c9eef8043",
+    "digest": "635e4aa3b5bf",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23262,7 +23266,7 @@
    "id": "upper_inner_squareness_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "d5411e9079b5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23276,7 +23280,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "b5185109684b",
+    "digest": "8118728e4b3a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23356,7 +23360,7 @@
    "id": "upper_outer_squareness_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "e3ae4b8a78f8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23370,7 +23374,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d1aa7ce29529",
+    "digest": "8ba9db4223f0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23450,7 +23454,7 @@
    "id": "upper_outer_squareness_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "389d2c7b2744",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23464,7 +23468,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "96ff18c5f551",
+    "digest": "0162ca40b64b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23544,7 +23548,7 @@
    "id": "upper_triangularity_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "724c4cf559e6",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23558,7 +23562,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "f20af6bab97e",
+    "digest": "d46d1b3ee222",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23638,7 +23642,7 @@
    "id": "upper_triangularity_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "670154fed67d",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23652,7 +23656,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "28495c0ae17b",
+    "digest": "5fb24b9463b0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23740,7 +23744,7 @@
    "id": "vacuum_magnetic_field",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "62e2e8b63c85",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23758,7 +23762,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "ad9bbc5949b0",
+    "digest": "15987d77a4e0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23848,7 +23852,7 @@
    "id": "vertical_coordinate_of_closest_wall_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "93994b3ec94b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23862,7 +23866,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "e947d2894982",
+    "digest": "7dbd06d1b4e5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23942,7 +23946,7 @@
    "id": "vertical_coordinate_of_constraint_position",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "9520c379baed",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -23956,7 +23960,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "c16e6360385c",
+    "digest": "5442b4817b13",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24037,7 +24041,7 @@
    "id": "vertical_coordinate_of_coordinate_system",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "382bfebb4093",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24051,7 +24055,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "656d16398465",
+    "digest": "f2fc627aefd0",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24132,7 +24136,7 @@
    "id": "vertical_coordinate_of_current_center",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "6a42e58bb421",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24146,7 +24150,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "884e26897b03",
+    "digest": "b68d0a69186b",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24227,7 +24231,7 @@
    "id": "vertical_coordinate_of_dr_dz_zero_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "18bf11153a57",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24241,7 +24245,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "3dc3f296342e",
+    "digest": "3d3402926267",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24321,7 +24325,7 @@
    "id": "vertical_coordinate_of_geometric_axis",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "dc5f05dc05a8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24335,7 +24339,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "2d860162dadf",
+    "digest": "db9ab95d57b8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24415,7 +24419,7 @@
    "id": "vertical_coordinate_of_magnetic_axis",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "56489bd458ae",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24429,7 +24433,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "c67c2a1efba2",
+    "digest": "1575d97e1ee6",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24509,7 +24513,7 @@
    "id": "vertical_coordinate_of_measurement_position",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "51e168ab2126",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24523,7 +24527,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "9c5db62b8bba",
+    "digest": "b1083b99f617",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24604,7 +24608,7 @@
    "id": "vertical_coordinate_of_plasma_boundary_gap_reference_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "f0786901c7fa",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24618,7 +24622,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "05bc7f310e56",
+    "digest": "7f65459e5d51",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24698,7 +24702,7 @@
    "id": "vertical_coordinate_of_plasma_filament",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "cf6509676acf",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24712,7 +24716,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "efb571b81b06",
+    "digest": "1e2227684b23",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24793,7 +24797,7 @@
    "id": "vertical_coordinate_of_primary_x_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "da0265267cf1",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24807,7 +24811,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d076a2d733fd",
+    "digest": "f7e4541d1c85",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24887,7 +24891,7 @@
    "id": "vertical_coordinate_of_strike_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "b017243d45c7",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24901,7 +24905,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "d568468b71ff",
+    "digest": "befeeb0de040",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24981,7 +24985,7 @@
    "id": "vertical_coordinate_of_x_point",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "2114b7e45c87",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -24995,7 +24999,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "a9d1bc00e9d3",
+    "digest": "70c2e420442f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25075,7 +25079,7 @@
    "id": "vertical_magnetic_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "9bd7919c30ab",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25089,7 +25093,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "6b53d9657374",
+    "digest": "3a7b4df38bc7",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25169,7 +25173,7 @@
    "id": "vertical_magnetization_of_iron_core_segment",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "345c883f3350",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25183,7 +25187,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "fb23240f9d42",
+    "digest": "0272e8e349d9",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25263,7 +25267,7 @@
    "id": "vertical_non_axisymmetric_magnetic_field",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "f353beb1df76",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25277,7 +25281,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "c721eeff9998",
+    "digest": "761ede06e6b7",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25357,7 +25361,7 @@
    "id": "vertical_outline",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "cca17caa0768",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25371,7 +25375,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "309c3e1f9cde",
+    "digest": "9d547612c098",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25451,7 +25455,7 @@
    "id": "vertical_outline_of_control_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "9f37d1d4e762",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25465,7 +25469,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "89c8a046f5d2",
+    "digest": "05c7be39a215",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25545,7 +25549,7 @@
    "id": "vertical_outline_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "b14ebf47f916",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25559,7 +25563,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "0dd749f26a24",
+    "digest": "8d35dd6f1de7",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25640,7 +25644,7 @@
    "id": "vertical_outline_of_plasma_filament",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "fefb8f0f569a",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25654,7 +25658,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "f35d642b1725",
+    "digest": "6ff5713d7e54",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25734,7 +25738,7 @@
    "id": "vertical_velocity_at_current_center",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "f2ec78897d43",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25748,7 +25752,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "99edde60bc38",
+    "digest": "7581cb8b9ad8",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25830,7 +25834,7 @@
    "id": "volume_of_flux_surface",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "04dc652a470f",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25845,7 +25849,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "212cf9b658b1",
+    "digest": "e4872285a027",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25927,7 +25931,7 @@
    "id": "volume_of_plasma_boundary",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "9a08d2243ab5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -25941,7 +25945,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "4228bc85e85d",
+    "digest": "d3a672ab0cfc",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -26021,7 +26025,7 @@
    "id": "wave_phase_of_wave_beam",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "3a14669db413",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -26035,7 +26039,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "6ae0611daa70",
+    "digest": "e6cb1d3fe781",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -26123,7 +26127,7 @@
    "id": "weight_of_interferometer_beam",
    "name_composition": {
     "complete": false,
-    "digest": "624a18af1024",
+    "digest": "927404b65214",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -26141,7 +26145,7 @@
    },
    "name_review": {
     "complete": false,
-    "digest": "04fe8999aef4",
+    "digest": "403d6dc1746e",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -26232,7 +26236,7 @@
    "id": "y_major_axis_unit_vector_of_shatter_cone",
    "name_composition": {
     "complete": true,
-    "digest": "624a18af1024",
+    "digest": "b92c7f6e49fc",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -26246,7 +26250,7 @@
    },
    "name_review": {
     "complete": true,
-    "digest": "e6cb87f9f85b",
+    "digest": "bad420263ef5",
     "expected": [
      "source_text",
      "enclosing_structure_text",
@@ -26308,5 +26312,5 @@
   "parent_enrichment",
   "scoring_review"
  ],
- "tree": "bfd60ca279d5934ae307944fc633ebfcec9f727a"
+ "tree": "fce3ba7ab2ea59395eae9102366f83e5c689bf6a"
 }
