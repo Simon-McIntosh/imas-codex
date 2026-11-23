@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "iter_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:_self_refine_candidate",
+    "iter_codex/standard_names/worker_tasks/worker_compose_and_validate.py:_compose_batch_body",
+    "iter_codex/standard_names/worker_tasks/worker_compose_batches.py:compose_batch",
+    "iter_codex/standard_names/worker_tasks/worker_review_names.py:process_review_name_batch",
+    "iter_codex/standard_names/worker_tasks/worker_refine_names.py:process_refine_name_batch",
+    "iter_codex/standard_names/worker_tasks/worker_generate_docs.py:process_generate_docs_batch",
+    "iter_codex/standard_names/worker_tasks/worker_enrich_parents.py:process_enrich_parents_batch",
+    "iter_codex/standard_names/worker_tasks/worker_review_docs.py:prepare_docs_review_request"
+  ],
+  "completed_at": "2026-11-23T06:50:58.649Z",
+  "dispatched_at": "2026-11-23T06:23:45Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_context_receipt.py",
+      "line": 152,
+      "severity": "non-blocking",
+      "text": "non-blocking: both sink tests pass an explicit sink (test_the_sink_holds_one_json_line_per_receipt at :152 and test_a_live_stage_context_records_what_the_stage_sent at :201) so the DEFAULT_RECEIPT_SINK path added by fbc1244b5 has no pytest guard; reverting record_receipt's default would leave every test green and the live half inert again, which is the blocking defect the prior review raised. Only the out-of-tree check_sink_default.py (positive-sink.log) exercises it."
+    },
+    {
+      "file": "iter_codex/standard_names/case_file.py",
+      "line": 153,
+      "severity": "non-blocking",
+      "text": "non-blocking: _CHILDREN_QUERY at :153 re-implements the live-children query already owned by _load_docs_review_parent_children at iter_codex/standard_names/worker_tasks/worker_review_docs.py:174 (same MATCH (c:StandardName)-[:HAS_PARENT]->(p), same name_stage filter, same name/unit/description/physics_domain projection) without folding the older loader onto the new case-file channel, so two statements can drift."
+    },
+    {
+      "file": "iter_codex/standard_names/context_receipt.py",
+      "line": 802,
+      "severity": "non-blocking",
+      "text": "non-blocking: content_from_prompt_context derives source_text from item dd_description/description and enclosing_structure_text from context 'anc', but build_compose_context (iter_codex/standard_names/context.py:67) supplies neither; a live stage that does not add 'anc' records enclosing_structure_text absent even where the prompt carried the structures, so the live receipt can disagree with the case-file-derived census for the same name."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified all eight production call sites named in the CALL_SITES line; each imports record_stage_receipt and calls it immediately before building the model messages, passing the same context the prompt was rendered from.",
+    "diff": "read commit by commit (19 commits, c7ae574a..fd8888f8e, 18 files, 30353 insertions); it adds context_receipt.py (923 lines), children and producer channels in case_file.py, eight stage call sites, the census script/JSON, the HTML evidence page, the figure and its script, and three test files; no prompt template text changes.",
+    "done_when": "the done_when's quantitative measures are present and recorded: per stage/channel expected/present/absent and ranked omissions (populations.all omitted in done_when), the 33 held-out defective names cross-tabulated in cross_tab, both controls in controls, zero model calls and graph writes in provenance, gates in gate.log (c5f432f12, 8909 passed, EXIT=0) and check.log (251 names, 12 omissions); the runtime clause is met by record_receipt's default sink, though that default is unguarded by a test.",
+    "goal": "the node goal is that every model-calling stage records the context it was given and the omissions are counted; the census uses the case file (context-receipts.py) and its JSON records 251 names, 12 omissions across 6 stages, and a 33-member defect cross-tabulation, and the live half now runs because record_receipt (context_receipt.py:758) defaults its sink instead of discarding the receipt.",
+    "manifest": "read; it records the repair round (fbc1244b5, eb8a91b43, 696086ae8, c5f432f12, fd8888f8e in the commits), the census at eb8a91b43 (251 names, failures 0, EXIT=0), the copy-list guard failure at 434b471c5 then green at c5f432f12 (gate.log), and the per-finding negative/positive controls (negative-sink.log, negative-render.log, positive-sink.log, positive-render.log); its baseline_suite and after_suite fields are absent, so added failures are read from gate-first-pass.log and gate.log.",
+    "write_paths": "the source node's dispatch-detail write_paths lists only the evidence page, the figure directory and context_receipt.py; the diff also touches case_file.py, eight worker_tasks stage files, three test files and the census script/JSON, all directly implied by the done_when clauses (children/producer channels, every stage writes, census and evidence committed), so the extra paths are in the section's expected scope even though they were not declared."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_context_receipt.py:33 renders all seven stages and :45 withholds a channel and requires complete=False, both independent guards, but :152 and :201 pass an explicit sink so the repaired DEFAULT_RECEIPT_SINK path has no test that reddens if it regresses.",
+    "evidence": "gate.log records REVISION=c5f432f12 with 8909 passed, 11 skipped, EXIT=0 and check.log records 251 names and 12 omissions EXIT=0, but context_receipt.py:802 content_from_prompt_context sources source_text/enclosing from keys build_compose_context does not supply, so the live receipts can disagree with the census that gate measures.",
+    "fit": "context_receipt.py follows the surrounding worker_tasks idiom of local imports inside the stage functions (worker_compose_batches.py:351) and reuses the case file's channel vocabulary (case_file.py WITHHELD_CHANNELS) rather than a second notion; the two new copied-list touches are registered in tests/standard_names/test_source_reads.py:465.",
+    "goal_fidelity": "context_receipt.py:901 record_stage_receipt is called at all eight stages and context_receipt.py:758 record_receipt now writes to DEFAULT_RECEIPT_SINK by default, so the live half runs; the children and producer channels are read in case_file.py:1147 and :1113, meeting the parent/no-producer clause.",
+    "reuse": "context_receipt.py:668 _stage_context delegates the section-level half to context.py:67 build_compose_context, an owner extension, but case_file.py:153 _CHILDREN_QUERY re-implements the children query already owned at worker_review_docs.py:174, so this is a partial duplication.",
+    "scope_discipline": "the diff stays inside the section's implementation: iter_codex/standard_names/context_receipt.py, case_file.py, the eight worker_tasks stage files, three test files and the docs/evidence + docs/figures artefacts, all implied by the done_when, with two undeclared paths explained in the manifest's scale_note."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T062310298745-review-of-context-receipts-fd8888f8e48a",
+  "reviewed_base_sha": "c7ae574a24036ee0269353d60a772d1170aa3a22",
+  "reviewed_head_sha": "fd8888f8e48a6104f432d9fb685604d3cb2e1e9f",
+  "reviewed_run_id": "r-20261122T184327216910-context-receipts",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 9,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T06:41:32.065625+00:00",
+  "total": 84
+}
