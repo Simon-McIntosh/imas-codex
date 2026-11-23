@@ -33,7 +33,30 @@
   "plan_slug": "iter-plant-signal-ontology",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1da24b2eae3f530103bc8192707d0a797d2f57ae",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "s2's done-when now names the sample census file, what it holds and its date, and states the count is a lower bound that s4 recounts against its fuller census",
+      "reason": "",
+      "when": "2026-11-23T04:35:04.861453+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1da24b2eae3f530103bc8192707d0a797d2f57ae",
+      "commit_basis": "edit",
+      "note": "s2's done-when now names the sample census file, what it holds and its date, and states the count is a lower bound that s4 recounts against its fuller census",
+      "reason": "",
+      "when": "2026-11-23T04:35:04.861453+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-plant-signal-ontology/r-20261122T212626430678-plan-review-of-iter-plant-signal-ontology.json",
   "review_run_id": "r-20261122T212626430678-plan-review-of-iter-plant-signal-ontology",
   "reviewed_blob_sha": "1deb0d35249d49d6d8a619e21c2f7f95663a4803",
   "rubric": "content",
