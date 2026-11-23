@@ -49,8 +49,10 @@ from iter_codex.graph.neo4j_ops import (
     graph_archive_stamp,
 )
 from iter_codex.graph.offsite import (
+    GraphCensus,
     OffsiteCountMismatch,
     OffsitePushFailed,
+    read_archive_manifest,
     run_offsite_push_cycle,
 )
 
@@ -554,18 +556,16 @@ def _archive_label_counts(archive: Path) -> dict[str, int] | None:
 
     The manifest is the archive's own statement of what it holds, so the
     visibility decision comes from the dump rather than from the flags the push
-    was invoked with.
+    was invoked with. It is the reader the offsite cycle already uses, so an
+    archive one path cannot read is one no path can read. An archive whose
+    manifest or census cannot be read answers ``None``, which the caller treats
+    as facility content.
     """
-    with tarfile.open(archive, "r:gz") as bundle:
-        for member in bundle.getmembers():
-            if member.isfile() and Path(member.name).name == "manifest.json":
-                stream = bundle.extractfile(member)
-                if stream is None:
-                    return None
-                manifest = json.loads(stream.read().decode("utf-8"))
-                counts = manifest.get("label_counts")
-                return counts if isinstance(counts, dict) else None
-    return None
+    try:
+        manifest = read_archive_manifest(archive)
+        return GraphCensus.from_manifest(manifest).label_counts
+    except (OSError, ValueError, tarfile.TarError):
+        return None
 
 
 def _require_private_package(
@@ -575,14 +575,15 @@ def _require_private_package(
     *,
     holds_facility_content: bool,
 ) -> None:
-    """Require a package that holds a facility's content to read back private.
+    """Make a package that holds a facility's content private, then verify it.
 
-    The visibility is read back after the write and echoed, so a package that
-    is still public fails the push rather than being recorded as private.
+    The package is set private before the read-back, so content already
+    uploaded stops being publicly readable; the value echoed is the registry's
+    own report, and a package that is still public fails the push.
     """
     if not holds_facility_content:
         return
-    visibility = require_private_package(registry, pkg_name, token, set_private=False)
+    visibility = require_private_package(registry, pkg_name, token)
     click.echo(f"  Package {pkg_name}: {visibility} (registry-reported)")
 
 

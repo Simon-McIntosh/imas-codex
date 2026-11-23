@@ -73,18 +73,18 @@ def test_plant_filter_keeps_the_facilitys_own_nodes():
 
 
 def test_public_registry_answer_makes_the_push_refuse(monkeypatch):
-    """A package holding facility content that reads back public stops the push."""
+    """A package whose set to private does not take effect stops the push."""
     import click
 
     from iter_codex.cli.graph import registry as registry_mod
     from iter_codex.graph import ghcr
 
+    attempts: list[str] = []
     monkeypatch.setattr(ghcr, "get_package_visibility", lambda *a, **k: "public")
-    # The check reads the registry; it never changes a package's visibility.
     monkeypatch.setattr(
         ghcr,
         "set_package_visibility",
-        lambda *a, **k: pytest.fail("the push check changed a package's visibility"),
+        lambda registry, pkg, vis, token=None: attempts.append(vis) or "public",
     )
 
     with pytest.raises(click.ClickException) as excinfo:
@@ -95,6 +95,7 @@ def test_public_registry_answer_makes_the_push_refuse(monkeypatch):
             holds_facility_content=True,
         )
     assert "must not be published publicly" in str(excinfo.value)
+    assert attempts == ["private"]
 
 
 def test_private_registry_answer_is_reported_and_the_push_continues(
@@ -104,6 +105,11 @@ def test_private_registry_answer_is_reported_and_the_push_continues(
     from iter_codex.graph import ghcr
 
     monkeypatch.setattr(ghcr, "get_package_visibility", lambda *a, **k: "private")
+    monkeypatch.setattr(
+        ghcr,
+        "set_package_visibility",
+        lambda *a, **k: pytest.fail("an already-private package was written"),
+    )
     registry_mod._require_private_package(
         "ghcr.io/owner",
         "iter-codex-graph",

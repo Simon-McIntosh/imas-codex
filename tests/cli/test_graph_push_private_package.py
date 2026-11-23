@@ -98,15 +98,23 @@ class _Progress:
         pass
 
 
-def _fake_registry(monkeypatch, *, visibility):
+def _fake_registry(monkeypatch, *, visibility, after_set="private"):
+    """A registry that reports *visibility* and answers *after_set* to a set."""
     from iter_codex.graph import ghcr
 
-    monkeypatch.setattr(ghcr, "get_package_visibility", lambda *a, **k: visibility)
-    monkeypatch.setattr(
-        ghcr,
-        "set_package_visibility",
-        lambda *a, **k: pytest.fail("the push check changed a package's visibility"),
-    )
+    state = {"visibility": visibility, "sets": []}
+
+    def _get(*args, **kwargs):
+        return state["visibility"]
+
+    def _set(registry, pkg_name, vis, token=None):
+        state["sets"].append(vis)
+        state["visibility"] = after_set
+        return after_set
+
+    monkeypatch.setattr(ghcr, "get_package_visibility", _get)
+    monkeypatch.setattr(ghcr, "set_package_visibility", _set)
+    return state
 
 
 def _profile(tmp_path, *, host):
@@ -125,7 +133,9 @@ def _profile(tmp_path, *, host):
     )
 
 
-def _prepare_local(monkeypatch, tmp_path, label_counts, *, visibility):
+def _prepare_local(
+    monkeypatch, tmp_path, label_counts, *, visibility, after_set="private"
+):
     """Wire a local push path whose archive is written by a fake export."""
     from iter_codex.cli.graph import registry as registry_mod
 
@@ -170,11 +180,13 @@ def _prepare_local(monkeypatch, tmp_path, label_counts, *, visibility):
         return subprocess.CompletedProcess(cmd, 0, "", "")
 
     monkeypatch.setattr(registry_mod.subprocess, "run", _tag_run)
-    _fake_registry(monkeypatch, visibility=visibility)
+    calls["registry"] = _fake_registry(
+        monkeypatch, visibility=visibility, after_set=after_set
+    )
     return calls
 
 
-def _prepare_remote(monkeypatch, tmp_path, *, visibility):
+def _prepare_remote(monkeypatch, tmp_path, *, visibility, after_set="private"):
     """Wire the remote push path so the script and its stream are recorded."""
     from iter_codex.cli.graph import registry as registry_mod
 
@@ -221,28 +233,39 @@ def _prepare_remote(monkeypatch, tmp_path, *, visibility):
     monkeypatch.setattr(
         "iter_codex.cli.graph_progress.remote_operation_streaming", _stream
     )
-    _fake_registry(monkeypatch, visibility=visibility)
+    calls["registry"] = _fake_registry(
+        monkeypatch, visibility=visibility, after_set=after_set
+    )
     return calls
 
 
-def test_full_graph_push_refuses_a_public_package(monkeypatch, tmp_path):
-    """A full-graph package holding facility content that reads back public fails."""
-    calls = _prepare_local(monkeypatch, tmp_path, FACILITY_LABELS, visibility="public")
+def test_full_graph_push_refuses_a_package_that_stays_public(monkeypatch, tmp_path):
+    """A facility-bearing package whose set to private does not take effect fails."""
+    calls = _prepare_local(
+        monkeypatch, tmp_path, FACILITY_LABELS, visibility="public", after_set="public"
+    )
 
     result = CliRunner().invoke(graph_push, [])
 
     assert result.exit_code != 0, result.output
     assert "must not be published publicly" in result.output
+    assert calls["registry"]["sets"] == ["private"]
     assert calls["tag"] == []
     assert calls["manifest"] == []
 
 
-def test_full_graph_push_continues_when_the_package_is_private(monkeypatch, tmp_path):
-    calls = _prepare_local(monkeypatch, tmp_path, FACILITY_LABELS, visibility="private")
+def test_full_graph_push_sets_a_public_package_private_then_continues(
+    monkeypatch, tmp_path
+):
+    """A public package holding facility content is made private, then verified."""
+    calls = _prepare_local(
+        monkeypatch, tmp_path, FACILITY_LABELS, visibility="public", after_set="private"
+    )
 
     result = CliRunner().invoke(graph_push, [])
 
     assert result.exit_code == 0, result.output
+    assert calls["registry"]["sets"] == ["private"]
     assert "private (registry-reported)" in result.output
     assert calls["tag"] == [
         ["oras", "tag", "ghcr.io/owner/iter-codex-graph:dev-aaaaaaa", "latest"]
@@ -250,13 +273,34 @@ def test_full_graph_push_continues_when_the_package_is_private(monkeypatch, tmp_
     assert calls["manifest"]
 
 
-def test_facility_filtered_push_refuses_a_public_package(monkeypatch, tmp_path):
-    calls = _prepare_local(monkeypatch, tmp_path, FACILITY_LABELS, visibility="public")
+def test_full_graph_push_continues_when_the_package_is_already_private(
+    monkeypatch, tmp_path
+):
+    calls = _prepare_local(monkeypatch, tmp_path, FACILITY_LABELS, visibility="private")
+
+    result = CliRunner().invoke(graph_push, [])
+
+    assert result.exit_code == 0, result.output
+    assert calls["registry"]["sets"] == []
+    assert "private (registry-reported)" in result.output
+    assert calls["tag"] == [
+        ["oras", "tag", "ghcr.io/owner/iter-codex-graph:dev-aaaaaaa", "latest"]
+    ]
+    assert calls["manifest"]
+
+
+def test_facility_filtered_push_refuses_a_package_that_stays_public(
+    monkeypatch, tmp_path
+):
+    calls = _prepare_local(
+        monkeypatch, tmp_path, FACILITY_LABELS, visibility="public", after_set="public"
+    )
 
     result = CliRunner().invoke(graph_push, ["--facility", "iter"])
 
     assert result.exit_code != 0, result.output
     assert "must not be published publicly" in result.output
+    assert calls["registry"]["sets"] == ["private"]
     assert calls["tag"] == []
 
 
@@ -269,6 +313,11 @@ def test_dd_only_push_never_queries_visibility(monkeypatch, tmp_path):
         "get_package_visibility",
         lambda *a, **k: pytest.fail("visibility read for a DD-only package"),
     )
+    monkeypatch.setattr(
+        ghcr,
+        "set_package_visibility",
+        lambda *a, **k: pytest.fail("visibility write for a DD-only package"),
+    )
 
     result = CliRunner().invoke(graph_push, ["--dd-only"])
 
@@ -276,8 +325,10 @@ def test_dd_only_push_never_queries_visibility(monkeypatch, tmp_path):
     assert calls["tag"]
 
 
-def test_cycle_push_refuses_a_public_package(monkeypatch, tmp_path):
-    calls = _prepare_local(monkeypatch, tmp_path, FACILITY_LABELS, visibility="public")
+def test_cycle_push_refuses_a_package_that_stays_public(monkeypatch, tmp_path):
+    calls = _prepare_local(
+        monkeypatch, tmp_path, FACILITY_LABELS, visibility="public", after_set="public"
+    )
     cycle_archive = tmp_path / "cycle.tar.gz"
     _archive(cycle_archive, FACILITY_LABELS, with_dump=True)
 
@@ -289,6 +340,7 @@ def test_cycle_push_refuses_a_public_package(monkeypatch, tmp_path):
             token=None,
         )
 
+    assert calls["registry"]["sets"] == ["private"]
     assert calls["tag"] == []
     assert calls["manifest"] == []
 
@@ -309,15 +361,35 @@ def test_cycle_push_records_the_push_when_the_package_is_private(monkeypatch, tm
     assert calls["manifest"]
 
 
-def test_remote_push_refuses_a_public_package_before_tagging(monkeypatch, tmp_path):
-    calls = _prepare_remote(monkeypatch, tmp_path, visibility="public")
+def test_remote_push_refuses_a_package_that_stays_public_before_tagging(
+    monkeypatch, tmp_path
+):
+    calls = _prepare_remote(
+        monkeypatch, tmp_path, visibility="public", after_set="public"
+    )
 
     result = CliRunner().invoke(graph_push, [])
 
     assert result.exit_code != 0, result.output
     assert "must not be published publicly" in result.output
+    assert calls["registry"]["sets"] == ["private"]
     assert calls["builds"][0]["tag_latest"] is False
     assert calls["scripts"] == ["remote script"]
+
+
+def test_remote_push_sets_a_public_package_private_then_tags(monkeypatch, tmp_path):
+    calls = _prepare_remote(
+        monkeypatch, tmp_path, visibility="public", after_set="private"
+    )
+
+    result = CliRunner().invoke(graph_push, [])
+
+    assert result.exit_code == 0, result.output
+    assert calls["registry"]["sets"] == ["private"]
+    assert calls["builds"][0]["tag_latest"] is False
+    assert len(calls["scripts"]) == 2
+    assert "oras tag" in calls["scripts"][1]
+    assert "latest" in calls["scripts"][1]
 
 
 def test_remote_push_tags_after_a_private_report(monkeypatch, tmp_path):
@@ -343,7 +415,9 @@ def test_the_decision_reads_the_archive_scope_not_the_push_flags():
 def test_an_archive_without_a_manifest_is_treated_as_facility_bearing(
     monkeypatch, tmp_path
 ):
-    calls = _prepare_local(monkeypatch, tmp_path, FACILITY_LABELS, visibility="public")
+    calls = _prepare_local(
+        monkeypatch, tmp_path, FACILITY_LABELS, visibility="public", after_set="public"
+    )
 
     @click.command(context_settings={"ignore_unknown_options": True})
     @click.option("--output", "-o", "output", required=True)
@@ -356,4 +430,5 @@ def test_an_archive_without_a_manifest_is_treated_as_facility_bearing(
     result = CliRunner().invoke(graph_push, [])
 
     assert result.exit_code != 0, result.output
+    assert calls["registry"]["sets"] == ["private"]
     assert calls["tag"] == []

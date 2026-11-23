@@ -9,6 +9,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from iter_codex.cli.graph import registry as graph_registry
 from iter_codex.cli.graph.data import graph_export
 from iter_codex.graph.neo4j_ops import backup_graph_dump
@@ -217,6 +219,10 @@ def test_graph_push_temporary_archive_uses_shared_stamp(monkeypatch):
     monkeypatch.setattr(graph_registry, "__version__", "1.0.0")
     monkeypatch.setattr(
         "iter_codex.graph.ghcr.get_package_visibility", lambda *a, **k: "private"
+    )
+    monkeypatch.setattr(
+        "iter_codex.graph.ghcr.set_package_visibility",
+        lambda *a, **k: pytest.fail("an already-private package was written"),
     )
     monkeypatch.setattr("iter_codex.graph.neo4j_ops.datetime", _FrozenDateTime)
 
