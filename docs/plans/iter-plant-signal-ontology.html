@@ -23,7 +23,7 @@
   <title>ITER plant signals have one consistent place in the shared ontology | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -74,6 +74,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-document-gate-open" data-who="reckon-build" data-when="">
     <div class="r-comment-body"><p>Landed r-20261122T202857944518-any-idm-document-read-only at head f0a3966d (merge 024d4c1d7), per the lead's 2026-11-22 decision that any IDM document may be read. The read-only client fetches any well-formed document identity through the configured document GET form, with no per-document allowlist; every other method, path, query shape and origin is still refused before the network, and document requests are paced by a private interval, one second by default. The review found nothing and the head adds no failure against the base. One live fetch of a non-pilot document succeeded with its digest recorded privately. The old <code>document_identities</code> key in private configuration is no longer read.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-lucy-skill-landed" data-who="reckon-build" data-when="">
+    <div class="r-comment-body"><p>Landed r-20261122T202946154777-lucy-record-tools-skill at head a2a427d0 (merge a7395d2ea), following the lead's 2026-11-22 request for a skill on Lucy's direct tools. <code>.claude/skills/lucy-records/SKILL.md</code> tells agents to find ITER documents and records with the schema, typed search, record and version tools instead of the chat tool, lists the traps the tools document, and names the project's read-only client as the route for fetching bytes. Every tool, field and operator it cites was checked against the server's own descriptions. The first review caught a document-fetch example missing a required argument, repaired before landing; a one-word slip in the retry interval was corrected after (6c61d7952).</p></div>
 </div>
 </section>
 </main>
