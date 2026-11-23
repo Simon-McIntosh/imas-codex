@@ -629,6 +629,46 @@ def _name_context(content: Mapping[str, Any]) -> dict[str, Any]:
     by_locus = dict(neighbours.get("by_locus") or {})
     locus_rows = [dict(row) for row in (by_locus.get("members") or ())]
     dd_description = item["dd_description"] or item["description"]
+    source_paths = item["source_paths"]
+    ancestor_rows = [
+        {"path": statement.get("path"), "text": statement.get("text")}
+        for statement in enclosing
+    ]
+    candidate_path = source_paths[0] if source_paths else name
+    items = [
+        {
+            "id": name,
+            "standard_name": name,
+            "source_id": candidate_path,
+            "path": candidate_path,
+            "description": item["dd_description"] or item["description"],
+            "documentation": item["dd_documentation"] or item["documentation"],
+            "dd_description": item["dd_description"] or item["description"],
+            "dd_documentation": item["dd_documentation"] or item["documentation"],
+            "unit": unit,
+            "kind": item["kind"],
+            "physics_domain": item["physics_domain"],
+            "coordinates": item["coordinates"],
+            "coordinate_paths": item["coordinates"],
+            "ancestor_context": ancestor_rows,
+            "source_paths": source_paths,
+        }
+    ]
+    ids_order: list[str] = []
+    for path in source_paths or ([name] if name else []):
+        section = str(path).split("/", 1)[0]
+        if section and section not in ids_order:
+            ids_order.append(section)
+    ids_contexts = [
+        {
+            "ids_name": section,
+            "ids_description": "",
+            "ids_documentation": "",
+            "top_sections": [],
+        }
+        for section in ids_order
+    ]
+    ids_name = ids_order[0] if ids_order else name
     dd_context = {
         "path": str(first.get("id") or ""),
         "ids_name": name,
@@ -659,6 +699,9 @@ def _name_context(content: Mapping[str, Any]) -> dict[str, Any]:
         "same_base_neighbours": same_base_neighbours,
         "same_path_neighbours": locus_rows,
         "locus_context": locus_rows or None,
+        "items": items,
+        "ids_contexts": ids_contexts,
+        "ids_name": ids_name,
     }
 
 
@@ -820,7 +863,7 @@ def content_from_prompt_context(
         or item.get("ancestors")
         or ()
     )
-    dd_text = str(item.get("dd_description") or item.get("description") or "")
+    dd_text = str(item.get("dd_description") or "")
     source = {
         "id": name,
         "exists": bool(dd_text),

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Draw, for every stage, the share of names that carried each expected channel.
 
-Rows are the model-calling stages; columns are the channels
-
-Left: one cell per stage and channel, coloured by the share of the names that
-expected that channel and carried it, with the share written in the cell. A
-channel a stage does not expect is left blank.
+One matrix: rows are the channels, columns are the model-calling stages, and
+each cell is coloured by the share of the names that expected that channel and
+the stage carried it, with the share written in the cell. A channel a stage does
+not expect is left blank.
 
 Every number is read from the census JSON committed beside the evidence page,
 so regenerating the figure re-derives its numbers and a drifting census shows up
@@ -43,7 +42,7 @@ def load() -> tuple[list[str], list[str], dict[str, dict[str, dict]], int]:
     return stages, channels, table, len(report["rows"])
 
 
-def draw(stages, channels, table, names, path) -> None:
+def draw(stages, channels, table, path) -> None:
     shares = np.full((len(channels), len(stages)), np.nan)
     for row, channel in enumerate(channels):
         for column, stage in enumerate(stages):
@@ -91,7 +90,7 @@ def draw(stages, channels, table, names, path) -> None:
 def main() -> None:
     use_style()
     stages, channels, table, names = load()
-    draw(stages, channels, table, names, SVG)
+    draw(stages, channels, table, SVG)
     print(f"{len(stages)} stages x {len(channels)} channels over {names} names")
     print(f"wrote {SVG}")
 

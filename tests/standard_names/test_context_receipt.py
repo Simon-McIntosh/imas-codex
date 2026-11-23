@@ -273,3 +273,82 @@ def test_record_receipt_writes_to_the_default_sink_when_none_is_given(
     assert written == target
     assert target.exists()
     assert len(target.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def _case_file(name, path, text, unit="eV"):
+    return {
+        "target": {"id": name, "kind": "quantity"},
+        "content": {
+            "target": {"id": name, "kind": "quantity"},
+            "incumbent": {
+                "id": name,
+                "name": name,
+                "description": f"the {name}",
+                "unit": unit,
+                "kind": "quantity",
+            },
+            "sources": [
+                {
+                    "id": path,
+                    "text": text,
+                    "unit": unit,
+                    "coordinates": ["rho_tor_norm"],
+                    "enclosing": {
+                        "status": "ok",
+                        "statement": "1 enclosing statement(s)",
+                        "statements": [
+                            {
+                                "path": path.rsplit("/", 1)[0],
+                                "text": f"the enclosing {name} structure",
+                            }
+                        ],
+                    },
+                }
+            ],
+            "family": {"status": "none", "members": []},
+            "neighbours": {"by_subject": {"members": []}, "by_locus": []},
+            "children": {"status": "none", "members": []},
+            "grammar": {"status": "unparsed", "segments": {}},
+        },
+    }
+
+
+def test_two_names_render_two_distinct_prompts_at_the_composition_stages():
+    """The per-name material reaches the keys the templates iterate.
+
+    A prompt whose composition-stage context carries no per-name item renders
+    the same text for every name, so a digest column built from it proves
+    nothing. The two stages that iterate ``items`` must differ between names.
+    """
+    first = _case_file(
+        "electron_temperature",
+        "core_profiles/profiles_1d/electrons/temperature",
+        "the temperature of the electron species",
+    )
+    second = _case_file(
+        "ion_density",
+        "core_profiles/profiles_1d/ion/density",
+        "the density of the ion species",
+        unit="m^-3",
+    )
+    for stage in ("name_composition", "name_review"):
+        assert (
+            cr.receipt_for_stage(stage, first).prompt_digest
+            != cr.receipt_for_stage(stage, second).prompt_digest
+        ), stage
+
+
+def test_a_description_only_item_reports_source_text_absent():
+    """A description is not source text.
+
+    The channel answers whether the prompt carried the bound source text; an
+    item that carries only an enriched description did not carry a source, so
+    reporting the channel present would overstate the context.
+    """
+    content = cr.content_from_prompt_context(
+        {"item": {"id": "desc_only", "description": "a described but unsourced name"}}
+    )
+    receipt = cr.receipt_from_content("name_review", "desc_only", content)
+
+    assert receipt.channels["source_text"].present is False
+    assert "source_text" in receipt.missing
