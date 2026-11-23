@@ -85,6 +85,16 @@
       "note": "\u00a72 now counts paths by the recorded mechanism that set the domain, and separately counts the live names whose stored domain equals a candidate drawn from their sources' IDS through the IDS-to-domain table",
       "reason": "",
       "when": "2026-11-23T07:04:38.956625+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "bab3757dbd0e24dbc951cf0b54a941e5e4c30ced",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "the IDS-to-domain table leaves \u00a71 and is regenerated from the rerun path domains in \u00a73",
+      "reason": "",
+      "when": "2026-11-23T07:04:41.439482+00:00"
     }
   ],
   "responses": {
@@ -105,6 +115,15 @@
       "note": "\u00a72 measures every DD path that carries a domain and accounts separately for the paths the build leaves without one (domain_source none_metadata)",
       "reason": "",
       "when": "2026-11-23T07:04:36.671955+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "bab3757dbd0e24dbc951cf0b54a941e5e4c30ced",
+      "commit_basis": "edit",
+      "note": "the IDS-to-domain table leaves \u00a71 and is regenerated from the rerun path domains in \u00a73",
+      "reason": "",
+      "when": "2026-11-23T07:04:41.439482+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/domains-follow-the-physics/r-20261123T062935943004-plan-review-of-domains-follow-the-physics.json",
