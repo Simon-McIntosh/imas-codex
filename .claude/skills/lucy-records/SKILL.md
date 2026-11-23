@@ -81,7 +81,7 @@ when ignored, and the answer still looks plausible.
   requesting principal may not see. A page of nothing is not a statement that
   nothing matches.
 - **Two calls in parallel, at most.** A third concurrent ICP call is refused as
-  `capacity_exceeded` (retryable); retry it once after about a call, rather
+  `capacity_exceeded` (retryable); retry it once after about a second, rather
   than fanning out.
 - **A continuation token needs identical arguments.** Same predicates,
   projection and page size; a changed result set invalidates the cursor.
