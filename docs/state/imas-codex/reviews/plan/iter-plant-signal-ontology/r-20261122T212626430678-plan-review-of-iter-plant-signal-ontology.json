@@ -53,6 +53,16 @@
       "note": "s4 now bounds 'every' to the rows of the coordinator-supplied census, which reads every page of a signal-list and a self-description title search; withheld rows are counted per search, not catalogued",
       "reason": "",
       "when": "2026-11-23T04:35:11.230086+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1da24b2eae3f530103bc8192707d0a797d2f57ae",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "s4's twenty hand checks carry a written verdict and reason each, recorded privately under ~/.cache/imas-codex-codac-uda/document-census/hand-checks/ and counted in the landing record",
+      "reason": "",
+      "when": "2026-11-23T04:35:17.364785+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "s4 now bounds 'every' to the rows of the coordinator-supplied census, which reads every page of a signal-list and a self-description title search; withheld rows are counted per search, not catalogued",
       "reason": "",
       "when": "2026-11-23T04:35:11.230086+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1da24b2eae3f530103bc8192707d0a797d2f57ae",
+      "commit_basis": "edit",
+      "note": "s4's twenty hand checks carry a written verdict and reason each, recorded privately under ~/.cache/imas-codex-codac-uda/document-census/hand-checks/ and counted in the landing record",
+      "reason": "",
+      "when": "2026-11-23T04:35:17.364785+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-plant-signal-ontology/r-20261122T212626430678-plan-review-of-iter-plant-signal-ontology.json",
