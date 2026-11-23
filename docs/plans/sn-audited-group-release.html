@@ -15,8 +15,8 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-effort-hours" content="48.0">
 <meta name="plan-after" content="sn-definitions-by-construction">
-<meta name="plan-version" content="58">
-<meta name="plan-modified" content="2026-11-22">
+<meta name="plan-version" content="59">
+<meta name="plan-modified" content="2026-11-23">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;done&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-audited-group-release#s1&quot;],&quot;s3&quot;:[&quot;sn-audited-group-release#s1&quot;,&quot;sn-audited-group-release#s2&quot;],&quot;s4&quot;:[&quot;sn-case-file-generation#s5&quot;,&quot;sn-case-file-generation#s7&quot;,&quot;sn-case-file-generation#s9&quot;],&quot;s5&quot;:[&quot;sn-audited-group-release#s4&quot;,&quot;sn-audited-group-release#s6&quot;],&quot;s6&quot;:[&quot;sn-audited-group-release#s2&quot;],&quot;s7&quot;:[&quot;sn-audited-group-release#s2&quot;]}">
 <meta name="plan-sprint" content="S20">
@@ -116,6 +116,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-partial-r-20261122T193445739125-sagr-transport-parts-write" data-who="reckon-build" data-when="2026-11-22T22:06:00Z">
     <div class="r-comment-body">Run r-20261122T193445739125-sagr-transport-parts-write delivered only the measurement half of this section (landed at merge 7533cd462). The write half stays implementable and is blocked outside this repository: none of the five ruled part names is a value of PhysicsDomain, which the grammar library owns, so the domain writer refuses every move. The section needs the vocabulary change, a grammar-library release and a pin bump before any stored domain can move; the evidence page carries the proposed grammar entries.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-domain-names-physics" data-who="Simon McIntosh" data-when="2026-11-23T06:55:00Z">
+    <div class="r-comment-body">Lead ruling, 2026-11-23, on the physics-domain proposal landed from run r-20261123T043405310814-physics-domain-proposal: rejected. A physics domain names physics; it is never named from a data-dictionary path or data structure. The five parts this section divides transport into (transport_coefficients, profile_quantities, distribution_quantities, summary_quantities, source_quantities) are data-structure groupings, so they are withdrawn, and this section's premise of dividing transport along data structure does not stand. The vocabulary is re-evaluated by the coordinator from the names' physics, not by a background worker.</div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261117T233848617849-review-of-sagr-stage-cause-trace-1229d5a97d19" data-who="reckon-build" data-when="2026-11-17T23:39:26.032Z">
     <div class="r-comment-body"><p>Independent review of r-20261117T230018011751-sagr-stage-cause-trace at 1229d5a97 scores goal_fidelity 19, evidence 14, scope_discipline 20, durability 13, fit 16, reuse 5 (total 87) with six non-blocking findings: --check accepts any three traced causes so the "three largest" headline is unguarded (demonstrated: the largest cause untraced still prints PASS exit 0), the committed page is never compared with --render output, decode_record duplicates the record decoder owned at equilibrium-adjudication.py:63 instead of using the sibling() helper, a dead parser.print_parser_help assignment, an opaque `not in (0, 0)` guard, and an unanchored text-parameter regex that would redden on a benign rename. Call sites: none.</p></div>
