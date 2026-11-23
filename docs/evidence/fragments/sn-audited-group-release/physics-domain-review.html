@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="imas-codex">
+<meta name="reckon-type" content="evidence-fragment">
+<title>Physics-domain review: one proposed list against the IDS sources</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 78rem; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+table { border-collapse: collapse; margin: 0.6rem 0 1.4rem; font-size: 0.82rem; }
+th, td { border-bottom: 1px solid #d8d8d8; padding: 0.22rem 0.5rem; text-align: left; vertical-align: top; }
+th { background: #f2f2f2; }
+section.domain { border-top: 1px solid #e2e2e2; padding: 0.4rem 0; }
+.tag { font-size: 0.72rem; background: #eef2f6; border-radius: 0.5rem; padding: 0.05rem 0.45rem; font-weight: normal; }
+figure img { max-width: 100%; }
+.ok { color: #1f6b33; } .bad { color: #a32020; font-weight: 600; }
+</style></head><body>
+<h1>Physics-domain review: one proposed list against the IDS sources</h1>
+<p>Generated 2026-11-23T05:34:06.395863+00:00 on 98dci4-clu-3143.iter.org at
+<code>47c4b1d38844f2d73f76f6d1a09d87b4b0c0d3c3</code>. Read-only: nothing in the graph, the
+vocabulary or the grammar library was changed.</p>
+
+<h2>Standing</h2>
+<p>3149 live standard names, 87 IDS in the DD version the graph holds,
+35 proposed domains. 15 live names carry no stored domain;
+7 of them take a proposed domain from their sources and
+8 fall to <code>general</code>. Two current domains carry no
+live name at all: <code>plasma_measurement_diagnostics</code> (no names, no paths) and
+<code>computational_workflow</code> (no names, 1,959 paths), so both are vocabulary
+decisions rather than name moves.</p>
+<table><thead><tr><th>check arm</th><th>state</th></tr></thead><tbody><tr><td>every_ids_maps</td><td>ok</td></tr>
+<tr><td>every_ids_target_is_proposed</td><td>ok</td></tr>
+<tr><td>every_live_name_maps</td><td>ok</td></tr>
+<tr><td>every_name_target_is_proposed</td><td>ok</td></tr>
+<tr><td>counts_sum_to_live_total</td><td>ok</td></tr>
+<tr><td>proposed_domains_all_counted</td><td>ok</td></tr>
+<tr><td>no_retired_domain_is_carried</td><td>ok</td></tr></tbody></table>
+<p>Source files and their digests:</p>
+<table><thead><tr><th>source</th><th>path</th><th>sha256</th></tr></thead><tbody><tr><td>grammar</td><td>/home/ITER/mcintos/Code/imas-standard-names/imas_standard_names/grammar/vocabularies/physics_domains.yml</td><td>cf4943964c573184e19a2747c77b250b091ccb46e432d237e99067bfc2d3121e</td></tr>
+<tr><td>ids_domains</td><td>/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/physics-domain-proposal/iter_codex/definitions/physics/ids_domains.json</td><td>d4e885dec5f3344976587d458d7d0d5487bff1f03e38eb3dc97890fbefde1286</td></tr>
+<tr><td>guidance</td><td>/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/physics-domain-proposal/iter_codex/definitions/physics/domains.yaml</td><td>372bb960a387229c71251be5fb0c18dec32b9a881bb46a47f9cddbb3c6120ab7</td></tr>
+<tr><td>path_domain_overrides</td><td>/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/physics-domain-proposal/iter_codex/definitions/physics/path_domain_overrides.json</td><td>593596782456758ba3f719b186e86e596156b1dc461467b1702c549d301d0a76</td></tr>
+<tr><td>domain_gold_set</td><td>/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/physics-domain-proposal/iter_codex/definitions/physics/domain_gold_set.json</td><td>b7f9af4619a4f8e4d90feadd88d093c5c5b9c81f75aada93e496eae9564fc6a3</td></tr></tbody></table>
+
+<h2>1. Every current domain</h2>
+<p>The union of the grammar library's vocabulary, this repository's IDS table and the
+guidance file, with the live count of names carrying it and the live count of DD paths
+carrying it. Disposition is the proposal's own (section 3).</p>
+<table><thead><tr><th>domain</th><th>grammar description</th><th>category</th><th>grammar IDS</th><th>codex IDS</th><th>guidance</th><th>live names</th><th>live DD paths</th><th>disposition</th><th>reason</th></tr></thead><tbody><tr><td>auxiliary_heating</td><td>Auxiliary heating systems including neutral beam, electron cyclotron, ion cyclotron, and lower hybrid</td><td>heating_current_drive</td><td>nbi, ec_launchers, ece, ic_antennas, lh_antennas</td><td>ec_antennas, ec_launchers, ic_antennas, lh_antennas, nbi</td><td>yes</td><td>198</td><td>1804</td><td>kept</td><td>Names the heating actuators and their hardware.</td></tr>
+<tr><td>computational_workflow</td><td>Auxiliary data, atomic and molecular data, geometry definitions, computational tools</td><td>data_computing</td><td>temporary, amns_data, geometry, operational_instrumentation, calorimetry, barometry, focs</td><td>amns_data, numerics, transport_solver_numerics, workflow</td><td>yes</td><td>0</td><td>1959</td><td>merged</td><td>Merged into data_management: its IDSs are reference or auxiliary data, atomic and molecular data, and computational infrastructure, not an area of physics. No live standard name carries it; its 1,959 live DD paths move with the vocabulary entry.</td></tr>
+<tr><td>core_plasma_physics</td><td>Core plasma profiles, kinetic quantities, global parameters, integrated quantities</td><td>core_plasma</td><td>core_profiles, core_transport, core_instant_changes, core_sources, plasma_sources</td><td>core_instant_changes, core_profiles, plasma_profiles, radiation</td><td>yes</td><td>47</td><td>5984</td><td>kept</td><td>Names the core plasma state, narrowed to quantities that are not a transport coefficient, a source or a profile form.</td></tr>
+<tr><td>current_drive</td><td>Non-inductive current drive physics, efficiency, and profile control</td><td>heating_current_drive</td><td>—</td><td>—</td><td>yes</td><td>10</td><td>141</td><td>kept</td><td>Names non-inductive current generation, a physics distinct from the heating that accompanies it; its ten names are current-drive quantities, not heating-system ones.</td></tr>
+<tr><td>data_management</td><td>Summary data products, integrated analysis results, data archival</td><td>data_computing</td><td>summary</td><td>dataset_description, dataset_fair, real_time_data, sdn</td><td>yes</td><td>0</td><td>134</td><td>merged</td><td>Absorbs computational_workflow: both are non-physics data domains, and a reference-data IDS and a workflow IDS belong in one place. No live standard name carries either today; 1,959 live DD paths carry computational_workflow.</td></tr>
+<tr><td>divertor_physics</td><td>Divertor target loads, detachment, particle and heat exhaust</td><td>edge_divertor</td><td>—</td><td>divertors</td><td>yes</td><td>68</td><td>520</td><td>kept</td><td>Names divertor target loads, detachment and exhaust.</td></tr>
+<tr><td>edge_plasma_physics</td><td>Scrape-off layer, divertor physics, plasma-wall interactions, recycling</td><td>edge_divertor</td><td>edge_profiles, edge_sources, wall, divertors, langmuir_probes, radiation</td><td>edge_profiles, edge_sources, edge_transport</td><td>yes</td><td>305</td><td>5691</td><td>kept</td><td>Names the boundary plasma, the most populous named area after transport.</td></tr>
+<tr><td>electromagnetic_wave_diagnostics</td><td>Interferometry, polarimetry, reflectometry, and wave-based diagnostics</td><td>diagnostics</td><td>interferometer, polarimeter, refractometer, reflectometer_profile, reflectometer_fluctuation</td><td>interferometer, polarimeter, reflectometer_fluctuation, reflectometer_profile, refractometer</td><td>yes</td><td>73</td><td>1033</td><td>kept</td><td>Names interferometry, reflectometry and polarimetry.</td></tr>
+<tr><td>equilibrium</td><td>MHD equilibrium, flux surfaces, magnetic geometry, coordinate systems</td><td>core_plasma</td><td>equilibrium</td><td>b_field_non_axisymmetric, equilibrium, pf_plasma</td><td>yes</td><td>206</td><td>3866</td><td>kept</td><td>Names the force-balance configuration and its surfaces; the most settled group.</td></tr>
+<tr><td>fast_particles</td><td>Fast ion and electron distributions, energetic particles, slowing-down</td><td>energetic_particles</td><td>distributions, distribution_sources</td><td>distribution_sources, distributions</td><td>yes</td><td>17</td><td>2790</td><td>kept</td><td>Names non-thermal fast-ion and fast-electron populations.</td></tr>
+<tr><td>fueling</td><td>Gas injection, pellet injection, shattered pellet injection, fueling systems</td><td>edge_divertor</td><td>gas_injection, pellets, spi, gas_pumping</td><td>gas_injection, pellets, spi</td><td>yes</td><td>23</td><td>1170</td><td>kept</td><td>Names gas and pellet injection systems and the quantities they deliver.</td></tr>
+<tr><td>general</td><td>Universal plasma physics quantities appearing across multiple IDS</td><td>general</td><td>—</td><td>summary, temporary</td><td>yes</td><td>31</td><td>639</td><td>kept</td><td>An explicit last resort for quantities that cross domains, so no name is ever left without a domain.</td></tr>
+<tr><td>gyrokinetics</td><td>Gyrokinetic theory, simulation, and turbulence modeling</td><td>advanced_physics</td><td>—</td><td>gyrokinetics, gyrokinetics_local</td><td>yes</td><td>42</td><td>2108</td><td>kept</td><td>Names a model framework whose quantities describe the model world, not the measured machine.</td></tr>
+<tr><td>machine_operations</td><td>Pulse scheduling, workflow management, operational metadata</td><td>control_operations</td><td>pulse_schedule, workflow, dataset_description, dataset_fair, real_time_data</td><td>—</td><td>yes</td><td>2</td><td>24</td><td>kept</td><td>Names pulse scheduling and operational quantities.</td></tr>
+<tr><td>magnetic_field_diagnostics</td><td>Magnetic diagnostics, flux loops, Rogowski coils, diamagnetic measurements</td><td>diagnostics</td><td>magnetics</td><td>focs, magnetics</td><td>yes</td><td>35</td><td>545</td><td>kept</td><td>Names the magnetic sensor set and its responses.</td></tr>
+<tr><td>magnetic_field_systems</td><td>Magnetic coil systems, superconducting magnets, field generation infrastructure</td><td>machine_systems</td><td>—</td><td>coils_non_axisymmetric, em_coupling, ferritic, iron_core, pf_active, pf_passive, tf</td><td>yes</td><td>131</td><td>1828</td><td>kept</td><td>Names the coil and magnet infrastructure that generates the field.</td></tr>
+<tr><td>magnetohydrodynamics</td><td>MHD stability, disruptions, instabilities, sawteeth, tearing modes</td><td>core_plasma</td><td>mhd, mhd_linear, disruption, ntms, sawteeth</td><td>disruption, mhd, mhd_linear, ntms, sawteeth</td><td>yes</td><td>142</td><td>1315</td><td>kept</td><td>Names a distinct macroscopic instability physics.</td></tr>
+<tr><td>mechanical_measurement_diagnostics</td><td>Mechanical and structural measurement diagnostics, strain, vibration</td><td>diagnostics</td><td>—</td><td>barometry, calorimetry, operational_instrumentation</td><td>yes</td><td>22</td><td>223</td><td>kept</td><td>Names strain and vibration measurement.</td></tr>
+<tr><td>neutronics</td><td>Neutron diagnostics, fusion product measurements, activation</td><td>diagnostics</td><td>neutron_diagnostic</td><td>neutron_diagnostic</td><td>yes</td><td>22</td><td>1120</td><td>kept</td><td>Names neutron diagnostics and fusion-product measurement.</td></tr>
+<tr><td>particle_measurement_diagnostics</td><td>Thomson scattering and particle-based diagnostic measurements</td><td>diagnostics</td><td>thomson_scattering</td><td>langmuir_probes, thomson_scattering</td><td>yes</td><td>85</td><td>645</td><td>kept</td><td>Names Thomson scattering, Langmuir probes and particle-based measurement.</td></tr>
+<tr><td>plant_systems</td><td>Power supplies, cooling systems, vacuum systems, plant infrastructure</td><td>machine_systems</td><td>—</td><td>balance_of_plant, gas_pumping</td><td>yes</td><td>131</td><td>139</td><td>kept</td><td>Names power, cooling and vacuum plant.</td></tr>
+<tr><td>plasma_control</td><td>Plasma position and shape control, feedback systems, electromagnetic coupling</td><td>control_operations</td><td>pf_active, pf_passive, pf_plasma, tf, control, controllers, coils_non_axisymmetric, iron_core, ferritic, b_field_non_axisymmetric, em_coupling</td><td>controllers, pulse_schedule</td><td>yes</td><td>1</td><td>1015</td><td>kept</td><td>Names position and shape control and the feedback system.</td></tr>
+<tr><td>plasma_initiation</td><td>Plasma startup, breakdown, initiation physics, early heating phase</td><td>control_operations</td><td>plasma_initiation</td><td>plasma_initiation</td><td>yes</td><td>3</td><td>158</td><td>kept</td><td>Names startup, breakdown and the early heating phase.</td></tr>
+<tr><td>plasma_measurement_diagnostics</td><td>General plasma parameter measurement diagnostics</td><td>diagnostics</td><td>—</td><td>—</td><td>yes</td><td>0</td><td>0</td><td>retired</td><td>No live name and no IDS name it; the general plasma-measurement role is carried by particle_measurement_diagnostics, so it stands on nothing.</td></tr>
+<tr><td>plasma_wall_interactions</td><td>First wall, plasma-facing components, erosion, deposition, material migration</td><td>edge_divertor</td><td>wall, divertors, cryostat</td><td>wall</td><td>yes</td><td>119</td><td>1078</td><td>kept</td><td>Names erosion, deposition and material migration at the wall.</td></tr>
+<tr><td>radiation_measurement_diagnostics</td><td>Bolometry, X-ray diagnostics, bremsstrahlung, imaging systems</td><td>diagnostics</td><td>bolometer, soft_x_rays, hard_x_rays, bremsstrahlung_visible, camera_visible, camera_x_rays, camera_ir</td><td>bolometer, bremsstrahlung_visible, camera_ir, camera_visible, camera_x_rays, ece, hard_x_rays, soft_x_rays</td><td>yes</td><td>179</td><td>3040</td><td>kept</td><td>Names bolometry, X-ray and imaging diagnostics.</td></tr>
+<tr><td>runaway_electrons</td><td>Runaway electron physics, avalanche generation, loss mechanisms</td><td>energetic_particles</td><td>runaway_electrons</td><td>runaway_electrons</td><td>yes</td><td>16</td><td>416</td><td>kept</td><td>Names avalanche generation and runaway loss physics, a distinct population with its own IDS.</td></tr>
+<tr><td>spectroscopy</td><td>Emission spectroscopy, charge exchange, motional Stark effect, impurity diagnostics</td><td>diagnostics</td><td>spectrometer_visible, spectrometer_uv, spectrometer_x_ray_crystal, spectrometer_mass, charge_exchange, mse</td><td>charge_exchange, mse, spectrometer_mass, spectrometer_uv, spectrometer_visible, spectrometer_x_ray_crystal</td><td>yes</td><td>51</td><td>3000</td><td>kept</td><td>Names emission, charge-exchange and Stark spectroscopy.</td></tr>
+<tr><td>structural_components</td><td>Vacuum vessel, cryostat, structural support systems</td><td>machine_systems</td><td>—</td><td>breeding_blanket, cryostat</td><td>yes</td><td>51</td><td>369</td><td>kept</td><td>Names the vessel and load-bearing structure.</td></tr>
+<tr><td>transport</td><td>Transport coefficients, fluxes, neoclassical and anomalous transport modeling</td><td>core_plasma</td><td>transport_solver_numerics, plasma_transport, edge_transport</td><td>core_sources, core_transport, plasma_sources, plasma_transport</td><td>yes</td><td>1042</td><td>9796</td><td>split</td><td>Divided per the lead&#x27;s ruling: 950 names go to the five quantity-form parts, and the names the data-structure rule cannot place stay here, enumerated by name.</td></tr>
+<tr><td>turbulence</td><td>Turbulence physics, fluctuations, turbulent transport, correlation analysis</td><td>core_plasma</td><td>turbulence</td><td>turbulence</td><td>yes</td><td>59</td><td>100</td><td>kept</td><td>Names fluctuation and turbulent-transport physics, distinct from the transport rate it produces.</td></tr>
+<tr><td>waves</td><td>Wave propagation, RF physics, wave-particle interactions, dispersion</td><td>heating_current_drive</td><td>waves</td><td>waves</td><td>yes</td><td>23</td><td>1055</td><td>kept</td><td>Names wave propagation and wave-particle physics, separate from the heating systems that launch it.</td></tr></tbody></table>
+
+<h2>2. Every IDS in the graph's DD version</h2>
+<p>The domain each of the three sources gives each IDS, the domain its live names mostly
+carry, and whether the three sources agree. 46 of
+87 IDS disagree between the sources; 36
+have a live-name majority that differs from the proposal.</p>
+<table><thead><tr><th>IDS</th><th>live DD paths</th><th>grammar</th><th>codex</th><th>proposed</th><th>live-name majority</th><th>live names</th><th>sources agree</th></tr></thead><tbody><tr><td>amns_data</td><td>246</td><td>computational_workflow</td><td>computational_workflow</td><td>data_management</td><td>transport</td><td>3</td><td>NO</td></tr>
+<tr><td>b_field_non_axisymmetric</td><td>182</td><td>plasma_control</td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>12</td><td>NO</td></tr>
+<tr><td>balance_of_plant</td><td>170</td><td></td><td>plant_systems</td><td>plant_systems</td><td>plant_systems</td><td>16</td><td>NO</td></tr>
+<tr><td>barometry</td><td>128</td><td>computational_workflow</td><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td><td>equilibrium</td><td>4</td><td>NO</td></tr>
+<tr><td>bolometer</td><td>534</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>22</td><td>yes</td></tr>
+<tr><td>breeding_blanket</td><td>195</td><td></td><td>structural_components</td><td>structural_components</td><td>structural_components</td><td>24</td><td>NO</td></tr>
+<tr><td>bremsstrahlung_visible</td><td>165</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>10</td><td>yes</td></tr>
+<tr><td>calorimetry</td><td>192</td><td>computational_workflow</td><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td><td>7</td><td>NO</td></tr>
+<tr><td>camera_ir</td><td>455</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>41</td><td>yes</td></tr>
+<tr><td>camera_visible</td><td>526</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>36</td><td>yes</td></tr>
+<tr><td>camera_x_rays</td><td>448</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>40</td><td>yes</td></tr>
+<tr><td>charge_exchange</td><td>543</td><td>spectroscopy</td><td>spectroscopy</td><td>spectroscopy</td><td>particle_measurement_diagnostics</td><td>40</td><td>yes</td></tr>
+<tr><td>coils_non_axisymmetric</td><td>244</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>15</td><td>NO</td></tr>
+<tr><td>controllers</td><td>189</td><td>plasma_control</td><td>plasma_control</td><td>plasma_control</td><td></td><td>0</td><td>yes</td></tr>
+<tr><td>core_instant_changes</td><td>914</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>2</td><td>yes</td></tr>
+<tr><td>core_profiles</td><td>1245</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>profile_quantities</td><td>transport</td><td>118</td><td>NO</td></tr>
+<tr><td>core_sources</td><td>558</td><td>core_plasma_physics</td><td>transport</td><td>source_quantities</td><td>transport</td><td>65</td><td>NO</td></tr>
+<tr><td>core_transport</td><td>660</td><td>core_plasma_physics</td><td>transport</td><td>transport_coefficients</td><td>transport</td><td>99</td><td>NO</td></tr>
+<tr><td>cryostat</td><td>276</td><td>plasma_wall_interactions</td><td>structural_components</td><td>structural_components</td><td>structural_components</td><td>10</td><td>NO</td></tr>
+<tr><td>dataset_description</td><td>121</td><td>machine_operations</td><td>data_management</td><td>data_management</td><td></td><td>0</td><td>NO</td></tr>
+<tr><td>dataset_fair</td><td>87</td><td>machine_operations</td><td>data_management</td><td>data_management</td><td></td><td>0</td><td>NO</td></tr>
+<tr><td>disruption</td><td>252</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>30</td><td>yes</td></tr>
+<tr><td>distribution_sources</td><td>420</td><td>fast_particles</td><td>fast_particles</td><td>fast_particles</td><td>transport</td><td>31</td><td>yes</td></tr>
+<tr><td>distributions</td><td>2114</td><td>fast_particles</td><td>fast_particles</td><td>distribution_quantities</td><td>transport</td><td>156</td><td>NO</td></tr>
+<tr><td>divertors</td><td>343</td><td>edge_plasma_physics</td><td>divertor_physics</td><td>divertor_physics</td><td>divertor_physics</td><td>37</td><td>NO</td></tr>
+<tr><td>ec_antennas</td><td>92</td><td></td><td>auxiliary_heating</td><td>auxiliary_heating</td><td></td><td>0</td><td>NO</td></tr>
+<tr><td>ec_launchers</td><td>385</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>33</td><td>yes</td></tr>
+<tr><td>ece</td><td>639</td><td>auxiliary_heating</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>51</td><td>NO</td></tr>
+<tr><td>edge_profiles</td><td>3337</td><td>edge_plasma_physics</td><td>edge_plasma_physics</td><td>profile_quantities</td><td>transport</td><td>234</td><td>NO</td></tr>
+<tr><td>edge_sources</td><td>829</td><td>edge_plasma_physics</td><td>edge_plasma_physics</td><td>source_quantities</td><td>transport</td><td>47</td><td>NO</td></tr>
+<tr><td>edge_transport</td><td>3759</td><td>transport</td><td>edge_plasma_physics</td><td>transport_coefficients</td><td>transport</td><td>265</td><td>NO</td></tr>
+<tr><td>em_coupling</td><td>268</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td></td><td>0</td><td>NO</td></tr>
+<tr><td>equilibrium</td><td>2019</td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>133</td><td>yes</td></tr>
+<tr><td>ferritic</td><td>348</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>29</td><td>NO</td></tr>
+<tr><td>focs</td><td>204</td><td>computational_workflow</td><td>magnetic_field_diagnostics</td><td>magnetic_field_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>10</td><td>NO</td></tr>
+<tr><td>gas_injection</td><td>265</td><td>fueling</td><td>fueling</td><td>fueling</td><td>fueling</td><td>14</td><td>yes</td></tr>
+<tr><td>gas_pumping</td><td>127</td><td>fueling</td><td>plant_systems</td><td>plant_systems</td><td>transport</td><td>5</td><td>NO</td></tr>
+<tr><td>gyrokinetics</td><td>763</td><td></td><td>gyrokinetics</td><td>gyrokinetics</td><td>turbulence</td><td>1</td><td>NO</td></tr>
+<tr><td>gyrokinetics_local</td><td>1628</td><td></td><td>gyrokinetics</td><td>gyrokinetics</td><td>turbulence</td><td>70</td><td>NO</td></tr>
+<tr><td>hard_x_rays</td><td>491</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>43</td><td>yes</td></tr>
+<tr><td>ic_antennas</td><td>467</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>43</td><td>yes</td></tr>
+<tr><td>interferometer</td><td>220</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>12</td><td>yes</td></tr>
+<tr><td>iron_core</td><td>243</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>21</td><td>NO</td></tr>
+<tr><td>langmuir_probes</td><td>662</td><td>edge_plasma_physics</td><td>particle_measurement_diagnostics</td><td>particle_measurement_diagnostics</td><td>edge_plasma_physics</td><td>26</td><td>NO</td></tr>
+<tr><td>lh_antennas</td><td>272</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>17</td><td>yes</td></tr>
+<tr><td>magnetics</td><td>520</td><td>magnetic_field_diagnostics</td><td>magnetic_field_diagnostics</td><td>magnetic_field_diagnostics</td><td>magnetic_field_diagnostics</td><td>37</td><td>yes</td></tr>
+<tr><td>mhd</td><td>496</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>24</td><td>yes</td></tr>
+<tr><td>mhd_linear</td><td>690</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>49</td><td>yes</td></tr>
+<tr><td>mse</td><td>333</td><td>spectroscopy</td><td>spectroscopy</td><td>spectroscopy</td><td>spectroscopy</td><td>22</td><td>yes</td></tr>
+<tr><td>nbi</td><td>406</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>auxiliary_heating</td><td>33</td><td>yes</td></tr>
+<tr><td>neutron_diagnostic</td><td>1060</td><td>neutronics</td><td>neutronics</td><td>neutronics</td><td>particle_measurement_diagnostics</td><td>43</td><td>yes</td></tr>
+<tr><td>ntms</td><td>237</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>14</td><td>yes</td></tr>
+<tr><td>numerics</td><td>23</td><td></td><td>computational_workflow</td><td>data_management</td><td></td><td>0</td><td>NO</td></tr>
+<tr><td>operational_instrumentation</td><td>181</td><td>computational_workflow</td><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td><td>13</td><td>NO</td></tr>
+<tr><td>pellets</td><td>236</td><td>fueling</td><td>fueling</td><td>fueling</td><td>plant_systems</td><td>21</td><td>yes</td></tr>
+<tr><td>pf_active</td><td>525</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>36</td><td>NO</td></tr>
+<tr><td>pf_passive</td><td>237</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>25</td><td>NO</td></tr>
+<tr><td>pf_plasma</td><td>211</td><td>plasma_control</td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td><td>21</td><td>NO</td></tr>
+<tr><td>plasma_initiation</td><td>283</td><td>plasma_initiation</td><td>plasma_initiation</td><td>plasma_initiation</td><td>transport</td><td>21</td><td>yes</td></tr>
+<tr><td>plasma_profiles</td><td>3670</td><td></td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>transport</td><td>249</td><td>NO</td></tr>
+<tr><td>plasma_sources</td><td>1213</td><td>core_plasma_physics</td><td>transport</td><td>source_quantities</td><td>transport</td><td>86</td><td>NO</td></tr>
+<tr><td>plasma_transport</td><td>4570</td><td>transport</td><td>transport</td><td>transport_coefficients</td><td>transport</td><td>328</td><td>NO</td></tr>
+<tr><td>polarimeter</td><td>174</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>7</td><td>yes</td></tr>
+<tr><td>pulse_schedule</td><td>1369</td><td>machine_operations</td><td>plasma_control</td><td>plasma_control</td><td>transport</td><td>12</td><td>NO</td></tr>
+<tr><td>radiation</td><td>536</td><td>edge_plasma_physics</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>equilibrium</td><td>4</td><td>NO</td></tr>
+<tr><td>real_time_data</td><td>117</td><td>machine_operations</td><td>data_management</td><td>data_management</td><td></td><td>0</td><td>NO</td></tr>
+<tr><td>reflectometer_fluctuation</td><td>475</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>34</td><td>yes</td></tr>
+<tr><td>reflectometer_profile</td><td>436</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>28</td><td>yes</td></tr>
+<tr><td>refractometer</td><td>201</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td><td>6</td><td>yes</td></tr>
+<tr><td>runaway_electrons</td><td>577</td><td>runaway_electrons</td><td>runaway_electrons</td><td>runaway_electrons</td><td>transport</td><td>43</td><td>yes</td></tr>
+<tr><td>sawteeth</td><td>290</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td><td>transport</td><td>40</td><td>yes</td></tr>
+<tr><td>sdn</td><td>39</td><td></td><td>data_management</td><td>data_management</td><td></td><td>0</td><td>NO</td></tr>
+<tr><td>soft_x_rays</td><td>462</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>40</td><td>yes</td></tr>
+<tr><td>spectrometer_mass</td><td>152</td><td>spectroscopy</td><td>spectroscopy</td><td>spectroscopy</td><td>particle_measurement_diagnostics</td><td>5</td><td>yes</td></tr>
+<tr><td>spectrometer_uv</td><td>521</td><td>spectroscopy</td><td>spectroscopy</td><td>spectroscopy</td><td>radiation_measurement_diagnostics</td><td>34</td><td>yes</td></tr>
+<tr><td>spectrometer_visible</td><td>1023</td><td>spectroscopy</td><td>spectroscopy</td><td>spectroscopy</td><td>radiation_measurement_diagnostics</td><td>84</td><td>yes</td></tr>
+<tr><td>spectrometer_x_ray_crystal</td><td>1006</td><td>spectroscopy</td><td>spectroscopy</td><td>spectroscopy</td><td>radiation_measurement_diagnostics</td><td>75</td><td>yes</td></tr>
+<tr><td>spi</td><td>427</td><td>fueling</td><td>fueling</td><td>fueling</td><td>plant_systems</td><td>41</td><td>yes</td></tr>
+<tr><td>summary</td><td>5216</td><td>data_management</td><td>general</td><td>summary_quantities</td><td>edge_plasma_physics</td><td>585</td><td>NO</td></tr>
+<tr><td>temporary</td><td>284</td><td>computational_workflow</td><td>general</td><td>general</td><td></td><td>0</td><td>NO</td></tr>
+<tr><td>tf</td><td>418</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>26</td><td>NO</td></tr>
+<tr><td>thomson_scattering</td><td>286</td><td>particle_measurement_diagnostics</td><td>particle_measurement_diagnostics</td><td>particle_measurement_diagnostics</td><td>particle_measurement_diagnostics</td><td>26</td><td>yes</td></tr>
+<tr><td>transport_solver_numerics</td><td>1199</td><td>transport</td><td>computational_workflow</td><td>data_management</td><td>equilibrium</td><td>12</td><td>NO</td></tr>
+<tr><td>turbulence</td><td>188</td><td>turbulence</td><td>turbulence</td><td>turbulence</td><td>transport</td><td>13</td><td>yes</td></tr>
+<tr><td>wall</td><td>1512</td><td>edge_plasma_physics</td><td>plasma_wall_interactions</td><td>plasma_wall_interactions</td><td>plasma_wall_interactions</td><td>97</td><td>NO</td></tr>
+<tr><td>waves</td><td>1206</td><td>waves</td><td>waves</td><td>waves</td><td>auxiliary_heating</td><td>110</td><td>yes</td></tr>
+<tr><td>workflow</td><td>136</td><td>machine_operations</td><td>computational_workflow</td><td>data_management</td><td></td><td>0</td><td>NO</td></tr></tbody></table>
+<h3>Every disagreement</h3>
+<table><thead><tr><th>IDS</th><th>grammar</th><th>codex</th><th>proposed</th><th>live-name majority</th></tr></thead><tbody><tr><td>amns_data</td><td>computational_workflow</td><td>computational_workflow</td><td>data_management</td><td>transport</td></tr>
+<tr><td>b_field_non_axisymmetric</td><td>plasma_control</td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td></tr>
+<tr><td>balance_of_plant</td><td></td><td>plant_systems</td><td>plant_systems</td><td>plant_systems</td></tr>
+<tr><td>barometry</td><td>computational_workflow</td><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td><td>equilibrium</td></tr>
+<tr><td>breeding_blanket</td><td></td><td>structural_components</td><td>structural_components</td><td>structural_components</td></tr>
+<tr><td>calorimetry</td><td>computational_workflow</td><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td></tr>
+<tr><td>coils_non_axisymmetric</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td></tr>
+<tr><td>core_profiles</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>profile_quantities</td><td>transport</td></tr>
+<tr><td>core_sources</td><td>core_plasma_physics</td><td>transport</td><td>source_quantities</td><td>transport</td></tr>
+<tr><td>core_transport</td><td>core_plasma_physics</td><td>transport</td><td>transport_coefficients</td><td>transport</td></tr>
+<tr><td>cryostat</td><td>plasma_wall_interactions</td><td>structural_components</td><td>structural_components</td><td>structural_components</td></tr>
+<tr><td>dataset_description</td><td>machine_operations</td><td>data_management</td><td>data_management</td><td></td></tr>
+<tr><td>dataset_fair</td><td>machine_operations</td><td>data_management</td><td>data_management</td><td></td></tr>
+<tr><td>distributions</td><td>fast_particles</td><td>fast_particles</td><td>distribution_quantities</td><td>transport</td></tr>
+<tr><td>divertors</td><td>edge_plasma_physics</td><td>divertor_physics</td><td>divertor_physics</td><td>divertor_physics</td></tr>
+<tr><td>ec_antennas</td><td></td><td>auxiliary_heating</td><td>auxiliary_heating</td><td></td></tr>
+<tr><td>ece</td><td>auxiliary_heating</td><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td><td>electromagnetic_wave_diagnostics</td></tr>
+<tr><td>edge_profiles</td><td>edge_plasma_physics</td><td>edge_plasma_physics</td><td>profile_quantities</td><td>transport</td></tr>
+<tr><td>edge_sources</td><td>edge_plasma_physics</td><td>edge_plasma_physics</td><td>source_quantities</td><td>transport</td></tr>
+<tr><td>edge_transport</td><td>transport</td><td>edge_plasma_physics</td><td>transport_coefficients</td><td>transport</td></tr>
+<tr><td>em_coupling</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td></td></tr>
+<tr><td>ferritic</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td></tr>
+<tr><td>focs</td><td>computational_workflow</td><td>magnetic_field_diagnostics</td><td>magnetic_field_diagnostics</td><td>electromagnetic_wave_diagnostics</td></tr>
+<tr><td>gas_pumping</td><td>fueling</td><td>plant_systems</td><td>plant_systems</td><td>transport</td></tr>
+<tr><td>gyrokinetics</td><td></td><td>gyrokinetics</td><td>gyrokinetics</td><td>turbulence</td></tr>
+<tr><td>gyrokinetics_local</td><td></td><td>gyrokinetics</td><td>gyrokinetics</td><td>turbulence</td></tr>
+<tr><td>iron_core</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td></tr>
+<tr><td>langmuir_probes</td><td>edge_plasma_physics</td><td>particle_measurement_diagnostics</td><td>particle_measurement_diagnostics</td><td>edge_plasma_physics</td></tr>
+<tr><td>numerics</td><td></td><td>computational_workflow</td><td>data_management</td><td></td></tr>
+<tr><td>operational_instrumentation</td><td>computational_workflow</td><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td></tr>
+<tr><td>pf_active</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td></tr>
+<tr><td>pf_passive</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td></tr>
+<tr><td>pf_plasma</td><td>plasma_control</td><td>equilibrium</td><td>equilibrium</td><td>equilibrium</td></tr>
+<tr><td>plasma_profiles</td><td></td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>transport</td></tr>
+<tr><td>plasma_sources</td><td>core_plasma_physics</td><td>transport</td><td>source_quantities</td><td>transport</td></tr>
+<tr><td>plasma_transport</td><td>transport</td><td>transport</td><td>transport_coefficients</td><td>transport</td></tr>
+<tr><td>pulse_schedule</td><td>machine_operations</td><td>plasma_control</td><td>plasma_control</td><td>transport</td></tr>
+<tr><td>radiation</td><td>edge_plasma_physics</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>equilibrium</td></tr>
+<tr><td>real_time_data</td><td>machine_operations</td><td>data_management</td><td>data_management</td><td></td></tr>
+<tr><td>sdn</td><td></td><td>data_management</td><td>data_management</td><td></td></tr>
+<tr><td>summary</td><td>data_management</td><td>general</td><td>summary_quantities</td><td>edge_plasma_physics</td></tr>
+<tr><td>temporary</td><td>computational_workflow</td><td>general</td><td>general</td><td></td></tr>
+<tr><td>tf</td><td>plasma_control</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td><td>magnetic_field_systems</td></tr>
+<tr><td>transport_solver_numerics</td><td>transport</td><td>computational_workflow</td><td>data_management</td><td>equilibrium</td></tr>
+<tr><td>wall</td><td>edge_plasma_physics</td><td>plasma_wall_interactions</td><td>plasma_wall_interactions</td><td>plasma_wall_interactions</td></tr>
+<tr><td>workflow</td><td>machine_operations</td><td>computational_workflow</td><td>data_management</td><td></td></tr></tbody></table>
+
+<h2>3. The proposed list</h2>
+<p>Each entry names either a <em>physics area</em> or a <em>grouping of data structures</em>.
+The five quantity-form parts carry the transport division the lead ruled; every proposed
+domain has a description, a category, an IDS list, and scope, includes and excludes in the
+form <code>domains.yaml</code> uses.</p>
+<section class="domain">
+<h3>auxiliary_heating <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names the heating actuators and their hardware.</p>
+<p><strong>Description.</strong> Auxiliary heating systems including neutral beam, electron cyclotron, ion cyclotron, and lower hybrid</p>
+<p><strong>Category.</strong> heating_current_drive &nbsp; <strong>Count.</strong> 199</p>
+<p><strong>IDS.</strong> ec_antennas, ec_launchers, ic_antennas, lh_antennas, nbi</p>
+<p><strong>Scope.</strong> The external systems that heat a plasma and their launch and coupling quantities, judged by whether the quantity belongs to a heating actuator or to the power it delivers. The heating method may be beams or waves; what decides the domain is that the quantity is about the injected power, not the transport it later causes.</p>
+<p><strong>Includes.</strong> neutral-beam injection quantities — beam power, energy, current drive by injection — `nbi/*`; electron, ion cyclotron and lower-hybrid launch quantities — `ec_launchers/*`, `ic_antennas/*`,     `lh_antennas/*`; antenna and launcher hardware, and the coupling of power to the plasma; absorbed and launched heating power, and the heating system&#x27;s efficiency</p>
+<p><strong>Excludes.</strong> a wave field propagating in the plasma as such → waves: The antenna and the power it delivers are auxiliary_heating; the wave it launches, its dispersion and its wave-particle interaction inside the plasma are waves.; a non-inductive current driven by the heating → current_drive: The deposition of heat is auxiliary_heating; the driven current and its efficiency and control are current_drive.; a plant component that supplies the heating system → plant_systems: A supply or cooling element serving an antenna is a plant component, plant_systems; the antenna and its launched power are auxiliary_heating.</p>
+</section>
+<section class="domain">
+<h3>core_plasma_physics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names the core plasma state, narrowed to quantities that are not a transport coefficient, a source or a profile form.</p>
+<p><strong>Description.</strong> Core plasma profiles, kinetic quantities, global parameters, integrated quantities</p>
+<p><strong>Category.</strong> core_plasma &nbsp; <strong>Count.</strong> 48</p>
+<p><strong>IDS.</strong> core_instant_changes, plasma_profiles, radiation</p>
+<p><strong>Scope.</strong> What a plasma is in its core: the values of its particle and energy distributions, the profiles built from them, and the global scalars integrated from those profiles, whether measured or modelled. Judge by whether the quantity is a state of the plasma rather than a rate of change, a diagnostic response or a data product.</p>
+<p><strong>Includes.</strong> electron and ion temperature, density and pressure profiles — `core_profiles/profiles_1d/electrons/temperature`; toroidal and poloidal rotation and current-density profiles; composition, impurity and effective-charge profiles; moments of the distribution function — density, mean velocity, pressure tensor; global scalars integrated from the profiles — stored energy, plasma current, line-averaged density</p>
+<p><strong>Excludes.</strong> a charge-exchange channel&#x27;s ion concentration and charge state → spectroscopy: A charge-exchange channel&#x27;s ion concentration and charge state are spectroscopy; the charge_exchange IDS is a spectroscopic diagnostic.; an interferometer&#x27;s electron line density → electromagnetic_wave_diagnostics: An interferometer&#x27;s electron line density is electromagnetic_wave_diagnostics; the interferometer IDS is the wave-probe family.; power radiated, taken as an integral over the plasma → radiation_measurement_diagnostics: Power radiated as an integral over the plasma is radiation_measurement_diagnostics; a bolometer&#x27;s own quantity is the family&#x27;s, not core_plasma_physics.; a transport coefficient, flux or source term → transport: How the plasma moves energy or particles is transport; the state it is in is core_plasma_physics. A profile&#x27;s gradient is core; the flux that gradient drives is transport.; a raw diagnostic measurement that infers a profile, such as a Thomson scattering spectrum or a line-integrated chord → particle_measurement_diagnostics: The instrument response and its calibrated signal are a diagnostic domain; the profile derived from it is core_plasma_physics.; a geometry definition or a data-product wrapper → computational_workflow: A core-plasma quantity is core_plasma_physics even when its IDS is named like a profile container or carries solver numerics; the domain follows the subject of the quantity, never the folder it is filed under.</p>
+</section>
+<section class="domain">
+<h3>current_drive <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names non-inductive current generation, a physics distinct from the heating that accompanies it; its ten names are current-drive quantities, not heating-system ones.</p>
+<p><strong>Description.</strong> Non-inductive current drive physics, efficiency, and profile control</p>
+<p><strong>Category.</strong> heating_current_drive &nbsp; <strong>Count.</strong> 10</p>
+<p><strong>IDS.</strong> —</p>
+<p><strong>Scope.</strong> The physics and profiles of current driven in the plasma by non-inductive means and the control of the current profile. Judge by whether the quantity states an amount of driven current, its efficiency, or the target current profile, rather than the power that drove it.</p>
+<p><strong>Includes.</strong> driven current density and its profiles — `nbi/*/current_drive`, `ec_launchers/*/current_drive`; current-drive efficiency and the figure of merit for a drive method; the target and achieved current profile and its control; bootstrap and other self-generated current fractions</p>
+<p><strong>Excludes.</strong> the injected power or deposition of the heating system → auxiliary_heating: The energy that was launched is auxiliary_heating; the current it drove is current_drive. Both may come from one beam, and the quantity&#x27;s subject decides.; the total plasma current as a global plasma parameter → core_plasma_physics: The total current the plasma carries is a global state of the plasma, core_plasma_physics; the part of it driven externally and its efficiency are current_drive.; an ohmic-field loop voltage from the central solenoid → magnetic_field_systems: The transformer that induces the current is a machine system; the current it drives in the plasma is current_drive.</p>
+</section>
+<section class="domain">
+<h3>data_management <span class="tag">data_structure_grouping</span>
+<span class="tag">merged</span></h3>
+<p><strong>Reason.</strong> Merged into data_management: its IDSs are reference or auxiliary data, atomic and molecular data, and computational infrastructure, not an area of physics. No live standard name carries it; its 1,959 live DD paths move with the vocabulary entry. Absorbs computational_workflow: both are non-physics data domains, and a reference-data IDS and a workflow IDS belong in one place. No live standard name carries either today; 1,959 live DD paths carry computational_workflow.</p>
+<p><strong>Description.</strong> Reference and auxiliary data, atomic and molecular data, summary data products, and computational and workflow infrastructure</p>
+<p><strong>Category.</strong> data_computing &nbsp; <strong>Count.</strong> 0</p>
+<p><strong>IDS.</strong> amns_data, dataset_description, dataset_fair, numerics, real_time_data, sdn, transport_solver_numerics, workflow</p>
+<p><strong>Scope.</strong> The dataset as such rather than the physics it records: dataset description, provenance, FAIR metadata and the archives kept for downstream use. Judge by whether the quantity says something about a dataset — what it contains, where it came from, when it was written — rather than about the plasma. A quantity that names a physical quantity takes that quantity&#x27;s domain even when it is stored under a container such as `summary`, because the container records where the value is filed and not what it measures. It also holds the reference and auxiliary data, atomic and molecular data and computational infrastructure that computational_workflow named, merged here so one data domain carries them.</p>
+<p><strong>Includes.</strong> dataset description, provenance and FAIR metadata — `dataset_description/*`, `dataset_fair/*`; archives, catalogues and manifests of a dataset; records of what a dataset holds, when it was produced and by what; atomic and molecular data services — `amns_data/*`; geometry definitions and computational geometry — `geometry/*`; generic and temporary containers — `temporary/*`; solver numerics and workflow tooling that carry no physics subject</p>
+<p><strong>Excludes.</strong> a line-density constraint on the equilibrium → equilibrium: A measured or reconstructed line-density constraint on the equilibrium is equilibrium; it is an equilibrium constraint, not a wave diagnostic or an assembled data product.; a directly measured or modelled plasma state → core_plasma_physics: A plasma profile is core_plasma_physics, and a summary quantity takes the domain of the physical quantity it names: an elongation under `summary` is equilibrium, a fusion neutron rate is neutronics, a plasma composition is the composition&#x27;s domain. `data_management` holds only data about the dataset itself, and being summarised into a product does not turn a plasma quantity into such data.; operational metadata about a shot → machine_operations: Operational metadata about how a shot ran is machine_operations; the archived data products from it are data_management.; atomic or molecular reference data → computational_workflow: A data product from a run is data_management; external atomic and molecular reference data is computational_workflow.; a passive loop element&#x27;s own geometry → magnetic_field_systems: A passive loop element&#x27;s geometry is magnetic_field_systems; it is a machine component, not a computational geometry definition.; a barometry gauge&#x27;s position → mechanical_measurement_diagnostics: A barometry gauge&#x27;s position is mechanical_measurement_diagnostics; computational_workflow owns geometry definitions and tooling, not instrument hardware.; a physics quantity that a numeric or profile container happens to hold → core_plasma_physics: A physics quantity is its own domain even when it is stored in a solver-numerics or temporary container. The failing case this file exists to separate: a kinetic profile or a fast-particle distribution must not fall to computational_workflow merely because its IDS also carries numerics.; a physics quantity delivered as an assembled product → core_plasma_physics: Tooling and reference data are computational_workflow; a product that summarises physical quantities takes the domain of the quantities it names, never that of the container it is delivered in.; a structural geometry of a real component → structural_components: A computational geometry definition is computational_workflow; the structure of a real component is structural_components.</p>
+</section>
+<section class="domain">
+<h3>distribution_quantities <span class="tag">data_structure_grouping</span>
+<span class="tag">added</span></h3>
+<p><strong>Reason.</strong> Added as a grouping of data structures: carries the distribution-function quantities section 6 divides out of transport, and owns the distributions IDS.</p>
+<p><strong>Description.</strong> Distribution-function quantities: the distribution itself and its orbit-class moments</p>
+<p><strong>Category.</strong> quantity_form &nbsp; <strong>Count.</strong> 165</p>
+<p><strong>IDS.</strong> distributions</p>
+<p><strong>Scope.</strong> The distribution-function quantities a distributions structure holds: the distribution itself and its orbit-class moments.</p>
+<p><strong>Includes.</strong> a distribution function or its moments; an orbit-class moment of a distribution</p>
+<p><strong>Excludes.</strong> a fast-particle population summary → fast_particles: A quantity read from the distributions structure is distribution_quantities; a name whose subject is the fast-particle population itself is fast_particles.</p>
+</section>
+<section class="domain">
+<h3>divertor_physics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names divertor target loads, detachment and exhaust.</p>
+<p><strong>Description.</strong> Divertor target loads, detachment, particle and heat exhaust</p>
+<p><strong>Category.</strong> edge_divertor &nbsp; <strong>Count.</strong> 68</p>
+<p><strong>IDS.</strong> divertors</p>
+<p><strong>Scope.</strong> The divertor region&#x27;s plasma and its exhaust of heat and particles: target loads, detachment, the radiation front and the ionisation and recombination in the divertor. Judge by whether the quantity concerns the divertor plasma rather than the edge globally or a wall surface.</p>
+<p><strong>Includes.</strong> target heat and particle fluxes — `divertors/*`; detachment onset, the radiation front and its position; divertor plasma temperature, density and ionisation state; the divertor&#x27;s neutral and impurity radiation</p>
+<p><strong>Excludes.</strong> a general scrape-off-layer quantity away from the divertor target → edge_plasma_physics: The edge plasma at large is edge_plasma_physics; the divertor&#x27;s own target and exhaust physics is divertor_physics.; a wall-surface erosion or retention quantity → plasma_wall_interactions: The plasma arriving at the target is divertor_physics; the surface it erodes is plasma_wall_interactions.; an MHD instability during a disruption at the divertor → magnetohydrodynamics: The instability is magnetohydrodynamics; the plasma exhaust and target load that follow are divertor_physics.</p>
+</section>
+<section class="domain">
+<h3>edge_plasma_physics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names the boundary plasma, the most populous named area after transport.</p>
+<p><strong>Description.</strong> Scrape-off layer, divertor physics, plasma-wall interactions, recycling</p>
+<p><strong>Category.</strong> edge_divertor &nbsp; <strong>Count.</strong> 305</p>
+<p><strong>IDS.</strong> —</p>
+<p><strong>Scope.</strong> The physics of the plasma outside the core and its boundary: the scrape-off layer, the pedestal, the edge transport barrier and the flows that carry plasma to the walls. Judge by whether the quantity describes plasma in the edge region rather than the core or a material surface.</p>
+<p><strong>Includes.</strong> scrape-off-layer and edge profiles — `edge_profiles/*`; the edge transport barrier and pedestal structure and its height or width; radial electric field, edge flows and edge currents; the edge&#x27;s own sources and sinks — `edge_sources/*`</p>
+<p><strong>Excludes.</strong> a visible spectrometer&#x27;s emissive channel → spectroscopy: A visible spectrometer&#x27;s isotope density ratio and hot-neutral velocity are spectroscopy; the emissive channel is a spectroscopic diagnostic, whatever plasma region it observes.; a global loss-power scalar → core_plasma_physics: A global loss-power scalar is a core energy-balance quantity, so it is core_plasma_physics; a flux or diffusivity is transport, and an edge resolution is edge_plasma_physics.; a plasma-wall interaction on a material surface → plasma_wall_interactions: The edge plasma&#x27;s behaviour near the wall is edge_plasma_physics; the surface&#x27;s erosion, deposition or heat load and the material migration are plasma_wall_interactions.; a divertor target quantity → divertor_physics: Edge physics concerns the boundary plasma; target loads, detachment and the divertor&#x27;s own heat and particle exhaust are divertor_physics.; the core plasma state → core_plasma_physics: A core profile is core_plasma_physics; the same quantity resolved in the scrape-off layer or pedestal region is edge_plasma_physics.</p>
+</section>
+<section class="domain">
+<h3>electromagnetic_wave_diagnostics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names interferometry, reflectometry and polarimetry.</p>
+<p><strong>Description.</strong> Interferometry, polarimetry, reflectometry, and wave-based diagnostics</p>
+<p><strong>Category.</strong> diagnostics &nbsp; <strong>Count.</strong> 73</p>
+<p><strong>IDS.</strong> interferometer, polarimeter, reflectometer_fluctuation, reflectometer_profile, refractometer</p>
+<p><strong>Scope.</strong> Diagnostics that probe the plasma with electromagnetic waves and detect the wave&#x27;s propagation: interferometry, polarimetry, reflectometry and refractometry. Judge by whether the instrument transmits a wave and measures its phase, polarisation or reflection.</p>
+<p><strong>Includes.</strong> line-integrated density from interferometry — `interferometer/*`; Faraday-rotation and polarimetry measurements — `polarimeter/*`; reflectometry and refractometry profiles and fluctuation spectra — `reflectometer_profile/*`, `reflectometer_fluctuation/*`; the diagnostic&#x27;s own frequencies, chords and calibration</p>
+<p><strong>Excludes.</strong> a heating actuator&#x27;s own launch geometry, such as an antenna module position → auxiliary_heating: An antenna module&#x27;s mechanical position is auxiliary_heating; electromagnetic_wave_diagnostics owns a probe that transmits a wave and measures its phase, not the launcher&#x27;s own hardware.; a line-density constraint on the equilibrium → equilibrium: A measured or reconstructed line-density constraint on the equilibrium is equilibrium; it is an equilibrium constraint, not a wave diagnostic or an assembled data product.; electron cyclotron emission and the position correction of its channels → radiation_measurement_diagnostics: Electron cyclotron emission is radiated power the plasma emits, so its position correction is radiation_measurement_diagnostics; a probe that transmits a wave is electromagnetic_wave_diagnostics.; a normalised flux coordinate along a ray path → equilibrium: A normalised flux coordinate along a ray path is a flux-surface mapping, so it is equilibrium; a probe that transmits a wave is electromagnetic_wave_diagnostics.; an electron cyclotron emission channel position → radiation_measurement_diagnostics: An ECE channel position is radiation_measurement_diagnostics; an ECE diagnostic records emitted cyclotron radiation rather than transmitting a probe wave.; a constraint on the equilibrium stored under equilibrium/time_slice/constraints → equilibrium: A line-density constraint stored under equilibrium/time_slice/constraints is a constraint on the equilibrium; the interferometer that measured it is electromagnetic_wave_diagnostics.; a wave propagating in the plasma as physics → waves: A probe instrument and its measured signal are electromagnetic_wave_diagnostics; the plasma wave physics the probe studies is waves.; an emission line measured with a spectrometer → spectroscopy: Transmitting a wave to probe the plasma is electromagnetic_wave_diagnostics; passively measuring emitted light is spectroscopy.; a particle-counting measurement → particle_measurement_diagnostics: A wave probe is electromagnetic_wave_diagnostics; a measurement that counts particles or their scattering is particle_measurement_diagnostics.</p>
+</section>
+<section class="domain">
+<h3>equilibrium <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names the force-balance configuration and its surfaces; the most settled group.</p>
+<p><strong>Description.</strong> MHD equilibrium, flux surfaces, magnetic geometry, coordinate systems</p>
+<p><strong>Category.</strong> core_plasma &nbsp; <strong>Count.</strong> 206</p>
+<p><strong>IDS.</strong> b_field_non_axisymmetric, equilibrium, pf_plasma</p>
+<p><strong>Scope.</strong> The static magnetic configuration of a plasma in force balance and the coordinate system it is expressed in: the flux-surface geometry, the poloidal flux and its radial derivatives, the safety factor, and the shape of the boundary. Judge by whether the quantity states where the field is and what shape its surfaces have, not by whether it is stored with a time coordinate.</p>
+<p><strong>Includes.</strong> flux-surface geometry — boundary outline, major and minor radius, elongation, triangularity; poloidal flux and its radial derivative — `equilibrium/time_slice/profiles_1d/psi`, `psi_norm`; safety factor and magnetic shear along the profile; the equilibrium reconstruction itself — the currents and coils fitted to it; coordinate systems and the mapping between real space and flux space — `equilibrium/time_slice/profiles_1d/rho_tor`, `equilibrium/grids_ggd`</p>
+<p><strong>Excludes.</strong> a ferritic field-shaping object → magnetic_field_systems: A ferritic field-shaping object is magnetic_field_systems; equilibrium owns the field and its surfaces, and structural_components the load-bearing structure.; a fitted pedestal position → edge_plasma_physics: A fitted pedestal position is a property of the pedestal region, so it is edge_plasma_physics; the flux-surface geometry it is expressed in stays equilibrium.; an electron cyclotron emission channel position → radiation_measurement_diagnostics: An ECE channel position is radiation_measurement_diagnostics; the flux surface it is expressed against is equilibrium.; a heat, particle or momentum flux, a diffusivity or a confinement time → transport: A quantity that says how fast the plasma redistributes energy or particles — a flux, a diffusion coefficient, a confinement time — is transport; equilibrium holds only the field&#x27;s shape and the mapping to it, never a flow across it.; the numerical value of a kinetic profile at a surface, such as the classical electron temperature → core_plasma_physics: The amplitude of a temperature or density profile is a property of the plasma, so it is core_plasma_physics; equilibrium owns the surface on which that value sits, not the value.; a growing instability, its growth rate or its stability limit → magnetohydrodynamics: A mode that destabilises the configuration is magnetohydrodynamics; a property of the converged, static configuration is equilibrium.</p>
+</section>
+<section class="domain">
+<h3>fast_particles <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names non-thermal fast-ion and fast-electron populations.</p>
+<p><strong>Description.</strong> Fast ion and electron distributions, energetic particles, slowing-down</p>
+<p><strong>Category.</strong> energetic_particles &nbsp; <strong>Count.</strong> 17</p>
+<p><strong>IDS.</strong> distribution_sources</p>
+<p><strong>Scope.</strong> Populations of particles far from the thermal bulk — their distribution functions, slowing-down, thermalisation, and the instabilities they drive. Judge by whether the quantity describes a suprathermal population&#x27;s distribution or its interaction with the plasma.</p>
+<p><strong>Includes.</strong> fast-ion and fast-electron distribution functions — `distributions/*`; slowing-down and thermalisation quantities; fast-particle sources and their deposition — `distribution_sources/*`; fast-particle-driven modes and their effect on the distribution</p>
+<p><strong>Excludes.</strong> a data-product or solver-numerics wrapper around a distribution → computational_workflow: A distribution of fast particles is fast_particles even when its IDS also holds solver numerics or auxiliary data; the domain follows the subject of the quantity, never the container it is filed in.; a neutral-beam heating quantity → auxiliary_heating: The beam and the power it injects are auxiliary_heating; the suprathermal population it creates in the plasma is fast_particles.; a thermal plasma profile → core_plasma_physics: The bulk thermal population is core_plasma_physics; the small suprathermal tail is fast_particles.</p>
+</section>
+<section class="domain">
+<h3>fueling <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names gas and pellet injection systems and the quantities they deliver.</p>
+<p><strong>Description.</strong> Gas injection, pellet injection, shattered pellet injection, fueling systems</p>
+<p><strong>Category.</strong> edge_divertor &nbsp; <strong>Count.</strong> 23</p>
+<p><strong>IDS.</strong> gas_injection, pellets, spi</p>
+<p><strong>Scope.</strong> The injection of particles into a plasma and the systems that deliver them: gas puffing, pellets and shattered-pellet injection, and the resulting transport of injected neutrals and their ionisation source. Judge by whether the quantity concerns the delivery or the source of particles rather than the plasma&#x27;s own density.</p>
+<p><strong>Includes.</strong> gas injection rates, valve and puff quantities — `gas_injection/*`; pellet quantities — velocity, mass, ablation rate — `pellets/*`; shattered-pellet injection quantities — `spi/*`; the ionisation source and density deposition from injected particles</p>
+<p><strong>Excludes.</strong> the plasma&#x27;s own density profile → core_plasma_physics: The delivered particles are fueling; the density the plasma holds as a result is core_plasma_physics.; a pumping or plant component → plant_systems: The gas and pellet systems that inject are fueling; the pumping and gas-supply plant that supports them is plant_systems.; a particle source term for the transport equations → transport: The injection itself and its deposition source are fueling; the transport of the injected particles through the plasma is transport.</p>
+</section>
+<section class="domain">
+<h3>general <span class="tag">data_structure_grouping</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> An explicit last resort for quantities that cross domains, so no name is ever left without a domain.</p>
+<p><strong>Description.</strong> Universal plasma physics quantities appearing across multiple IDS</p>
+<p><strong>Category.</strong> general &nbsp; <strong>Count.</strong> 39</p>
+<p><strong>IDS.</strong> temporary</p>
+<p><strong>Scope.</strong> Quantities that genuinely appear across many domains or carry no single physics subject, so no narrower domain fits. Hold this back: it is a last resort, and a path whose subject is knowable belongs in that subject&#x27;s domain.</p>
+<p><strong>Includes.</strong> universal quantities that recur identically across many domains and have no single subject; structural or placeholder quantities whose subject cannot be established</p>
+<p><strong>Excludes.</strong> a quantity whose subject is knowable → core_plasma_physics: Choose the subject&#x27;s own domain over general whenever the subject can be named; general is only for what remains after every narrower domain has been considered and rejected.; an auxiliary or tooling container → computational_workflow: Tooling and reference data are computational_workflow; general is for physical quantities with no single subject.; a summary data product → data_management: A summary product takes the domain of the physical quantity it names; general is for a quantity with no single subject, and a container around many quantities does not supply one. A product about the dataset itself is data_management.</p>
+</section>
+<section class="domain">
+<h3>gyrokinetics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names a model framework whose quantities describe the model world, not the measured machine.</p>
+<p><strong>Description.</strong> Gyrokinetic theory, simulation, and turbulence modeling</p>
+<p><strong>Category.</strong> advanced_physics &nbsp; <strong>Count.</strong> 42</p>
+<p><strong>IDS.</strong> gyrokinetics, gyrokinetics_local</p>
+<p><strong>Scope.</strong> The gyrokinetic model&#x27;s own quantities: gyrocenter moments, the gyrokinetic distribution and its fluxes, expressed in the model&#x27;s normalised coordinates. Judge by whether the quantity is defined within the gyrokinetic framework rather than in measured machine coordinates.</p>
+<p><strong>Includes.</strong> gyrokinetic distribution and gyrocenter moments — `gyrokinetics/*`; normalised turbulent fluxes and their spectra in gyrokinetic coordinates — `gyrokinetics_local/*`; linear eigenmodes and their frequencies and growth rates; the gyrokinetic simulation&#x27;s own input and output quantities</p>
+<p><strong>Excludes.</strong> an edge-transport model&#x27;s flux-limiter coordinate → transport: An edge-transport model&#x27;s flux-limiter coordinate is transport; the model&#x27;s own quantity in machine coordinates is not gyrokinetics, and a wall surface property is plasma_wall_interactions.; a broadband turbulence spectrum measured in the machine → turbulence: A quantity in the gyrokinetic model&#x27;s own normalised coordinates is gyrokinetics; a fluctuation measured in the machine&#x27;s coordinates is turbulence.; a coherent MHD mode and its growth rate → magnetohydrodynamics: A fluid-scale coherent instability is magnetohydrodynamics; a gyrokinetic eigenmode is gyrokinetics.; an experimental transport flux derived from a gyrokinetic model → transport: The model&#x27;s internal flux is gyrokinetics; the mean transport flux it predicts or that is measured in the plasma is transport.</p>
+</section>
+<section class="domain">
+<h3>machine_operations <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names pulse scheduling and operational quantities.</p>
+<p><strong>Description.</strong> Pulse scheduling, workflow management, operational metadata</p>
+<p><strong>Category.</strong> control_operations &nbsp; <strong>Count.</strong> 2</p>
+<p><strong>IDS.</strong> —</p>
+<p><strong>Scope.</strong> The operation of the machine around a discharge: pulse scheduling, the shot cycle, workflow orchestration and operational metadata. Judge by whether the quantity concerns when and whether the machine runs rather than the physics it produces.</p>
+<p><strong>Includes.</strong> pulse schedules and the shot cycle — `pulse_schedule/*`; workflow and orchestration metadata — `workflow/*`; operational configuration that is not physics — `real_time_data/*`; dataset description and fair-metadata records tied to an operation</p>
+<p><strong>Excludes.</strong> a sensor attachment-point coordinate → mechanical_measurement_diagnostics: A sensor attachment-point coordinate is the mechanical state of a component, so it is mechanical_measurement_diagnostics; machine_operations owns scheduling, not hardware geometry.; a plasma-control reference during the discharge → plasma_control: A command issued during the plasma is plasma_control; the schedule of when the shot runs and its phase is machine_operations.; a summary data product → data_management: Operational metadata about a shot is machine_operations; the operation&#x27;s own records do not become a data product by being summarised, and a summary of a physical quantity takes that quantity&#x27;s domain instead.; a plant-system state → plant_systems: The operational schedule of a shot is machine_operations; the state of the plant that supports it is plant_systems.</p>
+</section>
+<section class="domain">
+<h3>magnetic_field_diagnostics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names the magnetic sensor set and its responses.</p>
+<p><strong>Description.</strong> Magnetic diagnostics, flux loops, Rogowski coils, diamagnetic measurements</p>
+<p><strong>Category.</strong> diagnostics &nbsp; <strong>Count.</strong> 35</p>
+<p><strong>IDS.</strong> focs, magnetics</p>
+<p><strong>Scope.</strong> Diagnostics of the magnetic field and flux: magnetic probes, flux loops, Rogowski coils and diamagnetic loops. Judge by whether the instrument measures the magnetic field, its flux or the current it reveals.</p>
+<p><strong>Includes.</strong> magnetic probe and Mirnov coil signals — `magnetics/*`; flux loops and the poloidal flux they measure; Rogowski coil and the current it measures; diamagnetic-loop and saddle-loop measurements</p>
+<p><strong>Excludes.</strong> an MSE channel&#x27;s detector geometry → spectroscopy: An MSE channel&#x27;s detector geometry is spectroscopy; the motional Stark effect on the emitted light is a spectroscopic measurement, not neutronics or a magnetic sensor.; the equilibrium reconstructed from the measurements → equilibrium: The coils&#x27; signals are magnetic_field_diagnostics; the flux-surface geometry reconstructed from them is equilibrium.; a coil or magnet as a machine system → magnetic_field_systems: A sensing loop that measures the field is magnetic_field_diagnostics; a magnet or coil that generates the field is magnetic_field_systems.; an imaging or radiation measurement → radiation_measurement_diagnostics: Measuring the magnetic field is magnetic_field_diagnostics; measuring emitted radiation is radiation_measurement_diagnostics.</p>
+</section>
+<section class="domain">
+<h3>magnetic_field_systems <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names the coil and magnet infrastructure that generates the field.</p>
+<p><strong>Description.</strong> Magnetic coil systems, superconducting magnets, field generation infrastructure</p>
+<p><strong>Category.</strong> machine_systems &nbsp; <strong>Count.</strong> 131</p>
+<p><strong>IDS.</strong> coils_non_axisymmetric, em_coupling, ferritic, iron_core, pf_active, pf_passive, tf</p>
+<p><strong>Scope.</strong> The machines that generate and confine the magnetic field: coil systems, superconducting magnets and the iron or ferritic field-shaping infrastructure. Judge by whether the quantity describes the hardware that produces the field rather than the field it produces or measures.</p>
+<p><strong>Includes.</strong> poloidal field coil systems and their currents — `pf_active/*`, `pf_passive/*`; toroidal field coils — `tf/*`; non-axisymmetric and error-field coils — `coils_non_axisymmetric/*`; iron core, ferritic and electromagnetic-coupling infrastructure — `iron_core/*`, `ferritic/*`, `em_coupling/*`</p>
+<p><strong>Excludes.</strong> the magnetic field or flux reconstructed in the plasma → equilibrium: The coils that make the field are magnetic_field_systems; the equilibrium field and its surfaces are equilibrium.; a measurement of the field → magnetic_field_diagnostics: A generator (a magnet or coil) is magnetic_field_systems; a sensor (a loop or probe) is magnetic_field_diagnostics.; a control command that sets a coil current → plasma_control: The coil hardware is magnetic_field_systems; the control command that sets its current is plasma_control.</p>
+</section>
+<section class="domain">
+<h3>magnetohydrodynamics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names a distinct macroscopic instability physics.</p>
+<p><strong>Description.</strong> MHD stability, disruptions, instabilities, sawteeth, tearing modes</p>
+<p><strong>Category.</strong> core_plasma &nbsp; <strong>Count.</strong> 143</p>
+<p><strong>IDS.</strong> disruption, mhd, mhd_linear, ntms, sawteeth</p>
+<p><strong>Scope.</strong> The stability and macroscopic dynamics of a plasma as a conducting fluid: instabilities, their growth and saturation, magnetic reconnection and the events a loss of stability produces. Judge by whether the quantity describes a coherent mode, its mode numbers and growth, or the evolution of a disruption.</p>
+<p><strong>Includes.</strong> linear and non-linear mode amplitudes, mode numbers, growth rates and mode frequencies; tearing, kink, ballooning and neoclassical tearing-mode quantities; disruption quantities — the thermal quench, current quench and their timing; sawtooth and other macroscopic relaxation events — `sawteeth/*`, `ntms/*`, `mhd/*`</p>
+<p><strong>Excludes.</strong> a static property of the equilibrium the mode sits in → equilibrium: The shape of the field is equilibrium; a mode that grows on it and its stability is magnetohydrodynamics.; a turbulent broadband fluctuation → turbulence: A single coherent mode with definite mode numbers is magnetohydrodynamics; a broadband turbulent spectrum is turbulence.; a plasma-control command that reacts to a stability event → plasma_control: What the mode does is magnetohydrodynamics; what the controller commands in response is plasma_control.</p>
+</section>
+<section class="domain">
+<h3>mechanical_measurement_diagnostics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names strain and vibration measurement.</p>
+<p><strong>Description.</strong> Mechanical and structural measurement diagnostics, strain, vibration</p>
+<p><strong>Category.</strong> diagnostics &nbsp; <strong>Count.</strong> 22</p>
+<p><strong>IDS.</strong> barometry, calorimetry, operational_instrumentation</p>
+<p><strong>Scope.</strong> Diagnostics of mechanical and structural quantities of machine components: strain, vibration, displacement and inertial or pressure measurement. Judge by whether the instrument measures the mechanical state of a component rather than the plasma or its fields.</p>
+<p><strong>Includes.</strong> strain and stress gauges on machine components; vibration, acceleration and displacement measurement — `operational_instrumentation/*`; pressure and barometry measurement — `barometry/*`; structural monitoring instrumentation</p>
+<p><strong>Excludes.</strong> a plasma parameter measurement → plasma_measurement_diagnostics: A measurement of a machine component&#x27;s mechanical state is mechanical_measurement_diagnostics; a measurement of a plasma parameter is plasma_measurement_diagnostics.; the structural component itself → structural_components: The structure is structural_components; the instrument that measures its mechanical state is mechanical_measurement_diagnostics.; a magnetic-field measurement → magnetic_field_diagnostics: Measuring strain or vibration is mechanical_measurement_diagnostics; measuring the magnetic field is magnetic_field_diagnostics.</p>
+</section>
+<section class="domain">
+<h3>neutronics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names neutron diagnostics and fusion-product measurement.</p>
+<p><strong>Description.</strong> Neutron diagnostics, fusion product measurements, activation</p>
+<p><strong>Category.</strong> diagnostics &nbsp; <strong>Count.</strong> 22</p>
+<p><strong>IDS.</strong> neutron_diagnostic</p>
+<p><strong>Scope.</strong> Neutron and fusion-product measurement and the activation they cause: neutron detection, fusion-product counting and the neutronics of the machine. Judge by whether the quantity concerns neutrons or fusion products and their interactions with materials.</p>
+<p><strong>Includes.</strong> neutron diagnostics — `neutron_diagnostic/*`; fusion-product counting and the neutron emission rate; neutron activation and dose quantities; the neutron flux and spectrum at a measurement location</p>
+<p><strong>Excludes.</strong> an MSE channel&#x27;s detector geometry → spectroscopy: An MSE channel&#x27;s detector geometry is spectroscopy (mse/*): the motional Stark effect on emitted light is a spectroscopic measurement, not neutronics or a magnetic sensor. Neutronics owns neutron detection and activation quantities.; an electromagnetic-radiation measurement → radiation_measurement_diagnostics: Neutrons and fusion products are neutronics; photons, X-rays and imaging are radiation_measurement_diagnostics.; the stored-energy or power balance of the plasma → core_plasma_physics: The plasma&#x27;s energy state is core_plasma_physics; the neutron emission and its measurement are neutronics.; a structural component that is neutron-activated → structural_components: The component is structural_components; the neutronics of activation and dose in it is neutronics.</p>
+</section>
+<section class="domain">
+<h3>particle_measurement_diagnostics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names Thomson scattering, Langmuir probes and particle-based measurement.</p>
+<p><strong>Description.</strong> Thomson scattering and particle-based diagnostic measurements</p>
+<p><strong>Category.</strong> diagnostics &nbsp; <strong>Count.</strong> 86</p>
+<p><strong>IDS.</strong> langmuir_probes, thomson_scattering</p>
+<p><strong>Scope.</strong> Diagnostics that count or characterise particles to measure the plasma, chiefly Thomson scattering and other particle-based systems. Judge by whether the instrument works by scattering or collecting particles, rather than by an electromagnetic wave or the radiation the plasma emits.</p>
+<p><strong>Includes.</strong> Thomson scattering spectra and the profiles they infer — `thomson_scattering/*`; Langmuir probe current-voltage characteristics — `langmuir_probes/*`; mass-spectrometer and neutral particle measurement; the diagnostic&#x27;s own configuration — channels, geometry, calibration</p>
+<p><strong>Excludes.</strong> a neutron detector&#x27;s aperture geometry → neutronics: A neutron detector&#x27;s aperture geometry is neutronics: the detector also counts particles, but the neutron-detection family determines its domain. Particle_measurement_diagnostics owns scattering or particle-counting instruments without a more specific family.; a barometry gauge&#x27;s gas pressure → mechanical_measurement_diagnostics: A barometry gauge&#x27;s gas pressure is mechanical_measurement_diagnostics; particle_measurement_diagnostics owns a scattering or particle-counting instrument.; a spectrum that measures emission rather than scattering → spectroscopy: A scattering or particle-collection measurement is particle_measurement_diagnostics; an emission spectrum analysed for species, temperature or field is spectroscopy.; a wave-based diagnostic such as interferometry or reflectometry → electromagnetic_wave_diagnostics: Counting particles is particle_measurement_diagnostics; probing with electromagnetic waves and detecting their propagation is electromagnetic_wave_diagnostics.; the plasma profile derived from the measurement → core_plasma_physics: The instrument&#x27;s raw and calibrated signals are the diagnostic domain; the physical profile reconstructed from them is core_plasma_physics.</p>
+</section>
+<section class="domain">
+<h3>plant_systems <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names power, cooling and vacuum plant.</p>
+<p><strong>Description.</strong> Power supplies, cooling systems, vacuum systems, plant infrastructure</p>
+<p><strong>Category.</strong> machine_systems &nbsp; <strong>Count.</strong> 131</p>
+<p><strong>IDS.</strong> balance_of_plant, gas_pumping</p>
+<p><strong>Scope.</strong> The auxiliaries and balance of plant that support a discharge without being plasma-facing or field-generating: power supplies, cooling, vacuum and gas handling. Judge by whether the quantity describes supporting infrastructure that acts on the machine as a whole.</p>
+<p><strong>Includes.</strong> power-supply and electrical plant quantities; cooling-water and thermal plant quantities; vacuum pumping and gas-handling plant — `gas_pumping/*`; balance-of-plant monitoring — `balance_of_plant/*`</p>
+<p><strong>Excludes.</strong> the pellet, gas or SPI system that injects into the plasma → fueling: The injection system and its delivered particles are fueling; the gas handling, pumping and supply plant behind it is plant_systems.; a heating system&#x27;s launcher or its power → auxiliary_heating: The launcher and its delivered power are auxiliary_heating; the power supply and cooling that serve it are plant_systems.; the field-generating coil system → magnetic_field_systems: The coils are magnetic_field_systems; the plant that powers and cools them is plant_systems.</p>
+</section>
+<section class="domain">
+<h3>plasma_control <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names position and shape control and the feedback system.</p>
+<p><strong>Description.</strong> Plasma position and shape control, feedback systems, electromagnetic coupling</p>
+<p><strong>Category.</strong> control_operations &nbsp; <strong>Count.</strong> 1</p>
+<p><strong>IDS.</strong> controllers, pulse_schedule</p>
+<p><strong>Scope.</strong> The control of the plasma in real time: position and shape control, feedback loops and the reference and actuator signals that hold a discharge on its trajectory. Judge by whether the quantity is a control reference, a feedback signal or an actuator command rather than a plasma state.</p>
+<p><strong>Includes.</strong> reference and target position, shape and current profiles — `control/*`, `controllers/*`; feedback loop quantities, gains and error signals; actuator commands for the poloidal field — `pf_active/*`; plasma-shape and position control during the discharge</p>
+<p><strong>Excludes.</strong> the plasma state or equilibrium being controlled → equilibrium: The commanded or reference configuration is plasma_control; the achieved equilibrium is equilibrium.; a machine system that generates the field → magnetic_field_systems: The coil that generates the field is magnetic_field_systems; the control command that sets its current is plasma_control.; an MHD event the controller reacts to → magnetohydrodynamics: The mode is magnetohydrodynamics; the control response to it is plasma_control.</p>
+</section>
+<section class="domain">
+<h3>plasma_initiation <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names startup, breakdown and the early heating phase.</p>
+<p><strong>Description.</strong> Plasma startup, breakdown, initiation physics, early heating phase</p>
+<p><strong>Category.</strong> control_operations &nbsp; <strong>Count.</strong> 3</p>
+<p><strong>IDS.</strong> plasma_initiation</p>
+<p><strong>Scope.</strong> The start of a discharge: breakdown of the gas, the initial ionisation front, and the physics by which a burnthrough plasma is established. Judge by whether the quantity describes the very start of the plasma, before it is a confined, controlled discharge.</p>
+<p><strong>Includes.</strong> breakdown and start-up quantities — `plasma_initiation/*`; the ionisation front position and speed; loop voltage and field-null configuration during breakdown; burnthrough and the early-current-rise phase</p>
+<p><strong>Excludes.</strong> a plasma-control reference for the discharge that follows → plasma_control: The breakdown itself is plasma_initiation; controlling the confined plasma that forms after it is plasma_control.; a magnetic-field-system definition → magnetic_field_systems: The field-null configuration as a start-up physics quantity is plasma_initiation; the coils that produce it are magnetic_field_systems.; an operational schedule → machine_operations: The physics of the breakdown is plasma_initiation; the schedule that triggers it is machine_operations.</p>
+</section>
+<section class="domain">
+<h3>plasma_wall_interactions <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names erosion, deposition and material migration at the wall.</p>
+<p><strong>Description.</strong> First wall, plasma-facing components, erosion, deposition, material migration</p>
+<p><strong>Category.</strong> edge_divertor &nbsp; <strong>Count.</strong> 119</p>
+<p><strong>IDS.</strong> wall</p>
+<p><strong>Scope.</strong> The interaction between the plasma and the material surfaces it meets: erosion, deposition, material migration, fuel retention and the surface conditions that follow. Judge by whether the quantity is a property of a surface or of the interface rather than of the plasma volume.</p>
+<p><strong>Includes.</strong> erosion and deposition rates and net erosion — `wall/*`; surface temperature, surface composition and material migration; fuel retention and recycling at the surface; first-wall and plasma-facing-component temperatures and fluxes</p>
+<p><strong>Excludes.</strong> nuclear power deposited in a wall unit → neutronics: Nuclear power deposited in a wall unit is neutronics; the wall-surface erosion and retention that plasma_wall_interactions owns is a different quantity.; an edge-transport model&#x27;s flux-limiter coordinate → transport: An edge-transport model&#x27;s flux-limiter coordinate is transport; the model&#x27;s own quantity in machine coordinates is not gyrokinetics, and a wall surface property is plasma_wall_interactions.; a disruption halo-current wall point → magnetohydrodynamics: A disruption halo-current wall point is part of the disruption evolution, so it is magnetohydrodynamics; plasma_wall_interactions owns the surface&#x27;s erosion and retention.; an infrared camera&#x27;s target-image coordinate → radiation_measurement_diagnostics: An infrared camera&#x27;s target-image coordinate is radiation_measurement_diagnostics; the wall surface&#x27;s own response is plasma_wall_interactions.; the plasma&#x27;s behaviour in the scrape-off layer → edge_plasma_physics: The plasma near the wall is edge_plasma_physics; the wall surface&#x27;s response to it is plasma_wall_interactions.; the structural or engineering definition of the wall component → structural_components: A component&#x27;s material, geometry and support structure are structural_components; the erosion and deposition on its surface are plasma_wall_interactions.; a divertor plasma quantity such as the target heat flux in the plasma → divertor_physics: The plasma heat flux arriving at the target is divertor_physics; the target surface&#x27;s erosion from it is plasma_wall_interactions.</p>
+</section>
+<section class="domain">
+<h3>profile_quantities <span class="tag">data_structure_grouping</span>
+<span class="tag">added</span></h3>
+<p><strong>Reason.</strong> Added as a grouping of data structures: carries the profile forms section 6 divides out of transport. It takes core_profiles and edge_profiles at IDS level because a profile IDS&#x27;s content is this form, which leaves edge_plasma_physics with no IDS of its own — a question for the lead.</p>
+<p><strong>Description.</strong> Profile quantities: the one- and two-dimensional profiles and their general-grid forms</p>
+<p><strong>Category.</strong> quantity_form &nbsp; <strong>Count.</strong> 192</p>
+<p><strong>IDS.</strong> core_profiles, edge_profiles, ggd</p>
+<p><strong>Scope.</strong> The profiles a profile structure holds: the one- and two-dimensional profile quantities and their general-grid forms.</p>
+<p><strong>Includes.</strong> a quantity carried in profiles_1d or profiles_2d; a general-grid profile form</p>
+<p><strong>Excludes.</strong> the transport coefficient that models the profile&#x27;s flux → transport_coefficients: A profile amplitude is profile_quantities; a modelled coefficient is transport_coefficients.</p>
+</section>
+<section class="domain">
+<h3>radiation_measurement_diagnostics <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names bolometry, X-ray and imaging diagnostics.</p>
+<p><strong>Description.</strong> Bolometry, X-ray diagnostics, bremsstrahlung, imaging systems</p>
+<p><strong>Category.</strong> diagnostics &nbsp; <strong>Count.</strong> 181</p>
+<p><strong>IDS.</strong> bolometer, bremsstrahlung_visible, camera_ir, camera_visible, camera_x_rays, ece, hard_x_rays, soft_x_rays</p>
+<p><strong>Scope.</strong> Diagnostics of the radiation the plasma emits or of the imaging of it: bolometry, X-ray and bremsstrahlung detection, and the visible, IR and X-ray cameras. Judge by whether the instrument records radiated power, photon flux or an image, rather than a spectrum resolved in wavelength.</p>
+<p><strong>Includes.</strong> radiated power from bolometry — `bolometer/*`; soft, hard X-ray and bremsstrahlung measurements — `soft_x_rays/*`, `hard_x_rays/*`, `bremsstrahlung_visible/*`; visible, infrared and X-ray camera images — `camera_visible/*`, `camera_ir/*`, `camera_x_rays/*`; imaging system configuration, sightlines and calibration</p>
+<p><strong>Excludes.</strong> an emission spectrum analysed for species or temperature → spectroscopy: Recording radiated power, photon flux or an image is radiation_measurement_diagnostics; resolving an emission spectrum is spectroscopy. The failing case this file exists to separate: a spectrometer&#x27;s line-of-sight emission belongs to spectroscopy, not to radiation_measurement_diagnostics.; a magnetic measurement → magnetic_field_diagnostics: Measured photons or radiated power are radiation_measurement_diagnostics; measured magnetic flux or field is magnetic_field_diagnostics.; neutron or fusion-product radiation → neutronics: Electromagnetic radiation (photons) is radiation_measurement_diagnostics; neutron and fusion-product measurement is neutronics.</p>
+</section>
+<section class="domain">
+<h3>runaway_electrons <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names avalanche generation and runaway loss physics, a distinct population with its own IDS.</p>
+<p><strong>Description.</strong> Runaway electron physics, avalanche generation, loss mechanisms</p>
+<p><strong>Category.</strong> energetic_particles &nbsp; <strong>Count.</strong> 16</p>
+<p><strong>IDS.</strong> runaway_electrons</p>
+<p><strong>Scope.</strong> The runaway electron population produced when the accelerating electric field exceeds collisional drag: its generation, avalanche growth, confinement and loss. Judge by whether the quantity is specific to a runaway population rather than a general fast electron.</p>
+<p><strong>Includes.</strong> runaway electron density, current and energy distribution; primary generation and avalanche growth rates; runaway loss and wall-stability quantities; the runaway population&#x27;s effect during disruptions — `runaway_electrons/*`</p>
+<p><strong>Excludes.</strong> a general suprathermal fast-particle distribution → fast_particles: A suprathermal population in general is fast_particles; the specific runaway population driven by the electric field is runaway_electrons.; the disruption that produced the runaways → magnetohydrodynamics: The disruption event is magnetohydrodynamics; the runaway population it generates is runaway_electrons.; a control action to mitigate the runaways → plasma_control: The runaway population is runaway_electrons; the commanded mitigation and its feedback are plasma_control.</p>
+</section>
+<section class="domain">
+<h3>source_quantities <span class="tag">data_structure_grouping</span>
+<span class="tag">added</span></h3>
+<p><strong>Reason.</strong> Added as a grouping of data structures: carries the source terms section 6 divides out of transport, and owns the three sources IDS.</p>
+<p><strong>Description.</strong> Source terms: the particle, energy, momentum and current rates a source adds to the plasma</p>
+<p><strong>Category.</strong> quantity_form &nbsp; <strong>Count.</strong> 81</p>
+<p><strong>IDS.</strong> core_sources, edge_sources, plasma_sources</p>
+<p><strong>Scope.</strong> The source terms a sources structure holds: the particle, energy, momentum and current rates a source adds to the plasma.</p>
+<p><strong>Includes.</strong> a particle, energy, momentum or current source rate from a sources structure</p>
+<p><strong>Excludes.</strong> the transport of what the source adds → transport: The rate a source adds is source_quantities; the flux that carries it is transport.</p>
+</section>
+<section class="domain">
+<h3>spectroscopy <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names emission, charge-exchange and Stark spectroscopy.</p>
+<p><strong>Description.</strong> Emission spectroscopy, charge exchange, motional Stark effect, impurity diagnostics</p>
+<p><strong>Category.</strong> diagnostics &nbsp; <strong>Count.</strong> 51</p>
+<p><strong>IDS.</strong> charge_exchange, mse, spectrometer_mass, spectrometer_uv, spectrometer_visible, spectrometer_x_ray_crystal</p>
+<p><strong>Scope.</strong> Passive emission spectroscopy and its analysis: the spectrum of light the plasma emits, resolved in wavelength and interpreted for species, temperature, flows or the motional Stark effect. Judge by whether the quantity is an emission spectrum or an analysis of one.</p>
+<p><strong>Includes.</strong> visible, UV, X-ray-crystal and mass emission spectra — `spectrometer_visible/*`, `spectrometer_uv/*`, `spectrometer_x_ray_crystal/*`, `spectrometer_mass/*`; impurity line identification and intensity; charge-exchange spectroscopy — `charge_exchange/*`; motional Stark effect measurement of the field — `mse/*`</p>
+<p><strong>Excludes.</strong> a broadband radiated-power or imaging measurement → radiation_measurement_diagnostics: A spectrum resolved in wavelength is spectroscopy; a bolometric power or a camera image is radiation_measurement_diagnostics. The failing case this file exists to separate: a spectrometer&#x27;s emission is spectroscopy even though a spectrometer measures radiation.; a scattering measurement that counts particles → particle_measurement_diagnostics: A passively measured emission spectrum is spectroscopy; a scattering or particle-counting measurement is particle_measurement_diagnostics.; a wave-transmission probe → electromagnetic_wave_diagnostics: Measuring emitted light is spectroscopy; transmitting a wave to probe the plasma is electromagnetic_wave_diagnostics.</p>
+</section>
+<section class="domain">
+<h3>structural_components <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names the vessel and load-bearing structure.</p>
+<p><strong>Description.</strong> Vacuum vessel, cryostat, structural support systems</p>
+<p><strong>Category.</strong> machine_systems &nbsp; <strong>Count.</strong> 51</p>
+<p><strong>IDS.</strong> breeding_blanket, cryostat</p>
+<p><strong>Scope.</strong> The static engineering structure of the device: vacuum vessel, cryostat, supports and the structural definition of components — materials, geometry and load paths. Judge by whether the quantity describes a structure that holds the machine rather than the plasma physics around it.</p>
+<p><strong>Includes.</strong> vacuum vessel and cryostat structures — `cryostat/*`; structural supports and their mechanical definitions; breeding-blanket structures and component geometry — `breeding_blanket/*`; component material and geometry definitions</p>
+<p><strong>Excludes.</strong> a ferritic field-shaping object → magnetic_field_systems: A ferritic field-shaping object is magnetic_field_systems; equilibrium owns the field and its surfaces, and structural_components the load-bearing structure.; an interaction of plasma with a surface → plasma_wall_interactions: The component structure is structural_components; the erosion, deposition or heat load on its surface is plasma_wall_interactions.; a field-generating magnet → magnetic_field_systems: A magnetic coil system is magnetic_field_systems; the passive structure that supports it is structural_components.; a plant system that serves the structure → plant_systems: The structure is structural_components; the supply, cooling or vacuum plant that serves it is plant_systems.</p>
+</section>
+<section class="domain">
+<h3>summary_quantities <span class="tag">data_structure_grouping</span>
+<span class="tag">added</span></h3>
+<p><strong>Reason.</strong> Added as a grouping of data structures: carries the summary forms section 6 divides out of transport, and owns the summary IDS.</p>
+<p><strong>Description.</strong> Summary forms: local values at named locations and the volume-, line- and flux-surface-averaged or integrated forms of a profile quantity</p>
+<p><strong>Category.</strong> quantity_form &nbsp; <strong>Count.</strong> 153</p>
+<p><strong>IDS.</strong> summary</p>
+<p><strong>Scope.</strong> The summary forms a summary structure holds: local values at named locations and the volume-, line- and flux-surface-averaged or integrated form of a profile quantity.</p>
+<p><strong>Includes.</strong> a local value at a named location in the proposal&#x27;s summary structure; a volume-, line- or flux-surface-averaged or integrated form</p>
+<p><strong>Excludes.</strong> the profile the summary form averages → profile_quantities: The averaged form read from the summary structure is summary_quantities; the profile it averages is profile_quantities.</p>
+</section>
+<section class="domain">
+<h3>transport <span class="tag">physics_area</span>
+<span class="tag">split</span></h3>
+<p><strong>Reason.</strong> Divided per the lead&#x27;s ruling: 950 names go to the five quantity-form parts, and the names the data-structure rule cannot place stay here, enumerated by name.</p>
+<p><strong>Description.</strong> The transport quantities whose source data structure does not resolve to one part, which stay here by name and are enumerated</p>
+<p><strong>Category.</strong> core_plasma &nbsp; <strong>Count.</strong> 92</p>
+<p><strong>IDS.</strong> —</p>
+<p><strong>Scope.</strong> The rates and sources by which a plasma redistributes particles, energy and momentum, and the coefficients and model parameters that predict them. Judge by whether the quantity measures or models a transport rate, not by the IDS that happens to carry it — an equilibrium IDS with a diffusion model still holds transport quantities.</p>
+<p><strong>Includes.</strong> particle, energy and momentum fluxes, including their decomposed parts and errors; diffusivities, conductivities and pinch velocities from neoclassical or anomalous models; source and sink terms for the transport equations — `core_sources/source/profiles_1d/*`; flux-surface-averaged transport and the transport solver&#x27;s own parameters — `plasma_transport/*`; heat and particle confinement times</p>
+<p><strong>Excludes.</strong> a source term for a suprathermal distribution → fast_particles: A source term with a distribution source in the distribution_sources IDS is fast_particles; a flux or diffusivity is transport.; a global loss-power scalar → core_plasma_physics: A global loss-power scalar is a core energy-balance quantity, so it is core_plasma_physics; a flux or diffusivity is transport, and an edge resolution is edge_plasma_physics.; a static shape property of the magnetic field, such as the safety factor or the separatrix position → equilibrium: If the quantity describes the configuration&#x27;s geometry rather than a movement of particles or energy through it, it is equilibrium. A transport model that references the safety factor does not make that factor transport.; the value of a kinetic profile such as temperature or density → core_plasma_physics: The plasma&#x27;s own profile value is core_plasma_physics; a flux or diffusivity derived from it is transport.; a turbulent fluctuation amplitude, spectrum or correlation length → turbulence: The fluctuating field and its spectrum are turbulence; the mean flux it produces crosses into transport.</p>
+</section>
+<section class="domain">
+<h3>transport_coefficients <span class="tag">data_structure_grouping</span>
+<span class="tag">added</span></h3>
+<p><strong>Reason.</strong> Added as a grouping of data structures: carries the transport-model quantities section 6 divides out of transport, and owns the three transport IDS, whose whole content is this quantity form.</p>
+<p><strong>Description.</strong> Transport-model quantities: diffusivities, conductivities, convection velocities and damping rates</p>
+<p><strong>Category.</strong> quantity_form &nbsp; <strong>Count.</strong> 360</p>
+<p><strong>IDS.</strong> core_transport, edge_transport, plasma_transport</p>
+<p><strong>Scope.</strong> The transport-model quantities a transport model structure holds: the diffusivities, conductivities, convection velocities and damping rates that predict a transport flux.</p>
+<p><strong>Includes.</strong> a diffusion coefficient or diffusivity from a transport-model structure; a convection velocity or damping rate from a transport-model structure</p>
+<p><strong>Excludes.</strong> the flux a coefficient predicts → transport: The coefficient is transport_coefficients; a flux whose source structure is not a transport model is transport.</p>
+</section>
+<section class="domain">
+<h3>turbulence <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names fluctuation and turbulent-transport physics, distinct from the transport rate it produces.</p>
+<p><strong>Description.</strong> Turbulence physics, fluctuations, turbulent transport, correlation analysis</p>
+<p><strong>Category.</strong> core_plasma &nbsp; <strong>Count.</strong> 59</p>
+<p><strong>IDS.</strong> turbulence</p>
+<p><strong>Scope.</strong> The fluctuating part of a plasma&#x27;s fields and distributions: the amplitude, spectrum and correlation structure of turbulent fluctuations in density, temperature, potential and magnetic field. Judge by whether the quantity describes a fluctuation or its wavenumber-frequency spectrum rather than a mean value or a mean flux.</p>
+<p><strong>Includes.</strong> fluctuation amplitudes and their spatial or wavenumber spectra — `turbulence/*`; correlation lengths and times, and cross-phase between fluctuating fields; radial and poloidal flux spectra of the turbulent fields; the turbulent-transport model inputs that describe the fluctuations themselves</p>
+<p><strong>Excludes.</strong> a mean heat or particle flux produced by the turbulence → transport: The fluctuation and its spectrum are turbulence; once the quantity is the mean flux those fluctuations drive, it is transport — the essence of transport is the average, not the fluctuation.; a gyrokinetic simulation quantity from a gyrokinetics IDS → gyrokinetics: A quantity expressed in the gyrokinetic model&#x27;s own coordinates (gyrocenter moments, normalised fluxes) is gyrokinetics, even when it is turbulent in character.; an MHD mode amplitude or growth rate → magnetohydrodynamics: A coherent, macroscale unstable mode is magnetohydrodynamics; the broadband turbulent fluctuation is turbulence.</p>
+</section>
+<section class="domain">
+<h3>waves <span class="tag">physics_area</span>
+<span class="tag">kept</span></h3>
+<p><strong>Reason.</strong> Names wave propagation and wave-particle physics, separate from the heating systems that launch it.</p>
+<p><strong>Description.</strong> Wave propagation, RF physics, wave-particle interactions, dispersion</p>
+<p><strong>Category.</strong> heating_current_drive &nbsp; <strong>Count.</strong> 23</p>
+<p><strong>IDS.</strong> waves</p>
+<p><strong>Scope.</strong> Electromagnetic waves in a plasma: their propagation, dispersion, mode conversion, damping and wave-particle interaction, and the model quantities a wave code computes. Judge by whether the quantity describes a wave field or its interaction rather than the hardware that launched it.</p>
+<p><strong>Includes.</strong> the wave electric and magnetic field and their polarisation — `waves/*`; dispersion relations, refractive index, ray trajectories and cut-offs/resonances; absorption, damping and mode-conversion coefficients; the wave&#x27;s effect through quasilinear or wave-particle interaction terms</p>
+<p><strong>Excludes.</strong> a normalised flux coordinate along a wave-code ray → equilibrium: A normalised flux coordinate along a wave-code ray is both a flux-surface mapping and a quantity the wave code computes; precedence puts equilibrium first and settles the overlap.; a launcher, antenna or its delivered power → auxiliary_heating: Hardware and launched power are auxiliary_heating; the wave in the plasma and its propagation are waves.; a diagnostic that measures waves or the plasma → electromagnetic_wave_diagnostics: A wave field inside the plasma is waves; an instrument that probes the plasma with waves and records a signal, such as interferometry, reflectometry or polarimetry, is a diagnostic.; an electrostatic fluctuation from turbulence → turbulence: A launched wave of definite frequency and mode is waves; a broadband turbulent fluctuation is turbulence.</p>
+</section>
+
+<h2>4. Mapping from current domains to proposed ones</h2>
+<table><thead><tr><th>current domain</th><th>proposed domain</th></tr></thead><tbody><tr><td>auxiliary_heating</td><td>auxiliary_heating</td></tr>
+<tr><td>computational_workflow</td><td>data_management</td></tr>
+<tr><td>core_plasma_physics</td><td>core_plasma_physics</td></tr>
+<tr><td>current_drive</td><td>current_drive</td></tr>
+<tr><td>data_management</td><td>data_management</td></tr>
+<tr><td>divertor_physics</td><td>divertor_physics</td></tr>
+<tr><td>edge_plasma_physics</td><td>edge_plasma_physics</td></tr>
+<tr><td>electromagnetic_wave_diagnostics</td><td>electromagnetic_wave_diagnostics</td></tr>
+<tr><td>equilibrium</td><td>equilibrium</td></tr>
+<tr><td>fast_particles</td><td>fast_particles</td></tr>
+<tr><td>fueling</td><td>fueling</td></tr>
+<tr><td>general</td><td>general</td></tr>
+<tr><td>gyrokinetics</td><td>gyrokinetics</td></tr>
+<tr><td>machine_operations</td><td>machine_operations</td></tr>
+<tr><td>magnetic_field_diagnostics</td><td>magnetic_field_diagnostics</td></tr>
+<tr><td>magnetic_field_systems</td><td>magnetic_field_systems</td></tr>
+<tr><td>magnetohydrodynamics</td><td>magnetohydrodynamics</td></tr>
+<tr><td>mechanical_measurement_diagnostics</td><td>mechanical_measurement_diagnostics</td></tr>
+<tr><td>neutronics</td><td>neutronics</td></tr>
+<tr><td>particle_measurement_diagnostics</td><td>particle_measurement_diagnostics</td></tr>
+<tr><td>plant_systems</td><td>plant_systems</td></tr>
+<tr><td>plasma_control</td><td>plasma_control</td></tr>
+<tr><td>plasma_initiation</td><td>plasma_initiation</td></tr>
+<tr><td>plasma_wall_interactions</td><td>plasma_wall_interactions</td></tr>
+<tr><td>radiation_measurement_diagnostics</td><td>radiation_measurement_diagnostics</td></tr>
+<tr><td>runaway_electrons</td><td>runaway_electrons</td></tr>
+<tr><td>spectroscopy</td><td>spectroscopy</td></tr>
+<tr><td>structural_components</td><td>structural_components</td></tr>
+<tr><td>transport</td><td>transport</td></tr>
+<tr><td>turbulence</td><td>turbulence</td></tr>
+<tr><td>waves</td><td>waves</td></tr>
+<tr><td>plasma_measurement_diagnostics</td><td>(retired)</td></tr></tbody></table>
+<h3>Counts after applying the mapping to the live names</h3>
+<p>3149 of 3149 live names are placed; the proposed
+counts sum to the live total.</p>
+<table><thead><tr><th>proposed domain</th><th>axis</th><th>disposition</th><th>live names</th></tr></thead><tbody><tr><td>transport_coefficients</td><td>data_structure_grouping</td><td>added</td><td>360</td></tr>
+<tr><td>edge_plasma_physics</td><td>physics_area</td><td>kept</td><td>305</td></tr>
+<tr><td>equilibrium</td><td>physics_area</td><td>kept</td><td>206</td></tr>
+<tr><td>auxiliary_heating</td><td>physics_area</td><td>kept</td><td>199</td></tr>
+<tr><td>profile_quantities</td><td>data_structure_grouping</td><td>added</td><td>192</td></tr>
+<tr><td>radiation_measurement_diagnostics</td><td>physics_area</td><td>kept</td><td>181</td></tr>
+<tr><td>distribution_quantities</td><td>data_structure_grouping</td><td>added</td><td>165</td></tr>
+<tr><td>summary_quantities</td><td>data_structure_grouping</td><td>added</td><td>153</td></tr>
+<tr><td>magnetohydrodynamics</td><td>physics_area</td><td>kept</td><td>143</td></tr>
+<tr><td>magnetic_field_systems</td><td>physics_area</td><td>kept</td><td>131</td></tr>
+<tr><td>plant_systems</td><td>physics_area</td><td>kept</td><td>131</td></tr>
+<tr><td>plasma_wall_interactions</td><td>physics_area</td><td>kept</td><td>119</td></tr>
+<tr><td>transport</td><td>physics_area</td><td>split</td><td>92</td></tr>
+<tr><td>particle_measurement_diagnostics</td><td>physics_area</td><td>kept</td><td>86</td></tr>
+<tr><td>source_quantities</td><td>data_structure_grouping</td><td>added</td><td>81</td></tr>
+<tr><td>electromagnetic_wave_diagnostics</td><td>physics_area</td><td>kept</td><td>73</td></tr>
+<tr><td>divertor_physics</td><td>physics_area</td><td>kept</td><td>68</td></tr>
+<tr><td>turbulence</td><td>physics_area</td><td>kept</td><td>59</td></tr>
+<tr><td>spectroscopy</td><td>physics_area</td><td>kept</td><td>51</td></tr>
+<tr><td>structural_components</td><td>physics_area</td><td>kept</td><td>51</td></tr>
+<tr><td>core_plasma_physics</td><td>physics_area</td><td>kept</td><td>48</td></tr>
+<tr><td>gyrokinetics</td><td>physics_area</td><td>kept</td><td>42</td></tr>
+<tr><td>general</td><td>data_structure_grouping</td><td>kept</td><td>39</td></tr>
+<tr><td>magnetic_field_diagnostics</td><td>physics_area</td><td>kept</td><td>35</td></tr>
+<tr><td>fueling</td><td>physics_area</td><td>kept</td><td>23</td></tr>
+<tr><td>waves</td><td>physics_area</td><td>kept</td><td>23</td></tr>
+<tr><td>mechanical_measurement_diagnostics</td><td>physics_area</td><td>kept</td><td>22</td></tr>
+<tr><td>neutronics</td><td>physics_area</td><td>kept</td><td>22</td></tr>
+<tr><td>fast_particles</td><td>physics_area</td><td>kept</td><td>17</td></tr>
+<tr><td>runaway_electrons</td><td>physics_area</td><td>kept</td><td>16</td></tr>
+<tr><td>current_drive</td><td>physics_area</td><td>kept</td><td>10</td></tr>
+<tr><td>plasma_initiation</td><td>physics_area</td><td>kept</td><td>3</td></tr>
+<tr><td>machine_operations</td><td>physics_area</td><td>kept</td><td>2</td></tr>
+<tr><td>plasma_control</td><td>physics_area</td><td>kept</td><td>1</td></tr>
+<tr><td>data_management</td><td>data_structure_grouping</td><td>merged</td><td>0</td></tr></tbody></table>
+
+<h2>5. Where the sources disagree</h2>
+<figure><img src="/imas-codex/figures/sn-audited-group-release/physics-domain-review/domain-agreement-matrix.svg"
+ alt="Matrix of an IDS's proposed domain against the domain its live DD paths carry">
+<figcaption>Each row is the proposed domain an IDS's data structure gives it; each column
+is the domain its live DD paths are filed under; the cell is the number of live DD paths
+(log scale). The diagonal is agreement; the off-diagonal mass is the IDS whose data
+structure and whose live paths name different domains.</figcaption></figure>
+<p>The DD-path gold set is a fourth, path-level signal. Of 209 gold paths,
+39 have an expected domain equal to the proposal's IDS-level domain, and
+69 equal the domain the live names sourced from that IDS mostly
+carry. The gap between those two readings measures how much of the gold set is a
+path-level expectation rather than an IDS-level one: a path can be more specific than
+its IDS, so the second reading is the fair comparison. The paths the proposal does not
+match are listed in the data file (<code>gold_cross_check.disagreements</code>) for the
+lead.</p>
+
+<h2>What the lead is asked to rule</h2>
+<p>Nothing is written by this page; it is a proposal.</p>
+<ol>
+<li><strong>The list.</strong> Adopt, amend or reject the 35 proposed
+domains. Each entry carries its disposition and a one-line reason; the five
+<code>*_quantities</code> entries are the transport division already ruled, proposed as
+domains here so the vocabulary and the stored domains name the same things.</li>
+<li><strong>The parts' placement.</strong> Keep the five as domains or place them elsewhere,
+for example as a data-structure grouping axis outside the physics-domain vocabulary.
+The proposal favours domains because they are the write targets the transport division
+creates; the alternative is stated so the choice is explicit.</li>
+<li><strong>The zero-name moves.</strong> Retire <code>plasma_measurement_diagnostics</code>
+(nothing carries it) and merge <code>computational_workflow</code> into
+<code>data_management</code> (no names; 1,959 live paths move with the entry).</li>
+</ol>
+</body></html>
