@@ -450,6 +450,16 @@ async def prepare_docs_review_request(
     system_prompt = render_prompt(system_template, prompt_context)
     if is_parent and prompt_context["conventions"]:
         user_prompt += "\n\n" + render_prompt("sn/_conventions", prompt_context)
+
+    from iter_codex.standard_names.context_receipt import record_stage_receipt
+
+    record_stage_receipt(
+        "scoring_review",
+        prepared_item["id"],
+        prompt_context,
+        prompt_text=f"{system_prompt}\n\n{user_prompt}",
+    )
+
     response_model = (
         StandardNameQualityReviewDocsParentBatch
         if is_parent

@@ -406,3 +406,49 @@ def test_rendering_shows_the_enclosing_text_and_the_verdict():
 
     withheld = render_case_file(_build(withhold=["enclosing_structure_text"]))
     assert "Completeness: incomplete; usable=false" in withheld
+
+
+def test_a_name_with_no_producer_edge_says_so_instead_of_reading_as_empty():
+    """No producer means no DD source, and the block states that in prose."""
+    target = dict(_TARGET, source_ids=[])
+    record = build_name_case_file(
+        "elongation_of_flux_surface",
+        gc=_FakeGraph(**{"CASE_FILE_TARGET": [target]}),
+        compose_context=_CONTEXT,
+        family_reader=_family,
+        neighbour_reader=_neighbours,
+        locus_reader=_locus,
+    )
+
+    producer = record.content["producer"]
+    assert producer["status"] == "none"
+    assert producer["dd_paths"] == [] and producer["derived"] == []
+    assert "no producer" in producer["statement"]
+    assert "producer" not in record.completeness["missing"]
+
+
+def test_a_derived_parent_carries_its_children_as_members():
+    """A parent abstracts over its live children, and the block lists them."""
+    children = [
+        {
+            "name": "volume_of_flux_surface",
+            "unit": "m^3",
+            "description": "Volume enclosed by a flux surface.",
+            "physics_domain": "equilibrium",
+            "kind": "scalar",
+        }
+    ]
+    record = build_name_case_file(
+        "elongation_of_flux_surface",
+        gc=_FakeGraph(**{"CASE_FILE_CHILDREN": children}),
+        compose_context=_CONTEXT,
+        family_reader=_family,
+        neighbour_reader=_neighbours,
+        locus_reader=_locus,
+    )
+
+    block = record.content["children"]
+    assert block["status"] == "members"
+    assert [member["name"] for member in block["members"]] == ["volume_of_flux_surface"]
+    assert block["members"][0]["unit"] == "m^3"
+    assert "children" not in record.completeness["missing"]

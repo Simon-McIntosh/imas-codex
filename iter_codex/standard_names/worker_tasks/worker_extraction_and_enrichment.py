@@ -1893,6 +1893,27 @@ async def _self_refine_candidate(
             "diagnostics": diagnostics,
         },
     )
+    from iter_codex.standard_names.context_receipt import record_stage_receipt
+
+    record_stage_receipt(
+        "extraction",
+        name,
+        {
+            **context,
+            "item": {
+                "id": name,
+                "name": name,
+                "description": description or "",
+                "unit": (dd_context or {}).get("unit"),
+                "coordinates": (dd_context or {}).get("coordinates"),
+                "dd_description": (dd_context or {}).get("documentation")
+                or (dd_context or {}).get("description")
+                or "",
+            },
+            "anc": (dd_context or {}).get("ancestors") or (),
+        },
+        prompt_text=f"{system_prompt}\n\n{user_prompt}",
+    )
     try:
         llm_out = await acall_fn(
             model=model,

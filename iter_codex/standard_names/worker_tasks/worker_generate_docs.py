@@ -871,6 +871,15 @@ async def process_generate_docs_batch(
             logger.debug("generate_docs: system prompt render failed for %s", sn_id)
             system_prompt = None
 
+        from iter_codex.standard_names.context_receipt import record_stage_receipt
+
+        record_stage_receipt(
+            "documentation",
+            sn_id,
+            prompt_context,
+            prompt_text=f"{system_prompt or ''}\n\n{user_prompt}",
+        )
+
         _messages = (
             [
                 {"role": "system", "content": system_prompt},

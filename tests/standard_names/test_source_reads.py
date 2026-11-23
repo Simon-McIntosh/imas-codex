@@ -465,6 +465,8 @@ COPIED_LIST_SITES: dict[tuple[str, str], str] = {
     ("standard_names/case_file.py", "_neighbours_block"): "runtime",
     ("standard_names/consolidation.py", "_merge_duplicates"): "runtime",
     ("standard_names/context.py", "fetch_review_neighbours"): "runtime",
+    ("standard_names/context_receipt.py", "_name_context"): "runtime",
+    ("standard_names/context_receipt.py", "content_from_prompt_context"): "runtime",
     ("standard_names/dd_gaps.py", "_evidence_snapshot"): "other_label",
     ("standard_names/dd_gaps.py", "_registry_sync_plan"): "other_label",
     ("standard_names/dd_gaps.py", "sync_dd_unit_exception_gaps"): "other_label",

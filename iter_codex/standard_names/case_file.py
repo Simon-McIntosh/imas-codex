@@ -75,6 +75,8 @@ WITHHELD_CHANNELS = (
     "neighbours",
     "grammar",
     "incumbent",
+    "children",
+    "producer",
 )
 
 _REASON_FIELDS = (
@@ -148,6 +150,18 @@ RETURN sn.id AS id, coalesce(sn.physical_base, '') AS physical_base,
        coalesce(sn.name_stage, '') AS name_stage
 """
 
+_CHILDREN_QUERY = """
+// CASE_FILE_CHILDREN
+MATCH (child:StandardName)-[:HAS_PARENT]->(sn:StandardName {id: $id})
+WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested']
+RETURN child.id AS name,
+       child.unit AS unit,
+       child.description AS description,
+       child.physics_domain AS physics_domain,
+       child.kind AS kind
+ORDER BY child.id
+"""
+
 
 class CaseFile(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -219,6 +233,8 @@ def completeness_verdict(content: Mapping[str, Any]) -> dict[str, Any]:
         "grammar:vocabulary",
         "grammar:registry",
         "grammar:conventions",
+        "producer",
+        "children",
     ]
     target = content.get("target") or {}
     kind = target.get("kind")
@@ -248,6 +264,13 @@ def completeness_verdict(content: Mapping[str, Any]) -> dict[str, Any]:
             missing.append(f"enclosing_structure_text:{source_id}")
         if chain and not enclosing.get("chain_to_root"):
             missing.append(f"chain_to_root:{source_id}")
+
+    producer = content.get("producer") or {}
+    if not producer:
+        missing.append("producer")
+    children = content.get("children") or {}
+    if children.get("status") == "unavailable":
+        missing.append("children")
 
     family = content.get("family") or {}
     if (
@@ -1087,6 +1110,84 @@ def _neighbours_block(
 # ---------------------------------------------------------------------------
 
 
+def _producer_block(source_ids: Iterable[str]) -> dict[str, Any]:
+    """State what produces this name: a DD path, a derived node, or nothing.
+
+    A name whose only producer is the ``derived:`` provenance node a composed
+    name is written by has no DD source of its own; the block says so instead
+    of letting the empty source list read as a failed read.
+    """
+    ids = normalize_source_ids(source_ids)
+    dd_paths = sorted(
+        path[3:] for path in ids if path.startswith("dd:") and len(path) > 3
+    )
+    derived = sorted(path for path in ids if not path.startswith("dd:"))
+    if dd_paths:
+        return {
+            "status": "dd",
+            "dd_paths": dd_paths,
+            "derived": derived,
+            "statement": f"{len(dd_paths)} DD path producer(s)",
+        }
+    if derived:
+        return {
+            "status": "derived",
+            "dd_paths": [],
+            "derived": derived,
+            "statement": "the only producer is a derived provenance node",
+        }
+    return {
+        "status": "none",
+        "dd_paths": [],
+        "derived": [],
+        "statement": "no producer edge binds this name",
+    }
+
+
+def _children_block(
+    name: str | None,
+    reader: _Reader | None,
+    withheld: Sequence[str],
+) -> dict[str, Any]:
+    """Read the live children a derived parent abstracts over."""
+    if "children" in withheld:
+        return _withheld_answer("the children")
+    if not name:
+        return {
+            "status": "none",
+            "statement": "the target is an unnamed source: it has no children",
+            "members": [],
+        }
+    if reader is None:
+        return {
+            "status": "unavailable",
+            "statement": "no graph reader was given for the children channel",
+            "members": [],
+        }
+    rows = reader.query(_CHILDREN_QUERY, id=name)
+    members = [
+        {
+            "name": _plain(row.get("name")),
+            "unit": _plain(row.get("unit")),
+            "description": _plain(row.get("description")),
+            "physics_domain": _plain(row.get("physics_domain")),
+            "kind": _plain(row.get("kind")),
+        }
+        for row in rows
+    ]
+    if members:
+        return {
+            "status": "members",
+            "statement": f"{len(members)} child name(s)",
+            "members": members,
+        }
+    return {
+        "status": "none",
+        "statement": "no live child name points at this name",
+        "members": [],
+    }
+
+
 def _open_client(gc: Any) -> tuple[Any, bool]:
     if gc is not None:
         return gc, False
@@ -1134,6 +1235,8 @@ def _assemble(
     family: Mapping[str, Any],
     neighbours: Mapping[str, Any],
     grammar: Mapping[str, Any],
+    children: Mapping[str, Any],
+    producer: Mapping[str, Any],
     withheld: Sequence[str],
     statements: Sequence[str],
 ) -> CaseFile:
@@ -1145,6 +1248,8 @@ def _assemble(
         "family": dict(family),
         "neighbours": dict(neighbours),
         "grammar": dict(grammar),
+        "children": dict(children),
+        "producer": dict(producer),
         "withheld_channels": list(withheld),
     }
     verdict = completeness_verdict(content)
@@ -1252,6 +1357,12 @@ def build_name_case_file(
             family=family,
             neighbours=neighbours,
             grammar=grammar,
+            children=_children_block(name, reader, withheld),
+            producer=(
+                _withheld_answer("the producer")
+                if "producer" in withheld
+                else _producer_block(rows[0].get("source_ids") or ())
+            ),
             withheld=withheld,
             statements=statements,
         )
@@ -1313,6 +1424,12 @@ def build_source_case_file(
             family=family,
             neighbours=neighbours,
             grammar=grammar,
+            children=_children_block(None, reader, withheld),
+            producer=(
+                _withheld_answer("the producer")
+                if "producer" in withheld
+                else _producer_block([f"dd:{path}" for path in paths])
+            ),
             withheld=withheld,
             statements=statements,
         )
