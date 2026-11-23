@@ -115,6 +115,16 @@
       "note": "\u00a72 and \u00a73 name their evidence pages and data files under docs/evidence/fragments/domains-follow-the-physics/",
       "reason": "",
       "when": "2026-11-23T07:04:46.369951+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "bab3757dbd0e24dbc951cf0b54a941e5e4c30ced",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a71's search is scoped to codex's definitions, prompts, package code and tests, excluding the vendored data-dictionary resources, which are inputs",
+      "reason": "",
+      "when": "2026-11-23T07:04:48.953867+00:00"
     }
   ],
   "responses": {
@@ -153,6 +163,15 @@
       "note": "\u00a72 measures every DD path that carries a domain and accounts separately for the paths the build leaves without one (domain_source none_metadata)",
       "reason": "",
       "when": "2026-11-23T07:04:36.671955+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "bab3757dbd0e24dbc951cf0b54a941e5e4c30ced",
+      "commit_basis": "edit",
+      "note": "\u00a71's search is scoped to codex's definitions, prompts, package code and tests, excluding the vendored data-dictionary resources, which are inputs",
+      "reason": "",
+      "when": "2026-11-23T07:04:48.953867+00:00"
     },
     "wiring-1": {
       "action": "acted",
