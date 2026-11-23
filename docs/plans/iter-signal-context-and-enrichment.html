@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="100">
+<meta name="plan-version" content="101">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -204,6 +204,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-close-s13" data-who="reckon-build" data-when="">
     <div class="r-comment-body"><p>Landed r-20261122T144352526858-plant-wide-roles at head 0a4972ad (merge 4a08cc091), re-run on the graph after the controls-feed repair. Plant-wide, 1,732 signals have a decided role (measurement 1,436, state 101, command 86, setpoint 63, alarm 46); on the pilot system quantities stay at 728 and decided roles rise from 202 to 740. A plant listing can filter by that role. Two non-blocking review notes are carried forward: the private configuration key for field-code meanings is named in two modules, and the readings guard is tested but not applied by the command.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-private-push-guard" data-who="reckon-build" data-when="">
+    <div class="r-comment-body"><p>Landed r-20261123T045646829911-full-graph-push-stays-private at head eb6b1c0d (merge 3e9b0fffa), toward section 9. Before it, only a facility-only push checked that its package was private; the weekly full-graph cycle, which carries the ITER nodes, did not, and the rename means the next cycle creates a new package. Every push whose archive holds facility nodes now sets its package private and reads the visibility back, failing before any latest tag is recorded if it is not private; the archive's own manifest decides whether it holds facility content, and an unreadable manifest counts as facility content. The three existing graph packages read private on 2026-11-23. The first delivery only failed a public package, leaving uploaded content public; it was corrected to set private first before landing. The installed package in the main checkout serves the fix.</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261117T012257298867-review-of-grouping-rerun-on-full-catalogue-9a20d0e51987" data-who="reckon-build" data-when="2026-11-17T01:30:10.090Z">
     <div class="r-comment-body"><p>Independent review of r-20261116T044838773093-grouping-rerun-on-full-catalogue at base 91b28dadb47206f741fefe49698c78ff2e744d57 and head 9a20d0e519870c8150309c35afe46338e4860d5b: scores goal_fidelity 18, evidence 15, scope_discipline 20, durability 6, fit 17, reuse 20 (total 96), four non-blocking findings, added_failure_count 0; stored as a parsed record at both declared review-records paths.</p></div>
