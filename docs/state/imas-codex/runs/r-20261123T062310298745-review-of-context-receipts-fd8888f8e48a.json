@@ -1012,6 +1012,42 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "4c1d3d9aa0fcb62ef2aa3d10aec9e7500c24da60",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261123T062310298745-review-of-context-receipts-fd8888f8e48a",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261123T062310298745-review-of-context-receipts-fd8888f8e48a",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/8e101d1f-e306-47cb-a56a-48cba5e5c742/review-of-context-receipts-fd8888f8e48a",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/_trash/r-20261123T062310298745-review-of-context-receipts-fd8888f8e48a-20261123T065114131063Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
