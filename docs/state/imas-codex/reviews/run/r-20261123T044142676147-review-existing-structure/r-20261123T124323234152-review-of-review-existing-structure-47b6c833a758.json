@@ -1,0 +1,90 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed documentation node declares no baseline_suite or after_suite arms and its write paths reach no test path, so 0 with an empty list records that absence rather than a measured clean pair.",
+  "completed_at": "2026-11-23T13:02:51.141Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "migrate-iter-plant-signal-ontology",
+      "recorded_at": "2026-11-23T13:04:00.024436+00:00"
+    }
+  },
+  "dimension_justifications": {
+    "durability": "No in-repo test exists; the only guard is check_record.py outside the node's write paths, which reddens only when a checked literal is dropped (for example id=\"networks\" or 11 of 11) and never re-measures a graph count.",
+    "evidence": "The counts reconcile with graph_census.log, graph_redundancy.log and graph_census.log's field_code_table, yet the head gate receipt is stale at record-check.log:1 (816fdec, 12 checks) and manifest.md:11 names no test_logs, though check_record.py passes at head with 24 checks.",
+    "fit": "The record follows the repository's research-document idiom with no plan or ticket identifier in a symbol or path, and ontology-proposal.svg renders with one legend and each of 1..18 used once.",
+    "goal_fidelity": "docs/research/iter-plant-signal-ontology-review.html:26 answers the census, the six resolutions and the documentation measure, but the class table omits DataSource, which graph_census.log measures at 2 ITER nodes.",
+    "reuse": "A schema search at 47b6c833 for connection, network, port and field-code classes finds only SignalContextLink and ArchiveFieldPattern, so ArchiveFieldCode and PlantConnection name the absence of an owner and the proposals extend Document, PlantContextProvenance and the reified-edge pattern rather than duplicating them.",
+    "scope_discipline": "Every path in 730b85cd..47b6c833 is one of the four declared write paths, and the diff carries no schema, source or test edit the goal does not ask for."
+  },
+  "dispatched_at": "2026-11-23T12:43:52Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T13:05:17.399951+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261123T044142676147-review-existing-structure",
+      "section": "\u00a72"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T13:05:17.399951+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261123T044142676147-review-existing-structure",
+      "section": "\u00a72"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T13:05:17.399951+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261123T044142676147-review-existing-structure",
+      "section": "\u00a72"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/research/iter-plant-signal-ontology-review.html",
+      "line": 26,
+      "severity": "non-blocking",
+      "summary": "The class census omits DataSource, which graph_census.log measures at 2 ITER nodes and which is reachable in one hop from ArchiveEndpoint through HOSTED_BY_ARCHIVE, exactly as PulseCategory (744) is included. The node brief names DataSource among the shared classes to compare against, so the record's 'every class reachable' claim is short by one class and its AT_FACILITY, HOSTED_BY_ARCHIVE and SUPERSEDES relationship types are absent from the relationship table."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T044142676147-review-existing-structure/record-check.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The recorded gate receipt is stale: it names revision 816fdec78 and 'checks run: 12', while the head checker runs 24 checks, and manifest.md:11 records no test_logs path. The head result survives only in the manifest's checkpoint sentence. Re-running check_record.py at 47b6c833 passes with 24 checks and EXIT=0, so the result is true but the receipt predates the change it purports to gate."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T044142676147-review-existing-structure/census_coverage.py",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The '11 of 11' documentation denominator is the literal ROOTS list of eleven control codes rather than a live count, so a later first-level node would leave the measure silently reporting 11 of 11. The graph read control_node_one does return 11 today, and the record states the measure as a lower bound, so the figure is right now and only the guard against drift is missing."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production runtime code can reach the landed change: the three files are a research document, an HTML evidence fragment and an SVG figure, and no module imports or reads them. The production readers the record reasons about exist at group_enrichment.py:60,74, plant_context.py:21,270,279, plant_search.py:16,285 and domain_queries.py:124-154.",
+    "diff": "Read all six commits against 730b85cd. The cumulative diff 730b85cd..47b6c833 is three files and +2916 lines: the research record, the evidence fragment and ontology-proposal.svg. No schema, source or test file changes.",
+    "done_when": "The done_when names the census, the six resolutions, the reuse-or-none reason per proposal, readers and writers of every changed class, the documentation measure with the magnet supplies named, the shared-class statement and two negative controls. The record carries all of these and check_record.py passes at head with 24 checks; the class census is short one measured class (DataSource).",
+    "goal": "The goal is plan section 2: a review of every class and relationship reachable from an ITER archive signal, with live counts, verdicts, the six open problems resolved, the readers and writers of each change and a documentation measure. docs/research/iter-plant-signal-ontology-review.html:26 carries a nineteen-class table, a thirty-row existing relationship table plus seven proposed types, six resolutions, readers and writers for seven changes and the 11-of-11 lower bound.",
+    "manifest": "Read manifest.md: it reads status complete at :5, lists the six commit shas at :7, names the gate command at :11 and both negative controls at :12-13, and records the census and headline metrics at :14. It records no test_logs path, and its record-check.log is stale at revision 816fdec with 12 checks.",
+    "write_paths": "The four declared write paths are docs/research/iter-plant-signal-ontology-review.html, docs/figures/iter-plant-signal-ontology, docs/evidence/fragments/iter-plant-signal-ontology/review-existing-structure.html and docs/figures/iter-plant-signal-ontology/review-existing-structure. The three paths changed across 730b85cd..47b6c833 all lie inside them."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T124323234152-review-of-review-existing-structure-47b6c833a758",
+  "reviewed_base_sha": "730b85cd8e937b36a5adec071dc2b74f505125de",
+  "reviewed_head_sha": "47b6c833a758277db73b82409b1d05bc348e49d6",
+  "reviewed_run_id": "r-20261123T044142676147-review-existing-structure",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T13:07:39.724570+00:00",
+  "total": 100
+}
