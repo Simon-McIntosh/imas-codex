@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="imas-codex">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="domains-follow-the-physics">
+<meta name="plan-title" content="Domains Follow The Physics">
+<meta name="plan-summary" content="Bring codex's domain definitions, the DD build's path domains and every live standard name onto the ruled physics-only vocabulary.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort-hours" content="20.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-sprint" content="S20">
+<meta name="plan-tags" content="standard-names,physics-domains">
+<meta name="plan-blocks" content="sn-audited-group-release">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-depends-on" content="{&quot;s1&quot;:[&quot;imas-standard-names:physics-domain-vocabulary#s1&quot;,&quot;imas-standard-names:physics-domain-vocabulary#s2&quot;],&quot;s2&quot;:[&quot;domains-follow-the-physics#s1&quot;],&quot;s3&quot;:[&quot;domains-follow-the-physics#s1&quot;,&quot;domains-follow-the-physics#s2&quot;],&quot;s4&quot;:[&quot;domains-follow-the-physics#s1&quot;]}">
+<title>Domains Follow The Physics | imas-codex</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+<h2 id="s1">codex's domain definitions follow the ruled vocabulary</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>Lead rulings, 2026-11-23:</p>
+<ul>
+<li>A physics domain names the physics of the quantity. It is never named from a data-dictionary path or data structure.</li>
+<li><code>core_plasma_physics</code> becomes <code>plasma_state</code>.</li>
+<li><code>plasma_measurement_diagnostics</code> is retired.</li>
+<li><code>computational_workflow</code> merges into <code>data_management</code>.</li>
+<li>The per-domain IDS lists leave the vocabulary.</li>
+<li>Source and exchange terms of the particle, energy and momentum balance stay in <code>transport</code>.</li>
+</ul>
+<p>The vocabulary changes in <code>imas-standard-names:physics-domain-vocabulary</code>. codex carries the same domains in its own definitions, its IDS-to-domain table, its path overrides, its gold set and its classifier prompt.</p>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Every codex definition, table, override, gold-set entry, prompt and test fixture names only values of the ruled vocabulary. A search of the package and the tests finds none of the three removed values.</li>
+<li>The domain guidance gives <code>plasma_state</code> and <code>transport</code> the scopes ruled above, with the rule that a source whose name states its origin belongs to that origin's domain.</li>
+<li>Both imas-codex pins name the release candidate of <code>physics-domain-vocabulary</code> §2. An environment synced from them reports the 30 values.</li>
+<li>The domain-guidance test and the domain-classifier tests pass, and removing <code>plasma_state</code> from the guidance in a copy makes the guidance test fail.</li>
+<li>The whole <code>tests/standard_names</code> directory and <code>tests/graph</code> add no failure at head against base, run as one job on <code>all_debug</code>.</li>
+</ul>
+
+<h2 id="s2">The DD build's path domains are reviewed against the ruling</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>Every DD path in the graph carries a physics domain from the build. The DD-path domain on a name's sources has been a prompt for the name's own domain, and on 2026-11-22 it had put 1,042 names in <code>transport</code>. The lead asked on 2026-11-23 for the build to be reviewed, and rerun if the review shows it is needed.</p>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>An evidence page and data file, read from the live graph in one run, give:
+<ul>
+<li>for every DD path, the mechanism that assigned its domain;</li>
+<li>the count of paths whose domain rests on the IDS-to-domain table alone;</li>
+<li>the paths that carry a value the ruled vocabulary no longer holds;</li>
+<li>for each domain, the agreement between its paths' domains and the domains of the live names those paths source.</li>
+</ul></li>
+<li>For each domain, a sample drawn by a recorded seed lists each path's documentation beside its domain. The coordinator reads the sample by hand, and that reading is recorded on this plan.</li>
+<li>The evidence ends with a recommendation for or against rerunning the build's domain step. The recommendation states what a rerun would change.</li>
+<li>No graph write.</li>
+<li>Heavy reads run as a job on <code>all_debug</code>.</li>
+</ul>
+
+<h2 id="s3">The DD build's domain step reruns under the ruled vocabulary</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p>This section runs only once the lead has ruled on §2's recommendation, and that ruling is recorded here. If the lead rules against a rerun, this section is descoped with the reason.</p>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>A verified graph checkpoint is taken before the first write, with every graph-writing worker at rest.</li>
+<li>The build's domain step reruns over every DD path.</li>
+<li>Read back from the live graph:
+<ul>
+<li>every path's domain is a value of the ruled vocabulary, and none carries a removed value;</li>
+<li>the per-domain path counts before and after are recorded side by side;</li>
+<li>a sample drawn by a recorded seed from the moved paths is read by hand by the coordinator, and that reading is recorded.</li>
+</ul></li>
+<li>The graph-marked DD domain tests pass against the live graph.</li>
+<li>Heavy work runs on a compute partition, and no other graph writer runs at the same time.</li>
+</ul>
+
+<h2 id="s4">Every live standard name carries the domain its physics names</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p>The coordinator read the 1,042 names that carried <code>transport</code> on 2026-11-22 by hand, and placed each one by its physics. The result is <code>docs/evidence/fragments/domains-follow-the-physics/transport-physics-placement.json</code>:</p>
+<table>
+<thead><tr><th>Domain</th><th>Names</th></tr></thead>
+<tbody>
+<tr><td><code>transport</code></td><td>587</td></tr>
+<tr><td><code>plasma_state</code></td><td>310</td></tr>
+<tr><td><code>fast_particles</code></td><td>103</td></tr>
+<tr><td><code>runaway_electrons</code></td><td>18</td></tr>
+<tr><td><code>equilibrium</code></td><td>12</td></tr>
+<tr><td><code>current_drive</code></td><td>4</td></tr>
+<tr><td><code>magnetohydrodynamics</code></td><td>4</td></tr>
+<tr><td><code>auxiliary_heating</code></td><td>4</td></tr>
+</tbody>
+</table>
+<p>That file is the authority for these names, and this section applies it.</p>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Every name in the placement file carries its placed domain.</li>
+<li>Every live name that carried <code>core_plasma_physics</code> carries <code>plasma_state</code>.</li>
+<li>Each change is written through the pipeline's own domain write path, by one writer at a time.</li>
+<li>Read back from the live graph in one run:
+<ul>
+<li>the per-domain counts over the placed names equal the file's;</li>
+<li>no live name carries a removed value;</li>
+<li>apart from the domain field, the stored text of every changed name is unchanged, compared by digest before and after.</li>
+</ul></li>
+<li>A name absent from the placement file and outside <code>core_plasma_physics</code> keeps its domain. One such name is checked before and after as a control.</li>
+<li>No other graph writer runs at the same time.</li>
+</ul>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-dftp-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-23">
+<h4 class="r-fu-title">Bring codex onto the ruled vocabulary</h4>
+<div class="r-fu-body"><p>Starts once the grammar library's §1 and §2 have landed.</p></div>
+<pre class="r-fu-prompt">/reckon-build domains-follow-the-physics</pre>
+</article>
+</section>
+
+</main>
+</body>
+</html>
