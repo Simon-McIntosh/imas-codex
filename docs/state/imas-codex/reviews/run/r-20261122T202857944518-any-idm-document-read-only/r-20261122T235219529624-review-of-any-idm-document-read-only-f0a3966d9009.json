@@ -1,0 +1,46 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "iter_codex/discovery/icp/documents.py:56 ICPDocuments.fetch",
+    "iter_codex/discovery/icp/documents.py:84 ICPDocuments.fetch document_url",
+    "iter_codex/discovery/icp/__init__.py:5 ICPClient export"
+  ],
+  "completed_at": "2026-11-23T00:16:45.458Z",
+  "dispatched_at": "2026-11-22T23:53:01Z",
+  "findings": [],
+  "justifications": {
+    "durability": "The negative control at negative-control-unlisted-identity.log restores the identity allowlist and reddens all five parametrizations of test_unlisted_well_formed_identity_is_readable (EXIT=1), so the core guard fails on the regression it protects; the interval-default and transport-routing tests guard their own behaviour, and the added write-refusal test verifies an unchanged method rule rather than the widened identity rule.",
+    "evidence": "The gate ran tests/discovery/test_icp_documents.py with the client and records files (gate-head-worktree.log: 507 passed, EXIT=0; gate-base-icp.log: 480 passed, EXIT=0), and the live-fetch clause is evidenced by the private receipt at ~/.cache/imas-codex-codac-uda/any-idm-document-read-only, whose recorded SHA-256 matches the stored 192020-byte 4-page PDF (outcome fetched, status 200).",
+    "fit": "The module keeps the surrounding dataclass-and-policy idiom and adds mechanism-named symbols (_DOCUMENT_IDENTITY, DEFAULT_DOCUMENT_INTERVAL, document_pacer) with no plan or ticket identifiers.",
+    "goal_fidelity": "client.py:101-124 replaces the private identity allowlist with a well-formed-identity check while keeping the GET-only form, exact path/query and origin checks, and client.py:486-506 reads document_min_interval with a 1.0 s default, so an unlisted well-formed identity is now readable read-only.",
+    "reuse": "The document pacer reuses iter_codex/discovery/base/request_pacer.py:11 rather than a new throttle, and the identity regex consolidates the prior inline pattern into one constant rather than duplicating a validator.",
+    "scope_discipline": "Every path in the diff (client.py, documents.py, tests/discovery/test_icp_documents.py, the evidence fragment) lies inside the declared write paths, and no other rule of the request policy was widened."
+  },
+  "notes": "added_failure_count and added_failure_ids are derived from the reviewed run's own gate logs: gate-base-icp.log records 480 passed and gate-head-worktree.log records 507 passed, both EXIT=0 and both summary lines carry 0 failures, so no failure id is added.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261122T235219529624-review-of-any-idm-document-read-only-f0a3966d9009",
+  "reviewed_base_sha": "0bb6d2b7fb885a979cbe3f91ba2d466acba9a489",
+  "reviewed_head_sha": "f0a3966d9009f8a5eef0db4242cdd0b5051fe652",
+  "reviewed_run_id": "r-20261122T202857944518-any-idm-document-read-only",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T00:16:59.007668+00:00",
+  "total": 114,
+  "verdicts": {
+    "call_sites": "Searched the head tree for production users: ICPDocuments.fetch (documents.py:56) calls client.document_url and the guarded session, the package re-exports ICPClient in iter_codex/discovery/icp/__init__.py:5 re-exports it, and iter_codex/discovery/signals/plant_context.py:13 imports only record types, so the transport path is exercised through the icp package and its tests.",
+    "diff": "Read both commits against base 0bb6d2b7f: f6b59fa2a changes the gate, config reading and tests, and f0a3966d9 adds the 64-line evidence fragment; the only documents.py change is its module docstring.",
+    "done_when": "Read the done_when and the gate: test_unlisted_well_formed_identity_is_readable allows an unlisted GET, test_unlisted_identity_write_refused_before_transport refuses POST/PUT/PATCH/DELETE before transport, and test_document_form_is_exact refuses malformed identities, an extra key and other paths; gate-head-worktree.log records 507 passed EXIT=0 against 480 at base.",
+    "goal": "Read the brief's goal: the ICP client fetches any IDM document by identity and version read-only without a per-document allowlist; client.py:101-124 and client.py:486-506 deliver the well-formed-identity gate and the paced default.",
+    "manifest": "Read the reviewed run's manifest: status complete, commits f6b59fa2a and f0a3966d9, with baseline_suite (480 passed, 0 failures) and after_suite (507 passed, 0 failures) recorded as single-line JSON and the negative control named at negative-control-unlisted-identity.log.",
+    "write_paths": "Read the declared write paths against the diff: all four changed files (iter_codex/discovery/icp/client.py, iter_codex/discovery/icp/documents.py, tests/discovery/test_icp_documents.py, docs/evidence/fragments/iter-plant-signal-ontology/any-idm-document-read-only.html) are relevant directories or the named fragment."
+  }
+}
