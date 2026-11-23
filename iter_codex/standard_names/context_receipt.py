@@ -630,28 +630,27 @@ def _name_context(content: Mapping[str, Any]) -> dict[str, Any]:
     locus_rows = [dict(row) for row in (by_locus.get("members") or ())]
     dd_description = item["dd_description"] or item["description"]
     source_paths = item["source_paths"]
-    ancestor_rows = [
-        {"path": statement.get("path"), "text": statement.get("text")}
-        for statement in enclosing
-    ]
+    ancestor_rows = [dict(statement) for statement in enclosing]
     candidate_path = source_paths[0] if source_paths else name
+    # The candidate row is the per-name row above, aliased for the two
+    # composition templates rather than restated: `path` and `source_id` name
+    # the DD path the way each template spells it, `standard_name` names the
+    # candidate, and `ancestor_context` is the enclosure the case file already
+    # recorded. Only the two fields the templates read under a different
+    # precedence are overridden, so both stages render one shape that cannot
+    # drift from the case file it came from.
     items = [
         {
+            **item,
             "id": name,
+            "name": name,
             "standard_name": name,
             "source_id": candidate_path,
             "path": candidate_path,
-            "description": item["dd_description"] or item["description"],
+            "description": dd_description,
             "documentation": item["dd_documentation"] or item["documentation"],
-            "dd_description": item["dd_description"] or item["description"],
-            "dd_documentation": item["dd_documentation"] or item["documentation"],
-            "unit": unit,
-            "kind": item["kind"],
-            "physics_domain": item["physics_domain"],
-            "coordinates": item["coordinates"],
             "coordinate_paths": item["coordinates"],
             "ancestor_context": ancestor_rows,
-            "source_paths": source_paths,
         }
     ]
     ids_order: list[str] = []
