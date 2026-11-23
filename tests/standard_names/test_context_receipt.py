@@ -248,3 +248,28 @@ def test_a_live_context_without_source_text_reports_the_omission():
 
     assert receipt.complete is False
     assert "source_text" in receipt.missing
+
+
+def test_record_receipt_writes_to_the_default_sink_when_none_is_given(
+    tmp_path, monkeypatch
+):
+    """A stage's receipt reaches a sink nobody configured.
+
+    The default sink is what makes a live stage's record exist without the
+    pipeline being wired to produce one; a receipt written only when an
+    explicit sink or an environment override is supplied is one no stage
+    writes in the course of its run.
+    """
+    monkeypatch.delenv(cr.RECEIPT_SINK_ENV, raising=False)
+    target = tmp_path / "default.jsonl"
+    monkeypatch.setattr(cr, "DEFAULT_RECEIPT_SINK", target)
+
+    written = cr.record_receipt(
+        cr.receipt_from_content(
+            "name_review", "elongation_of_flux_surface", {"target": {"id": "x"}}
+        )
+    )
+
+    assert written == target
+    assert target.exists()
+    assert len(target.read_text(encoding="utf-8").splitlines()) == 1

@@ -597,6 +597,7 @@ def _name_context(content: Mapping[str, Any]) -> dict[str, Any]:
         ],
     }
     item["sibling_family"] = sibling_family
+
     def prompt_row(entry: Mapping[str, Any]) -> dict[str, Any]:
         """One case-file neighbour row in the shape a stage's prompt reads.
 
@@ -620,14 +621,10 @@ def _name_context(content: Mapping[str, Any]) -> dict[str, Any]:
     subject_rows = [dict(row) for row in (by_subject.get("members") or ())]
     same_base_source = "same physical base"
     vector_neighbours = [
-        prompt_row(row)
-        for row in subject_rows
-        if row.get("source") != same_base_source
+        prompt_row(row) for row in subject_rows if row.get("source") != same_base_source
     ]
     same_base_neighbours = [
-        prompt_row(row)
-        for row in subject_rows
-        if row.get("source") == same_base_source
+        prompt_row(row) for row in subject_rows if row.get("source") == same_base_source
     ]
     by_locus = dict(neighbours.get("by_locus") or {})
     locus_rows = [dict(row) for row in (by_locus.get("members") or ())]
@@ -816,7 +813,13 @@ def content_from_prompt_context(
         item = dict(items[0]) if items else {}
     name = str(item.get("id") or name)
 
-    enclosing = list(context.get("anc") or ())
+    enclosing = list(
+        context.get("anc")
+        or (context.get("dd_context") or {}).get("ancestors")
+        or item.get("enclosing")
+        or item.get("ancestors")
+        or ()
+    )
     dd_text = str(item.get("dd_description") or item.get("description") or "")
     source = {
         "id": name,
