@@ -25,7 +25,7 @@
 <title>Domains Follow The Physics | imas-codex</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -42,10 +42,11 @@
 <li>The per-domain IDS lists leave the vocabulary.</li>
 <li>Source and exchange terms of the particle, energy and momentum balance stay in <code>transport</code>.</li>
 </ul>
-<p>The vocabulary changes in <code>imas-standard-names:physics-domain-vocabulary</code>. codex carries the same domains in its own definitions, its IDS-to-domain table, its path overrides, its gold set and its classifier prompt.</p>
+<p>The vocabulary changes in <code>imas-standard-names:physics-domain-vocabulary</code>. codex carries the same domains in its own definitions, its path overrides, its gold set and its classifier prompt. Its IDS-to-domain table is generated from the domains on the graph's DD paths, so it is regenerated in §3, after those domains are rerun.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Every codex definition, table, override, gold-set entry, prompt and test fixture names only values of the ruled vocabulary. A search of the package and the tests finds none of the three removed values.</li>
+<li>Every codex domain definition, path override, gold-set entry, prompt and test fixture names only values of the ruled vocabulary.</li>
+<li>A search of codex's definitions, prompts, package code and tests finds none of the three removed values. The vendored data-dictionary resources are excluded from the search because they are inputs.</li>
 <li>The domain guidance gives <code>plasma_state</code> and <code>transport</code> the scopes ruled above, with the rule that a source whose name states its origin belongs to that origin's domain.</li>
 <li>Both imas-codex pins name the release candidate of <code>physics-domain-vocabulary</code> §2. An environment synced from them reports the 30 values.</li>
 <li>The domain-guidance test and the domain-classifier tests pass, and removing <code>plasma_state</code> from the guidance in a copy makes the guidance test fail.</li>
@@ -54,13 +55,14 @@
 
 <h2 id="s2">The DD build's path domains are reviewed against the ruling</h2>
 <section data-reckon="section" data-id="s2" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>Every DD path in the graph carries a physics domain from the build. The DD-path domain on a name's sources has been a prompt for the name's own domain, and on 2026-11-22 it had put 1,042 names in <code>transport</code>. The lead asked on 2026-11-23 for the build to be reviewed, and rerun if the review shows it is needed.</p>
+<p>The DD build gives most paths a physics domain and leaves infrastructure paths without one. The domains on a name's source paths, and the IDS-to-domain table drawn from them, have been offered as candidates for the name's own domain. On 2026-11-22 that route had put 1,042 names in <code>transport</code>. The lead asked on 2026-11-23 for the build to be reviewed, and rerun if the review shows it is needed.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>An evidence page and data file, read from the live graph in one run, give:
+<li>An evidence page and data file are committed at <code>docs/evidence/fragments/domains-follow-the-physics/dd-path-domain-review.html</code> and <code>.json</code>. Read from the live graph in one run, they give:
 <ul>
-<li>for every DD path, the mechanism that assigned its domain;</li>
-<li>the count of paths whose domain rests on the IDS-to-domain table alone;</li>
+<li>for every DD path that carries a domain, the recorded mechanism that set it, with the count of paths under each mechanism;</li>
+<li>the count of paths the build leaves without a domain, by the reason it records;</li>
+<li>the count of live names whose stored domain equals a candidate drawn from their sources' IDS through the IDS-to-domain table, beside the count whose domain matches no such candidate;</li>
 <li>the paths that carry a value the ruled vocabulary no longer holds;</li>
 <li>for each domain, the agreement between its paths' domains and the domains of the live names those paths source.</li>
 </ul></li>
@@ -72,17 +74,20 @@
 
 <h2 id="s3">The DD build's domain step reruns under the ruled vocabulary</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
-<p>This section runs only once the lead has ruled on §2's recommendation, and that ruling is recorded here. If the lead rules against a rerun, this section is descoped with the reason.</p>
+<p>This section runs only once the lead has ruled on §2's recommendation, and that ruling is recorded here. A path that carries a removed value must move whatever the ruling. If the lead rules against a full rerun of the domain step, only those paths are moved: <code>core_plasma_physics</code> to <code>plasma_state</code> and <code>computational_workflow</code> to <code>data_management</code>.</p>
 <p><strong>Done when:</strong></p>
 <ul>
 <li>A verified graph checkpoint is taken before the first write, with every graph-writing worker at rest.</li>
-<li>The build's domain step reruns over every DD path.</li>
+<li>The build's domain step reruns over every DD path, or over the paths carrying a removed value if that is what the lead ruled.</li>
+<li>A recorded run on a disposable graph is the planted control. A path planted with a removed value is reassigned to a ruled value, and a path planted with an unchanged domain keeps it.</li>
 <li>Read back from the live graph:
 <ul>
-<li>every path's domain is a value of the ruled vocabulary, and none carries a removed value;</li>
+<li>every path that carries a domain carries a value of the ruled vocabulary, and none carries a removed value;</li>
 <li>the per-domain path counts before and after are recorded side by side;</li>
 <li>a sample drawn by a recorded seed from the moved paths is read by hand by the coordinator, and that reading is recorded.</li>
 </ul></li>
+<li>The IDS-to-domain table is regenerated from the rerun path domains and names only ruled values.</li>
+<li>The counts, the control's log and the sample are committed at <code>docs/evidence/fragments/domains-follow-the-physics/dd-path-domain-rerun.html</code> and <code>.json</code>.</li>
 <li>The graph-marked DD domain tests pass against the live graph.</li>
 <li>Heavy work runs on a compute partition, and no other graph writer runs at the same time.</li>
 </ul>
