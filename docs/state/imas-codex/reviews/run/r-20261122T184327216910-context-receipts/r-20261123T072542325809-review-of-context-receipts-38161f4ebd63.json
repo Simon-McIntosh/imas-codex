@@ -1,0 +1,93 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "iter_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:_self_refine_candidate",
+    "iter_codex/standard_names/worker_tasks/worker_compose_and_validate.py:_compose_batch_body",
+    "iter_codex/standard_names/worker_tasks/worker_compose_batches.py:compose_batch",
+    "iter_codex/standard_names/worker_tasks/worker_review_names.py:process_review_name_batch",
+    "iter_codex/standard_names/worker_tasks/worker_refine_names.py:process_refine_name_batch",
+    "iter_codex/standard_names/worker_tasks/worker_generate_docs.py:process_generate_docs_batch",
+    "iter_codex/standard_names/worker_tasks/worker_enrich_parents.py:process_enrich_parents_batch",
+    "iter_codex/standard_names/worker_tasks/worker_review_docs.py:prepare_docs_review_request"
+  ],
+  "completed_at": "2026-11-23T08:06:45.805Z",
+  "dispatched_at": "2026-11-23T07:26:06Z",
+  "findings": [
+    {
+      "file": "iter_codex/standard_names/context_receipt.py",
+      "line": 642,
+      "severity": "blocking",
+      "text": "blocking: _name_context supplies no 'items' or 'ids_contexts', which both composition templates iterate, so name_composition and name_review render identical prompts for different names: 1 distinct digest across all 251 census rows."
+    },
+    {
+      "file": "iter_codex/standard_names/context_receipt.py",
+      "line": 823,
+      "severity": "non-blocking",
+      "text": "non-blocking: content_from_prompt_context fills source_text from dd_description or description, so a description-only item reports source_text present though the prompt carried no source text."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/context-receipts.py",
+      "line": 694,
+      "severity": "non-blocking",
+      "text": "non-blocking: provenance model_calls and graph_writes are hardcoded zero rather than measured, so the page's zero-spend claim cannot fail."
+    },
+    {
+      "file": "docs/figures/sn-case-file-generation/make_channel_coverage.py",
+      "line": 6,
+      "severity": "non-blocking",
+      "text": "non-blocking: the docstring still describes a two-panel figure while draw() emits one 7x11 matrix, and the names parameter is unused."
+    },
+    {
+      "file": "iter_codex/standard_names/case_file.py",
+      "line": 153,
+      "severity": "non-blocking",
+      "text": "non-blocking: _CHILDREN_QUERY duplicates the children loader at worker_review_docs.py:174, so one channel has two statements."
+    },
+    {
+      "file": "tests/standard_names/test_context_receipt.py",
+      "line": 33,
+      "severity": "non-blocking",
+      "text": "non-blocking: no test requires two distinct names to produce distinct prompt digests, so the composition collapse stays green."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/context-receipts.html",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "non-blocking: the page quotes 8909 passed at c5f432f12 but no such log remains; gate.log holds a 22-passed focused run, so that suite evidence cannot be re-read."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified all eight call sites; each calls record_stage_receipt immediately before building the model messages with the same context the prompt renders from.",
+    "diff": "Read the range c7ae574a..38161f4eb: 18 files, 30381 insertions; adds context_receipt.py, children and producer channels, eight call sites, the census, the evidence page, the figure and three tests; no prompt template text changed.",
+    "done_when": "Census, ranked omissions, 33-member cross-tabulation, both controls, children and producer channels and zero metered spend are present; the 'census renders each stage's prompt' clause is false for two of seven stages.",
+    "goal": "All eight stages call record_stage_receipt and omissions are counted, but the census renders name_composition and name_review without their per-name block, so for those stages it measures the case file rather than the prompt the stage is shown.",
+    "manifest": "Read; it records the repair round and per-finding controls, but has no baseline_suite or after_suite field, so added failures were read from gate-first-pass.log (1 failed, 8908 passed at 434b471c5) and the head run of that test (1 passed).",
+    "write_paths": "The declared paths are the evidence page, the figure directory and context_receipt.py; the diff also touches case_file.py, eight worker_tasks files, three tests and the census script, all implied by the done_when, so the extras are in expected scope though undeclared."
+  },
+  "justifications": {
+    "durability": "Positive, negative and default-sink tests exist, but none requires distinct names to yield distinct prompts, so the composition collapse passes the suite.",
+    "evidence": "251 names, 12 omissions, both controls and the cross-tabulation are recorded, but the composition digest is identical across all 251 rows and the zero-spend figures are constants.",
+    "fit": "_stage_context delegates to build_compose_context and the channel vocabulary to the case file, but _CHILDREN_QUERY duplicates the loader in worker_review_docs.py.",
+    "goal_fidelity": "The live half runs and every stage records a receipt, but two of seven stages are measured from the case file because their rendered prompt carries no per-name block.",
+    "reuse": "The section half and channel vocabulary are owned elsewhere, but the children query is re-implemented and prompt row shapes are partly re-derived.",
+    "scope_discipline": "The diff stays inside the section and the artefacts the done_when names; the undeclared case_file.py and worker_tasks paths follow directly from its clauses."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T072542325809-review-of-context-receipts-38161f4ebd63",
+  "reviewed_base_sha": "c7ae574a24036ee0269353d60a772d1170aa3a22",
+  "reviewed_head_sha": "38161f4ebd63661d98f72e8f95741267312dd2a0",
+  "reviewed_run_id": "r-20261122T184327216910-context-receipts",
+  "scores": {
+    "durability": 11,
+    "evidence": 10,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 7,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T08:58:00.000000+00:00",
+  "total": 71
+}
