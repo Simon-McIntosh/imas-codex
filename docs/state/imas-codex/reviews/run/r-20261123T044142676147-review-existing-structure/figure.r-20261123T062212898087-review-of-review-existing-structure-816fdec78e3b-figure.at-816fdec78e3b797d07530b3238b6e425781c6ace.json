@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T06:41:12.109Z",
+  "dispatched_at": "2026-11-23T06:25:46Z",
+  "findings": [
+    {
+      "file": "docs/figures/iter-plant-signal-ontology/review-existing-structure/ontology-proposal.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Edges are labelled with bare numbers only, so a reader must cross-reference the 17-entry key beneath the panels to learn any relationship's type and its live ITER count; the relationship name never sits beside the edge it names. The two-hop read slows the figure at every edge, and the label on the top-right FacilitySignal-SignalContextLink edge (key entry 9, HAS_PLANT_CONTEXT 225) is hard to resolve as a digit at display size."
+    },
+    {
+      "file": "docs/figures/iter-plant-signal-ontology/review-existing-structure/ontology-proposal.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The bottom third of the image is a 17-row inventory of relationship name plus live count, set as two ragged, unaligned column blocks rather than an aligned table. That name/count inventory is naturally tabular, and its counts (90,314 against 225 against 7) are hard to compare in the current ragged form."
+    },
+    {
+      "file": "docs/figures/iter-plant-signal-ontology/review-existing-structure/ontology-proposal.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Key entry 17 reads as a migration sentence ('PlantContextDocument to Document: 7 nodes migrate') where the other 16 entries are a relationship type and a count. A reader using the key as a lookup gets prose for the one entry, and the dashed 17 edge in the right panel cannot be matched to a relationship name the way the others can."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T062212898087-review-of-review-existing-structure-816fdec78e3b-figure",
+  "reviewed_base_sha": "730b85cd8e937b36a5adec071dc2b74f505125de",
+  "reviewed_head_sha": "816fdec78e3b797d07530b3238b6e425781c6ace",
+  "reviewed_run_id": "r-20261123T044142676147-review-existing-structure",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "All text clears its background: dark node labels and counts on white boxes, blue proposal labels and the blue ArchiveFieldCode box legible on white, and the key text dark enough to read at display size.",
+    "data_ink": "The data carry the weight: node boxes, class names and live counts are the substance; there is no grid, gradient or decorative fill competing with the data.",
+    "decoration": "No gradient, background fill, drop shadow or decorative styling; plain boxes and lines on white, which is what the plot style asks for.",
+    "label_collision": "No clipped or overlapping labels in the rendered PNG: the closest pair (edge boxes 15 and 1 near ControlNode) still has a visible gap, and no label sits on top of the plotted data.",
+    "legibility": "Readable at a glance for the class map: each node box carries its name and live count, and the two panels (classes reached from a signal, and the document and field-code side) are clearly separated. One defect: edges carry bare numbers, so a reader must jump to the key beneath to learn a relationship's name and count, and the top-right edge label does not resolve clearly as a digit at display size.",
+    "table_form": "The top two-thirds is a node-link diagram, which is the right form for topology, but the bottom third is a 17-row relationship inventory (name plus count) set as two ragged column blocks rather than an aligned table. That portion is naturally tabular."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T06:41:30.779769+00:00",
+  "total": null
+}
