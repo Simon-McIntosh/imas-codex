@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-23T00:40:34.984Z",
+  "dispatched_at": "2026-11-23T00:23:27Z",
+  "findings": [
+    {
+      "file": ".claude/skills/lucy-records/SKILL.md",
+      "line": 84,
+      "severity": "non-blocking",
+      "text": "The skill says a capacity_exceeded call should be retried 'once after about a call', while every ICP tool description in the saved live tool list says 'retry it once after about a second'; the advice as written is not actionable. The gate checks names and schema vocabulary only, so it cannot redden on this prose slip."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-plant-signal-ontology/lucy-record-tools-skill.html",
+      "line": 247,
+      "severity": "non-blocking",
+      "text": "The ICPRecords row claims the skill cites search_components and search_function_categories (records.py:222 and :227), but SKILL.md:203-206 cites neither; both methods exist at those lines, yet the table overstates what the skill names, so a reader cannot tell which of the ten listed methods is actually cited."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-plant-signal-ontology/lucy-record-tools-skill.html",
+      "line": 195,
+      "severity": "non-blocking",
+      "text": "The fragment states the skill holds 'no host, person or document title', but the listed checks (verify_skill.py identity regex \\b[A-Z0-9]{6}\\b, dotted two-part code, iter.org) cannot fail on a real document title such as the live 'GDC I&C signal list' or a person name, so that clause of the done_when is asserted rather than measured."
+    }
+  ],
+  "justifications": {
+    "durability": "No committed test fails if the skill regresses: the only guard is verify_skill.py in the run directory reading run-local JSON, and .claude/skills/lucy-records/SKILL.md carries no in-repo assertion, so a future edit reintroducing a wrong field name would pass the repository suite.",
+    "evidence": "The fragment's project-call table (lucy-record-tools-skill.html:205-260) cites line spans I re-read at the reviewed head and found exact (documents.py:56-64, 72-73, 74-76, 129-156, 177-190; client.py:33, 196-199; records.py:217-376), but the ICPRecords row at :247 names two methods the skill never cites and the hygiene claim at :195 rests on greps that cannot fail on a document title.",
+    "fit": "The gained commit restores the trailing newline both tracked files lacked, matching the idiom of .claude/skills/archive-signals/SKILL.md, and introduces no plan, sprint or ticket identifier; the only wording slip is prose at SKILL.md:84.",
+    "goal_fidelity": "The gained commit a2a427d0e rewrites the project-client paragraph at .claude/skills/lucy-records/SKILL.md:198-203 to the real async, keyword-only fetch signature, so the skill still does what the node goal states without a call that raises TypeError.",
+    "reuse": "The change adds no code definition; it documents the existing iter_codex/discovery/icp owner (client.py:33, records.py:135) and extends rather than duplicates it.",
+    "scope_discipline": "The gained commit touches only .claude/skills/lucy-records/SKILL.md and docs/evidence/fragments/iter-plant-signal-ontology/lucy-record-tools-skill.html, both inside the declared write paths, and every edit answers a finding of the prior review record."
+  },
+  "notes": "The review covers the commits gained since the prior review record at head 24fa0b9adf76, i.e. the single commit a2a427d0e, whose declared scope is the same two paths across the full delivered range 0bb6d2b7f..a2a427d0e. The reviewed run's manifest carries no baseline_suite or after_suite because the node is documentation-only and ran no test suite, so added_failure_count is 0 and added_failure_ids is empty by derivation from that absence.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T002253815668-review-of-lucy-record-tools-skill-a2a427d0ef91",
+  "reviewed_base_sha": "24fa0b9adf761166b29b6f3be5714a935936f4aa",
+  "reviewed_head_sha": "a2a427d0ef9133a8559f72efaee5dd0856718bb3",
+  "reviewed_run_id": "r-20261122T202946154777-lucy-record-tools-skill",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T00:41:46.365345+00:00",
+  "total": 99,
+  "verdicts": {
+    "call_sites": "Read no production call site reaches a Markdown skill or an evidence fragment; the repository code it documents (iter_codex/discovery/icp/client.py:33, records.py:135, documents.py:56) is unchanged by this commit.",
+    "diff": "Read the gained commit a2a427d0e against base 24fa0b9adf76: two edits inside the declared paths, +76 -5, fixing the fetch signature, the ICPRecords names, and the missing trailing newlines the prior review found.",
+    "done_when": "Read the done_when at brief.md:39-48: the skill exists with a triggering description, every cited tool, field and operator is confirmed against the server and listed in evidence, it holds no real identity, and the skill index if any lists it. gate.log records tools cited 13 all in live list True, all declared True, PASS, EXIT=0, and gate-negative.log records the version mutation FAILing with EXIT=1.",
+    "goal": "Read the source node's goal in its brief: write a project skill routing ITER document and record lookups through Lucy's direct record tools instead of the chat tool. The gained commit corrects SKILL.md:198-215 against the module source, so the goal remains met.",
+    "manifest": "Read the reviewed run's manifest: status complete, commits 24fa0b9adf761166b29b6f3be5714a935936f4aa and a2a427d0ef9133a8559f72efaee5dd0856718bb3, naming gate.log and gate-negative.log, changed_paths matching the two delivered files.",
+    "write_paths": "Read the declared write paths .claude/skills/lucy-records and docs/evidence/fragments/iter-plant-signal-ontology/lucy-record-tools-skill.html against the gained diff; both changed paths are inside them and nothing else changed."
+  }
+}
