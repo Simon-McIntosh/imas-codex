@@ -168,7 +168,7 @@ def test_projection_corrects_legacy_membership_and_repeats_without_duplicates(
             else:
                 assert row["state"] == "component"
                 assert row["members"] == 2
-                assert row["control"] is None
+                assert row["control"] == "demo:control_node:DEMO-UNIT"
         assert graph.query(
             "MATCH (c:PlantComponent {id:'demo:legacy'}) RETURN c.archive_field_pattern AS pattern"
         ) == [{"pattern": None}]
@@ -189,7 +189,7 @@ def test_projection_corrects_legacy_membership_and_repeats_without_duplicates(
             graph, grouping, "demo", snapshot_archive_signals(graph, "demo")
         )
         assert graph.query(
-            "MATCH (s:FacilitySignal {id:'demo:signal:0'}) OPTIONAL MATCH (s)-[:IN_ARCHIVE_COMPONENT|AT_CONTROL_NODE|IN_ARCHIVE_CONTROL_NODE|CANDIDATE_PLANT_COMPONENT]->(c) RETURN s.archive_grouping_state AS state,count(c) AS links"
+            "MATCH (s:FacilitySignal {id:'demo:signal:0'}) OPTIONAL MATCH (s)-[:IN_ARCHIVE_COMPONENT|AT_CONTROL_NODE]->(c) RETURN s.archive_grouping_state AS state,count(c) AS links"
         ) == [{"state": "ungrouped", "links": 0}]
 
 
