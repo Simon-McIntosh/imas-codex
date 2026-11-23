@@ -23,7 +23,7 @@
   <title>ITER plant signals have one consistent place in the shared ontology | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -92,6 +92,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261123T071239749484-review-of-review-existing-structure-9e809afef12c" data-who="reckon-build" data-when="2026-11-23T07:49:57.302Z">
     <div class="r-comment-body"><p>Stored an independent incremental review of r-20261123T044142676147-review-existing-structure over 816fdec78e3b797d07530b3238b6e425781c6ace..9e809afef12ca8f4b8336845e455383be69c824b; scores goal_fidelity 18, evidence 14, scope_discipline 20, durability 10, fit 17, reuse 20; one non-blocking finding; added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261123T044142676147-review-existing-structure" data-who="reckon-build" data-when="2026-11-23T08:19:56Z">
+    <div class="r-comment-body"><p>Reviewed every class and relationship type reachable from an ITER archive signal with live counts and per-item verdicts; proposes renaming PlantStructure to PlantBreakdownNode, adds ITER-only ArchiveFieldCode and PlantConnection classes (medium, from and to components, ports, source record, identity state) with only optional slots and links to the two shared classes, retires two duplicate memberships and the second document class into the shared one, states the rule that matches a source functional reference to an archive component and keeps an unmatched end unresolved rather than fabricating a component, places the pinned sibling-relation attempt as a signal-to-signal family meeting the connection only at the plant-group key, and measures documentation at 11 of 11 first-level control-breakdown nodes as a lower bound. The rename&#x27;s readers and writers are listed with file and line, and the figure numbers every relationship against the record&#x27;s two relationship tables.</p></div>
 </div>
 </section>
 </main>
