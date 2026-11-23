@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T06:57:07.567Z",
+  "dispatched_at": "2026-11-23T06:44:57Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:46",
+      "id": "reasoning-1",
+      "reason": "a worker on \u00a75 in the ruled order would wait on \u00a76 output that will never exist, so the ordering rule must name domains-follow-the-physics#s4 (or drop the transport line) before \u00a75 is dispatched.",
+      "text": "\u00a75's done-when still orders \"the parts of <code>transport</code> last and only once \u00a76 has created them\", but \u00a76 is now descoped and the lead ruling recorded in comment c-s6-lead-ruling-domain-names-physics withdraws the data-structure parts outright; \u00a75's declared dependency is now domains-follow-the-physics#s4, whose body places each of transport's 1,042 names into an existing physics domain (587 stay transport, 310 plasma_state, 103 fast_particles, and so on), so no \"parts of transport\" are ever created and the step \u00a75 orders cannot occur",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:34",
+      "id": "reasoning-2",
+      "reason": "the plan's authority is its section text, and \u00a72 still states as the ruling what the plan now records as rejected, so \u00a72 needs to record the 2026-11-23 reversal to stop propagating it.",
+      "text": "\u00a72's ruled text still asserts \"<code>transport</code> does not stand as one group, and it is not split by its sources' domains: it is divided along the data dictionary's own structures, which creates new group names and is carried by \u00a76\", and that \"Its parts are released after the other groups\"; the plan's own newest ruling (2026-11-23, recorded in comments) reverses exactly this premise \u2014 a physics domain \"is never named from a data dictionary path or data structure\" \u2014 so a reader of the done \u00a72 carries the withdrawn premise forward",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "bab3757dbd0e24dbc951cf0b54a941e5e4c30ced",
+  "plan_fingerprint": "3bfb7a936cd2178d877c4a1b6542e9f72dc1d9854602c8cd5b7d1868a03b9f5e",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 60,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261123T063845787641-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "b2b62db790bbcb77a79880cc2e82a3291275ad54",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the new depends-on targets (domains-follow-the-physics#s4, sn-case-file-generation#s5) and s6's data-links domains-follow-the-physics#s4 all resolve, and the reciprocal link back to sn-audited-group-release#s6 resolves.",
+    "done_when": "pass \u2014 each live node's done-when names a declared negative control (s2 planted census names, s3 planted-fault refusals, s4/s5 planted above-rate groups reported not cut); s5's reachability defect is recorded under reasoning rather than double-counted here.",
+    "evidence_paths": "pass \u2014 every section commits under docs/evidence/fragments/sn-audited-group-release/, a durable repository path; \u00a76's records now live in domains-follow-the-physics, also committed.",
+    "naming": "pass \u2014 the descope reason and comments carry plan/ruling dates, not code symbols, stage labels or ticket numbers; no new code identifier is introduced.",
+    "reasoning": "a finding \u2014 the changed dependency rewired s5 onto domains-follow-the-physics#s4 but s5's done-when and s2's ruling still describe transport divided along data structures and \"carried by \u00a76\", the premise the plan now records as withdrawn.",
+    "single_goal": "pass \u2014 each node names one deliverable (s4 brings one group to the bar and cuts it; s5 repeats it per group).",
+    "wiring": "pass \u2014 the rewired edges resolve: s5 now depends on sn-audited-group-release#s4 and domains-follow-the-physics#s4 (which exists and carries \u00a76's descoped work), s4 adds sn-case-file-generation#s5 (grammar section exists), and nothing dangles on the descoped s6."
+  },
+  "section_digests": {
+    "_document": "90ca33c7dd15425302dec156b9f80888680d0e40aeec0cb85fde00d2f43e81b6",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "3073ba4c58fc1374d8568d8e8798f5c1fac407860517b8ac0c4e0ca15a6a4a2b",
+    "s3": "a302e5d7f08618c4b0b55889eb4a8df491abf4aed370ac9e8014d8e48c4cd5a9",
+    "s4": "abc168a20f8f8dd7dbbc0392357b8cc35588316a3e42caef2ab3f331458fd3d1",
+    "s5": "19c92fc230104ebb4640eb2b10fe6d0dfc22fa16be6c052663dff9958abeea5b",
+    "s6": "90a0463c758d22b32611805f931c843f2382e2bc89a2e1ef318231acd72f2fca",
+    "s7": "c00231603538a13a9d760a0a7f3e06c28b97eb1c5682e0dc7a2708499b5571a9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T06:57:16.759039+00:00",
+  "total": null
+}
