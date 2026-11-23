@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T07:43:53.509Z",
+  "dispatched_at": "2026-11-23T07:29:46Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/domains-follow-the-physics.html:63",
+      "id": "done_when-1",
+      "reason": "the census must name a bucket for a recorded reason that asserts no domain alongside a present domain, or its rerun recommendation is built on a mechanism table that silently relabels a no-domain reason as a mechanism.",
+      "text": "the census reports \"the recorded mechanism that set it\" for every path carrying a domain, but 264 such paths carry `domain_source='none_metadata'`, which the schema (iter_codex/schemas/imas_dd.yaml:653-658) documents as \"infrastructure metadata with no physics domain\"; the plan's only anomaly bucket is for a null mechanism, so these 264 are reported as if a mechanism assigned their domain and the section's premise that the build \"leaves infrastructure paths without one\" is contradicted by paths that are recorded as infrastructure yet carry a domain",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "1c0aea84f6b914ef7a85230863ba7469d35a0ca6",
+  "plan_fingerprint": "b424e7bd22069af523675019331c648703e4b182e2e14d0c2734044341db13e7",
+  "plan_slug": "domains-follow-the-physics",
+  "plan_version": 7,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1c0aea84f6b914ef7a85230863ba7469d35a0ca6",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a72 adds a bucket, listed path by path, for paths that carry a domain while their recorded mechanism says they have none (264 measured with none_metadata); they are not counted under any assigning mechanism",
+      "reason": "",
+      "when": "2026-11-23T07:44:59.808447+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1c0aea84f6b914ef7a85230863ba7469d35a0ca6",
+      "commit_basis": "edit",
+      "note": "\u00a72 adds a bucket, listed path by path, for paths that carry a domain while their recorded mechanism says they have none (264 measured with none_metadata); they are not counted under any assigning mechanism",
+      "reason": "",
+      "when": "2026-11-23T07:44:59.808447+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-domains-follow-the-physics.v7.json",
+  "review_run_id": "r-20261123T072901000456-plan-review-of-domains-follow-the-physics",
+  "reviewed_blob_sha": "180bf31be71cba9b5c78e1a915de4a72b43d38b8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the named IDS-to-domain table resolves to iter_codex/definitions/physics/ids_domains.json, and the evidence deliverable paths sit under an existing directory; s2 contains no intra-plan href to mis-resolve.",
+    "done_when": "a finding \u2014 the newly added null-mechanism bucket is correct and complete (verified sum: 36,226 inherited_from_parent + 7,551 llm_classified + 4,481 jev_tree + 6 deterministic_override + 5,177 null = 53,705 paths carrying a domain), and the positive control is sound (core_plasma_physics is present on 5,984 paths), but the mechanism table has no bucket for paths that carry a domain while recording `domain_source='none_metadata'`, a value the schema documents as \"infrastructure metadata with no physics domain\".",
+    "evidence_paths": "pass \u2014 the census writes to docs/evidence/fragments/domains-follow-the-physics/dd-path-domain-review.html and .json, a durable committed path (the fragments directory already exists and holds the placement file), not a scratchpad.",
+    "naming": "pass \u2014 s2 introduces no symbol or file name and carries no plan label, stage id or ticket number; the values it names are domain vocabulary values, not implementation identifiers.",
+    "reasoning": "pass \u2014 the cited route (a name taking its source paths' domains, which put 1,042 names in transport on 2026-11-22) matches the code path `_expected_source_domains` in iter_codex/standard_names/domain_decision.py, the endpoint is checkable (all five census quantities were reproduced against the live graph in bounded queries), the measure can fail (core_plasma_physics count could be zero and the removed-value set is non-empty: 5,984 + 1,959), and s2 prescribes no code path, formula or function.",
+    "single_goal": "pass \u2014 s2 has one deliverable: a census of the DD build's path domains with a rerun recommendation; no second goal rides with it.",
+    "wiring": "pass \u2014 s2's declared dependency (domains-follow-the-physics#s1) resolves to a node that exists, s3 depends on s2, and the review's inputs (DD path domains, and name\u2192path links via HAS_STANDARD_NAME) are reachable in the live graph."
+  },
+  "section_digests": {
+    "_document": "fa2f9090d76762ecd61ca246d3f33c8be8495d73bf5b2dde1c82398e2e7d472d",
+    "s1": "604504dc654d7a9d910a96aafc2705234c5d3dae8dc110fcd980807eccb3a214",
+    "s2": "cc79ea78597ba6bbac8391a991eb799d0c60aa38e9c7a61617cddedefcc7f07c",
+    "s3": "7514b34e1983a07c057add81d38ad09738115c341a868d8f5cc169c78d13f047",
+    "s4": "1bff552efd7e0fd43dbf40217a359623e3c4a66db329196d973b07ec12b9af4f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:43:57.958781+00:00",
+  "total": null
+}
