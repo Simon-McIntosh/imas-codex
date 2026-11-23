@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "iter_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:_self_refine_candidate",
+    "iter_codex/standard_names/worker_tasks/worker_compose_and_validate.py:compose_worker",
+    "iter_codex/standard_names/worker_tasks/worker_compose_batches.py:compose_batch",
+    "iter_codex/standard_names/worker_tasks/worker_review_names.py:process_review_name_batch",
+    "iter_codex/standard_names/worker_tasks/worker_refine_names.py:process_refine_name_batch",
+    "iter_codex/standard_names/worker_tasks/worker_generate_docs.py:process_generate_docs_batch",
+    "iter_codex/standard_names/worker_tasks/worker_enrich_parents.py:process_enrich_parents_batch",
+    "iter_codex/standard_names/worker_tasks/worker_review_docs.py:prepare_docs_review_request"
+  ],
+  "completed_at": "2026-11-23T09:26:10.198Z",
+  "dispatched_at": "2026-11-23T09:17:07Z",
+  "findings": [
+    {
+      "file": "iter_codex/standard_names/context_receipt.py",
+      "line": 865,
+      "severity": "non-blocking",
+      "text": "non-blocking: content_from_prompt_context derives source_text only from item['dd_description'] (line 865) and enclosing_structure_text only from context 'anc' / dd_context.ancestors / item.enclosing|ancestors (lines 858-863); the name_composition call sites pass the compose batch item (worker_compose_batches.py:351, worker_compose_and_validate.py:311), whose enriched shape carries 'documentation' and 'ancestor_context' (worker_extraction_and_enrichment.py:789 _enrich_batch_items) but neither dd_description nor those enclosing keys. Every live name_composition receipt therefore records source_text and enclosing_structure_text absent even when the batch prompt carried them, disagreeing with the census for the same names."
+    },
+    {
+      "file": "iter_codex/standard_names/context_receipt.py",
+      "line": 138,
+      "severity": "non-blocking",
+      "text": "non-blocking: STAGE_TEMPLATES names one fixed template pair per stage, but two production stages choose a variant the census never renders: worker_review_docs.py:443-445 sends review_docs_parent_* for a parent and appends _conventions, and worker_compose_and_validate.py:300-305 sends generate_name_dd_names for a names-mode batch. The census's scoring_review digest for a parent name and its name_composition digest for a names-mode batch are therefore not the prompt those stages send."
+    },
+    {
+      "file": "tests/standard_names/test_context_receipt.py",
+      "line": 33,
+      "severity": "non-blocking",
+      "text": "non-blocking: no test exercises any of the eight production call sites; the tests drive receipt_for_stage/record_stage_receipt directly, so deleting a record_stage_receipt call from a worker_tasks stage would leave the suite green and the live half silently inert for that stage."
+    },
+    {
+      "file": "iter_codex/standard_names/case_file.py",
+      "line": 153,
+      "severity": "non-blocking",
+      "text": "non-blocking: _CHILDREN_QUERY still duplicates the live-children loader at worker_tasks/worker_review_docs.py:174 (same HAS_PARENT match and name_stage exclusion); the worker's manifest records the decline with the semantic differences (origin filter, placeholder-to-null mapping, 12-child truncation, kind projection) as the reason."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified all eight production call sites in the diff; each imports record_stage_receipt and calls it immediately before building the model messages, passing the same context the prompt was rendered from.",
+    "diff": "read commit by commit against c7ae574a: 19 files, 31209 insertions; adds context_receipt.py (968 lines), the children and producer channels in case_file.py, eight stage call sites, the census script/json/gate log, the evidence page, the figure and its script, and three test files; no prompt template text changes.",
+    "done_when": "the done_when's measures are present and recorded: per stage/channel expected/present/absent and ranked omissions for all and for the equilibrium and held_out cohorts separately, the 33 of 87 held-out defective names cross-tabulated per class and per stage/channel, both controls (positive complete at all seven stages; negative withholding enclosing_structure_text reports complete=false and is ranked 1), zero model calls and zero graph writes counted at armed boundaries, and the whole-directory gate 8912 passed, 11 skipped, EXIT=0 at revision 0674dc6b5; a census digests 251 distinct prompts at each of the seven stages, so the prior composition collapse is measured gone.",
+    "goal": "the node goal is that every model-calling stage records the context it was given and omissions are counted; context_receipt.py:946 record_stage_receipt is called at all eight stages, record_receipt defaults its sink to the CLI log directory (context_receipt.py:779), and the census records 251 names and 12 ranked omissions.",
+    "manifest": "read; it records the repair round (a014bd172..71381a38a), the gate at 0674dc6b5 (8912 passed, EXIT=0), the 251-name census with 251 distinct digests at each composition stage, per-finding two-direction negative controls, and a scale_note naming the four out-of-set paths; its baseline_suite and after_suite fields are absent, so added failures were read from gate-first-pass.log (1 failed, 8908 passed at 434b471c5) against gate-full.log (0 failed at 0674dc6b5).",
+    "write_paths": "the source node's declared write paths are the evidence page, the figure directory and context_receipt.py; the diff also touches case_file.py, eight worker_tasks stage files, three test files and the census script/json/gate log, all implied by the done_when's clauses, so they are in the section's expected scope though not declared."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_context_receipt.py:316 requires two distinct names to produce distinct composition prompt digests and :341 requires a description-only item to report source_text absent, both of which redden on the regressions they guard, but no test at :33 covers the eight live call sites so a stage could stop recording silently.",
+    "evidence": "the committed docs/evidence/fragments/sn-case-file-generation/context-receipts-gate.txt is byte-identical to the run log gate-full.log (REVISION=0674dc6b5, 8912 passed, EXIT=0) and the census self-check records 251 names and 12 omissions, though the gate predates the delivered head 71381a38a by one docs-only commit and the manifest carries no baseline/after suite pair.",
+    "fit": "context_receipt.py follows the surrounding worker_tasks idiom of function-local imports (worker_compose_batches.py:351) and registers its two copied-list touches in tests/standard_names/test_source_reads.py:468-469, with no plan or ticket identifiers in names or comments.",
+    "goal_fidelity": "context_receipt.py:946 record_stage_receipt is reached from all eight call sites and context_receipt.py:779's default sink makes the live record exist without configuration, while the census at docs/evidence/fragments/sn-case-file-generation/context-receipts.py records 251 names, 12 omissions, both controls and the 33-member cross-tabulation.",
+    "reuse": "context_receipt.py:715 _stage_context delegates the section-level half to context.py build_compose_context and the census asks case_file.assert_read_only for its write judgement, but case_file.py:153 _CHILDREN_QUERY re-implements the live-children query at worker_review_docs.py:174 rather than extending it.",
+    "scope_discipline": "the diff stays inside the section's implementation and artefacts, but sixteen of its nineteen paths fall outside the three declared write paths, each explained in the manifest scale_note rather than declared."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T091643281216-review-of-context-receipts-71381a38a66e",
+  "reviewed_base_sha": "c7ae574a24036ee0269353d60a772d1170aa3a22",
+  "reviewed_head_sha": "71381a38a66efbb66511fdcf4c5eb2c43f439c89",
+  "reviewed_run_id": "r-20261122T184327216910-context-receipts",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 12,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T10:30:00+00:00",
+  "total": 90
+}
