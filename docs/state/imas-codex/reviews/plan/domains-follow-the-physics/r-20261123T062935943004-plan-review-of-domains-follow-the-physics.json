@@ -125,6 +125,13 @@
       "note": "\u00a71's search is scoped to codex's definitions, prompts, package code and tests, excluding the vendored data-dictionary resources, which are inputs",
       "reason": "",
       "when": "2026-11-23T07:04:48.953867+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-3",
+      "reason": "the binding clause, both pins naming the release candidate, is read directly from pyproject.toml; the sync clause only corroborates it",
+      "when": "2026-11-23T07:04:51.598775+00:00"
     }
   ],
   "responses": {
@@ -145,6 +152,12 @@
       "note": "\u00a73 adds a planted control on a disposable graph: a path carrying a removed value is reassigned to a ruled value and a path carrying an unchanged domain keeps it",
       "reason": "",
       "when": "2026-11-23T07:04:43.837775+00:00"
+    },
+    "done_when-3": {
+      "action": "declined",
+      "by": "",
+      "reason": "the binding clause, both pins naming the release candidate, is read directly from pyproject.toml; the sync clause only corroborates it",
+      "when": "2026-11-23T07:04:51.598775+00:00"
     },
     "evidence_paths-1": {
       "action": "acted",
