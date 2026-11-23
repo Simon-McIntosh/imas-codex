@@ -14,7 +14,7 @@
 <meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-after" content="sn-audited-group-release">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-modified" content="2026-11-23">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;deferred&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[&quot;sn-case-file-generation#s1&quot;,&quot;sn-case-file-generation#s2&quot;],&quot;s4&quot;:[&quot;sn-case-file-generation#s3&quot;],&quot;s5&quot;:[&quot;sn-case-file-generation#s7&quot;],&quot;s6&quot;:[&quot;sn-case-file-generation#s3&quot;,&quot;sn-case-file-generation#s4&quot;,&quot;sn-case-file-generation#s5&quot;,&quot;sn-audited-group-release#s3&quot;],&quot;s7&quot;:[&quot;sn-case-file-generation#s8&quot;],&quot;s9&quot;:[&quot;sn-case-file-generation#s8&quot;]}">
@@ -115,6 +115,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261123T104159862514-review-of-family-consistency-aa6e70abe7fe" data-who="reckon-build" data-when="2026-11-23T10:57:13.039Z">
     <div class="r-comment-body"><p>Independent review of r-20261122T184543879763-family-consistency at base 31e5fd71c / head aa6e70abe scored 17 goal_fidelity, 13 evidence, 14 scope_discipline, 14 durability, 17 fit, 13 reuse, filed six non-blocking findings (operator operand extraction, qualifier repair direction, non-reproducible evidence page, unproven adjudication acceptance, declared scope under-specification, forked family-read query) and recorded added_failure_count 0 with no ids.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-s9-lead-ruling-model-reader" data-who="Simon McIntosh" data-when="2026-11-23T10:55:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-11-23: the family consistency pass is redone with a model reader. The coordinating session read the seed-9 sample of 20 families blind. The adjudication is committed at <code>c9e41cec8</code>, in <code>family-consistency-coordinator-adjudication.json</code>, and the key was opened only afterwards.</p><p>Under the section's rule the rule-based pass is not accepted. No member sound before is wrong after. But both proposed repairs are one-word wording edits, and the count of inconsistencies stays at 10 in the pass's classes, with 15 members wrong in all.</p><p>The pass called families consistent that carry:</p><ul><li>three ion-velocity-to-field-magnitude ratios with unit <code>m.s^-1</code> instead of <code>m.s^-1.T^-1</code>;</li><li>two names that say square but whose unit and definition are an inverse square;</li><li>a square-root against linear flux-coordinate convention;</li><li>two definitions with qualifiers their names omit.</li></ul><p>The rule-based pass is kept as a pre-filter. A model reads each family whole within the USD 10 ceiling. The seed-9 sample and a fresh seed are re-adjudicated blind. Definitions §10's family re-render stays held.</p></div>
 </div>
 </section>
 </main>

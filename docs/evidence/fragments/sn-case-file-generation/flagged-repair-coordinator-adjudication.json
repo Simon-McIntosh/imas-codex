@@ -1,0 +1,12 @@
+{
+ "subject": "blind adjudication of the flagged-repair packet, name and definition judged separately, read before opening the key",
+ "adjudicator": "coordinating session 8e101d1f-e306-47cb-a56a-48cba5e5c742",
+ "packet": "docs/evidence/fragments/sn-case-file-generation/flagged-repair-blind-packet.jsonl at the run head 9be4183d0",
+ "verdicts": [
+  {"packet_id": "fr-0d9f67b1e2cf0448", "name": "accumulated_tritium_prefill_count", "name_right": false, "definition_right": true, "reason": "the definition and enclosing structure state an equivalent-electron count; the name omits the counting basis and so denotes a plain tritium count"},
+  {"packet_id": "fr-243534ee08c9fc3b", "name": "accumulated_tritium_prefill_equivalent_electron_count_due_to_gas_injection", "name_right": true, "definition_right": true, "reason": "the name carries the equivalent-electron basis its source states, and the gas-injection origin matches the definition and the argon sibling's pattern"},
+  {"packet_id": "fr-51942a59ae1965a6", "name": "spectral_rate_of_spectrometer_channel", "name_right": false, "definition_right": true, "reason": "the source counts photoelectrons per unit time per wavelength pixel; 'spectral rate' does not say rate of what"},
+  {"packet_id": "fr-4428ff97ba76b754", "name": "spectral_photoelectron_rate_of_spectrometer_channel", "name_right": true, "definition_right": true, "reason": "the name states the photoelectron subject the source describes"}
+ ],
+ "note": "each pair shares one definition, so only the names differ; read before the key"
+}
