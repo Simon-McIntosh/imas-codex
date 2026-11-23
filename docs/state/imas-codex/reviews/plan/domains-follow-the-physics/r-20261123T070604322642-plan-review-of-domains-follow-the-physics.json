@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T07:26:12.768Z",
+  "dispatched_at": "2026-11-23T07:09:51Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/domains-follow-the-physics.html:63",
+      "id": "done_when-1",
+      "reason": "the worker either invents an unrecorded bucket the plan did not ask for or delivers a gap in its own evidence page; the plan needs one more bullet counting the paths that carry a domain with no recorded mechanism.",
+      "text": "\u00a72 requires \"for every DD path that carries a domain, the recorded mechanism that set it\", but 5,177 paths across 29 domains carry a domain with both `domain_source` and `domain_classified_at` null (of 53,705 paths carrying a domain; measured on the live graph 2026-11-23), so most of that bullet's deliverable cannot be produced: the bullet gives a bucket per mechanism and the next bullet accounts only for the paths with no domain, leaving these 5,177 in no bucket",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/domains-follow-the-physics.html:59",
+      "id": "done_when-2",
+      "reason": "a query that matches nothing returns no error, so without a positive control the evidence page can be confidently empty; \u00a71 and \u00a73 each carry a planted control and \u00a72 is the node that needs one.",
+      "text": "\u00a72 declares no control, so the buckets that measure an absence \u2014 \"the paths that carry a value the ruled vocabulary no longer holds\" (zero for `plasma_measurement_diagnostics` and legitimately zero for all three on a healthy read after a rebuild) and any zero per-domain count \u2014 read the same whether the data is absent or the query is wrong, and a read-only census has no guard whose firing could show otherwise",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "2f22958a56f97c4f3ed3368d1768a97c70b2de06",
+  "plan_fingerprint": "d6ae54a162181ae0f25af9d058dfbef0843070678dfa10fdb3bd92183ba86822",
+  "plan_slug": "domains-follow-the-physics",
+  "plan_version": 5,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261123T070604322642-plan-review-of-domains-follow-the-physics",
+  "reviewed_blob_sha": "be8e475e396c38b819359a901c46de6784909c45",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/plans/domains-follow-the-physics.html`, `imas-standard-names:physics-domain-vocabulary` \u00a71 and \u00a72 (in `/home/ITER/mcintos/Code/imas-standard-names/docs/plans/physics-domain-vocabulary.html`), `sn-audited-group-release#s6` (present, status `descoped`, reason records the 2026-11-23 ruling and links back to `domains-follow-the-physics#s4`) and the cited evidence file all resolve; no symbol is cited, which the rubric does not ask for.",
+    "done_when": "two findings \u2014 \u00a72 requires a per-path recorded mechanism that the live graph does not hold for 5,177 of the 53,705 DD paths that carry a domain, and \u00a72 declares no control that its read sees data known to be present.",
+    "evidence_paths": "pass \u2014 \u00a72 and \u00a73 name `docs/evidence/fragments/domains-follow-the-physics/dd-path-domain-review.html`/`.json` and `dd-path-domain-rerun.html`/`.json`, a directory that already exists with a committed `transport-physics-placement.json`; \u00a74's placement file is committed there too.",
+    "naming": "pass \u2014 the sections name no plan label, stage name, ticket number or version tag in a symbol or comment; the identifiers are domain values and the evidence directory named for the plan, the repository's fragment convention.",
+    "reasoning": "pass \u2014 all three checks hold against the live graph. \u00a71's claim that the IDS-to-domain table is generated from the graph's DD paths is exact (`iter_codex/ids/tools.py:344-374` reads `DISTINCT p.physics_domain` off `IMASNode`), so moving it to \u00a73 is right; \u00a72's candidate route matches `candidate_domains` (`iter_codex/standard_names/domain_decision.py:172-187`, which unions the sources' path domains with the IDS map); \u00a73's descoped two-value map is complete, measured: no `IMASNode` carries `plasma_measurement_diagnostics`, and the 31 distinct domains on DD paths all sit inside the 32-value vocabulary, so moving `core_plasma_physics` and `computational_workflow` leaves every path on a ruled value; no section prescribes a code path, step sequence or function.",
+    "single_goal": "pass \u2014 \u00a71 lands the definitions and pins on the ruled vocabulary, \u00a72 reviews path domains and recommends, \u00a73 reruns the domain step and the table derived from it, \u00a74 applies the placement file; the IDS-to-domain table sits in \u00a73 because it cannot be regenerated before the path domains are rerun.",
+    "wiring": "pass \u2014 \u00a71 depends on the vocabulary plan's \u00a71 and \u00a72, \u00a72 and \u00a73 on \u00a71, \u00a73 additionally on \u00a72, \u00a74 on \u00a71, and the declared targets (`imas-standard-names:physics-domain-vocabulary#s1`, `#s2`, `sn-audited-group-release#s6`) each resolve to a section that exists; \u00a73's dependency on \u00a72 is right because \u00a72 is the lead's decision point it waits on."
+  },
+  "section_digests": {
+    "_document": "fa2f9090d76762ecd61ca246d3f33c8be8495d73bf5b2dde1c82398e2e7d472d",
+    "s1": "604504dc654d7a9d910a96aafc2705234c5d3dae8dc110fcd980807eccb3a214",
+    "s2": "59b3354e004f3dff7094010cdfd1c4c2ce3fbb6f299a5b69008db80bcbc7a29a",
+    "s3": "7514b34e1983a07c057add81d38ad09738115c341a868d8f5cc169c78d13f047",
+    "s4": "1bff552efd7e0fd43dbf40217a359623e3c4a66db329196d973b07ec12b9af4f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:26:16.308599+00:00",
+  "total": null
+}
