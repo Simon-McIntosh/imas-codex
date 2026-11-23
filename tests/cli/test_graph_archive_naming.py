@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import io
+import json
 import tarfile
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
+
+import pytest
 
 from iter_codex.cli.graph import registry as graph_registry
 from iter_codex.cli.graph.data import graph_export
@@ -196,8 +200,14 @@ def test_graph_push_temporary_archive_uses_shared_stamp(monkeypatch):
     def invoke_export(_runner, _command, args):
         captured["export_args"] = args
         output_path = Path(args[args.index("-o") + 1])
-        output_path.write_bytes(b"archive")
-        return SimpleNamespace(exit_code=0, exception=None, output="")
+        manifest = json.dumps({"label_counts": {"FacilitySignal": 1}}).encode()
+        with tarfile.open(output_path, "w:gz") as bundle:
+            member = tarfile.TarInfo("stamp/manifest.json")
+            member.size = len(manifest)
+            bundle.addfile(member, io.BytesIO(manifest))
+        return SimpleNamespace(
+            archive_path=output_path, exit_code=0, exception=None, output=""
+        )
 
     def capture_push(command, **_kwargs):
         captured["push_command"] = command
@@ -207,6 +217,13 @@ def test_graph_push_temporary_archive_uses_shared_stamp(monkeypatch):
         "iter_codex.cli.graph_progress.run_oras_with_progress", capture_push
     )
     monkeypatch.setattr(graph_registry, "__version__", "1.0.0")
+    monkeypatch.setattr(
+        "iter_codex.graph.ghcr.get_package_visibility", lambda *a, **k: "private"
+    )
+    monkeypatch.setattr(
+        "iter_codex.graph.ghcr.set_package_visibility",
+        lambda *a, **k: pytest.fail("an already-private package was written"),
+    )
     monkeypatch.setattr("iter_codex.graph.neo4j_ops.datetime", _FrozenDateTime)
 
     graph_registry.graph_push.callback(

@@ -1063,6 +1063,7 @@ def build_remote_push_script(
     archive_dir_name: str,
     scheduler: str = "none",
     partition: str | None = None,
+    tag_latest: bool = True,
 ) -> str:
     """Build a bash script for remote graph export + ORAS push.
 
@@ -1091,7 +1092,7 @@ def build_remote_push_script(
     annotation_args = " \\\n    ".join(annotations)
 
     tag_latest_block = ""
-    if not is_dev:
+    if not is_dev and tag_latest:
         tag_latest_block = f"""
 echo "PROGRESS:TAGGING"
 oras tag "{artifact_ref}" latest 2>&1

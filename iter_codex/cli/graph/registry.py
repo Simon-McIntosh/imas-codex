@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 import shutil
 import subprocess
 import tarfile
@@ -18,6 +19,7 @@ from iter_codex import __version__
 from iter_codex.graph.ghcr import (
     delete_tag as _delete_tag,
     dispatch_graph_quality as _dispatch_graph_quality,
+    dump_holds_facility_content,
     ensure_fresh_version as _ensure_fresh_version,
     fetch_tag_messages as _fetch_tag_messages,
     get_ghcr_owner_and_type,
@@ -47,8 +49,10 @@ from iter_codex.graph.neo4j_ops import (
     graph_archive_stamp,
 )
 from iter_codex.graph.offsite import (
+    GraphCensus,
     OffsiteCountMismatch,
     OffsitePushFailed,
+    read_archive_manifest,
     run_offsite_push_cycle,
 )
 
@@ -547,24 +551,71 @@ def _run_offsite_cycle(
         click.echo(f"Receipt: {result.receipt_path}")
 
 
-def _report_plant_package_visibility(
+def _archive_label_counts(archive: Path) -> dict[str, int] | None:
+    """Read the label counts the export recorded for the dump it wrote.
+
+    The manifest is the archive's own statement of what it holds, so the
+    visibility decision comes from the dump rather than from the flags the push
+    was invoked with. It is the reader the offsite cycle already uses, so an
+    archive one path cannot read is one no path can read. An archive whose
+    manifest or census cannot be read answers ``None``, which the caller treats
+    as facility content.
+    """
+    try:
+        manifest = read_archive_manifest(archive)
+        return GraphCensus.from_manifest(manifest).label_counts
+    except (OSError, ValueError, tarfile.TarError):
+        return None
+
+
+def _require_private_package(
     registry: str,
     pkg_name: str,
     token: str | None,
     *,
-    facilities: tuple[str, ...],
-    without_dd: bool,
+    holds_facility_content: bool,
 ) -> None:
-    """Require a facility-content package to be private and report what the registry says.
+    """Make a package that holds a facility's content private, then verify it.
 
-    A package that holds a facility's own content is internal by definition.
-    The visibility read back after the write is what is echoed, so a package
-    that is still public fails the push rather than being recorded as private.
+    The package is set private before the read-back, so content already
+    uploaded stops being publicly readable; the value echoed is the registry's
+    own report, and a package that is still public fails the push.
     """
-    if not (facilities and without_dd):
+    if not holds_facility_content:
         return
     visibility = require_private_package(registry, pkg_name, token)
     click.echo(f"  Package {pkg_name}: {visibility} (registry-reported)")
+
+
+def _tag_remote_latest(
+    host: str, artifact_ref: str, *, token: str | None, progress
+) -> None:
+    """Tag the pushed artifact latest on the host that pushed it.
+
+    Runs after the visibility check, so a package that reads back public never
+    becomes the reference backup under the ``latest`` tag.
+    """
+    from iter_codex.cli.graph_progress import remote_operation_streaming
+
+    login = ""
+    if token:
+        login = (
+            f"echo {shlex.quote(token)} | "
+            "oras login ghcr.io -u token --password-stdin\n"
+        )
+    script = (
+        "set -e\n"
+        f"{login}"
+        f"oras tag {shlex.quote(artifact_ref)} latest 2>&1\n"
+        "echo TAGGED\n"
+    )
+    remote_operation_streaming(
+        script,
+        host,
+        progress=progress,
+        progress_markers={"TAGGING": "Tagging as latest"},
+        timeout=300,
+    )
 
 
 @click.command()
@@ -763,6 +814,11 @@ def graph_push(
 
         artifact_ref = f"{target_registry}/{pkg_name}:{version_tag}"
 
+        # The remote export cannot filter by facility, so its stated scope is
+        # the whole graph: only a DD-only remote push leaves facility content out.
+        holds_facility_content = not dd_only
+        tag_after_check = holds_facility_content and not dev
+
         _remote_markers_push = {
             "STOPPING": f"Stopping Neo4j on {profile.host}",
             "DUMPING": "Dumping graph database",
@@ -777,7 +833,7 @@ def graph_push(
             "COMPLETE": "Push complete",
         }
 
-        phases = 1  # single streaming operation
+        phases = 2 if tag_after_check else 1
         with GraphProgress("push") as gp:
             gp.set_total_phases(phases)
             gp.start_phase(f"Pushing [{profile.name}] from {profile.host}")
@@ -796,6 +852,7 @@ def graph_push(
                 archive_dir_name=archive_dir_name,
                 scheduler=_resolve_scheduler(profile),
                 partition=_resolve_partition(profile),
+                tag_latest=not tag_after_check,
             )
 
             try:
@@ -818,13 +875,17 @@ def graph_push(
                     size_str = line.split("=", 1)[1].strip()
             gp.complete_phase(size_str)
 
-        _report_plant_package_visibility(
-            target_registry,
-            pkg_name,
-            token,
-            facilities=facilities,
-            without_dd=without_dd,
-        )
+            _require_private_package(
+                target_registry,
+                pkg_name,
+                token,
+                holds_facility_content=holds_facility_content,
+            )
+
+            if tag_after_check:
+                gp.start_phase("Tagging as latest")
+                _tag_remote_latest(profile.host, artifact_ref, token=token, progress=gp)
+                gp.complete_phase()
 
         # Update local manifest
         manifest = get_local_graph_manifest() or {}
@@ -922,12 +983,13 @@ def graph_push(
             run_oras_with_progress(push_cmd, progress=gp, cwd=archive_path.parent)
             gp.complete_phase()
 
-            _report_plant_package_visibility(
+            _require_private_package(
                 target_registry,
                 pkg_name,
                 token,
-                facilities=facilities,
-                without_dd=without_dd,
+                holds_facility_content=dump_holds_facility_content(
+                    _archive_label_counts(archive_path)
+                ),
             )
 
             manifest = get_local_graph_manifest() or {}
