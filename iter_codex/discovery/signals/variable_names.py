@@ -97,9 +97,6 @@ class VariableNameParse:
             "component_sequence": self.component_sequence,
             "field_code": self.field_code,
             "field_discriminator": self.field_discriminator,
-            "candidate_plant_component": f"{facility}:plant_component:{self.plant_component_code}"
-            if self.plant_component_code
-            else None,
         }
 
 

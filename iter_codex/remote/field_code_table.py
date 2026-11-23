@@ -5,10 +5,10 @@ table's rows name real archive codes and the meanings read for them, so the
 receipt and the table it writes are private: write both under the private cache,
 never into the repository.
 
-The meanings are declared in the facility's private configuration under
-``field_code_meanings``; the roles are read from the sources the table records.
-A build is deterministic, so a second build changes no entry, and that is
-asserted rather than assumed.
+The meanings are read from the graph's own ``ArchiveFieldCode`` nodes, so the
+graph is the store of a code's reading and the row it came from; the roles are
+read from the sources the table records. A build is deterministic, so a second
+build changes no entry, and that is asserted rather than assumed.
 """
 
 from __future__ import annotations
@@ -18,30 +18,25 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from iter_codex.discovery.base.facility import get_facility_infrastructure
 from iter_codex.discovery.signals.field_codes_graph import (
     build_from_graph,
-    meanings_from_config,
+    meanings_from_graph,
 )
 from iter_codex.graph.client import GraphClient
-
-MEANINGS_KEY = "field_code_meanings"
 
 
 def build(*, facility: str, receipt_path: Path, dry_run: bool = False) -> dict:
     """Build the table twice, prove it is stable, and write the private output."""
     started = datetime.now(UTC)
-    private = get_facility_infrastructure(facility) or {}
-    entries = private.get(MEANINGS_KEY) or []
-    meanings = meanings_from_config(entries)
     receipt: dict = {
         "facility": facility,
         "taken_at": started.isoformat(),
-        "declared_meanings": len(meanings),
         "archive_contacted": False,
         "document_host_contacted": False,
     }
     with GraphClient() as graph:
+        meanings = meanings_from_graph(graph, facility)
+        receipt["declared_meanings"] = len(meanings)
         first = build_from_graph(graph, facility, meanings)
         table = first["table"]
         second = build_from_graph(graph, facility, meanings)

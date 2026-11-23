@@ -14,7 +14,7 @@ MATCH (s:FacilitySignal {facility_id: $facility})
 WHERE s.metadata_archive IS NOT NULL
   AND (s.accessor STARTS WITH $control_prefix OR s.accessor STARTS WITH $function_prefix)
 RETURN s.id AS id, s.accessor AS selector,
-       s.candidate_plant_component AS component_id,
+       s.archive_component AS component_id,
        s.plant_component_code AS component_code
 ORDER BY s.id LIMIT $limit
 """
@@ -42,7 +42,13 @@ RETURN count(s) AS written, sum(linked) AS linked
 """
 
 SCOPE_NODES_QUERY = """
-MATCH (n {context_scope: $scope})
+CALL () {
+    MATCH (n {context_scope: $scope}) RETURN n
+    UNION
+    MATCH (d:Document)-[:DOCUMENT_PLANT_STRUCTURE]->(p {context_scope: $scope})
+    RETURN d AS n
+}
+WITH DISTINCT n
 RETURN n.id AS id, n.facility_id AS facility,
        EXISTS { MATCH (n)-[:AT_FACILITY]->(:Facility {id: $facility}) } AS at_facility
 ORDER BY id
@@ -110,9 +116,11 @@ def context_statements(bundle: PlantContextBundle):
     for label, models in groups.items():
         items = []
         for model in models:
-            if (
-                model.facility_id != bundle.facility
-                or model.context_scope != bundle.scope
+            # A shared Document carries no context scope of its own; its signal
+            # rows and its plant references carry the scope.
+            scope = getattr(model, "context_scope", None)
+            if model.facility_id != bundle.facility or (
+                scope is not None and scope != bundle.scope
             ):
                 raise ValueError(
                     "Imported node is outside its facility or context scope"

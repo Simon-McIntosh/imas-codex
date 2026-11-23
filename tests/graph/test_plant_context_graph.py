@@ -12,10 +12,10 @@ from iter_codex.discovery.signals.plant_context_graph import (
 )
 from iter_codex.graph.client import GraphClient
 from iter_codex.graph.models import (
-    PlantContextDocument,
+    Document,
+    PlantBreakdownNode,
     PlantFunctionCategory,
     PlantSignalRow,
-    PlantStructure,
 )
 
 pytestmark = pytest.mark.graph
@@ -26,7 +26,7 @@ def context_transaction():
     facility = "synthetic_context_" + uuid4().hex
     scope = facility + ":context:demo"
     props = {"facility_id": facility, "context_scope": scope}
-    plant = PlantStructure(
+    plant = PlantBreakdownNode(
         id=facility + ":plant:root",
         source_uid="invented-plant",
         code="EX",
@@ -44,16 +44,17 @@ def context_transaction():
         source_endpoint="/api/categories/invented",
         **props,
     )
-    doc = PlantContextDocument(
+    doc = Document(
         id=facility + ":document:invented",
         source_uid="invented-document",
         version="draft",
-        description="Invented signal list",
-        role="signal_list",
+        title="Invented signal list",
+        content_role="signal_list",
         sha256="a" * 64,
-        system_code="DEMO-COIL",
-        plant_structure=plant.id,
-        **props,
+        status="discovered",
+        context_system_code="DEMO-COIL",
+        plant_structure=[plant.id],
+        facility_id=facility,
     )
     row = PlantSignalRow(
         id=facility + ":row:invented",

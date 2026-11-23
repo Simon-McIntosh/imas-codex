@@ -97,6 +97,61 @@ enums:
       unknown:
         description: Available evidence does not establish sampling semantics
 
+  DocumentVersionState:
+    description: Whether a catalogued record's stored version is the one in force
+    permissible_values:
+      current:
+        description: The version the document service holds as current
+      superseded:
+        description: A version a later one replaced; recorded rather than dropped
+      obsolete:
+        description: A version withdrawn from use without a replacement
+
+  DocumentContentRole:
+    description: What a catalogued record contributes, as distinct from its file format
+    permissible_values:
+      signal_list:
+        description: A list of signals with the source's own rows
+      functional_specification:
+        description: A specification of a plant system's function
+      supporting_reference:
+        description: Background documentation that states neither of the above
+
+  ArchiveFieldCodeState:
+    description: Whether a field code's role and reading are established or conflicted
+    permissible_values:
+      established:
+        description: The sources agree on one role and a declared reading exists
+      conflicting:
+        description: The sources state different roles; both are recorded, none chosen
+      unestablished:
+        description: No source states a role or no reading is declared, so the code is retained without a meaning
+
+  PlantMedium:
+    description: What a plant connection carries
+    permissible_values:
+      electrical: {description: An electrical cable or train}
+      water: {description: A water pipe}
+      helium: {description: A cryogenic helium line}
+      vacuum: {description: A vacuum line}
+      air: {description: A compressed-air line}
+      other: {description: A medium outside the members above}
+
+  PlantMediumState:
+    description: Whether a connection's medium was decided by a stated source field
+    permissible_values:
+      decided:
+        description: A source field named the medium; medium_source names it
+      undecided:
+        description: The source left the medium empty, so it is not a member
+
+  PlantConnectionIdentityState:
+    description: How many of a connection's ends resolved to an archive component
+    permissible_values:
+      resolved: {description: Both ends resolved}
+      partial: {description: Exactly one end resolved}
+      unresolved: {description: Neither end resolved}
+
   DataSourceType:
     description: Types of data source systems at fusion facilities
     permissible_values:
@@ -1852,9 +1907,13 @@ classes:
         required: true
         description: Facility-qualified stable import cohort, independent of execution attempts
 
-  PlantStructure:
-    description: Official plant breakdown record read through the guarded records client
-    class_uri: facility:PlantStructure
+  PlantBreakdownNode:
+    description: >-
+      Official plant breakdown record read through the guarded records client.
+      One node is one element of the Plant Breakdown Structure, matching one
+      node of the ControlNode hierarchy; the two are linked at the first level
+      and never merged.
+    class_uri: facility:PlantBreakdownNode
     mixins: [PlantContextProvenance]
     attributes:
       id: {identifier: true, required: true, description: Facility-qualified source identity}
@@ -1864,9 +1923,9 @@ classes:
       source_origin: {required: true, description: Private configured records origin}
       source_endpoint: {required: true, description: Read endpoint establishing this record}
       parent_structure:
-        range: PlantStructure
+        range: PlantBreakdownNode
         description: Parent established by the source record, not inferred from spelling
-        annotations: {relationship_type: PARENT_PLANT_STRUCTURE}
+        annotations: {relationship_type: PARENT_PLANT_NODE}
 
   PlantFunctionCategory:
     description: Official function-category code and meaning from the records client
@@ -1881,29 +1940,102 @@ classes:
       source_origin: {required: true, description: Private configured records origin}
       source_endpoint: {required: true, description: Read endpoint establishing this record}
 
-  PlantContextDocument:
-    description: Versioned private source document and extracted text for a plant system
-    class_uri: facility:PlantContextDocument
+  ArchiveFieldCode:
+    description: >-
+      A field code's established role and declared reading, with the source
+      that states the role and the signal-list row that established the
+      reading. A code whose sources disagree records the conflicting roles and
+      sources rather than choosing one; a code no source interprets is retained
+      with its state and no meaning, so a signal still reaches its code.
+    class_uri: facility:ArchiveFieldCode
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Facility plus field code
+      facility_id:
+        required: true
+        range: Facility
+        annotations: {relationship_type: AT_FACILITY}
+      code:
+        required: true
+        description: Field code as the signal name carries it
+      component_kind:
+        description: Component category the reading was established for, when unambiguous
+      role:
+        description: Role the sources agree on; unset when they disagree or none states one
+      meaning:
+        description: The declared one-line reading of the code
+      meaning_source:
+        description: Where the reading was declared
+      support:
+        range: integer
+        description: Number of source statements supporting the role
+      state:
+        range: ArchiveFieldCodeState
+        required: true
+        description: "Established, conflicting or unestablished"
+      conflict_roles:
+        multivalued: true
+        description: Every role the sources stated, when they disagree
+      conflict_sources:
+        multivalued: true
+        description: Every source that stated a role, when the roles disagree
+      source_row:
+        range: PlantSignalRow
+        description: The signal-list row that established the reading, at most one per code
+        annotations: {relationship_type: FIELD_CODE_SOURCE_ROW}
+
+  PlantConnection:
+    description: >-
+      One physical connection between two plant components, reified because the
+      edge carries the medium it carries, the direction and the source record
+      that states it. An end that does not resolve to an archive component
+      keeps the source's own reference and port instead of becoming a component.
+    class_uri: facility:PlantConnection
     mixins: [PlantContextProvenance]
     attributes:
-      id: {identifier: true, required: true, description: Facility-qualified document identity and version}
-      source_uid: {required: true, description: Native document identity}
-      version: {required: true, description: Version reported by the document service}
-      description: {required: true, description: Private source document title}
-      role: {required: true, description: "Signal list, functional specification or supporting reference"}
-      sha256: {required: true, description: Digest of the complete cached document bytes}
-      text: {description: Text extracted with the project's existing document extraction}
-      system_code: {required: true, description: Full control-system prefix delimiting the curated context}
-      source_system_codes:
-        multivalued: true
-        description: Source system spellings explicitly curated as the same plant system
-      system_binding_note:
-        description: Private source evidence supporting a binding between source and archive system spellings
-      plant_structure:
-        range: PlantStructure
+      id: {identifier: true, required: true, description: Facility-qualified identity of the source record}
+      source_uid: {required: true, description: "Native identity of the pipe or cable record"}
+      source_reference: {description: The functional reference the record states for itself}
+      medium:
+        range: PlantMedium
+        description: What the connection carries; set only when medium_state is decided
+      medium_state:
+        range: PlantMediumState
         required: true
-        description: Official plant system this document provides context for
-        annotations: {relationship_type: CONTEXT_FOR_PLANT}
+        description: Decided or undecided, with the deciding field named in medium_source
+      source_medium_field:
+        description: "Which source field decided the medium: record kind, fluid, or electrical_train"
+      from_component:
+        range: PlantComponent
+        description: Upstream end, where its reference resolves
+        annotations: {relationship_type: FROM_COMPONENT}
+      to_component:
+        range: PlantComponent
+        description: Downstream end, where its reference resolves
+        annotations: {relationship_type: TO_COMPONENT}
+      from_reference: {description: "The source's own upstream functional reference, retained whether or not it resolves"}
+      to_reference: {description: "The source's own downstream functional reference, retained whether or not it resolves"}
+      from_source_uid: {description: The source's own upstream component identity}
+      to_source_uid: {description: The source's own downstream component identity}
+      from_port_uid: {description: Upstream port identity as the record states it}
+      to_port_uid: {description: Downstream port identity as the record states it}
+      identity_state:
+        range: PlantConnectionIdentityState
+        required: true
+        description: "Which ends found an archive component"
+      specification: {description: Pipe specification as stated}
+      diameter: {range: float, description: Pipe diameter in millimetres as stated}
+      design_pressure: {range: float, description: Design pressure in pascals as stated}
+      design_temperature: {range: float, description: Design temperature in kelvin as stated}
+      network_colour: {description: "Network grouping the record states, kept as stated"}
+      electrical_train: {description: "Electrical train the record states, kept as stated"}
+      cable_family: {description: Cable family as stated}
+      wire_count: {range: integer, description: Number of wires as stated}
+      gauge: {description: Conductor gauge as stated}
+      shield: {description: Shield description as stated}
+      segregation_code: {description: Segregation code as stated}
 
   PlantSignalRow:
     description: A nonempty spreadsheet data row with source coordinates and untouched text
@@ -1912,9 +2044,9 @@ classes:
     attributes:
       id: {identifier: true, required: true, description: Document version plus sheet and row coordinate}
       source_document:
-        range: PlantContextDocument
+        range: Document
         required: true
-        description: Versioned spreadsheet containing this row
+        description: Catalogued spreadsheet containing this row
         annotations: {relationship_type: FROM_PLANT_DOCUMENT}
       sheet: {required: true, description: Native worksheet name}
       row_number: {required: true, range: integer, description: One-based workbook row number}
@@ -1929,7 +2061,7 @@ classes:
         multivalued: true
         description: Unchanged explicit selectors found in the source cells
       plant_structure:
-        range: PlantStructure
+        range: PlantBreakdownNode
         description: Source plant reference verified against an official record
         annotations: {relationship_type: ROW_PLANT_STRUCTURE}
       function_category:
@@ -2002,7 +2134,7 @@ classes:
         description: Official category meaning established by imported source context
         annotations: {relationship_type: COMPONENT_FUNCTION_CATEGORY}
       plant_structure:
-        range: PlantStructure
+        range: PlantBreakdownNode
         description: Official plant mapping established by imported source rows
         annotations: {relationship_type: COMPONENT_PLANT_STRUCTURE}
 
@@ -2051,6 +2183,15 @@ classes:
         description: Naming grammar used to derive the hierarchy
       description:
         description: Meaning of this control node when established from context
+      plant_structure:
+        range: PlantBreakdownNode
+        multivalued: true
+        inlined: false
+        description: >-
+          Official plant node this control node belongs to, bound from a source
+          that states the binding. Written for first-level nodes only; deeper
+          nodes reach it by walking parent_control_node to the first level.
+        annotations: {relationship_type: CONTROL_NODE_PLANT_STRUCTURE}
       archive_member_count:
         range: integer
         description: Function-level variables grouped directly under this control node
@@ -3173,7 +3314,13 @@ classes:
         description: Decided, conflict or undecided result for the unit axis
       vocabulary_role:
         range: SignalVocabularyRole
-        description: Decided role from the closed vocabulary; unset when conflicted or undecided
+        description: >-
+          Decided role from the closed vocabulary; unset when conflicted or
+          undecided. This is the source-assigned axis and the authoritative one:
+          it is decided only where a source's own text names one member, a
+          source naming two leaves it undecided rather than choosing, and where
+          vocabulary_role_state is decided this member is the signal's role
+          ahead of the judged signal_role.
       vocabulary_role_source:
         range: SignalVocabularySource
         description: First source in precedence that gave the stored role
@@ -3438,11 +3585,11 @@ classes:
         description: Sensor, actuator or controller field code, without an inferred meaning
       field_discriminator:
         description: Optional discriminator following the field code
-      candidate_plant_component:
-        range: PlantComponent
-        description: Syntactically derived candidate, never a verified identity
+      archive_field_code:
+        range: ArchiveFieldCode
+        description: Established role and declared reading of this signal's field code
         annotations:
-          relationship_type: CANDIDATE_PLANT_COMPONENT
+          relationship_type: HAS_FIELD_CODE
       archive_grouping_state:
         range: ArchiveGroupingState
         description: Explicit component, control-node or ungrouped result from the catalogue grouping pass
@@ -3453,11 +3600,6 @@ classes:
         description: Component group derived only from a completely parsed archive selector
         annotations:
           relationship_type: IN_ARCHIVE_COMPONENT
-      archive_control_node:
-        range: ControlNode
-        description: Function-level variable group, separate from physical component membership
-        annotations:
-          relationship_type: IN_ARCHIVE_CONTROL_NODE
       group_enrichment_state:
         range: SignalGroupEnrichmentState
         description: >-
@@ -3476,7 +3618,11 @@ classes:
           reference_or_setpoint, status_or_flag, configuration_parameter, or
           derived_or_computed), judged at enrichment from its name, description
           and glossary. A reprocessed signal is judged again on its new
-          description, because the reset to discovered clears this.
+          description, because the reset to discovered clears this. This is the
+          judged axis and subordinate to the source-assigned vocabulary_role:
+          where vocabulary_role_state is decided, that member is the signal's
+          role and this one is not consulted, and this value is never presented
+          as though a source had stated it.
         range: SignalRole
       embedding:
         description: Vector embedding of description for semantic search
@@ -4384,8 +4530,9 @@ classes:
       url:
         description: Full URL to document (wiki sources)
       filename:
-        description: Extracted filename (e.g., "ASTRA_manual_with_index.pdf")
-        required: true
+        description: >-
+          Extracted filename (e.g., "ASTRA_manual_with_index.pdf"). Optional
+          because a catalogued record has no file until it is fetched.
       path:
         description: Absolute remote filesystem path (filesystem sources only)
       in_directory:
@@ -4394,9 +4541,47 @@ classes:
         annotations:
           relationship_type: IN_DIRECTORY
       document_type:
-        description: Type of document (pdf, presentation, notebook, etc.)
+        description: >-
+          File format of the document (pdf, presentation, notebook, etc.).
+          Optional because a catalogued record has no file format until it is
+          fetched; content_role names what it contributes instead.
         range: DocumentType
-        required: true
+      source_uid:
+        description: Native identity of the catalogued record, where one was catalogued
+      title:
+        description: The record's own title, where one was catalogued
+      version:
+        description: Version the document service reports for this record
+      version_state:
+        range: DocumentVersionState
+        description: Whether this stored version is current, superseded or obsolete
+      sha256:
+        description: Digest of the complete document bytes; present only once the bytes were read
+      content_role:
+        range: DocumentContentRole
+        description: >-
+          What the record contributes (signal list, functional specification or
+          supporting reference), as distinct from document_type, which is its
+          file format.
+      context_system_code:
+        description: Full control-system prefix delimiting the curated plant context
+      source_system_codes:
+        multivalued: true
+        description: Source system spellings explicitly curated as the same plant system
+      source_binding_note:
+        description: Source evidence supporting a binding between source and archive system spellings
+      text:
+        description: Extracted body text, for an imported spreadsheet or a fetched document
+      pbs_codes:
+        multivalued: true
+        description: "Plant-breakdown codes the record itself states, whether or not each resolves"
+      plant_structure:
+        range: PlantBreakdownNode
+        multivalued: true
+        inlined: false
+        description: Official plant nodes this record states, for those that resolve
+        annotations:
+          relationship_type: DOCUMENT_PLANT_STRUCTURE
       site_type:
         description: >-
           Wiki platform type (mediawiki, confluence, twiki, etc.).

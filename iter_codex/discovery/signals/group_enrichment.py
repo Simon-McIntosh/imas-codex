@@ -57,7 +57,7 @@ WHERE s.plant_context_state IS NOT NULL
 RETURN s.id AS id, s.accessor AS accessor, s.status AS status,
        s.plant_context_state AS context_state,
        s.archive_component AS component,
-       s.archive_control_node AS control_node,
+       s.control_node AS control_node,
        s.field_code AS field_code,
        s.vocabulary_quantity AS quantity,
        s.vocabulary_quantity_state AS quantity_state,
@@ -71,7 +71,7 @@ ORDER BY s.id
 COMPONENT_QUERY = """
 MATCH (c:PlantComponent {id: $component, facility_id: $facility})
 OPTIONAL MATCH (c)-[:COMPONENT_FUNCTION_CATEGORY]->(category:PlantFunctionCategory)
-OPTIONAL MATCH (c)-[:COMPONENT_PLANT_STRUCTURE]->(structure:PlantStructure)
+OPTIONAL MATCH (c)-[:COMPONENT_PLANT_STRUCTURE]->(structure:PlantBreakdownNode)
 RETURN c.code AS code, c.component_category AS category_code,
        c.component_sequence AS sequence,
        c.archive_field_pattern AS field_pattern,
@@ -86,10 +86,10 @@ MATCH (s:FacilitySignal {facility_id: $facility})
       -[:IN_ARCHIVE_COMPONENT]->(c:PlantComponent {id: $component})
 MATCH (s)-[:HAS_PLANT_CONTEXT]->(:SignalContextLink)
       -[:CONTEXT_SOURCE_ROW]->(r:PlantSignalRow)
-OPTIONAL MATCH (r)-[:FROM_PLANT_DOCUMENT]->(d:PlantContextDocument)
+OPTIONAL MATCH (r)-[:FROM_PLANT_DOCUMENT]->(d:Document)
 RETURN DISTINCT r.id AS row_id, r.description AS description,
        r.field_code AS row_field, s.field_code AS signal_field,
-       d.description AS document, d.role AS document_role
+       d.title AS document, d.content_role AS document_role
 ORDER BY row_id
 """
 

@@ -71,7 +71,7 @@ def test_valid_function_variable_has_a_control_node_and_no_component(selector):
     assert parsed.components("demo") == []
     props = parsed.properties("demo")
     assert props["control_node"] == "demo:control_node:DEMO-UNIT"
-    assert props["candidate_plant_component"] is None
+    assert "candidate_plant_component" not in props
 
 
 @pytest.mark.parametrize(
@@ -103,7 +103,7 @@ def test_nonconforming_variable_has_no_inherited_identity(selector):
     )
     item = graph.query.call_args.kwargs["items"][0]
     assert item["components"] == item["control_nodes"] == []
-    assert item["properties"]["candidate_plant_component"] is None
+    assert "candidate_plant_component" not in item["properties"]
     assert item["properties"]["name_parse_reason"]
 
 

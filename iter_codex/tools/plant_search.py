@@ -13,7 +13,7 @@ _DESCRIPTION_CHARS = 2048
 
 _SIGNAL_FIELDS = """s { .id, .name, .accessor, .unit, .control_path,
     .component_category, .component_sequence, .field_code, .field_discriminator,
-    .name_parse_outcome, .candidate_plant_component,
+    .name_parse_outcome, .archive_component,
     .vocabulary_quantity, .vocabulary_quantity_state,
     .vocabulary_role, .vocabulary_role_state,
     description_source: s.description_source,
@@ -277,12 +277,12 @@ def fetch_signal_context(
     limit: int = 20,
     offset: int = 0,
 ) -> str | None:
-    """Resolve an exact signal id and page its candidate component's siblings."""
+    """Resolve an exact signal id and page its confirmed component's siblings."""
     _pagination(limit, offset)
     resource = _text(resource, "resource")
     rows = graph.query(
         f"""MATCH (s:FacilitySignal {{id: $resource}})
-        OPTIONAL MATCH (s)-[:CANDIDATE_PLANT_COMPONENT]->(c:PlantComponent {{facility_id: s.facility_id}})
+        OPTIONAL MATCH (s)-[:IN_ARCHIVE_COMPONENT]->(c:PlantComponent {{facility_id: s.facility_id}})
         OPTIONAL MATCH (s)-[:AT_CONTROL_NODE]->(control:ControlNode {{facility_id: s.facility_id}})
         OPTIONAL MATCH (control)-[:PARENT_CONTROL_NODE*0..4]->(ancestor:ControlNode {{facility_id: s.facility_id}})
         WITH s, c, control, ancestor ORDER BY ancestor.level
@@ -302,7 +302,7 @@ def fetch_signal_context(
     page = _read_page(
         graph,
         "MATCH (s:FacilitySignal {facility_id: $facility})",
-        "s.id <> $resource AND EXISTS { MATCH (s)-[:CANDIDATE_PLANT_COMPONENT]->(:PlantComponent {id: $component_id, facility_id: $facility}) }",
+        "s.id <> $resource AND EXISTS { MATCH (s)-[:IN_ARCHIVE_COMPONENT]->(:PlantComponent {id: $component_id, facility_id: $facility}) }",
         _SIGNAL_FIELDS,
         "s.id",
         {
@@ -322,7 +322,7 @@ def fetch_signal_context(
         arguments={"resource": resource, "limit": limit},
         kind="signal_context",
         **context,
-        component_identity_status="candidate" if component else None,
+        component_identity_status="confirmed" if component else None,
         system=next((node for node in hierarchy if node["level"] == 1), None),
         items_kind="sibling_signals",
     )

@@ -54,18 +54,14 @@ UNWIND $items AS item
 MATCH (s:FacilitySignal {id: item.id, facility_id: $facility})
 WHERE s.accessor = item.selector AND s.metadata_archive IS NOT NULL
 SET s.archive_grouping_state = item.state, s.archive_grouping_reason = item.reason,
-    s.archive_component = item.component, s.archive_control_node = item.group_control_node
+    s.archive_component = item.component
 WITH s, item
-OPTIONAL MATCH (s)-[old:IN_ARCHIVE_COMPONENT|IN_ARCHIVE_CONTROL_NODE]->()
+OPTIONAL MATCH (s)-[old:IN_ARCHIVE_COMPONENT|CANDIDATE_PLANT_COMPONENT|IN_ARCHIVE_CONTROL_NODE]->()
 DELETE old
 WITH DISTINCT s, item
 FOREACH (component_id IN CASE WHEN item.component IS NULL THEN [] ELSE [item.component] END |
     MERGE (c:PlantComponent {id: component_id})
     MERGE (s)-[:IN_ARCHIVE_COMPONENT]->(c)
-)
-FOREACH (control_id IN CASE WHEN item.group_control_node IS NULL THEN [] ELSE [item.group_control_node] END |
-    MERGE (c:ControlNode {id: control_id})
-    MERGE (s)-[:IN_ARCHIVE_CONTROL_NODE]->(c)
 )
 RETURN count(DISTINCT s) AS written
 """
@@ -83,7 +79,7 @@ RETURN count(DISTINCT c) AS retired
 RETIRE_UNUSED_CONTROL_GROUPS_QUERY = """
 MATCH (c:ControlNode {facility_id: $facility})
 WHERE c.archive_member_count IS NOT NULL
-  AND NOT EXISTS { MATCH (:FacilitySignal)-[:IN_ARCHIVE_CONTROL_NODE]->(c) }
+  AND NOT EXISTS { MATCH (:FacilitySignal)-[:AT_CONTROL_NODE]->(c) }
 REMOVE c.archive_member_count
 RETURN count(c) AS retired
 """

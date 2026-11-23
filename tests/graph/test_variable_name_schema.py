@@ -16,11 +16,7 @@ def test_control_and_component_relationships_and_roundtrip():
             ("control_node", "ControlNode", "AT_CONTROL_NODE"),
         },
         "FacilitySignal": {
-            (
-                "candidate_plant_component",
-                "PlantComponent",
-                "CANDIDATE_PLANT_COMPONENT",
-            ),
+            ("archive_component", "PlantComponent", "IN_ARCHIVE_COMPONENT"),
             ("control_node", "ControlNode", "AT_CONTROL_NODE"),
         },
     }

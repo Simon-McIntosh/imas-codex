@@ -1,0 +1,201 @@
+<article id="migrate-iter-plant-signal-ontology-evidence">
+  <h2>The ITER plant signal graph holds the reviewed ontology, and nothing else moved</h2>
+  <p>The schema, the writers and readers, and the live ITER graph now agree on one
+  plant form. The classes were relabelled, the plant-context document merged into
+  the shared document class, the two duplicate memberships retired, the archive
+  field-code class populated, and a control node bound to the plant nodes a source
+  states for it. Every step is counted in one graph census taken before the
+  migration and one taken after it, and the two censuses are compared by an
+  instrument that fails on any difference it was not told to expect.</p>
+  <figure id="migrate-iter-plant-signal-ontology-counts">
+    <img src="/imas-codex/figures/iter-plant-signal-ontology/migrate-iter-plant-signal-ontology/migration-counts.svg"
+      alt="Paired counts for each decided class and relationship, the counting axis logarithmic and a zero column for counts of zero. Retired memberships fall from 30 031 and 60 283 to zero while their replacements rise from zero to the same 30 031.">
+    <figcaption>A grey mark is the count read before the migration and a blue
+      mark the count read after it, on one logarithmic counting axis with a zero
+      column. Every retired name empties as its replacement fills with the same
+      magnitude; the class renames move 18, 7 and 0 nodes, and the field-code
+      class arrives with 259 nodes. The count of zero has no logarithm, so it
+      sits in its own column.</figcaption>
+  </figure>
+
+  <h3>Before and after, on the live ITER graph</h3>
+  <table>
+    <caption>ITER nodes per class, read before and after the migration</caption>
+    <thead><tr><th>Class</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><th><code>PlantStructure</code></th><td>18</td><td>0</td></tr>
+      <tr><th><code>PlantBreakdownNode</code></th><td>0</td><td>18</td></tr>
+      <tr><th><code>PlantContextDocument</code></th><td>7</td><td>0</td></tr>
+      <tr><th><code>Document</code>, ITER</th><td>808</td><td>815</td></tr>
+      <tr><th><code>ArchiveFieldCode</code></th><td>0</td><td>259</td></tr>
+      <tr><th><code>PlantConnection</code></th><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <caption>ITER relationships per type, read before and after the migration</caption>
+    <thead><tr><th>Relationship</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><th><code>PARENT_PLANT_STRUCTURE</code></th><td>16</td><td>0</td></tr>
+      <tr><th><code>PARENT_PLANT_NODE</code></th><td>0</td><td>16</td></tr>
+      <tr><th><code>CONTEXT_FOR_PLANT</code></th><td>7</td><td>0</td></tr>
+      <tr><th><code>DOCUMENT_PLANT_STRUCTURE</code></th><td>0</td><td>7</td></tr>
+      <tr><th><code>CANDIDATE_PLANT_COMPONENT</code></th><td>30 031</td><td>0</td></tr>
+      <tr><th><code>HAS_FIELD_CODE</code></th><td>0</td><td>30 031</td></tr>
+      <tr><th><code>IN_ARCHIVE_CONTROL_NODE</code></th><td>60 283</td><td>0</td></tr>
+      <tr><th><code>FIELD_CODE_SOURCE_ROW</code></th><td>0</td><td>13</td></tr>
+      <tr><th><code>CONTROL_NODE_PLANT_STRUCTURE</code></th><td>0</td><td>4</td></tr>
+    </tbody>
+  </table>
+  <p>ITER holds 115 790 nodes before the migration and 116 049 after it, the
+  difference being the 259 field-code nodes, each of which reaches the facility
+  with its own <code>AT_FACILITY</code> membership (1 516 661 to 1 516 920 across
+  every facility). ITER holds 652 127 relationships before and 592 120 after, the
+  net loss being the two retired duplicate memberships — 90 314 links — and the
+  scalar properties that mirrored them on 90 314 signals, less the 30 031
+  field-code links, 13 source-row links, 4 control bindings and 259 facility
+  memberships that replace them. <code>PlantConnection</code> is declared and
+  holds no node, which is the form the ontology agreed: the class exists for a
+  later source and nothing in the graph asserts a connection today.</p>
+
+  <h3>The field-code class is populated from the graph's own sources</h3>
+  <p>259 catalogue codes exist on ITER signals. Every one of them became
+  <code>ArchiveFieldCode</code> nodes, each linked from every signal that carries
+  the code (<code>HAS_FIELD_CODE</code>, 30 031 links over 30 031 signals) and
+  from the signal-list row that established it (<code>FIELD_CODE_SOURCE_ROW</code>,
+  13 rows). 69 declared readings cover 39 of those codes and name the role the
+  reading implies: 29 measurement, 16 state, 11 setpoint, 9 command and 4 alarm;
+  47 readings came from controls metadata and 22 from a signal-list row. 6 472
+  signals carry a code with a reading; 226 codes carry none and stay
+  unestablished rather than guessed. Three codes carry two readings each and are
+  recorded as a conflict rather than resolved; six declared readings name codes
+  that appear in no catalogue entry and stay as declarations without a node.</p>
+  <p>The private configuration's <code>field_code_table</code> reader is retired:
+  the table builder no longer reads the declared readings out of the private
+  configuration, because the graph nodes are now their store. The private
+  configuration keeps every entry unchanged as the private copy of what was
+  retired, and neither it nor any reading text appears in a tracked file.</p>
+
+  <h3>A control node records only the plant nodes a source states</h3>
+  <p>One first-level control root holds a binding after the migration: the magnet
+  root, bound to four plant breakdown nodes, from one pilot signal list whose 185
+  rows state the binding. The binding carries the identity of the document that
+  states it, and it lives in private cache, not in this record. Ten other
+  first-level roots stay unbound because no source in the graph states a plant
+  node for them; a second pass would bind zero more. The binding was written
+  only where a signal-list row names both the root and the plant node, so no
+  pairing was inferred from a name or from a hierarchy.</p>
+
+  <h3>The seven plant-context documents merge into one shared class</h3>
+  <p>Seven <code>PlantContextDocument</code> nodes became <code>Document</code>
+  nodes in the shared class, carrying the same identity, title, content role and
+  context code, joined to the same plant nodes by
+  <code>DOCUMENT_PLANT_STRUCTURE</code>. No document was created and none was
+  left in the old class, and the seven links were renamed in place, so every
+  plant node that had a document still reaches it. The shared class already
+  carried 808 ITER documents; it carries 815.</p>
+
+  <h3>A second run changes nothing</h3>
+  <p>The migration hashes the state each pass starts and ends at. The dry run
+  reports <code>953d0f6c…</code> before and after, the applied run moves
+  <code>953d0f6c…</code> to <code>dfea2c08…</code>, and the repeat pass over the
+  migrated graph starts and ends at <code>dfea2c08…</code>, reporting zero
+  relabelled nodes, zero renamed parent links, zero migrated documents, zero
+  duplicate memberships removed, zero pending field codes and zero bindings it
+  would add. The digest covers every node and relationship of the classes the
+  migration is allowed to touch, so an unchanged digest is an unchanged graph.</p>
+
+  <h3>No other facility, class or answer moved</h3>
+  <table>
+    <caption>Node and relationship counts per other facility, before and after</caption>
+    <thead><tr><th>Facility</th><th>Nodes</th><th>Relationships</th></tr></thead>
+    <tbody>
+      <tr><th>JET</th><td>584 852 to 584 852</td><td>1 391 253 to 1 391 253</td></tr>
+      <tr><th>JT-60SA</th><td>159 198 to 159 198</td><td>427 496 to 427 495</td></tr>
+      <tr><th>TCV</th><td>653 457 to 653 457</td><td>1 903 414 to 1 903 414</td></tr>
+    </tbody>
+  </table>
+  <p>One relationship of JT-60SA moved during the migration window: two
+  <code>MEMBER_OF</code> memberships became one
+  <code>BELONGS_TO_DIAGNOSTIC</code> link, which nets one fewer relationship and
+  no node. That edge type is written by the discovery pass
+  (<code>iter_codex/discovery/signals/parallel.py</code>) and by nothing the
+  migration or its tests run, so the movement is attributed to a concurrent
+  discovery write rather than to this node.</p>
+  <p>Twenty signals, drawn across roots and components and fetched through the
+  two tools a user reaches them by — the plant search and the signal-context
+  reader — answer identically before and after, signal for signal. Two names in
+  the answer changed and nothing else: the component identity now arrives under
+  the surviving archive-component reading instead of the retired candidate
+  spelling, and its status reads <code>confirmed</code> where it read
+  <code>candidate</code>, because the duplicate membership that used to say
+  "candidate" is the membership the archive grouping now confirms.</p>
+
+  <h3>Control measures</h3>
+  <table>
+    <caption>Every gate, its scope and its result</caption>
+    <thead><tr><th>Gate</th><th>Scope</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><th>Schema build</th><td><code>build-schemas</code> at the node revision</td><td>84 schema files, <code>EXIT=0</code></td></tr>
+      <tr><th>Model generation</th><td><code>build-models --force</code> at the node revision</td><td><code>EXIT=0</code></td></tr>
+      <tr><th>Graph targets</th><td>nine plant, search, vocabulary and enrichment graph files, graph marker, on a compute partition, at revision <code>103d791c348c8c4d9cea497a6792dcf60bf917dd</code></td><td><code>40 passed, 43 deselected, 1 warning in 94.11s (0:01:34)</code>, <code>EXIT=0</code></td></tr>
+      <tr><th>Default tier over the same files</th><td>the same nine graph files plus six plant discovery files, at revision <code>103d791c348c8c4d9cea497a6792dcf60bf917dd</code></td><td><code>213 passed, 40 deselected, 1 warning in 14.46s</code>, <code>EXIT=0</code></td></tr>
+      <tr><th>Default tier, base against node</th><td>the eight plant discovery and LLM test files at revision <code>a44f8dd8</code> and at the node revision</td><td>194 passed at each, no added failure</td></tr>
+      <tr><th>Whole default suite, base against node</th><td>every default test at <code>a44f8dd8</code> and at the node revision</td><td>3 failed, 3 231 passed at each, the same three failures</td></tr>
+      <tr><th>Whole graph suite, base against node</th><td>every graph-marked test at <code>a44f8dd8</code> and at the node revision</td><td>17 failed, 338 passed at each; the failure identifiers are identical</td></tr>
+    </tbody>
+  </table>
+  <p>The three failures in the whole default suite and the seventeen in the whole
+  graph suite are identical, identifier for identifier, at the base revision
+  and at the node revision, so neither tier adds a failure. The
+  graph targets pass on the partition where they were run, and every log names
+  the revision, the tree and the command and ends with a single <code>EXIT=</code>
+  line. The gate logs are <code>logs/schema-20261123T200229Z.log</code>,
+  <code>logs/models-20261123T200229Z.log</code>,
+  <code>logs/graph-20261123T194515Z.log</code>,
+  <code>logs/default-20261123T194515Z.log</code>,
+  <code>logs/base-default-20261123T194857Z.log</code>,
+  <code>logs/head-default-20261123T194857Z.log</code>,
+  <code>logs/base-default-20261123T193138Z.log</code>,
+  <code>logs/head-default-20261123T193138Z.log</code>,
+  <code>logs/base-graph-20261123T201243Z.log</code>,
+  <code>logs/head-graph-20261123T201243Z.log</code>,
+  <code>logs/migrate-20261123T190518Z.log</code>,
+  <code>logs/head-graph-targets-20261123T210102Z.log</code> and
+  <code>logs/head-default-tier-20261123T210102Z.log</code>.</p>
+  <p>At revision <code>103d791c348c8c4d9cea497a6792dcf60bf917dd</code> the nine
+  graph files report <code>40 passed, 43 deselected, 1 warning in 94.11s
+  (0:01:34)</code>, and the same nine with the six discovery files report
+  <code>213 passed, 40 deselected, 1 warning in 14.46s</code>, each ending in
+  <code>EXIT=0</code>. The same nine graph files reported forty passing at the
+  revision the migration was applied from, so the tier is green at both ends of
+  the work.</p>
+
+  <h3>Two negative controls, both detecting what they were built to detect</h3>
+  <p><strong>A change outside the migration is reported and removed.</strong> A
+  probe node written under another facility's identity moves that facility's
+  count from 584 852 to 584 853; the comparator reports the difference and a
+  difference in the label census, and the probe is then removed, with the count
+  read back at 584 852. The transcript reads
+  <code>CONTROL_PROBE</code>, <code>CONTROL_RESTORED</code>,
+  <code>CONTROL_DETECTED</code>. The probe left by an earlier run of the same
+  control was removed, and a recount taken afterwards moved by exactly that one
+  facility node and nothing else.</p>
+  <p><strong>The migration refuses a class outside the approved set.</strong>
+  Naming <code>StandardName</code> on the command line stops the run before it
+  opens the graph, with <code>UnapprovedNameError: ['StandardName'] is outside
+  the classes and relationships this migration may touch</code> and
+  <code>EXIT=1</code>, recorded in
+  <code>logs/negative-control-unapproved-label-20261123T215500Z.log</code>. The
+  refusal is what turns "only the classes in scope change" from a claim about
+  the code into a property of every run.</p>
+
+  <h3>Restore</h3>
+  <p>The private before-image holds every node and relationship the migration
+  read, so the graph can be returned to its earlier form from it:</p>
+  <pre><code>uv run python -m iter_codex.graph.plant_ontology_migration \
+    --facility iter --restore /home/ITER/mcintos/.cache/imas-codex-codac-uda/ontology-migration/20261123T190518Z/before-image/before.json</code></pre>
+  <p>The image, its restore command and every census and test log named here live
+  under <code>~/.cache/imas-codex-codac-uda/ontology-migration/</code>, outside
+  the repository. No signal name, document identity or reading text appears in
+  this record or in any other tracked file.</p>
+</article>

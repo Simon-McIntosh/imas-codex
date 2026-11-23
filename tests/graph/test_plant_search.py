@@ -65,6 +65,13 @@ def plant_graph(disposable_graph):
                 items=items,
             )
             persist_name_parses(graph, items)
+            graph.query(
+                """MATCH (s:FacilitySignal {facility_id:$facility})
+                WHERE s.plant_component_code IS NOT NULL
+                MATCH (c:PlantComponent {facility_id:$facility, code:s.plant_component_code})
+                MERGE (s)-[:IN_ARCHIVE_COMPONENT]->(c)""",
+                facility=facility,
+            )
         yield graph
 
 
@@ -190,7 +197,7 @@ def test_signal_filters_return_exact_totals_and_nonoverlapping_continuations(
     assert all(identity.startswith("demo-alpha:") for identity in identities)
 
 
-def test_signal_walk_retains_candidate_identity_and_excludes_self_and_other_facility(
+def test_signal_walk_retains_confirmed_identity_and_excludes_self_and_other_facility(
     plant_graph,
 ):
     result = json.loads(
@@ -198,7 +205,7 @@ def test_signal_walk_retains_candidate_identity_and_excludes_self_and_other_faci
     )
     assert result["signal"]["accessor"] == "DEMO-UNI-LOOP:QAZ0001-ABCD"
     assert result["component"]["code"] == "DEMO-UNI-LOOP:QAZ0001"
-    assert result["component_identity_status"] == "candidate"
+    assert result["component_identity_status"] == "confirmed"
     assert result["system"]["code"] == "DEMO"
     assert [node["code"] for node in result["control_hierarchy"]] == [
         "DEMO",
