@@ -49,6 +49,33 @@ delivered. These instructions add the inputs, the reuse map and the rules.
   type, bounded per label. The project's ICP client reads only plant-breakdown,
   component and function-category records; it cannot search documents.
 
+## Plant networks: the connection source the ontology must accommodate
+
+On 2026-11-23 the coordinator found that ICP4 holds the plant's engineering
+source data as structured records, read through Lucy's record tools:
+
+- `SSD Pipe Source Data`: about 122,500 records. Each pipe has a functional
+  reference, a function-category code, PBS fields, `from_component_functional_reference`
+  and `to_component_functional_reference` (with component uids, guids and port
+  guids), `fluid` (empty in the samples read), pipe specification, diameter,
+  pressures and temperatures, `network_color`, `electrical_train`.
+- `SSD Cable Source Data`: about 253,600 records with the same from/to
+  component fields, plus cable family, wire count, gauge, shield, segregation
+  code and electrical train. Signal cables are among them, so a sensor can be
+  traced to its cubicle.
+- Also `SSD Equipment Source Data`, `ICP4 SSD Diagram`, `Component` and
+  `Functional Reference` kinds.
+
+Functional references read plant-system code, function-category code and
+sequence (for example `00AA00-BJ-1234`, invented here), the same grammar the
+archive name parser splits into control path, component category and sequence.
+The lead chose (2026-11-23) to design the ontology for these networks now and
+import them in the pipeline plan. Settle a typed connection between components
+(medium, from, to, source) consistent with the shared schema, and say how an
+archive component and a source-data component are identified as the same.
+Whether the project's client can read these records by GET is not yet known;
+do not probe ICP from this node.
+
 ## What the lead has said
 
 - The schema is LinkML and shared; there is one graph. Keep the design
