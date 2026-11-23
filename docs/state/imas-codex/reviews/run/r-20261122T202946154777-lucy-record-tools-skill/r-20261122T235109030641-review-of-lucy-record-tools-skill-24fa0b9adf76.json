@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-23T00:11:18.828Z",
+  "dispatched_at": "2026-11-22T23:51:35Z",
+  "findings": [
+    {
+      "file": ".claude/skills/lucy-records/SKILL.md",
+      "line": 197,
+      "severity": "non-blocking",
+      "text": "The skill states ICPDocuments.fetch(uid, version, storage_dir) but iter_codex/discovery/icp/documents.py:56 declares a required keyword-only expected_type: str, so an agent copying the call verbatim gets a TypeError. The gate cannot catch it because verify_skill.py inspects only MCP tool names and live schema properties."
+    },
+    {
+      "file": ".claude/skills/lucy-records/SKILL.md",
+      "line": 215,
+      "severity": "non-blocking",
+      "text": "The file ends without a trailing newline, while every existing skill file in .claude/skills ends with one."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-plant-signal-ontology/lucy-record-tools-skill.html",
+      "line": 212,
+      "severity": "non-blocking",
+      "text": "The fragment ends without a trailing newline, unlike the other files in docs."
+    }
+  ],
+  "justifications": {
+    "durability": "No test in the repository fails if this change regresses: the guard is verify_skill.py in the run directory, which reads live-response JSON that does not travel with the repo, and the brief forbade a source or test change. The guard was nonetheless negative-controlled (gate-negative.log FAIL, EXIT=1 on the version mutation), which is why this is not lower.",
+    "evidence": "The done_when is met: every cited tool, field and operator is traced in lucy-record-tools-skill.html:34-131 to a saved live response, and gate.log records tools cited 13 all in live list, all declared True, PASS, EXIT=0, over the saved tools-list.json and document-schema.json.",
+    "fit": "The skill uses the directory-plus-SKILL.md form and the name/description frontmatter idiom of .claude/skills/archive-signals/SKILL.md:1-4, but both added files end without a trailing newline where every existing skill file ends with one.",
+    "goal_fidelity": "All four brief deliverables are present: SKILL.md:1-10 carries a frontmatter name and a description naming ITER documents, signal lists, self-description documents, PBS/GBS nodes and IDM identities, and SKILL.md:20-42 routes each question to its own tool with the chat tool confined to a written answer.",
+    "reuse": "No owner exists for the capability the skill documents: a search over .claude/skills, docs/ and AGENTS.md found no guide to Lucy's MCP record tools, and the only nearby capability, iter_codex/discovery/icp (client.py:33, records.py:1-6), is repository API code the skill cross-references rather than forks.",
+    "scope_discipline": "The diff is exactly the two declared write paths and nothing else, consistent with the brief's documentation-only rule recorded at lucy-record-tools-skill.html:10-12."
+  },
+  "notes": "The reviewed run's manifest carries no baseline_suite or after_suite because the node is documentation-only and ran no test suite, so added_failure_count is 0 and added_failure_ids is empty by derivation from that absence rather than by omission.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261122T235109030641-review-of-lucy-record-tools-skill-24fa0b9adf76",
+  "reviewed_base_sha": "0bb6d2b7fb885a979cbe3f91ba2d466acba9a489",
+  "reviewed_head_sha": "24fa0b9adf761166b29b6f3be5714a935936f4aa",
+  "reviewed_run_id": "r-20261122T202946154777-lucy-record-tools-skill",
+  "scores": {
+    "durability": 11,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T00:11:33.277545+00:00",
+  "total": 105,
+  "verdicts": {
+    "call_sites": "Read no production call site exists for a Markdown skill: it is documentation consumed by the agent harness, and the repository code it references (iter_codex/discovery/icp) is unchanged.",
+    "diff": "Read the single commit 24fa0b9ad against base 0bb6d2b7f: two new documentation files, 427 added lines, zero deletions, no source and no test change.",
+    "done_when": "Read the done_when: the skill exists with a triggering frontmatter, every cited tool, field and operator is confirmed against the server's live descriptions with an evidence list, it holds no real identity, and the skill index if any lists it. gate.log asserts the citation half, the fragment table is the evidence list, and the index clause is answered by there being no index in the repository.",
+    "goal": "Read the source node's goal in its brief: write a project skill telling an agent to find ITER documents and records through Lucy's direct record tools rather than the chat tool. SKILL.md:1-215 delivers that routing, its traps and four recipes.",
+    "manifest": "Read the reviewed run's manifest: status complete, naming commit 24fa0b9adf761166b29b6f3be5714a935936f4aa, citing gate.log and gate-negative.log, with changed_paths matching the diff's two paths.",
+    "write_paths": "Read the declared write paths against the diff's two paths: every changed file is inside .claude/skills/lucy-records or docs/evidence/fragments/iter-plant-signal-ontology/lucy-record-tools-skill.html, and nothing outside them changed."
+  }
+}
