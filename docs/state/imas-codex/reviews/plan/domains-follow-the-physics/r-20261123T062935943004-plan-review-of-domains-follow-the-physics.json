@@ -1,0 +1,92 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T07:02:32.177Z",
+  "dispatched_at": "2026-11-23T06:38:11Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/domains-follow-the-physics.html:57",
+      "id": "reasoning-1",
+      "reason": "the population must be \"every DD path that carries a domain\", plus an account of the unclassified ones, or the evidence numerator overstates the classified set.",
+      "text": "s2 opens \"Every DD path in the graph carries a physics domain from the build\", but the build sets physics_domain = null for infrastructure paths (ids_properties/*, code/*) and records them as domain_source = 'none_metadata' (iter_codex/graph/dd_domain_classifier.py:330-355), so a whole-population claim will meet paths with no domain and no mechanism",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/domains-follow-the-physics.html:63",
+      "id": "done_when-1",
+      "reason": "the required count cannot be read from the record s2 describes, so the node will either invent a number or measure names while calling them paths.",
+      "text": "s2 requires \"the count of paths whose domain rests on the IDS-to-domain table alone\", but the IDS-to-domain table supplies candidate domains to a standard NAME through its sources' IDSes (iter_codex/standard_names/domain_decision.py:440, candidate_domains), while a DD path's domain_source records only jev_tree / llm_classified / deterministic_override / inherited_from_parent / none_metadata, with no IDS-table value",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/domains-follow-the-physics.html:45",
+      "id": "wiring-1",
+      "reason": "as ordered the table cannot be regenerated before s1 closes, so the node must either hand-edit generated data or deadlock; the order or an explicit dependency must change.",
+      "text": "s1's done-when requires codex's IDS-to-domain table to name only ruled values, but ids_domains.json is derived from IMASNode.physics_domain (iter_codex/ids/tools.py:344-374 query_ids_physics_domains) and the graph's path domains are only rerun in s3, which depends on s1",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/domains-follow-the-physics.html:76",
+      "id": "done_when-2",
+      "reason": "without a planted name the rerun's write path is never shown to fire, and an empty moved-path sample could pass vacuously.",
+      "text": "s3 declares no negative control: its predecessor sn-audited-group-release \u00a76 required \"a recorded run on a disposable graph shows one planted name moved to its ruled part and one planted name outside transport left where it was\", and that planted control is absent here",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/domains-follow-the-physics.html:60",
+      "id": "evidence_paths-1",
+      "reason": "naming the fragment path is what makes the evidence openable by a later reader and by the coordinator's hand read.",
+      "text": "s2 asks for \"An evidence page and data file\" and s3 for before/after counts and a hand-read sample, but neither names a durable path (the predecessor \u00a76 named docs/evidence/fragments/sn-audited-group-release/), so a worker may leave the evidence in a session scratchpad or temporary directory",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/domains-follow-the-physics.html:48",
+      "id": "reasoning-2",
+      "reason": "the blanket search either flags files the plan never intended to edit or forces rewriting vendored DD metadata; the search must name its scope or the exempt resources.",
+      "text": "s1's \"A search of the package and the tests finds none of the three removed values\" collides with vendored DD resources that carry computational_workflow as an assigned physics_domain (iter_codex/resources/imas_data_dictionary/4.1.1/schemas/detailed/workflow.json \"physics_domain\": \"computational_workflow\"), which are inputs, not codex definitions",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/domains-follow-the-physics.html:50",
+      "id": "done_when-3",
+      "reason": "the binding \"Both imas-codex pins name the release candidate\" is directly checkable in pyproject.toml, so the weak corroborating clause does not make the whole done-when unfailable.",
+      "text": "s1's \"An environment synced from them reports the 30 values\" is satisfied by the sibling editable source override (pyproject.toml [tool.uv.sources] imas-standard-names = { path = \"../imas-standard-names\", editable = true }) rather than by the pins, so the sync clause measures the sibling checkout, not the pins",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "bab3757dbd0e24dbc951cf0b54a941e5e4c30ced",
+  "plan_fingerprint": "70871bf49f18b4763d31a1c009246bb6702846fbc24cf20e75446c3b66a8bd5c",
+  "plan_slug": "domains-follow-the-physics",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261123T062935943004-plan-review-of-domains-follow-the-physics",
+  "reviewed_blob_sha": "2affa282fbc76b28331ff17697ae69425d908cc5",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 each cited plan section and the evidence data file resolve; extensionless hrefs resolve as `<path>.html`.",
+    "done_when": "a finding \u2014 s2 asks for \"the count of paths whose domain rests on the IDS-to-domain table alone\", a record the build does not produce for paths; s2 and s3 also declare no negative control, s3 having dropped the planted-name disposable-graph control its predecessor required.",
+    "evidence_paths": "a finding \u2014 s2 and s3 name no durable path for their evidence page, citable data file or readback, so a worker may write to a session scratchpad.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or changelog prose reaches a code symbol or comment.",
+    "reasoning": "a finding \u2014 s2's premise that every DD path carries a physics domain is contradicted by the build's own record; and s1's blanket package search collides with vendored DD resource metadata.",
+    "single_goal": "pass \u2014 each section names one deliverable; s1's pin update is part of adopting the vocabulary.",
+    "wiring": "a finding \u2014 s1 requires the IDS-to-domain table to carry ruled values, but that table's values are derived from IMASNode.physics_domain and are only rerun by s3, which depends on s1."
+  },
+  "section_digests": {
+    "_document": "fa2f9090d76762ecd61ca246d3f33c8be8495d73bf5b2dde1c82398e2e7d472d",
+    "s1": "a59da452a5287acc535ec8d8980496d4c4fc10cad04498f0e41a40139aebadef",
+    "s2": "0df394ac4ca723e8b780de808b83664ff168fefb68856f9c5dd32658b66020d5",
+    "s3": "6034d84ca4095943c3365f5f3cb38e0f644503f810a14dd5f58409a10f869bfe",
+    "s4": "1bff552efd7e0fd43dbf40217a359623e3c4a66db329196d973b07ec12b9af4f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:02:41.503302+00:00",
+  "total": null
+}
