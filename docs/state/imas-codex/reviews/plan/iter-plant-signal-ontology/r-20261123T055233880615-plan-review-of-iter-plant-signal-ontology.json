@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T06:19:10.778Z",
+  "dispatched_at": "2026-11-23T06:03:51Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:53",
+      "id": "reasoning-1",
+      "reason": "a connection class whose ends cannot be matched to archive PlantComponents cannot be populated from the source data, so the import needs the further schema change or ad-hoc join decision the sentence claims it avoids.",
+      "text": "the addition settles \"a typed connection between plant components, carrying its medium ... and its source\" but says nothing about how the components at its two ends are identified as the same, although the tracked evidence for this sentence (docs/evidence/fragments/iter-plant-signal-ontology/briefs/review-existing-structure.md:58,75) records that the ICP4 pipe and cable records join components by `from`/`to` functional reference and component uid/guid and explicitly asks for \"how an archive component and a source-data component are identified as the same\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:53",
+      "id": "evidence_paths-1",
+      "reason": "a node dispatched on \u00a72 cannot check the prescribed form against anything the plan holds, so the section's central new constraint is unverifiable from the semantic authority and depends on a brief not every dispatch carries.",
+      "text": "the sentence requires the connection be \"in the form the plant's piping and cabling source data in ICP4 states connections\" but names no record kind (the ICP4 pipe and cable source records), no private path and no evidence fragment a later reader can open, whereas the same section's documentation measure names its census by absolute path",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "87c716f40a6acd4899b1b2a5e9a884b0991e244f",
+  "plan_fingerprint": "edbdb42c1bc2a4177e9be3baeb2e04cecf58ab6fe52837ff3ac5930acacaa662",
+  "plan_slug": "iter-plant-signal-ontology",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261123T055233880615-plan-review-of-iter-plant-signal-ontology",
+  "reviewed_blob_sha": "9484141aa87044e7dadd1d27a28dd31d3cb5b664",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited output path resolves as a deliverable and `~/.cache/imas-codex-codac-uda/document-census/signal-lists-sample.tsv` exists (172 lines; its header records two signal-list pages with 23 and 19 rows withheld plus one self-description page, 2026-11-22), matching the done-when's description; the section's other anchors are unchanged by this revision.",
+    "done_when": "pass \u2014 \u00a72's done-when is measurable (live counts per class, the named sample census, a stated lower bound with the magnet supplies named) and names two negative controls; the added connection falls under the clause requiring each proposal to name the shared class it reuses or why none fits.",
+    "evidence_paths": "a finding \u2014 the added sentence's only source for the connection form is named as \"ICP4\", with no record kind, private path or cited evidence fragment, while the same section names its document evidence by a durable path.",
+    "naming": "pass \u2014 the added text introduces no plan labels, stage names, ticket numbers or version tags; \"ICP4\" is a facility system name, not a tracker identifier.",
+    "reasoning": "a finding \u2014 the added typed connection carries medium and source but states no rule for identifying an archive component with an ICP4 source-data component, so the clause's claimed outcome of importing networks \"without a further schema change\" does not follow from what the section settles.",
+    "single_goal": "pass \u2014 \u00a72 is still one deliverable, the research record proposing the ontology; the network connection is part of that proposal rather than a second outcome, and its effort sits inside the section's 3.0 h.",
+    "wiring": "pass \u2014 s2 declares no depends-on, its consumers (s3 \u2192 s2, s4 \u2192 s3) resolve, and the added network-connection item needs no section that does not already precede it."
+  },
+  "section_digests": {
+    "_document": "878222f143675060d6c67a635eec3665eba921bbb9e79636d618cca92baea9f3",
+    "s1": "5a379093a3af688baa00b2dd56c7697cc8abfff3e4eadd31cd85c809aad0899e",
+    "s2": "8e9aae343260c6840b5a7f2acb98c0aafb4b9ee0441f11417281b4d4962e9a41",
+    "s3": "c3ca8d5036fe3480c5c2ff305867abe1690ea0110ad3734309f44c8da17956d2",
+    "s4": "9b174bf623670caea967426da8f22cec47e4336765a763c8e90096b8aa7b3798"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T06:19:16.890689+00:00",
+  "total": null
+}
