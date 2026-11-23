@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The documentation node has no baseline_suite or after_suite arms and no test path, so 0 and an empty list record that absence rather than a measured clean pair.",
+  "completed_at": "2026-11-23T08:17:00.766Z",
+  "dimension_justifications": {
+    "durability": "No tracked test guards the change; check_record.py lives outside the repository and fails only on removed literals such as id=\"networks\" or the count jet 46,872.",
+    "evidence": "Counts trace to graph_census.log, graph_redundancy.log and graph_links.log, yet the head gate result survives only in the session stream while record-check.log:1 is stale at revision 816fdec with 12 checks.",
+    "fit": "The record follows the repository's research-document idiom and adds no plan or ticket label, but review-existing-structure.html:14 carries a malformed row and ontology-proposal.svg:3706 reuses the retired dash.",
+    "goal_fidelity": "iter-plant-signal-ontology-review.html:26 answers the census, six resolutions and documentation measure, but the rename's readers and writers are missing from the same line.",
+    "reuse": "A schema search for connection, network, cable, pipe, port, field-code and breakdown classes found only SignalContextLink at facility.yaml:1940 and ArchiveFieldPattern, so the proposals extend Document and the cited reified-edge pattern rather than forking an owner.",
+    "scope_discipline": "Every path in 730b85cd..9e809afe is one of the four declared write paths and the commits carry nothing the goal does not imply."
+  },
+  "dispatched_at": "2026-11-23T07:51:01Z",
+  "findings": [
+    {
+      "file": "docs/research/iter-plant-signal-ontology-review.html",
+      "line": 26,
+      "severity": "blocking",
+      "summary": "The readers-and-writers section omits the PlantStructure to PlantBreakdownNode rename. Production code reaches the renamed class and its slots at group_enrichment.py:74, plant_context.py:21,179,187,270,279 and test_plant_context_graph.py:18,29, so a migration run from this record would not be told those sites must change."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-plant-signal-ontology/review-existing-structure.html",
+      "line": 14,
+      "severity": "non-blocking",
+      "summary": "The ArchiveFieldPattern row ends '</tr>>'. The stray '>' renders as a literal character; check_record.py's tag-balance parser cannot see it because it is text."
+    },
+    {
+      "file": "docs/figures/iter-plant-signal-ontology/review-existing-structure/ontology-proposal.svg",
+      "line": 3706,
+      "severity": "non-blocking",
+      "summary": "The legend gives grey dashed the meaning 'retired', but the 'source component reference' box at ontology-proposal.svg:2288 uses the same style. A reader following the legend reads an active source input as a retired element."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T044142676147-review-existing-structure/manifest.md",
+      "line": 11,
+      "severity": "non-blocking",
+      "summary": "The tests line names check_record.py but no test_logs is recorded and record-check.log:1 is stale at revision 816fdec with 'checks run: 12'. The 17-check head pass survives only as a session-stream tool result at 2026-11-23T07:09:24Z."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T044142676147-review-existing-structure/census_coverage.py",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The documentation denominator is the literal ROOTS list of eleven codes, so '11 of 11' is counted against a constant. The run's own control_node_one read matches today, but a later first-level node would leave it silently reporting 11 of 11."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production runtime code reads a tracked document, so the node has no call site of its own. The code the record reasons about was examined and exists at group_enrichment.py:60,74, plant_context.py:21,279, plant_search.py:16,285, domain_queries.py:117-154, field_codes_graph.py:135, field_code_table.py:28 and facility.yaml:4386,4396.",
+    "diff": "Read all four commits against 730b85cd. 769501f5a adds the record and figure, 816fdec78 adds the evidence fragment, 57ae754f4 adds the plant-network sections, and 9e809afef adds the method caveat. Three files, 3851 insertions, documentation only.",
+    "done_when": "The done_when names the census, the six resolutions, the reuse-or-none reason per proposal, readers and writers of every changed class, the documentation measure against the sample census with the magnet supplies named, the shared-class statement and two negative controls. The record carries all but the readers and writers of the PlantStructure rename.",
+    "goal": "The goal is a review of every class and relationship reachable from an ITER archive signal. docs/research/iter-plant-signal-ontology-review.html:26 carries a nineteen-class table and a thirty-row relationship table, each with a live count and a verdict, plus six resolved problems, readers and writers for seven changes, the 11-of-11 documentation measure and the shared-class statement.",
+    "manifest": "Read manifest.md: it lists the four commit shas, names the gate command, and records both negative controls and their logs. Its live status reads in-progress, rewritten by the promotion path, while the delivered copy manifest.md.attempt-2.asdelivered:5 reads complete; it records no test_logs path.",
+    "write_paths": "The four declared write paths are the record, the figure directory, the evidence fragment and a figure subdirectory. The four commits touch only docs/research/iter-plant-signal-ontology-review.html, docs/evidence/fragments/iter-plant-signal-ontology/review-existing-structure.html and docs/figures/iter-plant-signal-ontology/review-existing-structure/ontology-proposal.svg, all inside them."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T071232264943-review-of-review-existing-structure-9e809afef12c",
+  "reviewed_base_sha": "730b85cd8e937b36a5adec071dc2b74f505125de",
+  "reviewed_head_sha": "9e809afef12ca8f4b8336845e455383be69c824b",
+  "reviewed_run_id": "r-20261123T044142676147-review-existing-structure",
+  "scores": {
+    "durability": 10,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T08:17:16.473788+00:00",
+  "total": 97
+}
