@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "iter_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:_self_refine_candidate",
+    "iter_codex/standard_names/worker_tasks/worker_compose_and_validate.py:compose_worker",
+    "iter_codex/standard_names/worker_tasks/worker_compose_batches.py:compose_batch",
+    "iter_codex/standard_names/worker_tasks/worker_review_names.py:process_review_name_batch",
+    "iter_codex/standard_names/worker_tasks/worker_refine_names.py:process_refine_name_batch",
+    "iter_codex/standard_names/worker_tasks/worker_generate_docs.py:process_generate_docs_batch",
+    "iter_codex/standard_names/worker_tasks/worker_enrich_parents.py:process_enrich_parents_batch",
+    "iter_codex/standard_names/worker_tasks/worker_review_docs.py:prepare_docs_review_request"
+  ],
+  "completed_at": "2026-11-23T04:45:47.696Z",
+  "dispatched_at": "2026-11-23T04:33:16Z",
+  "findings": [
+    {
+      "file": "iter_codex/standard_names/context_receipt.py",
+      "line": 631,
+      "severity": "blocking",
+      "text": "blocking: record_receipt returns without writing when sink and ITER_CODEX_CONTEXT_RECEIPT_SINK are both unset, and no code in the reviewed tree sets that variable, so every one of the eight stage call sites builds a receipt and discards it; the done_when's first clause ('every stage ... writes ... a context receipt') does not run in production, and record_stage_receipt's docstring at line 752 says it 'records what arrived' while it records nothing."
+    },
+    {
+      "file": "iter_codex/standard_names/context_receipt.py",
+      "line": 597,
+      "severity": "non-blocking",
+      "text": "non-blocking: render_stage_prompt swallows a template UndefinedError and appends '[template did not render]', and _stage_context at line 507 supplies neither dd_context, field_guidance nor a top-level grammar key; reproduced on the reviewed tree, extraction/self_refine_user ('dd_context is undefined'), name_composition/generate_name_system ('field_guidance'), and name_review and refinement system templates ('grammar') all fail, so 4 of 7 stages' census digests cover a marker and the evidence page's claim that every stage's prompt template was rendered is false."
+    },
+    {
+      "file": "iter_codex/standard_names/context_receipt.py",
+      "line": 507,
+      "severity": "non-blocking",
+      "text": "non-blocking: _stage_context re-implements the prompt-context shape already owned by iter_codex/standard_names/context.py:679 fetch_review_neighbours and :887 fetch_sibling_family (item, anc, sibling_family, vector_neighbours, same_path_neighbours) instead of extending or calling that owner; the duplication is what let the four render failures above go unnoticed, since the real builders supply the keys this one omits."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the eight production call sites that reach the change: worker_extraction_and_enrichment.py, worker_compose_and_validate.py, worker_compose_batches.py, worker_review_names.py, worker_refine_names.py, worker_generate_docs.py, worker_enrich_parents.py and worker_review_docs.py, each invoking record_stage_receipt immediately before its model call.",
+    "diff": "read commit by commit (14 commits, c7ae574a..c69b0d74f, 18 files, 30179 insertions); it adds iter_codex/standard_names/context_receipt.py, the children/producer channels in case_file.py, eight stage call sites, three test files and the census/evidence artefacts, and changes no prompt template text.",
+    "done_when": "the done_when's quantitative measures (per stage/channel expected/present/absent, ranked omissions, 33-member cross-tabulation, both controls, zero model calls and zero graph writes) are all present and recorded in context-receipts.json and gate.log; it is not fully met at runtime because record_stage_receipt discards its receipt when no sink is set.",
+    "goal": "the node's goal is every model-calling stage records the context it was given and omissions are counted; the census half is delivered (docs/evidence/fragments/sn-case-file-generation/context-receipts.json counts 251 names, 2 channels absent for 12 of 33 defective held-out members) but the live recording half is inert because no sink is configured.",
+    "manifest": "read; it records the census on all_debug job 1337814 (251 names, 0 failures, 954 s), the check at c69b0d74f (251 names, 12 omissions), the negative-control demonstration, and the whole-directory gate at 48195bc5f (8909 passed, 11 skipped, EXIT=0); the gate.log and gate-first-pass.log on disk carry those headers and exit lines.",
+    "write_paths": "the source node's write_paths list is empty in dispatch-detail.json; the dispatch brief declares docs/evidence/fragments/sn-case-file-generation/context-receipts.html and the figure directory, and the delivered diff is the section's implementation (receipt module, case file, eight stage call sites, three test modules, census and evidence) \u2014 all within the section's expected scope, with test_source_reads.py registration explained as the repo guard's own channel."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_context_receipt.py:59 fails if complete stays True with a withheld channel and :77 fails if the census stops counting it, but no test asserts a live stage persists a receipt without an explicitly-passed sink, so the inert default (context_receipt.py:631) is unguarded.",
+    "evidence": "gate.log records REVISION=48195bc5f with 8909 passed, 11 skipped, EXIT=0, and check.log records 251 names and 12 omissions EXIT=0, but context_receipt.py:597 substitutes a marker for 4 of 7 stages' templates, so the page's claim that every stage's prompt template was rendered is not true.",
+    "fit": "the module follows the surrounding worker_tasks idiom of local imports inside the stage functions and reuses the case file's channel vocabulary rather than defining a second notion.",
+    "goal_fidelity": "context_receipt.py:752 record_stage_receipt is called at all eight stages, but context_receipt.py:631 returns without writing when no sink is set and nothing in the repository sets ITER_CODEX_CONTEXT_RECEIPT_SINK, so the live half of the goal does not run.",
+    "reuse": "context_receipt.py:507 _stage_context re-derives the prompt-context key shape owned by iter_codex/standard_names/context.py:679 fetch_review_neighbours and :887 fetch_sibling_family without extending it, and the duplication has already drifted (see the four render failures).",
+    "scope_discipline": "every path in the diff is the section's own implementation, with the single tests/standard_names/test_source_reads.py registration explained by the copied-list guard at tests/standard_names/test_source_reads.py:468."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T043235065378-review-of-context-receipts-c69b0d74ffba",
+  "reviewed_base_sha": "c7ae574a24036ee0269353d60a772d1170aa3a22",
+  "reviewed_head_sha": "c69b0d74ffbaa41539823a9434661b9eb047a268",
+  "reviewed_run_id": "r-20261122T184327216910-context-receipts",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T04:46:16.645204+00:00",
+  "total": 83
+}

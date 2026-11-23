@@ -14,8 +14,8 @@
 <meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-after" content="sn-audited-group-release">
-<meta name="plan-version" content="29">
-<meta name="plan-modified" content="2026-11-22">
+<meta name="plan-version" content="30">
+<meta name="plan-modified" content="2026-11-23">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;deferred&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[&quot;sn-case-file-generation#s1&quot;,&quot;sn-case-file-generation#s2&quot;],&quot;s4&quot;:[&quot;sn-case-file-generation#s3&quot;],&quot;s5&quot;:[&quot;sn-case-file-generation#s7&quot;],&quot;s6&quot;:[&quot;sn-case-file-generation#s3&quot;,&quot;sn-case-file-generation#s4&quot;,&quot;sn-case-file-generation#s5&quot;,&quot;sn-audited-group-release#s3&quot;],&quot;s7&quot;:[&quot;sn-case-file-generation#s8&quot;],&quot;s9&quot;:[&quot;sn-case-file-generation#s8&quot;]}">
 <meta name="plan-effort-hours" content="87.0">
@@ -94,6 +94,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261118T064807925154-scfg-benchmark" data-who="reckon-build" data-when="2026-11-18T18:31:05Z">
     <div class="r-comment-body"><p>Added a blind record-generation benchmark over the 176-member reference set (89 development, 87 held out) with four structure-by-model arms, two prompt rounds and two controls; final held-out share right: one-pass/frontier 28/87 = 32.2 % (95 % CI 23.3-42.6), staged/frontier 24/87 = 27.6 %, one-pass/local 15/87 = 17.2 %, staged/local 7/87 = 8.0 %, incumbent-unchanged 59/87 = 67.8 %; the incumbent control did not separate and the withheld control is unmeasurable once restricted to members the full arm answered correctly, so the run reports measuring=false and calls no arm difference a win; spend USD 18.54 against the USD 25 ceiling.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261123T043235065378-review-of-context-receipts-c69b0d74ffba" data-who="reckon-build" data-when="2026-11-23T04:45:47.696Z">
+    <div class="r-comment-body"><p>review of r-20261122T184327216910-context-receipts at c7ae574a..c69b0d74f: goal_fidelity 12, evidence 16, scope_discipline 18, durability 15, fit 17, reuse 5; the census half of the section is delivered and recorded, but the live stage receipts are dropped because no sink is configured, and 4 of 7 census stage prompts fall back to a render-failure marker.</p></div>
 </div>
 </section>
 </main>
