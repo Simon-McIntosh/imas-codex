@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T04:42:09.434Z",
+  "dispatched_at": "2026-11-23T04:36:41Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:64",
+      "id": "done_when-1",
+      "reason": "taken literally the gate requires the worker to catalogue documents the section exists to exclude, and a reviewer comparing the graph against the record would find either unexcluded rows or rows the done-when says must be present.",
+      "text": "s4's done-when requires \"every row of the census is catalogued\" while the Delivers text bounds the work to \"every signal-list and self-description document in the census\"; the census the plan names holds other roles, verified in `~/.cache/imas-codex-codac-uda/document-census/signal-lists-sample.tsv` as 3 `presentation`, 1 `meeting` and 1 `guideline` rows beside the signal-list and sdd rows, and a title search for \"Signal List\" and \"SDD\" will carry such rows into the fuller census too",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:63",
+      "id": "reasoning-1",
+      "reason": "the target class decides which node the write creates and what the landing record counts, so the wrong reading produces a graph the next pipeline stage cannot join on.",
+      "text": "s4 says the graph links each document \"to each archive control system it is matched to\" and its negative control asks that a document be \"matched to no control system\", but its done-when counts matches at \"first-level control-breakdown nodes\", so the endpoint names two different target classes for the same relationship; the plan never defines an archive control system and \u00a71 (line 45) distinguishes control systems from the PBS, so a worker cannot tell whether the link points at a `ControlNode` or at the first-level plant-structure/PBS node",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-plant-signal-ontology.html:63",
+      "id": "anchors_resolve-1",
+      "reason": "a node dispatched on this plan would open the named path, find a two-page sample, and either measure against it believing it is the census, or stall on an unnamed fuller export the coordinator has no written spec for.",
+      "text": "s4 anchors its sole declared input at the directory `~/.cache/imas-codex-codac-uda/document-census/` and states that census \"reads every page of a signal-list title search and a self-description title search\", but that directory today holds only `signal-lists-sample.tsv`, whose own header records \"pages 1-2 of an unfinished result (has_more true; 23 and 19 rows withheld by permissions on those pages)\" and \"first page only\" for the self-description search; the every-page census \u00a74's done-when measures does not exist at that path and is not distinguished from the sample by name",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "730b85cd8e937b36a5adec071dc2b74f505125de",
+  "plan_fingerprint": "f2c31e614f6e61db59b8ce647591f801a94b3551babe0dce2914decd828f1c54",
+  "plan_slug": "iter-plant-signal-ontology",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261123T043556076145-plan-review-of-iter-plant-signal-ontology",
+  "reviewed_blob_sha": "a5c7aca349d48ce250f8f278ee38b770bf62e85b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the single input \u00a74 anchors at `~/.cache/imas-codex-codac-uda/document-census/` currently resolves to the two-page sample whose own header says it is an unfinished search, not the every-page census \u00a74 describes.",
+    "done_when": "a finding \u2014 s4's done-when demands \"every row of the census is catalogued\", which is broader than the section's own scope (\"every signal-list and self-description document\") and would have the node catalogue rows of other roles the census holds.",
+    "evidence_paths": "pass \u2014 s2's record is a tracked file, and s4's private artefacts (hand-check verdicts under `~/.cache/imas-codex-codac-uda/document-census/hand-checks/`) sit on a durable home path rather than a scratch directory.",
+    "naming": "pass \u2014 the changed s2 and s4 text introduces no plan labels, stage names, ticket numbers or version tags, and the s4 followups `id=\"followups\"` anchor resolves.",
+    "reasoning": "a finding \u2014 s4's body and negative control speak of \"archive control system\" while its done-when counts \"first-level control-breakdown nodes\", leaving the link's target class undetermined; the rest of s2's reasoning holds (its stated metric is computable from the live graph's signal-to-control memberships joined to the census's `pbs_codes`, and it prescribes no implementation).",
+    "single_goal": "pass \u2014 s2 delivers one research record and s4 delivers one catalogue of documents linked to plant systems; the additions s2 now enumerates are the contents of that one record, not a second deliverable.",
+    "wiring": "pass \u2014 s2 declares no upstream and s4 declares `iter-plant-signal-ontology#s3`, which is the section that introduces the catalogued-document form s4 writes into; the description-separation the s2 text names as a precondition has already landed (iter-signal-context-and-enrichment comment: r-20261122T165053944927-keep-feed-descriptions-beside-generated-ones at head 3e290e15), so no new edge is owed."
+  },
+  "section_digests": {
+    "_document": "878222f143675060d6c67a635eec3665eba921bbb9e79636d618cca92baea9f3",
+    "s1": "5a379093a3af688baa00b2dd56c7697cc8abfff3e4eadd31cd85c809aad0899e",
+    "s2": "d19b604ece82a7287d1a00e9f07c5b5760ba75dd3108ec950157deef7cce604d",
+    "s3": "c3ca8d5036fe3480c5c2ff305867abe1690ea0110ad3734309f44c8da17956d2",
+    "s4": "9b174bf623670caea967426da8f22cec47e4336765a763c8e90096b8aa7b3798"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T04:41:42.746188+00:00",
+  "total": null
+}
