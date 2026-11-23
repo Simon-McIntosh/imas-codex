@@ -65,7 +65,30 @@
   "plan_slug": "domains-follow-the-physics",
   "plan_version": 2,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "bab3757dbd0e24dbc951cf0b54a941e5e4c30ced",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a72 measures every DD path that carries a domain and accounts separately for the paths the build leaves without one (domain_source none_metadata)",
+      "reason": "",
+      "when": "2026-11-23T07:04:36.671955+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "bab3757dbd0e24dbc951cf0b54a941e5e4c30ced",
+      "commit_basis": "edit",
+      "note": "\u00a72 measures every DD path that carries a domain and accounts separately for the paths the build leaves without one (domain_source none_metadata)",
+      "reason": "",
+      "when": "2026-11-23T07:04:36.671955+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/domains-follow-the-physics/r-20261123T062935943004-plan-review-of-domains-follow-the-physics.json",
   "review_run_id": "r-20261123T062935943004-plan-review-of-domains-follow-the-physics",
   "reviewed_blob_sha": "2affa282fbc76b28331ff17697ae69425d908cc5",
   "rubric": "content",
