@@ -25,7 +25,6 @@ import contextlib
 import hashlib
 import json
 import os
-import re
 import subprocess
 import sys
 import time
@@ -198,11 +197,6 @@ def build(ids: list[str], *, limit: int = 0) -> dict[str, Any]:
     }
 
 
-_WRITE_CLAUSE = re.compile(
-    r"\b(CREATE|MERGE|SET|DELETE|DETACH|REMOVE|DROP|LOAD\s+CSV)\b", re.IGNORECASE
-)
-
-
 @contextlib.contextmanager
 def measured_spend():
     """Count the model calls and graph writes the census actually makes.
@@ -248,11 +242,17 @@ def measured_spend():
 
     try:
         from iter_codex.graph.client import GraphClient
+        from iter_codex.standard_names.case_file import assert_read_only
 
         original_query = GraphClient.query
 
         def counted_query(self, cypher, *args, **kwargs):
-            if _WRITE_CLAUSE.search(str(cypher)):
+            # A statement the case file's own read-only guard would refuse is a
+            # write; asking that guard rather than matching a second vocabulary
+            # keeps one definition of a write in the repository.
+            try:
+                assert_read_only([str(cypher)])
+            except ValueError:
                 counts["graph_writes"] += 1
             return original_query(self, cypher, *args, **kwargs)
 
