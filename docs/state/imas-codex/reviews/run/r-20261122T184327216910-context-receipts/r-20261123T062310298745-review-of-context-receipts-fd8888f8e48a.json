@@ -12,6 +12,13 @@
     "iter_codex/standard_names/worker_tasks/worker_review_docs.py:prepare_docs_review_request"
   ],
   "completed_at": "2026-11-23T06:50:58.649Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-context-receipts-fd8888f8e48a",
+      "recorded_at": "2026-11-23T07:19:53.574164+00:00"
+    }
+  },
   "dispatched_at": "2026-11-23T06:23:45Z",
   "findings": [
     {
