@@ -1,0 +1,58 @@
+<section id="review-existing-structure-census">
+<h3>Every class and relationship reachable from an ITER archive signal, counted live</h3>
+<p>Each label was counted in one facility-scoped pass with an explicit facility filter; traversals that could not be bounded by an index carry a finite depth. The read wrote no node and no relationship. The duplicate-membership section below distinguishes relationship counts from distinct-signal counts where the two differ.</p>
+<table>
+<caption>ITER node counts per class at the review's base revision</caption>
+<thead><tr><th>Class</th><th>ITER nodes</th></tr></thead>
+<tbody>
+<tr><td><code>Facility</code></td><td>1</td></tr>
+<tr><td><code>FacilitySignal</code></td><td>97,525</td></tr>
+<tr><td><code>DataAccess</code></td><td>3</td></tr>
+<tr><td><code>ArchiveEndpoint</code></td><td>3</td></tr>
+<tr><td><code>ControlNode</code></td><td>550</td></tr>
+<tr><td><code>PlantComponent</code></td><td>2,957</td></tr>
+<tr><td><code>ArchiveFieldPattern</code></td><td>422</td></tr>>
+<tr><td><code>PlantStructure</code></td><td>18</td></tr>
+<tr><td><code>PlantFunctionCategory</code></td><td>16</td></tr>
+<tr><td><code>PlantContextDocument</code></td><td>7</td></tr>
+<tr><td><code>PlantSignalRow</code></td><td>343</td></tr>
+<tr><td><code>SignalContextLink</code></td><td>225</td></tr>
+<tr><td><code>Document</code></td><td>808</td></tr>
+<tr><td><code>PulseCategory</code></td><td>744</td></tr>
+<tr><td><code>Pulse</code></td><td>5,957</td></tr>
+</tbody>
+</table>
+<p>The control hierarchy holds 11 / 43 / 110 / 167 / 219 nodes at levels one to five. Of 2,957 components, 2,857 sit under a control node and 74 carry a plant link. The signal population splits by archive role into 90,664 slow and 6,861 fast, and by lifecycle into 97,335 discovered and 190 enriched. No ITER signal carries <code>signal_role</code>; 1,732 carry a decided <code>vocabulary_role</code>: measurement 1,436, state 101, command 86, setpoint 63, alarm 46.</p>
+<p><code>FacilitySignal</code> is shared: jet holds 46,872 and jt-60sa 15,111. <code>Document</code> is shared: tcv holds 20,159, jet 19,159 and jt-60sa 1,057. Every other class in the table holds ITER nodes only, counted across every facility with one facility row returned for each.</p>
+</section>
+
+<section id="review-existing-structure-redundancy">
+<h3>The duplicate memberships are identical, not merely parallel</h3>
+<table>
+<caption>Duplicate membership identity, measured over every signal carrying both</caption>
+<thead><tr><th>Axis</th><th>Signals with both</th><th>Scalar mirrors equal</th><th>Link targets equal</th><th>Differing</th></tr></thead>
+<tbody>
+<tr><td>Component</td><td>30,031</td><td>30,031</td><td>30,031 / 30,031</td><td>0</td></tr>
+<tr><td>Control</td><td>60,283</td><td>60,283</td><td>60,283 / 60,283</td><td>0</td></tr>
+</tbody>
+</table>
+<p>The canonical signal-to-control link covers 90,314 signals against the archive grouping's 60,283. The canonical signal-to-component link is the one the archive grouping confirms; the parse-time candidate is the proposal it confirms.</p>
+</section>
+
+<section id="review-existing-structure-documentation">
+<h3>Documentation found for every first-level control-breakdown node, as a lower bound</h3>
+<p>The measure is 11 of 11 level-one nodes that hold at least one catalogued ITER archive signal and have at least one signal-list or self-description document found for them. The census is the sample at <code>~/.cache/imas-codex-codac-uda/document-census/signal-lists-sample.tsv</code> saved on 2026-11-22: 168 rows, of which 154 are signal-list rows, 9 self-description and 5 other kinds. Two signal-list pages were read while the search was still running, and 23 and 19 rows respectively were withheld by permissions, so the figure is a lower bound in two distinct ways.</p>
+<p>Of the 168 rows, 97 carry at least one plant-breakdown code, covering 84 distinct codes; 71 carry none and are attributed only where the row's own title names the system. The magnet root, which carries the pilot, attributes nine documents to five level-two nodes: the toroidal-field coil supply, the poloidal-field coil supply, the correction-coil supply, the magnet system proper and the magnet cold-test bench.</p>
+</section>
+
+<section id="review-existing-structure-negative-controls">
+<h3>Both declared negative controls pass on their stated forms</h3>
+<p><strong>The class kept unchanged.</strong> <code>ArchiveEndpoint</code> keeps all three nodes. Every ITER signal reaches one: 97,525 of 97,525 carry a metadata-archive link. The relationship types reaching an endpoint are exactly <code>METADATA_ARCHIVE</code>, <code>LISTED_BY_ARCHIVE</code> and <code>DATA_ARCHIVE</code>, all retained, so no ITER node or relationship is left unrepresented.</p>
+<p><strong>The class removed.</strong> <code>PlantContextDocument</code> is named in eight source files, plus two byte-code caches caught by the same grep, found by an executed grep rather than from a hand-written list. Each is assigned a replacement reader in the migration map; the run reports <code>unassigned: []</code>. The positive control is the same run's executed grep, which reports the sites that exist rather than the ones remembered.</p>
+<p>Both controls are read-only and log to the run directory. Their transcript is <code>negative_control.log</code>; the reproduction is <code>negative_control.py</code>. Neither writes a node or a relationship.</p>
+</section>
+
+<section id="review-existing-structure-change-scope">
+<h3>Removals and one rename are confined to ITER data; shared changes are additive</h3>
+<p>The classes that change name, merge or lose relationships — <code>ControlNode</code>, <code>PlantComponent</code>, <code>ArchiveFieldPattern</code>, <code>PlantStructure</code>, <code>PlantFunctionCategory</code>, <code>PlantContextDocument</code>, <code>PlantSignalRow</code>, <code>SignalContextLink</code>, <code>ArchiveEndpoint</code> — each returned exactly one facility row when counted across all facilities. The two shared classes take only optional slots and links; no required slot is added and no existing name changes.</p>
+</section>
