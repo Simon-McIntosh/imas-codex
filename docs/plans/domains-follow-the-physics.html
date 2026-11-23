@@ -25,7 +25,7 @@
 <title>Domains Follow The Physics | imas-codex</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -60,12 +60,13 @@
 <ul>
 <li>An evidence page and data file are committed at <code>docs/evidence/fragments/domains-follow-the-physics/dd-path-domain-review.html</code> and <code>.json</code>. Read from the live graph in one run, they give:
 <ul>
-<li>for every DD path that carries a domain, the recorded mechanism that set it, with the count of paths under each mechanism;</li>
+<li>for every DD path that carries a domain, the recorded mechanism that set it, with the count of paths under each mechanism. Paths carrying a domain with no recorded mechanism form a bucket of their own. The buckets sum to the number of paths carrying a domain, read in the same run;</li>
 <li>the count of paths the build leaves without a domain, by the reason it records;</li>
 <li>the count of live names whose stored domain equals a candidate drawn from their sources' IDS through the IDS-to-domain table, beside the count whose domain matches no such candidate;</li>
 <li>the paths that carry a value the ruled vocabulary no longer holds;</li>
 <li>for each domain, the agreement between its paths' domains and the domains of the live names those paths source.</li>
 </ul></li>
+<li>A positive control shows the census reads data that is present. Its count of paths carrying <code>core_plasma_physics</code>, a removed value known to be present before the rerun, is above zero. It equals an independent count read by a second statement in the same run.</li>
 <li>For each domain, a sample drawn by a recorded seed lists each path's documentation beside its domain. The coordinator reads the sample by hand, and that reading is recorded on this plan.</li>
 <li>The evidence ends with a recommendation for or against rerunning the build's domain step. The recommendation states what a rerun would change.</li>
 <li>No graph write.</li>
