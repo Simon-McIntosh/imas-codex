@@ -137,8 +137,8 @@
     <tbody>
       <tr><th>Schema build</th><td><code>build-schemas</code> at the node revision</td><td>84 schema files, <code>EXIT=0</code></td></tr>
       <tr><th>Model generation</th><td><code>build-models --force</code> at the node revision</td><td><code>EXIT=0</code></td></tr>
-      <tr><th>Graph targets</th><td>nine plant, search, vocabulary and enrichment graph files, graph marker, on a compute partition</td><td>40 passed, <code>EXIT=0</code></td></tr>
-      <tr><th>Default tier over the same files</th><td>same nine files plus the plant discovery and LLM test files</td><td>220 passed, <code>EXIT=0</code></td></tr>
+      <tr><th>Graph targets</th><td>nine plant, search, vocabulary and enrichment graph files, graph marker, on a compute partition, at revision <code>103d791c348c8c4d9cea497a6792dcf60bf917dd</code></td><td><code>40 passed, 43 deselected, 1 warning in 94.11s (0:01:34)</code>, <code>EXIT=0</code></td></tr>
+      <tr><th>Default tier over the same files</th><td>the same nine graph files plus six plant discovery files, at revision <code>103d791c348c8c4d9cea497a6792dcf60bf917dd</code></td><td><code>213 passed, 40 deselected, 1 warning in 14.46s</code>, <code>EXIT=0</code></td></tr>
       <tr><th>Default tier, base against node</th><td>the eight plant discovery and LLM test files at revision <code>a44f8dd8</code> and at the node revision</td><td>194 passed at each, no added failure</td></tr>
       <tr><th>Whole default suite, base against node</th><td>every default test at <code>a44f8dd8</code> and at the node revision</td><td>3 failed, 3 231 passed at each, the same three failures</td></tr>
       <tr><th>Whole graph suite, base against node</th><td>every graph-marked test at <code>a44f8dd8</code> and at the node revision</td><td>17 failed, 338 passed at each; the failure identifiers are identical</td></tr>
@@ -158,8 +158,17 @@
   <code>logs/base-default-20261123T193138Z.log</code>,
   <code>logs/head-default-20261123T193138Z.log</code>,
   <code>logs/base-graph-20261123T201243Z.log</code>,
-  <code>logs/head-graph-20261123T201243Z.log</code> and
-  <code>logs/migrate-20261123T190518Z.log</code>.</p>
+  <code>logs/head-graph-20261123T201243Z.log</code>,
+  <code>logs/migrate-20261123T190518Z.log</code>,
+  <code>logs/head-graph-targets-20261123T210102Z.log</code> and
+  <code>logs/head-default-tier-20261123T210102Z.log</code>.</p>
+  <p>At revision <code>103d791c348c8c4d9cea497a6792dcf60bf917dd</code> the nine
+  graph files report <code>40 passed, 43 deselected, 1 warning in 94.11s
+  (0:01:34)</code>, and the same nine with the six discovery files report
+  <code>213 passed, 40 deselected, 1 warning in 14.46s</code>, each ending in
+  <code>EXIT=0</code>. The same nine graph files reported forty passing at the
+  revision the migration was applied from, so the tier is green at both ends of
+  the work.</p>
 
   <h3>Two negative controls, both detecting what they were built to detect</h3>
   <p><strong>A change outside the migration is reported and removed.</strong> A
