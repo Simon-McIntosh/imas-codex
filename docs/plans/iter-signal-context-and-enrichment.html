@@ -22,8 +22,8 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="97">
-<meta name="plan-modified" content="2026-11-22">
+<meta name="plan-version" content="98">
+<meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
   <main class="plan-doc">
@@ -316,6 +316,9 @@ Gates at the repair head: tests/discovery 2,455 passed; the graph statement gate
 nine statements with their own parameters, a structural check that a statement constant without an entry
 fails, and the cohort-selector positive control, live); the group suite 22 passed; the prompt-coverage file
 11 passed with 1 pre-existing failure, reproduced at the base sha.</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-run-r-20261122T235331644819-review-of-plant-wide-roles-0a4972ade0bf" data-who="reckon-build" data-when="2026-11-23T00:28:15.885Z">
+    <div class="r-comment-body"><p>Reviewed r-20261122T144352526858-plant-wide-roles at head 0a4972ade0bf against base e2482c5034ad. goal_fidelity 19, evidence 18, scope_discipline 18, durability 18, fit 17, reuse 17. Two non-blocking findings: a duplicated private-config constant, and validate_readings never wired into the CLI. The done_when measures reconcile with the private receipts; both head suite arms are green (69 passed and 14 passed, EXIT=0) and the negative control reddens 2 tests on the mutated module.</p></div>
 </div>
 </section>
 </main>

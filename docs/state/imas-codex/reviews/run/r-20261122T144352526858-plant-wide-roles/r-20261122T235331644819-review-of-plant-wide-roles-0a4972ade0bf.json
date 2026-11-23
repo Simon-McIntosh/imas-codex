@@ -1,0 +1,40 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T00:28:15.885Z",
+  "dispatched_at": "2026-11-22T23:54:10Z",
+  "findings": [
+    {
+      "file": "iter_codex/remote/signal_vocabulary.py",
+      "id": "66cc47fca5f",
+      "line": 38,
+      "severity": "non-blocking",
+      "text": "MEANINGS_KEY = \"field_code_meanings\" and the two-line facility-config read at :143-144 duplicate the owner in iter_codex/remote/field_code_table.py:28,35; a rename in either module silently desynchronises the private config key."
+    },
+    {
+      "file": "iter_codex/remote/signal_vocabulary.py",
+      "id": "8db299a4551",
+      "line": 78,
+      "severity": "non-blocking",
+      "text": "validate_readings is referenced only from tests/discovery/test_plant_wide_roles.py, never from the CLI path at :219, so the run's own 11-item readings file was never passed through the guard the evidence cites; the refusal capability is tested but not applied by the tool."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to run the section-11 vocabulary over every catalogued facility signal with the section-12 field-code table as the role source; iter_codex/remote/signal_vocabulary.py:125 run_catalogue_assignment builds the table through field_codes_graph.build_from_graph and assigns the whole catalogue, and the private receipt records catalogue_signals 97,525.\nVERDICT done_when: the measures are recorded: per-axis decided/conflict/undecided each summing to 97,525 (receipts/catalogue-write-repaired-20261122T230204.json and the evidence table), roles including 63 setpoints, the pilot before/after (quantity 728/0/0, role 198/542/4) with the four changed values listed and read, an 11-item reading sample digested 693b6fe8a7080cc7b444181a8ea681e4ae6a24269b58e08aa2f08884b7e55c28, a repeat assignment changing 0, a setpoint server search (tests/graph/test_plant_wide_assignment.py:186 and the 56/0 evidence check), and -m graph passing 14 at revision 6d2b4bc6 on rigel; the manifest records no baseline_suite, so added failures are derived from the green head arms (0).\nVERDICT write_paths: read the manifest's eight declared paths; every path in the node's own commits dfb280edb, d5312cef8 and 0a4972ade sits inside them (the two signal-vocabulary modules, remote/signal_vocabulary.py, tools/plant_search.py, llm/search_tools.py, tests/discovery, tests/graph, the named evidence fragment and the figure directory); the extra paths in the range arrive through the dependency merge 6d2b4bc6, not the node's own commits.\nVERDICT manifest: read; status complete, commits [dfb280edb, d5312cef8, 6d2b4bc6, 0a4972ade], both suite arms (69 passed / 0 failed and 14 passed / 0 failed, EXIT=0), and the negative-control log that mutates pattern_roles to None and records 2 failed / EXIT=1 with the imported module path printed.\nVERDICT diff: read commit by commit against e2482c5034ad977f7fa257af78782a6b22e7ac95; dfb280edb is the feature (table-driven assign_vocabulary/assign_cohort, catalogue snapshot count control, pilot_comparison, deterministic reading sample and validate_readings, plant-listing role filter, and twelve tests), d5312cef8 and 0a4972ade are the evidence fragment and its figure, and 6d2b4bc6 is the dependency merge.\nCALL_SITES: iter_codex/remote/signal_vocabulary.py:234, iter_codex/discovery/signals/vocabulary_graph.py:274, iter_codex/tools/plant_search.py:112, iter_codex/llm/search_tools.py:489, iter_codex/llm/search_tools.py:493\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: iter_codex/remote/signal_vocabulary.py:152 assigns the full catalogue with the table's role and stores only sourced values; the receipt's catalogue_signals 97,525 and per-axis sums 97,525 confirm the whole facility was run.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/discovery-arm-repaired-20261122T230933.log records 69 passed and logs/graph-arm-repaired-20261122T231024.log records 14 passed in 80.73s at revision 6d2b4bc6, each with a bare EXIT=0 line, and the private receipt reconciles cell-for-cell with the two suite arms; a baseline_suite was not recorded.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in dfb280edb, d5312cef8 and 0a4972ade is inside the eight declared paths; the out-of-scope paths in the range belong to the dependency merge 6d2b4bc6.\nSCORE durability: 18\nJUSTIFICATION durability: tests/graph/test_plant_wide_assignment.py:136 (second assignment changes nothing) and tests/discovery/test_signal_vocabulary.py:367 (unestablished code stays undecided) both redden in the negative-control log where pattern_roles is mutated to None.\nSCORE fit: 17\nJUSTIFICATION fit: the helpers follow the idiom of iter_codex/discovery/signals/vocabulary_graph.py:263 but iter_codex/remote/signal_vocabulary.py:38 re-declares a config constant already owned by iter_codex/remote/field_code_table.py:28.\nSCORE reuse: 17\nJUSTIFICATION reuse: the table build is reused through field_codes_graph.build_from_graph at iter_codex/remote/signal_vocabulary.py:146 and the figure through iter_codex/plotting/style.py, and no other owner duplicates the sample or reading validator, but MEANINGS_KEY is duplicated at :38 rather than imported.\nFINDING iter_codex/remote/signal_vocabulary.py:38 non-blocking: MEANINGS_KEY = \"field_code_meanings\" and the two-line facility-config read at :143-144 duplicate the owner in iter_codex/remote/field_code_table.py:28,35; a rename in either module silently desynchronises the private config key.\nFINDING iter_codex/remote/signal_vocabulary.py:78 non-blocking: validate_readings is referenced only from tests/discovery/test_plant_wide_roles.py, never from the CLI path at :219, so the run's own 11-item readings file was never passed through the guard the evidence cites; the refusal capability is tested but not applied by the tool.\n",
+  "review_run_id": "r-20261122T235331644819-review-of-plant-wide-roles-0a4972ade0bf",
+  "reviewed_base_sha": "e2482c5034ad977f7fa257af78782a6b22e7ac95",
+  "reviewed_head_sha": "0a4972ade0bf68d355ddf85a9b693e887dc38bb6",
+  "reviewed_run_id": "r-20261122T144352526858-plant-wide-roles",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T00:29:26.063351+00:00",
+  "total": 107
+}
