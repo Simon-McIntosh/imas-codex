@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed run records no baseline_suite or after_suite arm; its gate is the focused file tests/standard_names/test_family_consistency.py (18 passed, EXIT=0 at f554fff5f) plus a mutated-detector negative control (9 failed, 9 passed, EXIT=1), so no head-arm failure was added.",
+  "call_sites": "none",
+  "call_sites_note": "The only importer of iter_codex.standard_names.family_consistency is docs/evidence/fragments/sn-case-file-generation/family-consistency.py, a standalone evidence generator; no runtime module imports it.",
+  "completed_at": "2026-11-23T10:57:13.039Z",
+  "dispatched_at": "2026-11-23T10:42:42Z",
+  "findings": [
+    {
+      "file": "iter_codex/standard_names/family_consistency.py",
+      "line": 637,
+      "severity": "non-blocking",
+      "text": "_operator_operand breaks the operand phrase on any stopword once one token is kept, so 'averaged over the volume of the plasma' yields the head noun 'of' and two operands sharing a head noun ('a closed flux surface' and 'the plasma surface' both reduce to 'surface') are never flagged; the operator class therefore both misses real operand differences and can emit a nonsense operand (probe run at head: operands ('surface','surface') and ('of','volume') with no operator flag)."
+    },
+    {
+      "file": "iter_codex/standard_names/family_consistency.py",
+      "line": 462,
+      "severity": "non-blocking",
+      "text": "_detect_qualifier treats the token-longer head as the agreed form with no modal or majority check, unlike the operator, convention and unit_basis detectors that call _modal; one member carrying an extra qualifier therefore flags and proposes repairs on every sibling, changing the majority toward a minority (probe at head: three identical members flagged and repaired when a single member added 'local')."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/family-consistency.py",
+      "line": 688,
+      "severity": "non-blocking",
+      "text": "verify() checks only that the page exists, never that the committed page equals render(record); at aa6e70abe render() would append the GATE_REVISION stale sentence, and the committed HTML contains no such sentence, so the page is hand-edited relative to its generator and a regeneration produces a different page with no gate catching the drift."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/family-consistency.html",
+      "line": 51,
+      "severity": "non-blocking",
+      "text": "The done_when's acceptance measure, a blind adjudication of a seeded 20-family sample before and after (no member sound before adjudicated wrong after, and the count of adjudicated inconsistencies falling), is not performed or recorded; the page's Blind adjudication section states it is outstanding, so the section's own acceptance criterion is unproven and promotion must not read this node as accepted."
+    },
+    {
+      "file": "iter_codex/standard_names/family_consistency.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "Six of the nine delivered files (this module, its test, the evidence JSON, the packet, the sealed key and the evidence generator) sit outside the two declared write paths; the section's done_when requires them, so the change is in scope for the section, but the declared scope under-specifies it and a scope audit keyed on the declared paths would read this as a breach."
+    },
+    {
+      "file": "iter_codex/standard_names/family_consistency.py",
+      "line": 71,
+      "severity": "non-blocking",
+      "text": "_FAMILY_MEMBERS_QUERY and _GROUP_FAMILIES_QUERY re-implement parent-based family reads that iter_codex/standard_names/families.py already owns (fetch_pattern_family / _FAMILY_BASE_QUERY); the new module should reuse or extend that owner rather than fork its own HAS_PARENT query text."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_family_consistency.py:335 guards the naming detector and the emptied-_DETECTORS control fails 9 of 18, but read_family/group_families and the evidence generator have no test.",
+    "evidence": "the gate parenthetical is recorded with EXIT lines in gate/head.log and gate/negative-control.log, but the html:51 section leaves the blind adjudication outstanding, so the done_when's acceptance measure is unproven.",
+    "fit": "the module uses the repo's dataclass/typing idiom and ruff check --no-cache passes on both added Python files.",
+    "goal_fidelity": "iter_codex/standard_names/family_consistency.py:1276 render_family shows every member's name, definition, documentation, unit and source text in one view, and :1295 check_family flags only the five fixed classes with the members, field and differing words.",
+    "reuse": "iter_codex/standard_names/families.py:1023 fetch_pattern_family already reads a parent's members from the graph; family_consistency.py:71 _FAMILY_MEMBERS_QUERY forks that read instead of extending the owner.",
+    "scope_discipline": "six of nine delivered files sit outside the two declared write paths, though all are under the section's module, test and evidence areas."
+  },
+  "notes": "The stray file 'negative-control.log\\necho ok' under the reviewed run's gate/ is leftover scaffolding from an aborted negative-control attempt (its header carries a 'PYTHON placeholder' command); it is outside the repository and does not affect the landed change. The two gate logs cited by the manifest carry clean EXIT=0 / EXIT=1 lines.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261123T104159862514-review-of-family-consistency-aa6e70abe7fe",
+  "reviewed_base_sha": "31e5fd71c37b5cb8fb440474ce71209f1a50dc46",
+  "reviewed_head_sha": "aa6e70abe7feaa5ca6d13c0fde05289c8194ca9e",
+  "reviewed_run_id": "r-20261122T184543879763-family-consistency",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 13,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T10:57:45.472618+00:00",
+  "total": 88,
+  "verdicts": {
+    "diff": "Read commit by commit from 31e5fd71c to aa6e70abe: six commits add the module and its test, then the evidence JSON/HTML/packet/key and the figure, then two commits that regenerate the record and state the gate revision on the page; every file is new and inside the section's evidence/figure/module area.",
+    "done_when": "The done_when names five fixed classes, a proposed repair, typed unresolved reasons, planted controls and a blind 20-family adjudication; the gate (tests/standard_names/test_family_consistency.py 18 passed EXIT=0, the mutated-detector control 9 failed EXIT=1, and family-consistency.py --check OK EXIT=0) covers all of it except the adjudication, which the page records as outstanding.",
+    "goal": "The goal, read from the source node.json and plan section s9, is a one-pass family reader that makes a family consistent in one view; iter_codex/standard_names/family_consistency.py:1276 renders every member field together and :1295 flags only the five fixed classes.",
+    "manifest": "The reviewed manifest reads complete and honestly states the 18 passed EXIT=0 head gate, the 9 failed EXIT=1 negative control, the evidence counts and the outstanding blind adjudication.",
+    "write_paths": "Two paths were declared (docs/evidence/fragments/sn-case-file-generation/family-consistency.html and docs/figures/sn-case-file-generation/family-consistency); the diff adds nine files, so six (the module, its test, the evidence JSON, the packet, the sealed key and the evidence generator) sit outside the declared list even though the section's done_when requires them."
+  }
+}

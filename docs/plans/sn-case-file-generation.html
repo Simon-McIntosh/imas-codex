@@ -14,7 +14,7 @@
 <meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-after" content="sn-audited-group-release">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="36">
 <meta name="plan-modified" content="2026-11-23">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;deferred&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[&quot;sn-case-file-generation#s1&quot;,&quot;sn-case-file-generation#s2&quot;],&quot;s4&quot;:[&quot;sn-case-file-generation#s3&quot;],&quot;s5&quot;:[&quot;sn-case-file-generation#s7&quot;],&quot;s6&quot;:[&quot;sn-case-file-generation#s3&quot;,&quot;sn-case-file-generation#s4&quot;,&quot;sn-case-file-generation#s5&quot;,&quot;sn-audited-group-release#s3&quot;],&quot;s7&quot;:[&quot;sn-case-file-generation#s8&quot;],&quot;s9&quot;:[&quot;sn-case-file-generation#s8&quot;]}">
@@ -112,6 +112,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-11-23T09:33:00Z">
     <div class="r-comment-body"><p>§8 landed at merge <code>ea0721648</code> (reviewed head <code>71381a38a</code>) after four review rounds, each of which found a real defect:</p><ol><li>The stage receipts were built and then discarded, because no record destination was set by default.</li><li>A live stage read its enclosing-structure text from different keys than the census wrote.</li><li>Name composition and name review rendered one identical prompt for every name.</li><li>The census's zero model-call and zero graph-write figures were hardcoded rather than measured.</li></ol><p>Every model-calling standard-name stage now writes a per-name context receipt by default. The census over 251 names (210 equilibrium, 87 held out) gives one distinct prompt digest per name at every stage. It finds 57 names that lack source text and enclosing-structure text at the six stages that expect them, and 12 of the 33 defective held-out names are among those 57. Model calls and graph writes are measured at their boundaries, and both are zero. The whole <code>tests/standard_names</code> directory passes on the delivered tree: 8,912 passed, 11 skipped, run on <code>all_debug</code>.</p><p>Left open, none blocking:</p><ul><li>The census renders one template per stage, while two stages choose a variant: the docs review of a parent, and name composition in names mode.</li><li>No test drives the eight production call sites.</li><li>The live-children query is still duplicated, declined because the two statements return different rows.</li></ul><p><a href="/imas-codex/evidence/fragments/sn-case-file-generation/context-receipts.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261123T104159862514-review-of-family-consistency-aa6e70abe7fe" data-who="reckon-build" data-when="2026-11-23T10:57:13.039Z">
+    <div class="r-comment-body"><p>Independent review of r-20261122T184543879763-family-consistency at base 31e5fd71c / head aa6e70abe scored 17 goal_fidelity, 13 evidence, 14 scope_discipline, 14 durability, 17 fit, 13 reuse, filed six non-blocking findings (operator operand extraction, qualifier repair direction, non-reproducible evidence page, unproven adjudication acceptance, declared scope under-specification, forked family-read query) and recorded added_failure_count 0 with no ids.</p></div>
 </div>
 </section>
 </main>
