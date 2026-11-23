@@ -202,6 +202,71 @@ grep -En '[0-9]{2}\.[A-Z0-9]{2}|LC[0-9]|SSEN' SKILL.md -> 00.AA.BB only</code></
     repository, and none of their values was carried into the skill or into
     this fragment.</p>
 
+  <h4 id="lucy-record-tools-skill-project-calls">Every project call checked against its definition</h4>
+  <p>The skill's section on the repository's own client was read against the
+    module source, not against memory, and the reading found one defect: the
+    skill showed <code>ICPDocuments.fetch(uid, version, storage_dir)</code>,
+    while <code>fetch</code> declares <code>expected_type</code> as a required
+    keyword-only argument
+    (<code>iter_codex/discovery/icp/documents.py:56-64</code>), so the call as
+    written raises <code>TypeError</code> before reaching the transport. The
+    skill now carries the real form, with <code>await</code>, the keyword and
+    its two supported values. Each item the section cites, and the definition of
+    each:</p>
+  <table>
+    <thead><tr><th>Item cited</th><th>Definition read, and the fact checked</th></tr></thead>
+    <tbody>
+      <tr><td><code>ICPDocuments.fetch</code></td>
+        <td><code>documents.py:56-64</code>: an <code>async def</code> whose
+        parameters are <code>expected_type: str</code> keyword-only (after
+        <code>*</code>) and <code>max_size_bytes: int = 50 MB</code>.
+        <code>documents.py:72-73</code> accepts only <code>"pdf"</code> or
+        <code>"xlsx"</code> and requires a positive size limit;
+        <code>documents.py:74-76</code> resolves <code>storage_dir</code> and
+        raises when it sits inside the source tree.</td></tr>
+      <tr><td>The receipt's fields</td>
+        <td><code>documents.py:15-29</code>, the <code>DocumentReceipt</code>
+        dataclass: <code>outcome</code>, <code>status</code>,
+        <code>content_type</code>, <code>size_bytes</code>, <code>sha256</code>,
+        <code>path</code>, <code>signature</code>, <code>page_count</code>,
+        <code>sheets</code>, <code>extracted_text_path</code>. The fetch sets
+        <code>outcome="fetched"</code> only on the stored-file return
+        (<code>documents.py:177-190</code>); failures return a receipt with no
+        stored file, which its docstring states.</td></tr>
+      <tr><td><code>page_count</code> and <code>sheets</code></td>
+        <td><code>documents.py:129-156</code>: PDFs get a <code>page_count</code>
+        from <code>PdfReader</code> and no sheets; spreadsheets get
+        <code>sheets</code> from the workbook and a
+        <code>extracted_text_path</code>. The skill said "page count, extracted
+        text path" without the branch; it now names both.</td></tr>
+      <tr><td><code>ICPRecords</code> method names</td>
+        <td><code>records.py:135</code> defines the class at
+        <code>iter_codex/discovery/icp/records.py</code>; the names the skill
+        cites are defined at <code>records.py:217</code>
+        (<code>search_plants</code>), <code>222</code>
+        (<code>search_components</code>), <code>227</code>
+        (<code>search_function_categories</code>), <code>245</code>
+        (<code>plant_by_uid</code>), <code>263</code>
+        (<code>plant_by_code</code>), <code>312</code> (<code>children</code>),
+        <code>316</code> (<code>subtree</code>), <code>342</code>
+        (<code>function_category</code>), <code>357</code>
+        (<code>component_by_reference</code>) and <code>376</code>
+        (<code>components_for_plant</code>).</td></tr>
+      <tr><td>The GET/HEAD rule, and the absence of list and query POSTs</td>
+        <td><code>client.py:33</code>,
+        <code>_READ_METHODS = frozenset({"GET", "HEAD"})</code>;
+        <code>client.py:196-199</code> refuses any request whose method is
+        neither a read nor the sign-in form POST, with the message "Only sign-in
+        form POSTs are allowed"; <code>records.py:1-8</code> states "List-view
+        and query POST operations are deliberately absent from this reader".</td></tr>
+    </tbody>
+  </table>
+  <p>That review is itself evidence of a failure mode the skill warns about,
+    from the other direction: a remembered signature reads exactly like a
+    checked one — plausible names, plausible order — and only the definition
+    settles it. Both tracked files also now end with a newline, which two of
+    them did not at first commit.</p>
+
   <h4 id="lucy-record-tools-skill-index">Skill discovery</h4>
   <p>The repository carries no skill index: <code>.claude/skills/</code> holds
     the skills themselves and the tool discovers them from their frontmatter,

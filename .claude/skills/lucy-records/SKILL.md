@@ -194,9 +194,15 @@ acronym is unused.
 A pipeline does not go through these conversation tools. It fetches document
 bytes through `iter_codex/discovery/icp`:
 
-- `ICPDocuments.fetch(uid, version, storage_dir)` stores the file and returns a
-  receipt (size, sha256, page count, extracted text path).
-- `ICPRecords` answers typed plant, function-category and component reads.
+- `await ICPDocuments(client).fetch(uid, version, storage_dir, expected_type="pdf")`
+  is async, and `expected_type` is a required keyword-only argument taking
+  `"pdf"` or `"xlsx"`. `storage_dir` must resolve outside the source tree. It
+  returns a `DocumentReceipt`: `outcome` is `"fetched"` only on success, and the
+  receipt carries `sha256`, `page_count` (PDF) or `sheets` (spreadsheet file),
+  and `extracted_text_path` where text was extracted.
+- `ICPRecords` answers typed plant, function-category and component reads:
+  `search_plants`, `plant_by_uid`, `plant_by_code`, `children`, `subtree`,
+  `function_category`, `components_for_plant` and `component_by_reference`.
 - The client's access rule is **GET and HEAD only**. Its guarded session
   refuses any other method outside the sign-in exchange, and list-view and
   query POST operations are deliberately absent from the reader.
