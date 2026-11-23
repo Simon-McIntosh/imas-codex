@@ -23,6 +23,8 @@
   <title>ITER plant signals have one consistent place in the shared ontology | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
   <main class="plan-doc">
@@ -61,12 +63,19 @@
     <p><strong>Delivers.</strong> The graph holds, as ITER-facility nodes in the catalogued-document form section 3 introduced, every signal-list and self-description document a records search finds, with its identity, title, current version and version state, file type and the PBS nodes it names, and a link to each archive control system it is matched to. A document is catalogued whether or not it has been fetched; fetching and importing rows is the pipeline's work and is not part of this section. The project's read-only client refuses the POST that a records search uses, so the documents come from a record export the coordinator supplies under <code>~/.cache/imas-codex-codac-uda/document-census/</code>, with each search's predicate, date, pages read and rows withheld by permissions recorded beside it; a search through the client is left to the pipeline plan.</p>
     <p><strong>Done when.</strong> The landing record gives the number of documents found per search, catalogued, linked to a PBS node, and matched to an archive control system, and the number of first-level control-breakdown nodes with and without a matched document; the magnet supplies' signal lists and self-description documents are catalogued and matched; twenty matches are checked by hand against the document's title and PBS reference; a second run adds nothing; and no document identity or title appears in the tracked tree. <strong>Negative control:</strong> a document whose PBS reference names a system with no archive signals is catalogued but matched to no control system, and a superseded or obsolete version is recorded as such rather than as current.</p>
 
-    <section data-reckon="followups">
-      <h2>Followups</h2>
-      <article class="r-fu" data-id="fu-plant-signal-pipeline">
-        <p class="r-fu-body">Next: a plan that runs plant context, grouping, field-code meanings, the signal vocabulary and group enrichment as stages of the signals discovery pipeline, system by system, magnet supplies first, writing into the ontology this plan settles.</p>
-      </article>
-    </section>
-  </main>
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="fu-plant-signal-pipeline" data-status="open" data-written-by="" data-written-at="" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title"></h4>
+    <div class="r-fu-body">Next: a plan that runs plant context, grouping, field-code meanings, the signal vocabulary and group enrichment as stages of the signals discovery pipeline, system by system, magnet supplies first, writing into the ontology this plan settles.</div>
+    <pre class="r-fu-prompt">/reckon-create a plan that runs the ITER plant-signal passes as stages of the signals discovery pipeline, system by system, magnet supplies first, on the ontology iter-plant-signal-ontology settles</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-document-gate-open" data-who="reckon-build" data-when="">
+    <div class="r-comment-body"><p>Landed r-20261122T202857944518-any-idm-document-read-only at head f0a3966d (merge 024d4c1d7), per the lead's 2026-11-22 decision that any IDM document may be read. The read-only client fetches any well-formed document identity through the configured document GET form, with no per-document allowlist; every other method, path, query shape and origin is still refused before the network, and document requests are paced by a private interval, one second by default. The review found nothing and the head adds no failure against the base. One live fetch of a non-pilot document succeeded with its digest recorded privately. The old <code>document_identities</code> key in private configuration is no longer read.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
