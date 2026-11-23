@@ -17,6 +17,7 @@ import json
 from collections.abc import Mapping, Sequence
 from typing import Any
 
+from iter_codex.discovery.signals.field_codes import FieldCodeTable
 from iter_codex.discovery.signals.vocabulary import (
     AXES,
     SOURCE_ORDER,
@@ -55,6 +56,32 @@ RETURN s.id AS id, s.field_code AS field_code, s.unit AS unit,
        s.vocabulary_role_state AS vocabulary_role_state
 ORDER BY s.id
 LIMIT $limit
+"""
+
+CATALOGUE_QUERY = """
+MATCH (s:FacilitySignal {facility_id: $facility})
+RETURN s.id AS id, s.field_code AS field_code,
+       s.component_category AS component_category, s.unit AS unit,
+       s.description AS description,
+       s.description_source AS description_source,
+       s.archive_metadata AS archive_metadata,
+       s.plant_context_state AS plant_context_state,
+       s.vocabulary_quantity AS vocabulary_quantity,
+       s.vocabulary_quantity_source AS vocabulary_quantity_source,
+       s.vocabulary_quantity_state AS vocabulary_quantity_state,
+       s.vocabulary_unit AS vocabulary_unit,
+       s.vocabulary_unit_source AS vocabulary_unit_source,
+       s.vocabulary_unit_state AS vocabulary_unit_state,
+       s.vocabulary_role AS vocabulary_role,
+       s.vocabulary_role_source AS vocabulary_role_source,
+       s.vocabulary_role_state AS vocabulary_role_state
+ORDER BY s.id
+LIMIT $limit
+"""
+
+CATALOGUE_CONTROL_QUERY = """
+MATCH (s:FacilitySignal {facility_id: $facility})
+RETURN count(s) AS total, count(s.field_code) AS coded
 """
 
 COHORT_ROWS_QUERY = """
@@ -171,6 +198,50 @@ def snapshot_cohort(
     return signals, rows
 
 
+def snapshot_catalogue(
+    graph, facility: str, *, limit: int = 100000
+) -> tuple[list[dict], list[dict]]:
+    """Read the facility's whole catalogue, with a positive control on the selector.
+
+    The catalogue is every archive signal the facility holds in the graph. The
+    control query proves the selector sees a non-empty population, and the
+    snapshot is required to hold exactly that many signals, so a truncated read
+    is an error rather than a smaller assignment.
+    """
+    if not 1 <= limit <= 1000000:
+        raise ValueError("Use a finite catalogue bound")
+    control = graph.query(CATALOGUE_CONTROL_QUERY, facility=facility)[0]
+    if not control["total"]:
+        raise RuntimeError("The catalogue selector sees no signal")
+    signals = graph.query(CATALOGUE_QUERY, facility=facility, limit=limit + 1)
+    if not signals:
+        raise RuntimeError("Catalogue snapshot is empty")
+    if len(signals) > limit:
+        raise RuntimeError("Catalogue exceeds its declared bound")
+    if len(signals) != control["total"]:
+        raise RuntimeError("Catalogue snapshot does not hold every catalogued signal")
+    rows = graph.query(COHORT_ROWS_QUERY, facility=facility)
+    return signals, rows
+
+
+def table_roles(
+    signals: Sequence[Mapping[str, Any]], table: FieldCodeTable
+) -> dict[str, str]:
+    """The role the field-code table establishes for each signal, by code and kind.
+
+    A code establishes a role for the component kinds its entry names, so a
+    signal of a third kind resolves nothing. A signal with no entry gets no
+    entry here either, which is what keeps a code the table does not establish
+    from deciding a role through whatever other signals share it.
+    """
+    roles: dict[str, str] = {}
+    for signal in signals:
+        role = table.resolve(signal.get("field_code"), signal.get("component_category"))
+        if role is not None:
+            roles[signal["id"]] = role
+    return roles
+
+
 def _rows_by_signal(
     rows: Sequence[Mapping[str, Any]],
 ) -> dict[str, list[Mapping[str, Any]]]:
@@ -192,10 +263,19 @@ def assign_cohort(
     signals: Sequence[Mapping[str, Any]],
     rows: Sequence[Mapping[str, Any]],
     rules: VocabularyRules | None = None,
+    table: FieldCodeTable | None = None,
 ) -> dict[str, Any]:
-    """Assign every signal and describe what the write would change."""
+    """Assign every signal and describe what the write would change.
+
+    With ``table`` the role comes from the field-code table instead of the
+    population's role consensus; without it the cohort keeps the consensus.
+    """
     sources = cohort_sources(signals, _rows_by_signal(rows))
-    ledger = assign_vocabulary(sources, rules)
+    ledger = assign_vocabulary(
+        sources,
+        rules,
+        pattern_roles=table_roles(signals, table) if table is not None else None,
+    )
     stored = {signal["id"]: signal for signal in signals}
     pending = [
         {"id": record["id"], **vocabulary_properties(record)}
@@ -209,6 +289,112 @@ def assign_cohort(
         "signals": len(ledger),
         "changed": len(pending),
     }
+
+
+def pilot_comparison(
+    before_signals: Sequence[Mapping[str, Any]],
+    ledger: Sequence[Mapping[str, Any]],
+    axes: Sequence[str] = ("quantity", "role"),
+) -> dict[str, Any]:
+    """Compare the pilot's stored values with what this assignment gives them.
+
+    Unchanged is a decided value this assignment still decides identically.
+    Newly decided is one this assignment decides where the earlier one did not.
+    Changed is an earlier decided value this assignment decides differently or
+    leaves undecided; every changed item is listed with the signal's own source
+    text so a reader can judge it without querying again.
+    """
+    after = {record["id"]: record for record in ledger}
+    by_id = {signal["id"]: signal for signal in before_signals}
+    report: dict[str, Any] = {}
+    for axis in axes:
+        unchanged = newly = changed = undecided_before = 0
+        changed_items: list[dict[str, Any]] = []
+        for signal in before_signals:
+            signal_id = signal["id"]
+            record = after.get(signal_id)
+            if record is None:
+                continue
+            before_state = signal.get(f"vocabulary_{axis}_state") or "undecided"
+            before_value = signal.get(f"vocabulary_{axis}") or None
+            after_state = record[f"vocabulary_{axis}_state"]
+            after_value = record[f"vocabulary_{axis}"]
+            if before_state == "decided" and after_state == "decided":
+                if before_value == after_value:
+                    unchanged += 1
+                else:
+                    changed += 1
+                    changed_items.append(
+                        _changed_item(by_id[signal_id], axis, before_value, after_value)
+                    )
+            elif before_state != "decided" and after_state == "decided":
+                newly += 1
+            elif before_state == "decided":
+                changed += 1
+                changed_items.append(
+                    _changed_item(by_id[signal_id], axis, before_value, None)
+                )
+            else:
+                undecided_before += 1
+        report[axis] = {
+            "unchanged": unchanged,
+            "newly_decided": newly,
+            "changed": changed,
+            "undecided_before_and_after": undecided_before,
+            "changed_items": changed_items,
+        }
+    return report
+
+
+def _changed_item(
+    signal: Mapping[str, Any],
+    axis: str,
+    before_value: str | None,
+    after_value: str | None,
+) -> dict[str, Any]:
+    return {
+        "id": signal["id"],
+        "axis": axis,
+        "before": before_value,
+        "after": after_value,
+        "field_code": signal.get("field_code"),
+        "component_category": signal.get("component_category"),
+        "description": signal.get("description"),
+        "description_source": signal.get("description_source"),
+        "unit": signal.get("unit"),
+    }
+
+
+def newly_decided(
+    before_signals: Sequence[Mapping[str, Any]],
+    ledger: Sequence[Mapping[str, Any]],
+    axis: str = "role",
+) -> list[dict[str, Any]]:
+    """Every signal this assignment newly decides on one axis, with its sources."""
+    before = {signal["id"]: signal for signal in before_signals}
+    items = []
+    for record in ledger:
+        signal = before.get(record["id"])
+        if signal is None:
+            continue
+        if (signal.get(f"vocabulary_{axis}_state") or "undecided") == "decided":
+            continue
+        if record[f"vocabulary_{axis}_state"] != "decided":
+            continue
+        items.append(
+            {
+                "id": record["id"],
+                "axis": axis,
+                "value": record[f"vocabulary_{axis}"],
+                "source": record[f"vocabulary_{axis}_source"],
+                "field_code": signal.get("field_code"),
+                "component_category": signal.get("component_category"),
+                "description": signal.get("description"),
+                "description_source": signal.get("description_source"),
+                "unit": signal.get("unit"),
+            }
+        )
+    return items
 
 
 def apply_assignment(
@@ -243,10 +429,18 @@ def apply_assignment(
 
 
 def verify_assignment(
-    graph, facility: str, ledger: Sequence[Mapping[str, Any]]
+    graph,
+    facility: str,
+    ledger: Sequence[Mapping[str, Any]],
+    *,
+    snapshot=None,
 ) -> dict[str, Any]:
-    """Read every stored value back and compare it with the assignment."""
-    signals, _ = snapshot_cohort(graph, facility)
+    """Read every stored value back and compare it with the assignment.
+
+    ``snapshot`` selects the population to read back: the pilot cohort by
+    default, or ``snapshot_catalogue`` for a plant-wide assignment.
+    """
+    signals, _ = (snapshot or snapshot_cohort)(graph, facility)
     stored = {signal["id"]: signal for signal in signals}
     mismatched = []
     for record in ledger:

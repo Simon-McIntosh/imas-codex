@@ -462,25 +462,29 @@ def _search_signals(
         "function": function,
         "component_category": component_category,
         "field": field,
+        "vocabulary_role": vocabulary_role,
     }
     if query is None or any(value is not None for value in plant_filters.values()):
         from iter_codex.tools.plant_search import list_plant_signals
 
         if query is not None:
             raise ValueError("omit query when listing by plant codes")
+        if vocabulary_role is not None and vocabulary_role not in VOCABULARY_ROLES:
+            return _VOCABULARY_ROLE_REFUSAL.format(value=vocabulary_role)
         if any(
             (
                 diagnostic,
                 physics_domain,
                 role,
                 quantity,
-                vocabulary_role,
                 check_status,
                 error_type,
                 include_check_details,
             )
         ):
-            raise ValueError("plant listings accept plant-code filters only")
+            raise ValueError(
+                "plant listings accept plant-code and vocabulary-role filters only"
+            )
         if gc is not None:
             return list_plant_signals(
                 gc, facility, **plant_filters, limit=k, offset=offset
