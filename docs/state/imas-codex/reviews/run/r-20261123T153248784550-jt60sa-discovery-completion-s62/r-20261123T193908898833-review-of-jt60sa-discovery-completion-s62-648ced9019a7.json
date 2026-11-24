@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "365d497ff3a750269ae381592911ada7248870a5",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-24T08:20:49.235Z",
+  "dispatched_at": "2026-11-24T07:58:30Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html",
+      "line": "6",
+      "severity": "blocking",
+      "text": "blocking: the fragment states the population's enriched_at maximum as 2026-10-13T17:12:54.894Z, which is the pre-repair span (gate-enrichment-census.log, revision 365d497ff); gate-census.log at the cited revision eed4150c1 records hi 2026-11-23T18:43:13.519Z for the same 15,111 rows, and the repaired twenty all carry 2026-11-23 timestamps, so the stated maximum contradicts the receipt the fragment cites."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html",
+      "line": "11",
+      "severity": "blocking",
+      "text": "blocking: \"a scan for a numeric identifier ... finds nothing anywhere in the 15,111\" overstates the scan's coverage and its tense: the numeric rule in verify_sample.py:30-36 and test_enrichment_gate.py:40 runs only over the 3,879 rows with enrichment_source='direct', no all-population numeric scan is recorded, and on the population as written by the regeneration the same rule returned 16 hits (number-conflict.log), which paragraph 2 of this fragment then describes."
+    },
+    {
+      "file": "docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html",
+      "line": "41",
+      "severity": "blocking",
+      "text": "blocking: the screen accounting does not match the run's own logs: number-conflict.log reports 16 hits made of 14 rotated signals plus the two singletons (not 14 plus \"the other four\"), and batch-leaks.log reports 16 within-batch content leaks of which 11 lie outside the twenty and none is one of the four the numeric screen missed, so \"both screens isolate the same twenty signals and flag nothing else\" is false as stated."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T153248784550-jt60sa-discovery-completion-s62/test_enrichment_gate.py",
+      "line": "56",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert all(r[\"description\"] for r in sample)` is tautological because the sample is drawn at line 40 from rows filtered `s.description IS NOT NULL AND <> ''`, so it cannot fail; the test name promises that the sample describes its own catalogue text but nothing compares a sampled description with its source_description, and docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:79-81 claims both facts are asserted by this gate arm."
+    }
+  ],
+  "head_log_revision": "648ced9019a7a72bc2f8dbc4950690a40c82b853",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site exists in this repository for a docs/evidence/fragments HTML artifact; the fragment is spliced by reckon's plan evidence composer outside the repo, so CALL_SITES is none.",
+    "diff": "read the three commits against base 365d497ff: 347b630d4 adds the 101-line fragment, eed4150c1 anchors its element ids to the node, 648ced901 adds the gate-arm citation; the whole diff is one new HTML fragment, +108 -0.",
+    "done_when": "the done_when asks that every signal's enriched_at postdate the fix and that a fresh 30-signal direct sample carry no other signal's description; the manifest names the gate /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T153248784550-jt60sa-discovery-completion-s62/test_enrichment_gate.py and gate-sample.log records 2 passed EXIT=0 at revision eed4150c1, but its second test asserts completeness of the sample rather than agreement with source_description, and its first predicate was already true before this node ran (gate-enrichment-census.log: lo 2026-10-13T12:00:02.305Z, before_fix 0).",
+    "goal": "the node's goal is to regenerate JT-60SA signal enrichment after the batch-order defect; the landed artifact docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:1-108 records a live-graph result whose repaired twenty names match their own catalogue text in the run transcript at harness/projects/.../7a91ae15-....jsonl line 1284.",
+    "manifest": "read; status complete, commits 347b630d4 eed4150c1 648ced901, changed_paths the single fragment, tests the run_gate_sample.sh command, test_logs gate-sample.log, artifacts naming the census, reset 20, repair runs, reembed and verify-sample logs, and an outside_scope entry for SIGNAL_RESET_SPECS['discovered'] omitting embedded_text_hash.",
+    "write_paths": "the declared fence was the evidence fragment and a figures directory; the delivered diff 365d497ff..648ced901 touches exactly one path, docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html, and no figure, all inside the fence."
+  },
+  "justifications": {
+    "durability": "the gate is repeatable and its numeric conflict assertion fails on the pre-repair snapshot (16 conflicts reproduced), but /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T153248784550-jt60sa-discovery-completion-s62/test_enrichment_gate.py:56 asserts that sample descriptions are non-empty over rows the query at :40 already filtered to non-empty, so that case cannot fail.",
+    "evidence": "the conflicts rule in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T153248784550-jt60sa-discovery-completion-s62/test_enrichment_gate.py:45-53 genuinely fires (a replay of it over enrichment-before-regeneration.jsonl returns 16 conflicts pre-repair and gate-sample.log records 0 post-repair), but docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:6-7, :11-13 and :41-45 misstate the population span, the scan's coverage and the two screens' counts.",
+    "fit": "the fragment is well-formed HTML with every element id prefixed jt60sa-discovery-completion-s62- and matches the shapes of siblings such as docs/evidence/fragments/jt60sa-discovery-completion/edas-scan.html, and it names no plan or sprint label.",
+    "goal_fidelity": "the delivered docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:1-108 records the regeneration and the repair of the twenty rotated signals, and the twenty then carry their own catalogue text per the post-repair listing in the run transcript.",
+    "reuse": "the change adds documentation only and no definition; the search for an existing owner of JT-60SA enrichment evidence found only the plan section and sibling fragments, so nothing is forked.",
+    "scope_discipline": "git diff --stat 365d497ff..648ced901 lists only docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html, inside the declared write paths, and the node edits no plan file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to regenerate JT-60SA signal enrichment after the batch-order defect; the landed artifact docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:1-108 records a live-graph result whose repaired twenty names match their own catalogue text in the run transcript (harness/projects/.../7a91ae15-....jsonl line 1284).\nVERDICT done_when: the done_when asks that every signal's enriched_at postdate the fix and that a fresh 30-signal direct sample carry no other signal's description; the manifest names /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T153248784550-jt60sa-discovery-completion-s62/test_enrichment_gate.py and gate-sample.log records 2 passed EXIT=0 at revision eed4150c1, but its second test asserts only non-empty descriptions and its first predicate was already true before this node ran.\nVERDICT write_paths: the fence was the evidence fragment and a figures directory; the delivered diff touches exactly docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html and no figure.\nVERDICT manifest: read; status complete, three commits, the single fragment as changed_paths, tests the run_gate_sample.sh command, gate-sample.log as test_logs, and an outside_scope entry for SIGNAL_RESET_SPECS['discovered'] omitting embedded_text_hash.\nVERDICT diff: read the three commits against base 365d497ff; 347b630d4 adds the fragment, eed4150c1 prefixes its element ids with the node id, 648ced901 adds the gate-arm citation; one path, +108 -0.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:1-108 records the regeneration and the repair of the twenty, and the twenty then carry their own catalogue text in the post-repair listing at harness/projects/.../7a91ae15-....jsonl line 1284.\nSCORE evidence: 12\nJUSTIFICATION evidence: the conflicts rule at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T153248784550-jt60sa-discovery-completion-s62/test_enrichment_gate.py:45-53 genuinely fires (16 conflicts replayed over the pre-repair snapshot, 0 recorded in gate-sample.log), but docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:6-7, :11-13 and :41-45 misstate the span, the scan coverage and the screen counts.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 365d497ff..648ced901 lists only docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html, inside the declared write paths, and no plan file is edited.\nSCORE durability: 14\nJUSTIFICATION durability: the gate is repeatable and its conflict assertion fails on the pre-repair snapshot, but /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T153248784550-jt60sa-discovery-completion-s62/test_enrichment_gate.py:56 is tautological over rows the query at :40 already filtered to non-empty.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment is well-formed HTML whose element ids all begin jt60sa-discovery-completion-s62- and whose shape matches siblings such as docs/evidence/fragments/jt60sa-discovery-completion/edas-scan.html.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition; a search of docs/evidence/fragments and iter_codex for an owner of JT-60SA enrichment evidence found only the plan section and sibling fragments, so nothing is forked.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:6 blocking: blocking: the fragment states the population's enriched_at maximum as 2026-10-13T17:12:54.894Z, which is the pre-repair span (gate-enrichment-census.log, revision 365d497ff); gate-census.log at the cited revision eed4150c1 records hi 2026-11-23T18:43:13.519Z for the same 15,111 rows, and the repaired twenty all carry 2026-11-23 timestamps, so the stated maximum contradicts the receipt the fragment cites.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:11 blocking: blocking: \"a scan for a numeric identifier ... finds nothing anywhere in the 15,111\" overstates the scan's coverage and its tense: the numeric rule in verify_sample.py:30-36 and test_enrichment_gate.py:40 runs only over the 3,879 rows with enrichment_source='direct', no all-population numeric scan is recorded, and on the population as written by the regeneration the same rule returned 16 hits (number-conflict.log), which paragraph 2 of this fragment then describes.\nFINDING docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:41 blocking: blocking: the screen accounting does not match the run's own logs: number-conflict.log reports 16 hits made of 14 rotated signals plus the two singletons (not 14 plus \"the other four\"), and batch-leaks.log reports 16 within-batch content leaks of which 11 lie outside the twenty and none is one of the four the numeric screen missed, so \"both screens isolate the same twenty signals and flag nothing else\" is false as stated.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T153248784550-jt60sa-discovery-completion-s62/test_enrichment_gate.py:56 non-blocking: non-blocking: `assert all(r[\"description\"] for r in sample)` is tautological because the sample is drawn at line 40 from rows filtered `s.description IS NOT NULL AND <> ''`, so it cannot fail; the test name promises that the sample describes its own catalogue text but nothing compares a sampled description with its source_description, and docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html:79-81 claims both facts are asserted by this gate arm.",
+  "review_run_id": "r-20261123T193908898833-review-of-jt60sa-discovery-completion-s62-648ced9019a7",
+  "reviewed_base_sha": "365d497ff3a750269ae381592911ada7248870a5",
+  "reviewed_head_sha": "648ced9019a7a72bc2f8dbc4950690a40c82b853",
+  "reviewed_run_id": "r-20261123T153248784550-jt60sa-discovery-completion-s62",
+  "reviewer": "review-of-jt60sa-discovery-completion-s62-648ced9019a7",
+  "reviewer_run_id": "r-20261123T193908898833-review-of-jt60sa-discovery-completion-s62-648ced9019a7",
+  "scores": {
+    "durability": 14,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T08:30:36.085429+00:00",
+  "total": 99
+}
