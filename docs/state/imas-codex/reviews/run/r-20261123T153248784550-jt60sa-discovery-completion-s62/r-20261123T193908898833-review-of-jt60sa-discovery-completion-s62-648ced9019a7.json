@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-24T08:20:49.235Z",
   "dispatched_at": "2026-11-24T07:58:30Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-jt60sa-discovery-completion-s62-648ced9019a7",
+      "recorded_at": "2026-11-24T08:36:41.793559+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/jt60sa-discovery-completion/jt60sa-discovery-completion-s62.html",
