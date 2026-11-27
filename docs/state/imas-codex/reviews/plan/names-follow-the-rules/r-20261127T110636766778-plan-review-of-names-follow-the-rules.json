@@ -61,6 +61,16 @@
       "note": "rule 7 now says a collision marks a duplicate whose retirement is put to the lead, matching \u00a73, which withholds the repair and lists the duplicate with the name to keep",
       "reason": "",
       "when": "2026-11-27T11:12:23.865471+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5e71e16a75224ddca908e5b43cf3f4bee86b9dcc",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "\u00a73 repairs only names \u00a72 reads as breaking a rule; edge cases wait for the lead's ruling and are re-read after it",
+      "reason": "",
+      "when": "2026-11-27T11:12:26.754686+00:00"
     }
   ],
   "responses": {
@@ -81,6 +91,15 @@
       "note": "rule 7 now says a collision marks a duplicate whose retirement is put to the lead, matching \u00a73, which withholds the repair and lists the duplicate with the name to keep",
       "reason": "",
       "when": "2026-11-27T11:12:23.865471+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "5e71e16a75224ddca908e5b43cf3f4bee86b9dcc",
+      "commit_basis": "edit",
+      "note": "\u00a73 repairs only names \u00a72 reads as breaking a rule; edge cases wait for the lead's ruling and are re-read after it",
+      "reason": "",
+      "when": "2026-11-27T11:12:26.754686+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/names-follow-the-rules/r-20261127T110636766778-plan-review-of-names-follow-the-rules.json",
