@@ -14,7 +14,7 @@ title.
 
     uv run python scripts/figures_knowledge_graph_scale.py --query    # counts + sample
     uv run python scripts/figures_knowledge_graph_scale.py            # draw from cache
-    uv run python scripts/figures_knowledge_graph_scale.py --portrait # 1:2 column
+    uv run python scripts/figures_knowledge_graph_scale.py --portrait # 2:3 portrait
 
 The query pass writes ``graph-stats.json`` beside the figure and the sampled
 subgraph to ``SAMPLE`` so a redraw never needs the graph.
@@ -541,28 +541,28 @@ LANDSCAPE = Arrangement(
         "jt-60sa": {"code": 0, "wiki": -51, "signals": -141},
     },
 )
-# A column half as wide as it is tall: the facilities stack above and below
-# the Data Dictionary, so every mapping line still runs to the middle.
+# A portrait canvas, two wide by three tall: JET spans the top, TCV and the
+# Data Dictionary share the middle, JT-60SA and Standard Names the bottom.
 PORTRAIT = Arrangement(
     file="knowledge-graph-scale-portrait.svg",
-    canvas=(6.6, 13.2),
+    canvas=(8.0, 12.0),
     title_space=0.0,
     centres={
-        "jet": (2.8, 10.9, "above"),
-        "tcv": (1.5, 7.3, "above"),
-        "iter": (0.5, 4.0, "right"),
-        "dd": (4.4, 5.0, "below"),
-        "jt-60sa": (1.6, 1.75, "below"),
-        "sn": (4.7, 1.9, "below"),
+        "jet": (2.6, 9.8, "above"),
+        "tcv": (1.6, 6.05, "above"),
+        "iter": (6.3, 8.4, "right"),
+        "dd": (6.0, 5.6, "below"),
+        "jt-60sa": (2.0, 1.9, "below"),
+        "sn": (6.0, 2.0, "below"),
     },
     satellites={
         "jet": {"wiki": 20, "signals": -20},
-        "tcv": {"wiki": -75, "signals": 0},
+        "tcv": {"wiki": 15, "signals": -30},
         "jt-60sa": {"signals": None, "wiki": 150},
     },
     label_angles={
         "jet": {"code": -130, "wiki": 0, "signals": 0},
-        "tcv": {"code": -130, "wiki": 180, "signals": 90},
+        "tcv": {"code": -130, "wiki": 0, "signals": -90},
         "jt-60sa": {"code": 0, "wiki": 90, "signals": 180},
     },
 )
@@ -758,7 +758,7 @@ def main() -> None:
         "--relayout", action="store_true", help="recompute the cached layout"
     )
     parser.add_argument(
-        "--portrait", action="store_true", help="draw the 1:2 column arrangement"
+        "--portrait", action="store_true", help="draw the 2:3 portrait arrangement"
     )
     parser.add_argument(
         "--png", action="store_true", help="write a PNG instead of the SVG"
