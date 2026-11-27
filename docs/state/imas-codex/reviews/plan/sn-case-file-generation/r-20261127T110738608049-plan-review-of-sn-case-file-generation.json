@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-27T11:11:22.259Z",
+  "dispatched_at": "2026-11-27T11:08:19Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:46",
+      "id": "reasoning-1",
+      "reason": "s5's central input is either missing or must be rebuilt from scratch, and the fix is to name the reading s5 actually consumes (or drop the sampling now that every live name is read).",
+      "text": "s5's done-when runs its \"about 200 live names ... through the detection passes of \u00a77 reporting only\", but s7 is declared `descoped` at line 53 and was never built (its declaration was `implementable` before this change); the dependency was moved to `names-follow-the-rules#s2` without moving the text, so a node building s5 is sent to a mechanism no section will deliver, and if it builds one it duplicates a reading that plan already performs over every live name",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:58",
+      "id": "reasoning-2",
+      "reason": "closing the section that found the omission leaves the defect it found with no owner in the plan, so it would either be silently dropped or rediscovered by the next audit; the answer is a named owner (a followup or a section) rather than a change of wording.",
+      "text": "s8 is now closed (`done` at line 19), yet it says the missing channels its census found \"is the work of the sections that own the prompts\" while no section of this plan owns a prompt, and the census records 57 names lacking source and enclosing-structure text at six stages, 12 of them among the 33 defective held-out names",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "2c6fddf100ff4458b46a3b4ceaaffa634c3c90d8",
+  "plan_fingerprint": "8fe2a2b4f4f78441beb07fbd10dfbf8cdec1d0c1b3c1e238ea9259383993dbcb",
+  "plan_slug": "sn-case-file-generation",
+  "plan_version": 38,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261127T110738608049-plan-review-of-sn-case-file-generation",
+  "reviewed_blob_sha": "2f678cbdac1be4972cdaebcda555ce5e8fc62a62",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `names-follow-the-rules.html#s2` resolves and is the catalog reading the s7 ruling names; `sn-definitions-by-construction.html#s10` resolves; the s8 merge `ea0721648` and the s9 adjudication commit `c9e41cec8` both resolve in the repository. `descoped` is an established declaration value (56 uses across `docs/plans/`, and the `data-descope-reason` attribute is used by peer plans). The `\u00a77` reference in s5 resolves to a section that exists but is now descoped \u2014 that is a reasoning defect, not a resolution failure.",
+    "done_when": "pass \u2014 the declared-done sections carry their controls in committed evidence: s8's census records `controls.negative.reported_complete: false` with an absent-before/absent-after pair and `controls.positive.complete_at_every_stage: true`; s9 and s5 each keep two planted controls; s7's descope removes its gate rather than leaving an unfailable one.",
+    "evidence_paths": "pass \u2014 the new comments' evidence sits under `docs/evidence/fragments/sn-case-file-generation/` (`context-receipts.html`/`.json`, `incumbent-failures-under-codified-rules.json`, `family-consistency-coordinator-adjudication.json`), all durable and all present.",
+    "naming": "pass \u2014 the changed unit adds no code symbols, plan labels or ticket numbers; the names quoted are catalog names used as data.",
+    "reasoning": "a finding \u2014 s5's endpoint still depends on \"the detection passes of \u00a77\", and \u00a77 is now descoped, so the measure s5 names is not obtainable from any section the plan will build.",
+    "single_goal": "pass \u2014 each section still names one deliverable; s5's sampling is the instrument that makes its one grammar proposal complete, not a second deliverable.",
+    "wiring": "pass \u2014 the changed depends-on map is complete and correct: s5 now waits on `names-follow-the-rules#s2`, whose done-when (\"Every live standard name is read against the rules\", breaks flagged \"with the words that break it and the source or definition words that show it\") is the right node for the classes s5 must add, and no section still declares an edge into the descoped s7. The stale reference to s7 that remains is in s5's own body and is reported under reasoning."
+  },
+  "section_digests": {
+    "_document": "b2d2b0015dcc8771de5dbabf0adb444b2d72a22dd76c9268a1366221263e6f2e",
+    "s1": "66daa3f78292910aa399a3a7874182b6ced822cba15f461f52d7f321bfb0d49c",
+    "s2": "678940dfe8bd6d437c712fed9aac830d188a43a3a48ac6eca1c34afa21ad5cfa",
+    "s3": "7da2eb37916f38bde6478e3e6258bf73b046248fbc5a7d256ce3251c430a2d4a",
+    "s4": "d0c203a2f760ab938d4544c7f4956717f1a6a1b14ab758143abf49bbdf0beb45",
+    "s5": "138d4431d9f81b899846332fa069f2e6f15d1018cac5db0c1f0263818f859096",
+    "s6": "5914118099288f7cdc28bdb5a4837999feae2391e6decaa78a12188d67aa1b7e",
+    "s7": "e72a2a8e63b73f766aff6cb9d8adb72bcd41c5b121d15160e5c82fe081e0c592",
+    "s8": "5f0774921b0a497d2cf53b921d9c6ed464764b94720ac22980cffccb9d27418c",
+    "s9": "2b8a3003bcc74d9c5ff7b4608be9d39e730ce1701548cd6e82dc1a4bee91b4c0"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-27T11:11:27.118167+00:00",
+  "total": null
+}
