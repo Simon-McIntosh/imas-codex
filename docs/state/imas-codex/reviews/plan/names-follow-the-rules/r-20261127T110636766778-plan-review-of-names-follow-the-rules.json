@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-27T11:10:33.425Z",
+  "dispatched_at": "2026-11-27T11:07:15Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/names-follow-the-rules.html:41",
+      "id": "reasoning-1",
+      "reason": "without the grammar constraint \u00a73 either blocks silently on transfer names or attempts a grammar change the plan never scopes, which is the one outcome the evidence already rules out.",
+      "text": "rule 6 states that \"A transfer between two populations names both donor and recipient\" while the cited evidence (`incumbent-failures-under-codified-rules.json`, `rules.transfer`) reads \"\u2026names both donor and recipient; the grammar has no form for this today\"; the limitation is dropped, so \u00a73's \"Each name \u00a72 flags is repaired once, changing only what its rule names\" sends a worker at repairs the grammar cannot express, with no route for them",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/names-follow-the-rules.html:78",
+      "id": "reasoning-2",
+      "reason": "the collision case is the highest-consequence repair path (evidence records 4 of 9 frontier blocks as `collision`), and an unresolved contradiction there decides which name survives the catalog.",
+      "text": "\u00a73 says \"A repair whose new name collides with an existing name is not applied. It is listed as a duplicate, with the name to keep, for the lead to rule on\", but rule 7 at line 42 says \"A repair that collides with an existing name marks a duplicate to retire\" \u2014 the two dispositions of the same case are opposite (withhold the repair versus apply it and retire the duplicate), so a worker resolves the rule it was handed arbitrarily",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/names-follow-the-rules.html:78",
+      "id": "reasoning-3",
+      "reason": "the set \u00a73 repairs is what a worker reads off the page, and the mismatch sends a rename at names the plan says no one may decide yet.",
+      "text": "\u00a73 scopes its work as \"Each name \u00a72 flags\", but \u00a72 (line 59\u201364) defines three results, one of which is \"an edge case the rules do not settle\"; the plan's own text says edge cases are put to the lead (line 68), so \"each name \u00a72 flags\" would repair the very names waiting on a ruling, while \u00a73's acceptance measure silently counts only \"sampled names that break a rule\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/names-follow-the-rules.html:59",
+      "id": "reasoning-4",
+      "reason": "the reading's recorded version is the only provenance a later repair depends on, and a version that can move mid-read makes that provenance unfalsifiable.",
+      "text": "\u00a72 pins the reading to \"the rules file at a recorded version\" and also requires that \"Each ruling the lead gives is added to the rules file's log\" (line 68), so the file's version moves while the catalog is being read; the plan states no epoch rule, leaving a worker unable to say whether a name read before a ruling was read under the version it records",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5e71e16a75224ddca908e5b43cf3f4bee86b9dcc",
+  "plan_fingerprint": "dd9247fe2d852ae2557d5c0bcdbcc37736f6cef4a028992eccfe065e63ef7ab9",
+  "plan_slug": "names-follow-the-rules",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261127T110636766778-plan-review-of-names-follow-the-rules",
+  "reviewed_blob_sha": "b8986433cecd5bfcacf30244d9399bbf3b36f1f4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/sn-case-file-generation/incumbent-failures-under-codified-rules.json` and `tests/standard_names` both resolve, as do the section ids `s1`/`s2`/`s3` referenced from \u00a73, and the verbal anchor \"the 2026-11-18/19 ruling that a name identifies and its definition specifies\" resolves in `docs/plans/sn-case-file-generation.html` (\"2026-11-18, that a name identifies and its definition specifies\").",
+    "done_when": "pass \u2014 each of the three nodes names a control that can fail: s1 removes a rule from a copy and requires the prompt render to fail (log committed at `docs/evidence/fragments/names-follow-the-rules/rules-negative-control.log`), s2 is bounded on both sides by the 17/13 re-read counts (\u226515 of 17 and \u22642 of 13), and s3 requires \"no name read sound before is read wrong after\" beside the \u2265half-that-break-a-rule tolerance.",
+    "evidence_paths": "pass \u2014 all four cited evidence targets sit under `docs/evidence/fragments/`, and the new ones under `docs/evidence/fragments/names-follow-the-rules/`, which is a committed repository path, not a scratch or node-local one.",
+    "naming": "pass \u2014 the plan states its rule names in plain English and names no symbol, file or function for a worker to create, so no plan label or ticket number reaches code through it.",
+    "reasoning": "findings \u2014 \u00a71 restates the seven codified rules but drops the grammar constraint its cited evidence records for the transfer rule, and three further statements in \u00a71/\u00a72/\u00a73 do not hold against the plan's own text or its evidence.",
+    "single_goal": "pass \u2014 s1 delivers the versioned rules file and its loaders, s2 delivers one catalog reading, s3 delivers the repairs; none of the three carries a second independent deliverable that would need its own verdict.",
+    "wiring": "pass \u2014 `plan-section-depends-on` orders s2 after `names-follow-the-rules#s1` and s3 after `#s2`, which is the only ordering the sections require (each section consumes the previous one's artifact), and the `blocks`/`plan-blocks` relationship to `sn-audited-group-release` points at a plan that exists."
+  },
+  "section_digests": {
+    "_document": "fe2c6adb48fa4461ec55a6fc6c07b170dcd0009f485a47c1a4a7985688b46da6",
+    "s1": "cc9c2f454220beb9502c04856e7fc682cc78e885ec5a75e531e567a4ee181924",
+    "s2": "7fadaba1c6f4169e5f6831bcb078adfbfacb8f34935dc2e666578497e1a7fa37",
+    "s3": "a0dcb7d47fd8b420c3be35a3cf1e4c9fc57de9ccf34baf5b5699308e2d286d4a"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-27T11:10:38.278196+00:00",
+  "total": null
+}
