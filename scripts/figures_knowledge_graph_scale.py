@@ -14,7 +14,7 @@ title.
 
     uv run python scripts/figures_knowledge_graph_scale.py --query    # counts + sample
     uv run python scripts/figures_knowledge_graph_scale.py            # draw from cache
-    uv run python scripts/figures_knowledge_graph_scale.py --portrait # 1:3 column
+    uv run python scripts/figures_knowledge_graph_scale.py --portrait # 1:2 column
 
 The query pass writes ``graph-stats.json`` beside the figure and the sampled
 subgraph to ``SAMPLE`` so a redraw never needs the graph.
@@ -541,28 +541,28 @@ LANDSCAPE = Arrangement(
         "jt-60sa": {"code": 0, "wiki": -51, "signals": -141},
     },
 )
-# A column one third as wide as it is tall: the facilities stack above and
-# below the Data Dictionary, so every mapping line still runs to the middle.
+# A column half as wide as it is tall: the facilities stack above and below
+# the Data Dictionary, so every mapping line still runs to the middle.
 PORTRAIT = Arrangement(
     file="knowledge-graph-scale-portrait.svg",
-    canvas=(5.0, 15.0),
+    canvas=(6.6, 13.2),
     title_space=0.0,
     centres={
-        "jet": (1.6, 12.6, "above"),
-        "tcv": (1.4, 8.6, "above"),
-        "iter": (0.5, 5.4, "right"),
-        "dd": (3.2, 5.4, "below"),
-        "jt-60sa": (1.3, 1.9, "below"),
-        "sn": (3.6, 2.2, "below"),
+        "jet": (2.8, 10.9, "above"),
+        "tcv": (1.5, 7.3, "above"),
+        "iter": (0.5, 4.0, "right"),
+        "dd": (4.4, 5.0, "below"),
+        "jt-60sa": (1.6, 1.75, "below"),
+        "sn": (4.7, 1.9, "below"),
     },
     satellites={
-        "jet": {"wiki": 30, "signals": -25},
-        "tcv": {"wiki": -75, "signals": 15},
+        "jet": {"wiki": 20, "signals": -20},
+        "tcv": {"wiki": -75, "signals": 0},
         "jt-60sa": {"signals": None, "wiki": 150},
     },
     label_angles={
         "jet": {"code": -130, "wiki": 0, "signals": 0},
-        "tcv": {"code": -130, "wiki": 180, "signals": 0},
+        "tcv": {"code": -130, "wiki": 180, "signals": 90},
         "jt-60sa": {"code": 0, "wiki": 90, "signals": 180},
     },
 )
@@ -641,6 +641,7 @@ def draw(
     pos: dict,
     arrangement: Arrangement,
     draft: Path | None,
+    png: bool = False,
 ) -> None:
     use_style(**FONT)
     width, height = arrangement.canvas
@@ -741,6 +742,8 @@ def draw(
         plt.close(fig)
         return
     out = FIGURES / arrangement.file
+    if png:
+        out = out.with_suffix(".png")
     save_figure(fig, out, clear_of=reserved)
     plt.close(fig)
     print(out.relative_to(ROOT))
@@ -755,7 +758,10 @@ def main() -> None:
         "--relayout", action="store_true", help="recompute the cached layout"
     )
     parser.add_argument(
-        "--portrait", action="store_true", help="draw the 1:3 column arrangement"
+        "--portrait", action="store_true", help="draw the 1:2 column arrangement"
+    )
+    parser.add_argument(
+        "--png", action="store_true", help="write a PNG instead of the SVG"
     )
     parser.add_argument(
         "--draft", type=Path, help="write a PNG here, reporting layout faults"
@@ -775,7 +781,9 @@ def main() -> None:
     if args.query or args.relayout or not LAYOUT.exists():
         LAYOUT.write_text(json.dumps(layout(sample, stats)))
     arrangement = PORTRAIT if args.portrait else LANDSCAPE
-    draw(stats, sample, json.loads(LAYOUT.read_text()), arrangement, args.draft)
+    draw(
+        stats, sample, json.loads(LAYOUT.read_text()), arrangement, args.draft, args.png
+    )
 
 
 if __name__ == "__main__":
