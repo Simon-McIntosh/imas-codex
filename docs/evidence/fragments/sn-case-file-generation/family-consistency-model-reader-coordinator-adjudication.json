@@ -1,0 +1,15 @@
+{
+ "subject": "blind adjudication of the model-reader family consistency pass, seeds 9 and 23, read before opening either key",
+ "adjudicator": "coordinating session 8e101d1f-e306-47cb-a56a-48cba5e5c742",
+ "packets": ["family-consistency-packet.json (seed 9)", "family-consistency-packet-seed23.json (seed 23)"],
+ "blindness_caveat": "the worker did not open the coordinator's first adjudication file, but the plan comment recording the lead's ruling named the misses (three unit-basis errors, the square-root convention), and the worker reads the plan; the seed-9 comparison is therefore not fully blind. Seed 23 shares 12 families with seed 9 and adds 8.",
+ "changes_after": {"magnetic_field_magnitude": "the units of ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude, ratio_of_radial_ion_velocity_to_magnetic_field_magnitude and ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude change from m.s^-1 to T^-1.m.s^-1; correct"},
+ "seed_9": {"inconsistencies_in_the_five_classes_before": 10, "after": 7, "sound_before_wrong_after": 0,
+  "remaining": ["square_of_magnetic_field_magnitude and square_of_major_radius (inverse-square units)", "parallel_current_density and radial_current_density (qualifiers the names omit)", "diamagnetic_current_density (scalar against vector convention)", "normalized_poloidal_flux_coordinate_at_reflectometer_cutoff_position (square root against linear)", "radial_coordinate_of_ion_cyclotron_heating_antenna (qualifier the name omits)"]},
+ "seed_23_new_families": {
+  "electron_density": [{"member": "pedestal_electron_density", "class": "naming pattern", "reason": "defined as the density differentiated with respect to a coordinate, while the name and unit m^-3 say a density"}],
+  "magnetic_field": [{"member": "parallel_magnetic_field", "class": "qualifier presence", "reason": "defined for the edge plasma only; the name is the general parallel component"}, {"member": "magnetic_field_of_poloidal_field_coil", "class": "no definition", "reason": "placeholder definition"}],
+  "magnetic_vector_potential": [], "normalized_toroidal_flux_coordinate": [], "poloidal_plane_cross_sectional_area_of_flux_surface": [], "safety_factor": [], "triangularity_of_plasma_boundary": [], "volume_of_flux_surface": []},
+ "seed_23": {"inconsistencies_in_the_five_classes_before": 11, "after": 8, "sound_before_wrong_after": 0, "note": "the 12 families shared with seed 9 carry the 10 read there (of which magnetic_field_magnitude's 3 units are repaired in both), plus the two new-family class breaks above, less the one shared family not drawn; counted on the five classes only"},
+ "verdict": "accepted under the section's rule on both samples: no member sound before is wrong after, and the count of inconsistencies falls (10 to 7, 11 to 8). Recall is low: the pass repairs one family, 3 of about 10 class breaks per sample, and leaves the naming-pattern and qualifier breaks that the adopted naming rules now cover."
+}
