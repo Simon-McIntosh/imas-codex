@@ -25,6 +25,8 @@
 <title>Names Follow The Rules | imas-codex</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-11-27">
 </head>
 <body>
 <main class="plan-doc">
@@ -38,8 +40,8 @@
 <li><strong>Owner.</strong> A centre, centroid, axis or similar locus names its owner unless the term is unique in the catalog.</li>
 <li><strong>Parent.</strong> A generic parent name is right when it names the general quantity its children specialise.</li>
 <li><strong>Settled terms.</strong> A term with a settled meaning is used only with that meaning. Neutron flux counts neutrons; parity is not a sign; a coil's radius is not an arc's curvature radius.</li>
-<li><strong>Transfer.</strong> A transfer between two populations names both donor and recipient.</li>
-<li><strong>One name.</strong> One quantity has one name. A repair that collides with an existing name marks a duplicate to retire.</li>
+<li><strong>Transfer.</strong> A transfer between two populations names both donor and recipient. The grammar has no form for this today, so such names go to the grammar work rather than to repair.</li>
+<li><strong>One name.</strong> One quantity has one name. A repair that collides with an existing name marks a duplicate. Which name is retired is put to the lead.</li>
 </ol>
 <p>The lead also ruled that the rules are updated as edge cases arise. Each case is put to the lead and recorded with its ruling.</p>
 <p><strong>Done when:</strong></p>
@@ -56,7 +58,7 @@
 <p>Lead ruling, 2026-11-24: names are measured against the rules and only those that break one are repaired; the catalog is not regenerated. Regeneration did not beat the incumbent in the second benchmark round (60 against 54 of 87, inside the interval), and rewriting sound names broke some.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Every live standard name is read against the rules file at a recorded version. Each name gets one of three results:
+<li>Every live standard name is read against the rules file at one recorded version, and each result records that version. A ruling made during the read raises the version. Every name whose result rests on the changed rule is then read again at the new version before §3 starts. Each name gets one of three results:
 <ul>
 <li>it conforms;</li>
 <li>it breaks a named rule, with the words that break it and the source or definition words that show it;</li>
@@ -75,7 +77,8 @@
 <p>Repairs go through the pipeline's own edit path. A rename carries its documentation links with it.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Each name §2 flags is repaired once, changing only what its rule names. A repair whose new name collides with an existing name is not applied. It is listed as a duplicate, with the name to keep, for the lead to rule on.</li>
+<li>Each name §2 reads as breaking a rule is repaired once, changing only what its rule names. Edge cases are not repaired until the lead has ruled and §2 has re-read them. A name that breaks the transfer rule is listed for the grammar section of <code>sn-case-file-generation</code> rather than repaired.</li>
+<li>A repair whose new name collides with an existing name is not applied. It is listed as a duplicate, with the name proposed to keep, for the lead to rule on which is retired.</li>
 <li>After the repairs:
 <ul>
 <li>every documentation link to a renamed name resolves to its new name;</li>
@@ -95,11 +98,11 @@
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-nftr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-27">
-<h4 class="r-fu-title">Fix the rules, read the catalog, repair what breaks them</h4>
-<div class="r-fu-body"><p>Build §1, then §2, then §3.</p></div>
-<pre class="r-fu-prompt">/reckon-build names-follow-the-rules</pre>
-</article>
+<article class="r-fu" data-id="f-nftr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-27" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Fix the rules, read the catalog, repair what breaks them</h4>
+    <div class="r-fu-body"><p>Build §1, then §2, then §3.</p></div>
+    <pre class="r-fu-prompt">/reckon-build names-follow-the-rules</pre>
+    </article>
 </section>
 
 </main>
