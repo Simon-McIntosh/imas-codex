@@ -25,7 +25,30 @@
   "plan_slug": "sn-case-file-generation",
   "plan_version": 38,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2c6fddf100ff4458b46a3b4ceaaffa634c3c90d8",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a75 now takes the names that break a rule, in every group, from the catalog reading of names-follow-the-rules \u00a72 instead of the descoped \u00a77's detection passes",
+      "reason": "",
+      "when": "2026-11-27T11:14:27.942231+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2c6fddf100ff4458b46a3b4ceaaffa634c3c90d8",
+      "commit_basis": "edit",
+      "note": "\u00a75 now takes the names that break a rule, in every group, from the catalog reading of names-follow-the-rules \u00a72 instead of the descoped \u00a77's detection passes",
+      "reason": "",
+      "when": "2026-11-27T11:14:27.942231+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-case-file-generation/r-20261127T110738608049-plan-review-of-sn-case-file-generation.json",
   "review_run_id": "r-20261127T110738608049-plan-review-of-sn-case-file-generation",
   "reviewed_blob_sha": "2f678cbdac1be4972cdaebcda555ce5e8fc62a62",
   "rubric": "content",
