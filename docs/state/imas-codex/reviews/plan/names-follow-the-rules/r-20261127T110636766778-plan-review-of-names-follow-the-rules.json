@@ -41,7 +41,30 @@
   "plan_slug": "names-follow-the-rules",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5e71e16a75224ddca908e5b43cf3f4bee86b9dcc",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "rule 6 now states the grammar has no donor-recipient form today; \u00a73 lists names breaking it for the grammar section (case-file \u00a75) instead of repairing them",
+      "reason": "",
+      "when": "2026-11-27T11:12:21.154118+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5e71e16a75224ddca908e5b43cf3f4bee86b9dcc",
+      "commit_basis": "edit",
+      "note": "rule 6 now states the grammar has no donor-recipient form today; \u00a73 lists names breaking it for the grammar section (case-file \u00a75) instead of repairing them",
+      "reason": "",
+      "when": "2026-11-27T11:12:21.154118+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/names-follow-the-rules/r-20261127T110636766778-plan-review-of-names-follow-the-rules.json",
   "review_run_id": "r-20261127T110636766778-plan-review-of-names-follow-the-rules",
   "reviewed_blob_sha": "b8986433cecd5bfcacf30244d9399bbf3b36f1f4",
   "rubric": "content",
