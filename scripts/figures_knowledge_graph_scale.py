@@ -14,6 +14,7 @@ title.
 
     uv run python scripts/figures_knowledge_graph_scale.py --query    # counts + sample
     uv run python scripts/figures_knowledge_graph_scale.py            # draw from cache
+    uv run python scripts/figures_knowledge_graph_scale.py --portrait # 1:3 column
 
 The query pass writes ``graph-stats.json`` beside the figure and the sampled
 subgraph to ``SAMPLE`` so a redraw never needs the graph.
@@ -27,6 +28,7 @@ import math
 import random
 import subprocess
 from collections import Counter, defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 
 import matplotlib
@@ -47,7 +49,6 @@ from iter_codex.plotting.style import (  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs" / "figures" / "knowledge-graph-scale"
 STATS = FIGURES / "graph-stats.json"
-SVG = FIGURES / "knowledge-graph-scale.svg"
 CACHE = Path.home() / ".cache" / "iter-codex-knowledge-graph-scale"
 SAMPLE = CACHE / "graph-sample.json"
 LAYOUT = CACHE / "layout.json"
@@ -332,7 +333,7 @@ CATEGORIES = {
 
 def group_of(system: str, label: str) -> str:
     """A large facility splits into code, wiki and signals; others stay whole."""
-    if system not in SATELLITES:
+    if system not in SPLIT:
         return system
     for category, members in CATEGORIES.items():
         if label in members:
@@ -485,29 +486,86 @@ CROSS = "#7a7a7a"
 CATEGORY_INK = "#5a5a5a"
 GAP = 0.08  # in, between a facility's sub-clusters
 
-SYSTEMS = {
-    # key: (display name, colour, centre x, centre y, label side). A facility's
-    # centre is its code cluster; wiki and signals sit beside it.
-    "jet": ("JET", "#d0751f", 1.75, 2.6, "above"),
-    "tcv": ("TCV", "#2f6db5", 5.9, 4.0, "above"),
-    "dd": ("IMAS Data Dictionary", SLATE, 8.6, 1.75, "below"),
-    "jt-60sa": ("JT-60SA", "#2e8b57", 11.9, 4.4, "above"),
-    "sn": ("Standard Names", "#c2407a", 12.4, 1.9, "below"),
-    "iter": ("ITER", "#8a5cc4", 8.0, 5.0, "right"),
+SPLIT = ("jet", "tcv", "jt-60sa")  # facilities drawn as code, wiki and signals
+NAMES = {
+    # key: (display name, colour)
+    "jet": ("JET", "#d0751f"),
+    "tcv": ("TCV", "#2f6db5"),
+    "dd": ("IMAS Data Dictionary", SLATE),
+    "jt-60sa": ("JT-60SA", "#2e8b57"),
+    "sn": ("Standard Names", "#c2407a"),
+    "iter": ("ITER", "#8a5cc4"),
 }
-# Direction, in degrees from the code cluster, of each satellite cluster; None
-# points it at the Data Dictionary so the mapping lines run short and straight.
-SATELLITES = {
-    "jet": {"wiki": 90, "signals": None},
-    "tcv": {"wiki": 180, "signals": -20},
-    "jt-60sa": {"signals": None, "wiki": -51},
-}
-# Where each sub-cluster's name sits, in degrees around that sub-cluster.
-CATEGORY_LABEL_ANGLE = {
-    "jet": {"code": -90, "wiki": 180, "signals": -90},
-    "tcv": {"code": -130, "wiki": 90, "signals": -20},
-    "jt-60sa": {"code": 0, "wiki": -51, "signals": -141},
-}
+
+
+@dataclass(frozen=True)
+class Arrangement:
+    """Where every cluster and label sits on one canvas.
+
+    ``centres`` gives each system's centre and the side its name sits on; a
+    split facility's centre is its code cluster. ``satellites`` gives the
+    direction, in degrees from the code cluster, of each satellite cluster;
+    None points it at the Data Dictionary so the mapping lines run short and
+    straight. ``label_angles`` places each sub-cluster's name, in degrees
+    around that sub-cluster.
+    """
+
+    file: str
+    canvas: tuple[float, float]
+    title_space: float  # in kept clear at the top for the slide's own title
+    centres: dict[str, tuple[float, float, str]]
+    satellites: dict[str, dict[str, float | None]]
+    label_angles: dict[str, dict[str, float]]
+
+
+LANDSCAPE = Arrangement(
+    file="knowledge-graph-scale.svg",
+    canvas=(SLIDE_WIDTH, HEIGHT),
+    title_space=TITLE_SPACE,
+    centres={
+        "jet": (1.75, 2.6, "above"),
+        "tcv": (5.9, 4.0, "above"),
+        "dd": (8.6, 1.75, "below"),
+        "jt-60sa": (11.9, 4.4, "above"),
+        "sn": (12.4, 1.9, "below"),
+        "iter": (8.0, 5.0, "right"),
+    },
+    satellites={
+        "jet": {"wiki": 90, "signals": None},
+        "tcv": {"wiki": 180, "signals": -20},
+        "jt-60sa": {"signals": None, "wiki": -51},
+    },
+    label_angles={
+        "jet": {"code": -90, "wiki": 180, "signals": -90},
+        "tcv": {"code": -130, "wiki": 90, "signals": -20},
+        "jt-60sa": {"code": 0, "wiki": -51, "signals": -141},
+    },
+)
+# A column one third as wide as it is tall: the facilities stack above and
+# below the Data Dictionary, so every mapping line still runs to the middle.
+PORTRAIT = Arrangement(
+    file="knowledge-graph-scale-portrait.svg",
+    canvas=(5.0, 15.0),
+    title_space=0.0,
+    centres={
+        "tcv": (1.75, 12.6, "above"),
+        "jet": (1.6, 8.8, "above"),
+        "iter": (0.5, 5.4, "right"),
+        "dd": (3.2, 5.4, "below"),
+        "jt-60sa": (1.3, 1.9, "below"),
+        "sn": (3.6, 2.2, "below"),
+    },
+    satellites={
+        "tcv": {"wiki": 20, "signals": -30},
+        "jet": {"wiki": -110, "signals": None},
+        "jt-60sa": {"signals": None, "wiki": 150},
+    },
+    label_angles={
+        "tcv": {"code": -130, "wiki": 0, "signals": 0},
+        "jet": {"code": 130, "wiki": -90, "signals": -120},
+        "jt-60sa": {"code": 0, "wiki": 90, "signals": 180},
+    },
+)
 RADIUS_PER_ROOT_NODE = 1.55 / math.sqrt(653_458)  # in: area reads as node count
 
 # Arial, falling back to its metric twins Liberation Sans or Nimbus Sans where
@@ -532,11 +590,18 @@ def size_of(count: int) -> float:
     return max(0.16, RADIUS_PER_ROOT_NODE * math.sqrt(count))
 
 
-def geometry(stats: dict) -> dict[str, tuple[float, float, float]]:
-    """Centre and radius of every group, area in proportion to real node count."""
+def geometry(
+    stats: dict, arrangement: Arrangement = LANDSCAPE
+) -> dict[str, tuple[float, float, float]]:
+    """Centre and radius of every group, area in proportion to real node count.
+
+    The radii depend on the counts alone, so they are the same in every
+    arrangement and one cached layout serves them all.
+    """
     out = {}
-    for system, (_, _, cx, cy, _) in SYSTEMS.items():
-        if system not in SATELLITES:
+    dd_x, dd_y, _ = arrangement.centres["dd"]
+    for system, (cx, cy, _) in arrangement.centres.items():
+        if system not in SPLIT:
             out[system] = (cx, cy, size_of(stats["nodes"][system]))
             continue
         counts: Counter = Counter()
@@ -544,10 +609,10 @@ def geometry(stats: dict) -> dict[str, tuple[float, float, float]]:
             counts[group_of(system, label)] += n
         rc = size_of(counts[f"{system}/code"])
         out[f"{system}/code"] = (cx, cy, rc)
-        for category, angle in SATELLITES[system].items():
+        for category, angle in arrangement.satellites[system].items():
             r = size_of(counts[f"{system}/{category}"])
             d = rc + r + GAP
-            dx, dy = SYSTEMS["dd"][2] - cx, SYSTEMS["dd"][3] - cy
+            dx, dy = dd_x - cx, dd_y - cy
             a = math.atan2(dy, dx) if angle is None else math.radians(angle)
             out[f"{system}/{category}"] = (
                 cx + d * math.cos(a),
@@ -570,16 +635,27 @@ def directional_text(ax, x, y, angle, text, **kw):
     )
 
 
-def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) -> None:
+def draw(
+    stats: dict,
+    sample: dict,
+    pos: dict,
+    arrangement: Arrangement,
+    draft: Path | None,
+) -> None:
     use_style(**FONT)
-    fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT), dpi=100)
+    width, height = arrangement.canvas
+    fig = plt.figure(figsize=(width, height), dpi=100)
     # the strip the slide draws its own title into; no figure text may enter it
-    reserved = title_strip(fig, TITLE_SPACE / HEIGHT)
+    reserved = (
+        [title_strip(fig, arrangement.title_space / height)]
+        if arrangement.title_space
+        else []
+    )
     ax = fig.add_axes((0, 0, 1, 1))
     ax.axis("off")
-    ax.set(xlim=(0, SLIDE_WIDTH), ylim=(0, HEIGHT), aspect="equal")
+    ax.set(xlim=(0, width), ylim=(0, height), aspect="equal")
     nodes = sample["nodes"]
-    geo = geometry(stats)
+    geo = geometry(stats, arrangement)
     group = {n: group_of(d["system"], d["label"]) for n, d in nodes.items()}
 
     xy = {}
@@ -597,7 +673,7 @@ def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) ->
     ax.add_collection(
         LineCollection(cross, colors=CROSS, linewidths=0.5, alpha=0.25, zorder=1)
     )
-    for system, (_, colour, *_rest) in SYSTEMS.items():
+    for system, (_, colour) in NAMES.items():
         inner, between = [], []
         for a, b in sample["internal_edges"]:
             if nodes[a]["system"] != system or a not in xy or b not in xy:
@@ -615,7 +691,7 @@ def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) ->
         ax.scatter(*pts.T, s=np.minimum(size, 14), color=colour, lw=0, zorder=3)
 
     # sub-cluster names, just outside each cluster
-    for system, angles in CATEGORY_LABEL_ANGLE.items():
+    for system, angles in arrangement.label_angles.items():
         for cat, angle in angles.items():
             gx, gy, r = geo[f"{system}/{cat}"]
             a = math.radians(angle)
@@ -631,7 +707,8 @@ def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) ->
                 zorder=6,
             )
 
-    for key, (name, colour, _, _, side) in SYSTEMS.items():
+    for key, (name, colour) in NAMES.items():
+        side = arrangement.centres[key][2]
         circles = [g for k, g in geo.items() if k.split("/")[0] == key]
         x0 = min(x - r for x, _, r in circles)
         x1 = max(x + r for x, _, r in circles)
@@ -660,10 +737,11 @@ def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) ->
             )
 
     if draft is not None:
-        save_figure(fig, draft, dpi=100, clear_of=[reserved])
+        save_figure(fig, draft, dpi=100, clear_of=reserved)
         plt.close(fig)
         return
-    save_figure(fig, out, clear_of=[reserved])
+    out = FIGURES / arrangement.file
+    save_figure(fig, out, clear_of=reserved)
     plt.close(fig)
     print(out.relative_to(ROOT))
 
@@ -675,6 +753,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--relayout", action="store_true", help="recompute the cached layout"
+    )
+    parser.add_argument(
+        "--portrait", action="store_true", help="draw the 1:3 column arrangement"
     )
     parser.add_argument(
         "--draft", type=Path, help="write a PNG here, reporting layout faults"
@@ -693,7 +774,8 @@ def main() -> None:
     sample = json.loads(SAMPLE.read_text())
     if args.query or args.relayout or not LAYOUT.exists():
         LAYOUT.write_text(json.dumps(layout(sample, stats)))
-    draw(stats, sample, json.loads(LAYOUT.read_text()), SVG, args.draft)
+    arrangement = PORTRAIT if args.portrait else LANDSCAPE
+    draw(stats, sample, json.loads(LAYOUT.read_text()), arrangement, args.draft)
 
 
 if __name__ == "__main__":

@@ -49,9 +49,13 @@ def title_strip(figure, share: float):
 
 def _declared_size(figure) -> tuple[float, float]:
     """The slide size the figure declares: the slide's own size for the default
-    canvas, otherwise the slide width with the height its aspect ratio needs."""
+    canvas, the slide height for a canvas taller than it is wide, otherwise the
+    slide width with the height its aspect ratio needs."""
     if tuple(figure.get_size_inches()) == CANVAS:
         return SLIDE_SIZE_CM
+    if figure.get_figheight() > figure.get_figwidth():
+        height = SLIDE_SIZE_CM[1]
+        return round(height * figure.get_figwidth() / figure.get_figheight(), 2), height
     width = SLIDE_WIDTH_CM
     return round(width, 2), round(
         width * figure.get_figheight() / figure.get_figwidth(), 2

@@ -29,8 +29,8 @@ import numpy as np  # noqa: E402
 from figures_knowledge_graph_scale import (  # noqa: E402
     FIGURES,
     FONT,
+    NAMES,
     SLATE,
-    SYSTEMS,
     TITLE_SPACE,
     human,
 )
@@ -182,7 +182,7 @@ def draw(data: dict, out, draft) -> None:
 
     # each facility: a bar of its signals by stage, ribbons into the middle
     for f in FACILITIES:
-        colour = SYSTEMS[f][1]
+        colour = NAMES[f][1]
         left = f == "jet"
         x = X[f]
         side = {"ha": "right"} if left else {"ha": "left"}
@@ -190,7 +190,7 @@ def draw(data: dict, out, draft) -> None:
         text(
             x + BAR / 2,
             TOP + 0.75,
-            SYSTEMS[f][0],
+            NAMES[f][0],
             fontsize=22,
             fontweight="bold",
             color=colour,
