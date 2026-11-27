@@ -548,21 +548,21 @@ PORTRAIT = Arrangement(
     canvas=(5.0, 15.0),
     title_space=0.0,
     centres={
-        "tcv": (1.75, 12.6, "above"),
-        "jet": (1.6, 8.8, "above"),
+        "jet": (1.6, 12.6, "above"),
+        "tcv": (1.4, 8.6, "above"),
         "iter": (0.5, 5.4, "right"),
         "dd": (3.2, 5.4, "below"),
         "jt-60sa": (1.3, 1.9, "below"),
         "sn": (3.6, 2.2, "below"),
     },
     satellites={
-        "tcv": {"wiki": 20, "signals": -30},
-        "jet": {"wiki": -110, "signals": None},
+        "jet": {"wiki": 30, "signals": -25},
+        "tcv": {"wiki": -75, "signals": 15},
         "jt-60sa": {"signals": None, "wiki": 150},
     },
     label_angles={
-        "tcv": {"code": -130, "wiki": 0, "signals": 0},
-        "jet": {"code": 130, "wiki": -90, "signals": -120},
+        "jet": {"code": -130, "wiki": 0, "signals": 0},
+        "tcv": {"code": -130, "wiki": 180, "signals": 0},
         "jt-60sa": {"code": 0, "wiki": 90, "signals": 180},
     },
 )
