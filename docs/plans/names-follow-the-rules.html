@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="imas-codex">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="names-follow-the-rules">
+<meta name="plan-title" content="Names Follow The Rules">
+<meta name="plan-summary" content="Fix the naming rules in one versioned file, read every live name against them, and repair only the names that break one.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort-hours" content="28.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-sprint" content="S20">
+<meta name="plan-tags" content="standard-names">
+<meta name="plan-blocks" content="sn-audited-group-release">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;names-follow-the-rules#s1&quot;],&quot;s3&quot;:[&quot;names-follow-the-rules#s2&quot;]}">
+<title>Names Follow The Rules | imas-codex</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+<h2 id="s1">The naming rules live in one versioned file that the pipeline loads</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>Lead ruling, 2026-11-24: seven naming rules are adopted as the standard. They extend the 2026-11-18/19 ruling that a name identifies and its definition specifies. They were written after a re-reading of the 33 held-out incumbents counted as failures (<code>docs/evidence/fragments/sn-case-file-generation/incumbent-failures-under-codified-rules.json</code>). That re-reading found the two earlier readings disagreeing on 21 of the 33 names, because the rules left the call open.</p>
+<ol>
+<li><strong>Identity.</strong> A word that changes the number a quantity takes belongs in the name. Examples are energy versus number, ions versus neutrals, equivalent electrons versus particles, apparent versus thermodynamic temperature, and the quantity a rate or time belongs to.</li>
+<li><strong>Specification.</strong> Where and how a quantity is evaluated belongs in the definition. Examples are a location such as the midplane, a reconstruction context, a component sub-unit and the species pair of a collisionality. The exception is when two catalog names would otherwise read the same; then the name carries the least that separates them.</li>
+<li><strong>Owner.</strong> A centre, centroid, axis or similar locus names its owner unless the term is unique in the catalog.</li>
+<li><strong>Parent.</strong> A generic parent name is right when it names the general quantity its children specialise.</li>
+<li><strong>Settled terms.</strong> A term with a settled meaning is used only with that meaning. Neutron flux counts neutrons; parity is not a sign; a coil's radius is not an arc's curvature radius.</li>
+<li><strong>Transfer.</strong> A transfer between two populations names both donor and recipient.</li>
+<li><strong>One name.</strong> One quantity has one name. A repair that collides with an existing name marks a duplicate to retire.</li>
+</ol>
+<p>The lead also ruled that the rules are updated as edge cases arise. Each case is put to the lead and recorded with its ruling.</p>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>One versioned file in the repository states the seven rules. Each rule carries at least one worked example drawn from the 33 incumbents, and the file has a log of edge-case rulings with date and example.</li>
+<li>The name-generation and name-review prompts render the rules from that file.</li>
+<li>A test fails when a rule is removed from the file and a prompt still renders. Removing a rule in a copy makes it fail, and that run's log is committed at <code>docs/evidence/fragments/names-follow-the-rules/rules-negative-control.log</code>.</li>
+<li>The version of the rules file is recorded with every name the pipeline writes or reviews from then on.</li>
+<li>The whole <code>tests/standard_names</code> directory adds no failure at head against base, run as one job on <code>all_debug</code>.</li>
+</ul>
+
+<h2 id="s2">Every live name is read against the rules</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>Lead ruling, 2026-11-24: names are measured against the rules and only those that break one are repaired; the catalog is not regenerated. Regeneration did not beat the incumbent in the second benchmark round (60 against 54 of 87, inside the interval), and rewriting sound names broke some.</p>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Every live standard name is read against the rules file at a recorded version. Each name gets one of three results:
+<ul>
+<li>it conforms;</li>
+<li>it breaks a named rule, with the words that break it and the source or definition words that show it;</li>
+<li>it is an edge case the rules do not settle.</li>
+</ul></li>
+<li>The counts by result and by rule are committed at <code>docs/evidence/fragments/names-follow-the-rules/catalog-reading.html</code> and <code>.json</code>.</li>
+<li>Two controls are drawn from the re-reading of the 33 incumbents. The reader flags at least 15 of the 17 names read there as real defects. It flags at most 2 of the 13 read there as not defects.</li>
+<li>The coordinating session reads by hand a sample of 100 names drawn by a recorded seed, before seeing the reader's result for them. The agreement is reported with a 95 % interval.</li>
+<li>Edge cases are listed for the lead. Each ruling the lead gives is added to the rules file's log.</li>
+<li>Spend is stated beside a ceiling of USD 10.</li>
+<li>No graph write.</li>
+</ul>
+
+<h2 id="s3">Names that break a rule are repaired, and the rest are left alone</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="16.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p>Repairs go through the pipeline's own edit path. A rename carries its documentation links with it.</p>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Each name §2 flags is repaired once, changing only what its rule names. A repair whose new name collides with an existing name is not applied. It is listed as a duplicate, with the name to keep, for the lead to rule on.</li>
+<li>After the repairs:
+<ul>
+<li>every documentation link to a renamed name resolves to its new name;</li>
+<li>a renamed name's own documentation is regenerated only where its text depends on the old name.</li>
+</ul></li>
+<li>The coordinating session adjudicates a seeded sample of the repaired names blind, beside their incumbents, before the key is opened.</li>
+<li>The repairs are accepted only if both hold:
+<ul>
+<li>no name the sample reads as sound before is read as wrong after;</li>
+<li>at least half of the sampled names that break a rule are right after.</li>
+</ul></li>
+<li>A name §2 found conforming is unchanged, compared by digest before and after.</li>
+<li>A verified graph checkpoint is taken before the first write, and no other graph writer runs at the same time.</li>
+<li>Spend is stated beside a ceiling of USD 90.</li>
+<li>The evidence is committed at <code>docs/evidence/fragments/names-follow-the-rules/repairs.html</code> and <code>.json</code>.</li>
+</ul>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-nftr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-27">
+<h4 class="r-fu-title">Fix the rules, read the catalog, repair what breaks them</h4>
+<div class="r-fu-body"><p>Build §1, then §2, then §3.</p></div>
+<pre class="r-fu-prompt">/reckon-build names-follow-the-rules</pre>
+</article>
+</section>
+
+</main>
+</body>
+</html>
