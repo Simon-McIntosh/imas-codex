@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-27T11:14:33.801Z",
+  "dispatched_at": "2026-11-27T11:11:44Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:46",
+      "id": "reasoning-1",
+      "reason": "the plan must either make \u00a74's cut wait on the placement or require equilibrium (and any group gaining names) to be re-audited for its new members before its release stands, or the bar of \u00a73 is certified over a membership the released tag does not hold.",
+      "text": "s5 releases each further group after domains-follow-the-physics#s4 has placed transport's names by physics, but that placement moves 12 names into equilibrium (docs/plans/domains-follow-the-physics.html:107), the group \u00a74 cuts first, and neither \u00a74 nor s5 re-audits the first group after the placement; the first release candidate can therefore ship without the 12 members it gains, and \u00a75's \"each further group\" scope does not cover it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:46",
+      "id": "reasoning-2",
+      "reason": "without a re-read, a group's cut either refuses on a family that no longer spans or passes a family that now does, so the gate proves a membership that is no longer the group's.",
+      "text": "\u00a73's family refusal reads \"the ruling recorded in \u00a72\" as its exception list, and \u00a72's per-group membership and family-spanning counts were measured on the pre-placement partition (2026-11-16/17, 225 spanning families); domains-follow-the-physics#s4 then re-domains 455 names across plasma_state, fast_particles, runaway_electrons and others, so the list the bar reads is stale for every group s5 releases, and s5 requires no re-read of \u00a72 over the post-placement partition",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5421a99b30ed2c2a2da33d26ab1f312647b6b48b",
+  "plan_fingerprint": "c672fdd3870de2149a3b57b5658aa023e6b4f70be63fed87ac317a165886c0ca",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 62,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261127T111105001874-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "3060021ec00392ded2419b81c630e12556c11454",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 domains-follow-the-physics#s4 exists as \"Every live standard name carries the domain its physics names\"; group-release-table.json is this section's own future deliverable, not a binding to an existing file.",
+    "done_when": "pass \u2014 the section's measure is stated and carries a negative control: a recorded disposable group planted with a rate above the bar is reported with its rate and not cut.",
+    "evidence_paths": "pass \u2014 the table is committed at docs/evidence/fragments/sn-audited-group-release/group-release-table.json with a page beside it, a durable repository path rather than a scratch tree.",
+    "naming": "pass \u2014 s5's text carries no plan labels, stage names, ticket numbers or changelog prose; the only identifiers are plan slugs and a committed evidence path.",
+    "reasoning": "findings \u2014 the section now waits on domains-follow-the-physics#s4, which re-partitions 455 of transport's names across groups after \u00a72 and \u00a74 have already measured the partition they rely on, and s5 re-reads neither.",
+    "single_goal": "pass \u2014 s5 carries one deliverable, the same audit-repair-cut route for each further group, recorded in one group-by-group table.",
+    "wiring": "pass \u2014 s5's depends-on now names sn-audited-group-release#s4 and domains-follow-the-physics#s4 (plan.html:21), the withdrawn \u00a76 reference is gone from the section text, and both dependencies resolve."
+  },
+  "section_digests": {
+    "_document": "90ca33c7dd15425302dec156b9f80888680d0e40aeec0cb85fde00d2f43e81b6",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "3073ba4c58fc1374d8568d8e8798f5c1fac407860517b8ac0c4e0ca15a6a4a2b",
+    "s3": "a302e5d7f08618c4b0b55889eb4a8df491abf4aed370ac9e8014d8e48c4cd5a9",
+    "s4": "abc168a20f8f8dd7dbbc0392357b8cc35588316a3e42caef2ab3f331458fd3d1",
+    "s5": "0a0023180830ef25acfc9630fb06eb7f58fcfc6a4a40153977767f4a806fa039",
+    "s6": "90a0463c758d22b32611805f931c843f2382e2bc89a2e1ef318231acd72f2fca",
+    "s7": "c00231603538a13a9d760a0a7f3e06c28b97eb1c5682e0dc7a2708499b5571a9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-27T11:14:37.914911+00:00",
+  "total": null
+}
