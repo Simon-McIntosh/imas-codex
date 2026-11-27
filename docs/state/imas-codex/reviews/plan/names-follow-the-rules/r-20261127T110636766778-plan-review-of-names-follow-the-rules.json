@@ -71,6 +71,16 @@
       "note": "\u00a73 repairs only names \u00a72 reads as breaking a rule; edge cases wait for the lead's ruling and are re-read after it",
       "reason": "",
       "when": "2026-11-27T11:12:26.754686+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5e71e16a75224ddca908e5b43cf3f4bee86b9dcc",
+      "commit_basis": "edit",
+      "finding": "reasoning-4",
+      "note": "\u00a72 reads the catalog at one version; a ruling during the read raises the version and every name whose result rests on the changed rule is re-read at the new version before \u00a73 starts; each result records its version",
+      "reason": "",
+      "when": "2026-11-27T11:12:29.633553+00:00"
     }
   ],
   "responses": {
@@ -100,6 +110,15 @@
       "note": "\u00a73 repairs only names \u00a72 reads as breaking a rule; edge cases wait for the lead's ruling and are re-read after it",
       "reason": "",
       "when": "2026-11-27T11:12:26.754686+00:00"
+    },
+    "reasoning-4": {
+      "action": "acted",
+      "by": "",
+      "commit": "5e71e16a75224ddca908e5b43cf3f4bee86b9dcc",
+      "commit_basis": "edit",
+      "note": "\u00a72 reads the catalog at one version; a ruling during the read raises the version and every name whose result rests on the changed rule is re-read at the new version before \u00a73 starts; each result records its version",
+      "reason": "",
+      "when": "2026-11-27T11:12:29.633553+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/names-follow-the-rules/r-20261127T110636766778-plan-review-of-names-follow-the-rules.json",
